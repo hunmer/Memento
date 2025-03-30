@@ -282,12 +282,9 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    widget.channels.removeWhere((c) => c.id == channel.id);
+                    // 使用新的删除频道方法，它会同时删除频道数据和消息
+                    ChatPlugin.instance.deleteChannel(channel.id);
                     _updateSortedChannels();
-                    // 保存删除后的频道数据到本地存储
-                    ChatPlugin.instance.saveChannels();
-                    // 删除该频道的消息文件
-                    ChatPlugin.instance.deleteChannelMessages(channel.id);
                   });
                   Navigator.pop(context);
                 },

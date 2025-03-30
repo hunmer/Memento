@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
 import 'screens/home_screen.dart';
-import 'plugins/base_plugin.dart'; // 插件基类
 import 'plugins/chat/chat_plugin.dart'; // 聊天插件
 import 'plugins/diary/diary_plugin.dart'; // 日记插件
+import 'plugins/activity/activity_plugin.dart'; // 活动插件
 
 // 全局单例实例
 late final StorageManager globalStorage;
@@ -26,12 +27,7 @@ void main() async {
   ]);
 
   try {
-    // 获取应用文档目录
-    final appDir = await getApplicationDocumentsDirectory();
-    final baseStoragePath = path.join(appDir.path, 'flutter_chat_app');
-    debugPrint('应用存储路径: $baseStoragePath');
-
-    // 创建并初始化存储管理器
+    // 创建并初始化存储管理器（内部会处理Web平台的情况）
     globalStorage = StorageManager();
     debugPrint('初始化存储管理器...');
     await globalStorage.initialize();
@@ -49,7 +45,11 @@ void main() async {
 
     // 注册内置插件
     debugPrint('注册内置插件...');
-    final plugins = [ChatPlugin.instance, DiaryPlugin.instance];
+    final plugins = [
+      ChatPlugin.instance,
+      DiaryPlugin.instance,
+      ActivityPlugin.instance,
+    ];
 
     // 遍历并注册插件
     for (final plugin in plugins) {

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../core/plugin_manager.dart';
 import '../core/config_manager.dart';
@@ -10,30 +9,38 @@ abstract class BasePlugin extends PluginBase {
   late StorageManager _storageManager;
 
   /// 设置存储管理器
+  @override
   void setStorageManager(StorageManager storageManager) {
     _storageManager = storageManager;
   }
 
   /// 获取存储管理器
   StorageManager get storageManager => _storageManager;
+  @override
   StorageManager get storage => _storageManager;
 
   /// 插件ID
+  @override
   String get id;
 
   /// 插件名称
+  @override
   String get name;
 
   /// 插件版本
+  @override
   String get version;
 
   /// 插件描述
+  @override
   String get description;
 
   /// 插件作者
+  @override
   String get author;
 
   /// 插件目录
+  @override
   String get pluginDir;
 
   /// 向应用注册插件
@@ -43,12 +50,14 @@ abstract class BasePlugin extends PluginBase {
   );
 
   /// 初始化插件
+  @override
   Future<void> initialize();
 
   /// 初始化默认数据
   Future<void> initializeDefaultData() async {}
 
   /// 构建主视图
+  @override
   Widget buildMainView(BuildContext context);
 
   /// 卸载插件

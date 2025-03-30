@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../core/plugin_base.dart';
+import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import 'screens/activity_timeline_screen.dart';
 
-class ActivityPlugin extends PluginBase {
+class ActivityPlugin extends BasePlugin {
   static final ActivityPlugin instance = ActivityPlugin._internal();
   ActivityPlugin._internal();
 
@@ -26,6 +26,7 @@ class ActivityPlugin extends PluginBase {
   @override
   String get author => 'Zhuanz';
 
+  @override
   Future<void> registerToApp(
     PluginManager pluginManager,
     ConfigManager configManager,

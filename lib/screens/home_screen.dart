@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../core/plugin_manager.dart';
-import '../core/config_manager.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../core/plugin_base.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_bar_widget.dart';
@@ -59,6 +58,29 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: const AppBarWidget(title: '插件管理器'),
       drawer: const AppDrawer(),
+      floatingActionButton:
+          kIsWeb
+              ? FloatingActionButton(
+                onPressed: () async {
+                  // 测试Web存储
+                  final testKey = 'test_data';
+                  final testContent = DateTime.now().toString();
+                  await globalStorage.writeString(testKey, testContent);
+
+                  final readContent = await globalStorage.readString(testKey);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('存储测试: $readContent'),
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                  }
+                },
+                tooltip: '测试Web存储',
+                child: const Icon(Icons.storage),
+              )
+              : null,
       body: FutureBuilder<List<PluginBase>>(
         future: _pluginsFuture,
         builder: (context, snapshot) {

@@ -4,6 +4,7 @@ class ActivityRecord {
   final String title;
   final List<String> tags;
   final String? description;
+  final String? mood; // 添加心情字段
 
   ActivityRecord({
     required this.startTime,
@@ -11,6 +12,7 @@ class ActivityRecord {
     required this.title,
     this.tags = const [],
     this.description,
+    this.mood, // 心情emoji
   });
 
   // 计算持续时间（分钟）
@@ -33,6 +35,7 @@ class ActivityRecord {
       title: json['title'],
       tags: List<String>.from(json['tags'] ?? []),
       description: json['description'],
+      mood: json['mood'],
     );
   }
 
@@ -44,6 +47,7 @@ class ActivityRecord {
       'title': title,
       'tags': tags,
       'description': description,
+      'mood': mood,
     };
   }
 }

@@ -87,6 +87,9 @@ class ChatPlugin extends BasePlugin {
 
   Future<void> _loadChannels() async {
     try {
+      // 清空现有频道列表，避免重复加载
+      _channels.clear();
+
       // 获取所有频道目录
       final dataPath = '$pluginDir/datas';
       final directory = Directory('${storage.basePath}/$dataPath');
@@ -185,9 +188,24 @@ class ChatPlugin extends BasePlugin {
     }
   }
 
+  // 删除频道
+  Future<void> deleteChannel(String channelId) async {
+    final channelPath = '$pluginDir/datas/$channelId';
+
+    try {
+      // 删除频道目录及其所有内容
+      await storage.deleteDirectory(channelPath);
+
+      // 从内存中移除频道
+      _channels.removeWhere((channel) => channel.id == channelId);
+    } catch (e) {
+      debugPrint('Error deleting channel: $e');
+    }
+  }
+
   // 删除频道消息
   Future<void> deleteChannelMessages(String channelId) async {
-    final channelPath = 'plugins/chat/datas/$channelId';
+    final channelPath = '$pluginDir/datas/$channelId';
 
     try {
       // 删除消息文件

@@ -26,6 +26,7 @@ class DiaryPlugin extends BasePlugin {
   @override
   String get author => 'Zhuanz';
 
+  @override
   Future<void> registerToApp(
     PluginManager pluginManager,
     ConfigManager configManager,
