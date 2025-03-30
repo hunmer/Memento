@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 /// 存储引擎的抽象基类
 abstract class StorageEngine {
@@ -21,7 +22,7 @@ class JsonStorageEngine implements StorageEngine {
       }
       return {};
     } catch (e) {
-      print('Error reading JSON file: $e');
+      debugPrint('Error reading JSON file: $e');
       return {};
     }
   }
@@ -36,7 +37,7 @@ class JsonStorageEngine implements StorageEngine {
       }
       await file.writeAsString(json.encode(data));
     } catch (e) {
-      print('Error writing JSON file: $e');
+      debugPrint('Error writing JSON file: $e');
       rethrow;
     }
   }

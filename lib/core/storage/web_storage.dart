@@ -1,9 +1,7 @@
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-
-// 条件导入 dart:html
-// 注意：dart:html 已被标记为废弃，未来应考虑使用 package:web 和 dart:js_interop 替代
-import 'dart:html' if (dart.library.io) 'web_storage_stub.dart' as html;
 
 /// Web平台的持久化存储实现，使用localStorage
 class WebStorage {
@@ -62,6 +60,7 @@ class WebStorage {
 
   /// 保存JSON对象到localStorage
   static void saveJson(String key, dynamic data) {
+    debugPrint('saveJson: $key, $data');
     if (!kIsWeb) {
       throw UnsupportedError('WebStorage 仅支持Web平台');
     }
@@ -75,6 +74,7 @@ class WebStorage {
 
   /// 从localStorage读取JSON对象
   static dynamic loadJson(String key) {
+    debugPrint('loadJson: $key');
     if (!kIsWeb) {
       throw UnsupportedError('WebStorage 仅支持Web平台');
     }
@@ -97,7 +97,6 @@ class WebStorage {
     }
     final keys = <String>[];
     try {
-      // 直接遍历 localStorage 的所有键
       html.window.localStorage.forEach((key, value) {
         if (key.startsWith(prefix)) {
           keys.add(key);

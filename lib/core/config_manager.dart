@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'storage/storage_manager.dart';
 
 /// 配置管理器，负责管理插件配置
@@ -10,8 +11,10 @@ class ConfigManager {
 
   /// 初始化配置管理器
   Future<void> initialize() async {
-    // 确保配置目录存在
-    await _storage.createDirectory('configs');
+    // Web平台不需要创建目录，只需要确保存储管理器已初始化
+    if (!kIsWeb) {
+      await _storage.createDirectory('configs');
+    }
   }
 
   /// 保存插件配置

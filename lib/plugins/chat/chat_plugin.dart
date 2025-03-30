@@ -1,4 +1,4 @@
-import 'dart:io';
+// import 'dart:io'; // 移除，因为在Web平台不可用
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../base_plugin.dart';
@@ -82,7 +82,13 @@ class ChatPlugin extends BasePlugin {
   Future<void> initializeDefaultData() async {
     // 确保数据目录存在
     await storage.ensureDirectoryExists('$pluginDir/datas');
-    // 默认数据已移除，用户需要手动创建频道和消息
+
+    // 确保channels.json文件存在
+    final dataPath = '$pluginDir/datas';
+    final channelsListData = await storage.read('$dataPath/channels.json');
+    if (channelsListData.isEmpty) {
+      await storage.write('$dataPath/channels.json', {'channels': []});
+    }
   }
 
   Future<void> _loadChannels() async {
@@ -90,16 +96,17 @@ class ChatPlugin extends BasePlugin {
       // 清空现有频道列表，避免重复加载
       _channels.clear();
 
-      // 获取所有频道目录
       final dataPath = '$pluginDir/datas';
-      final directory = Directory('${storage.basePath}/$dataPath');
+      // 读取频道列表文件
+      final channelsListData = await storage.read('$dataPath/channels.json');
 
-      if (await directory.exists()) {
-        final channelDirs = await directory.list().toList();
+      if (channelsListData.isNotEmpty &&
+          channelsListData.containsKey('channels')) {
+        final List<String> channelIds = List<String>.from(
+          channelsListData['channels'],
+        );
 
-        for (var channelDir in channelDirs) {
-          final channelId = channelDir.path.split('/').last;
-
+        for (var channelId in channelIds) {
           // 加载频道信息
           final channelData = await storage.read(
             '$dataPath/$channelId/channel.json',
@@ -158,6 +165,7 @@ class ChatPlugin extends BasePlugin {
   // 保存频道信息
   Future<void> saveChannel(Channel channel) async {
     final channelPath = '$pluginDir/datas/${channel.id}';
+    final dataPath = '$pluginDir/datas';
 
     // 确保目录存在
     await storage.ensureDirectoryExists(channelPath);
@@ -166,6 +174,10 @@ class ChatPlugin extends BasePlugin {
     await storage.write('$channelPath/channel.json', {
       'channel': ChannelSerializer.toJson(channel),
     });
+
+    // 更新频道列表
+    final channelIds = _channels.map((c) => c.id).toList();
+    await storage.write('$dataPath/channels.json', {'channels': channelIds});
   }
 
   // 保存消息
@@ -191,13 +203,19 @@ class ChatPlugin extends BasePlugin {
   // 删除频道
   Future<void> deleteChannel(String channelId) async {
     final channelPath = '$pluginDir/datas/$channelId';
+    final dataPath = '$pluginDir/datas';
 
     try {
-      // 删除频道目录及其所有内容
-      await storage.deleteDirectory(channelPath);
+      // 删除频道相关文件
+      await storage.delete('$channelPath/channel.json');
+      await storage.delete('$channelPath/messages.json');
 
       // 从内存中移除频道
       _channels.removeWhere((channel) => channel.id == channelId);
+
+      // 更新频道列表
+      final channelIds = _channels.map((c) => c.id).toList();
+      await storage.write('$dataPath/channels.json', {'channels': channelIds});
     } catch (e) {
       debugPrint('Error deleting channel: $e');
     }
@@ -233,7 +251,7 @@ class ChatPlugin extends BasePlugin {
     // 添加到内存中
     _channels.add(channel);
 
-    // 保存频道信息
+    // 保存频道信息（saveChannel方法已包含更新channels.json的逻辑）
     await saveChannel(channel);
 
     // 保存空消息列表

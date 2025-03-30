@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-
-// 条件导入
-import 'dart:io'
-    if (dart.library.html) 'package:flutter_application_1/core/storage/web_file_stub.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_application_1/core/storage/web_storage.dart'
-    if (dart.library.io) 'package:flutter_application_1/core/storage/native_storage_stub.dart'
-    as storage;
+
+// 不需要单独导入FileSystemException，因为已经通过io别名导入了
+
+import 'dart:io' as io;
+import 'web_file_stub.dart' if (dart.library.io) 'dart:io' as io;
+import 'web_storage.dart' as storage;
 
 // 不需要额外导入WebStorage，因为已经通过as storage导入了
 
@@ -41,7 +40,7 @@ class StorageManager {
         _basePath = '${directory.path}/app_data';
 
         // 确保基础目录存在
-        final baseDir = Directory(_basePath);
+        final baseDir = io.Directory(_basePath);
         if (!await baseDir.exists()) {
           await baseDir.create(recursive: true);
         }
@@ -63,8 +62,15 @@ class StorageManager {
   /// 创建目录
   Future<void> createDirectory(String path) async {
     await _ensureInitialized();
+
+    // Web平台不支持目录创建，直接返回
+    if (kIsWeb) {
+      debugPrint('Web平台跳过目录创建: $path');
+      return;
+    }
+
     final dirPath = '$_basePath/$path';
-    final directory = Directory(dirPath);
+    final directory = io.Directory(dirPath);
 
     if (!await directory.exists()) {
       await directory.create(recursive: true);
@@ -85,7 +91,7 @@ class StorageManager {
       try {
         // 非Web平台使用文件系统
         final filePath = '$_basePath/$path';
-        final file = File(filePath);
+        final file = io.File(filePath);
 
         // 确保目录存在
         final directory = file.parent;
@@ -123,10 +129,10 @@ class StorageManager {
     try {
       // 非Web平台读取文件
       final filePath = '$_basePath/$path';
-      final file = File(filePath);
+      final file = io.File(filePath);
 
       if (!await file.exists()) {
-        throw FileSystemException('文件不存在', filePath);
+        throw io.FileSystemException('文件不存在', filePath);
       }
 
       final content = await file.readAsString();
@@ -166,7 +172,7 @@ class StorageManager {
     try {
       // 非Web平台删除文件
       final filePath = '$_basePath/$path';
-      final file = File(filePath);
+      final file = io.File(filePath);
 
       if (await file.exists()) {
         await file.delete();
@@ -193,7 +199,7 @@ class StorageManager {
     try {
       // 非Web平台检查文件系统
       final filePath = '$_basePath/$path';
-      final file = File(filePath);
+      final file = io.File(filePath);
       return file.exists();
     } catch (e) {
       debugPrint('检查文件是否存在失败: $path - $e');
@@ -213,7 +219,7 @@ class StorageManager {
     try {
       // 非Web平台创建目录
       final dirPath = '$_basePath/$path';
-      final directory = Directory(dirPath);
+      final directory = io.Directory(dirPath);
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
@@ -274,10 +280,21 @@ class StorageManager {
       try {
         // 非Web平台删除目录
         final dirPath = '$_basePath/$path';
-        final directory = Directory(dirPath);
+        final directory = io.Directory(dirPath);
 
         if (await directory.exists()) {
-          await directory.delete(recursive: true);
+          // 递归删除目录及其内容
+          if (kIsWeb) {
+            // Web环境：使用Web存储API
+            // 在Web平台上，目录删除已经通过storage.removeDataByPrefix处理
+            // 这里不需要做任何事情
+          } else {
+            // 非Web环境：递归删除文件系统中的内容
+            await for (var entity in directory.list(recursive: true)) {
+              await entity.delete();
+            }
+            await directory.delete();
+          }
         }
 
         // 从缓存中删除所有相关项
