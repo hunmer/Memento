@@ -1,0 +1,89 @@
+import 'package:flutter/material.dart';
+import '../core/plugin_base.dart';
+import '../main.dart'; // 导入全局实例
+
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final plugins = globalPluginManager.allPlugins;
+
+    return Drawer(
+      child: Column(
+        children: [
+          const UserAccountsDrawerHeader(
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Icon(Icons.person),
+            ),
+            accountName: Text('用户名'),
+            accountEmail: Text('user@example.com'),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: ExpansionPanelList.radio(
+                elevation: 0,
+                expandedHeaderPadding: EdgeInsets.zero,
+                dividerColor: Colors.transparent,
+                children:
+                    plugins.map((plugin) {
+                      return ExpansionPanelRadio(
+                        value: plugin, // 使用插件对象作为唯一标识
+                        headerBuilder: (context, isExpanded) {
+                          return ListTile(
+                            leading: const Icon(Icons.extension),
+                            title: Text(
+                              plugin is PluginBase
+                                  ? plugin.name
+                                  : plugin.toString(),
+                            ),
+                          );
+                        },
+                        body: Column(
+                          children: [
+                            ListTile(
+                              title: Text(
+                                '版本: ${plugin is PluginBase ? plugin.version : "未知"}',
+                              ),
+                              subtitle: Text(
+                                plugin is PluginBase
+                                    ? plugin.description
+                                    : "无描述",
+                              ),
+                              onTap: () {
+                                Navigator.pop(context); // 关闭抽屉
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) =>
+                                            plugin is PluginBase
+                                                ? plugin.buildMainView(context)
+                                                : const Center(
+                                                  child: Text('插件未提供视图'),
+                                                ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+              ),
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('设置'),
+            onTap: () {
+              // TODO: 导航到设置页面
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}

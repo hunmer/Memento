@@ -1,0 +1,7 @@
+{
+  "name": "Chat",
+  "version": "1.0.0",
+  "description": "基础聊天功能插件",
+  "author": "Zhuanz",
+  "main": "chat_plugin.dart"
+}

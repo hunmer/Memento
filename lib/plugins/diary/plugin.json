@@ -1,0 +1,8 @@
+{
+  "id": "diary_plugin",
+  "name": "Diary",
+  "version": "1.0.0",
+  "description": "A markdown-based diary plugin",
+  "author": "Zhuanz",
+  "main": "diary_plugin.dart"
+}
