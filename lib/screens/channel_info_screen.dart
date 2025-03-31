@@ -10,9 +10,7 @@ class ChannelInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('频道信息'),
-      ),
+      appBar: AppBar(title: const Text('频道信息')),
       body: ListView(
         children: [
           // 频道基本信息
@@ -34,7 +32,7 @@ class ChannelInfoScreen extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                backgroundColor: Colors.blue,
+                backgroundColor: channel.backgroundColor,
                 radius: 30,
                 child: Icon(channel.icon, size: 30, color: Colors.white),
               ),
@@ -63,16 +61,10 @@ class ChannelInfoScreen extends StatelessWidget {
           const SizedBox(height: 16),
           const Text(
             '频道描述',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            '这是一个频道的详细描述信息...',
-            style: TextStyle(color: Colors.grey),
-          ),
+          const Text('这是一个频道的详细描述信息...', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
@@ -86,10 +78,7 @@ class ChannelInfoScreen extends StatelessWidget {
           padding: EdgeInsets.all(16.0),
           child: Text(
             '频道成员',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
         ListView.builder(

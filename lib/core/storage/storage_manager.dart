@@ -1,23 +1,34 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-
-// 不需要单独导入FileSystemException，因为已经通过io别名导入了
-
 import 'dart:io' as io;
-import 'web_file_stub.dart' if (dart.library.io) 'dart:io' as io;
-import 'web_storage.dart' as storage;
 
-// 不需要额外导入WebStorage，因为已经通过as storage导入了
+import 'storage_interface.dart';
+import 'mobile_storage.dart';
+
+// 条件导入，只在Web平台编译时才会导入
+import 'web_storage_stub.dart'
+    if (dart.library.html) 'web_storage.dart'
+    as web_storage;
 
 /// 存储管理器，负责文件读写操作
 class StorageManager {
   late String _basePath;
   final Map<String, dynamic> _cache = {};
+  late StorageInterface _storage;
 
   /// 创建存储管理器实例
   /// 注意：使用前需要调用 initialize() 方法确保初始化完成
-  StorageManager();
+  StorageManager() {
+    // 根据平台选择合适的存储实现
+    if (kIsWeb) {
+      // 在非Web平台编译时，这里会使用stub实现
+      // 在Web平台编译时，会使用实际的WebStorage实现
+      _storage = web_storage.WebStorage.instance;
+    } else {
+      _storage = MobileStorage.instance;
+    }
+  }
 
   /// 初始化存储管理器
   Future<void> initialize() async {
@@ -85,8 +96,8 @@ class StorageManager {
     _cache[path] = content;
 
     if (kIsWeb) {
-      // Web平台使用localStorage
-      storage.saveData(path, content);
+      // Web平台使用抽象接口
+      await _storage.saveData(path, content);
     } else {
       try {
         // 非Web平台使用文件系统
@@ -117,8 +128,8 @@ class StorageManager {
     }
 
     if (kIsWeb) {
-      // Web平台使用localStorage
-      final content = storage.loadData(path);
+      // Web平台使用抽象接口
+      final content = await _storage.loadData(path);
       if (content != null) {
         _cache[path] = content;
         return content;
@@ -146,14 +157,24 @@ class StorageManager {
 
   /// 写入JSON
   Future<void> writeJson(String path, dynamic data) async {
-    final jsonString = jsonEncode(data);
-    await writeString(path, jsonString);
+    if (kIsWeb) {
+      await _storage.saveJson(path, data);
+      // 更新缓存
+      _cache[path] = jsonEncode(data);
+    } else {
+      final jsonString = jsonEncode(data);
+      await writeString(path, jsonString);
+    }
   }
 
   /// 读取JSON
   Future<dynamic> readJson(String path) async {
-    final jsonString = await readString(path);
-    return jsonDecode(jsonString);
+    if (kIsWeb) {
+      return await _storage.loadJson(path);
+    } else {
+      final jsonString = await readString(path);
+      return jsonDecode(jsonString);
+    }
   }
 
   /// 删除文件
@@ -164,8 +185,8 @@ class StorageManager {
     _cache.remove(path);
 
     if (kIsWeb) {
-      // Web平台从localStorage删除
-      storage.removeData(path);
+      // Web平台使用抽象接口
+      await _storage.removeData(path);
       return;
     }
 
@@ -191,9 +212,9 @@ class StorageManager {
       return true;
     }
 
-    // Web平台检查localStorage
+    // 使用抽象接口
     if (kIsWeb) {
-      return storage.hasData(path);
+      return await _storage.hasData(path);
     }
 
     try {
@@ -232,8 +253,8 @@ class StorageManager {
   Future<Map<String, dynamic>> read(String path) async {
     try {
       if (kIsWeb) {
-        // Web平台直接使用WebStorage的JSON方法
-        final data = storage.loadJson(path);
+        // Web平台使用抽象接口
+        final data = await _storage.loadJson(path);
         if (data != null && data is Map<String, dynamic>) {
           return data;
         }
@@ -250,15 +271,7 @@ class StorageManager {
 
   /// 写入 JSON 文件
   Future<void> write(String path, Map<String, dynamic> data) async {
-    if (kIsWeb) {
-      // Web平台直接使用WebStorage的JSON方法
-      storage.saveJson(path, data);
-      // 更新缓存
-      _cache[path] = json.encode(data);
-    } else {
-      final jsonString = json.encode(data);
-      await writeString(path, jsonString);
-    }
+    await writeJson(path, data);
   }
 
   /// 删除文件
@@ -271,8 +284,8 @@ class StorageManager {
     await _ensureInitialized();
 
     if (kIsWeb) {
-      // Web平台需要删除所有以该路径开头的存储项
-      storage.removeDataByPrefix(path);
+      // Web平台使用抽象接口
+      await _storage.clearWithPrefix(path);
 
       // 从缓存中删除所有相关项
       _cache.removeWhere((key, _) => key.startsWith(path));
@@ -284,17 +297,10 @@ class StorageManager {
 
         if (await directory.exists()) {
           // 递归删除目录及其内容
-          if (kIsWeb) {
-            // Web环境：使用Web存储API
-            // 在Web平台上，目录删除已经通过storage.removeDataByPrefix处理
-            // 这里不需要做任何事情
-          } else {
-            // 非Web环境：递归删除文件系统中的内容
-            await for (var entity in directory.list(recursive: true)) {
-              await entity.delete();
-            }
-            await directory.delete();
+          await for (var entity in directory.list(recursive: true)) {
+            await entity.delete();
           }
+          await directory.delete();
         }
 
         // 从缓存中删除所有相关项
@@ -323,5 +329,15 @@ class StorageManager {
   /// 写入字符串到文件（别名方法，与 writeString 功能相同）
   Future<void> writeFile(String path, String content) async {
     await writeString(path, content);
+  }
+
+  /// 获取插件存储路径
+  String getPluginStoragePath(String pluginId) {
+    // 返回插件的完整存储路径
+    if (kIsWeb) {
+      return 'web_app_data/$pluginId';
+    } else {
+      return '$_basePath/$pluginId';
+    }
   }
 }

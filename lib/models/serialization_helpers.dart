@@ -3,6 +3,52 @@ import 'channel.dart';
 import 'message.dart';
 import 'user.dart';
 
+// 预定义的图标映射表，使用常量构造函数
+final Map<String, IconData> predefinedIcons = {
+  'message': Icons.message,
+  'person': Icons.person,
+  'group': Icons.group,
+  'star': Icons.star,
+  'favorite': Icons.favorite,
+  'home': Icons.home,
+  'settings': Icons.settings,
+  'work': Icons.work,
+  'school': Icons.school,
+  'event': Icons.event,
+  'chat': Icons.chat,
+  'chat_bubble': Icons.chat_bubble,
+  'notifications': Icons.notifications,
+  'people': Icons.people,
+  'sports': Icons.sports,
+  'music_note': Icons.music_note,
+  'movie': Icons.movie,
+  'book': Icons.book,
+  'shopping_cart': Icons.shopping_cart,
+  'email': Icons.email,
+  'phone': Icons.phone,
+  'camera': Icons.camera,
+  'photo': Icons.photo,
+  'video_camera_back': Icons.video_camera_back,
+  'restaurant': Icons.restaurant,
+  'local_cafe': Icons.local_cafe,
+  'local_bar': Icons.local_bar,
+  'local_hotel': Icons.local_hotel,
+  'flight': Icons.flight,
+  'directions_car': Icons.directions_car,
+  'directions_bike': Icons.directions_bike,
+  'pets': Icons.pets,
+  'nature': Icons.nature,
+  'park': Icons.park,
+  'beach_access': Icons.beach_access,
+  'ac_unit': Icons.ac_unit,
+  'whatshot': Icons.whatshot,
+  'sports_esports': Icons.sports_esports,
+  'sports_basketball': Icons.sports_basketball,
+  'sports_football': Icons.sports_football,
+  'celebration': Icons.celebration,
+  'cake': Icons.cake,
+};
+
 /// 用户序列化/反序列化
 class UserSerializer {
   static Map<String, dynamic> toJson(User user) {
@@ -32,6 +78,7 @@ class MessageSerializer {
       'date': message.date.toIso8601String(),
       'type': message.type.toString().split('.').last,
       'editedAt': message.editedAt?.toIso8601String(),
+      'fixedSymbol': message.fixedSymbol,
     };
   }
 
@@ -56,6 +103,7 @@ class MessageSerializer {
           json['editedAt'] != null
               ? DateTime.parse(json['editedAt'] as String)
               : null,
+      fixedSymbol: json['fixedSymbol'] as String?,
     );
   }
 }
@@ -69,6 +117,9 @@ class ChannelSerializer {
       'icon': _iconDataToString(channel.icon),
       'priority': channel.priority,
       'members': channel.members.map((u) => UserSerializer.toJson(u)).toList(),
+      'groups': channel.groups,
+      'backgroundColor': channel.backgroundColor.value,
+      'fixedSymbol': channel.fixedSymbol,
     };
   }
 
@@ -89,22 +140,31 @@ class ChannelSerializer {
       priority: json['priority'] as int? ?? 0,
       members: members,
       messages: messages ?? [],
+      groups: (json['groups'] as List<dynamic>?)?.cast<String>() ?? [],
+      backgroundColor: Color(
+        json['backgroundColor'] as int? ?? Colors.blue.value,
+      ),
+      fixedSymbol: json['fixedSymbol'] as String?,
     );
   }
 
-  // 将IconData转换为字符串
+  // 将IconData转换为字符串（使用图标名称）
   static String _iconDataToString(IconData icon) {
-    return '${icon.codePoint}:${icon.fontFamily}:${icon.fontPackage}';
+    // 查找图标名称
+    final iconName =
+        predefinedIcons.entries
+            .firstWhere(
+              (entry) => entry.value == icon,
+              orElse: () => const MapEntry('message', Icons.message), // 默认图标
+            )
+            .key;
+    return iconName;
   }
 
-  // 将字符串转换为IconData
-  static IconData _stringToIconData(String iconString) {
-    final parts = iconString.split(':');
-    return IconData(
-      int.parse(parts[0]),
-      fontFamily: parts[1] == 'null' ? null : parts[1],
-      fontPackage: parts.length > 2 && parts[2] != 'null' ? parts[2] : null,
-    );
+  // 将字符串（图标名称）转换为IconData
+  static IconData _stringToIconData(String iconName) {
+    // 从预定义图标中获取，如果不存在则使用默认图标
+    return predefinedIcons[iconName] ?? Icons.message;
   }
 }
 

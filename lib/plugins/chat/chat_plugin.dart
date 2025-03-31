@@ -11,6 +11,43 @@ import '../../models/serialization_helpers.dart';
 import '../../screens/channel_list_screen.dart';
 
 class ChatPlugin extends BasePlugin {
+  // 新增：插件设置
+  bool _showAvatarInChannelList = false;
+
+  bool get showAvatarInChannelList => _showAvatarInChannelList;
+
+  // 新增：设置是否在聊天列表显示自己的头像
+  void setShowAvatarInChannelList(bool value) {
+    _showAvatarInChannelList = value;
+    // 保存设置到本地存储
+    storage.write('$pluginDir/settings.json', {
+      'showAvatarInChannelList': value,
+    });
+  }
+
+  @override
+  Widget buildSettingsView(BuildContext context) {
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return Column(
+          children: [
+            SwitchListTile(
+              title: const Text('在聊天列表显示自己的头像'),
+              value: _showAvatarInChannelList,
+              onChanged: (bool value) {
+                setState(() {
+                  setShowAvatarInChannelList(value);
+                });
+              },
+            ),
+            const Divider(),
+            super.buildSettingsView(context),
+          ],
+        );
+      },
+    );
+  }
+
   static ChatPlugin? _instance;
   static ChatPlugin get instance {
     _instance ??= ChatPlugin();
@@ -76,6 +113,11 @@ class ChatPlugin extends BasePlugin {
   Future<void> initialize() async {
     await initializeDefaultData();
     await _loadChannels();
+    // 加载设置
+    final settings = await storage.read('$pluginDir/settings.json');
+    if (settings.isNotEmpty) {
+      _showAvatarInChannelList = settings['showAvatarInChannelList'] ?? false;
+    }
   }
 
   @override
@@ -178,6 +220,34 @@ class ChatPlugin extends BasePlugin {
     // 更新频道列表
     final channelIds = _channels.map((c) => c.id).toList();
     await storage.write('$dataPath/channels.json', {'channels': channelIds});
+
+    // 更新内存中的频道信息
+    final index = _channels.indexWhere((c) => c.id == channel.id);
+    if (index != -1) {
+      _channels[index] = channel;
+    } else {
+      _channels.add(channel);
+    }
+
+    // 重新排序频道列表
+    _channels.sort(Channel.compare);
+  }
+
+  // 更新频道颜色
+  Future<void> updateChannelColor(String channelId, Color color) async {
+    final channel = _channels.firstWhere((c) => c.id == channelId);
+    final updatedChannel = channel.copyWith(backgroundColor: color);
+    await saveChannel(updatedChannel);
+  }
+
+  // 更新频道固定符号
+  Future<void> updateChannelFixedSymbol(
+    String channelId,
+    String? fixedSymbol,
+  ) async {
+    final channel = _channels.firstWhere((c) => c.id == channelId);
+    final updatedChannel = channel.copyWith(fixedSymbol: fixedSymbol);
+    await saveChannel(updatedChannel);
   }
 
   // 保存消息
@@ -263,7 +333,7 @@ class ChatPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return ChannelListScreen(channels: _channels);
+    return ChannelListScreen(channels: _channels, chatPlugin: this);
   }
 
   /// 注册插件到应用

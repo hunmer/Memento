@@ -9,6 +9,8 @@ class MessageBubble extends StatelessWidget {
   final Function(Message) onEdit;
   final Function(Message) onDelete;
   final Function(Message) onCopy;
+  final Function(Message, String?) onSetFixedSymbol;
+  final Color? channelColor; // 添加频道颜色参数
 
   const MessageBubble({
     super.key,
@@ -16,16 +18,28 @@ class MessageBubble extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onCopy,
+    required this.onSetFixedSymbol,
+    this.channelColor, // 可选的频道颜色参数
   });
 
   @override
   Widget build(BuildContext context) {
     final isSentMessage = message.type == MessageType.sent;
+    // 使用频道颜色或默认颜色
     final backgroundColor =
         isSentMessage
-            ? Theme.of(context).colorScheme.primary
+            ? (channelColor ?? Theme.of(context).colorScheme.primary)
             : Colors.grey.shade200;
-    final textColor = isSentMessage ? Colors.white : Colors.black87;
+
+    // 根据背景色亮度自动调整文字颜色
+    final textColor =
+        isSentMessage
+            ? (channelColor != null
+                ? (channelColor!.computeLuminance() > 0.5
+                    ? Colors.black87
+                    : Colors.white)
+                : Colors.white)
+            : Colors.black87;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
@@ -34,8 +48,10 @@ class MessageBubble extends StatelessWidget {
             isSentMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!isSentMessage) _buildAvatar(message.user),
-          const SizedBox(width: 8),
+          if (!isSentMessage) _buildAvatar(message.user, showAvatar: true),
+          if (!isSentMessage) const SizedBox(width: 8),
+          if (message.fixedSymbol != null && !isSentMessage)
+            _buildFixedSymbol(),
           Flexible(
             child: Column(
               crossAxisAlignment:
@@ -77,6 +93,8 @@ class MessageBubble extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (message.fixedSymbol != null && isSentMessage)
+                  _buildFixedSymbol(),
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0),
                   child: Text(
@@ -87,16 +105,30 @@ class MessageBubble extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          if (isSentMessage) _buildAvatar(message.user),
+          if (isSentMessage) const SizedBox(width: 8),
+          if (isSentMessage) _buildAvatar(message.user, showAvatar: false),
         ],
       ),
     );
   }
 
-  void _showMessageOptions(BuildContext context) {
-    final isSentMessage = message.type == MessageType.sent;
+  Widget _buildFixedSymbol() {
+    return Container(
+      margin: EdgeInsets.only(
+        left: message.type == MessageType.sent ? 4 : 0,
+        right: message.type == MessageType.received ? 4 : 0,
+      ),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Text(message.fixedSymbol!, style: const TextStyle(fontSize: 12)),
+    );
+  }
 
+  void _showMessageOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -105,6 +137,22 @@ class MessageBubble extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('编辑消息'),
+                onTap: () {
+                  Navigator.pop(context);
+                  onEdit(message);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('删除消息'),
+                onTap: () {
+                  Navigator.pop(context);
+                  onDelete(message);
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.copy),
                 title: const Text('复制消息'),
                 onTap: () {
@@ -112,27 +160,14 @@ class MessageBubble extends StatelessWidget {
                   onCopy(message);
                 },
               ),
-              if (isSentMessage) // 只有发送的消息才能编辑和删除
-                ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: const Text('编辑消息'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    onEdit(message);
-                  },
-                ),
-              if (isSentMessage)
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text(
-                    '删除消息',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    onDelete(message);
-                  },
-                ),
+              ListTile(
+                leading: const Icon(Icons.push_pin),
+                title: Text('${message.fixedSymbol == null ? '设置' : '移除'}固定符号'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSetFixedSymbolDialog(context);
+                },
+              ),
             ],
           ),
         );
@@ -140,7 +175,71 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(User user) {
+  void _showSetFixedSymbolDialog(BuildContext context) {
+    final TextEditingController controller = TextEditingController(
+      text: message.fixedSymbol,
+    );
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('设置固定符号'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(hintText: '输入固定符号（通常为表情）'),
+                  maxLength: 2,
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children:
+                      ['👍', '❤️', '😊', '🎉', '🔥', '👀'].map((emoji) {
+                        return ElevatedButton(
+                          onPressed: () {
+                            controller.text = emoji;
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(8),
+                            minimumSize: const Size(40, 40),
+                          ),
+                          child: Text(
+                            emoji,
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                        );
+                      }).toList(),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  final symbol =
+                      controller.text.isEmpty ? null : controller.text;
+                  onSetFixedSymbol(message, symbol);
+                  Navigator.of(context).pop();
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget _buildAvatar(User user, {required bool showAvatar}) {
+    // 如果是自己发送的消息，且不显示头像，则返回空的SizedBox
+    if (!showAvatar && message.type == MessageType.sent) {
+      return const SizedBox(width: 32); // 保持宽度一致，但不显示头像
+    }
+
     Widget avatar;
     if (user.iconPath != null) {
       avatar = CircleAvatar(

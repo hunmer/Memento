@@ -81,6 +81,31 @@ class AppDrawer extends StatelessWidget {
                                     );
                                   },
                                 ),
+                                ListTile(
+                                  leading: const Icon(Icons.settings),
+                                  title: const Text('插件设置'),
+                                  onTap: () {
+                                    if (plugin is PluginBase) {
+                                      Navigator.pop(context); // 关闭抽屉
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => Scaffold(
+                                                appBar: AppBar(
+                                                  title: Text(
+                                                    '${plugin.name}设置',
+                                                  ),
+                                                ),
+                                                body: plugin.buildSettingsView(
+                                                  context,
+                                                ),
+                                              ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                           );

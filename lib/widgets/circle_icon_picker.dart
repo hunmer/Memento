@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'icon_picker_dialog.dart';
 
 class CircleIconPicker extends StatelessWidget {
   final IconData currentIcon;
+  final Color backgroundColor;
   final Function(IconData) onIconSelected;
+  final Function(Color) onColorSelected;
 
   const CircleIconPicker({
     super.key,
     required this.currentIcon,
+    required this.backgroundColor,
     required this.onIconSelected,
+    required this.onColorSelected,
   });
 
   @override
@@ -24,22 +29,67 @@ class CircleIconPicker extends StatelessWidget {
             onIconSelected(result);
           }
         },
-        child: Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-              width: 2,
+        child: Stack(
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: backgroundColor,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+              child: Icon(currentIcon, size: 32, color: Colors.white),
             ),
-          ),
-          child: Icon(
-            currentIcon,
-            size: 32,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: GestureDetector(
+                onTap: () async {
+                  final Color? color = await showDialog<Color>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('选择背景颜色'),
+                        content: SingleChildScrollView(
+                          child: ColorPicker(
+                            pickerColor: backgroundColor,
+                            onColorChanged: onColorSelected,
+                            showLabel: true,
+                            pickerAreaHeightPercent: 0.8,
+                          ),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('确定'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  if (color != null) {
+                    onColorSelected(color);
+                  }
+                },
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey),
+                  ),
+                  child: const Icon(Icons.color_lens, size: 16),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

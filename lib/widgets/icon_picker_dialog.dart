@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'custom_dialog.dart';
+import '../models/serialization_helpers.dart'; // 导入预定义图标映射表
 
 class IconPickerDialog extends StatefulWidget {
   final IconData currentIcon;
@@ -15,50 +16,21 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
-  // 所有可用的图标列表
-  final List<IconData> allIcons = [
-    Icons.chat,
-    Icons.people,
-    Icons.work,
-    Icons.school,
-    Icons.sports,
-    Icons.music_note,
-    Icons.movie,
-    Icons.book,
-    Icons.favorite,
-    Icons.shopping_cart,
-    Icons.home,
-    Icons.settings,
-    Icons.person,
-    Icons.email,
-    Icons.phone,
-    Icons.camera,
-    Icons.photo,
-    Icons.video_camera_back,
-    Icons.restaurant,
-    Icons.local_cafe,
-    Icons.local_bar,
-    Icons.local_hotel,
-    Icons.flight,
-    Icons.directions_car,
-    Icons.directions_bike,
-    Icons.pets,
-    Icons.nature,
-    Icons.park,
-    Icons.beach_access,
-    Icons.ac_unit,
-    Icons.whatshot,
-    Icons.sports_esports,
-    Icons.sports_basketball,
-    Icons.sports_football,
-    Icons.celebration,
-    Icons.cake,
-  ];
+  // 使用预定义的图标映射表中的图标
+  late List<IconData> allIcons;
 
   @override
   void initState() {
     super.initState();
     selectedIcon = widget.currentIcon;
+    // 从预定义图标映射表中获取所有图标
+    allIcons = predefinedIcons.values.toList();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   // 过滤图标列表

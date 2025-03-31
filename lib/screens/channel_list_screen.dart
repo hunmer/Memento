@@ -5,11 +5,17 @@ import '../widgets/custom_dialog.dart';
 import '../widgets/circle_icon_picker.dart';
 import 'chat_screen.dart';
 import '../plugins/chat/chat_plugin.dart';
+import '../models/serialization_helpers.dart'; // 导入预定义图标映射表
 
 class ChannelListScreen extends StatefulWidget {
   final List<Channel> channels;
+  final ChatPlugin chatPlugin;
 
-  const ChannelListScreen({super.key, required this.channels});
+  const ChannelListScreen({
+    super.key,
+    required this.channels,
+    required this.chatPlugin,
+  });
 
   @override
   State<ChannelListScreen> createState() => _ChannelListScreenState();
@@ -17,21 +23,57 @@ class ChannelListScreen extends StatefulWidget {
 
 class _ChannelListScreenState extends State<ChannelListScreen> {
   late List<Channel> _sortedChannels;
+  String _selectedGroup = "全部"; // 当前选择的频道组，默认为"全部"
+  List<String> _availableGroups = ["全部"]; // 可用的频道组列表
+  Color selectedColor = Colors.blue; // 默认背景颜色
 
   @override
   void initState() {
     super.initState();
     _updateSortedChannels();
+    _updateAvailableGroups();
   }
 
   void _updateSortedChannels() {
-    _sortedChannels = List<Channel>.from(widget.channels)
-      ..sort(Channel.compare);
+    if (_selectedGroup == "全部") {
+      _sortedChannels = List<Channel>.from(widget.channels)
+        ..sort(Channel.compare);
+    } else if (_selectedGroup == "未分组") {
+      _sortedChannels =
+          widget.channels.where((channel) => channel.groups.isEmpty).toList()
+            ..sort(Channel.compare);
+    } else {
+      _sortedChannels =
+          widget.channels
+              .where((channel) => channel.groups.contains(_selectedGroup))
+              .toList()
+            ..sort(Channel.compare);
+    }
+  }
+
+  void _updateAvailableGroups() {
+    // 始终包含"全部"和"未分组"选项
+    Set<String> groups = {"全部", "未分组"};
+
+    // 收集所有频道的所有组
+    for (var channel in widget.channels) {
+      groups.addAll(channel.groups);
+    }
+
+    _availableGroups = groups.toList()..sort();
   }
 
   void _showAddChannelDialog() {
     final TextEditingController nameController = TextEditingController();
-    IconData selectedIcon = Icons.chat;
+    final TextEditingController groupController = TextEditingController();
+    // 使用预定义图标映射表中的默认图标
+    IconData selectedIcon = predefinedIcons['chat']!;
+    // 使用类级别的 selectedColor 变量
+    void updateSelectedColor(Color color) {
+      setState(() {
+        selectedColor = color;
+      });
+    }
 
     showDialog(
       context: context,
@@ -47,11 +89,20 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildIconSelector((icon) {
-                          setDialogState(() {
-                            selectedIcon = icon;
-                          });
-                        }, selectedIcon),
+                        _buildIconSelector(
+                          (icon) {
+                            setDialogState(() {
+                              selectedIcon = icon;
+                            });
+                          },
+                          selectedIcon,
+                          selectedColor,
+                          (color) {
+                            setDialogState(() {
+                              selectedColor = color;
+                            });
+                          },
+                        ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: nameController,
@@ -60,6 +111,15 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                             border: OutlineInputBorder(),
                           ),
                           autofocus: true,
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: groupController,
+                          decoration: const InputDecoration(
+                            labelText: '频道分组（多个分组用逗号分隔）',
+                            border: OutlineInputBorder(),
+                            hintText: '例如：工作,学习,娱乐',
+                          ),
                         ),
                       ],
                     ),
@@ -74,6 +134,17 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                         final name = nameController.text.trim();
                         if (name.isNotEmpty) {
                           // TODO: 实际应用中，这里应该调用API或数据库操作
+                          // 处理分组信息
+                          List<String> groups = [];
+                          if (groupController.text.trim().isNotEmpty) {
+                            groups =
+                                groupController.text
+                                    .split(',')
+                                    .map((g) => g.trim())
+                                    .where((g) => g.isNotEmpty)
+                                    .toList();
+                          }
+
                           final newChannel = Channel(
                             id:
                                 DateTime.now().millisecondsSinceEpoch
@@ -83,10 +154,12 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                             members: [], // 初始为空，或添加当前用户
                             messages: [], // 初始为空
                             priority: 0,
+                            groups: groups,
                           );
 
                           setState(() {
                             widget.channels.add(newChannel);
+                            _updateAvailableGroups();
                             _updateSortedChannels();
                             // 保存频道数据到本地存储
                             ChatPlugin.instance.saveChannels();
@@ -102,93 +175,16 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
     );
   }
 
-  void _showPluginSettingsDialog() {
-    final TextEditingController dirController = TextEditingController(
-      text: ChatPlugin.instance.customPluginDir,
-    );
-
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierColor: Colors.black54,
-      builder:
-          (context) => StatefulBuilder(
-            builder:
-                (context, setDialogState) => CustomDialog(
-                  title: '插件设置',
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('插件UUID: ${ChatPlugin.instance.uuid}'),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: dirController,
-                                decoration: const InputDecoration(
-                                  labelText: '数据保存位置',
-                                  border: OutlineInputBorder(),
-                                  hintText: '留空则使用默认位置',
-                                ),
-                                readOnly: true,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.folder_open),
-                              onPressed: () async {
-                                final selectedDir =
-                                    await ChatPlugin.instance.pickDirectory();
-                                if (selectedDir != null) {
-                                  setDialogState(() {
-                                    dirController.text = selectedDir;
-                                  });
-                                }
-                              },
-                              tooltip: '选择目录',
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '当前数据位置: ${ChatPlugin.instance.pluginDir}',
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('取消'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        final newDir = dirController.text.trim();
-                        ChatPlugin.instance.setCustomPluginDir(newDir);
-                        Navigator.pop(context);
-                        // 刷新UI以显示新的路径
-                        setState(() {});
-                      },
-                      child: const Text('保存'),
-                    ),
-                  ],
-                ),
-          ),
-    );
-  }
-
   void _showEditChannelDialog(Channel channel) {
     final TextEditingController nameController = TextEditingController(
       text: channel.title,
     );
+    final TextEditingController groupController = TextEditingController(
+      text: channel.groups.join(', '),
+    );
     IconData selectedIcon = channel.icon;
+    // 加载频道的背景颜色
+    Color dialogSelectedColor = channel.backgroundColor;
 
     // 使用我们的自定义对话框和StatefulBuilder，设置基础zIndex
     showDialog(
@@ -205,12 +201,21 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildIconSelector((icon) {
-                          // 使用对话框内部的setState
-                          setDialogState(() {
-                            selectedIcon = icon;
-                          });
-                        }, selectedIcon),
+                        _buildIconSelector(
+                          (icon) {
+                            // 使用对话框内部的setState
+                            setDialogState(() {
+                              selectedIcon = icon;
+                            });
+                          },
+                          selectedIcon,
+                          dialogSelectedColor,
+                          (color) {
+                            setDialogState(() {
+                              dialogSelectedColor = color;
+                            });
+                          },
+                        ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: nameController,
@@ -219,6 +224,15 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                             border: OutlineInputBorder(),
                           ),
                           autofocus: true,
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: groupController,
+                          decoration: const InputDecoration(
+                            labelText: '频道分组（多个分组用逗号分隔）',
+                            border: OutlineInputBorder(),
+                            hintText: '例如：工作,学习,娱乐',
+                          ),
                         ),
                       ],
                     ),
@@ -238,17 +252,31 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                             (c) => c.id == channel.id,
                           );
                           if (index != -1) {
+                            // 处理分组信息
+                            List<String> groups = [];
+                            if (groupController.text.trim().isNotEmpty) {
+                              groups =
+                                  groupController.text
+                                      .split(',')
+                                      .map((g) => g.trim())
+                                      .where((g) => g.isNotEmpty)
+                                      .toList();
+                            }
+
                             final updatedChannel = Channel(
                               id: channel.id,
                               title: name,
                               icon: selectedIcon,
+                              backgroundColor: dialogSelectedColor,
                               members: channel.members,
                               messages: channel.messages,
                               priority: channel.priority,
+                              groups: groups,
                             );
 
                             setState(() {
                               widget.channels[index] = updatedChannel;
+                              _updateAvailableGroups();
                               _updateSortedChannels();
                               // 保存更新后的频道数据到本地存储
                               ChatPlugin.instance.saveChannels();
@@ -302,6 +330,8 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   Widget _buildIconSelector(
     Function(IconData) onIconSelected,
     IconData currentIcon,
+    Color backgroundColor,
+    Function(Color) onColorSelected,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,7 +340,9 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
         const SizedBox(height: 16),
         CircleIconPicker(
           currentIcon: currentIcon,
+          backgroundColor: backgroundColor,
           onIconSelected: onIconSelected,
+          onColorSelected: onColorSelected,
         ),
       ],
     );
@@ -320,54 +352,117 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('聊天'),
+        title: InkWell(
+          onTap: () {
+            _showGroupSelectionMenu(context);
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [Text(_selectedGroup), const Icon(Icons.arrow_drop_down)],
+          ),
+        ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _showPluginSettingsDialog,
-          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _showAddChannelDialog,
           ),
         ],
       ),
-      body: ReorderableListView.builder(
-        itemCount: _sortedChannels.length,
-        onReorder: (oldIndex, newIndex) {
-          setState(() {
-            if (oldIndex < newIndex) {
-              newIndex -= 1;
-            }
-            final Channel item = _sortedChannels.removeAt(oldIndex);
-            _sortedChannels.insert(newIndex, item);
+      body:
+          _sortedChannels.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.chat_bubble_outline,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "这里没有任何频道",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: _showAddChannelDialog,
+                      icon: const Icon(Icons.add),
+                      label: const Text("点击右上角添加频道"),
+                    ),
+                  ],
+                ),
+              )
+              : ReorderableListView.builder(
+                itemCount: _sortedChannels.length,
+                onReorder: (oldIndex, newIndex) {
+                  setState(() {
+                    if (oldIndex < newIndex) {
+                      newIndex -= 1;
+                    }
+                    final Channel item = _sortedChannels.removeAt(oldIndex);
+                    _sortedChannels.insert(newIndex, item);
 
-            // 更新优先级以反映新的顺序
-            // 在实际应用中，这里应该调用API或数据库操作来持久化排序
-            for (int i = 0; i < _sortedChannels.length; i++) {
-              final channel = _sortedChannels[i];
-              final index = widget.channels.indexWhere(
-                (c) => c.id == channel.id,
-              );
-              if (index != -1) {
-                // 这里我们设置一个优先级，让排序在拖拽后能够保持
-                // 我们使用一个简单的计算方式：最大优先级 - 索引位置
-                // 这样，越靠前的项目优先级越高
-                final newPriority = _sortedChannels.length - i;
-                widget.channels[index].priority = newPriority;
-                // 保存频道排序数据到本地存储
-                ChatPlugin.instance.saveChannels();
-              }
-            }
-          });
-        },
-        itemBuilder: (context, index) {
-          final channel = _sortedChannels[index];
-          // 使用 ObjectKey 而不是 ValueKey 来避免 GlobalKey 冲突
-          return _buildChannelTile(context, channel, key: ObjectKey(channel));
-        },
-      ),
+                    // 更新优先级以反映新的顺序
+                    // 在实际应用中，这里应该调用API或数据库操作来持久化排序
+                    for (int i = 0; i < _sortedChannels.length; i++) {
+                      final channel = _sortedChannels[i];
+                      final index = widget.channels.indexWhere(
+                        (c) => c.id == channel.id,
+                      );
+                      if (index != -1) {
+                        // 这里我们设置一个优先级，让排序在拖拽后能够保持
+                        // 我们使用一个简单的计算方式：最大优先级 - 索引位置
+                        // 这样，越靠前的项目优先级越高
+                        final newPriority = _sortedChannels.length - i;
+                        widget.channels[index].priority = newPriority;
+                        // 保存频道排序数据到本地存储
+                        ChatPlugin.instance.saveChannels();
+                      }
+                    }
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final channel = _sortedChannels[index];
+                  // 使用 ObjectKey 而不是 ValueKey 来避免 GlobalKey 冲突
+                  return _buildChannelTile(
+                    context,
+                    channel,
+                    key: ObjectKey(channel),
+                  );
+                },
+              ),
+    );
+  }
+
+  void _showGroupSelectionMenu(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('选择频道组'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children:
+                  _availableGroups.map((String group) {
+                    return ListTile(
+                      title: Text(group),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        if (group != _selectedGroup) {
+                          setState(() {
+                            _selectedGroup = group;
+                            _updateSortedChannels();
+                          });
+                        }
+                      },
+                    );
+                  }).toList(),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -382,7 +477,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
     return ListTile(
       key: key, // 这个 key 是从 itemBuilder 传入的 ObjectKey
       leading: CircleAvatar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: channel.backgroundColor,
         child: Icon(channel.icon, color: Colors.white),
       ),
       title: Text(
@@ -395,48 +490,38 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.grey[600], fontSize: 13),
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (channel.priority > 0)
-            const Padding(
-              padding: EdgeInsets.only(right: 8.0),
-              child: Icon(Icons.star, color: Colors.amber, size: 20),
-            ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, size: 20),
-            onSelected: (value) {
-              if (value == 'edit') {
-                _showEditChannelDialog(channel);
-              } else if (value == 'delete') {
-                _deleteChannel(channel);
-              }
-            },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit, size: 20),
-                        SizedBox(width: 8),
-                        Text('编辑'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, size: 20, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('删除', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
-          ),
-        ],
+      trailing: PopupMenuButton<String>(
+        icon: const Icon(Icons.more_vert, size: 20),
+        onSelected: (value) {
+          if (value == 'edit') {
+            _showEditChannelDialog(channel);
+          } else if (value == 'delete') {
+            _deleteChannel(channel);
+          }
+        },
+        itemBuilder:
+            (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, size: 20),
+                    SizedBox(width: 8),
+                    Text('编辑'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, size: 20, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('删除', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
       ),
       onTap: () {
         Navigator.push(
