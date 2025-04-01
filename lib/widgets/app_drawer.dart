@@ -11,14 +11,6 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
-          const UserAccountsDrawerHeader(
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person),
-            ),
-            accountName: Text('用户名'),
-            accountEmail: Text('user@example.com'),
-          ),
           Expanded(
             child: FutureBuilder<List<PluginBase>>(
               future: Future.microtask(() => globalPluginManager.allPlugins),

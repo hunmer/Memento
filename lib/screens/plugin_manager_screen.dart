@@ -14,95 +14,74 @@ class PluginManagerScreen extends StatelessWidget {
       body:
           plugins.isEmpty
               ? const Center(child: Text('没有已安装的插件'))
-              : ListView.builder(
+              : GridView.builder(
+                padding: const EdgeInsets.all(8.0),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 8.0,
+                  mainAxisSpacing: 8.0,
+                ),
                 itemCount: plugins.length,
                 itemBuilder: (context, index) {
                   final plugin = plugins[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 4.0,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              // 插件图标
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).primaryColor.withAlpha((0.1 * 255).toInt()),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.extension,
-                                  size: 32,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              // 插件名称和版本信息
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      plugin.name,
-                                      style:
-                                          Theme.of(
-                                            context,
-                                          ).textTheme.titleLarge,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '版本: ${plugin.version} | 作者: ${plugin.author}',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium?.copyWith(
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).textTheme.bodySmall?.color,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // 启动按钮
-                              IconButton(
-                                icon: const Icon(Icons.launch, size: 28),
-                                color: Theme.of(context).primaryColor,
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) =>
-                                              plugin.buildMainView(context),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => plugin.buildMainView(context),
                           ),
-                          // 插件描述
-                          if (plugin.description.isNotEmpty) ...[
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // 插件图标
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor.withAlpha(25),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.extension,
+                                size: 36,
+                                color: Colors.blue,
+                              ),
+                            ),
                             const SizedBox(height: 12),
+                            // 插件名称
                             Text(
-                              plugin.description,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              maxLines: 3,
+                              plugin.name,
+                              style: Theme.of(context).textTheme.titleMedium,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
+                            const SizedBox(height: 4),
+                            // 版本信息
+                            Text(
+                              '版本: ${plugin.version}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                              textAlign: TextAlign.center,
+                            ),
+                            const Spacer(),
+                            // 进入指示器
+                            Icon(
+                              Icons.chevron_right,
+                              size: 20,
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   );

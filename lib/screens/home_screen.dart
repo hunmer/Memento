@@ -117,219 +117,64 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.all(16.0),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
-                      childAspectRatio:
-                          constraints.maxWidth < 600 ? 2.2 : 1.6, // 在小屏幕上调整卡片比例
+                      childAspectRatio: 1.0, // 正方形卡片
                       crossAxisSpacing: 12.0,
                       mainAxisSpacing: 12.0,
                     ),
                     itemCount: plugins.length,
                     itemBuilder: (context, index) {
                       final plugin = plugins[index];
-                      // 获取插件配置
-                      final pluginConfig =
-                          globalConfigManager.getPluginConfig(plugin.id) ??
-                          {'enabled': true};
-                      final bool isEnabled =
-                          (pluginConfig is Map<String, dynamic>
-                                  ? pluginConfig['enabled']
-                                  : true)
-                              as bool? ??
-                          true;
-
                       return Card(
-                        elevation: 4.0,
-                        margin: const EdgeInsets.all(4.0), // 添加外边距
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // 卡片内容部分
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: 16.0,
-                                right: 16.0,
-                                top: 16.0,
-                                bottom: 12.0,
+                        elevation: 2.0,
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () {
+                            globalConfigManager.savePluginConfig(
+                              'last_opened_plugin',
+                              {'pluginId': plugin.id},
+                            );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => plugin.buildMainView(context),
                               ),
-                              child: Row(
-                                children: [
-                                  // 左侧图标
-                                  SizedBox(
-                                    width: 64,
-                                    height: 64,
-                                    child: Stack(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .primaryColor
-                                                .withAlpha((0.1 * 255).toInt()),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            Icons.extension,
-                                            size: 36,
-                                            color:
-                                                isEnabled
-                                                    ? Theme.of(
-                                                      context,
-                                                    ).primaryColor
-                                                    : Theme.of(
-                                                      context,
-                                                    ).disabledColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // 插件图标
+                                Container(
+                                  width: 64,
+                                  height: 64,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).primaryColor.withAlpha(25),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  const SizedBox(width: 16),
-                                  // 中间的标题和描述
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          plugin.name,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.titleLarge?.copyWith(
-                                            color:
-                                                isEnabled
-                                                    ? Theme.of(context)
-                                                        .textTheme
-                                                        .titleLarge
-                                                        ?.color
-                                                    : Theme.of(
-                                                      context,
-                                                    ).disabledColor,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          plugin.description,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium?.copyWith(
-                                            color:
-                                                isEnabled
-                                                    ? Theme.of(context)
-                                                        .textTheme
-                                                        .bodyMedium
-                                                        ?.color
-                                                    : Theme.of(
-                                                      context,
-                                                    ).disabledColor,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // 底部操作栏
-                            Container(
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).cardColor,
-                                border: Border(
-                                  top: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                    width: 0.5,
+                                  child: Icon(
+                                    Icons.extension,
+                                    size: 36,
+                                    color: Theme.of(context).primaryColor,
                                   ),
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // 左侧开关
-                                  Switch(
-                                    value: isEnabled,
-                                    onChanged: (value) async {
-                                      await globalConfigManager
-                                          .savePluginConfig(plugin.id, {
-                                            ...(pluginConfig
-                                                as Map<String, dynamic>),
-                                            'enabled': value,
-                                          });
-                                      setState(() {});
-                                    },
-                                  ),
-                                  // 右侧进入按钮
-                                  Container(
-                                    margin: const EdgeInsets.only(right: 8),
-                                    child: Material(
-                                      color:
-                                          isEnabled
-                                              ? Theme.of(context).primaryColor
-                                              : Theme.of(context).disabledColor,
-                                      borderRadius: BorderRadius.circular(20),
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(20),
-                                        onTap:
-                                            isEnabled
-                                                ? () {
-                                                  globalConfigManager
-                                                      .savePluginConfig(
-                                                        'last_opened_plugin',
-                                                        {'pluginId': plugin.id},
-                                                      );
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder:
-                                                          (context) => plugin
-                                                              .buildMainView(
-                                                                context,
-                                                              ),
-                                                    ),
-                                                  );
-                                                }
-                                                : null,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 8,
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                '进入',
-                                                style: TextStyle(
-                                                  color:
-                                                      isEnabled
-                                                          ? Colors.white
-                                                          : Colors.white70,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Icon(
-                                                Icons.arrow_forward,
-                                                size: 18,
-                                                color:
-                                                    isEnabled
-                                                        ? Colors.white
-                                                        : Colors.white70,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                const SizedBox(height: 16),
+                                // 插件名称
+                                Text(
+                                  plugin.name,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       );
                     },
