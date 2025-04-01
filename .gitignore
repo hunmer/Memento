@@ -1,22 +1,70 @@
-# Ignore everything
-*
-**/*/
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
 
-# Don't ignore these folders
-!lib/
-!lib/**
-!assets/
-!assets/**
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
 
-# Don't ignore gitignore
-!.gitignore
+# Visual Studio Code related
+.classpath
+.project
+.settings/
+.vscode/
 
-# Flutter/Dart specific
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/
-build/
-.DS_Store
+/build/
+
+# Web related
+lib/generated_plugin_registrant.dart
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Don't ignore these important project files
+!pubspec.yaml
+!pubspec.lock
+!android/
+!android/**
+!ios/
+!ios/**
+!web/
+!web/**
+!windows/
+!windows/**
+!macos/
+!macos/**
+!linux/
+!linux/**
+!test/
+!test/**
+!integration_test/
+!integration_test/**
+!analysis_options.yaml
+!README.md
