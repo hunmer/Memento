@@ -1,4 +1,7 @@
+import 'package:uuid/uuid.dart';
+
 class ActivityRecord {
+  final String id;
   final DateTime startTime;
   final DateTime endTime;
   final String title;
@@ -7,13 +10,14 @@ class ActivityRecord {
   final String? mood; // 添加心情字段
 
   ActivityRecord({
+    String? id,
     required this.startTime,
     required this.endTime,
     required this.title,
     this.tags = const [],
     this.description,
     this.mood, // 心情emoji
-  });
+  }) : id = id ?? const Uuid().v4();
 
   // 计算持续时间（分钟）
   int get durationInMinutes {
@@ -30,6 +34,7 @@ class ActivityRecord {
   // 从JSON创建实例
   factory ActivityRecord.fromJson(Map<String, dynamic> json) {
     return ActivityRecord(
+      id: json['id'],
       startTime: DateTime.parse(json['startTime']),
       endTime: DateTime.parse(json['endTime']),
       title: json['title'],
@@ -42,6 +47,7 @@ class ActivityRecord {
   // 转换为JSON
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
       'title': title,

@@ -21,12 +21,10 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   int _sortMode = 0;
   List<String> _selectedTags = [];
 
-  // 示例标签组
-  final List<TagGroup> _tagGroups = [
-    TagGroup(name: '工作', tags: ['会议', '编程', '写作', '阅读', '学习']),
-    TagGroup(name: '生活', tags: ['运动', '购物', '休息', '娱乐', '社交']),
-    TagGroup(name: '健康', tags: ['锻炼', '冥想', '饮食', '睡眠']),
-  ];
+  // 标签组
+  late List<TagGroup> _tagGroups;
+  // 最近使用的标签
+  final List<String> _recentTags = [];
 
   void _sortActivities() {
     setState(() {
@@ -52,6 +50,13 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   @override
   void initState() {
     super.initState();
+    // 初始化标签组
+    _tagGroups = [
+      TagGroup(name: '最近使用', tags: []),
+      TagGroup(name: '工作', tags: ['会议', '编程', '写作', '阅读', '学习']),
+      TagGroup(name: '生活', tags: ['运动', '购物', '休息', '娱乐', '社交']),
+      TagGroup(name: '健康', tags: ['锻炼', '冥想', '饮食', '睡眠']),
+    ];
     // 初始化服务
     _initializeService();
   }
@@ -60,7 +65,91 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     final storage = StorageManager();
     await storage.initialize();
     _activityService = ActivityService(storage, 'activity');
+
+    // 加载保存的标签组
+    await _loadTagGroups();
+
+    // 加载活动
     _loadActivities();
+  }
+
+  // 加载保存的标签组
+  Future<void> _loadTagGroups() async {
+    try {
+      final savedGroups = await _activityService.getTagGroups();
+      if (savedGroups.isNotEmpty) {
+        setState(() {
+          _tagGroups = savedGroups;
+          // 确保最近使用标签组总是存在
+          if (!_tagGroups.any((group) => group.name == '最近使用')) {
+            _tagGroups.insert(0, TagGroup(name: '最近使用', tags: []));
+          }
+        });
+      }
+
+      // 加载最近使用的标签
+      final recentTags = await _activityService.getRecentTags();
+      if (recentTags.isNotEmpty) {
+        setState(() {
+          _recentTags.clear();
+          _recentTags.addAll(recentTags);
+
+          // 更新最近使用标签组
+          final recentGroupIndex = _tagGroups.indexWhere(
+            (g) => g.name == '最近使用',
+          );
+          if (recentGroupIndex != -1) {
+            _tagGroups[recentGroupIndex] = TagGroup(
+              name: '最近使用',
+              tags: recentTags,
+            );
+          }
+        });
+      }
+    } catch (e) {
+      // 处理错误
+      debugPrint('加载标签组失败: $e');
+    }
+  }
+
+  // 保存标签组
+  Future<void> _saveTagGroups() async {
+    try {
+      await _activityService.saveTagGroups(_tagGroups);
+    } catch (e) {
+      debugPrint('保存标签组失败: $e');
+    }
+  }
+
+  // 更新最近使用的标签
+  Future<void> _updateRecentTags(List<String> tags) async {
+    if (tags.isEmpty) return;
+
+    // 更新最近使用标签列表
+    for (final tag in tags) {
+      _recentTags.remove(tag); // 如果已存在，先移除
+      _recentTags.insert(0, tag); // 添加到最前面
+    }
+
+    // 限制最近使用标签数量
+    if (_recentTags.length > 10) {
+      _recentTags.removeRange(10, _recentTags.length);
+    }
+
+    // 更新最近使用标签组
+    final recentGroupIndex = _tagGroups.indexWhere((g) => g.name == '最近使用');
+    if (recentGroupIndex != -1) {
+      _tagGroups[recentGroupIndex] = TagGroup(
+        name: '最近使用',
+        tags: List.from(_recentTags),
+      );
+    }
+
+    // 保存最近使用的标签
+    await _activityService.saveRecentTags(_recentTags);
+
+    // 保存标签组
+    await _saveTagGroups();
   }
 
   Future<void> _loadActivities() async {
@@ -71,6 +160,12 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       _activities = activities;
     });
     _sortActivities();
+  }
+
+  // 删除活动的方法
+  Future<void> _deleteActivity(ActivityRecord activity) async {
+    await _activityService.deleteActivity(activity);
+    _loadActivities();
   }
 
   void _onDateChanged(DateTime date) {
@@ -87,6 +182,12 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
           (context) => ActivityForm(
             onSave: (ActivityRecord activity) async {
               await _activityService.saveActivity(activity);
+
+              // 更新最近使用的标签
+              if (activity.tags.isNotEmpty) {
+                await _updateRecentTags(activity.tags);
+              }
+
               _loadActivities();
             },
             selectedDate: _selectedDate,
@@ -98,15 +199,26 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     final result = await showDialog<List<String>>(
       context: context,
       builder:
-          (context) =>
-              TagManagerDialog(groups: _tagGroups, selectedTags: _selectedTags),
+          (context) => TagManagerDialog(
+            groups: _tagGroups,
+            selectedTags: _selectedTags,
+            onGroupsChanged: (updatedGroups) {
+              // 保存更新后的标签组
+              setState(() {
+                _tagGroups = updatedGroups;
+              });
+              _saveTagGroups();
+            },
+          ),
     );
 
     if (result != null) {
       setState(() {
         _selectedTags = result;
       });
-      // 这里可以根据选中的标签过滤活动
+      // 更新最近使用的标签
+      await _updateRecentTags(result);
+      // 根据选中的标签过滤活动
       _filterActivitiesByTags();
     }
   }
@@ -244,6 +356,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
           Expanded(
             child: ActivityTimeline(
               activities: _activities,
+              onDeleteActivity: _deleteActivity,
               onActivityTap: (activity) {
                 showDialog(
                   context: context,
@@ -255,6 +368,12 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                             activity,
                             updatedActivity,
                           );
+
+                          // 更新最近使用的标签
+                          if (updatedActivity.tags.isNotEmpty) {
+                            await _updateRecentTags(updatedActivity.tags);
+                          }
+
                           _loadActivities();
                         },
                         selectedDate: _selectedDate,

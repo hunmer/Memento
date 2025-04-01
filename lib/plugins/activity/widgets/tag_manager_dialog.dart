@@ -10,11 +10,13 @@ class TagGroup {
 class TagManagerDialog extends StatefulWidget {
   final List<TagGroup> groups;
   final List<String> selectedTags;
+  final Function(List<TagGroup>) onGroupsChanged;
 
   const TagManagerDialog({
     super.key,
     required this.groups,
     required this.selectedTags,
+    required this.onGroupsChanged,
   });
 
   @override
@@ -25,6 +27,7 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
   late String _selectedGroup;
   late List<String> _selectedTags;
   late List<TagGroup> _groups;
+  List<String> get _allTags => _groups.expand((group) => group.tags).toList();
 
   @override
   void initState() {
@@ -110,6 +113,7 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
               name: _selectedGroup,
               tags: currentTags,
             );
+            widget.onGroupsChanged(_groups);
           }
         }
       });
@@ -198,6 +202,7 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
       } else {
         _selectedGroup = _groups[0].name;
       }
+      widget.onGroupsChanged(_groups);
     });
   }
 
@@ -211,6 +216,7 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
         currentTags.removeWhere((tag) => _selectedTags.contains(tag));
         _groups[groupIndex] = TagGroup(name: _selectedGroup, tags: currentTags);
         _selectedTags.clear(); // 清空选中的标签
+        widget.onGroupsChanged(_groups);
       }
     });
   }

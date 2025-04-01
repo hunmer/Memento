@@ -24,6 +24,10 @@ class _ChatScreenState extends State<ChatScreen> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   Message? _messageBeingEdited;
   final TextEditingController _editingController = TextEditingController();
+  
+  // 多选模式相关状态
+  bool _isMultiSelectMode = false;
+  final Set<String> _selectedMessageIds = <String>{};
 
   @override
   void initState() {
@@ -281,42 +285,138 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  // 处理多选消息的复制
+  void _handleMultiMessagesCopy() {
+    if (_selectedMessageIds.isEmpty) return;
+    
+    final selectedMessages = messages
+        .where((msg) => _selectedMessageIds.contains(msg.id))
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+    
+    final copiedText = selectedMessages
+        .map((msg) => msg.content)
+        .join('\n\n');
+    
+    Clipboard.setData(ClipboardData(text: copiedText));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('已复制选中的消息')),
+    );
+    
+    // 退出多选模式
+    setState(() {
+      _isMultiSelectMode = false;
+      _selectedMessageIds.clear();
+    });
+  }
+
+  // 处理多选消息的删除
+  void _handleMultiMessagesDelete() {
+    if (_selectedMessageIds.isEmpty) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('删除消息'),
+        content: Text('确定要删除${_selectedMessageIds.length}条选中的消息吗？此操作不可撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                messages.removeWhere((msg) => _selectedMessageIds.contains(msg.id));
+                widget.channel.messages.removeWhere(
+                  (msg) => _selectedMessageIds.contains(msg.id),
+                );
+                // 保存更改到本地存储
+                ChatPlugin.instance.saveMessages(widget.channel.id, messages);
+                
+                // 退出多选模式
+                _isMultiSelectMode = false;
+                _selectedMessageIds.clear();
+              });
+              Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 切换消息的选中状态
+  void _toggleMessageSelection(String messageId) {
+    setState(() {
+      if (_selectedMessageIds.contains(messageId)) {
+        _selectedMessageIds.remove(messageId);
+        if (_selectedMessageIds.isEmpty) {
+          _isMultiSelectMode = false;
+        }
+      } else {
+        _selectedMessageIds.add(messageId);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: GestureDetector(
-          onTap: _showChannelInfo,
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: widget.channel.backgroundColor,
-                child: Icon(widget.channel.icon, color: Colors.white, size: 20),
+        leading: _isMultiSelectMode
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  setState(() {
+                    _isMultiSelectMode = false;
+                    _selectedMessageIds.clear();
+                  });
+                },
+              )
+            : null,
+        title: _isMultiSelectMode
+            ? Text('已选择 ${_selectedMessageIds.length} 项')
+            : GestureDetector(
+                onTap: _showChannelInfo,
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: widget.channel.backgroundColor,
+                      child: Icon(widget.channel.icon, color: Colors.white, size: 20),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(widget.channel.title),
+                  ],
+                ),
               ),
-              const SizedBox(width: 8),
-              Text(widget.channel.title),
-            ],
-          ),
-        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: _showChannelInfo,
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'info') {
-                _showChannelInfo();
-              } else if (value == 'more') {
-                _showChannelOptions();
-              }
-            },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(value: 'info', child: Text('查看频道信息')),
-                  const PopupMenuItem(value: 'more', child: Text('更多选项')),
-                ],
-          ),
+          if (!_isMultiSelectMode) ...[
+            IconButton(
+              icon: const Icon(Icons.check_box_outlined),
+              onPressed: () {
+                setState(() {
+                  _isMultiSelectMode = true;
+                });
+              },
+            ),
+            // 移除了单独的信息图标按钮
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'info') {
+                  _showChannelInfo();
+                } else if (value == 'more') {
+                  _showChannelOptions();
+                }
+              },
+              itemBuilder:
+                  (context) => [
+                    const PopupMenuItem(value: 'more', child: Text('更多选项')),
+                  ],
+            ),
+          ],
         ],
       ),
       body: Column(
@@ -343,15 +443,57 @@ class _ChatScreenState extends State<ChatScreen> {
                             onDelete: _handleMessageDelete,
                             onCopy: _handleMessageCopy,
                             onSetFixedSymbol: _handleSetFixedSymbol,
-                            channelColor:
-                                widget.channel.backgroundColor, // 传递频道背景颜色
+                            channelColor: widget.channel.backgroundColor,
+                            isMultiSelectMode: _isMultiSelectMode,
+                            isSelected: _selectedMessageIds.contains(item.id),
+                            onSelect: () => _toggleMessageSelection(item.id),
                           );
                         }
                         return const SizedBox.shrink();
                       },
                     ),
           ),
-          MessageInput(onMessageSent: _handleMessageSent),
+          if (_isMultiSelectMode)
+            SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      offset: const Offset(0, -1),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _handleMultiMessagesCopy,
+                      icon: const Icon(Icons.copy),
+                      label: const Text('复制'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: _handleMultiMessagesDelete,
+                      icon: const Icon(Icons.delete),
+                      label: const Text('删除'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            MessageInput(onMessageSent: _handleMessageSent),
         ],
       ),
     );

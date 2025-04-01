@@ -3,12 +3,16 @@ import '../models/activity_record.dart';
 
 class ActivityTimeline extends StatelessWidget {
   final Function(DateTime start, DateTime end)? onUnrecordedTimeTap;
+  final Function(ActivityRecord)? onDeleteActivity;
+  final List<ActivityRecord> activities;
+  final Function(ActivityRecord)? onActivityTap;
 
   const ActivityTimeline({
     super.key,
     required this.activities,
     this.onActivityTap,
     this.onUnrecordedTimeTap,
+    this.onDeleteActivity,
   });
 
   String _formatDuration(DateTime start, DateTime end) {
@@ -190,9 +194,6 @@ class ActivityTimeline extends StatelessWidget {
     }
   }
 
-  final List<ActivityRecord> activities;
-  final Function(ActivityRecord)? onActivityTap;
-
   List<Widget> _buildTimelineItems(BuildContext context) {
     final List<Widget> items = [];
     final now = DateTime.now();
@@ -302,208 +303,247 @@ class ActivityTimeline extends StatelessWidget {
     // 使用GlobalKey来获取卡片的高度
     final cardKey = GlobalKey();
 
-    return InkWell(
-      onTap: () => onActivityTap?.call(activity),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: IntrinsicHeight(
-          // 使用IntrinsicHeight使Row的子元素高度一致
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch, // 拉伸子元素以填充高度
-            children: [
-              // 时间线
-              SizedBox(
-                width: 60,
-                child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween, // 分散对齐，使开始和结束时间分别在顶部和底部
-                  children: [
-                    Text(
-                      '${activity.startTime.hour.toString().padLeft(2, '0')}:${activity.startTime.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: IntrinsicHeight(
+        // 使用IntrinsicHeight使Row的子元素高度一致
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch, // 拉伸子元素以填充高度
+          children: [
+            // 时间线
+            SizedBox(
+              width: 60,
+              child: Column(
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween, // 分散对齐，使开始和结束时间分别在顶部和底部
+                children: [
+                  Text(
+                    '${activity.startTime.hour.toString().padLeft(2, '0')}:${activity.startTime.minute.toString().padLeft(2, '0')}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
                     ),
-                    Expanded(
-                      // 使Stack填充中间空间
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // 主垂直连接线 - 现在会自动填充整个高度
-                          Center(
-                            child: Container(
-                              width: 4,
-                              height: double.infinity, // 使用无限高度，让父级约束决定实际高度
+                  ),
+                  Expanded(
+                    // 使Stack填充中间空间
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // 主垂直连接线 - 现在会自动填充整个高度
+                        Center(
+                          child: Container(
+                            width: 4,
+                            height: double.infinity, // 使用无限高度，让父级约束决定实际高度
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        // 圆形时间指示器（带背景色覆盖线条）
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(
                               color: Theme.of(context).primaryColor,
+                              width: 2,
                             ),
                           ),
-                          // 圆形时间指示器（带背景色覆盖线条）
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).scaffoldBackgroundColor,
-                              shape: BoxShape.circle,
-                              border: Border.all(
+                          child: Center(
+                            child: Text(
+                              _formatDuration(
+                                activity.startTime,
+                                activity.endTime,
+                              ),
+                              style: TextStyle(
+                                fontSize: 9,
                                 color: Theme.of(context).primaryColor,
-                                width: 2,
+                                fontWeight: FontWeight.bold,
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                            child: Center(
-                              child: Text(
-                                _formatDuration(
-                                  activity.startTime,
-                                  activity.endTime,
-                                ),
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '${activity.endTime.hour.toString().padLeft(2, '0')}:${activity.endTime.minute.toString().padLeft(2, '0')}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            // 活动内容
+            Expanded(
+              child: Dismissible(
+                key: Key('activity_${activity.id}'),
+                direction: DismissDirection.endToStart,
+                confirmDismiss: (direction) async {
+                  return await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('确认删除'),
+                        content: Text('确定要删除活动"${activity.title}"吗？'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('取消'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('删除'),
                           ),
                         ],
-                      ),
-                    ),
-                    Text(
-                      '${activity.endTime.hour.toString().padLeft(2, '0')}:${activity.endTime.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                      );
+                    },
+                  );
+                },
+                onDismissed: (direction) {
+                  if (onDeleteActivity != null) {
+                    onDeleteActivity!(activity);
+                  }
+                },
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20.0),
+                  color: Colors.red,
+                  child: const Icon(Icons.delete, color: Colors.white),
                 ),
-              ),
-              const SizedBox(width: 16),
-              // 活动内容
-              Expanded(
-                child: Card(
-                  key: cardKey,
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          activity.title,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      if (activity.mood != null)
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 8,
-                                            right: 8,
-                                          ),
+                child: InkWell(
+                  onTap: () => onActivityTap?.call(activity),
+                  child: Card(
+                    key: cardKey,
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(
                                           child: Text(
-                                            activity.mood!,
+                                            activity.title,
                                             style: const TextStyle(
-                                              fontSize: 20,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).primaryColor.withAlpha(25),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                                        if (activity.mood != null)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              left: 8,
+                                            ),
+                                            child: Text(
+                                              activity.mood!,
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                        child: Text(
-                                          activity.formattedDuration,
-                                          style: TextStyle(
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if (activity.description != null &&
+                                        activity.description!.isNotEmpty)
+                                      Text(
+                                        activity.description!,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey[600],
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                ],
+                                  ],
+                                ),
                               ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).primaryColor.withAlpha(25),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  activity.formattedDuration,
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (activity.tags.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 4,
+                              runSpacing: 4,
+                              children:
+                                  activity.tags
+                                      .map(
+                                        (tag) => Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(
+                                              context,
+                                            ).primaryColor.withAlpha(25),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            tag,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color:
+                                                  Theme.of(
+                                                    context,
+                                                  ).primaryColor,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
                             ),
                           ],
-                        ),
-                        if (activity.description != null) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            activity.description!,
-                            style: TextStyle(color: Colors.grey[800]),
-                          ),
                         ],
-                        if (activity.tags.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 4, // 添加行间距
-                            children:
-                                activity.tags
-                                    .map(
-                                      (tag) => Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 2,
-                                        ), // 减小内边距
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).primaryColor.withAlpha(25),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          tag,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

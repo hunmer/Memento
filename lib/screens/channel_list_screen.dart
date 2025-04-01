@@ -6,6 +6,7 @@ import '../widgets/circle_icon_picker.dart';
 import 'chat_screen.dart';
 import '../plugins/chat/chat_plugin.dart';
 import '../models/serialization_helpers.dart'; // 导入预定义图标映射表
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChannelListScreen extends StatefulWidget {
   final List<Channel> channels;
@@ -24,14 +25,27 @@ class ChannelListScreen extends StatefulWidget {
 class _ChannelListScreenState extends State<ChannelListScreen> {
   late List<Channel> _sortedChannels;
   String _selectedGroup = "全部"; // 当前选择的频道组，默认为"全部"
+  late SharedPreferences prefs;
   List<String> _availableGroups = ["全部"]; // 可用的频道组列表
   Color selectedColor = Colors.blue; // 默认背景颜色
 
   @override
   void initState() {
     super.initState();
+    _loadSelectedGroup();
     _updateSortedChannels();
     _updateAvailableGroups();
+  }
+
+  Future<void> _loadSelectedGroup() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedGroup = prefs.getString('selectedGroup') ?? "全部";
+    });
+  }
+
+  Future<void> _saveSelectedGroup(String group) async {
+    await prefs.setString('selectedGroup', group);
   }
 
   void _updateSortedChannels() {
@@ -455,6 +469,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                             _selectedGroup = group;
                             _updateSortedChannels();
                           });
+                          _saveSelectedGroup(group);
                         }
                       },
                     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/activity_record.dart';
 import 'tag_manager_dialog.dart';
+import '../../../core/storage/storage_manager.dart';
+import '../services/activity_service.dart';
 
 class ActivityForm extends StatefulWidget {
   final ActivityRecord? activity;
@@ -8,6 +10,7 @@ class ActivityForm extends StatefulWidget {
   final DateTime selectedDate;
   final DateTime? initialStartTime;
   final DateTime? initialEndTime;
+  final DateTime? lastActivityEndTime;
 
   const ActivityForm({
     super.key,
@@ -16,6 +19,7 @@ class ActivityForm extends StatefulWidget {
     required this.selectedDate,
     this.initialStartTime,
     this.initialEndTime,
+    this.lastActivityEndTime,
   });
 
   @override
@@ -69,12 +73,22 @@ class _ActivityFormState extends State<ActivityForm> {
       _startTime = TimeOfDay.fromDateTime(widget.initialStartTime!);
       _endTime = TimeOfDay.fromDateTime(widget.initialEndTime!);
     } else {
-      // 使用当前时间作为默认值
+      // 如果有最后一个活动的结束时间，使用它作为开始时间
+      // 否则使用当天的 00:00
+      if (widget.lastActivityEndTime != null) {
+        _startTime = TimeOfDay.fromDateTime(widget.lastActivityEndTime!);
+      } else {
+        final today = DateTime(
+          widget.selectedDate.year,
+          widget.selectedDate.month,
+          widget.selectedDate.day,
+        );
+        _startTime = TimeOfDay.fromDateTime(today);
+      }
+
+      // 直接使用当前时间作为结束时间
       final now = DateTime.now();
-      _startTime = TimeOfDay.fromDateTime(widget.initialStartTime ?? now);
-      _endTime = TimeOfDay.fromDateTime(
-        widget.initialEndTime ?? now.add(const Duration(hours: 1)),
-      );
+      _endTime = TimeOfDay.fromDateTime(now);
     }
   }
 
@@ -130,14 +144,7 @@ class _ActivityFormState extends State<ActivityForm> {
     return duration.inMinutes;
   }
 
-  void _handleSave() {
-    if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请输入活动标题')));
-      return;
-    }
-
+  Future<void> _handleSave() async {
     // 创建DateTime对象
     final now = widget.selectedDate;
     final startDateTime = DateTime(
@@ -163,19 +170,80 @@ class _ActivityFormState extends State<ActivityForm> {
       return;
     }
 
-    // 使用已选择的标签
-    final tags = _selectedTags;
+    // 检查时间间隔是否小于1分钟
+    final duration = endDateTime.difference(startDateTime);
+    if (duration.inMinutes < 1) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('活动时间必须至少为1分钟')));
+      return;
+    }
+
+    // 检查是否超过当天结束时间
+    final dayEnd = DateTime(now.year, now.month, now.day, 23, 59);
+    if (endDateTime.isAfter(dayEnd)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('活动结束时间不能超过当天23:59')));
+      return;
+    }
+
+    // 处理标签
+    final inputTags =
+        _tagsController.text
+            .split(',')
+            .map((tag) => tag.trim())
+            .where((tag) => tag.isNotEmpty)
+            .toList();
+
+    // 获取标签组服务
+    final storage = StorageManager();
+    await storage.initialize();
+    final activityService = ActivityService(storage, 'activity');
+
+    // 加载标签组
+    List<TagGroup> tagGroups = await activityService.getTagGroups();
+
+    // 确保有未分组标签组
+    TagGroup? unGroupedTags = tagGroups.firstWhere(
+      (group) => group.name == '未分组',
+      orElse: () {
+        final newGroup = TagGroup(name: '未分组', tags: []);
+        tagGroups.insert(1, newGroup);
+        return newGroup;
+      },
+    );
+
+    // 检查新标签并添加到未分组
+    for (final tag in inputTags) {
+      bool isNewTag = true;
+      for (final group in tagGroups) {
+        if (group.tags.contains(tag)) {
+          isNewTag = false;
+          break;
+        }
+      }
+      if (isNewTag && !unGroupedTags.tags.contains(tag)) {
+        unGroupedTags.tags.add(tag);
+      }
+    }
+
+    // 保存更新后的标签组
+    await activityService.saveTagGroups(tagGroups);
 
     // 创建活动记录
     final activity = ActivityRecord(
       startTime: startDateTime,
       endTime: endDateTime,
-      title: _titleController.text,
+      title:
+          _titleController.text.trim().isEmpty
+              ? '未命名活动'
+              : _titleController.text.trim(),
       description:
           _descriptionController.text.isEmpty
               ? null
               : _descriptionController.text,
-      tags: tags,
+      tags: inputTags,
       mood: _selectedMood,
     );
 
@@ -204,7 +272,9 @@ class _ActivityFormState extends State<ActivityForm> {
                 decoration: const InputDecoration(
                   labelText: '活动标题',
                   border: OutlineInputBorder(),
+                  helperText: '不填写则显示为"未命名活动"',
                 ),
+                autofocus: true,
               ),
               const SizedBox(height: 16),
               // 时间范围和间隔控制
@@ -402,25 +472,51 @@ class _ActivityFormState extends State<ActivityForm> {
                         labelText: '标签（用逗号分隔）',
                         border: OutlineInputBorder(),
                         hintText: '例如: 工作, 学习, 运动',
+                        helperText: '可以直接输入新标签，将自动保存到未分组',
                       ),
-                      readOnly: true,
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.label),
                     onPressed: () async {
-                      // 示例标签组
-                      final tagGroups = [
-                        TagGroup(
-                          name: '工作',
-                          tags: ['会议', '编程', '写作', '阅读', '学习'],
-                        ),
-                        TagGroup(
-                          name: '生活',
-                          tags: ['运动', '购物', '休息', '娱乐', '社交'],
-                        ),
-                        TagGroup(name: '健康', tags: ['锻炼', '冥想', '饮食', '睡眠']),
-                      ];
+                      // 获取标签组服务
+                      final storage = StorageManager();
+                      await storage.initialize();
+                      final activityService = ActivityService(
+                        storage,
+                        'activity',
+                      );
+
+                      // 加载保存的标签组
+                      List<TagGroup> tagGroups =
+                          await activityService.getTagGroups();
+
+                      // 如果没有保存的标签组，使用默认标签组
+                      if (tagGroups.isEmpty) {
+                        tagGroups = [
+                          TagGroup(name: '所有', tags: []),
+                          TagGroup(name: '最近使用', tags: []),
+                          TagGroup(name: '未分组', tags: []),
+                          TagGroup(
+                            name: '工作',
+                            tags: ['会议', '编程', '写作', '阅读', '学习'],
+                          ),
+                          TagGroup(
+                            name: '生活',
+                            tags: ['运动', '购物', '休息', '娱乐', '社交'],
+                          ),
+                          TagGroup(name: '健康', tags: ['锻炼', '冥想', '饮食', '睡眠']),
+                        ];
+                      }
+
+                      // 确保存在所有和未分组标签组
+                      if (!tagGroups.any((group) => group.name == '所有')) {
+                        tagGroups.insert(0, TagGroup(name: '所有', tags: []));
+                      }
+                      if (!tagGroups.any((group) => group.name == '未分组')) {
+                        // 在"所有"和"最近使用"之后插入"未分组"
+                        tagGroups.insert(2, TagGroup(name: '未分组', tags: []));
+                      }
 
                       final result = await showDialog<List<String>>(
                         context: context,
@@ -428,6 +524,12 @@ class _ActivityFormState extends State<ActivityForm> {
                             (BuildContext context) => TagManagerDialog(
                               groups: tagGroups,
                               selectedTags: _selectedTags,
+                              onGroupsChanged: (updatedGroups) async {
+                                // 保存更新后的标签组
+                                await activityService.saveTagGroups(
+                                  updatedGroups,
+                                );
+                              },
                             ),
                       );
 
