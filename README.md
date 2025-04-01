@@ -101,6 +101,16 @@ Memento supports a plugin system. Follow these steps to develop a new plugin:
 
 Pull requests and issues are welcome!
 
+## Screenshots
+
+| Chat | Diary | Activity Tracking |
+|:----:|:-----:|:-----------------:|
+| ![Chat](screenshots/chat.jpg) | ![Diary](screenshots/diary.jpg) | ![Activity](screenshots/activity.jpg) |
+
+| Plugin System | Local Storage | Cross-Platform |
+|:-------------:|:-------------:|:--------------:|
+| ![Plugins](screenshots/plugins.jpg) | ![Storage](screenshots/storage.jpg) | ![Cross-Platform](screenshots/cross_platform.jpg) |
+
 ## License
 
 This project is licensed under the MIT License

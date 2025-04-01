@@ -92,6 +92,16 @@ Memento 支持插件系统，您可以通过以下步骤开发新插件：
 
 欢迎提交 Pull Request 或创建 Issue！
 
+## 应用截图
+
+| 聊天功能 | 日记功能 | 活动记录 |
+|:--------:|:--------:|:--------:|
+| ![聊天](screenshots/chat.jpg) | ![日记](screenshots/diary.jpg) | ![活动](screenshots/activity.jpg) |
+
+| 插件系统 | 本地存储 | 跨平台支持 |
+|:--------:|:--------:|:----------:|
+| ![插件](screenshots/plugins.jpg) | ![存储](screenshots/storage.jpg) | ![跨平台](screenshots/cross_platform.jpg) |
+
 ## 许可证
 
 本项目采用 MIT 许可证
