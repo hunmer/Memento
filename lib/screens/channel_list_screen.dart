@@ -23,24 +23,45 @@ class ChannelListScreen extends StatefulWidget {
 }
 
 class _ChannelListScreenState extends State<ChannelListScreen> {
-  late List<Channel> _sortedChannels;
-  String _selectedGroup = "全部"; // 当前选择的频道组，默认为"全部"
+  late List<Channel> _sortedChannels = [];
+  String _selectedGroup = "默认"; // 当前选择的频道组，默认为"默认"
   late SharedPreferences prefs;
-  List<String> _availableGroups = ["全部"]; // 可用的频道组列表
+  List<String> _availableGroups = ["全部", "默认", "未分组"]; // 可用的频道组列表
   Color selectedColor = Colors.blue; // 默认背景颜色
 
   @override
   void initState() {
     super.initState();
-    _loadSelectedGroup();
-    _updateSortedChannels();
+    _initializePrefs();
     _updateAvailableGroups();
+    widget.chatPlugin.addListener(_onChannelsUpdated);
+  }
+
+  @override
+  void dispose() {
+    widget.chatPlugin.removeListener(_onChannelsUpdated);
+    super.dispose();
+  }
+
+  void _onChannelsUpdated() {
+    setState(() {
+      _updateSortedChannels();
+    });
+  }
+
+  Future<void> _initializePrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      // 从本地存储加载选中的分组，如果没有则使用"默认"分组
+      _selectedGroup = prefs.getString('selectedGroup') ?? "默认";
+      _updateSortedChannels();
+    });
   }
 
   Future<void> _loadSelectedGroup() async {
     prefs = await SharedPreferences.getInstance();
     setState(() {
-      _selectedGroup = prefs.getString('selectedGroup') ?? "全部";
+      _selectedGroup = prefs.getString('selectedGroup') ?? "默认";
     });
   }
 
@@ -56,6 +77,13 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
       _sortedChannels =
           widget.channels.where((channel) => channel.groups.isEmpty).toList()
             ..sort(Channel.compare);
+    } else if (_selectedGroup == "默认") {
+      // 默认分组显示所有带有"默认"标签的频道
+      _sortedChannels =
+          widget.channels
+              .where((channel) => channel.groups.contains("默认"))
+              .toList()
+            ..sort(Channel.compare);
     } else {
       _sortedChannels =
           widget.channels
@@ -66,8 +94,8 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   }
 
   void _updateAvailableGroups() {
-    // 始终包含"全部"和"未分组"选项
-    Set<String> groups = {"全部", "未分组"};
+    // 始终包含"全部"、"默认"和"未分组"选项
+    Set<String> groups = {"全部", "默认", "未分组"};
 
     // 收集所有频道的所有组
     for (var channel in widget.channels) {
@@ -75,6 +103,9 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
     }
 
     _availableGroups = groups.toList()..sort();
+
+    // 确保在更新可用分组后更新排序的频道列表
+    _updateSortedChannels();
   }
 
   void _showAddChannelDialog() {
@@ -482,11 +513,37 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   }
 
   Widget _buildChannelTile(BuildContext context, Channel channel, {Key? key}) {
-    final lastMessage = channel.lastMessage;
-    final subtitle =
-        lastMessage != null
-            ? '${lastMessage.content}\n${DateFormatter.formatDateTime(lastMessage.date)}'
-            : '暂无消息';
+    Widget subtitleWidget;
+    if (channel.draft != null && channel.draft!.isNotEmpty) {
+      subtitleWidget = RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '[草稿] ',
+              style: TextStyle(color: Colors.red, fontSize: 13),
+            ),
+            TextSpan(
+              text: channel.draft,
+              style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            ),
+          ],
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    } else {
+      final lastMessage = channel.lastMessage;
+      String subtitle =
+          lastMessage != null
+              ? '${lastMessage.content}\n${DateFormatter.formatDateTime(lastMessage.date)}'
+              : '暂无消息';
+      subtitleWidget = Text(
+        subtitle,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+      );
+    }
 
     // 确保 key 被正确传递给 ListTile
     return ListTile(
@@ -499,12 +556,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
         channel.title,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      subtitle: Text(
-        subtitle,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: Colors.grey[600], fontSize: 13),
-      ),
+      subtitle: subtitleWidget,
       trailing: PopupMenuButton<String>(
         icon: const Icon(Icons.more_vert, size: 20),
         onSelected: (value) {

@@ -55,6 +55,22 @@ class ChatPlugin extends BasePlugin {
   }
 
   final List<Channel> _channels = [];
+  final List<Function()> _listeners = [];
+
+  void addListener(Function() listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(Function() listener) {
+    _listeners.remove(listener);
+  }
+
+  void notifyListeners() {
+    for (var listener in _listeners) {
+      listener();
+    }
+  }
+
   final String _pluginId = 'chat';
   final String _uuid = '12345678901234567890123456789012'; // 32位UUID
   String _customPluginDir = ''; // 自定义插件目录
@@ -188,11 +204,21 @@ class ChatPlugin extends BasePlugin {
                     .toList();
           }
 
+          // 加载草稿
+          final draftData = await storage.read(
+            '$dataPath/$channelId/draft.json',
+          );
+          String? draft;
+          if (draftData.isNotEmpty && draftData.containsKey('draft')) {
+            draft = draftData['draft'] as String;
+          }
+
           // 创建频道对象
           final channel = ChannelSerializer.fromJson(
             channelJson,
             messages: messages,
           );
+          channel.draft = draft;
           _channels.add(channel);
         }
 
@@ -261,6 +287,53 @@ class ChatPlugin extends BasePlugin {
     await storage.write('$channelPath/messages.json', {
       'messages': messages.map((m) => MessageSerializer.toJson(m)).toList(),
     });
+
+    // 更新频道的最后一条消息
+    final channelIndex = _channels.indexWhere((c) => c.id == channelId);
+    if (channelIndex != -1 && messages.isNotEmpty) {
+      // 找出最新的消息
+      final latestMessage = messages.reduce(
+        (curr, next) => curr.date.isAfter(next.date) ? curr : next,
+      );
+
+      // 更新频道的最后一条消息
+      _channels[channelIndex].lastMessage = latestMessage;
+
+      // 通知监听器数据已更新
+      notifyListeners();
+    }
+  }
+
+  // 保存草稿
+  Future<void> saveDraft(String channelId, String draft) async {
+    final channelPath = '$pluginDir/datas/$channelId';
+
+    // 确保目录存在
+    await storage.ensureDirectoryExists(channelPath);
+
+    // 保存草稿
+    await storage.write('$channelPath/draft.json', {'draft': draft});
+
+    // 更新内存中的频道草稿
+    final index = _channels.indexWhere((c) => c.id == channelId);
+    if (index != -1) {
+      _channels[index].draft = draft;
+
+      // 通知监听器数据已更新，以便更新UI
+      notifyListeners();
+    }
+  }
+
+  // 加载草稿
+  Future<String?> loadDraft(String channelId) async {
+    final channelPath = '$pluginDir/datas/$channelId';
+
+    final draftData = await storage.read('$channelPath/draft.json');
+    if (draftData.isNotEmpty && draftData.containsKey('draft')) {
+      return draftData['draft'] as String;
+    }
+
+    return null;
   }
 
   // 保存所有频道信息
@@ -312,8 +385,14 @@ class ChatPlugin extends BasePlugin {
     // 添加消息到内存中
     _channels[channelIndex].messages.add(message);
 
+    // 更新频道的最后一条消息
+    _channels[channelIndex].lastMessage = message;
+
     // 保存到存储
     await saveMessages(channelId, _channels[channelIndex].messages);
+
+    // 通知监听器数据已更新
+    notifyListeners();
   }
 
   // 创建新频道

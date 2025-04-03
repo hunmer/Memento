@@ -13,6 +13,8 @@ class Channel {
   final DateTime lastMessageTime;
   List<String> groups; // 频道所属的组，可以属于多个组
   String? fixedSymbol; // 频道的固定符号
+  String? draft; // 频道的草稿内容
+  Message? _lastMessage; // 最后一条消息的缓存
 
   Channel({
     required this.id,
@@ -24,10 +26,19 @@ class Channel {
     this.priority = 0,
     this.groups = const [], // 默认为空列表，表示不属于任何组
     this.fixedSymbol,
+    this.draft,
+    Message? lastMessage,
   }) : lastMessageTime =
-           messages.isNotEmpty ? messages.last.date : DateTime.now();
+           messages.isNotEmpty ? messages.last.date : DateTime.now() {
+    _lastMessage = lastMessage ?? (messages.isNotEmpty ? messages.last : null);
+  }
 
-  Message? get lastMessage => messages.isNotEmpty ? messages.last : null;
+  Message? get lastMessage =>
+      _lastMessage ?? (messages.isNotEmpty ? messages.last : null);
+
+  set lastMessage(Message? message) {
+    _lastMessage = message;
+  }
 
   // 用于排序的比较器
   static int compare(Channel a, Channel b) {
@@ -49,6 +60,8 @@ class Channel {
     int? priority,
     List<String>? groups,
     String? fixedSymbol,
+    String? draft,
+    Message? lastMessage,
   }) {
     return Channel(
       id: id,
@@ -60,6 +73,8 @@ class Channel {
       priority: priority ?? this.priority,
       groups: groups ?? this.groups,
       fixedSymbol: fixedSymbol ?? this.fixedSymbol,
+      draft: draft ?? this.draft,
+      lastMessage: lastMessage ?? this._lastMessage,
     );
   }
 }

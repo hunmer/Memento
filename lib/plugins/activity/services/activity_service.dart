@@ -32,8 +32,20 @@ class ActivityService {
       // 读取现有活动
       List<ActivityRecord> activities = await getActivitiesForDate(date);
 
-      // 添加新活动
-      activities.add(activity);
+      // 检查是否存在重叠的活动
+      final overlappingIndex = activities.indexWhere(
+        (a) =>
+            a.startTime.isBefore(activity.endTime) &&
+            a.endTime.isAfter(activity.startTime),
+      );
+
+      if (overlappingIndex != -1) {
+        // 如果存在重叠，替换原有的活动
+        activities[overlappingIndex] = activity;
+      } else {
+        // 如果不存在重叠，添加新活动
+        activities.add(activity);
+      }
 
       // 按开始时间排序
       activities.sort((a, b) => a.startTime.compareTo(b.startTime));

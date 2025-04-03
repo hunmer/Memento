@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class MessageInput extends StatefulWidget {
   final Function(String) onMessageSent;
+  final TextEditingController? controller;
+  final Function(String)? onChanged;
 
-  const MessageInput({super.key, required this.onMessageSent});
+  const MessageInput({
+    super.key,
+    required this.onMessageSent,
+    this.controller,
+    this.onChanged,
+  });
 
   @override
   State<MessageInput> createState() => _MessageInputState();
 }
 
 class _MessageInputState extends State<MessageInput> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
   bool _isComposing = false;
   bool _showAttachments = false;
 
@@ -35,8 +43,17 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _isComposing = _controller.text.trim().isNotEmpty;
+  }
+
+  @override
   void dispose() {
-    _controller.dispose();
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     _focusNode.dispose();
     super.dispose();
   }
@@ -71,23 +88,36 @@ class _MessageInputState extends State<MessageInput> {
               ),
               // 自适应高度的输入框
               Expanded(
-                child: TextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  maxLines: null, // 允许多行
-                  keyboardType: TextInputType.multiline,
-                  textCapitalization: TextCapitalization.sentences,
-                  onChanged: (text) {
-                    setState(() {
-                      _isComposing = text.trim().isNotEmpty;
-                    });
+                child: RawKeyboardListener(
+                  focusNode: FocusNode(),
+                  onKey: (RawKeyEvent event) {
+                    if (event is RawKeyDownEvent &&
+                        event.isControlPressed &&
+                        event.logicalKey == LogicalKeyboardKey.enter) {
+                      _handleSubmitted();
+                    }
                   },
-                  decoration: const InputDecoration(
-                    hintText: '输入消息...',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 10.0,
-                      horizontal: 12.0,
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    maxLines: null, // 允许多行
+                    keyboardType: TextInputType.multiline,
+                    textCapitalization: TextCapitalization.sentences,
+                    onChanged: (text) {
+                      setState(() {
+                        _isComposing = text.trim().isNotEmpty;
+                      });
+                      if (widget.onChanged != null) {
+                        widget.onChanged!(text);
+                      }
+                    },
+                    decoration: const InputDecoration(
+                      hintText: '输入消息...',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 10.0,
+                        horizontal: 12.0,
+                      ),
                     ),
                   ),
                 ),
