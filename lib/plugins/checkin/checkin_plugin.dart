@@ -152,6 +152,5 @@ class CheckinPlugin extends BasePlugin {
     ConfigManager configManager,
   ) async {
     await initialize();
-    pluginManager.registerPlugin(this);
   }
 }

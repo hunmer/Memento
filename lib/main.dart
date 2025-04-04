@@ -8,6 +8,7 @@ import 'plugins/chat/chat_plugin.dart'; // 聊天插件
 import 'plugins/diary/diary_plugin.dart'; // 日记插件
 import 'plugins/activity/activity_plugin.dart'; // 活动插件
 import 'plugins/checkin/checkin_plugin.dart'; // 打卡插件
+import 'plugins/timer/timer_plugin.dart'; // 计时器插件
 
 // 全局单例实例
 late final StorageManager globalStorage;
@@ -48,13 +49,14 @@ void main() async {
       DiaryPlugin.instance,
       ActivityPlugin.instance,
       CheckinPlugin.instance,
+      TimerPlugin.instance,
     ];
 
     // 遍历并注册插件
     for (final plugin in plugins) {
       try {
         plugin.setStorageManager(globalStorage);
-        await plugin.registerToApp(globalPluginManager, globalConfigManager);
+        await globalPluginManager.registerPlugin(plugin);
         debugPrint('插件注册成功: ${plugin.name}');
       } catch (e) {
         debugPrint('插件注册失败: ${plugin.name} - $e');
@@ -73,7 +75,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Chat App',
+      title: 'Memonto',
       debugShowCheckedModeBanner: false, // 关闭调试横幅
       theme: ThemeData(
         primarySwatch: Colors.blue,

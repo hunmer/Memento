@@ -103,14 +103,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   int crossAxisCount = 1;
 
                   // 只有在较宽的设备上才增加每行卡片数
-                  if (constraints.maxWidth >= 600) {
+                  if (constraints.maxWidth >= 400) {
                     crossAxisCount = 2;
                   }
-                  if (constraints.maxWidth >= 900) {
+                  if (constraints.maxWidth >= 600) {
                     crossAxisCount = 3;
                   }
-                  if (constraints.maxWidth >= 1200) {
+                  if (constraints.maxWidth >= 900) {
                     crossAxisCount = 4;
+                  }
+                  if (constraints.maxWidth >= 1200) {
+                    crossAxisCount = 5;
                   }
 
                   return GridView.builder(
@@ -118,8 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
                       childAspectRatio: 1.0, // 正方形卡片
-                      crossAxisSpacing: 12.0,
-                      mainAxisSpacing: 12.0,
+                      crossAxisSpacing: 4.0,
+                      mainAxisSpacing: 4.0,
                     ),
                     itemCount: plugins.length,
                     itemBuilder: (context, index) {

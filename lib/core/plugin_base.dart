@@ -21,6 +21,12 @@ abstract class PluginBase {
   /// 插件作者
   String get author;
 
+  /// 插件图标
+  IconData? get icon => Icons.extension;
+
+  /// 插件颜色
+  Color? get color => Colors.blue;
+
   /// 存储管理器实例
   late final StorageManager storage;
 
