@@ -7,6 +7,7 @@ import 'screens/home_screen.dart';
 import 'plugins/chat/chat_plugin.dart'; // 聊天插件
 import 'plugins/diary/diary_plugin.dart'; // 日记插件
 import 'plugins/activity/activity_plugin.dart'; // 活动插件
+import 'plugins/checkin/checkin_plugin.dart'; // 打卡插件
 
 // 全局单例实例
 late final StorageManager globalStorage;
@@ -46,6 +47,7 @@ void main() async {
       ChatPlugin.instance,
       DiaryPlugin.instance,
       ActivityPlugin.instance,
+      CheckinPlugin.instance,
     ];
 
     // 遍历并注册插件
