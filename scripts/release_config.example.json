@@ -1,7 +1,18 @@
 {
     "github": {
-        "owner": "your-username",
-        "repo": "your-repo-name",
-        "token": "your-github-token"
+        "token": "YOUR_GITHUB_TOKEN",
+        "user": "hunmer",
+        "repo": "Memento"
+    },
+    "build": {
+        "platforms": [
+            "android",
+            "web",
+            "ios",
+            "windows",
+            "linux",
+            "macos"
+        ],
+        "skipTests": false
     }
 }

@@ -16,10 +16,10 @@ class CheckinItem {
     Color? color,
     String? group,
     Map<DateTime, bool>? checkInRecords,
-  })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        color = color ?? Colors.blue,
-        group = group ?? '默认分组',
-        checkInRecords = checkInRecords ?? {};
+  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+       color = color ?? Colors.blue,
+       group = group ?? '默认分组',
+       checkInRecords = checkInRecords ?? {};
 
   // 检查今天是否已打卡
   bool isCheckedToday() {
@@ -49,9 +49,9 @@ class CheckinItem {
     return checkInRecords.entries
         .where((entry) => entry.key.year == year && entry.key.month == month)
         .fold({}, (map, entry) {
-      map[entry.key] = entry.value;
-      return map;
-    });
+          map[entry.key] = entry.value;
+          return map;
+        });
   }
 
   // 获取连续打卡天数
@@ -94,10 +94,18 @@ class CheckinItem {
 
   // 从Map创建对象
   factory CheckinItem.fromJson(Map<String, dynamic> json) {
+    // 使用预定义的MaterialIcons中的图标
+    final iconData = IconData(
+      json['icon'] as int,
+      fontFamily: 'MaterialIcons',
+      fontPackage: null,
+      matchTextDirection: false,
+    );
+
     return CheckinItem(
       id: json['id'],
       name: json['name'],
-      icon: IconData(json['icon'], fontFamily: 'MaterialIcons'),
+      icon: iconData,
       color: Color(json['color']),
       group: json['group'] ?? '默认分组',
       checkInRecords: (json['checkInRecords'] as Map<String, dynamic>).map(

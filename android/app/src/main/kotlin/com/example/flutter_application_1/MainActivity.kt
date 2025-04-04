@@ -1,4 +1,4 @@
-package com.example.flutter_application_1
+package github.hunmer.memento
 
 import android.content.Intent
 import androidx.annotation.NonNull
@@ -7,7 +7,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.example.flutter_application_1/timer_service"
+    private val CHANNEL = "github.hunmer.memento/timer_service"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

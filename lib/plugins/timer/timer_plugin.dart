@@ -11,7 +11,7 @@ import '../../widgets/group_management_dialog.dart';
 class TimerPlugin extends BasePlugin {
   static final TimerPlugin instance = TimerPlugin._internal();
   static const MethodChannel _channel = MethodChannel(
-    'com.example.flutter_application_1/timer_service',
+    'github.hunmer.memento/timer_service',
   );
 
   TimerPlugin._internal();

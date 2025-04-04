@@ -1,4 +1,4 @@
-package com.example.flutter_application_1
+package github.hunmer.memento
 
 import android.app.*
 import android.content.Intent

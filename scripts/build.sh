@@ -8,7 +8,16 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
-# export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
+
+# 解析命令行参数
+CLEAR_BUILD=false
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --clear) CLEAR_BUILD=true ;;
+        *) echo "Unknown parameter: $1"; exit 1 ;;
+    esac
+    shift
+done
 
 # 检查必要的命令是否存在
 check_command() {
@@ -20,8 +29,6 @@ check_command() {
 
 # 检查必要的工具
 check_command "flutter"
-check_command "gh"
-check_command "git"
 
 # 加载配置文件
 CONFIG_FILE="scripts/release_config.json"
@@ -67,8 +74,12 @@ OUTPUT_DIR="build/releases"
 mkdir -p $OUTPUT_DIR
 
 # 清理之前的构建
-echo -e "${YELLOW}Cleaning previous builds...${NC}"
-# flutter clean
+if [ "$CLEAR_BUILD" = true ]; then
+    echo -e "${YELLOW}Cleaning previous builds...${NC}"
+    flutter clean
+else
+    echo -e "${YELLOW}Skipping clean (use --clear to clean previous builds)${NC}"
+fi
 
 # 获取依赖
 echo -e "${YELLOW}Getting dependencies...${NC}"
@@ -77,11 +88,11 @@ flutter pub get
 # 构建 Android
 if is_platform_enabled "android"; then
     echo -e "${YELLOW}Building Android APK...${NC}"
-    flutter build apk --release
+    flutter build apk --release --no-tree-shake-icons
     mkdir -p "$OUTPUT_DIR"
     if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
-        cp "build/app/outputs/flutter-apk/app-release.apk" "$OUTPUT_DIR/app-$VERSION-android.apk"
-        echo -e "${GREEN}Successfully built Android APK: $OUTPUT_DIR/app-$VERSION-android.apk${NC}"
+        cp "build/app/outputs/flutter-apk/app-release.apk" "$OUTPUT_DIR/memento-$VERSION-android.apk"
+        echo -e "${GREEN}Successfully built Android APK: $OUTPUT_DIR/memento-$VERSION-android.apk${NC}"
     else
         echo -e "${RED}Error: Android APK build failed or file not found${NC}"
         exit 1
@@ -93,9 +104,9 @@ fi
 # 构建 Web
 if is_platform_enabled "web"; then
     echo -e "${YELLOW}Building Web...${NC}"
-    flutter build web --release
+    flutter build web --release --no-tree-shake-icons
     if [ -d "build/web" ]; then
-        (cd build/web && zip -r "../../$OUTPUT_DIR/app-$VERSION-web.zip" .)
+        (cd build/web && zip -r "../../$OUTPUT_DIR/memento-$VERSION-web.zip" .)
         echo -e "${GREEN}Successfully built Web: $OUTPUT_DIR/app-$VERSION-web.zip${NC}"
     else
         echo -e "${RED}Error: Web build failed or directory not found${NC}"
@@ -135,8 +146,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
         if [ -f "build/ios/ipa/Runner.ipa" ]; then
             mkdir -p "$OUTPUT_DIR"
-            mv "build/ios/ipa/Runner.ipa" "$OUTPUT_DIR/app-$VERSION-ios.ipa"
-            echo -e "${GREEN}Successfully built iOS .ipa: $OUTPUT_DIR/app-$VERSION-ios.ipa${NC}"
+            mv "build/ios/ipa/Runner.ipa" "$OUTPUT_DIR/apmementop-$VERSION-ios.ipa"
+            echo -e "${GREEN}Successfully built iOS .ipa: $OUTPUT_DIR/memento-$VERSION-ios.ipa${NC}"
         else
             echo -e "${RED}Error: iOS .ipa build failed${NC}"
             exit 1
@@ -148,7 +159,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # 构建 macOS
     if is_platform_enabled "macos"; then
         echo -e "${YELLOW}Building macOS...${NC}"
-        flutter build macos --release
+        flutter build macos --release --no-tree-shake-icons
         
         # 确保输出目录存在
         mkdir -p "$OUTPUT_DIR"
@@ -171,7 +182,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
             fi
             
             # 创建 DMG 文件
-            DMG_NAME="Memento-$VERSION.dmg"
+            DMG_NAME="memento-$VERSION.dmg"
             if create-dmg \
               --volname "Memento" \
               --volicon "assets/icon/app_icon.icns" \
@@ -203,11 +214,11 @@ fi
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if is_platform_enabled "linux"; then
         echo -e "${YELLOW}Building Linux...${NC}"
-        flutter build linux --release
+        flutter build linux --release --no-tree-shake-icons
         if [ -d "build/linux/x64/release/bundle" ]; then
             mkdir -p "$OUTPUT_DIR"
-            (cd build/linux/x64/release/bundle && tar czf "../../../../$OUTPUT_DIR/app-$VERSION-linux.tar.gz" .)
-            echo -e "${GREEN}Successfully built Linux package: $OUTPUT_DIR/app-$VERSION-linux.tar.gz${NC}"
+            (cd build/linux/x64/release/bundle && tar czf "../../../../$OUTPUT_DIR/apmementop-$VERSION-linux.tar.gz" .)
+            echo -e "${GREEN}Successfully built Linux package: $OUTPUT_DIR/memento-$VERSION-linux.tar.gz${NC}"
         else
             echo -e "${RED}Error: Linux build failed or directory not found${NC}"
             exit 1
@@ -221,11 +232,11 @@ fi
 if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
     if is_platform_enabled "windows"; then
         echo -e "${YELLOW}Building Windows...${NC}"
-        flutter build windows --release
+        flutter build windows --release --no-tree-shake-icons
         if [ -d "build/windows/x64/runner/Release" ]; then
             mkdir -p "$OUTPUT_DIR"
-            (cd build/windows/x64/runner/Release && zip -r "../../../../$OUTPUT_DIR/app-$VERSION-windows.zip" .)
-            echo -e "${GREEN}Successfully built Windows package: $OUTPUT_DIR/app-$VERSION-windows.zip${NC}"
+            (cd build/windows/x64/runner/Release && zip -r "../../../../$OUTPUT_DIR/memento-$VERSION-windows.zip" .)
+            echo -e "${GREEN}Successfully built Windows package: $OUTPUT_DIR/memento-$VERSION-windows.zip${NC}"
         else
             echo -e "${RED}Error: Windows build failed or directory not found${NC}"
             exit 1
@@ -235,97 +246,4 @@ if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
     fi
 fi
 
-# 检查GitHub认证
-check_github_auth() {
-    if ! gh auth status &> /dev/null; then
-        echo -e "${RED}Error: Not authenticated with GitHub CLI.${NC}"
-        echo -e "${YELLOW}Please run 'gh auth login' to authenticate.${NC}"
-        exit 1
-    fi
-}
-
-# 检查GitHub Token
-if [ -z "$GITHUB_TOKEN" ]; then
-    # 尝试从配置文件读取
-    if [ -f "scripts/release_config.json" ]; then
-        if command -v jq &> /dev/null; then
-            GITHUB_TOKEN=$(jq -r '.github.token' scripts/release_config.json)
-        else
-            echo -e "${YELLOW}Warning: jq not installed, cannot parse config file${NC}"
-        fi
-    fi
-    
-    # 如果仍然没有token，检查GitHub CLI认证
-    if [ -z "$GITHUB_TOKEN" ]; then
-        echo -e "${YELLOW}GitHub token not found in environment or config file.${NC}"
-        echo -e "${YELLOW}Checking GitHub CLI authentication...${NC}"
-        check_github_auth
-        echo -e "${GREEN}Using GitHub CLI authentication.${NC}"
-    else
-        # 如果找到token，设置环境变量
-        export GITHUB_TOKEN
-        echo -e "${GREEN}Using GitHub token from config file.${NC}"
-    fi
-else
-    echo -e "${GREEN}Using GitHub token from environment variable.${NC}"
-fi
-
-# 创建 GitHub Release
-echo -e "${YELLOW}Creating GitHub Release...${NC}"
-RELEASE_NOTES="release_notes.md"
-
-# 生成发布说明
-cat > $RELEASE_NOTES << EOL
-# Memento $VERSION
-
-## 构建信息
-- 构建时间: $(date)
-- Flutter 版本: $(flutter --version | head -n 1)
-
-## 下载
-- 🌐 Web: app-$VERSION-web.zip
-EOL
-
-# 根据操作系统添加额外的下载信息
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "- 🍎 iOS: app-$VERSION-ios.zip" >> $RELEASE_NOTES
-    echo "- 🖥️ macOS: app-$VERSION-macos.zip" >> $RELEASE_NOTES
-fi
-
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    echo "- 🐧 Linux: app-$VERSION-linux.tar.gz" >> $RELEASE_NOTES
-fi
-
-if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
-    echo "- 🪟 Windows: app-$VERSION-windows.zip" >> $RELEASE_NOTES
-fi
-
-# 创建 GitHub Release
-if ! gh release create "v$VERSION" --title "Memento v$VERSION" --notes-file $RELEASE_NOTES; then
-    echo -e "${RED}Error: Failed to create GitHub release.${NC}"
-    echo -e "${YELLOW}Please check your GitHub CLI authentication and permissions.${NC}"
-    exit 1
-fi
-
-# 上传构建文件
-for file in $OUTPUT_DIR/*; do
-    if [ -f "$file" ]; then
-        echo -e "${YELLOW}Uploading $file...${NC}"
-        if ! gh release upload "v$VERSION" "$file"; then
-            echo -e "${RED}Error: Failed to upload $file.${NC}"
-            echo -e "${YELLOW}Please check your GitHub CLI authentication and permissions.${NC}"
-            exit 1
-        fi
-    fi
-done
-
-# 清理临时文件
-rm $RELEASE_NOTES
-
-echo -e "${GREEN}Release v$VERSION completed successfully!${NC}"
-
-# 提示下一步操作
-echo -e "${YELLOW}Next steps:${NC}"
-echo "1. 检查 GitHub Releases 页面确认发布状态"
-echo "2. 更新 pubspec.yaml 中的版本号为下一个版本"
-echo "3. 提交版本更新到代码库"
+echo -e "${GREEN}Build process completed successfully!${NC}"

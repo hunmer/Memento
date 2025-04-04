@@ -1,4 +1,36 @@
-# Memento
+<p align="center">
+  <img src="assets/icon/icon.png" width="128" alt="Memento Logo">
+</p>
+
+<h1 align="center">Memento</h1>
+
+<p align="center">
+  <a href="https://github.com/hunmer/Memento/stargazers">
+    <img src="https://img.shields.io/github/stars/hunmer/Memento?style=flat-square" alt="Stars">
+  </a>
+  <a href="https://github.com/hunmer/Memento/releases">
+    <img src="https://img.shields.io/github/downloads/hunmer/Memento/total?style=flat-square" alt="Downloads">
+  </a>
+  <br>
+  <a href="#platforms">
+    <img src="https://img.shields.io/badge/android-supported-success.svg?style=flat-square" alt="Android">
+  </a>
+  <a href="#platforms">
+    <img src="https://img.shields.io/badge/ios-supported-success.svg?style=flat-square" alt="iOS">
+  </a>
+  <a href="#platforms">
+    <img src="https://img.shields.io/badge/web-supported-success.svg?style=flat-square" alt="Web">
+  </a>
+  <a href="#platforms">
+    <img src="https://img.shields.io/badge/windows-supported-success.svg?style=flat-square" alt="Windows">
+  </a>
+  <a href="#platforms">
+    <img src="https://img.shields.io/badge/macos-supported-success.svg?style=flat-square" alt="macOS">
+  </a>
+  <a href="#platforms">
+    <img src="https://img.shields.io/badge/linux-supported-success.svg?style=flat-square" alt="Linux">
+  </a>
+</p>
 
 Memento is a cross-platform personal assistant application built with Flutter, integrating chat, diary, and activity tracking features.
 
@@ -106,10 +138,6 @@ Pull requests and issues are welcome!
 | Chat | Diary | Activity Tracking |
 |:----:|:-----:|:-----------------:|
 | ![Chat](screenshots/chat.jpg) | ![Diary](screenshots/diary.jpg) | ![Activity](screenshots/activity.jpg) |
-
-| Plugin System | Local Storage | Cross-Platform |
-|:-------------:|:-------------:|:--------------:|
-| ![Plugins](screenshots/plugins.jpg) | ![Storage](screenshots/storage.jpg) | ![Cross-Platform](screenshots/cross_platform.jpg) |
 
 ## License
 
