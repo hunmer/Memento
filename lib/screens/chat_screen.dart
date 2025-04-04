@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../services/image_service.dart';
 import '../models/channel.dart';
 import '../plugins/chat/chat_plugin.dart';
 import '../models/message.dart';
@@ -8,6 +10,7 @@ import '../widgets/message_bubble.dart';
 import '../widgets/message_input.dart';
 import 'channel_info_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class ChatScreen extends StatefulWidget {
   final Channel channel;
@@ -25,6 +28,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Message? _messageBeingEdited;
   final TextEditingController _editingController = TextEditingController();
   final TextEditingController _draftController = TextEditingController();
+  final ImageService _imageService = ImageService();
 
   // 多选模式相关状态
   bool _isMultiSelectMode = false;
@@ -247,11 +251,38 @@ class _ChatScreenState extends State<ChatScreen> {
       builder:
           (context) => AlertDialog(
             title: const Text('编辑消息'),
-            content: TextField(
-              controller: _editingController,
-              autofocus: true,
-              maxLines: null,
-              decoration: const InputDecoration(hintText: '输入新的消息内容...'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _editingController,
+                  autofocus: true,
+                  maxLines: null,
+                  decoration: const InputDecoration(hintText: '输入新的消息内容...'),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.format_bold),
+                      onPressed: () => _insertMarkdownStyle('**'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.format_italic),
+                      onPressed: () => _insertMarkdownStyle('*'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.format_strikethrough),
+                      onPressed: () => _insertMarkdownStyle('~~'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.format_underline),
+                      onPressed: () => _insertMarkdownStyle('__'),
+                    ),
+                  ],
+                ),
+              ],
             ),
             actions: [
               TextButton(
@@ -282,6 +313,25 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ],
           ),
+    );
+  }
+
+  void _insertMarkdownStyle(String style) {
+    final text = _editingController.text;
+    final selection = _editingController.selection;
+    final newText = text.replaceRange(
+      selection.start,
+      selection.end,
+      '$style${selection.textInside(text)}$style',
+    );
+    _editingController.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(
+        offset:
+            selection.baseOffset +
+            style.length * 2 +
+            selection.textInside(text).length,
+      ),
     );
   }
 

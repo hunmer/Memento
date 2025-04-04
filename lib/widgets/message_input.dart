@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/image_service.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class MessageInput extends StatefulWidget {
   final Function(String) onMessageSent;
@@ -24,6 +26,50 @@ class _MessageInputState extends State<MessageInput> {
 
   // 用于控制输入框高度
   final FocusNode _focusNode = FocusNode();
+
+  void _insertMarkdownStyle(String style) {
+    final text = _controller.text;
+    final selection = _controller.selection;
+
+    // 检查选择是否有效
+    if (selection.isValid &&
+        selection.start >= 0 &&
+        selection.end <= text.length) {
+      // 有效的选择范围
+      final selectedText = selection.textInside(text);
+      final newText = text.replaceRange(
+        selection.start,
+        selection.end,
+        '$style$selectedText$style',
+      );
+
+      _controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(
+          offset: selection.start + style.length * 2 + selectedText.length,
+        ),
+      );
+    } else {
+      // 无效的选择范围，插入样式标记并将光标放在中间
+      final cursorPosition =
+          selection.baseOffset >= 0 && selection.baseOffset <= text.length
+              ? selection.baseOffset
+              : text.length;
+
+      final newText =
+          text.substring(0, cursorPosition) +
+          style +
+          style +
+          text.substring(cursorPosition);
+
+      _controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(
+          offset: cursorPosition + style.length,
+        ),
+      );
+    }
+  }
 
   void _handleSubmitted() {
     final text = _controller.text.trim();
@@ -71,14 +117,23 @@ class _MessageInputState extends State<MessageInput> {
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
           child: Row(
             children: [
-              // 表情按钮
+              // Markdown 样式按钮
               IconButton(
-                icon: const Icon(Icons.emoji_emotions_outlined),
+                icon: const Icon(Icons.format_bold),
                 onPressed: () {
-                  // 表情功能可以在这里实现
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('表情功能尚未实现')));
+                  _insertMarkdownStyle('**');
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.format_italic),
+                onPressed: () {
+                  _insertMarkdownStyle('*');
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.format_strikethrough),
+                onPressed: () {
+                  _insertMarkdownStyle('~~');
                 },
               ),
               // 加号按钮（附件）

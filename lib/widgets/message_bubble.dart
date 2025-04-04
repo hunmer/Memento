@@ -1,11 +1,43 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../services/image_service.dart';
 import '../models/message.dart';
 import '../models/user.dart';
 import '../utils/date_formatter.dart';
 import '../screens/user_profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
-class MessageBubble extends StatelessWidget {
+class MessageBubble extends StatefulWidget {
+  final Message message;
+  final Function(Message) onEdit;
+  final Function(Message) onDelete;
+  final Function(Message) onCopy;
+  final Function(Message, String?) onSetFixedSymbol;
+  final Color? channelColor;
+  final bool isMultiSelectMode;
+  final bool isSelected;
+  final VoidCallback onSelect;
+
+  const MessageBubble({
+    Key? key,
+    required this.message,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onCopy,
+    required this.onSetFixedSymbol,
+    this.channelColor,
+    this.isMultiSelectMode = false,
+    this.isSelected = false,
+    required this.onSelect,
+  }) : super(key: key);
+
+  @override
+  _MessageBubbleState createState() => _MessageBubbleState();
+}
+
+class _MessageBubbleState extends State<MessageBubble> {
   // 获取最近使用的表情列表
   Future<List<String>> _getRecentEmojis() async {
     // 默认表情列表
@@ -64,63 +96,42 @@ class MessageBubble extends StatelessWidget {
     }
   }
 
-  final Message message;
-  final Function(Message) onEdit;
-  final Function(Message) onDelete;
-  final Function(Message) onCopy;
-  final Function(Message, String?) onSetFixedSymbol;
-  final Color? channelColor;
-  final bool isMultiSelectMode;
-  final bool isSelected;
-  final VoidCallback onSelect;
-
-  const MessageBubble({
-    super.key,
-    required this.message,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onCopy,
-    required this.onSetFixedSymbol,
-    this.channelColor,
-    this.isMultiSelectMode = false,
-    this.isSelected = false,
-    required this.onSelect,
-  });
-
   @override
   Widget build(BuildContext context) {
-    final isSentMessage = message.type == MessageType.sent;
+    final isSentMessage = widget.message.type == MessageType.sent;
     // 使用频道颜色或默认颜色
     final backgroundColor =
         isSentMessage
-            ? (channelColor ?? Theme.of(context).colorScheme.primary)
+            ? (widget.channelColor ?? Theme.of(context).colorScheme.primary)
             : Colors.grey.shade200;
 
     // 根据背景色亮度自动调整文字颜色
     final textColor =
         isSentMessage
-            ? (channelColor != null
-                ? (channelColor!.computeLuminance() > 0.5
+            ? (widget.channelColor != null
+                ? (widget.channelColor!.computeLuminance() > 0.5
                     ? Colors.black87
                     : Colors.white)
                 : Colors.white)
             : Colors.black87;
 
     return GestureDetector(
-      onTap: isMultiSelectMode ? onSelect : null,
+      onTap: widget.isMultiSelectMode ? widget.onSelect : null,
       onLongPress:
-          isMultiSelectMode ? null : () => _showMessageOptions(context),
+          widget.isMultiSelectMode ? null : () => _showMessageOptions(context),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-        color: isSelected ? Colors.blue.withAlpha(25) : Colors.transparent,
+        color:
+            widget.isSelected ? Colors.blue.withAlpha(25) : Colors.transparent,
         child: Row(
           mainAxisAlignment:
               isSentMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!isSentMessage) _buildAvatar(message.user, showAvatar: true),
+            if (!isSentMessage)
+              _buildAvatar(widget.message.user, showAvatar: true),
             if (!isSentMessage) const SizedBox(width: 8),
-            if (message.fixedSymbol != null && !isSentMessage)
+            if (widget.message.fixedSymbol != null && !isSentMessage)
               _buildFixedSymbol(),
             Flexible(
               child: Column(
@@ -136,7 +147,7 @@ class MessageBubble extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     foregroundDecoration:
-                        isSelected
+                        widget.isSelected
                             ? BoxDecoration(
                               color: Colors.blue.withAlpha(25),
                               borderRadius: BorderRadius.circular(16),
@@ -145,11 +156,54 @@ class MessageBubble extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          message.content,
-                          style: TextStyle(color: textColor),
+                        // 使用 MarkdownBody 渲染 Markdown 格式的消息
+                        MarkdownBody(
+                          data: widget.message.content,
+                          selectable: false,
+                          styleSheet: MarkdownStyleSheet(
+                            p: TextStyle(color: textColor),
+                            strong: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                            em: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              color: textColor,
+                            ),
+                            del: TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: textColor,
+                            ),
+                            a: TextStyle(
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                            code: TextStyle(
+                              backgroundColor: Colors.grey.shade200,
+                              color:
+                                  isSentMessage
+                                      ? Colors.black87
+                                      : Colors.black87,
+                              fontFamily: 'monospace',
+                            ),
+                            codeblockDecoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onTapLink: (text, href, title) {
+                            if (href != null) {
+                              Clipboard.setData(ClipboardData(text: href));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('链接已复制: $href'),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          },
                         ),
-                        if (message.isEdited)
+                        if (widget.message.isEdited)
                           Padding(
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Text(
@@ -167,12 +221,12 @@ class MessageBubble extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (message.fixedSymbol != null && isSentMessage)
+                  if (widget.message.fixedSymbol != null && isSentMessage)
                     _buildFixedSymbol(),
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
-                      _formatMessageDate(message.date),
+                      _formatMessageDate(widget.message.date),
                       style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ),
@@ -180,9 +234,11 @@ class MessageBubble extends StatelessWidget {
               ),
             ),
             if (isSentMessage &&
-                _buildAvatar(message.user, showAvatar: false) is! SizedBox)
+                _buildAvatar(widget.message.user, showAvatar: false)
+                    is! SizedBox)
               const SizedBox(width: 8),
-            if (isSentMessage) _buildAvatar(message.user, showAvatar: false),
+            if (isSentMessage)
+              _buildAvatar(widget.message.user, showAvatar: false),
           ],
         ),
       ),
@@ -192,8 +248,8 @@ class MessageBubble extends StatelessWidget {
   Widget _buildFixedSymbol() {
     return Container(
       margin: EdgeInsets.only(
-        left: message.type == MessageType.sent ? 4 : 0,
-        right: message.type == MessageType.received ? 4 : 0,
+        left: widget.message.type == MessageType.sent ? 4 : 0,
+        right: widget.message.type == MessageType.received ? 4 : 0,
       ),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -201,7 +257,10 @@ class MessageBubble extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade300),
       ),
-      child: Text(message.fixedSymbol!, style: const TextStyle(fontSize: 12)),
+      child: Text(
+        widget.message.fixedSymbol!,
+        style: const TextStyle(fontSize: 12),
+      ),
     );
   }
 
@@ -218,7 +277,7 @@ class MessageBubble extends StatelessWidget {
                 title: const Text('编辑消息'),
                 onTap: () {
                   Navigator.pop(context);
-                  onEdit(message);
+                  widget.onEdit(widget.message);
                 },
               ),
               ListTile(
@@ -226,7 +285,7 @@ class MessageBubble extends StatelessWidget {
                 title: const Text('删除消息'),
                 onTap: () {
                   Navigator.pop(context);
-                  onDelete(message);
+                  widget.onDelete(widget.message);
                 },
               ),
               ListTile(
@@ -234,15 +293,23 @@ class MessageBubble extends StatelessWidget {
                 title: const Text('复制消息'),
                 onTap: () {
                   Navigator.pop(context);
-                  onCopy(message);
+                  widget.onCopy(widget.message);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.push_pin),
-                title: Text('设置固定符号'),
+                title: const Text('设置固定符号'),
                 onTap: () {
                   Navigator.pop(context);
                   _showSetFixedSymbolDialog(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.code),
+                title: const Text('查看原始文本'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showRawTextDialog(context);
                 },
               ),
             ],
@@ -252,9 +319,38 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
+  void _showRawTextDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('原始文本'),
+            content: SingleChildScrollView(
+              child: SelectableText(
+                widget.message.content,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('关闭'),
+              ),
+              TextButton(
+                onPressed: () {
+                  widget.onCopy(widget.message);
+                  Navigator.of(context).pop();
+                },
+                child: const Text('复制'),
+              ),
+            ],
+          ),
+    );
+  }
+
   void _showSetFixedSymbolDialog(BuildContext context) {
     final TextEditingController controller = TextEditingController(
-      text: message.fixedSymbol,
+      text: widget.message.fixedSymbol,
     );
 
     showDialog<void>(
@@ -318,7 +414,7 @@ class MessageBubble extends StatelessWidget {
                       if (symbol != null) {
                         _saveRecentEmoji(symbol);
                       }
-                      onSetFixedSymbol(message, symbol);
+                      widget.onSetFixedSymbol(widget.message, symbol);
                       Navigator.of(context).pop();
                     },
                     child: const Text('确定'),
@@ -332,7 +428,7 @@ class MessageBubble extends StatelessWidget {
 
   Widget _buildAvatar(User user, {required bool showAvatar}) {
     // 如果是自己发送的消息，且不显示头像，则返回空的Widget
-    if (!showAvatar && message.type == MessageType.sent) {
+    if (!showAvatar && widget.message.type == MessageType.sent) {
       return const SizedBox.shrink(); // 不占用任何空间
     }
 
