@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/plugin_base.dart';
+import '../screens/settings_screen.dart';
 import '../main.dart'; // 导入全局实例
 
 class AppDrawer extends StatelessWidget {
@@ -77,25 +78,21 @@ class AppDrawer extends StatelessWidget {
                                   leading: const Icon(Icons.settings),
                                   title: const Text('插件设置'),
                                   onTap: () {
-                                    if (plugin is PluginBase) {
-                                      Navigator.pop(context); // 关闭抽屉
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => Scaffold(
-                                                appBar: AppBar(
-                                                  title: Text(
-                                                    '${plugin.name}设置',
-                                                  ),
-                                                ),
-                                                body: plugin.buildSettingsView(
-                                                  context,
-                                                ),
+                                    Navigator.pop(context); // 关闭抽屉
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => Scaffold(
+                                              appBar: AppBar(
+                                                title: Text('${plugin.name}设置'),
                                               ),
-                                        ),
-                                      );
-                                    }
+                                              body: plugin.buildSettingsView(
+                                                context,
+                                              ),
+                                            ),
+                                      ),
+                                    );
                                   },
                                 ),
                               ],
@@ -112,7 +109,11 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings),
             title: const Text('设置'),
             onTap: () {
-              // TODO: 导航到设置页面
+              Navigator.pop(context); // 关闭抽屉
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
             },
           ),
         ],

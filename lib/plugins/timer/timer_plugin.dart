@@ -173,9 +173,17 @@ class TimerPlugin extends BasePlugin {
   Future<void> updateTask(TimerTask task) async {
     final index = _tasks.indexWhere((t) => t.id == task.id);
     if (index != -1) {
+      final oldTask = _tasks[index];
       _tasks[index] = task;
       await _saveTasks();
-      await _updateNotification(task);
+
+      if (!oldTask.isRunning && task.isRunning) {
+        await startNotificationService(task);
+      } else if (oldTask.isRunning && !task.isRunning) {
+        await stopNotificationService(task.id);
+      } else if (task.isRunning) {
+        await _updateNotification(task);
+      }
     }
   }
 
@@ -197,21 +205,17 @@ class TimerPlugin extends BasePlugin {
 
   // 更新前台通知
   Future<void> _updateNotification(TimerTask task) async {
-    if (task.isRunning) {
-      try {
-        print('Updating notification for task: ${task.name}');
-        await _channel.invokeMethod('updateTimerService', {
-          'taskId': task.id,
-          'taskName': task.name,
-          'totalSeconds': task.totalDuration.inSeconds,
-          'currentSeconds': task.elapsedDuration.inSeconds,
-        });
-        print('Notification updated successfully');
-      } catch (e) {
-        print('Error updating notification: $e');
-      }
-    } else {
-      await stopNotificationService(task.id);
+    try {
+      print('Updating notification for task: ${task.name}');
+      await _channel.invokeMethod('updateTimerService', {
+        'taskId': task.id,
+        'taskName': task.name,
+        'totalSeconds': task.totalDuration.inSeconds,
+        'currentSeconds': task.elapsedDuration.inSeconds,
+      });
+      print('Notification updated successfully');
+    } catch (e) {
+      print('Error updating notification: $e');
     }
   }
 
@@ -219,8 +223,7 @@ class TimerPlugin extends BasePlugin {
   Future<void> stopNotificationService([String? taskId]) async {
     try {
       print(
-        'Stopping notification service' +
-            (taskId != null ? ' for task: $taskId' : ''),
+        'Stopping notification service${taskId != null ? ' for task: $taskId' : ''}',
       );
       await _channel.invokeMethod('stopTimerService', {'taskId': taskId ?? ''});
       print('Notification service stopped successfully');
@@ -263,33 +266,95 @@ class TimerPlugin extends BasePlugin {
 
   // 显示分组管理对话框
   void showGroupManagementDialog(BuildContext context) {
-    final dialog = GroupManagementDialog<TimerTask>(
+    final groupDataList =
+        groups.map((group) {
+          final groupTasks =
+              _tasks.where((task) => task.group == group).toList();
+          final completedCount =
+              groupTasks.where((task) => task.isRunning).length;
+          return GroupData(
+            name: group,
+            itemCount: groupTasks.length,
+            completedCount: completedCount,
+            items: groupTasks,
+          );
+        }).toList();
+
+    GroupManagementDialog.show(
       context: context,
-      items: _tasks,
-      getGroupName: (task) => task.group,
-      getItemName: (task) => task.name,
-      isItemChecked: (task) => task.isRunning,
-      updateItemGroup: (task, newGroup) async {
-        task.group = newGroup;
-        _expandedGroups.remove(task.group);
+      groups: groupDataList,
+      expandedGroups: _expandedGroups,
+      onGroupRenamed: (oldGroup, newGroup) async {
+        // 更新所有该分组下的任务
+        for (var task in _tasks) {
+          if (task.group == oldGroup) {
+            task.group = newGroup;
+          }
+        }
+        // 更新分组展开状态
+        _expandedGroups.remove(oldGroup);
         _expandedGroups[newGroup] = true;
         await _saveTasks();
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('已更新分组"$newGroup"')));
+        }
       },
-      createNewGroup: (name, icon, color) async {
+      onGroupCreated: (groupName, icon, color) async {
+        // 创建一个新的任务作为分组标记
         final newTask = TimerTask.create(
-          name: name,
+          name: groupName,
           color: color,
           icon: icon,
-          group: name,
+          group: groupName,
           timerItems: [],
         );
         await addTask(newTask);
-        _expandedGroups[name] = true;
+        _expandedGroups[groupName] = true;
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('已创建新分组"$groupName"')));
+        }
       },
-      onStateChanged: () async {
-        await _saveTasks();
+      customItemBuilder: (context, group) {
+        return ListTile(
+          leading: const Icon(Icons.folder_outlined),
+          title: Text(group.name),
+          subtitle: Text(
+            '${group.itemCount}个任务，${group.completedCount}个运行中',
+            style: TextStyle(
+              color: group.completedCount > 0 ? Colors.green : Colors.grey,
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (group.itemCount == 0)
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: '删除空分组',
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                tooltip: '编辑分组',
+                onPressed: () {
+                  // 编辑分组的逻辑已经在 GroupManagementDialog 中处理
+                },
+              ),
+            ],
+          ),
+        );
       },
-    );
-    dialog.show();
+    ).then((_) {
+      // 关闭对话框后刷新界面
+      _saveTasks();
+    });
   }
 }

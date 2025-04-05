@@ -1,4 +1,4 @@
-package github.hunmer.memento
+package com.example.flutter_application_1
 
 import android.content.Intent
 import androidx.annotation.NonNull
@@ -14,21 +14,24 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "startTimerService" -> {
+                    val taskId = call.argument<String>("taskId")
                     val taskName = call.argument<String>("taskName")
                     val totalSeconds = call.argument<Int>("totalSeconds")
                     val currentSeconds = call.argument<Int>("currentSeconds")
-                    startTimerService(taskName, totalSeconds, currentSeconds)
+                    startTimerService(taskId, taskName, totalSeconds, currentSeconds)
                     result.success(null)
                 }
                 "updateTimerService" -> {
+                    val taskId = call.argument<String>("taskId")
                     val taskName = call.argument<String>("taskName")
                     val totalSeconds = call.argument<Int>("totalSeconds")
                     val currentSeconds = call.argument<Int>("currentSeconds")
-                    updateTimerService(taskName, totalSeconds, currentSeconds)
+                    updateTimerService(taskId, taskName, totalSeconds, currentSeconds)
                     result.success(null)
                 }
                 "stopTimerService" -> {
-                    stopTimerService()
+                    val taskId = call.argument<String>("taskId")
+                    stopTimerService(taskId)
                     result.success(null)
                 }
                 else -> result.notImplemented()
@@ -36,9 +39,10 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun startTimerService(taskName: String?, totalSeconds: Int?, currentSeconds: Int?) {
+    private fun startTimerService(taskId: String?, taskName: String?, totalSeconds: Int?, currentSeconds: Int?) {
         val serviceIntent = Intent(this, TimerForegroundService::class.java).apply {
             action = "START"
+            putExtra("taskId", taskId)
             putExtra("taskName", taskName)
             putExtra("totalSeconds", totalSeconds ?: 0)
             putExtra("currentSeconds", currentSeconds ?: 0)
@@ -46,9 +50,10 @@ class MainActivity : FlutterActivity() {
         startService(serviceIntent)
     }
 
-    private fun updateTimerService(taskName: String?, totalSeconds: Int?, currentSeconds: Int?) {
+    private fun updateTimerService(taskId: String?, taskName: String?, totalSeconds: Int?, currentSeconds: Int?) {
         val serviceIntent = Intent(this, TimerForegroundService::class.java).apply {
             action = "UPDATE"
+            putExtra("taskId", taskId)
             putExtra("taskName", taskName)
             putExtra("totalSeconds", totalSeconds ?: 0)
             putExtra("currentSeconds", currentSeconds ?: 0)
@@ -56,9 +61,10 @@ class MainActivity : FlutterActivity() {
         startService(serviceIntent)
     }
 
-    private fun stopTimerService() {
+    private fun stopTimerService(taskId: String?) {
         val serviceIntent = Intent(this, TimerForegroundService::class.java).apply {
             action = "STOP"
+            putExtra("taskId", taskId)
         }
         startService(serviceIntent)
     }

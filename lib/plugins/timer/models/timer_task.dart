@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'timer_item.dart';
 import '../timer_plugin.dart';
@@ -238,12 +237,12 @@ class TimerTask {
     String? group,
   }) {
     return TimerTask(
-      id: this.id,
+      id: id,
       name: name ?? this.name,
       color: color ?? this.color,
       icon: icon ?? this.icon,
       timerItems: timerItems ?? List.from(this.timerItems),
-      createdAt: this.createdAt,
+      createdAt: createdAt,
       isRunning: isRunning ?? this.isRunning,
       group: group ?? this.group,
     );

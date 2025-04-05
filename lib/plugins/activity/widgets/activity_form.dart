@@ -209,7 +209,20 @@ class _ActivityFormState extends State<ActivityForm> {
       (group) => group.name == '未分组',
       orElse: () {
         final newGroup = TagGroup(name: '未分组', tags: []);
-        tagGroups.insert(1, newGroup);
+        // 如果列表为空，直接添加；否则在合适的位置插入
+        if (tagGroups.isEmpty) {
+          tagGroups.add(newGroup);
+        } else {
+          // 在"所有"标签组后面插入（如果存在），否则插入到开头
+          final allTagsIndex = tagGroups.indexWhere(
+            (group) => group.name == '所有',
+          );
+          if (allTagsIndex != -1) {
+            tagGroups.insert(allTagsIndex + 1, newGroup);
+          } else {
+            tagGroups.insert(0, newGroup);
+          }
+        }
         return newGroup;
       },
     );
@@ -514,8 +527,31 @@ class _ActivityFormState extends State<ActivityForm> {
                         tagGroups.insert(0, TagGroup(name: '所有', tags: []));
                       }
                       if (!tagGroups.any((group) => group.name == '未分组')) {
-                        // 在"所有"和"最近使用"之后插入"未分组"
-                        tagGroups.insert(2, TagGroup(name: '未分组', tags: []));
+                        // 检查是否存在"最近使用"标签组
+                        final recentIndex = tagGroups.indexWhere(
+                          (group) => group.name == '最近使用',
+                        );
+                        if (recentIndex != -1) {
+                          // 在"最近使用"之后插入"未分组"
+                          tagGroups.insert(
+                            recentIndex + 1,
+                            TagGroup(name: '未分组', tags: []),
+                          );
+                        } else {
+                          // 在"所有"之后插入"未分组"
+                          final allIndex = tagGroups.indexWhere(
+                            (group) => group.name == '所有',
+                          );
+                          if (allIndex != -1) {
+                            tagGroups.insert(
+                              allIndex + 1,
+                              TagGroup(name: '未分组', tags: []),
+                            );
+                          } else {
+                            // 如果没有"所有"，直接添加到列表末尾
+                            tagGroups.add(TagGroup(name: '未分组', tags: []));
+                          }
+                        }
                       }
 
                       final result = await showDialog<List<String>>(

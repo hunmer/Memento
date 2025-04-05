@@ -28,5 +28,11 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>This app requires access to the Documents folder for importing and exporting data.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>This app requires access to the Downloads folder for importing and exporting data.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>This app requires access to the Desktop folder for importing and exporting data.</string>
 </dict>
 </plist>

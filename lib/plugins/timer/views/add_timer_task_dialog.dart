@@ -122,9 +122,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
               const SizedBox(height: 16),
 
               // 计时器列表
-              ..._timerItems
-                  .map((timer) => _buildTimerItemTile(timer))
-                  .toList(),
+              ..._timerItems.map((timer) => _buildTimerItemTile(timer)),
 
               // 添加计时器按钮
               OutlinedButton.icon(

@@ -1,4 +1,4 @@
-package github.hunmer.memento
+package com.example.flutter_application_1
 
 import android.app.*
 import android.content.Intent
@@ -35,8 +35,12 @@ class TimerForegroundService : Service() {
                 updateTimer(taskId, taskName, totalSeconds, currentSeconds)
             }
             "STOP" -> {
-                val taskId = intent.getStringExtra("taskId") ?: return START_NOT_STICKY
-                stopTimer(taskId)
+                val taskId = intent.getStringExtra("taskId")
+                if (taskId.isNullOrEmpty()) {
+                    stopAllTimers()
+                } else {
+                    stopTimer(taskId)
+                }
             }
         }
         return START_NOT_STICKY
@@ -77,10 +81,11 @@ class TimerForegroundService : Service() {
 
     private fun stopTimer(taskId: String) {
         val notificationId = activeTimers.remove(taskId) ?: return
-        stopForeground(STOP_FOREGROUND_REMOVE)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(notificationId)
+        
         if (activeTimers.isEmpty()) {
+            stopForeground(true)
             stopSelf()
         }
     }
@@ -88,11 +93,11 @@ class TimerForegroundService : Service() {
     private fun createNotification(taskName: String, totalSeconds: Int, currentSeconds: Int): Notification {
         val progress = if (totalSeconds > 0) ((currentSeconds.toFloat() / totalSeconds.toFloat()) * 100).toInt() else 0
         
-        val timeLeft = formatTime(totalSeconds - currentSeconds)
+        val timeLeft = formatTime(if (totalSeconds > currentSeconds) totalSeconds - currentSeconds else currentSeconds)
         
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(taskName)
-            .setContentText("Time remaining: $timeLeft")
+            .setContentText("Time: $timeLeft")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setProgress(100, progress, false)
             .setOngoing(true)
@@ -117,7 +122,7 @@ class TimerForegroundService : Service() {
             notificationManager.cancel(notificationId)
         }
         activeTimers.clear()
-        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopForeground(true)
         stopSelf()
     }
 

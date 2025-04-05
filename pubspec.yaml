@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   image_picker: ^1.0.7
   path_provider: ^2.1.2
+  archive: ^3.4.10
   universal_platform: ^1.0.0+1
   uuid: ^4.3.3
   shared_preferences: ^2.5.3
@@ -42,7 +43,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   path: ^1.8.3
-  file_picker: ^5.5.0
+  file_picker: ^6.1.1
   table_calendar: ^3.0.9
   flutter_markdown: ^0.6.18
   intl: ^0.18.1

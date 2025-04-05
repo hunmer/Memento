@@ -1,10 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/image_service.dart';
 import '../models/message.dart';
 import '../models/user.dart';
-import '../utils/date_formatter.dart';
 import '../screens/user_profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -21,7 +18,7 @@ class MessageBubble extends StatefulWidget {
   final VoidCallback onSelect;
 
   const MessageBubble({
-    Key? key,
+    super.key,
     required this.message,
     required this.onEdit,
     required this.onDelete,
@@ -31,7 +28,7 @@ class MessageBubble extends StatefulWidget {
     this.isMultiSelectMode = false,
     this.isSelected = false,
     required this.onSelect,
-  }) : super(key: key);
+  });
 
   @override
   _MessageBubbleState createState() => _MessageBubbleState();

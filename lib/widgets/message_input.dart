@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/image_service.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
 class MessageInput extends StatefulWidget {
   final Function(String) onMessageSent;

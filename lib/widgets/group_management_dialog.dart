@@ -1,154 +1,77 @@
 import 'package:flutter/material.dart';
 import 'circle_icon_picker.dart';
 
-class GroupManagementDialog<T> {
-  final BuildContext context;
-  final List<T> items;
-  final String Function(T) getGroupName;
-  final String Function(T) getItemName;
-  final bool Function(T) isItemChecked;
-  final Future<void> Function(T, String) updateItemGroup;
-  final Future<void> Function(String, IconData, Color) createNewGroup;
-  final VoidCallback onStateChanged;
+class GroupData {
+  final String name;
+  final int itemCount;
+  final int completedCount;
+  final List<dynamic> items;
 
-  GroupManagementDialog({
-    required this.context,
+  GroupData({
+    required this.name,
+    required this.itemCount,
+    required this.completedCount,
     required this.items,
-    required this.getGroupName,
-    required this.getItemName,
-    required this.isItemChecked,
-    required this.updateItemGroup,
-    required this.createNewGroup,
-    required this.onStateChanged,
+  });
+}
+
+class GroupManagementDialog extends StatefulWidget {
+  final List<GroupData> groups;
+  final Function(String oldGroup, String newGroup) onGroupRenamed;
+  final Function(String groupName, IconData icon, Color color) onGroupCreated;
+  final Map<String, bool> expandedGroups;
+  final String title;
+  final Widget Function(BuildContext, GroupData)? customItemBuilder;
+
+  const GroupManagementDialog({
+    super.key,
+    required this.groups,
+    required this.onGroupRenamed,
+    required this.onGroupCreated,
+    required this.expandedGroups,
+    this.title = '分组管理',
+    this.customItemBuilder,
   });
 
-  void show() {
-    showDialog(
+  static Future<void> show({
+    required BuildContext context,
+    required List<GroupData> groups,
+    required Function(String oldGroup, String newGroup) onGroupRenamed,
+    required Function(String groupName, IconData icon, Color color)
+    onGroupCreated,
+    required Map<String, bool> expandedGroups,
+    String title = '分组管理',
+    Widget Function(BuildContext, GroupData)? customItemBuilder,
+  }) {
+    return showDialog(
       context: context,
       builder:
-          (BuildContext dialogContext) => StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return AlertDialog(
-                title: const Text('分组管理'),
-                content: SizedBox(
-                  width: double.maxFinite,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (groups.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(
-                            child: Text(
-                              '暂无分组',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        Flexible(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: groups.length,
-                            itemBuilder: (context, index) {
-                              final group = groups[index];
-                              final groupItems = groupedItems[group] ?? [];
-                              final completedCount =
-                                  groupItems.where(isItemChecked).length;
-
-                              return ListTile(
-                                leading: const Icon(Icons.folder_outlined),
-                                title: Text(group),
-                                subtitle: Text(
-                                  '${groupItems.length}个项目，$completedCount个已完成',
-                                  style: TextStyle(
-                                    color:
-                                        completedCount > 0
-                                            ? Colors.green
-                                            : Colors.grey,
-                                  ),
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit_outlined),
-                                      tooltip: '编辑分组',
-                                      onPressed: () {
-                                        _showEditOrCreateGroupDialog(
-                                          group: group,
-                                          items: groupItems,
-                                          parentContext: dialogContext,
-                                          onGroupUpdated: () => setState(() {}),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('关闭'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _showEditOrCreateGroupDialog(
-                        parentContext: dialogContext,
-                        onGroupUpdated: () => setState(() {}),
-                      );
-                    },
-                    child: const Text('新建'),
-                  ),
-                ],
-              );
-            },
+          (BuildContext dialogContext) => GroupManagementDialog(
+            groups: groups,
+            onGroupRenamed: onGroupRenamed,
+            onGroupCreated: onGroupCreated,
+            expandedGroups: expandedGroups,
+            title: title,
+            customItemBuilder: customItemBuilder,
           ),
-    ).then((_) {
-      // 关闭对话框后刷新界面
-      onStateChanged();
-    });
+    );
   }
 
-  List<String> get groups => items.map(getGroupName).toSet().toList()..sort();
+  @override
+  State<GroupManagementDialog> createState() => _GroupManagementDialogState();
+}
 
-  Map<String, List<T>> get groupedItems {
-    final grouped = <String, List<T>>{};
-    for (var item in items) {
-      final group = getGroupName(item);
-      if (!grouped.containsKey(group)) {
-        grouped[group] = [];
-      }
-      grouped[group]!.add(item);
-    }
-    return grouped;
-  }
-
-  void _showEditOrCreateGroupDialog({
-    String? group,
-    List<T>? items,
-    required BuildContext parentContext,
-    required VoidCallback onGroupUpdated,
-  }) {
+class _GroupManagementDialogState extends State<GroupManagementDialog> {
+  void _showEditOrCreateGroupDialog({String? group, List<dynamic>? items}) {
     final bool isEditing = group != null;
     final TextEditingController groupController = TextEditingController(
       text: group,
     );
-    IconData selectedIcon = Icons.folder; // 默认图标
-    Color selectedColor = Colors.blue; // 默认颜色
+    IconData selectedIcon = Icons.folder;
+    Color selectedColor = Colors.blue;
 
     showDialog(
-      context: parentContext,
+      context: context,
       builder:
           (BuildContext context) => StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -189,37 +112,19 @@ class GroupManagementDialog<T> {
                     child: const Text('取消'),
                   ),
                   TextButton(
-                    onPressed: () async {
+                    onPressed: () {
                       final newGroupName = groupController.text.trim();
                       if (newGroupName.isNotEmpty &&
                           (!isEditing || newGroupName != group)) {
                         if (isEditing) {
-                          // 更新所有该分组下的项目
-                          for (var item in items!) {
-                            await updateItemGroup(item, newGroupName);
-                          }
+                          widget.onGroupRenamed(group, newGroupName);
                         } else {
-                          // 创建新分组
-                          await createNewGroup(
+                          widget.onGroupCreated(
                             newGroupName,
                             selectedIcon,
                             selectedColor,
                           );
                         }
-
-                        Navigator.pop(context);
-                        onGroupUpdated();
-                        onStateChanged();
-                        ScaffoldMessenger.of(parentContext).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              isEditing
-                                  ? '已更新分组"$newGroupName"'
-                                  : '已创建新分组"$newGroupName"',
-                            ),
-                          ),
-                        );
-                      } else {
                         Navigator.pop(context);
                       }
                     },
@@ -229,6 +134,95 @@ class GroupManagementDialog<T> {
               );
             },
           ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.groups.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: Text(
+                    '暂无分组',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widget.groups.length,
+                  itemBuilder: (context, index) {
+                    final group = widget.groups[index];
+
+                    if (widget.customItemBuilder != null) {
+                      return widget.customItemBuilder!(context, group);
+                    }
+
+                    return ListTile(
+                      leading: const Icon(Icons.folder_outlined),
+                      title: Text(group.name),
+                      subtitle: Text(
+                        '${group.itemCount}个项目，${group.completedCount}个已完成',
+                        style: TextStyle(
+                          color:
+                              group.completedCount > 0
+                                  ? Colors.green
+                                  : Colors.grey,
+                        ),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (group.itemCount == 0)
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              tooltip: '删除空分组',
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          IconButton(
+                            icon: const Icon(Icons.edit_outlined),
+                            tooltip: '编辑分组',
+                            onPressed: () {
+                              _showEditOrCreateGroupDialog(
+                                group: group.name,
+                                items: group.items,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('关闭'),
+        ),
+        TextButton(
+          onPressed: () {
+            _showEditOrCreateGroupDialog();
+          },
+          child: const Text('新建'),
+        ),
+      ],
     );
   }
 }

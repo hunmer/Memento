@@ -9,6 +9,7 @@ import 'plugins/diary/diary_plugin.dart'; // 日记插件
 import 'plugins/activity/activity_plugin.dart'; // 活动插件
 import 'plugins/checkin/checkin_plugin.dart'; // 打卡插件
 import 'plugins/timer/timer_plugin.dart'; // 计时器插件
+import 'plugins/todo/todo_plugin.dart'; // 计时器插件
 
 // 全局单例实例
 late final StorageManager globalStorage;
@@ -50,6 +51,7 @@ void main() async {
       ActivityPlugin.instance,
       CheckinPlugin.instance,
       TimerPlugin.instance,
+      TodoPlugin.instance,
     ];
 
     // 遍历并注册插件

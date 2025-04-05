@@ -6,10 +6,10 @@ class CheckinCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const CheckinCard({
-    Key? key,
+    super.key,
     required this.checkinItem,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

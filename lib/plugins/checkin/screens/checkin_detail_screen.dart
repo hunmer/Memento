@@ -5,10 +5,7 @@ import '../../../utils/audio_service.dart';
 class CheckinDetailScreen extends StatelessWidget {
   final CheckinItem checkinItem;
 
-  const CheckinDetailScreen({
-    Key? key,
-    required this.checkinItem,
-  }) : super(key: key);
+  const CheckinDetailScreen({super.key, required this.checkinItem});
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +18,9 @@ class CheckinDetailScreen extends StatelessWidget {
         children: [
           // 打卡状态卡片
           _buildStatusCard(),
-          
+
           // 打卡历史列表
-          Expanded(
-            child: _buildHistoryList(),
-          ),
+          Expanded(child: _buildHistoryList()),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -40,14 +35,13 @@ class CheckinDetailScreen extends StatelessWidget {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => CheckinDetailScreen(checkinItem: checkinItem),
+              builder:
+                  (context) => CheckinDetailScreen(checkinItem: checkinItem),
             ),
           );
         },
         backgroundColor: checkinItem.color,
-        child: Icon(
-          checkinItem.isCheckedToday() ? Icons.close : Icons.check,
-        ),
+        child: Icon(checkinItem.isCheckedToday() ? Icons.close : Icons.check),
       ),
     );
   }
@@ -56,7 +50,8 @@ class CheckinDetailScreen extends StatelessWidget {
     final consecutiveDays = checkinItem.getConsecutiveDays();
     final now = DateTime.now();
     final monthlyRecords = checkinItem.getMonthlyRecords(now.year, now.month);
-    final monthlyCount = monthlyRecords.values.where((checked) => checked).length;
+    final monthlyCount =
+        monthlyRecords.values.where((checked) => checked).length;
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -75,11 +70,7 @@ class CheckinDetailScreen extends StatelessWidget {
               '$consecutiveDays天',
               Icons.local_fire_department,
             ),
-            _buildStatusItem(
-              '本月完成',
-              '$monthlyCount天',
-              Icons.calendar_month,
-            ),
+            _buildStatusItem('本月完成', '$monthlyCount天', Icons.calendar_month),
           ],
         ),
       ),
@@ -89,11 +80,7 @@ class CheckinDetailScreen extends StatelessWidget {
   Widget _buildStatusItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: checkinItem.color,
-          size: 32,
-        ),
+        Icon(icon, color: checkinItem.color, size: 32),
         const SizedBox(height: 8),
         Text(
           value,
@@ -103,13 +90,7 @@ class CheckinDetailScreen extends StatelessWidget {
             color: checkinItem.color,
           ),
         ),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
   }
@@ -135,7 +116,10 @@ class CheckinDetailScreen extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: isChecked ? checkinItem.color.withOpacity(0.1) : Colors.grey.shade100,
+                color:
+                    isChecked
+                        ? checkinItem.color.withOpacity(0.1)
+                        : Colors.grey.shade100,
                 shape: BoxShape.circle,
               ),
               child: Icon(

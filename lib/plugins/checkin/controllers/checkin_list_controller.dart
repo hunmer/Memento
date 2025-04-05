@@ -3,7 +3,6 @@ import '../models/checkin_item.dart';
 import '../widgets/checkin_form_dialog.dart';
 import '../screens/checkin_detail_screen.dart';
 import '../../../widgets/circle_icon_picker.dart';
-import '../../../widgets/group_management_dialog.dart';
 import '../checkin_plugin.dart';
 
 class CheckinListController {

@@ -28,7 +28,6 @@ class CheckinPlugin extends BasePlugin {
   @override
   String get version => '1.0.0';
 
-  @override
   String get pluginDir => 'checkin';
 
   @override
@@ -55,9 +54,11 @@ class CheckinPlugin extends BasePlugin {
   Future<void> initialize() async {
     try {
       // 从存储中加载保存的打卡项目
-      final pluginPath = 'checkin/$_storageKey.json';
+      final pluginPath = 'checkin/$_storageKey';
       if (await storage.fileExists(pluginPath)) {
-        final Map<String, dynamic> storedData = await storage.read(pluginPath);
+        final Map<String, dynamic> storedData = await storage.readJson(
+          pluginPath,
+        );
         if (storedData.containsKey('items')) {
           _checkinItems =
               (storedData['items'] as List)
@@ -139,8 +140,8 @@ class CheckinPlugin extends BasePlugin {
   Future<void> _saveCheckinItems() async {
     try {
       final itemsJson = _checkinItems.map((item) => item.toJson()).toList();
-      final pluginPath = 'checkin/$_storageKey.json';
-      await storage.write(pluginPath, {'items': itemsJson});
+      final pluginPath = 'checkin/$_storageKey';
+      await storage.writeJson(pluginPath, {'items': itemsJson});
     } catch (e) {
       debugPrint('保存打卡项目失败: $e');
     }

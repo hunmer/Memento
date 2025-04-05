@@ -74,7 +74,7 @@ class Channel {
       groups: groups ?? this.groups,
       fixedSymbol: fixedSymbol ?? this.fixedSymbol,
       draft: draft ?? this.draft,
-      lastMessage: lastMessage ?? this._lastMessage,
+      lastMessage: lastMessage ?? _lastMessage,
     );
   }
 }

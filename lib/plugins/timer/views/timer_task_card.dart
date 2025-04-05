@@ -11,13 +11,13 @@ class TimerTaskCard extends StatefulWidget {
   final Function(TimerTask) onDelete;
 
   const TimerTaskCard({
-    Key? key,
+    super.key,
     required this.task,
     required this.onTap,
     required this.onEdit,
     required this.onReset,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   _TimerTaskCardState createState() => _TimerTaskCardState();
@@ -49,84 +49,117 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
     final activeTimer = task.activeTimer;
     final isRunning = task.isRunning;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 4,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: task.color.withOpacity(0.5), width: 2),
+        boxShadow: [
+          // 默认阴影
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+          // 激活状态的发光效果
+          if (isRunning)
+            BoxShadow(
+              color: task.color.withOpacity(0.3),
+              blurRadius: 12,
+              spreadRadius: 2,
+            ),
+        ],
       ),
-      child: InkWell(
-        onTap: () => widget.onTap(task),
-        onLongPress: () => _showContextMenu(context, task),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 任务图标和名称
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: task.color,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(task.icon, color: Colors.white, size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      task.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: task.color.withOpacity(isRunning ? 0.8 : 0.5),
+            width: 2,
+          ),
+        ),
+        child: InkWell(
+          onTap: () => widget.onTap(task),
+          onLongPress: () => _showContextMenu(context, task),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 任务图标和名称
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: task.color,
+                        shape: BoxShape.circle,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      child: Icon(task.icon, color: Colors.white, size: 24),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        task.name,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
-              // 计时器类型标签
-              Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children:
-                    task.timerItems.map((timer) {
-                      return _buildTimerTypeChip(timer);
-                    }).toList(),
-              ),
+                // 计时器类型标签和状态
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 8,
+                  children:
+                      task.timerItems.map((timer) {
+                        if (timer.isRunning) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildTimerTypeChip(timer),
+                              const SizedBox(height: 2),
+                              // 为正在运行的计时器添加单独的进度条
+                              SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width *
+                                    0.35, // 使用屏幕宽度的比例，更好地适应不同设备
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(2),
+                                  child: LinearProgressIndicator(
+                                    value:
+                                        timer.completedDuration.inSeconds /
+                                        timer.duration.inSeconds,
+                                    backgroundColor: Colors.grey[300],
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      task.color,
+                                    ),
+                                    minHeight: 2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return _buildTimerTypeChip(timer);
+                        }
+                      }).toList(),
+                ),
 
-              const Spacer(),
+                const Spacer(),
 
-              // 进度条
-              LinearProgressIndicator(
-                value: task.progress,
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(task.color),
-              ),
-              const SizedBox(height: 8),
-
-              // 时间显示
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // 显示当前活动的计时器或总进度
-                  Text(
-                    activeTimer != null
-                        ? '${activeTimer.name}: ${activeTimer.formattedRemainingTime}'
-                        : _formatDuration(task.completedDuration),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-
-                  // 控制按钮
-                  _buildControlButton(task),
-                ],
-              ),
-            ],
+                // 控制按钮
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [_buildControlButton(task)],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -155,9 +188,21 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
     return Chip(
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       avatar: Icon(icon, size: 16, color: Colors.white),
-      label: Text(
-        timer.name,
-        style: const TextStyle(fontSize: 12, color: Colors.white),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            timer.name,
+            style: const TextStyle(fontSize: 12, color: Colors.white),
+          ),
+          if (timer.isRunning) ...[
+            const SizedBox(width: 4),
+            Text(
+              timer.formattedRemainingTime,
+              style: const TextStyle(fontSize: 12, color: Colors.white),
+            ),
+          ],
+        ],
       ),
       backgroundColor: color,
       padding: EdgeInsets.zero,

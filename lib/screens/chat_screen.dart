@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/image_service.dart';
@@ -10,7 +9,6 @@ import '../widgets/message_bubble.dart';
 import '../widgets/message_input.dart';
 import 'channel_info_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
 class ChatScreen extends StatefulWidget {
   final Channel channel;
@@ -183,12 +181,13 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     setState(() {
-      messages.insert(0, newMessage);
-      widget.channel.messages.add(newMessage);
-      // 更新频道的最后一条消息
-      widget.channel.lastMessage = newMessage;
       // 保存消息到本地存储
       ChatPlugin.instance.addMessage(widget.channel.id, newMessage);
+
+      // 更新频道的最后一条消息
+      widget.channel.lastMessage = newMessage;
+      widget.channel.messages.add(newMessage);
+
       // 清除草稿
       widget.channel.draft = '';
       _draftController.clear();
@@ -197,12 +196,12 @@ class _ChatScreenState extends State<ChatScreen> {
       // 更新有消息的日期集合
       _updateDatesWithMessages();
 
-      // 如果当前正在查看特定日期的消息，并且新消息的日期与当前选择的日期相同，则更新消息列表
-      if (_selectedDate != null &&
+      if (_selectedDate == null ||
           _isSameDay(newMessage.date, _selectedDate!)) {
-        _loadMessages();
-      } else if (_selectedDate != null) {
-        // 如果当前正在查看特定日期的消息，但新消息不属于该日期，提示用户
+        // 如果没有选择日期或者消息日期与选择日期相同，直接添加到当前消息列表
+        messages.insert(0, newMessage);
+      } else {
+        // 如果当前正在查看其他日期的消息，提示用户
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('新消息已发送，但不在当前显示的日期范围内'),
@@ -211,8 +210,8 @@ class _ChatScreenState extends State<ChatScreen> {
               onPressed: () {
                 setState(() {
                   _selectedDate = null;
+                  _loadMessages();
                 });
-                _loadMessages();
               },
             ),
           ),
@@ -494,7 +493,7 @@ class _ChatScreenState extends State<ChatScreen> {
     } else if (messageDate == yesterday) {
       return '昨天';
     } else if (now.difference(date).inDays < 7) {
-      return '${_getWeekday(date)}';
+      return _getWeekday(date);
     } else {
       return '${date.year}年${date.month}月${date.day}日';
     }
