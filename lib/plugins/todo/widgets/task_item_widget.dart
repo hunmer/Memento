@@ -344,8 +344,10 @@ class TaskItemWidgetState extends State<TaskItemWidget>
                       widget.task.isExpanded = expanded;
                     });
 
-                    // 将更改保存到存储
-                    if (widget.onEdit != null) {
+                    // 只在需要保存展开状态时更新任务
+                    if (widget.onEdit != null &&
+                        widget.task.isExpanded != expanded) {
+                      widget.task.isExpanded = expanded;
                       widget.onEdit!(widget.task);
                     }
                   },

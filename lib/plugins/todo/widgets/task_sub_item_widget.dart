@@ -111,8 +111,9 @@ class _TaskSubItemWidgetState extends State<TaskSubItemWidget> {
                       widget.subTask.isExpanded = expanded;
                     });
 
-                    // 将更改保存到存储
-                    if (widget.onEdit != null) {
+                    if (widget.onEdit != null &&
+                        widget.subTask.isExpanded != expanded) {
+                      widget.subTask.isExpanded = expanded;
                       widget.onEdit!(widget.subTask);
                     }
                   },
