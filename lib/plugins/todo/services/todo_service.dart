@@ -138,8 +138,10 @@ class TodoService {
         orElse: () => TaskItem(id: '', title: '', createdAt: DateTime.now()),
       );
       if (parentTask.id.isNotEmpty) {
+        // 使用Set去重，确保不会添加重复的子任务ID
+        final updatedSubTaskIds = {...parentTask.subTaskIds, task.id}.toList();
         final updatedParent = parentTask.copyWith(
-          subTaskIds: [...parentTask.subTaskIds, task.id],
+          subTaskIds: updatedSubTaskIds,
         );
         await updateTask(updatedParent);
       }
@@ -320,8 +322,13 @@ class TodoService {
       if (currentIndex > 0) {
         final previousTask = _tasks[currentIndex - 1];
         if (!previousTask.subTaskIds.contains(taskId)) {
-          previousTask.subTaskIds.add(taskId);
-          await _saveData();
+          // 使用Set去重并创建新的列表实例
+          final updatedSubTaskIds =
+              {...previousTask.subTaskIds, taskId}.toList();
+          final updatedTask = previousTask.copyWith(
+            subTaskIds: updatedSubTaskIds,
+          );
+          await updateTask(updatedTask);
         }
       }
     }

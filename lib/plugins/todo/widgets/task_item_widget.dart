@@ -155,21 +155,35 @@ class TaskItemWidgetState extends State<TaskItemWidget>
     if (widget.subTasks.isEmpty) return;
 
     setState(() {
-      for (var subTask in widget.subTasks) {
-        subTask.completedAt = completed ? DateTime.now() : null;
-        // 递归更新子任务的子任务
-        final subTaskChildren =
-            widget.subTasks
-                .where((task) => task.parentTaskId == subTask.id)
-                .toList();
+      // 获取直接子任务
+      final directSubTasks =
+          widget.subTasks
+              .where((task) => task.parentTaskId == widget.task.id)
+              .toList();
 
-        if (subTaskChildren.isNotEmpty) {
-          for (var childTask in subTaskChildren) {
-            childTask.completedAt = completed ? DateTime.now() : null;
-          }
-        }
-      }
+      // 递归更新所有子任务的完成状态
+      _recursiveUpdateTaskStatus(directSubTasks, completed);
     });
+  }
+
+  // 递归更新任务状态
+  void _recursiveUpdateTaskStatus(List<TaskItem> tasks, bool completed) {
+    for (var task in tasks) {
+      // 更新当前任务状态
+      task.completedAt = completed ? DateTime.now() : null;
+      task.isPartiallyCompleted = false; // 重置部分完成状态
+
+      // 获取当前任务的直接子任务
+      final childTasks =
+          widget.subTasks
+              .where((childTask) => childTask.parentTaskId == task.id)
+              .toList();
+
+      // 如果有子任务，递归更新
+      if (childTasks.isNotEmpty) {
+        _recursiveUpdateTaskStatus(childTasks, completed);
+      }
+    }
   }
 
   // 更新父任务状态基于所有子任务（包括子任务的子任务）完成情况
@@ -245,16 +259,98 @@ class TaskItemWidgetState extends State<TaskItemWidget>
     return _buildTaskItem();
   }
 
+  // 构建子任务列表
+  Widget _buildSubTasksList() {
+    if (widget.onReorderSubTasks != null) {
+      return ReorderableListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: widget.subTasks.length,
+        onReorder: (oldIndex, newIndex) {
+          if (widget.onReorderSubTasks != null) {
+            widget.onReorderSubTasks!(
+              oldIndex,
+              newIndex > oldIndex ? newIndex - 1 : newIndex,
+            );
+          }
+        },
+        itemBuilder:
+            (context, index) => _buildSubTaskItem(widget.subTasks[index]),
+      );
+    }
+
+    return Column(children: widget.subTasks.map(_buildSubTaskItem).toList());
+  }
+
+  // 构建单个子任务项
+  Widget _buildSubTaskItem(TaskItem subTask) {
+    // 只获取直接子任务，避免重复显示
+    final List<TaskItem> directSubTasks = List<TaskItem>.from(
+      widget.subTasks.where((task) => task.parentTaskId == subTask.id),
+    );
+
+    return TaskItemWidget(
+      key: ValueKey(subTask.id),
+      task: subTask,
+      subTasks: directSubTasks,
+      onToggleComplete: () {
+        setState(() {});
+        widget.onToggleComplete();
+      },
+      onEdit: widget.onEdit,
+      onDelete: widget.onDelete,
+      onReorderSubTasks: widget.onReorderSubTasks,
+      level: widget.level + 1, // 增加层级
+    );
+  }
+
+  // 递归获取所有子任务（仅在需要时使用）
+  List<TaskItem> _getAllSubTasks(String parentId) {
+    // 创建一个新的可修改列表来存储子任务
+    List<TaskItem> allSubTasks = [];
+
+    // 使用Set来避免重复添加任务
+    Set<String> processedTaskIds = {};
+
+    // 确保widget.subTasks不为null
+    if (widget.subTasks.isEmpty) {
+      return allSubTasks;
+    }
+
+    // 使用队列进行广度优先搜索，避免递归调用可能导致的栈溢出
+    List<TaskItem> queue =
+        widget.subTasks.where((task) => task.parentTaskId == parentId).toList();
+
+    while (queue.isNotEmpty) {
+      TaskItem current = queue.removeAt(0);
+
+      // 如果已处理过该任务，跳过
+      if (processedTaskIds.contains(current.id)) {
+        continue;
+      }
+
+      // 添加到结果列表并标记为已处理
+      allSubTasks.add(current);
+      processedTaskIds.add(current.id);
+
+      // 将当前任务的子任务添加到队列
+      queue.addAll(
+        widget.subTasks.where((task) => task.parentTaskId == current.id),
+      );
+    }
+
+    return allSubTasks;
+  }
+
   Widget _buildTaskItem() {
-    // 检查是否有子任务
-    final bool hasSubTasks = widget.subTasks.isNotEmpty;
+    // 检查是否有直接子任务（当前任务作为父任务被引用）
+    // 检查当前任务是否有直接子任务
+    final bool hasDirectSubTasks = widget.subTasks.any(
+      (task) => task.parentTaskId == widget.task.id,
+    );
 
-    // 检查是否有备注
-    final bool hasNotes =
-        widget.task.notes != null && widget.task.notes!.isNotEmpty;
-
-    // 只有在有子任务时才使用可展开控件
-    final bool useExpansionTile = hasSubTasks;
+    // 只要有直接子任务就使用可展开控件
+    final bool useExpansionTile = hasDirectSubTasks;
 
     // 计算任务的实际层级并获取对应的缩进值
     final int taskLevel = _calculateTaskLevel();
@@ -436,80 +532,10 @@ class TaskItemWidgetState extends State<TaskItemWidget>
                           )
                           : null,
                   children: [
-                    if (hasSubTasks)
+                    if (hasDirectSubTasks)
                       Padding(
                         padding: const EdgeInsets.only(top: 0),
-                        child:
-                            widget.onReorderSubTasks != null
-                                ? ReorderableListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: widget.subTasks.length,
-                                  onReorder: (oldIndex, newIndex) {
-                                    if (widget.onReorderSubTasks != null) {
-                                      widget.onReorderSubTasks!(
-                                        oldIndex,
-                                        newIndex > oldIndex
-                                            ? newIndex - 1
-                                            : newIndex,
-                                      );
-                                    }
-                                  },
-                                  itemBuilder: (context, index) {
-                                    final subTask = widget.subTasks[index];
-                                    // 获取当前子任务的子任务列表
-                                    final subTaskChildren =
-                                        widget.subTasks
-                                            .where(
-                                              (task) =>
-                                                  task.parentTaskId ==
-                                                  subTask.id,
-                                            )
-                                            .toList();
-
-                                    return TaskItemWidget(
-                                      key: ValueKey(subTask.id),
-                                      task: subTask,
-                                      subTasks: subTaskChildren,
-                                      onToggleComplete: () {
-                                        setState(() {});
-                                        widget.onToggleComplete();
-                                      },
-                                      onEdit: widget.onEdit,
-                                      onDelete: widget.onDelete,
-                                      onReorderSubTasks:
-                                          widget.onReorderSubTasks,
-                                    );
-                                  },
-                                )
-                                : Column(
-                                  children:
-                                      widget.subTasks.map((subTask) {
-                                        // 获取当前子任务的子任务列表
-                                        final subTaskChildren =
-                                            widget.subTasks
-                                                .where(
-                                                  (task) =>
-                                                      task.parentTaskId ==
-                                                      subTask.id,
-                                                )
-                                                .toList();
-
-                                        return TaskItemWidget(
-                                          key: ValueKey(subTask.id),
-                                          task: subTask,
-                                          subTasks: subTaskChildren,
-                                          onToggleComplete: () {
-                                            setState(() {});
-                                            widget.onToggleComplete();
-                                          },
-                                          onEdit: widget.onEdit,
-                                          onDelete: widget.onDelete,
-                                          onReorderSubTasks:
-                                              widget.onReorderSubTasks,
-                                        );
-                                      }).toList(),
-                                ),
+                        child: _buildSubTasksList(),
                       ),
                   ],
                 )
