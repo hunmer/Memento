@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/task_item.dart';
 import 'task_item_menus.dart';
-import 'task_sub_item_widget.dart';
 
 class TaskItemWidget extends StatefulWidget {
   final TaskItem task;
@@ -99,39 +98,68 @@ class TaskItemWidgetState extends State<TaskItemWidget>
     ];
   }
 
+  // 检查所有直接子任务是否完成
   bool get _isAllSubTasksCompleted {
     if (widget.subTasks.isEmpty) return false;
     return widget.subTasks.every((subTask) => subTask.isCompleted);
   }
 
-  // 更新所有子任务的完成状态
+  // 检查是否部分子任务完成（包括子任务的子任务）
+  bool get _isPartiallySubTasksCompleted {
+    if (widget.subTasks.isEmpty) return false;
+    return widget.subTasks.any(
+      (subTask) => subTask.isCompleted || subTask.isPartiallyCompleted,
+    );
+  }
+
+  // 更新所有子任务的完成状态（递归）
   void _updateSubTasksStatus(bool completed) {
     if (widget.subTasks.isEmpty) return;
 
     setState(() {
       for (var subTask in widget.subTasks) {
         subTask.completedAt = completed ? DateTime.now() : null;
+        // 递归更新子任务的子任务
+        final subTaskChildren =
+            widget.subTasks
+                .where((task) => task.parentTaskId == subTask.id)
+                .toList();
+
+        if (subTaskChildren.isNotEmpty) {
+          for (var childTask in subTaskChildren) {
+            childTask.completedAt = completed ? DateTime.now() : null;
+          }
+        }
       }
     });
   }
 
-  // 更新父任务状态基于子任务完成情况
+  // 更新父任务状态基于所有子任务（包括子任务的子任务）完成情况
   void _updateParentTaskStatus() {
     if (!mounted) return;
 
-    bool shouldBeCompleted = _isAllSubTasksCompleted;
-    // 移除条件判断，确保状态始终同步
+    final bool shouldBeCompleted = _isAllSubTasksCompleted;
+    final bool isPartiallyCompleted = _isPartiallySubTasksCompleted;
+
     setState(() {
-      widget.task.completedAt = shouldBeCompleted ? DateTime.now() : null;
-      _localCompletionState = shouldBeCompleted;
-      if (_checkmarkController != null) {
-        if (shouldBeCompleted) {
-          _checkmarkController!.forward();
-        } else {
-          _checkmarkController!.reverse();
-        }
+      if (shouldBeCompleted) {
+        widget.task.completedAt = DateTime.now();
+        _localCompletionState = true;
+        _isPartiallyCompleted = false;
+        _checkmarkController?.forward();
+      } else if (isPartiallyCompleted) {
+        widget.task.completedAt = null;
+        _localCompletionState = false;
+        _isPartiallyCompleted = true;
+        _checkmarkController?.reverse();
+      } else {
+        widget.task.completedAt = null;
+        _localCompletionState = false;
+        _isPartiallyCompleted = false;
+        _checkmarkController?.reverse();
       }
     });
+
     // 通知父组件状态变化
     widget.onToggleComplete();
   }
@@ -385,15 +413,58 @@ class TaskItemWidgetState extends State<TaskItemWidget>
                                     }
                                   },
                                   itemBuilder: (context, index) {
-                                    return _buildSubTaskItem(
-                                      widget.subTasks[index],
+                                    final subTask = widget.subTasks[index];
+                                    // 获取当前子任务的子任务列表
+                                    final subTaskChildren =
+                                        widget.subTasks
+                                            .where(
+                                              (task) =>
+                                                  task.parentTaskId ==
+                                                  subTask.id,
+                                            )
+                                            .toList();
+
+                                    return TaskItemWidget(
+                                      key: ValueKey(subTask.id),
+                                      task: subTask,
+                                      subTasks: subTaskChildren,
+                                      onToggleComplete: () {
+                                        setState(() {});
+                                        widget.onToggleComplete();
+                                      },
+                                      onEdit: widget.onEdit,
+                                      onDelete: widget.onDelete,
+                                      onReorderSubTasks:
+                                          widget.onReorderSubTasks,
                                     );
                                   },
                                 )
                                 : Column(
                                   children:
-                                      widget.subTasks.map((task) {
-                                        return _buildSubTaskItem(task);
+                                      widget.subTasks.map((subTask) {
+                                        // 获取当前子任务的子任务列表
+                                        final subTaskChildren =
+                                            widget.subTasks
+                                                .where(
+                                                  (task) =>
+                                                      task.parentTaskId ==
+                                                      subTask.id,
+                                                )
+                                                .toList();
+
+                                        return TaskItemWidget(
+                                          key: ValueKey(subTask.id),
+                                          task: subTask,
+                                          subTasks: subTaskChildren,
+                                          onToggleComplete: () {
+                                            setState(() {});
+                                            widget.onToggleComplete();
+                                          },
+                                          onEdit: widget.onEdit,
+                                          onDelete: widget.onDelete,
+                                          onReorderSubTasks:
+                                              widget.onReorderSubTasks,
+                                        );
                                       }).toList(),
                                 ),
                       ),
@@ -567,20 +638,5 @@ class TaskItemWidgetState extends State<TaskItemWidget>
     );
   }
 
-  Widget _buildSubTaskItem(TaskItem subTask) {
-    return TaskSubItemWidget(
-      key: ValueKey(subTask.id),
-      subTask: subTask,
-      onToggleComplete: () {
-        // 先执行子任务的状态切换回调
-        widget.onToggleComplete();
-        // 然后检查并更新父任务状态
-        _updateParentTaskStatus();
-      },
-      onEdit: widget.onEdit,
-      onDelete: widget.onDelete,
-      onActivateMoveMode: () {},
-      updateParentStatus: _updateParentTaskStatus,
-    );
-  }
+  // 此方法已移除，使用递归的TaskItemWidget替代
 }
