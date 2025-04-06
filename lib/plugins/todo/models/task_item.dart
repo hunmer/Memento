@@ -16,6 +16,7 @@ class TaskItem {
   final String id;
   String title;
   List<String> subTaskIds;
+  String? parentTaskId; // 父任务ID
   DateTime createdAt;
   List<String> tags;
   String group;
@@ -45,6 +46,7 @@ class TaskItem {
     this.completedAt,
     this.isPartiallyCompleted = false,
     this.isExpanded = false,
+    this.parentTaskId,
   });
 
   bool get isCompleted => completedAt != null;
@@ -81,6 +83,7 @@ class TaskItem {
       'completedAt': completedAt?.toIso8601String(),
       'isPartiallyCompleted': isPartiallyCompleted,
       'isExpanded': isExpanded,
+      'parentTaskId': parentTaskId,
     };
   }
 
@@ -116,10 +119,10 @@ class TaskItem {
     }
 
     // 设置展开状态
-    print(json['isExpanded']);
     if (json['isExpanded'] != null) {
       task.isExpanded = json['isExpanded'] as bool;
     }
+    task.parentTaskId = json['parentTaskId'] as String?;
 
     return task;
   }
@@ -140,6 +143,7 @@ class TaskItem {
     DateTime? completedAt,
     bool? isPartiallyCompleted,
     bool? isExpanded,
+    String? parentTaskId,
   }) {
     final task = TaskItem(
       id: id ?? this.id,
@@ -155,6 +159,7 @@ class TaskItem {
       notes: notes ?? this.notes,
       priority: priority ?? this.priority,
       completedAt: completedAt ?? this.completedAt,
+      parentTaskId: parentTaskId ?? this.parentTaskId,
     );
     task.isPartiallyCompleted =
         isPartiallyCompleted ?? this.isPartiallyCompleted;

@@ -200,6 +200,12 @@ class TaskItemWidgetState extends State<TaskItemWidget>
             widget.onEdit ?? (_) {},
             widget.onDelete,
             details.globalPosition,
+            onAddSubTask: (newSubTask) {
+              // 直接使用传入的子任务对象
+              if (widget.onEdit != null) {
+                widget.onEdit!(newSubTask);
+              }
+            },
           );
         },
         child:
@@ -359,14 +365,6 @@ class TaskItemWidgetState extends State<TaskItemWidget>
                           )
                           : null,
                   children: [
-                    if (hasNotes)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Text(
-                          widget.task.notes!,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
                     if (hasSubTasks)
                       Padding(
                         padding: const EdgeInsets.only(top: 0),

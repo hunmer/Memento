@@ -12,6 +12,10 @@ class TaskEditDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 根据是否有parentTaskId来决定标题
+    final String dialogTitle =
+        parentTaskId != null ? "新建子任务" : (task != null ? "编辑任务" : "新建任务");
+
     // 设置对话框宽度为屏幕宽度的80%
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
@@ -20,15 +24,39 @@ class TaskEditDialog extends StatelessWidget {
         vertical: 24.0,
       ),
       // 使对话框高度自适应内容
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.85,
-          maxWidth: MediaQuery.of(context).size.width * 0.85,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.0),
-          child: TaskEditDialogContent(task: task, parentTaskId: parentTaskId),
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 24.0),
+            child: Row(
+              children: [
+                Text(
+                  dialogTitle,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Flexible(
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
+                maxWidth: MediaQuery.of(context).size.width * 0.85,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16.0),
+                child: TaskEditDialogContent(
+                  task: task,
+                  parentTaskId: parentTaskId,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -81,7 +109,7 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
     }
 
     // 初始化父任务ID
-    _parentTaskId = widget.parentTaskId;
+    _parentTaskId = widget.task?.parentTaskId ?? widget.parentTaskId;
 
     // 如果是编辑任务，填充现有数据
     if (widget.task != null) {
@@ -95,14 +123,16 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
       _dueDate = widget.task!.dueDate;
     } else {
       // 新建任务，设置默认值
+      final defaultGroup =
+          _todoService.groups.isNotEmpty ? _todoService.groups.first : '';
       group =
           widget.parentTaskId != null
               ? _todoService.tasks
-                  .firstWhere((t) => t.id == widget.parentTaskId)
-                  .group
-              : (_todoService.groups.isNotEmpty
-                  ? _todoService.groups.first
-                  : '');
+                      .where((t) => t.id == widget.parentTaskId)
+                      .map((t) => t.group)
+                      .firstOrNull ??
+                  defaultGroup
+              : defaultGroup;
       priority = Priority.notImportantNotUrgent;
       selectedTags = [];
     }
@@ -123,13 +153,6 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
     final title = isNewTask ? (isSubTask ? '新建子任务' : '新建任务') : '编辑任务';
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        automaticallyImplyLeading: false,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-        ),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -248,7 +271,7 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   ),
                 ),
-                maxLines: 18,
+                maxLines: 21,
               ),
               const SizedBox(height: 16),
               // 底部按钮
@@ -278,14 +301,6 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
-          children: [
-            Icon(Icons.account_tree, size: 20),
-            SizedBox(width: 8),
-            Text('父任务', style: TextStyle(fontWeight: FontWeight.w500)),
-          ],
-        ),
-        const SizedBox(height: 8),
         InkWell(
           onTap: _showParentTaskSelectionDialog,
           child: InputDecorator(
@@ -303,8 +318,10 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
                   child: Text(
                     _parentTaskId != null
                         ? _todoService.tasks
-                            .firstWhere((t) => t.id == _parentTaskId)
-                            .title
+                                .where((t) => t.id == _parentTaskId)
+                                .map((t) => t.title)
+                                .firstOrNull ??
+                            '父任务不存在'
                         : '无父任务',
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -506,7 +523,7 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
                         showCheckmark: false,
                         selectedColor: Theme.of(
                           context,
-                        ).primaryColor.withOpacity(0.2),
+                        ).primaryColor.withAlpha(51), // 0.2 * 255 ≈ 51
                         backgroundColor: Colors.grey.shade200,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.0),
@@ -636,9 +653,8 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
       final notes = _notesController.text.trim();
 
       TaskItem task;
-
-      if (widget.task != null) {
-        // 编辑现有任务
+      if (widget.task != null && widget.task!.id.isNotEmpty) {
+        // 编辑现有任务（只有当ID不为空时）
         task = widget.task!.copyWith(
           title: title,
           subtitle: subtitle.isNotEmpty ? subtitle : null,
@@ -648,10 +664,40 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
           tags: selectedTags,
           startDate: _startDate,
           dueDate: _dueDate,
+          parentTaskId: _parentTaskId, // 确保更新父任务ID
         );
+
+        // 如果父任务ID发生变化，需要处理旧的和新的父任务关系
+        if (widget.task!.parentTaskId != _parentTaskId) {
+          // 如果有旧的父任务，从其子任务列表中移除当前任务
+          if (widget.task!.parentTaskId != null) {
+            final oldParentTask = _todoService.tasks.firstWhere(
+              (t) => t.id == widget.task!.parentTaskId,
+              orElse: () => task,
+            );
+            if (oldParentTask.id != task.id) {
+              oldParentTask.subTaskIds.remove(task.id);
+              _todoService.updateTask(oldParentTask);
+            }
+          }
+
+          // 如果有新的父任务，将当前任务添加到其子任务列表中
+          if (_parentTaskId != null) {
+            final newParentTask = _todoService.tasks.firstWhere(
+              (t) => t.id == _parentTaskId,
+              orElse: () => task,
+            );
+            if (newParentTask.id != task.id &&
+                !newParentTask.subTaskIds.contains(task.id)) {
+              newParentTask.subTaskIds.add(task.id);
+              _todoService.updateTask(newParentTask);
+            }
+          }
+        }
+
         _todoService.updateTask(task);
       } else {
-        // 创建新任务
+        // 创建新任务（当task为null或者id为空时）
         final newId = const Uuid().v4();
         task = TaskItem(
           id: newId,
@@ -664,25 +710,23 @@ class TaskEditDialogState extends State<TaskEditDialogContent> {
           tags: selectedTags,
           startDate: _startDate,
           dueDate: _dueDate,
+          parentTaskId: _parentTaskId ?? widget.parentTaskId, // 设置父任务ID
         );
-        _todoService.addTask(task);
 
-        // 如果是子任务，更新父任务
-        if (_parentTaskId != null) {
+        // 如果有父任务，将新任务添加到父任务的子任务列表中
+        if (task.parentTaskId != null) {
           final parentTask = _todoService.tasks.firstWhere(
-            (t) => t.id == _parentTaskId,
+            (t) => t.id == task.parentTaskId,
+            orElse: () => task,
           );
-          parentTask.subTaskIds.add(task.id);
-          _todoService.updateTask(parentTask);
+          if (parentTask.id != task.id) {
+            parentTask.subTaskIds.add(task.id);
+            _todoService.updateTask(parentTask);
+          }
         }
-        // 如果原来有父任务ID但现在没有选择，仍然需要处理
-        else if (widget.parentTaskId != null) {
-          final parentTask = _todoService.tasks.firstWhere(
-            (t) => t.id == widget.parentTaskId,
-          );
-          parentTask.subTaskIds.add(task.id);
-          _todoService.updateTask(parentTask);
-        }
+
+        // 添加新任务
+        _todoService.addTask(task);
       }
 
       Navigator.of(context).pop(task);

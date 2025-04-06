@@ -32,7 +32,6 @@ class TodoService {
           final data = await TodoPlugin.instance.storage.readJson(_storageKey);
           if (data != null) {
             final Map<String, dynamic> jsonData = data as Map<String, dynamic>;
-            print(jsonData);
             _tasks.clear();
             _tasks.addAll(
               (jsonData['tasks'] as List).map(
@@ -51,75 +50,11 @@ class TodoService {
           }
         } catch (e) {
           print('JSON parsing error: $e');
-
-          // 尝试修复损坏的JSON文件
-          await _tryFixCorruptedJsonFile();
         }
       }
     } catch (e) {
       print('Failed to load todo data: $e');
     }
-  }
-
-  Future<void> _tryFixCorruptedJsonFile() async {
-    try {
-      // 如果JSON解析失败，尝试读取原始文件内容
-      final String rawContent = await TodoPlugin.instance.storage.readString(
-        _storageKey,
-      );
-
-      // 检查是否有重复的结束括号
-      if (rawContent.contains('"]}"]}')) {
-        // 修复格式错误的JSON
-        final fixedContent = rawContent.replaceAll('"]}"]}', '"]}');
-
-        // 验证修复后的JSON是否有效
-        final Map<String, dynamic> fixedData = json.decode(fixedContent);
-
-        // 如果有效，保存修复后的内容
-        await TodoPlugin.instance.storage.writeString(
-          _storageKey,
-          fixedContent,
-        );
-
-        // 重新加载数据
-        final data = await TodoPlugin.instance.storage.readJson(_storageKey);
-        if (data != null) {
-          final Map<String, dynamic> jsonData = data as Map<String, dynamic>;
-          _tasks.clear();
-          _tasks.addAll(
-            (jsonData['tasks'] as List).map(
-              (task) => TaskItem.fromJson(task as Map<String, dynamic>),
-            ),
-          );
-
-          _groups.clear();
-          _groups.addAll((jsonData['groups'] as List).cast<String>());
-
-          _tags.clear();
-          _tags.addAll((jsonData['tags'] as List).cast<String>());
-        }
-
-        print('Successfully fixed corrupted JSON file');
-      } else {
-        // 如果不是简单的重复括号问题，则重置数据
-        print('Unable to fix JSON, resetting data');
-        await _resetData();
-      }
-    } catch (e) {
-      print('Failed to fix corrupted JSON: $e');
-      await _resetData();
-    }
-  }
-
-  Future<void> _resetData() async {
-    // 重置数据
-    _tasks.clear();
-    _groups.clear();
-    _tags.clear();
-
-    // 保存默认数据
-    await _saveData();
   }
 
   Future<void> _saveData() async {
@@ -196,13 +131,18 @@ class TodoService {
 
   Future<void> addTask(TaskItem task) async {
     _tasks.add(task);
-    // 如果是子任务，同步父任务状态
-    final parentTask = _tasks.firstWhere(
-      (t) => t.subTaskIds.contains(task.id),
-      orElse: () => TaskItem(id: '', title: '', createdAt: DateTime.now()),
-    );
-    if (parentTask.id.isNotEmpty) {
-      await _syncTaskCompletionStatus(parentTask.id);
+    // 如果有父任务ID，更新父任务的子任务列表
+    if (task.parentTaskId != null && task.parentTaskId!.isNotEmpty) {
+      final parentTask = _tasks.firstWhere(
+        (t) => t.id == task.parentTaskId,
+        orElse: () => TaskItem(id: '', title: '', createdAt: DateTime.now()),
+      );
+      if (parentTask.id.isNotEmpty) {
+        final updatedParent = parentTask.copyWith(
+          subTaskIds: [...parentTask.subTaskIds, task.id],
+        );
+        await updateTask(updatedParent);
+      }
     }
     await _saveData();
   }
@@ -210,7 +150,43 @@ class TodoService {
   Future<void> updateTask(TaskItem task) async {
     final index = _tasks.indexWhere((t) => t.id == task.id);
     if (index != -1) {
+      final oldTask = _tasks[index];
       _tasks[index] = task;
+
+      // 如果父任务ID发生变化，需要更新新旧父任务的子任务列表
+      if (oldTask.parentTaskId != task.parentTaskId) {
+        // 从旧父任务中移除
+        if (oldTask.parentTaskId != null && oldTask.parentTaskId!.isNotEmpty) {
+          final oldParent = _tasks.firstWhere(
+            (t) => t.id == oldTask.parentTaskId,
+            orElse:
+                () => TaskItem(id: '', title: '', createdAt: DateTime.now()),
+          );
+          if (oldParent.id.isNotEmpty) {
+            final updatedOldParent = oldParent.copyWith(
+              subTaskIds:
+                  oldParent.subTaskIds.where((id) => id != task.id).toList(),
+            );
+            await updateTask(updatedOldParent);
+          }
+        }
+
+        // 添加到新父任务
+        if (task.parentTaskId != null && task.parentTaskId!.isNotEmpty) {
+          final newParent = _tasks.firstWhere(
+            (t) => t.id == task.parentTaskId,
+            orElse:
+                () => TaskItem(id: '', title: '', createdAt: DateTime.now()),
+          );
+          if (newParent.id.isNotEmpty) {
+            final updatedNewParent = newParent.copyWith(
+              subTaskIds: [...newParent.subTaskIds, task.id],
+            );
+            await updateTask(updatedNewParent);
+          }
+        }
+      }
+
       // 同步父子任务的完成状态
       await _syncTaskCompletionStatus(task.id);
       await _saveData();

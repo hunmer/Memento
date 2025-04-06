@@ -18,31 +18,30 @@ class TaskItemMenus {
         offset.dx + button.size.width,
         offset.dy + button.size.height,
       ),
-      items: Priority.values.map((priority) {
-        final bool isSelected = task.priority == priority;
-        return PopupMenuItem(
-          value: priority,
-          child: Row(
-            children: [
-              Icon(
-                Icons.flag,
-                color: getPriorityColor(priority),
+      items:
+          Priority.values.map((priority) {
+            final bool isSelected = task.priority == priority;
+            return PopupMenuItem(
+              value: priority,
+              child: Row(
+                children: [
+                  Icon(Icons.flag, color: getPriorityColor(priority)),
+                  SizedBox(width: 8),
+                  Text(
+                    getPriorityText(priority),
+                    style: TextStyle(
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  if (isSelected) ...[
+                    SizedBox(width: 8),
+                    Icon(Icons.check, size: 18),
+                  ],
+                ],
               ),
-              SizedBox(width: 8),
-              Text(
-                getPriorityText(priority),
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              if (isSelected) ...[
-                SizedBox(width: 8),
-                Icon(Icons.check, size: 18),
-              ],
-            ],
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     ).then((selectedPriority) {
       if (selectedPriority != null && selectedPriority != task.priority) {
         final updatedTask = task.copyWith(priority: selectedPriority);
@@ -56,12 +55,7 @@ class TaskItemMenus {
     TaskItem task,
     Function(TaskItem) onEdit,
   ) {
-    showGroupsMenu(
-      context,
-      task,
-      onEdit,
-      isTagMode: true,
-    );
+    showGroupsMenu(context, task, onEdit, isTagMode: true);
   }
 
   static void showAddTagDialog(
@@ -114,148 +108,172 @@ class TaskItemMenus {
     Function(TaskItem) onEdit, {
     bool isTagMode = false,
   }) {
-    final List<String> availableItems = isTagMode ? task.tags : ['工作', '个人', '学习', '家庭', '健康', '其他'];
-    
+    final List<String> availableItems =
+        isTagMode ? task.tags : ['工作', '个人', '学习', '家庭', '健康', '其他'];
+
     showDialog(
       context: context,
-      builder: (BuildContext dialogContext) => StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return AlertDialog(
-            title: Text(isTagMode ? '标签管理' : '分组管理'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (availableItems.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Center(
-                        child: Text(
-                          '暂无分组',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
+      builder:
+          (BuildContext dialogContext) => StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return AlertDialog(
+                title: Text(isTagMode ? '标签管理' : '分组管理'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (availableItems.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(
+                            child: Text(
+                              '暂无分组',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        Flexible(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: availableItems.length,
+                            itemBuilder: (context, index) {
+                              final item = availableItems[index];
+                              final bool isCurrentItem =
+                                  isTagMode
+                                      ? task.tags.contains(item)
+                                      : task.group == item;
+
+                              return ListTile(
+                                leading: Icon(
+                                  isTagMode
+                                      ? Icons.label_outline
+                                      : Icons.folder_outlined,
+                                ),
+                                title: Text(item),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (isCurrentItem)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          isTagMode ? '已选' : '当前',
+                                          style: TextStyle(
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_outlined),
+                                      tooltip: isTagMode ? '编辑标签' : '编辑分组',
+                                      onPressed: () {
+                                        if (isTagMode) {
+                                          _showEditTagDialog(
+                                            context: context,
+                                            oldTag: item,
+                                            task: task,
+                                            onEdit: onEdit,
+                                            onComplete: () {
+                                              if (context.mounted) {
+                                                Navigator.of(context).pop();
+                                              }
+                                            },
+                                          );
+                                        } else {
+                                          _showEditGroupDialog(
+                                            context: context,
+                                            group: item,
+                                            task: task,
+                                            onEdit: onEdit,
+                                            onComplete: () {
+                                              if (context.mounted) {
+                                                Navigator.of(context).pop();
+                                              }
+                                            },
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                onTap: () {
+                                  if (isTagMode) {
+                                    final updatedTags = List<String>.from(
+                                      task.tags,
+                                    );
+                                    if (isCurrentItem) {
+                                      updatedTags.remove(item);
+                                    } else {
+                                      updatedTags.add(item);
+                                    }
+                                    final updatedTask = task.copyWith(
+                                      tags: updatedTags,
+                                    );
+                                    onEdit(updatedTask);
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  } else if (!isCurrentItem) {
+                                    final updatedTask = task.copyWith(
+                                      group: item,
+                                    );
+                                    onEdit(updatedTask);
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  }
+                                },
+                              );
+                            },
                           ),
                         ),
-                      ),
-                    )
-                  else
-                    Flexible(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: availableItems.length,
-                        itemBuilder: (context, index) {
-                          final item = availableItems[index];
-                          final bool isCurrentItem = isTagMode 
-                              ? task.tags.contains(item)
-                              : task.group == item;
-
-                          return ListTile(
-                            leading: Icon(isTagMode ? Icons.label_outline : Icons.folder_outlined),
-                            title: Text(item),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (isCurrentItem)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      isTagMode ? '已选' : '当前',
-                                      style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit_outlined),
-                                  tooltip: isTagMode ? '编辑标签' : '编辑分组',
-                                  onPressed: () {
-                                    if (isTagMode) {
-                                      _showEditTagDialog(
-                                        context: context,
-                                        oldTag: item,
-                                        task: task,
-                                        onEdit: onEdit,
-                                        onComplete: () {
-                                          if (context.mounted) {
-                                            Navigator.of(context).pop();
-                                          }
-                                        }
-                                      );
-                                    } else {
-                                      _showEditGroupDialog(
-                                        context: context,
-                                        group: item,
-                                        task: task,
-                                        onEdit: onEdit,
-                                        onComplete: () {
-                                          if (context.mounted) {
-                                            Navigator.of(context).pop();
-                                          }
-                                        }
-                                      );
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                            onTap: () {
-                              if (isTagMode) {
-                                final updatedTags = List<String>.from(task.tags);
-                                if (isCurrentItem) {
-                                  updatedTags.remove(item);
-                                } else {
-                                  updatedTags.add(item);
-                                }
-                                final updatedTask = task.copyWith(tags: updatedTags);
-                                onEdit(updatedTask);
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
-                              } else if (!isCurrentItem) {
-                                final updatedTask = task.copyWith(group: item);
-                                onEdit(updatedTask);
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
-                              }
-                            },
-                          );
-                        },
-                      ),
-                    ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('关闭'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (isTagMode) {
+                        showAddTagDialog(context, task, onEdit);
+                      } else {
+                        showAddGroupDialog(context, task, onEdit);
+                      }
+                    },
+                    child: const Text('新建'),
+                  ),
                 ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('关闭'),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (isTagMode) {
-                    showAddTagDialog(context, task, onEdit);
-                  } else {
-                    showAddGroupDialog(context, task, onEdit);
-                  }
-                },
-                child: const Text('新建'),
-              ),
-            ],
-          );
-        },
-      ),
+              );
+            },
+          ),
     );
   }
-  
+
   static void _showEditTagDialog({
     required BuildContext context,
     required String oldTag,
@@ -263,7 +281,9 @@ class TaskItemMenus {
     required Function(TaskItem) onEdit,
     required VoidCallback onComplete,
   }) {
-    final TextEditingController controller = TextEditingController(text: oldTag);
+    final TextEditingController controller = TextEditingController(
+      text: oldTag,
+    );
 
     showDialog(
       context: context,
@@ -410,8 +430,9 @@ class TaskItemMenus {
     TaskItem task,
     Function(TaskItem)? onEdit,
     Function(TaskItem)? onDelete,
-    Offset? position,
-  ) {
+    Offset? position, {
+    Function(TaskItem)? onAddSubTask,
+  }) {
     final RenderBox overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox;
     late final RelativeRect menuPosition;
@@ -447,10 +468,43 @@ class TaskItemMenus {
           ),
           onTap: () {
             if (onEdit != null) {
-              onEdit(task);
+              // 延迟执行以确保菜单先关闭
+              Future.delayed(Duration.zero, () {
+                onEdit(task);
+              });
             }
           },
         ),
+        if (onAddSubTask != null)
+          PopupMenuItem(
+            child: ListTile(
+              leading: Icon(
+                Icons.add_task,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              title: Text('增加子任务'),
+              dense: true,
+            ),
+            onTap: () {
+              // 延迟执行以确保菜单先关闭
+              Future.delayed(Duration.zero, () {
+                // 创建一个新的空白子任务
+                final newSubTask = TaskItem(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  title: '',
+                  createdAt: DateTime.now(),
+                  group: task.group,
+                  priority: task.priority,
+                  parentTaskId: task.id, // 设置父任务ID
+                );
+
+                // 调用onAddSubTask来触发子任务的创建对话框
+                if (onAddSubTask != null) {
+                  onAddSubTask(newSubTask);
+                }
+              });
+            },
+          ),
         if (onDelete != null)
           PopupMenuItem(
             child: ListTile(
@@ -459,7 +513,10 @@ class TaskItemMenus {
               dense: true,
             ),
             onTap: () {
-              onDelete(task);
+              // 延迟执行以确保菜单先关闭
+              Future.delayed(Duration.zero, () {
+                onDelete(task);
+              });
             },
           ),
       ],
@@ -473,7 +530,7 @@ class TaskItemMenus {
       case Priority.importantNotUrgent:
         return Colors.orange;
       case Priority.notImportantUrgent:
-        return Colors.amber.shade600;  // 使用较深的琥珀色替代鲜黄色
+        return Colors.amber.shade600; // 使用较深的琥珀色替代鲜黄色
       case Priority.notImportantNotUrgent:
         return Colors.green;
     }

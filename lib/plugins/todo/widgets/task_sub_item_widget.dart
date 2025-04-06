@@ -90,6 +90,7 @@ class _TaskSubItemWidgetState extends State<TaskSubItemWidget> {
             widget.onEdit ?? (_) {},
             widget.onDelete,
             details.globalPosition,
+            onAddSubTask: widget.onEdit,
           ),
       child: Container(
         margin: const EdgeInsets.only(top: 0, left: 32),

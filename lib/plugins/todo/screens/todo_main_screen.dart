@@ -43,6 +43,22 @@ class TodoMainScreenState extends State<TodoMainScreen> {
     TaskItem? task,
     String? parentTaskId,
   }) async {
+    // 如果是编辑现有任务，使用任务自己的父任务ID
+    if (task != null && task.id.isNotEmpty) {
+      // 查找此任务的父任务
+      parentTaskId =
+          _todoService.tasks
+              .firstWhere(
+                (t) => t.subTaskIds.contains(task.id),
+                orElse:
+                    () =>
+                        TaskItem(id: '', title: '', createdAt: DateTime.now()),
+              )
+              .id;
+      if (parentTaskId.isEmpty) {
+        parentTaskId = null;
+      }
+    }
     // 获取当前的 PluginWidget
     final pluginWidget = PluginWidget.of(context);
     if (pluginWidget == null) {
@@ -60,7 +76,7 @@ class TodoMainScreenState extends State<TodoMainScreen> {
 
     if (result != null) {
       setState(() {
-        // 刷新UI
+        // 任务已经通过 TodoService 添加或更新，这里只需要触发重建即可
       });
     }
   }
@@ -101,7 +117,15 @@ class TodoMainScreenState extends State<TodoMainScreen> {
                       });
                     },
                     onEdit: (taskToEdit) {
-                      _showAddTaskDialog(task: taskToEdit);
+                      // 如果是新建子任务（空ID），则传递父任务ID
+                      if (taskToEdit.id.isEmpty &&
+                          taskToEdit.parentTaskId != null) {
+                        _showAddTaskDialog(
+                          parentTaskId: taskToEdit.parentTaskId,
+                        );
+                      } else {
+                        _showAddTaskDialog(task: taskToEdit);
+                      }
                     },
                     onDelete: (taskToDelete) {
                       setState(() {
