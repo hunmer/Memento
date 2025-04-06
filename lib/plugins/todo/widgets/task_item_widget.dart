@@ -10,6 +10,17 @@ class TaskItemWidget extends StatefulWidget {
   final Function(TaskItem task)? onEdit;
   final Function(TaskItem task)? onDelete;
   final Function(int oldIndex, int newIndex)? onReorderSubTasks;
+  final int level; // 添加层级属性
+
+  static const double baseIndent = 16.0; // 基础缩进值
+  static const int maxLevel = 5; // 最大层级数
+
+  // 计算层级对应的边距
+  static double calculateLevelIndent(int level) {
+    // 确保层级不超过最大层级
+    final int effectiveLevel = level < maxLevel ? level : maxLevel - 1;
+    return baseIndent * effectiveLevel;
+  }
 
   const TaskItemWidget({
     super.key,
@@ -20,6 +31,7 @@ class TaskItemWidget extends StatefulWidget {
     this.onEdit,
     this.onDelete,
     this.onReorderSubTasks,
+    this.level = 0, // 默认为顶层
   });
 
   @override
@@ -31,6 +43,32 @@ class TaskItemWidgetState extends State<TaskItemWidget>
   AnimationController? _checkmarkController;
   bool _localCompletionState = false;
   bool _isPartiallyCompleted = false;
+
+  // 计算任务的实际层级
+  int _calculateTaskLevel() {
+    int level = 0;
+    String? currentParentId = widget.task.parentTaskId;
+
+    // 遍历父任务链直到找到顶层任务
+    while (currentParentId != null && level < TaskItemWidget.maxLevel) {
+      level++;
+      // 在所有任务中查找当前父任务
+      final parentTask = _findParentTask(currentParentId, widget.subTasks);
+      currentParentId = parentTask?.parentTaskId;
+    }
+
+    return level;
+  }
+
+  // 在任务列表中查找指定ID的任务
+  TaskItem? _findParentTask(String parentId, List<TaskItem> tasks) {
+    for (var task in tasks) {
+      if (task.id == parentId) {
+        return task;
+      }
+    }
+    return null;
+  }
 
   @override
   void initState() {
@@ -218,8 +256,13 @@ class TaskItemWidgetState extends State<TaskItemWidget>
     // 只有在有子任务时才使用可展开控件
     final bool useExpansionTile = hasSubTasks;
 
+    // 计算任务的实际层级并获取对应的缩进值
+    final int taskLevel = _calculateTaskLevel();
+    final double levelIndent = TaskItemWidget.calculateLevelIndent(taskLevel);
+
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
+      margin: EdgeInsets.only(left: levelIndent),
       child: GestureDetector(
         onLongPressStart: (details) {
           TaskItemMenus.showTaskMenu(
