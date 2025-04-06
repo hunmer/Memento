@@ -205,6 +205,7 @@ class TaskItemWidgetState extends State<TaskItemWidget>
         child:
             useExpansionTile
                 ? ExpansionTile(
+                  initiallyExpanded: widget.task.isExpanded,
                   expandedAlignment: Alignment.centerLeft,
                   shape: Border(), // 移除描边
                   collapsedShape: Border(), // 移除描边
@@ -336,6 +337,16 @@ class TaskItemWidgetState extends State<TaskItemWidget>
                         (widget.task.notes == null ||
                             widget.task.notes!.isEmpty)) {
                       return;
+                    }
+
+                    // 保存展开状态
+                    setState(() {
+                      widget.task.isExpanded = expanded;
+                    });
+
+                    // 将更改保存到存储
+                    if (widget.onEdit != null) {
+                      widget.onEdit!(widget.task);
                     }
                   },
                   trailing:

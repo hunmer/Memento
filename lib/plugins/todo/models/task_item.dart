@@ -27,6 +27,7 @@ class TaskItem {
   Priority priority;
   DateTime? completedAt;
   bool isPartiallyCompleted = false; // 用于表示父任务部分完成状态
+  bool isExpanded = false; // 用于保存任务的展开状态
 
   TaskItem({
     required this.id,
@@ -42,6 +43,8 @@ class TaskItem {
     this.notes,
     this.priority = Priority.notImportantNotUrgent,
     this.completedAt,
+    this.isPartiallyCompleted = false,
+    this.isExpanded = false,
   });
 
   bool get isCompleted => completedAt != null;
@@ -77,6 +80,7 @@ class TaskItem {
       'priority': priority.toString().split('.').last,
       'completedAt': completedAt?.toIso8601String(),
       'isPartiallyCompleted': isPartiallyCompleted,
+      'isExpanded': isExpanded,
     };
   }
 
@@ -111,6 +115,12 @@ class TaskItem {
       task.isPartiallyCompleted = json['isPartiallyCompleted'] as bool;
     }
 
+    // 设置展开状态
+    print(json['isExpanded']);
+    if (json['isExpanded'] != null) {
+      task.isExpanded = json['isExpanded'] as bool;
+    }
+
     return task;
   }
 
@@ -129,6 +139,7 @@ class TaskItem {
     Priority? priority,
     DateTime? completedAt,
     bool? isPartiallyCompleted,
+    bool? isExpanded,
   }) {
     final task = TaskItem(
       id: id ?? this.id,
@@ -147,6 +158,7 @@ class TaskItem {
     );
     task.isPartiallyCompleted =
         isPartiallyCompleted ?? this.isPartiallyCompleted;
+    task.isExpanded = isExpanded ?? this.isExpanded;
     return task;
   }
 }

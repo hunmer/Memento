@@ -99,13 +99,22 @@ class _TaskSubItemWidgetState extends State<TaskSubItemWidget> {
         child:
             shouldUseExpansionTile
                 ? ExpansionTile(
+                  initiallyExpanded: widget.subTask.isExpanded,
                   onExpansionChanged: (expanded) {
                     // 如果没有子任务和备注，则不展开
                     if (expanded && !hasSubTasks && !hasNotes) {
                       return;
                     }
-                    // 无需保存展开状态
-                    setState(() {});
+
+                    // 保存展开状态
+                    setState(() {
+                      widget.subTask.isExpanded = expanded;
+                    });
+
+                    // 将更改保存到存储
+                    if (widget.onEdit != null) {
+                      widget.onEdit!(widget.subTask);
+                    }
                   },
                   expandedAlignment: Alignment.centerLeft,
                   shape: const Border(),

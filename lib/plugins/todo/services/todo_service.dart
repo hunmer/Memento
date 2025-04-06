@@ -1,22 +1,21 @@
-import 'dart:math';
 import 'dart:convert';
 import '../models/task_item.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../todo_plugin.dart';
 
 class TodoService {
-  static const String _storageKey = 'plugins/todo/tasks.json';
-  final StorageManager _storage;
+  static const String _storageKey = 'todo/tasks.json';
   static TodoService? _instance;
   static TodoService getInstance(StorageManager storage) {
-    _instance ??= TodoService._internal(storage);
+    _instance ??= TodoService._internal();
     return _instance!;
   }
 
-  TodoService._internal(this._storage);
+  TodoService._internal();
 
   final List<TaskItem> _tasks = [];
-  final List<String> _groups = ['个人', '工作', '学习', '家庭'];
-  final List<String> _tags = ['重要', '紧急', '会议', '项目', '阅读'];
+  final List<String> _groups = [];
+  final List<String> _tags = [];
 
   List<TaskItem> get tasks => List.unmodifiable(_tasks);
   List<String> get groups => List.unmodifiable(_groups);
@@ -24,19 +23,16 @@ class TodoService {
 
   Future<void> init() async {
     await _loadData();
-    if (_tasks.isEmpty) {
-      _generateDemoTasks();
-      await _saveData();
-    }
   }
 
   Future<void> _loadData() async {
     try {
-      if (await _storage.fileExists(_storageKey)) {
+      if (await TodoPlugin.instance.storage.fileExists(_storageKey)) {
         try {
-          final data = await _storage.readJson(_storageKey);
+          final data = await TodoPlugin.instance.storage.readJson(_storageKey);
           if (data != null) {
             final Map<String, dynamic> jsonData = data as Map<String, dynamic>;
+            print(jsonData);
             _tasks.clear();
             _tasks.addAll(
               (jsonData['tasks'] as List).map(
@@ -68,7 +64,9 @@ class TodoService {
   Future<void> _tryFixCorruptedJsonFile() async {
     try {
       // 如果JSON解析失败，尝试读取原始文件内容
-      final String rawContent = await _storage.readString(_storageKey);
+      final String rawContent = await TodoPlugin.instance.storage.readString(
+        _storageKey,
+      );
 
       // 检查是否有重复的结束括号
       if (rawContent.contains('"]}"]}')) {
@@ -79,10 +77,13 @@ class TodoService {
         final Map<String, dynamic> fixedData = json.decode(fixedContent);
 
         // 如果有效，保存修复后的内容
-        await _storage.writeString(_storageKey, fixedContent);
+        await TodoPlugin.instance.storage.writeString(
+          _storageKey,
+          fixedContent,
+        );
 
         // 重新加载数据
-        final data = await _storage.readJson(_storageKey);
+        final data = await TodoPlugin.instance.storage.readJson(_storageKey);
         if (data != null) {
           final Map<String, dynamic> jsonData = data as Map<String, dynamic>;
           _tasks.clear();
@@ -114,15 +115,10 @@ class TodoService {
   Future<void> _resetData() async {
     // 重置数据
     _tasks.clear();
-    _groups
-      ..clear()
-      ..addAll(['个人', '工作', '学习', '家庭']);
-    _tags
-      ..clear()
-      ..addAll(['重要', '紧急', '会议', '项目', '阅读']);
+    _groups.clear();
+    _tags.clear();
 
-    // 生成演示数据并保存
-    _generateDemoTasks();
+    // 保存默认数据
     await _saveData();
   }
 
@@ -138,60 +134,17 @@ class TodoService {
       final jsonString = json.encode(data);
       json.decode(jsonString); // 验证JSON格式
 
-      await _storage.writeJson(_storageKey, data);
+      await TodoPlugin.instance.storage.writeJson(_storageKey, data);
     } catch (e) {
       print('Failed to save todo data: $e');
       // 如果保存失败，重置数据
       _tasks.clear();
-      _groups
-        ..clear()
-        ..addAll(['个人', '工作', '学习', '家庭']);
-      _tags
-        ..clear()
-        ..addAll(['重要', '紧急', '会议', '项目', '阅读']);
+      _groups.clear();
+      _tags.clear();
     }
   }
 
-  void _generateDemoTasks() {
-    final random = Random();
-
-    // 生成5个主任务
-    for (int i = 1; i <= 5; i++) {
-      final mainTaskId = 'task-$i';
-      final mainTask = TaskItem(
-        id: mainTaskId,
-        title: '任务$i',
-        createdAt: DateTime.now().subtract(Duration(days: random.nextInt(10))),
-        tags: [_tags[random.nextInt(_tags.length)]],
-        group: _groups[random.nextInt(_groups.length)],
-        priority: Priority.values[random.nextInt(Priority.values.length)],
-        subtitle: random.nextBool() ? '任务$i的副标题' : null,
-      );
-
-      // 为每个主任务生成1-3个子任务
-      final subTaskCount = random.nextInt(3) + 1;
-      final subTaskIds = <String>[];
-
-      for (int j = 1; j <= subTaskCount; j++) {
-        final subTaskId = '$mainTaskId-sub-$j';
-        subTaskIds.add(subTaskId);
-
-        final subTask = TaskItem(
-          id: subTaskId,
-          title: '子任务$j',
-          createdAt: DateTime.now().subtract(Duration(days: random.nextInt(5))),
-          tags: random.nextBool() ? [_tags[random.nextInt(_tags.length)]] : [],
-          group: mainTask.group,
-          priority: Priority.values[random.nextInt(Priority.values.length)],
-        );
-
-        _tasks.add(subTask);
-      }
-
-      mainTask.subTaskIds = subTaskIds;
-      _tasks.add(mainTask);
-    }
-  }
+  // _generateDemoTasks 方法已被移除
 
   List<TaskItem> getTasksByGroup(String group) {
     if (group.isEmpty) return tasks;
