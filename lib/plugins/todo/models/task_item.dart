@@ -26,6 +26,7 @@ class TaskItem {
   String? notes;
   Priority priority;
   DateTime? completedAt;
+  bool isPartiallyCompleted = false; // 用于表示父任务部分完成状态
 
   TaskItem({
     required this.id,
@@ -44,6 +45,13 @@ class TaskItem {
   });
 
   bool get isCompleted => completedAt != null;
+
+  set isCompleted(bool value) {
+    completedAt = value ? DateTime.now() : null;
+    if (value) {
+      isPartiallyCompleted = false; // 完全完成时，部分完成状态应为false
+    }
+  }
 
   void toggleComplete() {
     if (isCompleted) {
@@ -68,11 +76,12 @@ class TaskItem {
       'notes': notes,
       'priority': priority.toString().split('.').last,
       'completedAt': completedAt?.toIso8601String(),
+      'isPartiallyCompleted': isPartiallyCompleted,
     };
   }
 
   factory TaskItem.fromJson(Map<String, dynamic> json) {
-    return TaskItem(
+    final task = TaskItem(
       id: json['id'] as String,
       title: json['title'] as String,
       subTaskIds: (json['subTaskIds'] as List<dynamic>).cast<String>(),
@@ -96,6 +105,13 @@ class TaskItem {
               ? DateTime.parse(json['completedAt'] as String)
               : null,
     );
+
+    // 设置部分完成状态
+    if (json['isPartiallyCompleted'] != null) {
+      task.isPartiallyCompleted = json['isPartiallyCompleted'] as bool;
+    }
+
+    return task;
   }
 
   TaskItem copyWith({
@@ -112,8 +128,9 @@ class TaskItem {
     String? notes,
     Priority? priority,
     DateTime? completedAt,
+    bool? isPartiallyCompleted,
   }) {
-    return TaskItem(
+    final task = TaskItem(
       id: id ?? this.id,
       title: title ?? this.title,
       subTaskIds: subTaskIds ?? this.subTaskIds,
@@ -128,5 +145,8 @@ class TaskItem {
       priority: priority ?? this.priority,
       completedAt: completedAt ?? this.completedAt,
     );
+    task.isPartiallyCompleted =
+        isPartiallyCompleted ?? this.isPartiallyCompleted;
+    return task;
   }
 }

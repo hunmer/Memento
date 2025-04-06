@@ -49,6 +49,9 @@ class TodoService {
 
             _tags.clear();
             _tags.addAll((jsonData['tags'] as List).cast<String>());
+
+            // 加载后同步所有任务的完成状态
+            _syncAllTasksCompletionStatus();
           }
         } catch (e) {
           print('JSON parsing error: $e');
@@ -240,6 +243,14 @@ class TodoService {
 
   Future<void> addTask(TaskItem task) async {
     _tasks.add(task);
+    // 如果是子任务，同步父任务状态
+    final parentTask = _tasks.firstWhere(
+      (t) => t.subTaskIds.contains(task.id),
+      orElse: () => TaskItem(id: '', title: '', createdAt: DateTime.now()),
+    );
+    if (parentTask.id.isNotEmpty) {
+      await _syncTaskCompletionStatus(parentTask.id);
+    }
     await _saveData();
   }
 
@@ -247,17 +258,85 @@ class TodoService {
     final index = _tasks.indexWhere((t) => t.id == task.id);
     if (index != -1) {
       _tasks[index] = task;
+      // 同步父子任务的完成状态
+      await _syncTaskCompletionStatus(task.id);
       await _saveData();
     }
   }
 
-  Future<void> deleteTask(String taskId) async {
-    // 删除任务及其子任务
+  // 同步所有任务的完成状态
+  void _syncAllTasksCompletionStatus() {
+    // 从子任务开始同步，确保父任务状态正确
+    final mainTasks = getMainTasks();
+    for (var task in mainTasks) {
+      _syncTaskCompletionStatusWithoutSave(task.id);
+    }
+  }
+
+  // 同步指定任务的完成状态（包括保存）
+  Future<void> _syncTaskCompletionStatus(String taskId) async {
+    _syncTaskCompletionStatusWithoutSave(taskId);
+    await _saveData();
+  }
+
+  // 同步指定任务的完成状态（不保存）
+  void _syncTaskCompletionStatusWithoutSave(String taskId) {
     final task = _tasks.firstWhere((t) => t.id == taskId);
+
+    if (task.subTaskIds.isNotEmpty) {
+      // 如果是父任务，根据子任务状态更新完成状态
+      final subTasks = getSubTasks(taskId);
+      final allSubTasksCompleted = subTasks.every((t) => t.isCompleted);
+      final anySubTaskCompleted = subTasks.any((t) => t.isCompleted);
+
+      // 只有所有子任务完成时，父任务才算完成
+      task.isCompleted = allSubTasksCompleted;
+
+      // 如果有部分子任务完成，设置父任务为部分完成状态
+      task.isPartiallyCompleted = anySubTaskCompleted && !allSubTasksCompleted;
+    } else {
+      // 如果是子任务，更新父任务的状态
+      final parentTask = _tasks.firstWhere(
+        (t) => t.subTaskIds.contains(taskId),
+        orElse: () => TaskItem(id: '', title: '', createdAt: DateTime.now()),
+      );
+
+      if (parentTask.id.isNotEmpty) {
+        final allSubTasksCompleted = getSubTasks(
+          parentTask.id,
+        ).every((t) => t.isCompleted);
+        final anySubTaskCompleted = getSubTasks(
+          parentTask.id,
+        ).any((t) => t.isCompleted);
+
+        parentTask.isCompleted = allSubTasksCompleted;
+        parentTask.isPartiallyCompleted =
+            anySubTaskCompleted && !allSubTasksCompleted;
+      }
+    }
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    // 找到要删除的任务
+    final task = _tasks.firstWhere((t) => t.id == taskId);
+
+    // 找到父任务（如果存在）
+    final parentTask = _tasks.firstWhere(
+      (t) => t.subTaskIds.contains(taskId),
+      orElse: () => TaskItem(id: '', title: '', createdAt: DateTime.now()),
+    );
+
+    // 删除任务及其子任务
     for (var subTaskId in task.subTaskIds) {
       _tasks.removeWhere((t) => t.id == subTaskId);
     }
     _tasks.removeWhere((t) => t.id == taskId);
+
+    // 如果存在父任务，更新其状态
+    if (parentTask.id.isNotEmpty) {
+      await _syncTaskCompletionStatus(parentTask.id);
+    }
+
     await _saveData();
   }
 

@@ -31,6 +31,7 @@ class TaskItemWidgetState extends State<TaskItemWidget>
     with TickerProviderStateMixin {
   AnimationController? _checkmarkController;
   bool _localCompletionState = false;
+  bool _isPartiallyCompleted = false;
 
   @override
   void initState() {
@@ -63,6 +64,7 @@ class TaskItemWidgetState extends State<TaskItemWidget>
     if (!mounted) return;
     setState(() {
       _localCompletionState = widget.task.isCompleted;
+      _isPartiallyCompleted = widget.task.isPartiallyCompleted;
       if (_checkmarkController != null) {
         if (_localCompletionState) {
           _checkmarkController!.forward();
@@ -229,6 +231,12 @@ class TaskItemWidgetState extends State<TaskItemWidget>
                                             .bodyLarge
                                             ?.color
                                             ?.withAlpha((0.5 * 255).round())
+                                        : _isPartiallyCompleted
+                                        ? Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.color
+                                            ?.withAlpha((0.8 * 255).round())
                                         : Theme.of(
                                           context,
                                         ).textTheme.bodyLarge?.color,
@@ -285,12 +293,20 @@ class TaskItemWidgetState extends State<TaskItemWidget>
                               color:
                                   _localCompletionState
                                       ? Colors.transparent
+                                      : _isPartiallyCompleted
+                                      ? Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withOpacity(0.5)
                                       : Theme.of(context).colorScheme.primary,
                               width: 2,
                             ),
                             color:
                                 _localCompletionState
                                     ? Theme.of(context).colorScheme.primary
+                                    : _isPartiallyCompleted
+                                    ? Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.2)
                                     : Colors.transparent,
                           ),
                           child:
@@ -300,6 +316,13 @@ class TaskItemWidgetState extends State<TaskItemWidget>
                                     size: 16,
                                     color:
                                         Theme.of(context).colorScheme.onPrimary,
+                                  )
+                                  : _isPartiallyCompleted
+                                  ? Icon(
+                                    Icons.remove,
+                                    size: 16,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   )
                                   : null,
                         );
