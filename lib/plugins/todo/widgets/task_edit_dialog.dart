@@ -2,49 +2,66 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/task_item.dart';
 import '../services/todo_service.dart';
+import '../../plugin_widget.dart';
 
 class TaskEditDialog extends StatefulWidget {
   final TaskItem? task; // 如果为null，表示新建任务；否则表示编辑任务
   final String? parentTaskId; // 如果不为null，表示创建子任务
 
-  const TaskEditDialog({Key? key, this.task, this.parentTaskId})
-    : super(key: key);
+  const TaskEditDialog({super.key, this.task, this.parentTaskId});
 
   @override
-  _TaskEditDialogState createState() => _TaskEditDialogState();
+  State<TaskEditDialog> createState() => TaskEditDialogState();
 }
 
-class _TaskEditDialogState extends State<TaskEditDialog> {
+class TaskEditDialogState extends State<TaskEditDialog> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _subtitleController = TextEditingController();
   final _notesController = TextEditingController();
 
-  late String _group;
-  late Priority _priority;
-  late List<String> _selectedTags;
+  late String group;
+  late Priority priority;
+  late List<String> selectedTags;
   DateTime? _startDate;
   DateTime? _dueDate;
 
-  final TodoService _todoService = TodoService();
+  late final TodoService _todoService;
+
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
+    // 在 initState 中不要访问 context
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      // 获取插件实例
+      final pluginWidget = PluginWidget.of(context);
+      if (pluginWidget == null) {
+        throw Exception('TaskEditDialog must be a child of a PluginWidget');
+      }
+      _todoService = TodoService.getInstance(pluginWidget.plugin.storage);
+      _isInitialized = true;
+    }
 
     // 如果是编辑任务，填充现有数据
     if (widget.task != null) {
       _titleController.text = widget.task!.title;
       _subtitleController.text = widget.task!.subtitle ?? '';
       _notesController.text = widget.task!.notes ?? '';
-      _group = widget.task!.group;
-      _priority = widget.task!.priority;
-      _selectedTags = List.from(widget.task!.tags);
+      group = widget.task!.group;
+      priority = widget.task!.priority;
+      selectedTags = List.from(widget.task!.tags);
       _startDate = widget.task!.startDate;
       _dueDate = widget.task!.dueDate;
     } else {
       // 新建任务，设置默认值
-      _group =
+      group =
           widget.parentTaskId != null
               ? _todoService.tasks
                   .firstWhere((t) => t.id == widget.parentTaskId)
@@ -52,8 +69,8 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
               : (_todoService.groups.isNotEmpty
                   ? _todoService.groups.first
                   : '');
-      _priority = Priority.notImportantNotUrgent;
-      _selectedTags = [];
+      priority = Priority.notImportantNotUrgent;
+      selectedTags = [];
     }
   }
 
@@ -103,7 +120,7 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _group,
+                value: group,
                 decoration: const InputDecoration(
                   labelText: '分组',
                   border: OutlineInputBorder(),
@@ -119,14 +136,14 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
                 onChanged: (value) {
                   if (value != null) {
                     setState(() {
-                      _group = value;
+                      group = value;
                     });
                   }
                 },
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<Priority>(
-                value: _priority,
+                value: priority,
                 decoration: const InputDecoration(
                   labelText: '优先级',
                   border: OutlineInputBorder(),
@@ -156,7 +173,7 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
                 onChanged: (value) {
                   if (value != null) {
                     setState(() {
-                      _priority = value;
+                      priority = value;
                     });
                   }
                 },
@@ -202,16 +219,16 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
           runSpacing: 8,
           children:
               _todoService.tags.map((tag) {
-                final isSelected = _selectedTags.contains(tag);
+                final isSelected = selectedTags.contains(tag);
                 return FilterChip(
                   label: Text(tag),
                   selected: isSelected,
                   onSelected: (selected) {
                     setState(() {
                       if (selected) {
-                        _selectedTags.add(tag);
+                        selectedTags.add(tag);
                       } else {
-                        _selectedTags.remove(tag);
+                        selectedTags.remove(tag);
                       }
                     });
                   },
@@ -333,9 +350,9 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
           title: title,
           subtitle: subtitle.isNotEmpty ? subtitle : null,
           notes: notes.isNotEmpty ? notes : null,
-          group: _group,
-          priority: _priority,
-          tags: _selectedTags,
+          group: group,
+          priority: priority,
+          tags: selectedTags,
           startDate: _startDate,
           dueDate: _dueDate,
         );
@@ -349,9 +366,9 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
           createdAt: DateTime.now(),
           subtitle: subtitle.isNotEmpty ? subtitle : null,
           notes: notes.isNotEmpty ? notes : null,
-          group: _group,
-          priority: _priority,
-          tags: _selectedTags,
+          group: group,
+          priority: priority,
+          tags: selectedTags,
           startDate: _startDate,
           dueDate: _dueDate,
         );

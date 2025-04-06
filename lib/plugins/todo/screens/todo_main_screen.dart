@@ -3,23 +3,39 @@ import '../services/todo_service.dart';
 import '../models/task_item.dart';
 import '../widgets/task_item_widget.dart';
 import '../widgets/task_edit_dialog.dart';
-import '../widgets/group_management_dialog.dart';
+import '../../plugin_widget.dart';
 
 class TodoMainScreen extends StatefulWidget {
   const TodoMainScreen({super.key});
 
   @override
-  _TodoMainScreenState createState() => _TodoMainScreenState();
+  State<TodoMainScreen> createState() => TodoMainScreenState();
 }
 
-class _TodoMainScreenState extends State<TodoMainScreen> {
-  final TodoService _todoService = TodoService();
-  String _currentGroup = '';
+class TodoMainScreenState extends State<TodoMainScreen> {
+  late TodoService _todoService;
+  String currentGroup = '';
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _todoService.init();
+    // 在 initState 中不要访问 context
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      // 获取插件实例
+      final pluginWidget = PluginWidget.of(context);
+      if (pluginWidget == null) {
+        throw Exception('TodoMainScreen must be a child of a PluginWidget');
+      }
+      _todoService = TodoService.getInstance(pluginWidget.plugin.storage);
+      _todoService.init();
+      _isInitialized = true;
+    }
   }
 
   // 显示新建/编辑任务对话框
@@ -27,10 +43,19 @@ class _TodoMainScreenState extends State<TodoMainScreen> {
     TaskItem? task,
     String? parentTaskId,
   }) async {
+    // 获取当前的 PluginWidget
+    final pluginWidget = PluginWidget.of(context);
+    if (pluginWidget == null) {
+      throw Exception('TodoMainScreen must be a child of a PluginWidget');
+    }
+
     final result = await showDialog<TaskItem>(
       context: context,
       builder:
-          (context) => TaskEditDialog(task: task, parentTaskId: parentTaskId),
+          (context) => PluginWidget(
+            plugin: pluginWidget.plugin,
+            child: TaskEditDialog(task: task, parentTaskId: parentTaskId),
+          ),
     );
 
     if (result != null) {
@@ -43,9 +68,9 @@ class _TodoMainScreenState extends State<TodoMainScreen> {
   @override
   Widget build(BuildContext context) {
     final tasks =
-        _currentGroup.isEmpty
+        currentGroup.isEmpty
             ? _todoService.getMainTasks()
-            : _todoService.getTasksByGroup(_currentGroup);
+            : _todoService.getTasksByGroup(currentGroup);
 
     return Scaffold(
       appBar: AppBar(
@@ -87,7 +112,7 @@ class _TodoMainScreenState extends State<TodoMainScreen> {
                 },
               ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddTaskDialog,
+        onPressed: () => _showAddTaskDialog(),
         child: Icon(Icons.add),
       ),
     );

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
+import '../plugin_widget.dart';
 import 'screens/todo_main_screen.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import 'services/todo_service.dart';
 
 class TodoPlugin extends BasePlugin {
   // 单例实例
@@ -40,19 +42,13 @@ class TodoPlugin extends BasePlugin {
 
   @override
   Future<void> initialize() async {
-    // 在这里初始化插件
-    // 例如：加载数据、设置初始状态等
-    await initializeDefaultData();
+    // 初始化TodoService，传入storageManager
+    final todoService = TodoService.getInstance(storage);
+    await todoService.init();
   }
 
   @override
   Widget buildMainView(BuildContext context) {
-    return TodoMainScreen();
-  }
-
-  @override
-  Future<void> initializeDefaultData() async {
-    // 在这里初始化默认数据
-    // 例如：创建默认任务、分组等
+    return PluginWidget(plugin: this, child: const TodoMainScreen());
   }
 }

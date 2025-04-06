@@ -24,10 +24,10 @@ class TaskItemWidget extends StatefulWidget {
   });
 
   @override
-  State<TaskItemWidget> createState() => _TaskItemWidgetState();
+  State<TaskItemWidget> createState() => TaskItemWidgetState();
 }
 
-class _TaskItemWidgetState extends State<TaskItemWidget>
+class TaskItemWidgetState extends State<TaskItemWidget>
     with TickerProviderStateMixin {
   AnimationController? _checkmarkController;
   bool _localCompletionState = false;
@@ -105,7 +105,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget>
   // 更新所有子任务的完成状态
   void _updateSubTasksStatus(bool completed) {
     if (widget.subTasks.isEmpty) return;
-    
+
     setState(() {
       for (var subTask in widget.subTasks) {
         subTask.completedAt = completed ? DateTime.now() : null;
@@ -116,7 +116,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget>
   // 更新父任务状态基于子任务完成情况
   void _updateParentTaskStatus() {
     if (!mounted) return;
-    
+
     bool shouldBeCompleted = _isAllSubTasksCompleted;
     // 移除条件判断，确保状态始终同步
     setState(() {
@@ -256,7 +256,8 @@ class _TaskItemWidgetState extends State<TaskItemWidget>
                     onTap: () {
                       setState(() {
                         _localCompletionState = !_localCompletionState;
-                        widget.task.completedAt = _localCompletionState ? DateTime.now() : null;
+                        widget.task.completedAt =
+                            _localCompletionState ? DateTime.now() : null;
                         if (_localCompletionState) {
                           _checkmarkController?.forward();
                         } else {
@@ -375,7 +376,8 @@ class _TaskItemWidgetState extends State<TaskItemWidget>
                         onTap: () {
                           setState(() {
                             _localCompletionState = !_localCompletionState;
-                            widget.task.completedAt = _localCompletionState ? DateTime.now() : null;
+                            widget.task.completedAt =
+                                _localCompletionState ? DateTime.now() : null;
                             if (_localCompletionState) {
                               _checkmarkController?.forward();
                             } else {

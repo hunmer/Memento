@@ -1,10 +1,18 @@
 import 'dart:math';
+import 'dart:convert';
 import '../models/task_item.dart';
+import '../../../core/storage/storage_manager.dart';
 
 class TodoService {
-  static final TodoService _instance = TodoService._internal();
-  factory TodoService() => _instance;
-  TodoService._internal();
+  static const String _storageKey = 'plugins/todo/tasks.json';
+  final StorageManager _storage;
+  static TodoService? _instance;
+  static TodoService getInstance(StorageManager storage) {
+    _instance ??= TodoService._internal(storage);
+    return _instance!;
+  }
+
+  TodoService._internal(this._storage);
 
   final List<TaskItem> _tasks = [];
   final List<String> _groups = ['个人', '工作', '学习', '家庭'];
@@ -14,9 +22,130 @@ class TodoService {
   List<String> get groups => List.unmodifiable(_groups);
   List<String> get tags => List.unmodifiable(_tags);
 
-  void init() {
+  Future<void> init() async {
+    await _loadData();
     if (_tasks.isEmpty) {
       _generateDemoTasks();
+      await _saveData();
+    }
+  }
+
+  Future<void> _loadData() async {
+    try {
+      if (await _storage.fileExists(_storageKey)) {
+        try {
+          final data = await _storage.readJson(_storageKey);
+          if (data != null) {
+            final Map<String, dynamic> jsonData = data as Map<String, dynamic>;
+            _tasks.clear();
+            _tasks.addAll(
+              (jsonData['tasks'] as List).map(
+                (task) => TaskItem.fromJson(task as Map<String, dynamic>),
+              ),
+            );
+
+            _groups.clear();
+            _groups.addAll((jsonData['groups'] as List).cast<String>());
+
+            _tags.clear();
+            _tags.addAll((jsonData['tags'] as List).cast<String>());
+          }
+        } catch (e) {
+          print('JSON parsing error: $e');
+
+          // 尝试修复损坏的JSON文件
+          await _tryFixCorruptedJsonFile();
+        }
+      }
+    } catch (e) {
+      print('Failed to load todo data: $e');
+    }
+  }
+
+  Future<void> _tryFixCorruptedJsonFile() async {
+    try {
+      // 如果JSON解析失败，尝试读取原始文件内容
+      final String rawContent = await _storage.readString(_storageKey);
+
+      // 检查是否有重复的结束括号
+      if (rawContent.contains('"]}"]}')) {
+        // 修复格式错误的JSON
+        final fixedContent = rawContent.replaceAll('"]}"]}', '"]}');
+
+        // 验证修复后的JSON是否有效
+        final Map<String, dynamic> fixedData = json.decode(fixedContent);
+
+        // 如果有效，保存修复后的内容
+        await _storage.writeString(_storageKey, fixedContent);
+
+        // 重新加载数据
+        final data = await _storage.readJson(_storageKey);
+        if (data != null) {
+          final Map<String, dynamic> jsonData = data as Map<String, dynamic>;
+          _tasks.clear();
+          _tasks.addAll(
+            (jsonData['tasks'] as List).map(
+              (task) => TaskItem.fromJson(task as Map<String, dynamic>),
+            ),
+          );
+
+          _groups.clear();
+          _groups.addAll((jsonData['groups'] as List).cast<String>());
+
+          _tags.clear();
+          _tags.addAll((jsonData['tags'] as List).cast<String>());
+        }
+
+        print('Successfully fixed corrupted JSON file');
+      } else {
+        // 如果不是简单的重复括号问题，则重置数据
+        print('Unable to fix JSON, resetting data');
+        await _resetData();
+      }
+    } catch (e) {
+      print('Failed to fix corrupted JSON: $e');
+      await _resetData();
+    }
+  }
+
+  Future<void> _resetData() async {
+    // 重置数据
+    _tasks.clear();
+    _groups
+      ..clear()
+      ..addAll(['个人', '工作', '学习', '家庭']);
+    _tags
+      ..clear()
+      ..addAll(['重要', '紧急', '会议', '项目', '阅读']);
+
+    // 生成演示数据并保存
+    _generateDemoTasks();
+    await _saveData();
+  }
+
+  Future<void> _saveData() async {
+    try {
+      final data = {
+        'tasks': _tasks.map((task) => task.toJson()).toList(),
+        'groups': _groups.toList(), // 确保转换为List
+        'tags': _tags.toList(), // 确保转换为List
+      };
+
+      // 先验证JSON格式是否正确
+      final jsonString = json.encode(data);
+      json.decode(jsonString); // 验证JSON格式
+
+      await _storage.writeJson(_storageKey, data);
+    } catch (e) {
+      print('Failed to save todo data: $e');
+      // 如果保存失败，重置数据
+      _tasks.clear();
+      _groups
+        ..clear()
+        ..addAll(['个人', '工作', '学习', '家庭']);
+      _tags
+        ..clear()
+        ..addAll(['重要', '紧急', '会议', '项目', '阅读']);
     }
   }
 
@@ -77,86 +206,95 @@ class TodoService {
     return _tasks.where((task) => parent.subTaskIds.contains(task.id)).toList();
   }
 
-  void addGroup(String group) {
+  Future<void> addGroup(String group) async {
     if (!_groups.contains(group)) {
       _groups.add(group);
+      await _saveData();
     }
   }
 
-  void removeGroup(String group) {
+  Future<void> removeGroup(String group) async {
     _groups.remove(group);
     // 将该分组下的任务移到默认分组
     for (var task in _tasks.where((task) => task.group == group)) {
       task.group = '';
     }
+    await _saveData();
   }
 
-  void addTag(String tag) {
+  Future<void> addTag(String tag) async {
     if (!_tags.contains(tag)) {
       _tags.add(tag);
+      await _saveData();
     }
   }
 
-  void removeTag(String tag) {
+  Future<void> removeTag(String tag) async {
     _tags.remove(tag);
     // 从所有任务中移除该标签
     for (var task in _tasks) {
       task.tags.remove(tag);
     }
+    await _saveData();
   }
 
-  void addTask(TaskItem task) {
+  Future<void> addTask(TaskItem task) async {
     _tasks.add(task);
+    await _saveData();
   }
 
-  void updateTask(TaskItem task) {
+  Future<void> updateTask(TaskItem task) async {
     final index = _tasks.indexWhere((t) => t.id == task.id);
     if (index != -1) {
       _tasks[index] = task;
+      await _saveData();
     }
   }
 
-  void deleteTask(String taskId) {
+  Future<void> deleteTask(String taskId) async {
     // 删除任务及其子任务
     final task = _tasks.firstWhere((t) => t.id == taskId);
     for (var subTaskId in task.subTaskIds) {
       _tasks.removeWhere((t) => t.id == subTaskId);
     }
     _tasks.removeWhere((t) => t.id == taskId);
+    await _saveData();
   }
 
   // 向上移动任务
-  void moveTaskUp(String taskId) {
+  Future<void> moveTaskUp(String taskId) async {
     final currentIndex = _tasks.indexWhere((t) => t.id == taskId);
     if (currentIndex > 0) {
       final task = _tasks[currentIndex];
       _tasks.removeAt(currentIndex);
       _tasks.insert(currentIndex - 1, task);
+      await _saveData();
     }
   }
 
   // 向下移动任务
-  void moveTaskDown(String taskId) {
+  Future<void> moveTaskDown(String taskId) async {
     final currentIndex = _tasks.indexWhere((t) => t.id == taskId);
     if (currentIndex < _tasks.length - 1) {
       final task = _tasks[currentIndex];
       _tasks.removeAt(currentIndex);
       _tasks.insert(currentIndex + 1, task);
+      await _saveData();
     }
   }
 
   // 改变任务层级
   // 升级任务（变为父任务的同级任务）
-  void moveTaskLevelUp(String taskId) {
-    changeTaskLevel(taskId, true);
+  Future<void> moveTaskLevelUp(String taskId) async {
+    await changeTaskLevel(taskId, true);
   }
 
   // 降级任务（变为上一个同级任务的子任务）
-  void moveTaskLevelDown(String taskId) {
-    changeTaskLevel(taskId, false);
+  Future<void> moveTaskLevelDown(String taskId) async {
+    await changeTaskLevel(taskId, false);
   }
 
-  void changeTaskLevel(String taskId, bool levelUp) {
+  Future<void> changeTaskLevel(String taskId, bool levelUp) async {
     final task = _tasks.firstWhere((t) => t.id == taskId);
     if (levelUp) {
       // 升级：从当前父任务的子任务列表中移除
@@ -166,6 +304,7 @@ class TodoService {
       );
       if (parentTask.id.isNotEmpty) {
         parentTask.subTaskIds.remove(taskId);
+        await _saveData();
       }
     } else {
       // 降级：添加到上一个同级任务的子任务列表中
@@ -174,6 +313,7 @@ class TodoService {
         final previousTask = _tasks[currentIndex - 1];
         if (!previousTask.subTaskIds.contains(taskId)) {
           previousTask.subTaskIds.add(taskId);
+          await _saveData();
         }
       }
     }
