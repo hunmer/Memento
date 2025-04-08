@@ -45,4 +45,7 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String daysAgo(int days) => '$days days ago';
+
+  @override
+  String userInitial(String username) => 'Initial letter of $username';
 }

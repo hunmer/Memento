@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../models/user.dart';
 import '../utils/date_formatter.dart';
+import '../l10n/chat_localizations.dart';
 
 class MessageBubble extends StatelessWidget {
   final Message message;
@@ -24,7 +25,7 @@ class MessageBubble extends StatelessWidget {
             isSentMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!isSentMessage) _buildAvatar(message.user),
+          if (!isSentMessage) _buildAvatar(message.user, context),
           const SizedBox(width: 8),
           Flexible(
             child: Column(
@@ -55,19 +56,27 @@ class MessageBubble extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          if (isSentMessage) _buildAvatar(message.user),
+          if (isSentMessage) _buildAvatar(message.user, context),
         ],
       ),
     );
   }
 
-  Widget _buildAvatar(User user) {
+  Widget _buildAvatar(User user, [BuildContext? context]) {
     if (user.iconPath != null) {
       return CircleAvatar(
         backgroundImage: AssetImage(user.iconPath!),
         radius: 16,
       );
     }
-    return CircleAvatar(radius: 16, child: Text(user.username[0]));
+    return CircleAvatar(
+      radius: 16, 
+      child: Text(
+        user.username[0],
+        semanticsLabel: context != null 
+            ? ChatLocalizations.of(context)!.userInitial(user.username)
+            : user.username[0],
+      ),
+    );
   }
 }

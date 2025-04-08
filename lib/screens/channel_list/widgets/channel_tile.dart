@@ -20,9 +20,77 @@ class ChannelTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget subtitleWidget;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          key: itemKey,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                backgroundColor: channel.backgroundColor,
+                child: Icon(channel.icon, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      channel.title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    _buildSubtitle(),
+                  ],
+                ),
+              ),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert, size: 20),
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    onEdit(channel);
+                  } else if (value == 'delete') {
+                    onDelete(channel);
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit, size: 20),
+                        SizedBox(width: 8),
+                        Text('编辑'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, size: 20),
+                        SizedBox(width: 8),
+                        Text('删除'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubtitle() {
     if (channel.draft != null && channel.draft!.isNotEmpty) {
-      subtitleWidget = RichText(
+      return RichText(
         text: TextSpan(
           children: [
             const TextSpan(
@@ -43,58 +111,12 @@ class ChannelTile extends StatelessWidget {
       String subtitle = lastMessage != null
           ? '${lastMessage.content}\n${DateFormatter.formatDateTime(lastMessage.date)}'
           : '暂无消息';
-      subtitleWidget = Text(
+      return Text(
         subtitle,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.grey[600], fontSize: 13),
       );
     }
-
-    return ListTile(
-      key: itemKey,
-      leading: CircleAvatar(
-        backgroundColor: channel.backgroundColor,
-        child: Icon(channel.icon, color: Colors.white),
-      ),
-      title: Text(
-        channel.title,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: subtitleWidget,
-      trailing: PopupMenuButton<String>(
-        icon: const Icon(Icons.more_vert, size: 20),
-        onSelected: (value) {
-          if (value == 'edit') {
-            onEdit(channel);
-          } else if (value == 'delete') {
-            onDelete(channel);
-          }
-        },
-        itemBuilder: (BuildContext context) => [
-          const PopupMenuItem<String>(
-            value: 'edit',
-            child: Row(
-              children: [
-                Icon(Icons.edit, size: 20),
-                SizedBox(width: 8),
-                Text('编辑'),
-              ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete, size: 20),
-                SizedBox(width: 8),
-                Text('删除'),
-              ],
-            ),
-          ),
-        ],
-      ),
-      onTap: onTap,
-    );
   }
 }

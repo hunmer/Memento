@@ -1,6 +1,5 @@
 // import 'dart:io'; // 移除，因为在Web平台不可用
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'l10n/chat_localizations.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -9,7 +8,7 @@ import '../../models/channel.dart';
 import '../../models/message.dart';
 import '../../models/user.dart';
 import '../../models/serialization_helpers.dart';
-import '../../screens/channel_list_screen.dart';
+import '../../screens/channel_list/channel_list_screen.dart';
 
 class ChatPlugin extends BasePlugin {
   // 新增：插件设置

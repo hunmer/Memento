@@ -45,4 +45,7 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String daysAgo(int days) => '$days天前';
+
+  @override
+  String userInitial(String username) => '$username的首字母';
 }

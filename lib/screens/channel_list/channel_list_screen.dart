@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/channel.dart';
 import '../../plugins/chat/chat_plugin.dart';
 import '../chat_screen.dart';
@@ -50,7 +49,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Channels'),
+        title: const Text('Channels'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -75,15 +74,18 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                     onReorder: _controller.reorderChannels,
                     itemBuilder: (context, index) {
                       final channel = _controller.sortedChannels[index];
-                      return ChannelTile(
+                      return Padding(
                         key: ValueKey(channel.id),
-                        itemKey: ValueKey(channel.id),
-                        channel: channel,
-                        onTap: () => _navigateToChat(channel),
-                        onEdit: (channel) => _showEditChannelDialog(channel),
-                        onDelete: (channel) => _showDeleteChannelDialog(channel),
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: ChannelTile(
+                          channel: channel,
+                          onTap: () => _navigateToChat(channel),
+                          onEdit: (channel) => _showEditChannelDialog(channel),
+                          onDelete: (channel) => _showDeleteChannelDialog(channel),
+                        ),
                       );
                     },
+                    buildDefaultDragHandles: false,
                   ),
           ),
         ],

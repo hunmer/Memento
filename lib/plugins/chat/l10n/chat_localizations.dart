@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
 
 import 'chat_localizations_en.dart';
 import 'chat_localizations_zh.dart';
@@ -48,6 +47,7 @@ abstract class ChatLocalizations {
   String minutesAgo(int minutes);
   String hoursAgo(int hours);
   String daysAgo(int days);
+  String userInitial(String username);
 }
 
 class _ChatLocalizationsDelegate extends LocalizationsDelegate<ChatLocalizations> {
