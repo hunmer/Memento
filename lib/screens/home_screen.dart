@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AppBarWidget(title: '插件管理器'),
+      appBar: const AppBarWidget(titleKey: 'pluginManager'),
       drawer: const AppDrawer(),
       floatingActionButton:
           kIsWeb

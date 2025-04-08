@@ -1,18 +1,24 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../l10n/chat_localizations.dart';
+
 class DateFormatter {
-  static String formatDateTime(DateTime dateTime) {
+  static String formatDateTime(DateTime dateTime, BuildContext context) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
+    final l10n = ChatLocalizations.of(context)!;
     if (difference.inMinutes < 1) {
-      return '刚刚';
+      return l10n.justNow;
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}分钟前';
+      return l10n.minutesAgo(difference.inMinutes);
     } else if (difference.inDays < 1) {
-      return '${difference.inHours}小时前';
+      return l10n.hoursAgo(difference.inHours);
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}天前';
+      return l10n.daysAgo(difference.inDays);
     } else {
-      return '${dateTime.month}-${dateTime.day} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+      final DateFormat formatter = DateFormat('MM-dd HH:mm');
+      return formatter.format(dateTime);
     }
   }
 }

@@ -5,8 +5,7 @@ import 'base_plugin.dart';
 class PluginWidget extends InheritedWidget {
   final BasePlugin plugin;
 
-  const PluginWidget({super.key, required this.plugin, required Widget child})
-    : super(child: child);
+  const PluginWidget({super.key, required this.plugin, required super.child});
 
   static PluginWidget? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<PluginWidget>();

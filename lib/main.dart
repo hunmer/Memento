@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
@@ -9,7 +11,7 @@ import 'plugins/diary/diary_plugin.dart'; // 日记插件
 import 'plugins/activity/activity_plugin.dart'; // 活动插件
 import 'plugins/checkin/checkin_plugin.dart'; // 打卡插件
 import 'plugins/timer/timer_plugin.dart'; // 计时器插件
-import 'plugins/todo/todo_plugin.dart'; // 计时器插件
+import 'plugins/todo/todo_plugin.dart'; // 任务插件
 
 // 全局单例实例
 late final StorageManager globalStorage;
@@ -77,8 +79,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Memonto',
+      title: 'Memento',
       debugShowCheckedModeBanner: false, // 关闭调试横幅
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('zh', ''), // 中文
+        Locale('en', ''), // 英文
+      ],
+      locale: const Locale('en', ''), 
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -97,6 +110,7 @@ class MyApp extends StatelessWidget {
         );
       },
       home: const HomeScreen(),
+      onGenerateTitle: (BuildContext context) => AppLocalizations.of(context)!.appTitle,
     );
   }
 }

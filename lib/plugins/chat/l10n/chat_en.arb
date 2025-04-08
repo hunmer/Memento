@@ -1,0 +1,76 @@
+{
+    "chatPluginName": "Chat",
+    "@chatPluginName": {
+        "description": "Name of the chat plugin"
+    },
+    "chatPluginDescription": "Basic chat functionality plugin",
+    "@chatPluginDescription": {
+        "description": "Description of the chat plugin"
+    },
+    "showAvatarInChannelList": "Show avatars in channel list",
+    "@showAvatarInChannelList": {
+        "description": "Setting for displaying avatars in the channel list"
+    },
+    "channelList": "Channel List",
+    "@channelList": {
+        "description": "Channel list screen title"
+    },
+    "newChannel": "New Channel",
+    "@newChannel": {
+        "description": "Button to create a new channel"
+    },
+    "deleteChannel": "Delete Channel",
+    "@deleteChannel": {
+        "description": "Option to delete a channel"
+    },
+    "deleteMessages": "Delete Messages",
+    "@deleteMessages": {
+        "description": "Option to delete messages in a channel"
+    },
+    "draft": "Draft",
+    "@draft": {
+        "description": "Draft message label"
+    },
+    "chatRoom": "Chat Room",
+    "@chatRoom": {
+        "description": "Chat room screen title"
+    },
+    "enterMessage": "Type a message...",
+    "@enterMessage": {
+        "description": "Message input field hint text"
+    },
+    "justNow": "Just now",
+    "@justNow": {
+        "description": "Time indicator for very recent messages"
+    },
+    "minutesAgo": "{minutes} minutes ago",
+    "@minutesAgo": {
+        "description": "Time indicator for messages sent minutes ago",
+        "placeholders": {
+            "minutes": {
+                "type": "int",
+                "example": "5"
+            }
+        }
+    },
+    "hoursAgo": "{hours} hours ago",
+    "@hoursAgo": {
+        "description": "Time indicator for messages sent hours ago",
+        "placeholders": {
+            "hours": {
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "daysAgo": "{days} days ago",
+    "@daysAgo": {
+        "description": "Time indicator for messages sent days ago",
+        "placeholders": {
+            "days": {
+                "type": "int",
+                "example": "3"
+            }
+        }
+    }
+}

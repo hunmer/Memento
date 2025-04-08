@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
+import '../l10n/chat_localizations.dart';
 import '../models/user.dart';
 import '../models/message.dart';
 import '../widgets/message_bubble.dart';
@@ -15,36 +15,11 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<Message> _messages = [];
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-
-  // 定义两个测试用户
   final User currentUser = const User(id: '1', username: '我', iconPath: null);
-  final User otherUser = const User(id: '2', username: '小明', iconPath: null);
 
   @override
   void initState() {
     super.initState();
-    // 初始化时随机生成一些消息
-    final random = Random();
-    final List<String> sampleMessages = [
-      '你好！',
-      '今天天气真不错',
-      'Flutter开发真有趣',
-      '周末要出去玩吗？',
-      '项目进展如何？',
-    ];
-
-    for (int i = 0; i < 10; i++) {
-      final isReceived = random.nextBool();
-      _messages.insert(
-        0, // 在列表开头插入示例消息
-        Message(
-          content: sampleMessages[random.nextInt(sampleMessages.length)],
-          user: isReceived ? otherUser : currentUser,
-          type: isReceived ? MessageType.received : MessageType.sent,
-          date: DateTime.now().subtract(Duration(minutes: random.nextInt(60))),
-        ),
-      );
-    }
   }
 
   void _handleSubmitted(String text) {
@@ -60,8 +35,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ChatLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text('聊天室'), centerTitle: true),
+      appBar: AppBar(title: Text(l10n.chatRoom), centerTitle: true),
       body: Column(
         children: [
           Expanded(
@@ -93,7 +69,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       controller: _textController,
                       focusNode: _focusNode,
                       decoration: InputDecoration(
-                        hintText: '输入消息...',
+                        hintText: l10n.enterMessage,
                         border: InputBorder.none,
                       ),
                       onSubmitted: _handleSubmitted,

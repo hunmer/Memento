@@ -1,0 +1,129 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../models/channel.dart';
+import '../../plugins/chat/chat_plugin.dart';
+import '../chat_screen.dart';
+import 'controllers/channel_list_controller.dart';
+import 'widgets/channel_tile.dart';
+import 'widgets/empty_channel_view.dart';
+import 'widgets/channel_group_selector.dart';
+import 'widgets/channel_dialogs/add_channel_dialog.dart';
+import 'widgets/channel_dialogs/edit_channel_dialog.dart';
+import 'widgets/channel_dialogs/delete_channel_dialog.dart';
+
+class ChannelListScreen extends StatefulWidget {
+  final List<Channel> channels;
+  final ChatPlugin chatPlugin;
+
+  const ChannelListScreen({
+    super.key,
+    required this.channels,
+    required this.chatPlugin,
+  });
+
+  @override
+  State<ChannelListScreen> createState() => _ChannelListScreenState();
+}
+
+class _ChannelListScreenState extends State<ChannelListScreen> {
+  late final ChannelListController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ChannelListController(
+      channels: widget.channels,
+      chatPlugin: widget.chatPlugin,
+    );
+    _controller.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Channels'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _showAddChannelDialog,
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          ChannelGroupSelector(
+            selectedGroup: _controller.selectedGroup,
+            availableGroups: _controller.availableGroups,
+            onGroupSelected: (group) {
+              _controller.saveSelectedGroup(group);
+            },
+          ),
+          Expanded(
+            child: _controller.sortedChannels.isEmpty
+                ? EmptyChannelView(onAddChannel: _showAddChannelDialog)
+                : ReorderableListView.builder(
+                    itemCount: _controller.sortedChannels.length,
+                    onReorder: _controller.reorderChannels,
+                    itemBuilder: (context, index) {
+                      final channel = _controller.sortedChannels[index];
+                      return ChannelTile(
+                        key: ValueKey(channel.id),
+                        itemKey: ValueKey(channel.id),
+                        channel: channel,
+                        onTap: () => _navigateToChat(channel),
+                        onEdit: (channel) => _showEditChannelDialog(channel),
+                        onDelete: (channel) => _showDeleteChannelDialog(channel),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddChannelDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AddChannelDialog(
+        onAddChannel: _controller.addChannel,
+      ),
+    );
+  }
+
+  void _showEditChannelDialog(Channel channel) {
+    showDialog(
+      context: context,
+      builder: (context) => EditChannelDialog(
+        channel: channel,
+        onUpdateChannel: _controller.updateChannel,
+      ),
+    );
+  }
+
+  void _showDeleteChannelDialog(Channel channel) {
+    showDialog(
+      context: context,
+      builder: (context) => DeleteChannelDialog(
+        channel: channel,
+        onDeleteChannel: _controller.deleteChannel,
+      ),
+    );
+  }
+
+  void _navigateToChat(Channel channel) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ChatScreen(channel: channel)),
+    );
+  }
+}

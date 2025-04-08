@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   image_picker: ^1.0.7
   path_provider: ^2.1.2
   archive: ^3.4.10
@@ -46,7 +48,7 @@ dependencies:
   file_picker: ^6.1.1
   table_calendar: ^3.0.9
   flutter_markdown: ^0.6.18
-  intl: ^0.18.1
+  intl: ^0.19.0
   flutter_colorpicker: ^1.1.0
 
 dev_dependencies:
@@ -77,6 +79,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  
+  generate: true # 添加这一行以启用本地化文件生成
 
   # To add assets to your application, add an assets section, like this:
   assets:

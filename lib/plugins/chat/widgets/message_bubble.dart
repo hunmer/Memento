@@ -47,7 +47,7 @@ class MessageBubble extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0),
                   child: Text(
-                    DateFormatter.formatDateTime(message.date),
+                    DateFormatter.formatDateTime(message.date, context),
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                 ),

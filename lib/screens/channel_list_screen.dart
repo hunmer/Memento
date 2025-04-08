@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/channel.dart';
 import '../utils/date_formatter.dart';
 import '../widgets/custom_dialog.dart';
@@ -109,6 +110,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   }
 
   void _showAddChannelDialog() {
+    final l10n = AppLocalizations.of(context)!;
     final TextEditingController nameController = TextEditingController();
     final TextEditingController groupController = TextEditingController();
     // 使用预定义图标映射表中的默认图标
@@ -128,7 +130,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
           (context) => StatefulBuilder(
             builder:
                 (context, setDialogState) => CustomDialog(
-                  title: '新建频道',
+                  title: l10n.newChannel,
                   content: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -151,19 +153,19 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: nameController,
-                          decoration: const InputDecoration(
-                            labelText: '频道名称',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.channelName,
+                            border: const OutlineInputBorder(),
                           ),
                           autofocus: true,
                         ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: groupController,
-                          decoration: const InputDecoration(
-                            labelText: '频道分组（多个分组用逗号分隔）',
+                          decoration: InputDecoration(
+                            labelText: l10n.channelGroups,
                             border: OutlineInputBorder(),
-                            hintText: '例如：工作,学习,娱乐',
+                            hintText: l10n.channelGroupsHint,
                           ),
                         ),
                       ],
@@ -172,7 +174,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('取消'),
+                      child: Text(l10n.cancel),
                     ),
                     ElevatedButton(
                       onPressed: () {
@@ -212,7 +214,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                           Navigator.pop(context);
                         }
                       },
-                      child: const Text('创建'),
+                      child: Text(l10n.create),
                     ),
                   ],
                 ),
@@ -221,6 +223,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   }
 
   void _showEditChannelDialog(Channel channel) {
+    final l10n = AppLocalizations.of(context)!;
     final TextEditingController nameController = TextEditingController(
       text: channel.title,
     );
@@ -240,7 +243,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
           (context) => StatefulBuilder(
             builder:
                 (context, setDialogState) => CustomDialog(
-                  title: '编辑频道',
+                  title: l10n.editChannel,
                   content: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -264,8 +267,8 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: nameController,
-                          decoration: const InputDecoration(
-                            labelText: '频道名称',
+                          decoration: InputDecoration(
+                            labelText: l10n.channelName,
                             border: OutlineInputBorder(),
                           ),
                           autofocus: true,
@@ -273,10 +276,10 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: groupController,
-                          decoration: const InputDecoration(
-                            labelText: '频道分组（多个分组用逗号分隔）',
+                          decoration: InputDecoration(
+                            labelText: l10n.channelGroups,
                             border: OutlineInputBorder(),
-                            hintText: '例如：工作,学习,娱乐',
+                            hintText: l10n.channelGroupsHint,
                           ),
                         ),
                       ],
@@ -285,7 +288,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('取消'),
+                      child: Text(l10n.cancel),
                     ),
                     ElevatedButton(
                       onPressed: () {
@@ -330,7 +333,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                           Navigator.pop(context);
                         }
                       },
-                      child: const Text('保存'),
+                      child: Text(l10n.save),
                     ),
                   ],
                 ),
@@ -339,6 +342,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   }
 
   void _deleteChannel(Channel channel) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: true,

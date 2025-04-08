@@ -1,0 +1,76 @@
+{
+    "chatPluginName": "聊天",
+    "@chatPluginName": {
+        "description": "聊天插件名称"
+    },
+    "chatPluginDescription": "基础聊天功能插件",
+    "@chatPluginDescription": {
+        "description": "聊天插件描述"
+    },
+    "showAvatarInChannelList": "在聊天列表显示头像",
+    "@showAvatarInChannelList": {
+        "description": "设置是否在聊天列表显示头像"
+    },
+    "channelList": "频道列表",
+    "@channelList": {
+        "description": "频道列表屏幕标题"
+    },
+    "newChannel": "新建频道",
+    "@newChannel": {
+        "description": "创建新频道的按钮"
+    },
+    "deleteChannel": "删除频道",
+    "@deleteChannel": {
+        "description": "删除频道的选项"
+    },
+    "deleteMessages": "删除消息",
+    "@deleteMessages": {
+        "description": "删除频道中消息的选项"
+    },
+    "draft": "草稿",
+    "@draft": {
+        "description": "草稿消息标签"
+    },
+    "chatRoom": "聊天室",
+    "@chatRoom": {
+        "description": "聊天室屏幕标题"
+    },
+    "enterMessage": "输入消息...",
+    "@enterMessage": {
+        "description": "消息输入框提示文本"
+    },
+    "justNow": "刚刚",
+    "@justNow": {
+        "description": "非常近期消息的时间指示器"
+    },
+    "minutesAgo": "{minutes}分钟前",
+    "@minutesAgo": {
+        "description": "几分钟前发送的消息的时间指示器",
+        "placeholders": {
+            "minutes": {
+                "type": "int",
+                "example": "5"
+            }
+        }
+    },
+    "hoursAgo": "{hours}小时前",
+    "@hoursAgo": {
+        "description": "几小时前发送的消息的时间指示器",
+        "placeholders": {
+            "hours": {
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "daysAgo": "{days}天前",
+    "@daysAgo": {
+        "description": "几天前发送的消息的时间指示器",
+        "placeholders": {
+            "days": {
+                "type": "int",
+                "example": "3"
+            }
+        }
+    }
+}

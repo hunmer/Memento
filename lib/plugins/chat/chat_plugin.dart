@@ -1,5 +1,7 @@
 // import 'dart:io'; // 移除，因为在Web平台不可用
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'l10n/chat_localizations.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -33,10 +35,11 @@ class ChatPlugin extends BasePlugin {
   Widget buildSettingsView(BuildContext context) {
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
+        final l10n = ChatLocalizations.of(context)!;
         return Column(
           children: [
             SwitchListTile(
-              title: const Text('在聊天列表显示自己的头像'),
+              title: Text(l10n.showAvatarInChannelList),
               value: _showAvatarInChannelList,
               onChanged: (bool value) {
                 setState(() {
@@ -81,15 +84,18 @@ class ChatPlugin extends BasePlugin {
   // 获取频道列表的getter
   List<Channel> get channels => _channels;
 
+  late String _name =  'Chat';
+  late String _description =  'A plugin for chatting with other users';
+  
   @override
-  String get name => 'Chat';
+  String get name => _name;
 
   @override
   String get version => '1.0.0';
 
   @override
-  String get description => '基础聊天功能插件';
-
+  String get description => _description;
+  
   @override
   String get author => 'Zhuanz';
 
@@ -101,6 +107,11 @@ class ChatPlugin extends BasePlugin {
     // 加载默认数据和频道
     await _initializeDefaultData();
     await _loadChannels();
+  }
+
+  // 更新本地化文本
+  void updateLocalizedStrings(BuildContext context) {
+    final l10n = ChatLocalizations.of(context);
   }
 
   Future<void> _initializeDefaultData() async {
@@ -354,6 +365,10 @@ class ChatPlugin extends BasePlugin {
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
+    // 设置默认名称和描述（以防在initialize前使用）
+    _name = 'Chat';
+    _description = 'A plugin for chatting with other users';
+    
     // 初始化插件
     await initialize();
 

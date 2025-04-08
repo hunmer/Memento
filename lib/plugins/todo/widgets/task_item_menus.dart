@@ -499,10 +499,8 @@ class TaskItemMenus {
                 );
 
                 // 调用onAddSubTask来触发子任务的创建对话框
-                if (onAddSubTask != null) {
-                  onAddSubTask(newSubTask);
-                }
-              });
+                onAddSubTask(newSubTask);
+                            });
             },
           ),
         if (onDelete != null)
