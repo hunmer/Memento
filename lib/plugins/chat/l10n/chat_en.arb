@@ -72,5 +72,13 @@
                 "example": "3"
             }
         }
+    },
+    "today": "Today",
+    "@today": {
+        "description": "Label for today's date"
+    },
+    "yesterday": "Yesterday",
+    "@yesterday": {
+        "description": "Label for yesterday's date"
     }
 }

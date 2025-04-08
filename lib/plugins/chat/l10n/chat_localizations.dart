@@ -43,11 +43,16 @@ abstract class ChatLocalizations {
   String get chatRoom;
   String get enterMessage;
   String get justNow;
+  String get edit;
+  String get copy;
+  String get delete;
   
   String minutesAgo(int minutes);
   String hoursAgo(int hours);
   String daysAgo(int days);
   String userInitial(String username);
+  String get today;
+  String get yesterday;
 }
 
 class _ChatLocalizationsDelegate extends LocalizationsDelegate<ChatLocalizations> {

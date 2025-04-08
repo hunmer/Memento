@@ -72,5 +72,13 @@
                 "example": "3"
             }
         }
+    },
+    "today": "今天",
+    "@today": {
+        "description": "今天的日期标签"
+    },
+    "yesterday": "昨天",
+    "@yesterday": {
+        "description": "昨天的日期标签"
     }
 }

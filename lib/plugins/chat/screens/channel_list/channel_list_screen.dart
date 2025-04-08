@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/channel.dart';
-import '../../plugins/chat/chat_plugin.dart';
-import '../chat_screen.dart';
+import '../../chat_plugin.dart';
+import '../chat_screen/chat_screen.dart';
 import 'controllers/channel_list_controller.dart';
 import 'widgets/channel_tile.dart';
 import 'widgets/empty_channel_view.dart';

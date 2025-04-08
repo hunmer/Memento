@@ -48,4 +48,19 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String userInitial(String username) => '$username的首字母';
+
+  @override
+  String get edit => '编辑';
+
+  @override
+  String get copy => '复制';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get today => '今天';
+
+  @override
+  String get yesterday => '昨天';
 }

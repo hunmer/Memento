@@ -43,6 +43,7 @@ void main() async {
 
     // 获取插件管理器单例实例
     globalPluginManager = PluginManager();
+    globalPluginManager.setStorageManager(globalStorage);
     debugPrint('初始化插件管理器...');
 
     // 注册内置插件
@@ -59,7 +60,6 @@ void main() async {
     // 遍历并注册插件
     for (final plugin in plugins) {
       try {
-        plugin.setStorageManager(globalStorage);
         await globalPluginManager.registerPlugin(plugin);
         debugPrint('插件注册成功: ${plugin.name}');
       } catch (e) {

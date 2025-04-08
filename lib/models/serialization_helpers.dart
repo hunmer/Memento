@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'channel.dart';
-import 'message.dart';
-import 'user.dart';
+import '../plugins/chat/models/channel.dart';
+import '../plugins/chat/models/message.dart';
+import '../plugins/chat/models/user.dart';
 
 // 预定义的图标映射表，使用常量构造函数
 final Map<String, IconData> predefinedIcons = {

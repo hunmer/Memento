@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import '../l10n/chat_localizations.dart';
 import '../models/user.dart';
 import '../models/message.dart';
@@ -16,6 +17,11 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final User currentUser = const User(id: '1', username: '我', iconPath: null);
+  final Random _random = Random();
+
+  String _generateMessageId() {
+    return '${DateTime.now().millisecondsSinceEpoch}-${_random.nextInt(1000)}';
+  }
 
   @override
   void initState() {
@@ -27,7 +33,12 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       _messages.insert(
         0, // 在列表开头插入新消息
-        Message(content: text, user: currentUser, type: MessageType.sent),
+        Message(
+          id: _generateMessageId(),
+          content: text,
+          user: currentUser,
+          type: MessageType.sent,
+        ),
       );
       _textController.clear();
     });

@@ -45,7 +45,7 @@ class ChannelTile extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
-                    _buildSubtitle(),
+                    _buildSubtitle(context),
                   ],
                 ),
               ),
@@ -88,7 +88,7 @@ class ChannelTile extends StatelessWidget {
     );
   }
 
-  Widget _buildSubtitle() {
+  Widget _buildSubtitle(BuildContext context) {
     if (channel.draft != null && channel.draft!.isNotEmpty) {
       return RichText(
         text: TextSpan(
@@ -109,7 +109,7 @@ class ChannelTile extends StatelessWidget {
     } else {
       final lastMessage = channel.lastMessage;
       String subtitle = lastMessage != null
-          ? '${lastMessage.content}\n${DateFormatter.formatDateTime(lastMessage.date)}'
+          ? '${lastMessage.content}\n${DateFormatter.formatDateTime(lastMessage.date, context)}'
           : '暂无消息';
       return Text(
         subtitle,

@@ -6,7 +6,7 @@ import '../core/plugin_base.dart';
 
 /// 插件基类，所有插件都应该继承这个类
 abstract class BasePlugin extends PluginBase {
-  late StorageManager _storageManager;
+  StorageManager? _storageManager;
 
   /// 设置存储管理器
   @override
@@ -15,9 +15,21 @@ abstract class BasePlugin extends PluginBase {
   }
 
   /// 获取存储管理器
-  StorageManager get storageManager => _storageManager;
+  StorageManager get storageManager {
+    if (_storageManager == null) {
+      // 尝试从 PluginManager 获取 StorageManager
+      final pluginManager = PluginManager.instance;
+      if (pluginManager.storageManager != null) {
+        _storageManager = pluginManager.storageManager;
+      } else {
+        throw StateError('StorageManager has not been initialized');
+      }
+    }
+    return _storageManager!;
+  }
+
   @override
-  StorageManager get storage => _storageManager;
+  StorageManager get storage => storageManager;
 
   /// 插件ID
   @override

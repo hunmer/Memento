@@ -4,11 +4,11 @@ import 'l10n/chat_localizations.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
-import '../../models/channel.dart';
-import '../../models/message.dart';
-import '../../models/user.dart';
+import 'models/channel.dart';
+import 'models/message.dart';
+import 'models/user.dart';
 import '../../models/serialization_helpers.dart';
-import '../../screens/channel_list/channel_list_screen.dart';
+import 'screens/channel_list/channel_list_screen.dart';
 
 class ChatPlugin extends BasePlugin {
   // 新增：插件设置
@@ -58,6 +58,18 @@ class ChatPlugin extends BasePlugin {
   static ChatPlugin get instance {
     _instance ??= ChatPlugin();
     return _instance!;
+  }
+
+  // 检查插件是否已初始化
+  bool get isInitialized {
+    try {
+      // 尝试访问存储管理器，如果成功则表示已初始化
+      storage;
+      return true;
+    } catch (e) {
+      // 如果抛出异常，表示存储管理器未初始化
+      return false;
+    }
   }
 
   final List<Channel> _channels = [];
@@ -275,9 +287,18 @@ class ChatPlugin extends BasePlugin {
 
   // 加载草稿
   Future<String?> loadDraft(String channelId) async {
-    final draftData = await storage.read('chat/draft/$channelId');
-    if (draftData.isNotEmpty && draftData.containsKey('draft')) {
-      return draftData['draft'] as String;
+    if (!isInitialized) {
+      debugPrint('ChatPlugin is not initialized yet. Cannot load draft.');
+      return null;
+    }
+    
+    try {
+      final draftData = await storage.read('chat/draft/$channelId');
+      if (draftData.isNotEmpty && draftData.containsKey('draft')) {
+        return draftData['draft'] as String;
+      }
+    } catch (e) {
+      debugPrint('Error loading draft: $e');
     }
 
     return null;

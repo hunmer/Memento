@@ -28,7 +28,15 @@ abstract class PluginBase {
   Color? get color => Colors.blue;
 
   /// 存储管理器实例
-  late final StorageManager storage;
+  StorageManager? _storage;
+  
+  /// 获取存储管理器
+  StorageManager get storage {
+    if (_storage == null) {
+      throw StateError('Storage manager has not been initialized');
+    }
+    return _storage!;
+  }
 
   /// 插件配置
   Map<String, dynamic> _settings = {};
@@ -38,7 +46,7 @@ abstract class PluginBase {
 
   /// 设置存储管理器
   void setStorageManager(StorageManager storageManager) {
-    storage = storageManager;
+    _storage = storageManager;
   }
 
   /// 加载插件配置

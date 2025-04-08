@@ -48,4 +48,19 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String userInitial(String username) => 'Initial letter of $username';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
 }

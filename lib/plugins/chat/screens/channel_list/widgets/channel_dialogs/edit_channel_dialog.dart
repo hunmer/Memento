@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../models/channel.dart';
-import '../../../../widgets/circle_icon_picker.dart';
+import '../../../../../../widgets/circle_icon_picker.dart';
 // import '../../../../models/serialization_helpers.dart';
 
 class EditChannelDialog extends StatefulWidget {
