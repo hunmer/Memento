@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 import '../controllers/day_controller.dart';
 import '../l10n/day_localizations.dart';
 import '../widgets/memorial_day_card.dart';
@@ -16,13 +17,18 @@ class DayHomeScreen extends StatefulWidget {
 
 class _DayHomeScreenState extends State<DayHomeScreen> {
   Future<void> _showEditDialog(BuildContext context, [MemorialDay? memorialDay]) async {
-    final result = await showDialog<MemorialDay>(
+    final result = await showDialog<dynamic>(
       context: context,
       builder: (context) => EditMemorialDayDialog(memorialDay: memorialDay),
     );
 
-    if (result == null && memorialDay != null) {
-      // 用户点击了删除按钮
+    // 用户点击取消按钮
+    if (result == 'cancel') {
+      return;
+    }
+    
+    // 用户点击删除按钮
+    if (result == 'delete' && memorialDay != null) {
       if (!mounted) return;
     final confirmed = await showDialog<bool>(
         context: context,
@@ -48,7 +54,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
       if (confirmed == true && mounted) {
         await _controller.deleteMemorialDay(memorialDay.id);
       }
-    } else if (result != null && mounted) {
+    } else if (result != null && result is MemorialDay && mounted) {
       // 用户保存了更改
       if (memorialDay != null) {
         await _controller.updateMemorialDay(result);
@@ -82,6 +88,15 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
             appBar: AppBar(
               title: Text(DayLocalizations.of(context).memorialDays),
               actions: [
+                // 视图切换按钮
+                // 排序模式切换按钮
+                IconButton(
+                  icon: Icon(controller.useCustomOrder ? Icons.sort : Icons.sort_by_alpha),
+                  onPressed: controller.toggleSortMode,
+                  tooltip: controller.useCustomOrder 
+                    ? DayLocalizations.of(context).autoSort 
+                    : DayLocalizations.of(context).manualSort,
+                ),
                 // 视图切换按钮
                 IconButton(
                   icon: Icon(controller.isCardView ? Icons.view_list : Icons.view_module),
@@ -118,7 +133,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
   }
 
   Widget _buildCardView(List<MemorialDay> days) {
-    return GridView.builder(
+    return ReorderableGridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -129,23 +144,27 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
       itemCount: days.length,
       itemBuilder: (context, index) {
         return MemorialDayCard(
+          key: ValueKey(days[index].id),
           memorialDay: days[index],
           onTap: () => _showEditDialog(context, days[index]),
         );
       },
+      onReorder: _controller.reorderMemorialDays,
     );
   }
 
   Widget _buildListView(List<MemorialDay> days) {
-    return ListView.builder(
+    return ReorderableListView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: days.length,
       itemBuilder: (context, index) {
         return MemorialDayListItem(
+          key: ValueKey(days[index].id),
           memorialDay: days[index],
           onTap: () => _showEditDialog(context, days[index]),
         );
       },
+      onReorder: _controller.reorderMemorialDays,
     );
   }
 }

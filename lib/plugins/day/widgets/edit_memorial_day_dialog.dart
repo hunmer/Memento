@@ -111,14 +111,14 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog> {
       actions: [
         // 取消按钮
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop('cancel'),
           child: Text(localizations.cancel),
         ),
         // 删除按钮（仅编辑时显示）
         if (widget.memorialDay != null)
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(null);
+              Navigator.of(context).pop('delete');
             },
             child: Text(
               localizations.delete,

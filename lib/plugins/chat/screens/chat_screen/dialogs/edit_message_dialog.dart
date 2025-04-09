@@ -8,12 +8,12 @@ class EditMessageDialog extends StatelessWidget {
   final Function() onSave;
 
   const EditMessageDialog({
-    Key? key,
+    super.key,
     required this.message,
     required this.controller,
     required this.onCancel,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

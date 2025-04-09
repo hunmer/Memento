@@ -7,11 +7,11 @@ class DatePickerDialog extends StatelessWidget {
   final Function(DateTime) onDateSelected;
 
   const DatePickerDialog({
-    Key? key,
+    super.key,
     required this.availableDates,
     required this.selectedDate,
     required this.onDateSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

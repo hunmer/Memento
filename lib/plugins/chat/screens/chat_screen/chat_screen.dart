@@ -53,8 +53,7 @@ class _ChatScreenState extends State<ChatScreen> {
         final draft = await chatPlugin.loadDraft(widget.channel.id);
         if (draft != null && 
             draft.isNotEmpty && 
-            mounted && 
-            _controller.draftController != null) {
+            mounted) {
           setState(() {
             // 增加额外的空值检查
             if (_controller.draftController.hasListeners) {

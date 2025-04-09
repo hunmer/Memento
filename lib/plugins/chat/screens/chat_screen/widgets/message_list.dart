@@ -54,7 +54,7 @@ class MessageList extends StatelessWidget {
               if (dateSeparator != null) dateSeparator,
               GestureDetector(
                 onLongPressStart: (LongPressStartDetails details) {
-                  final RenderBox overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
+                  final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
                   final RelativeRect position = RelativeRect.fromRect(
                     Rect.fromPoints(
                       details.globalPosition,
@@ -90,7 +90,7 @@ class MessageList extends StatelessWidget {
   }
 
   void _showContextMenu(BuildContext context, Message message, RelativeRect position) {
-    final RenderBox overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     
     showMenu<String>(
       color: Theme.of(context).cardColor,

@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import '../../../models/channel.dart';
-import '../../../models/user.dart';
 
 /// 时间线过滤器设置
 class TimelineFilter {

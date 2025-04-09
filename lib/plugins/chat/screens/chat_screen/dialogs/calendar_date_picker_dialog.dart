@@ -9,12 +9,12 @@ class CalendarDatePickerDialog extends StatefulWidget {
   final Map<DateTime, int>? dateCountMap;
 
   const CalendarDatePickerDialog({
-    Key? key,
+    super.key,
     required this.availableDates,
     required this.selectedDate,
     required this.onDateSelected,
     this.dateCountMap,
-  }) : super(key: key);
+  });
 
   @override
   State<CalendarDatePickerDialog> createState() => _CalendarDatePickerDialogState();

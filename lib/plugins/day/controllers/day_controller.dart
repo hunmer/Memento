@@ -30,8 +30,10 @@ class DayController extends ChangeNotifier {
       final config = await _plugin.storage.readFile('${_plugin.pluginDir}/view_preference.json');
       final data = jsonDecode(config);
       _isCardView = data['isCardView'] ?? true;
+      _useCustomOrder = data['useCustomOrder'] ?? false;
     } catch (e) {
       _isCardView = true;
+      _useCustomOrder = false;
     }
   }
 
@@ -40,7 +42,10 @@ class DayController extends ChangeNotifier {
     try {
       await _plugin.storage.writeFile(
         '${_plugin.pluginDir}/view_preference.json',
-        jsonEncode({'isCardView': _isCardView}),
+        jsonEncode({
+          'isCardView': _isCardView,
+          'useCustomOrder': _useCustomOrder,
+        }),
       );
     } catch (e) {
       debugPrint('保存视图偏好设置失败: $e');
@@ -58,8 +63,10 @@ class DayController extends ChangeNotifier {
       _memorialDays = MemorialDay.generateTestData();
       await _saveMemorialDays();
     }
-    // 按剩余天数排序
-    _sortMemorialDays();
+    // 如果不使用自定义排序，则按剩余天数排序
+    if (!_useCustomOrder) {
+      _sortMemorialDays();
+    }
   }
 
   // 保存纪念日数据
@@ -104,5 +111,32 @@ class DayController extends ChangeNotifier {
   // 按剩余天数排序
   void _sortMemorialDays() {
     _memorialDays.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+  }
+
+  // 手动重新排序纪念日
+  Future<void> reorderMemorialDays(int oldIndex, int newIndex) async {
+    if (oldIndex < newIndex) {
+      // 如果将项目向下移动，需要减1，因为移除oldIndex后，newIndex的位置会变化
+      newIndex -= 1;
+    }
+    final item = _memorialDays.removeAt(oldIndex);
+    _memorialDays.insert(newIndex, item);
+    await _saveMemorialDays();
+    notifyListeners();
+  }
+
+  // 设置自定义排序顺序
+  bool _useCustomOrder = false;
+  bool get useCustomOrder => _useCustomOrder;
+
+  // 切换排序模式
+  Future<void> toggleSortMode() async {
+    _useCustomOrder = !_useCustomOrder;
+    if (!_useCustomOrder) {
+      // 如果切换回自动排序，重新按剩余天数排序
+      _sortMemorialDays();
+    }
+    await _saveViewPreference();
+    notifyListeners();
   }
 }

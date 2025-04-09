@@ -28,6 +28,8 @@ abstract class DayLocalizations {
   String get titleRequired;
   String get cardView;
   String get listView;
+  String get manualSort;
+  String get autoSort;
 }
 
 /// 默认英文实现
@@ -104,6 +106,12 @@ class _DefaultDayLocalizations implements DayLocalizations {
   
   @override
   String get listView => 'List View';
+
+  @override
+  String get manualSort => 'Manual Sort';
+  
+  @override
+  String get autoSort => 'Auto Sort';
 }
 
 /// 中文实现
@@ -180,6 +188,12 @@ class DayLocalizationsZh implements DayLocalizations {
   
   @override
   String get listView => '列表视图';
+
+  @override
+  String get manualSort => '手动排序';
+  
+  @override
+  String get autoSort => '自动排序';
 }
 
 /// 英文实现
@@ -256,6 +270,12 @@ class DayLocalizationsEn implements DayLocalizations {
   
   @override
   String get listView => 'List View';
+
+  @override
+  String get manualSort => 'Manual Sort';
+  
+  @override
+  String get autoSort => 'Auto Sort';
 }
 
 /// 本地化代理
