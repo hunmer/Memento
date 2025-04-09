@@ -38,7 +38,6 @@ class MemorialDayListItem extends StatelessWidget {
             ),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right),
       ),
     );
   }

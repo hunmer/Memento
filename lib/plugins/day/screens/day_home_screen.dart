@@ -150,6 +150,17 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
         );
       },
       onReorder: _controller.reorderMemorialDays,
+      // 自定义拖拽装饰，移除边框
+      dragWidgetBuilder: (index, child) {
+        return Material(
+          color: Colors.transparent,
+          elevation: 0,
+          child: Transform.scale(
+            scale: 1.05,
+            child: child,
+          ),
+        );
+      },
     );
   }
 
@@ -165,6 +176,21 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
         );
       },
       onReorder: _controller.reorderMemorialDays,
+      // 自定义拖拽装饰，移除边框
+      proxyDecorator: (child, index, animation) {
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (BuildContext context, Widget? child) {
+            return Material(
+              elevation: 0, // 无阴影
+              color: Colors.transparent, // 透明背景
+              borderRadius: BorderRadius.zero, // 无圆角
+              child: child,
+            );
+          },
+          child: child,
+        );
+      },
     );
   }
 }
