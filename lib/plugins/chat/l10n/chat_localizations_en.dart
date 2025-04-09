@@ -96,4 +96,53 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String get yesterday => 'Yesterday';
+
+  // Advanced filter related implementations
+  @override
+  String get advancedFilter => 'Advanced Filter';
+
+  @override
+  String get searchIn => 'Search in:';
+
+  @override
+  String get channelNames => 'Channel names';
+
+  @override
+  String get usernames => 'Usernames';
+
+  @override
+  String get messageContent => 'Message content';
+
+  @override
+  String get dateRange => 'Date range:';
+
+  @override
+  String get startDate => 'Start date';
+
+  @override
+  String get endDate => 'End date';
+
+  @override
+  String get clearDates => 'Clear dates';
+
+  @override
+  String get selectChannels => 'Select channels:';
+
+  @override
+  String get selectUsers => 'Select users:';
+
+  @override
+  String get noChannelsAvailable => 'No channels available';
+
+  @override
+  String get noUsersAvailable => 'No users available';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get apply => 'Apply';
 }

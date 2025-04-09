@@ -41,7 +41,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
       body: Column(
         children: [
           // 搜索栏
-          TimelineSearchBar(controller: _controller),
+          TimelineSearchBar(
+            controller: _controller,
+            chatPlugin: widget.chatPlugin,
+          ),
           
           // 消息列表
           Expanded(

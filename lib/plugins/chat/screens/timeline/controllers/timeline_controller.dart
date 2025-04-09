@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/message.dart';
 import '../../../models/channel.dart';
 import '../../../chat_plugin.dart';
+import '../models/timeline_filter.dart';
 
 /// Timeline 页面的控制器，负责管理消息流数据和搜索功能
 class TimelineController extends ChangeNotifier {
@@ -12,6 +13,10 @@ class TimelineController extends ChangeNotifier {
   List<Message> _filteredMessages = [];
   bool _isLoading = false;
   String _searchQuery = '';
+  
+  // 高级过滤器
+  final TimelineFilter filter = TimelineFilter();
+  bool _isFilterActive = false;
   
   TimelineController(this._chatPlugin) {
     _loadAllMessages();
@@ -24,6 +29,7 @@ class TimelineController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   List<Message> get messages => _filteredMessages;
   String get searchQuery => _searchQuery;
+  bool get isFilterActive => _isFilterActive;
   
   void _onSearchChanged() {
     _searchQuery = searchController.text;
@@ -73,18 +79,85 @@ class TimelineController extends ChangeNotifier {
     }
   }
   
-  /// 根据搜索查询过滤消息
+  /// 根据搜索查询和高级过滤器过滤消息
   void _filterMessages() {
-    if (_searchQuery.isEmpty) {
-      _filteredMessages = List.from(_allMessages);
-    } else {
+    // 先应用基本的搜索过滤
+    List<Message> result = _allMessages;
+    
+    // 应用文本搜索
+    if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      _filteredMessages = _allMessages.where((message) {
-        return message.content.toLowerCase().contains(query) ||
-               message.user.username.toLowerCase().contains(query) ||
-               (message.metadata?['channelName'] as String?)?.toLowerCase().contains(query) == true;
+      result = result.where((message) {
+        bool matches = false;
+        
+        // 根据过滤器设置决定搜索范围
+        if (filter.includeContent) {
+          matches = matches || message.content.toLowerCase().contains(query);
+        }
+        
+        if (filter.includeUsernames) {
+          matches = matches || message.user.username.toLowerCase().contains(query);
+        }
+        
+        if (filter.includeChannels) {
+          matches = matches || (message.metadata?['channelName'] as String?)?.toLowerCase().contains(query) == true;
+        }
+        
+        return matches;
       }).toList();
     }
+    
+    // 应用高级过滤器
+    if (_isFilterActive) {
+      // 过滤频道
+      if (filter.selectedChannelIds.isNotEmpty) {
+        result = result.where((message) {
+          final channelId = message.metadata?['channelId'] as String?;
+          return channelId != null && filter.selectedChannelIds.contains(channelId);
+        }).toList();
+      }
+      
+      // 过滤用户
+      if (filter.selectedUserIds.isNotEmpty) {
+        result = result.where((message) {
+          return filter.selectedUserIds.contains(message.user.id);
+        }).toList();
+      }
+      
+      // 过滤日期范围
+      if (filter.startDate != null || filter.endDate != null) {
+        result = result.where((message) {
+          final messageDate = message.date;
+          
+          bool matchesStartDate = true;
+          if (filter.startDate != null) {
+            final startDate = DateTime(
+              filter.startDate!.year,
+              filter.startDate!.month,
+              filter.startDate!.day,
+            );
+            matchesStartDate = messageDate.isAfter(startDate) || 
+                              messageDate.isAtSameMomentAs(startDate);
+          }
+          
+          bool matchesEndDate = true;
+          if (filter.endDate != null) {
+            final endDate = DateTime(
+              filter.endDate!.year,
+              filter.endDate!.month,
+              filter.endDate!.day,
+              23, 59, 59, 999,
+            );
+            matchesEndDate = messageDate.isBefore(endDate) || 
+                            messageDate.isAtSameMomentAs(endDate);
+          }
+          
+          return matchesStartDate && matchesEndDate;
+        }).toList();
+      }
+    }
+    
+    _filteredMessages = result;
     notifyListeners();
   }
   
@@ -92,6 +165,35 @@ class TimelineController extends ChangeNotifier {
   Future<void> refreshTimeline() async {
     _loadAllMessages();
     return Future.value();
+  }
+  
+  /// 应用高级过滤器
+  void applyFilter(TimelineFilter newFilter) {
+    filter.includeChannels = newFilter.includeChannels;
+    filter.includeUsernames = newFilter.includeUsernames;
+    filter.includeContent = newFilter.includeContent;
+    filter.startDate = newFilter.startDate;
+    filter.endDate = newFilter.endDate;
+    filter.selectedChannelIds = newFilter.selectedChannelIds;
+    filter.selectedUserIds = newFilter.selectedUserIds;
+    
+    // 检查过滤器是否有效
+    _isFilterActive = filter.selectedChannelIds.isNotEmpty || 
+                      filter.selectedUserIds.isNotEmpty || 
+                      filter.startDate != null || 
+                      filter.endDate != null ||
+                      !filter.includeChannels ||
+                      !filter.includeUsernames ||
+                      !filter.includeContent;
+    
+    _filterMessages();
+  }
+  
+  /// 重置过滤器
+  void resetFilter() {
+    filter.reset();
+    _isFilterActive = false;
+    _filterMessages();
   }
   
   /// 获取消息所属的频道

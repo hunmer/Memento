@@ -142,5 +142,69 @@
     "timelineComingSoon": "Timeline - Coming Soon",
     "@timelineComingSoon": {
         "description": "Placeholder text for timeline feature"
+    },
+    "advancedFilter": "Advanced Filter",
+    "@advancedFilter": {
+        "description": "Title for advanced filter dialog"
+    },
+    "searchIn": "Search in:",
+    "@searchIn": {
+        "description": "Label for search scope section in filter"
+    },
+    "channelNames": "Channel names",
+    "@channelNames": {
+        "description": "Option to search in channel names"
+    },
+    "usernames": "Usernames",
+    "@usernames": {
+        "description": "Option to search in usernames"
+    },
+    "messageContent": "Message content",
+    "@messageContent": {
+        "description": "Option to search in message content"
+    },
+    "dateRange": "Date range:",
+    "@dateRange": {
+        "description": "Label for date range section"
+    },
+    "startDate": "Start date",
+    "@startDate": {
+        "description": "Label for start date selection"
+    },
+    "endDate": "End date",
+    "@endDate": {
+        "description": "Label for end date selection"
+    },
+    "clearDates": "Clear dates",
+    "@clearDates": {
+        "description": "Button to clear selected dates"
+    },
+    "selectChannels": "Select channels:",
+    "@selectChannels": {
+        "description": "Label for channel selection section"
+    },
+    "selectUsers": "Select users:",
+    "@selectUsers": {
+        "description": "Label for user selection section"
+    },
+    "noChannelsAvailable": "No channels available",
+    "@noChannelsAvailable": {
+        "description": "Message when no channels are available"
+    },
+    "noUsersAvailable": "No users available",
+    "@noUsersAvailable": {
+        "description": "Message when no users are available"
+    },
+    "cancel": "Cancel",
+    "@cancel": {
+        "description": "Cancel button text"
+    },
+    "reset": "Reset",
+    "@reset": {
+        "description": "Reset button text"
+    },
+    "apply": "Apply",
+    "@apply": {
+        "description": "Apply button text"
     }
 }

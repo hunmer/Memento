@@ -58,6 +58,24 @@ abstract class ChatLocalizations {
   String get timelineTab;
   String get timelineComingSoon;
   
+  // Advanced filter related strings
+  String get advancedFilter;
+  String get searchIn;
+  String get channelNames;
+  String get usernames;
+  String get messageContent;
+  String get dateRange;
+  String get startDate;
+  String get endDate;
+  String get clearDates;
+  String get selectChannels;
+  String get selectUsers;
+  String get noChannelsAvailable;
+  String get noUsersAvailable;
+  String get cancel;
+  String get reset;
+  String get apply;
+  
   String minutesAgo(int minutes);
   String hoursAgo(int hours);
   String daysAgo(int days);

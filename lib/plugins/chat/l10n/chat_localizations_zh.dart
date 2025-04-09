@@ -96,4 +96,53 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String get yesterday => '昨天';
+
+  // Advanced filter related implementations
+  @override
+  String get advancedFilter => '高级筛选';
+
+  @override
+  String get searchIn => '搜索范围：';
+
+  @override
+  String get channelNames => '频道名称';
+
+  @override
+  String get usernames => '用户名';
+
+  @override
+  String get messageContent => '消息内容';
+
+  @override
+  String get dateRange => '日期范围：';
+
+  @override
+  String get startDate => '开始日期';
+
+  @override
+  String get endDate => '结束日期';
+
+  @override
+  String get clearDates => '清除日期';
+
+  @override
+  String get selectChannels => '选择频道：';
+
+  @override
+  String get selectUsers => '选择用户：';
+
+  @override
+  String get noChannelsAvailable => '没有可用的频道';
+
+  @override
+  String get noUsersAvailable => '没有可用的用户';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String get apply => '应用';
 }

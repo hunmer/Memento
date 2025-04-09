@@ -142,5 +142,69 @@
     "timelineComingSoon": "时间线功能 - 即将推出",
     "@timelineComingSoon": {
         "description": "时间线功能占位文本"
+    },
+    "advancedFilter": "高级筛选",
+    "@advancedFilter": {
+        "description": "高级筛选对话框标题"
+    },
+    "searchIn": "搜索范围：",
+    "@searchIn": {
+        "description": "筛选中的搜索范围部分标签"
+    },
+    "channelNames": "频道名称",
+    "@channelNames": {
+        "description": "搜索频道名称的选项"
+    },
+    "usernames": "用户名",
+    "@usernames": {
+        "description": "搜索用户名的选项"
+    },
+    "messageContent": "消息内容",
+    "@messageContent": {
+        "description": "搜索消息内容的选项"
+    },
+    "dateRange": "日期范围：",
+    "@dateRange": {
+        "description": "日期范围部分标签"
+    },
+    "startDate": "开始日期",
+    "@startDate": {
+        "description": "开始日期选择标签"
+    },
+    "endDate": "结束日期",
+    "@endDate": {
+        "description": "结束日期选择标签"
+    },
+    "clearDates": "清除日期",
+    "@clearDates": {
+        "description": "清除已选日期的按钮"
+    },
+    "selectChannels": "选择频道：",
+    "@selectChannels": {
+        "description": "频道选择部分标签"
+    },
+    "selectUsers": "选择用户：",
+    "@selectUsers": {
+        "description": "用户选择部分标签"
+    },
+    "noChannelsAvailable": "没有可用的频道",
+    "@noChannelsAvailable": {
+        "description": "当没有可用频道时的消息"
+    },
+    "noUsersAvailable": "没有可用的用户",
+    "@noUsersAvailable": {
+        "description": "当没有可用用户时的消息"
+    },
+    "cancel": "取消",
+    "@cancel": {
+        "description": "取消按钮文本"
+    },
+    "reset": "重置",
+    "@reset": {
+        "description": "重置按钮文本"
+    },
+    "apply": "应用",
+    "@apply": {
+        "description": "应用按钮文本"
     }
 }
