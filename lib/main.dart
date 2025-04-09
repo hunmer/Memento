@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
+import 'plugins/day/l10n/day_localizations.dart';
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
@@ -13,6 +14,7 @@ import 'plugins/activity/activity_plugin.dart'; // 活动插件
 import 'plugins/checkin/checkin_plugin.dart'; // 打卡插件
 import 'plugins/timer/timer_plugin.dart'; // 计时器插件
 import 'plugins/todo/todo_plugin.dart'; // 任务插件
+import 'plugins/day/day_plugin.dart'; // 纪念日插件
 
 // 全局单例实例
 late final StorageManager globalStorage;
@@ -56,6 +58,7 @@ void main() async {
       CheckinPlugin.instance,
       TimerPlugin.instance,
       TodoPlugin.instance,
+      DayPlugin.instance,
     ];
 
     // 遍历并注册插件
@@ -82,9 +85,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Memento',
       debugShowCheckedModeBanner: false, // 关闭调试横幅
-      localizationsDelegates: const [
+      localizationsDelegates: [
         AppLocalizations.delegate,
         ChatLocalizations.delegate, // 添加聊天插件的本地化代理
+        DayLocalizationsDelegate.delegate, // 添加纪念日插件的本地化代理
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

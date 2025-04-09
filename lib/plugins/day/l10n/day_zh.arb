@@ -1,0 +1,39 @@
+{
+  "@@locale": "zh",
+  "memorialDays": "纪念日",
+  "addMemorialDay": "添加纪念日",
+  "editMemorialDay": "编辑纪念日",
+  "deleteMemorialDay": "删除纪念日",
+  "deleteConfirmation": "确定要删除这个纪念日吗？",
+  "title": "标题",
+  "targetDate": "目标日期",
+  "notes": "笔记",
+  "addNote": "添加笔记",
+  "backgroundColor": "背景颜色",
+  "backgroundImage": "背景图片",
+  "save": "保存",
+  "cancel": "取消",
+  "delete": "删除",
+  "daysRemaining": "{count, plural, =0{就是今天} =1{还剩1天} other{还剩{count}天}}",
+  "@daysRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysPassed": "{count, plural, =1{已过1天} other{已过{count}天}}",
+  "@daysPassed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noMemorialDays": "暂无纪念日，立即添加一个！",
+  "enterTitle": "请输入标题",
+  "enterNote": "请输入笔记",
+  "titleRequired": "标题不能为空",
+  "cardView": "卡片视图",
+  "listView": "列表视图"
+}
