@@ -9,6 +9,7 @@ import 'models/message.dart';
 import 'models/user.dart';
 import '../../models/serialization_helpers.dart';
 import 'screens/channel_list/channel_list_screen.dart';
+import 'screens/timeline/timeline_screen.dart';
 
 class ChatPlugin extends BasePlugin {
   // 新增：插件设置
@@ -382,7 +383,37 @@ class ChatPlugin extends BasePlugin {
   Widget buildMainView(BuildContext context) {
     // 更新本地化文本
     updateLocalizedStrings(context);
-    return ChannelListScreen(channels: _channels, chatPlugin: this);
+    
+    final l10n = ChatLocalizations.of(context);
+    final theme = Theme.of(context);
+    
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: TabBarView(
+          children: [
+            // 频道列表标签页
+            ChannelListScreen(channels: _channels, chatPlugin: this),
+            // 时间线标签页
+            TimelineScreen(chatPlugin: this),
+          ],
+        ),
+        bottomNavigationBar: TabBar(
+          labelColor: theme.colorScheme.primary,
+          unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+          tabs: [
+            Tab(
+              icon: const Icon(Icons.chat_bubble_outline),
+              text: l10n?.channelsTab ?? 'Channels',
+            ),
+            Tab(
+              icon: const Icon(Icons.timeline),
+              text: l10n?.timelineTab ?? 'Timeline',
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// 注册插件到应用

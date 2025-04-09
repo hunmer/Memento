@@ -83,6 +83,15 @@ class ChatLocalizationsZh extends ChatLocalizations {
   String get edited => '已编辑';
 
   @override
+  String get channelsTab => '频道';
+
+  @override
+  String get timelineTab => '时间线';
+
+  @override
+  String get timelineComingSoon => '时间线功能 - 即将推出';
+
+  @override
   String get today => '今天';
 
   @override

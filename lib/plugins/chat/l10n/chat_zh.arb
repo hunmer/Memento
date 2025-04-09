@@ -130,5 +130,17 @@
     "edited": "已编辑",
     "@edited": {
         "description": "已编辑消息标签"
+    },
+    "channelsTab": "频道",
+    "@channelsTab": {
+        "description": "频道标签页标签"
+    },
+    "timelineTab": "时间线",
+    "@timelineTab": {
+        "description": "时间线标签页标签"
+    },
+    "timelineComingSoon": "时间线功能 - 即将推出",
+    "@timelineComingSoon": {
+        "description": "时间线功能占位文本"
     }
 }

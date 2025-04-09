@@ -83,6 +83,15 @@ class ChatLocalizationsEn extends ChatLocalizations {
   String get edited => 'edited';
 
   @override
+  String get channelsTab => 'Channels';
+
+  @override
+  String get timelineTab => 'Timeline';
+
+  @override
+  String get timelineComingSoon => 'Timeline - Coming Soon';
+
+  @override
   String get today => 'Today';
 
   @override

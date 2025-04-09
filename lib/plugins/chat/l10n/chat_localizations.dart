@@ -54,6 +54,9 @@ abstract class ChatLocalizations {
   String get channelInfo;
   String get selectedMessages;
   String get edited;
+  String get channelsTab;
+  String get timelineTab;
+  String get timelineComingSoon;
   
   String minutesAgo(int minutes);
   String hoursAgo(int hours);

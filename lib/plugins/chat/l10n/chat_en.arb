@@ -130,5 +130,17 @@
     "edited": "edited",
     "@edited": {
         "description": "Label for edited message"
+    },
+    "channelsTab": "Channels",
+    "@channelsTab": {
+        "description": "Label for channels tab"
+    },
+    "timelineTab": "Timeline",
+    "@timelineTab": {
+        "description": "Label for timeline tab"
+    },
+    "timelineComingSoon": "Timeline - Coming Soon",
+    "@timelineComingSoon": {
+        "description": "Placeholder text for timeline feature"
     }
 }
