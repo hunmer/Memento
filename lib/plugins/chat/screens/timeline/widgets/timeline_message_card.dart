@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import '../../../models/message.dart';
 import '../../../models/channel.dart';
 import '../../../utils/date_formatter.dart';
+import '../utils/text_highlight.dart';
+import '../controllers/timeline_controller.dart';
 
 /// Timeline 中显示的消息卡片组件
 class TimelineMessageCard extends StatelessWidget {
   final Message message;
   final Channel channel;
+  final TimelineController controller;
 
   const TimelineMessageCard({
     super.key,
     required this.message,
     required this.channel,
+    required this.controller,
   });
 
   @override
@@ -59,10 +63,15 @@ class TimelineMessageCard extends StatelessWidget {
             
             const SizedBox(height: 12),
             
-            // 消息内容
-            Text(
-              message.content,
-              style: theme.textTheme.bodyLarge,
+            // 消息内容（带高亮）
+            RichText(
+              text: TextSpan(
+                children: TextHighlight.highlightText(
+                  text: message.content,
+                  query: controller.searchQuery,
+                  style: theme.textTheme.bodyLarge ?? const TextStyle(),
+                ),
+              ),
             ),
             
             const SizedBox(height: 12),
@@ -77,10 +86,15 @@ class TimelineMessageCard extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 4),
-                Text(
-                  channel.title,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                RichText(
+                  text: TextSpan(
+                    children: TextHighlight.highlightText(
+                      text: channel.title,
+                      query: controller.searchQuery,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ) ?? const TextStyle(),
+                    ),
                   ),
                 ),
               ],

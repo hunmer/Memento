@@ -84,6 +84,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
                         child: TimelineMessageCard(
                           message: message,
                           channel: channel,
+                          controller: _controller,
                         ),
                       );
                     },
