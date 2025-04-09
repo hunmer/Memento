@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import '../models/memorial_day.dart';
 import '../l10n/day_localizations.dart';
 
@@ -14,12 +15,28 @@ class EditMemorialDayDialog extends StatefulWidget {
   State<EditMemorialDayDialog> createState() => _EditMemorialDayDialogState();
 }
 
-class _EditMemorialDayDialogState extends State<EditMemorialDayDialog> {
+class _EditMemorialDayDialogState extends State<EditMemorialDayDialog> with SingleTickerProviderStateMixin {
   late TextEditingController _titleController;
   late DateTime _selectedDate;
   late List<String> _notes;
   late Color _selectedColor;
   String? _backgroundImageUrl;
+  late TabController _tabController;
+  final ScrollController _horizontalScrollController = ScrollController();
+  
+  // 预定义的背景图片列表
+  final List<String> _predefinedBackgroundImages = [
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb', // 自然风景
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e', // 海滩
+    'https://images.unsplash.com/photo-1519681393784-d120267933ba', // 星空
+    'https://images.unsplash.com/photo-1554080353-a576cf803bda', // 山脉
+    'https://images.unsplash.com/photo-1490750967868-88aa4486c946', // 花朵
+    'https://images.unsplash.com/photo-1513151233558-d860c5398176', // 城市
+    'https://images.unsplash.com/photo-1501785888041-af3ef285b470', // 日落
+    'https://images.unsplash.com/photo-1515266591878-f93e32bc5937', // 雪景
+    'https://images.unsplash.com/photo-1500964757637-c85e8a162699', // 田野
+    'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5', // 森林
+  ];
 
   @override
   void initState() {
@@ -29,82 +46,57 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog> {
     _notes = List.from(widget.memorialDay?.notes ?? []);
     _selectedColor = widget.memorialDay?.backgroundColor ?? Colors.blue[300]!;
     _backgroundImageUrl = widget.memorialDay?.backgroundImageUrl;
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
   void dispose() {
     _titleController.dispose();
+    _tabController.dispose();
+    _horizontalScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final localizations = DayLocalizations.of(context);
-    final theme = Theme.of(context);
 
     return AlertDialog(
-      title: Text(widget.memorialDay == null
-          ? localizations.addMemorialDay
-          : localizations.editMemorialDay),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(widget.memorialDay == null
+              ? localizations.addMemorialDay
+              : localizations.editMemorialDay),
+          const SizedBox(height: 16),
+          TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(
+                icon: const Icon(Icons.info_outline),
+                text: localizations.information,
+              ),
+              Tab(
+                icon: const Icon(Icons.notes),
+                text: localizations.notes,
+              ),
+              Tab(
+                icon: const Icon(Icons.palette_outlined),
+                text: localizations.appearance,
+              ),
+            ],
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: TabBarView(
+          controller: _tabController,
           children: [
-            // 标题输入
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                labelText: localizations.title,
-                hintText: localizations.enterTitle,
-              ),
-              maxLength: 50,
-            ),
-            const SizedBox(height: 16),
-
-            // 日期选择
-            Row(
-              children: [
-                Text(localizations.targetDate),
-                const SizedBox(width: 16),
-                TextButton(
-                  onPressed: _selectDate,
-                  child: Text(_formatDate(_selectedDate)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 笔记列表
-            Text(localizations.notes),
-            const SizedBox(height: 8),
-            ..._buildNotesList(),
-            TextButton.icon(
-              onPressed: _addNote,
-              icon: const Icon(Icons.add),
-              label: Text(localizations.addNote),
-            ),
-            const SizedBox(height: 16),
-
-            // 背景颜色选择
-            Text(localizations.backgroundColor),
-            const SizedBox(height: 8),
-            _buildColorPicker(),
-            const SizedBox(height: 16),
-
-            // 背景图片URL输入
-            TextField(
-              decoration: InputDecoration(
-                labelText: localizations.backgroundImage,
-                hintText: 'https://',
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _backgroundImageUrl = value.isEmpty ? null : value;
-                });
-              },
-              controller: TextEditingController(text: _backgroundImageUrl),
-            ),
+            _buildInformationTab(localizations),
+            _buildNotesTab(localizations),
+            _buildAppearanceTab(localizations),
           ],
         ),
       ),
@@ -131,6 +123,201 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog> {
           child: Text(localizations.save),
         ),
       ],
+    );
+  }
+
+  Widget _buildInformationTab(DayLocalizations localizations) {
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 标题输入
+          TextField(
+            controller: _titleController,
+            decoration: InputDecoration(
+              labelText: localizations.title,
+              hintText: localizations.enterTitle,
+            ),
+            maxLength: 50,
+          ),
+          const SizedBox(height: 16),
+
+          // 日期选择
+          Row(
+            children: [
+              Text(localizations.targetDate),
+              const SizedBox(width: 16),
+              TextButton(
+                onPressed: _selectDate,
+                child: Text(_formatDate(_selectedDate)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotesTab(DayLocalizations localizations) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: ListView(
+            children: [
+              ..._buildNotesList(),
+            ],
+          ),
+        ),
+        TextButton.icon(
+          onPressed: _addNote,
+          icon: const Icon(Icons.add),
+          label: Text(localizations.addNote),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAppearanceTab(DayLocalizations localizations) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 背景颜色选择
+          Text(localizations.backgroundColor),
+          const SizedBox(height: 8),
+          _buildColorPicker(),
+          const SizedBox(height: 16),
+
+          // 背景图片选择
+          Text(localizations.backgroundImage),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 100,
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                dragDevices: {
+                  PointerDeviceKind.touch, 
+                  PointerDeviceKind.mouse,
+                },
+                // 自定义滚动行为，使鼠标滚轮可以水平滚动
+                physics: const BouncingScrollPhysics(),
+              ),
+              child: MouseRegion(
+                child: Scrollbar(
+                  controller: _horizontalScrollController,
+                  thumbVisibility: true,
+                  child: ListView(
+                    controller: _horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      // 上传按钮
+                      Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: InkWell(
+                          onTap: () {
+                            // TODO: 实现图片上传功能
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('图片上传功能即将推出')),
+                            );
+                          },
+                          child: Container(
+                            width: 80,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Theme.of(context).dividerColor),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add_photo_alternate_outlined, size: 24),
+                                  SizedBox(height: 4),
+                                  Text('上传图片', style: TextStyle(fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                
+                      // 预定义图片列表
+                            ..._predefinedBackgroundImages.map((imageUrl) => Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _backgroundImageUrl = imageUrl;
+                              });
+                            },
+                            child: Container(
+                              width: 80,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: _backgroundImageUrl == imageUrl
+                                      ? Theme.of(context).primaryColor
+                                      : Theme.of(context).dividerColor,
+                                  width: _backgroundImageUrl == imageUrl ? 2 : 1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: NetworkImage('$imageUrl?w=200&h=200&fit=crop'),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          
+          // 预览区域
+          if (_backgroundImageUrl != null) ...[
+            const SizedBox(height: 16),
+            Text(localizations.preview),
+            const SizedBox(height: 8),
+            Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: _selectedColor,
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: NetworkImage('$_backgroundImageUrl?w=400&fit=crop'),
+                  fit: BoxFit.cover,
+                  onError: (_, __) {
+                    setState(() {
+                      // 图片加载失败时不显示图片
+                      _backgroundImageUrl = null;
+                    });
+                  },
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  _titleController.text.isNotEmpty ? _titleController.text : '纪念日标题',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black54,
+                        offset: Offset(1, 1),
+                        blurRadius: 3,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -207,10 +394,15 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog> {
               boxShadow: [
                 if (_selectedColor == color)
                   BoxShadow(
-                    color: color.withOpacity(0.5),
-                    blurRadius: 8,
-                    spreadRadius: 1,
+                  color: Color.fromRGBO(
+                    color.r.round(),
+                    color.g.round(),
+                    color.b.round(),
+                    0.5,
                   ),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
               ],
             ),
           ),

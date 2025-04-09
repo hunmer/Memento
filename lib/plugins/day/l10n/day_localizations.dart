@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 /// 纪念日插件本地化接口
 abstract class DayLocalizations {
   static DayLocalizations of(BuildContext context) {
-    return Localizations.of<DayLocalizations>(context, DayLocalizations) ?? _DefaultDayLocalizations();
+    final localizations = Localizations.of<DayLocalizations>(context, DayLocalizations);
+    if (localizations == null) {
+      throw FlutterError('No DayLocalizations found in context');
+    }
+    return localizations;
   }
 
   String get memorialDays;
@@ -30,88 +34,9 @@ abstract class DayLocalizations {
   String get listView;
   String get manualSort;
   String get autoSort;
-}
-
-/// 默认英文实现
-class _DefaultDayLocalizations implements DayLocalizations {
-  @override
-  String get memorialDays => 'Memorial Days';
-  
-  @override
-  String get addMemorialDay => 'Add Memorial Day';
-  
-  @override
-  String get editMemorialDay => 'Edit Memorial Day';
-  
-  @override
-  String get deleteMemorialDay => 'Delete Memorial Day';
-  
-  @override
-  String get deleteConfirmation => 'Are you sure you want to delete this memorial day?';
-  
-  @override
-  String get title => 'Title';
-  
-  @override
-  String get targetDate => 'Target Date';
-  
-  @override
-  String get notes => 'Notes';
-  
-  @override
-  String get addNote => 'Add Note';
-  
-  @override
-  String get backgroundColor => 'Background Color';
-  
-  @override
-  String get backgroundImage => 'Background Image';
-  
-  @override
-  String get save => 'Save';
-  
-  @override
-  String get cancel => 'Cancel';
-  
-  @override
-  String get delete => 'Delete';
-  
-  @override
-  String daysRemaining(int count) {
-    if (count == 0) return 'Today';
-    if (count == 1) return '1 day remaining';
-    return '$count days remaining';
-  }
-  
-  @override
-  String daysPassed(int count) {
-    if (count == 1) return '1 day passed';
-    return '$count days passed';
-  }
-  
-  @override
-  String get noMemorialDays => 'No memorial days found. Add one now!';
-  
-  @override
-  String get enterTitle => 'Enter title';
-  
-  @override
-  String get enterNote => 'Enter note';
-  
-  @override
-  String get titleRequired => 'Title is required';
-  
-  @override
-  String get cardView => 'Card View';
-  
-  @override
-  String get listView => 'List View';
-
-  @override
-  String get manualSort => 'Manual Sort';
-  
-  @override
-  String get autoSort => 'Auto Sort';
+  String get information;
+  String get appearance;
+  String get preview;
 }
 
 /// 中文实现
@@ -194,6 +119,15 @@ class DayLocalizationsZh implements DayLocalizations {
   
   @override
   String get autoSort => '自动排序';
+
+  @override
+  String get information => '信息';
+
+  @override
+  String get appearance => '外观';
+
+  @override
+  String get preview => '预览';
 }
 
 /// 英文实现
@@ -276,6 +210,15 @@ class DayLocalizationsEn implements DayLocalizations {
   
   @override
   String get autoSort => 'Auto Sort';
+
+  @override
+  String get information => 'Information';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get preview => 'Preview';
 }
 
 /// 本地化代理
