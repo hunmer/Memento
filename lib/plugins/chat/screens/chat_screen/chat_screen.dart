@@ -13,7 +13,7 @@ import 'widgets/message_list.dart';
 import 'widgets/message_input.dart';
 import 'dialogs/edit_message_dialog.dart';
 import 'dialogs/clear_messages_dialog.dart';
-import 'dialogs/date_picker_dialog.dart' as custom;
+import 'dialogs/calendar_date_picker_dialog.dart';
 import 'utils/message_list_builder.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -120,14 +120,22 @@ class _ChatScreenState extends State<ChatScreen> {
       return DateTime(msg.date.year, msg.date.month, msg.date.day);
     }).toSet().toList();
     
+    // 计算每个日期的消息数量
+    final dateCountMap = <DateTime, int>{};
+    for (final msg in _controller.messages) {
+      final date = DateTime(msg.date.year, msg.date.month, msg.date.day);
+      dateCountMap[date] = (dateCountMap[date] ?? 0) + 1;
+    }
+
     // 按日期降序排序
     dates.sort((a, b) => b.compareTo(a));
 
     showDialog(
       context: context,
-      builder: (context) => custom.DatePickerDialog(
+      builder: (context) => CalendarDatePickerDialog(
         availableDates: dates,
         selectedDate: _controller.selectedDate,
+        dateCountMap: dateCountMap,
         onDateSelected: (date) {
           setState(() {
             _controller.selectedDate = date;

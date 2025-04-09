@@ -102,12 +102,8 @@ class ChatScreenController extends ChangeNotifier {
       return;
     }
 
-    // Remove unused variable
-    if (selectedDate == null ||
-        selectedDate!.isBefore(messages.last.date) ||
-        selectedDate!.isAfter(messages.first.date)) {
-      selectedDate = messages.first.date;
-    }
+    // 默认不选中日期，显示全部消息
+    // selectedDate 保持为 null
     notifyListeners();
   }
 

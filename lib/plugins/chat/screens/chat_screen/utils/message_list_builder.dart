@@ -10,6 +10,27 @@ class MessageListBuilder {
     // 创建消息列表的副本
     List<Message> filteredMessages = List.from(messages);
 
+    // 如果选择了日期，过滤出该日期的消息
+    if (selectedDate != null) {
+      filteredMessages = filteredMessages.where((msg) {
+        final msgDate = DateTime(
+          msg.date.year,
+          msg.date.month,
+          msg.date.day,
+        );
+        final selected = DateTime(
+          selectedDate.year,
+          selectedDate.month,
+          selectedDate.day,
+        );
+        return msgDate.isAtSameMomentAs(selected);
+      }).toList();
+
+      if (filteredMessages.isEmpty) {
+        return [];
+      }
+    }
+
     // 按日期时间升序排序（因为ListView是reverse的，所以这里用升序）
     filteredMessages.sort((a, b) => a.date.millisecondsSinceEpoch.compareTo(b.date.millisecondsSinceEpoch));
 
