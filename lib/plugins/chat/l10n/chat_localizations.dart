@@ -46,6 +46,14 @@ abstract class ChatLocalizations {
   String get edit;
   String get copy;
   String get delete;
+  String get pin;
+  String get clear;
+  String get info;
+  String get multiSelectMode;
+  String get clearMessages;
+  String get channelInfo;
+  String get selectedMessages;
+  String get edited;
   
   String minutesAgo(int minutes);
   String hoursAgo(int hours);

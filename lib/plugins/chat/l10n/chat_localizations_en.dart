@@ -59,6 +59,30 @@ class ChatLocalizationsEn extends ChatLocalizations {
   String get delete => 'Delete';
 
   @override
+  String get pin => 'Pin';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get info => 'Info';
+
+  @override
+  String get multiSelectMode => 'Multi-select Mode';
+
+  @override
+  String get clearMessages => 'Clear Messages';
+
+  @override
+  String get channelInfo => 'Channel Info';
+
+  @override
+  String get selectedMessages => '{count} messages selected';
+
+  @override
+  String get edited => 'edited';
+
+  @override
   String get today => 'Today';
 
   @override

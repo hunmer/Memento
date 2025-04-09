@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/channel.dart';
+import '../../../l10n/chat_localizations.dart';
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Channel channel;
@@ -27,6 +28,11 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onEnterMultiSelect,
   });
 
+  String _getLocalizedText(BuildContext context, String defaultText, String Function(ChatLocalizations) getter) {
+    final localizations = ChatLocalizations.of(context);
+    return localizations != null ? getter(localizations) : defaultText;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isMultiSelectMode) {
@@ -35,7 +41,11 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           icon: const Icon(Icons.close),
           onPressed: onExitMultiSelect,
         ),
-        title: Text('已选择 $selectedCount 条消息'),
+        title: Text(_getLocalizedText(
+          context,
+          '$selectedCount selected',
+          (l) => l.selectedMessages.replaceAll('{count}', selectedCount.toString()),
+        )),
         actions: [
           IconButton(
             icon: const Icon(Icons.copy),
@@ -58,33 +68,33 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         PopupMenuButton(
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'multiselect',
               child: Row(
                 children: [
-                  Icon(Icons.check_box_outlined, size: 20),
-                  SizedBox(width: 8),
-                  Text('多选模式'),
+                  const Icon(Icons.check_box_outlined, size: 20),
+                  const SizedBox(width: 8),
+                  Text(_getLocalizedText(context, 'Select Multiple', (l) => l.multiSelectMode)),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'info',
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 20),
-                  SizedBox(width: 8),
-                  Text('频道信息'),
+                  const Icon(Icons.info_outline, size: 20),
+                  const SizedBox(width: 8),
+                  Text(_getLocalizedText(context, 'Channel Info', (l) => l.channelInfo)),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'clear',
               child: Row(
                 children: [
-                  Icon(Icons.delete_sweep, size: 20),
-                  SizedBox(width: 8),
-                  Text('清空消息'),
+                  const Icon(Icons.delete_sweep, size: 20),
+                  const SizedBox(width: 8),
+                  Text(_getLocalizedText(context, 'Clear Messages', (l) => l.clearMessages)),
                 ],
               ),
             ),

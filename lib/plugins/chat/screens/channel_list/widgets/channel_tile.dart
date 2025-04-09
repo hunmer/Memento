@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/channel.dart';
 import '../../../utils/date_formatter.dart';
+import '../../../l10n/chat_localizations.dart';
 
 class ChannelTile extends StatelessWidget {
   final Channel channel;
@@ -59,23 +60,23 @@ class ChannelTile extends StatelessWidget {
                   }
                 },
                 itemBuilder: (BuildContext context) => [
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(Icons.edit, size: 20),
-                        SizedBox(width: 8),
-                        Text('编辑'),
+                        const Icon(Icons.edit, size: 20),
+                        const SizedBox(width: 8),
+                        Text(ChatLocalizations.of(context)?.edit ?? 'Edit'),
                       ],
                     ),
                   ),
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete, size: 20),
-                        SizedBox(width: 8),
-                        Text('删除'),
+                        const Icon(Icons.delete, size: 20),
+                        const SizedBox(width: 8),
+                        Text(ChatLocalizations.of(context)?.delete ?? 'Delete'),
                       ],
                     ),
                   ),
@@ -93,9 +94,9 @@ class ChannelTile extends StatelessWidget {
       return RichText(
         text: TextSpan(
           children: [
-            const TextSpan(
-              text: '[草稿] ',
-              style: TextStyle(color: Colors.red, fontSize: 13),
+            TextSpan(
+              text: '[${ChatLocalizations.of(context)?.draft ?? "Draft"}] ',
+              style: const TextStyle(color: Colors.red, fontSize: 13),
             ),
             TextSpan(
               text: channel.draft,
@@ -110,7 +111,7 @@ class ChannelTile extends StatelessWidget {
       final lastMessage = channel.lastMessage;
       String subtitle = lastMessage != null
           ? '${lastMessage.content}\n${DateFormatter.formatDateTime(lastMessage.date, context)}'
-          : '暂无消息';
+          : ChatLocalizations.of(context)?.enterMessage ?? 'Type a message...';
       return Text(
         subtitle,
         maxLines: 2,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/chat_localizations.dart';
 
 class EmptyChannelView extends StatelessWidget {
   final VoidCallback onAddChannel;
@@ -20,15 +21,15 @@ class EmptyChannelView extends StatelessWidget {
             color: Colors.grey,
           ),
           const SizedBox(height: 16),
-          const Text(
-            "这里没有任何频道",
-            style: TextStyle(fontSize: 18, color: Colors.grey),
+          Text(
+            ChatLocalizations.of(context)?.channelList ?? "Channel List",
+            style: const TextStyle(fontSize: 18, color: Colors.grey),
           ),
           const SizedBox(height: 8),
           TextButton.icon(
             onPressed: onAddChannel,
             icon: const Icon(Icons.add),
-            label: const Text("点击右上角添加频道"),
+            label: Text(ChatLocalizations.of(context)?.newChannel ?? "New Channel"),
           ),
         ],
       ),

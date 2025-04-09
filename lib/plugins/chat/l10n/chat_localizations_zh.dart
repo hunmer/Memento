@@ -59,6 +59,30 @@ class ChatLocalizationsZh extends ChatLocalizations {
   String get delete => '删除';
 
   @override
+  String get pin => '置顶';
+
+  @override
+  String get clear => '清空';
+
+  @override
+  String get info => '信息';
+
+  @override
+  String get multiSelectMode => '多选模式';
+
+  @override
+  String get clearMessages => '清空消息';
+
+  @override
+  String get channelInfo => '频道信息';
+
+  @override
+  String get selectedMessages => '已选择 {count} 条消息';
+
+  @override
+  String get edited => '已编辑';
+
+  @override
   String get today => '今天';
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../models/channel.dart';
 import '../../../../../../widgets/circle_icon_picker.dart';
+import '../../../../l10n/chat_localizations.dart';
 // import '../../../../models/serialization_helpers.dart';
 
 class AddChannelDialog extends StatefulWidget {
@@ -22,7 +23,7 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('添加新频道'),
+      title: Text(ChatLocalizations.of(context)?.newChannel ?? 'New Channel'),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -31,10 +32,10 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: '频道名称'),
+                decoration: const InputDecoration(labelText: 'Channel Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入频道名称';
+                    return 'Please enter channel name';
                   }
                   return null;
                 },
@@ -42,7 +43,7 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _groupController,
-                decoration: const InputDecoration(labelText: '频道分组（可选）'),
+                decoration: const InputDecoration(labelText: 'Channel Group (Optional)'),
               ),
               const SizedBox(height: 16),
               CircleIconPicker(
@@ -66,7 +67,7 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -76,7 +77,7 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
                 title: _titleController.text,
                 groups: _groupController.text.isNotEmpty
                     ? [_groupController.text]
-                    : ['默认'],
+                    : ['Default'],
                 icon: _selectedIcon,
                 backgroundColor: _selectedColor,
                 priority: 0,
@@ -87,7 +88,7 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('添加'),
+          child: Text(ChatLocalizations.of(context)?.newChannel ?? 'New Channel'),
         ),
       ],
     );

@@ -123,6 +123,10 @@ class ChatPlugin extends BasePlugin {
   // 更新本地化文本
   void updateLocalizedStrings(BuildContext context) {
     final l10n = ChatLocalizations.of(context);
+    if (l10n != null) {
+      _name = l10n.chatPluginName;
+      _description = l10n.chatPluginDescription;
+    }
   }
 
   Future<void> _initializeDefaultData() async {
@@ -376,6 +380,8 @@ class ChatPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
+    // 更新本地化文本
+    updateLocalizedStrings(context);
     return ChannelListScreen(channels: _channels, chatPlugin: this);
   }
 

@@ -80,5 +80,55 @@
     "yesterday": "昨天",
     "@yesterday": {
         "description": "昨天的日期标签"
+    },
+    "edit": "编辑",
+    "@edit": {
+        "description": "编辑操作标签"
+    },
+    "copy": "复制",
+    "@copy": {
+        "description": "复制操作标签"
+    },
+    "delete": "删除",
+    "@delete": {
+        "description": "删除操作标签"
+    },
+    "pin": "置顶",
+    "@pin": {
+        "description": "置顶消息操作标签"
+    },
+    "clear": "清空",
+    "@clear": {
+        "description": "清空操作标签"
+    },
+    "info": "信息",
+    "@info": {
+        "description": "信息操作标签"
+    },
+    "multiSelectMode": "多选模式",
+    "@multiSelectMode": {
+        "description": "多选模式选项标签"
+    },
+    "clearMessages": "清空消息",
+    "@clearMessages": {
+        "description": "清空消息选项标签"
+    },
+    "channelInfo": "频道信息",
+    "@channelInfo": {
+        "description": "频道信息选项标签"
+    },
+    "selectedMessages": "已选择 {count} 条消息",
+    "@selectedMessages": {
+        "description": "已选择消息的数量",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "example": "5"
+            }
+        }
+    },
+    "edited": "已编辑",
+    "@edited": {
+        "description": "已编辑消息标签"
     }
 }

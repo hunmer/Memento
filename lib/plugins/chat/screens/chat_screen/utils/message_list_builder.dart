@@ -7,42 +7,39 @@ class MessageListBuilder {
       return [];
     }
 
-    // 如果有选中日期，则过滤消息
-    List<Message> filteredMessages = selectedDate != null
-        ? messages.where((msg) {
-            final msgDate = DateTime(
-              msg.date.year,
-              msg.date.month,
-              msg.date.day,
-            );
-            final selected = DateTime(
-              selectedDate.year,
-              selectedDate.month,
-              selectedDate.day,
-            );
-            return msgDate.isAtSameMomentAs(selected);
-          }).toList()
-        : List.from(messages);
+    // 创建消息列表的副本
+    List<Message> filteredMessages = List.from(messages);
 
-    // 按日期降序排序
-    filteredMessages.sort((a, b) => b.date.compareTo(a.date));
+    // 按日期时间升序排序（因为ListView是reverse的，所以这里用升序）
+    filteredMessages.sort((a, b) => a.date.millisecondsSinceEpoch.compareTo(b.date.millisecondsSinceEpoch));
 
     // 构建包含日期分隔符的列表
     List<dynamic> result = [];
     DateTime? lastDate;
 
-    for (var message in filteredMessages) {
+    // 由于ListView是reverse的，所以这里反向遍历消息列表
+    for (int i = filteredMessages.length - 1; i >= 0; i--) {
+      final message = filteredMessages[i];
       final messageDate = DateTime(
         message.date.year,
         message.date.month,
         message.date.day,
       );
 
+      // 如果是新的一天或者是最后一条消息，添加日期分隔符
       if (lastDate == null || !_isSameDay(lastDate, messageDate)) {
-        result.add(messageDate);
+        // 添加日期分隔符（如果不是第一条消息）
+        if (lastDate != null) {
+          result.add(lastDate);
+        }
         lastDate = messageDate;
       }
       result.add(message);
+    }
+
+    // 添加最后一个日期分隔符
+    if (lastDate != null) {
+      result.add(lastDate);
     }
 
     return result;

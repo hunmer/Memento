@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/channel.dart';
 import '../../chat_plugin.dart';
+import '../../l10n/chat_localizations.dart';
 import '../chat_screen/chat_screen.dart';
 import 'controllers/channel_list_controller.dart';
 import 'widgets/channel_tile.dart';
@@ -49,7 +50,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Channels'),
+        title: Text(ChatLocalizations.of(context)?.channelList ?? 'Channel List'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),

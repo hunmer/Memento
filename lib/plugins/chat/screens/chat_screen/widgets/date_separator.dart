@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../utils/date_formatter.dart';
+import '../utils/date_formatter.dart' show formatDate;
 
 class DateSeparator extends StatelessWidget {
   final DateTime date;
@@ -12,7 +12,8 @@ class DateSeparator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         children: [
           Expanded(child: Divider(color: Colors.grey[300])),

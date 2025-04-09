@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'plugins/chat/l10n/chat_localizations.dart';
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
@@ -83,6 +84,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false, // 关闭调试横幅
       localizationsDelegates: const [
         AppLocalizations.delegate,
+        ChatLocalizations.delegate, // 添加聊天插件的本地化代理
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

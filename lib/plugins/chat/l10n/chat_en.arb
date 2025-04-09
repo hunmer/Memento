@@ -80,5 +80,55 @@
     "yesterday": "Yesterday",
     "@yesterday": {
         "description": "Label for yesterday's date"
+    },
+    "edit": "Edit",
+    "@edit": {
+        "description": "Edit action label"
+    },
+    "copy": "Copy",
+    "@copy": {
+        "description": "Copy action label"
+    },
+    "delete": "Delete",
+    "@delete": {
+        "description": "Delete action label"
+    },
+    "pin": "Pin",
+    "@pin": {
+        "description": "Pin message action label"
+    },
+    "clear": "Clear",
+    "@clear": {
+        "description": "Clear action label"
+    },
+    "info": "Info",
+    "@info": {
+        "description": "Information action label"
+    },
+    "multiSelectMode": "Multi-select Mode",
+    "@multiSelectMode": {
+        "description": "Label for multi-select mode option"
+    },
+    "clearMessages": "Clear Messages",
+    "@clearMessages": {
+        "description": "Label for clear messages option"
+    },
+    "channelInfo": "Channel Info",
+    "@channelInfo": {
+        "description": "Label for channel info option"
+    },
+    "selectedMessages": "{count} messages selected",
+    "@selectedMessages": {
+        "description": "Count of selected messages",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "example": "5"
+            }
+        }
+    },
+    "edited": "edited",
+    "@edited": {
+        "description": "Label for edited message"
     }
 }

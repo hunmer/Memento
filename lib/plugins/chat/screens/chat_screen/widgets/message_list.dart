@@ -38,9 +38,14 @@ class MessageList extends StatelessWidget {
         final item = items[index];
         final nextItem = index > 0 ? items[index - 1] : null;
 
+        // 处理日期分隔符
         Widget? dateSeparator;
-        if (nextItem is Message && (item is DateTime || _shouldShowDateSeparator(item as Message, nextItem))) {
-          dateSeparator = DateSeparator(date: item is DateTime ? item : (item as Message).date);
+        if (item is DateTime) {
+          // 如果项目本身是日期，直接显示日期分隔符
+          return DateSeparator(date: item);
+        } else if (item is Message && nextItem is Message && _shouldShowDateSeparator(item, nextItem)) {
+          // 如果当前消息和下一条消息不是同一天，显示日期分隔符
+          dateSeparator = DateSeparator(date: item.date);
         }
 
         if (item is Message) {
@@ -74,8 +79,6 @@ class MessageList extends StatelessWidget {
               ),
             ],
           );
-        } else if (item is DateTime) {
-          return const SizedBox.shrink(); // 日期分隔符已经在消息之前显示，这里不需要额外处理
         }
         return const SizedBox.shrink();
       },
