@@ -277,16 +277,38 @@ class ChatPlugin extends BasePlugin {
 
   // 保存草稿
   Future<void> saveDraft(String channelId, String draft) async {
-    // 保存草稿
-    await storage.write('chat/draft/$channelId', {'draft': draft});
+    try {
+      // 确保目录存在
+      await storage.createDirectory('chat/draft');
+      
+      // 检查频道是否存在
+      final index = _channels.indexWhere((c) => c.id == channelId);
+      if (index == -1) {
+        debugPrint('Cannot save draft: Channel $channelId not found');
+        return;
+      }
+      
+      // 检查草稿文件是否存在
+      final draftExists = await storage.fileExists('chat/draft/$channelId');
+      
+      if (draft.trim().isEmpty) {
+        // 如果草稿为空且文件存在，删除草稿文件
+        if (draftExists) {
+          await storage.delete('chat/draft/$channelId');
+        }
+        // 如果草稿为空且文件不存在，不需要任何操作
+      } else {
+        // 保存草稿
+        await storage.write('chat/draft/$channelId', {'draft': draft});
+      }
 
-    // 更新内存中的频道草稿
-    final index = _channels.indexWhere((c) => c.id == channelId);
-    if (index != -1) {
-      _channels[index].draft = draft;
-
+      // 更新内存中的频道草稿
+      _channels[index].draft = draft.trim().isEmpty ? null : draft;
+      
       // 通知监听器数据已更新，以便更新UI
       notifyListeners();
+    } catch (e) {
+      debugPrint('Error saving draft: $e');
     }
   }
 
@@ -298,12 +320,30 @@ class ChatPlugin extends BasePlugin {
     }
     
     try {
+      // 先检查文件是否存在
+      final fileExists = await storage.fileExists('chat/draft/$channelId');
+      if (!fileExists) {
+        // 如果文件不存在，确保目录存在并创建空草稿
+        await storage.createDirectory('chat/draft');
+        await storage.write('chat/draft/$channelId', {'draft': ''});
+        return null;
+      }
+      
+      // 读取草稿数据
       final draftData = await storage.read('chat/draft/$channelId');
       if (draftData.isNotEmpty && draftData.containsKey('draft')) {
-        return draftData['draft'] as String;
+        final draft = draftData['draft'] as String;
+        return draft.isEmpty ? null : draft;
       }
     } catch (e) {
       debugPrint('Error loading draft: $e');
+      // 出错时创建空草稿
+      try {
+        await storage.createDirectory('chat/draft');
+        await storage.write('chat/draft/$channelId', {'draft': ''});
+      } catch (e2) {
+        debugPrint('Error creating empty draft: $e2');
+      }
     }
 
     return null;
@@ -320,9 +360,11 @@ class ChatPlugin extends BasePlugin {
   Future<void> deleteChannel(String channelId) async {
     try {
       // 删除频道相关数据
-      await storage.delete('chat/channel/$channelId');
-      await storage.delete('chat/messages/$channelId');
-      await storage.delete('chat/draft/$channelId');
+      await Future.wait([
+        storage.delete('chat/channel/$channelId'),
+        storage.delete('chat/messages/$channelId'),
+        storage.delete('chat/draft/$channelId')
+      ]);
 
       // 从内存中移除频道
       _channels.removeWhere((channel) => channel.id == channelId);
@@ -330,8 +372,12 @@ class ChatPlugin extends BasePlugin {
       // 更新频道列表
       final channelIds = _channels.map((c) => c.id).toList();
       await storage.write('chat/channels', {'channels': channelIds});
+
+      // 通知监听器数据已更新
+      notifyListeners();
     } catch (e) {
       debugPrint('Error deleting channel: $e');
+      rethrow; // 重新抛出异常，让调用者知道删除失败
     }
   }
 
@@ -366,17 +412,63 @@ class ChatPlugin extends BasePlugin {
 
   // 创建新频道
   Future<void> createChannel(Channel channel) async {
-    // 添加到内存中
-    _channels.add(channel);
+    try {
+      // 确保所有必要的目录存在
+      await Future.wait([
+        storage.createDirectory('chat/channel'),
+        storage.createDirectory('chat/messages'),
+        storage.createDirectory('chat/draft'),
+      ]);
 
-    // 保存频道信息（saveChannel方法已包含更新channels.json的逻辑）
-    await saveChannel(channel);
+      // 添加到内存中
+      _channels.add(channel);
 
-    // 保存空消息列表
-    await saveMessages(channel.id, []);
+      // 初始化频道的所有必要文件
+      await Future.wait([
+        // 保存频道基本信息
+        storage.write('chat/channel/${channel.id}', {
+          'channel': ChannelSerializer.toJson(channel),
+        }),
+        // 初始化空消息列表
+        storage.write('chat/messages/${channel.id}', {
+          'messages': [],
+        }),
+        // 初始化空草稿
+        storage.write('chat/draft/${channel.id}', {
+          'draft': '',
+        }),
+      ]);
 
-    // 重新排序
-    _channels.sort(Channel.compare);
+      // 更新频道列表
+      final channelIds = _channels.map((c) => c.id).toList();
+      await storage.write('chat/channels', {'channels': channelIds});
+
+      // 重新排序
+      _channels.sort(Channel.compare);
+
+      // 通知监听器数据已更新
+      notifyListeners();
+    } catch (e) {
+      // 如果创建过程中出现错误，需要清理已创建的内容
+      debugPrint('Error creating channel: $e');
+      
+      // 从内存中移除
+      _channels.removeWhere((c) => c.id == channel.id);
+      
+      // 尝试清理已创建的文件
+      try {
+        await Future.wait([
+          storage.delete('chat/channel/${channel.id}'),
+          storage.delete('chat/messages/${channel.id}'),
+          storage.delete('chat/draft/${channel.id}'),
+        ]);
+      } catch (cleanupError) {
+        debugPrint('Error cleaning up after failed channel creation: $cleanupError');
+      }
+      
+      // 重新抛出异常
+      rethrow;
+    }
   }
 
   @override

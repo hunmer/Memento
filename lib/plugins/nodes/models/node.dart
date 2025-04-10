@@ -41,16 +41,19 @@ class Node {
     required this.id,
     required this.title,
     required this.createdAt,
-    this.tags = const [],
+    List<String>? tags,
     this.status = NodeStatus.todo,
     this.startDate,
     this.endDate,
-    this.customFields = const [],
+    List<CustomField>? customFields,
     this.notes = '',
     this.parentId = '',
-    this.children = const [],
+    List<Node>? children,
     this.isExpanded = true,
-  });
+  }) : 
+    tags = tags ?? [],
+    customFields = customFields ?? [],
+    children = children ?? [];
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -66,21 +69,27 @@ class Node {
     'children': children.map((child) => child.toJson()).toList(),
   };
 
-  factory Node.fromJson(Map<String, dynamic> json) => Node(
-    id: json['id'] as String,
-    title: json['title'] as String,
-    createdAt: DateTime.parse(json['createdAt'] as String),
-    tags: (json['tags'] as List<dynamic>).map((e) => e as String).toList(),
-    status: NodeStatus.values[json['status'] as int],
-    startDate: json['startDate'] != null ? DateTime.parse(json['startDate'] as String) : null,
-    endDate: json['endDate'] != null ? DateTime.parse(json['endDate'] as String) : null,
-    customFields: (json['customFields'] as List<dynamic>)
+  factory Node.fromJson(Map<String, dynamic> json) {
+    final tagsList = (json['tags'] as List<dynamic>).map((e) => e as String).toList();
+    final customFieldsList = (json['customFields'] as List<dynamic>)
         .map((e) => CustomField.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    notes: json['notes'] as String,
-    parentId: json['parentId'] as String,
-    children: (json['children'] as List<dynamic>)
+        .toList();
+    final childrenList = (json['children'] as List<dynamic>)
         .map((e) => Node.fromJson(e as Map<String, dynamic>))
-        .toList(),
-  );
+        .toList();
+        
+    return Node(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      tags: tagsList,
+      status: NodeStatus.values[json['status'] as int],
+      startDate: json['startDate'] != null ? DateTime.parse(json['startDate'] as String) : null,
+      endDate: json['endDate'] != null ? DateTime.parse(json['endDate'] as String) : null,
+      customFields: customFieldsList,
+      notes: json['notes'] as String,
+      parentId: json['parentId'] as String,
+      children: childrenList,
+    );
+  }
 }

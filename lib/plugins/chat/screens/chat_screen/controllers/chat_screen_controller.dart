@@ -67,14 +67,33 @@ class ChatScreenController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 假设 channel.messages 包含了所有消息
+      // 从ChatPlugin加载最新的消息，而不是使用传入的channel.messages
+      final channelIndex = chatPlugin.channels.indexWhere((c) => c.id == channel.id);
+      if (channelIndex == -1) {
+        _logger.warning('Channel not found in ChatPlugin');
+        return;
+      }
+      
+      // 获取最新的消息列表
+      final latestMessages = chatPlugin.channels[channelIndex].messages;
+      
+      // 清空现有消息，确保不会重复
+      if (currentPage == 1) {
+        messages.clear();
+      }
+      
+      // 分页加载消息
       final startIndex = (currentPage - 1) * pageSize;
       final endIndex = startIndex + pageSize;
-      final newMessages = channel.messages.sublist(
-        startIndex,
-        endIndex < channel.messages.length ? endIndex : channel.messages.length,
-      );
-      messages.addAll(newMessages);
+      
+      if (startIndex < latestMessages.length) {
+        final newMessages = latestMessages.sublist(
+          startIndex,
+          endIndex < latestMessages.length ? endIndex : latestMessages.length,
+        );
+        messages.addAll(newMessages);
+      }
+      
       _updateDatesWithMessages();
       
       // 在加载完消息后请求滚动到最新位置
@@ -218,6 +237,8 @@ class ChatScreenController extends ChangeNotifier {
   }
 
   Future<void> sendMessage(String content) async {
+    if (content.trim().isEmpty) return;
+    
     try {
       final newMessage = Message(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -227,9 +248,22 @@ class ChatScreenController extends ChangeNotifier {
         type: MessageType.sent,
       );
       
-      // 添加消息到列表
+      // 添加消息到本地列表
       messages.insert(0, newMessage);
-      await chatPlugin.saveMessages(channel.id, messages);
+      
+      // 获取ChatPlugin中的频道索引
+      final channelIndex = chatPlugin.channels.indexWhere((c) => c.id == channel.id);
+      if (channelIndex != -1) {
+        // 直接使用ChatPlugin的addMessage方法，它会同时更新内存和存储
+        await chatPlugin.addMessage(channel.id, newMessage);
+      } else {
+        // 如果找不到频道，则使用旧方法保存
+        await chatPlugin.saveMessages(channel.id, messages);
+      }
+      
+      // 清除草稿
+      draftController.clear();
+      await chatPlugin.saveDraft(channel.id, '');
       
       // 请求滚动到最新消息
       requestScrollToLatest();
@@ -237,8 +271,14 @@ class ChatScreenController extends ChangeNotifier {
       // 通知UI更新
       notifyListeners();
       
-      // 播放声音
-      await audioPlayer.play(AssetSource('audio/msg_sended.mp3'));
+      // 在主线程上播放声音
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          await audioPlayer.play(AssetSource('audio/msg_sended.mp3'));
+        } catch (e) {
+          _logger.warning('Error playing audio: $e');
+        }
+      });
     } catch (e) {
       _logger.warning('Error sending message: $e');
     }
