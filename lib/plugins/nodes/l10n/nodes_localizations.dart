@@ -38,6 +38,14 @@ class NodesLocalizations {
       'key': 'Key',
       'value': 'Value',
       'addCustomField': 'Add Custom Field',
+      'noNodesYet': 'No nodes yet. Tap + to add one.',
+      'copyToText': 'Copy to Text',
+      'clearNodes': 'Clear Nodes',
+      'clearNodesTitle': 'Clear All Nodes',
+      'clearNodesConfirm': 'Are you sure you want to clear all nodes? This action cannot be undone.',
+      'clear': 'Clear',
+      'copiedToClipboard': 'Copied to clipboard',
+      'nodesCleared': 'All nodes cleared',
     },
     'zh': {
       'notebooks': '笔记本',
@@ -66,6 +74,14 @@ class NodesLocalizations {
       'key': '键',
       'value': '值',
       'addCustomField': '添加自定义属性',
+      'noNodesYet': '还没有节点。点击 + 添加一个。',
+      'copyToText': '复制到文本',
+      'clearNodes': '清空节点',
+      'clearNodesTitle': '清空所有节点',
+      'clearNodesConfirm': '确定要清空所有节点吗？此操作无法撤消。',
+      'clear': '清空',
+      'copiedToClipboard': '已复制到剪贴板',
+      'nodesCleared': '所有节点已清空',
     },
   };
 
@@ -95,4 +111,12 @@ class NodesLocalizations {
   String get key => _localizedValues[locale.languageCode]?['key'] ?? 'Key';
   String get value => _localizedValues[locale.languageCode]?['value'] ?? 'Value';
   String get addCustomField => _localizedValues[locale.languageCode]?['addCustomField'] ?? 'Add Custom Field';
+  String get noNodesYet => _localizedValues[locale.languageCode]?['noNodesYet'] ?? 'No nodes yet. Tap + to add one.';
+  String get copyToText => _localizedValues[locale.languageCode]?['copyToText'] ?? 'Copy to Text';
+  String get clearNodes => _localizedValues[locale.languageCode]?['clearNodes'] ?? 'Clear Nodes';
+  String get clearNodesTitle => _localizedValues[locale.languageCode]?['clearNodesTitle'] ?? 'Clear All Nodes';
+  String get clearNodesConfirm => _localizedValues[locale.languageCode]?['clearNodesConfirm'] ?? 'Are you sure you want to clear all nodes? This action cannot be undone.';
+  String get clear => _localizedValues[locale.languageCode]?['clear'] ?? 'Clear';
+  String get copiedToClipboard => _localizedValues[locale.languageCode]?['copiedToClipboard'] ?? 'Copied to clipboard';
+  String get nodesCleared => _localizedValues[locale.languageCode]?['nodesCleared'] ?? 'All nodes cleared';
 }

@@ -17,6 +17,22 @@ class NodesController extends ChangeNotifier {
   List<Notebook> get notebooks => _notebooks;
   Notebook? get selectedNotebook => _selectedNotebook;
 
+  Notebook? getNotebook(String notebookId) {
+    return _notebooks.firstWhere(
+      (notebook) => notebook.id == notebookId,
+      orElse: () => Notebook(id: '', title: '', icon: Icons.book),
+    );
+  }
+
+  Future<void> clearNodes(String notebookId) async {
+    final index = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    if (index != -1) {
+      _notebooks[index].nodes.clear();
+      notifyListeners();
+      await _saveData();
+    }
+  }
+
   void selectNotebook(Notebook notebook) {
     _selectedNotebook = notebook;
     notifyListeners();
@@ -200,6 +216,18 @@ class NodesController extends ChangeNotifier {
     if (_selectedNotebook?.id == notebookId) {
       _selectedNotebook = _notebooks.isNotEmpty ? _notebooks.first : null;
     }
+    
+    notifyListeners();
+    await _saveData();
+  }
+
+  Future<void> reorderNotebooks(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || newIndex < 0 || oldIndex >= _notebooks.length || newIndex >= _notebooks.length) {
+      return;
+    }
+    
+    final Notebook item = _notebooks.removeAt(oldIndex);
+    _notebooks.insert(newIndex, item);
     
     notifyListeners();
     await _saveData();

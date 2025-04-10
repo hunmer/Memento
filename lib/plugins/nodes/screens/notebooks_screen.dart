@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' show lerpDouble;
 import 'package:provider/provider.dart';
 import '../controllers/nodes_controller.dart';
 import '../models/notebook.dart';
@@ -33,33 +34,97 @@ class NotebooksScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView.builder(
+      body: ReorderableListView.builder(
+        proxyDecorator: (Widget child, int index, Animation<double> animation) {
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (BuildContext context, Widget? child) {
+              final double animValue = Curves.easeInOut.transform(animation.value);
+              final double elevation = lerpDouble(0, 6, animValue)!;
+              return Material(
+                elevation: elevation,
+                color: Colors.transparent,
+                shadowColor: Colors.transparent,
+                child: child,
+              );
+            },
+            child: child,
+          );
+        },
         itemCount: controller.notebooks.length,
         itemBuilder: (context, index) {
           final notebook = controller.notebooks[index];
-          return ListTile(
-            leading: Icon(notebook.icon, color: notebook.color),
-            title: Text(notebook.title),
-            subtitle: Text('${notebook.nodes.length} ${l10n.nodes}'),
-            selected: notebook.id == controller.selectedNotebook?.id,
-            onTap: () {
-              controller.selectNotebook(notebook);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChangeNotifierProvider<NodesController>.value(
-                    value: controller,
-                    child: NodesScreen(notebook: notebook),
-                  ),
+          return Dismissible(
+            key: Key(notebook.id),
+            direction: DismissDirection.endToStart,
+            confirmDismiss: (direction) async {
+              final bool? result = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(l10n.deleteNotebook),
+                  content: Text('Are you sure you want to delete "${notebook.title}"?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(l10n.cancel),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(l10n.deleteNode),
+                    ),
+                  ],
                 ),
               );
+              if (result ?? false) {
+                controller.deleteNotebook(notebook.id);
+              }
+              return false;
             },
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _showDeleteNotebookDialog(context, notebook),
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 16.0),
+              child: const Icon(Icons.delete, color: Colors.white),
             ),
-            onLongPress: () => _showNotebookActions(context, notebook),
+            child: Card(
+              key: Key(notebook.id),
+              margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              child: ListTile(
+                leading: ReorderableDragStartListener(
+                  index: index,
+                  child: Icon(
+                    notebook.icon,
+                    color: notebook.color,
+                  ),
+                ),
+                title: Text(notebook.title),
+                subtitle: Text('${notebook.nodes.length} ${l10n.nodes}'),
+                selected: notebook.id == controller.selectedNotebook?.id,
+                trailing: IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () => _showNotebookActions(context, notebook),
+                ),
+                onTap: () {
+                  controller.selectNotebook(notebook);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangeNotifierProvider<NodesController>.value(
+                        value: controller,
+                        child: NodesScreen(notebook: notebook),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           );
+        },
+        onReorder: (oldIndex, newIndex) {
+          if (oldIndex < newIndex) {
+            newIndex -= 1;
+          }
+          controller.reorderNotebooks(oldIndex, newIndex);
         },
       ),
     );
