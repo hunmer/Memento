@@ -1,0 +1,347 @@
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:uuid/uuid.dart';
+import '../models/node.dart';
+import '../models/notebook.dart';
+import '../../../core/storage/storage_manager.dart';
+
+class NodesController extends ChangeNotifier {
+  final StorageManager _storageManager;
+  List<Notebook> _notebooks = [];
+  Notebook? _selectedNotebook;
+  
+  NodesController(this._storageManager) {
+    _loadData();
+  }
+
+  List<Notebook> get notebooks => _notebooks;
+  Notebook? get selectedNotebook => _selectedNotebook;
+
+  void selectNotebook(Notebook notebook) {
+    _selectedNotebook = notebook;
+    notifyListeners();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final notebooksData = await _storageManager.read('nodes_notebooks');
+      if (notebooksData.isNotEmpty) {
+        final List<dynamic> notebooks = notebooksData['notebooks'] as List<dynamic>;
+        _notebooks = notebooks.map((data) => Notebook.fromJson(data as Map<String, dynamic>)).toList();
+        
+        if (_notebooks.isNotEmpty && _selectedNotebook == null) {
+          _selectedNotebook = _notebooks.first;
+        }
+      } else {
+        // Create a default notebook with sample nodes if none exists
+        _createDefaultNotebook();
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading notebooks: $e');
+      // Create a default notebook if there's an error
+      _createDefaultNotebook();
+      notifyListeners();
+    }
+  }
+
+  void _createDefaultNotebook() {
+    final defaultNotebook = Notebook(
+      id: const Uuid().v4(),
+      title: 'Default Notebook',
+      nodes: _createSampleNodes(),
+    );
+    _notebooks = [defaultNotebook];
+    _selectedNotebook = defaultNotebook;
+    _saveData();
+  }
+
+  List<Node> _createSampleNodes() {
+    final rootNode1 = Node(
+      id: const Uuid().v4(),
+      title: 'Node 1',
+      createdAt: DateTime.now(),
+      children: [
+        Node(
+          id: const Uuid().v4(),
+          title: 'Node 1.1',
+          createdAt: DateTime.now(),
+          children: [
+            Node(
+              id: const Uuid().v4(),
+              title: 'Node 1.1.1',
+              createdAt: DateTime.now(),
+              children: [
+                Node(
+                  id: const Uuid().v4(),
+                  title: 'Node 1.1.1.1',
+                  createdAt: DateTime.now(),
+                  children: [
+                    Node(
+                      id: const Uuid().v4(),
+                      title: 'Node 1.1.1.1.1',
+                      createdAt: DateTime.now(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        Node(
+          id: const Uuid().v4(),
+          title: 'Node 1.2',
+          createdAt: DateTime.now(),
+          children: [
+            Node(
+              id: const Uuid().v4(),
+              title: 'Node 1.2.1',
+              createdAt: DateTime.now(),
+              children: [
+                Node(
+                  id: const Uuid().v4(),
+                  title: 'Node 1.2.1.1',
+                  createdAt: DateTime.now(),
+                  children: [
+                    Node(
+                      id: const Uuid().v4(),
+                      title: 'Node 1.2.1.1.1',
+                      createdAt: DateTime.now(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+
+    final rootNode2 = Node(
+      id: const Uuid().v4(),
+      title: 'Node 2',
+      createdAt: DateTime.now(),
+      children: [
+        Node(
+          id: const Uuid().v4(),
+          title: 'Node 2.1',
+          createdAt: DateTime.now(),
+          children: [
+            Node(
+              id: const Uuid().v4(),
+              title: 'Node 2.1.1',
+              createdAt: DateTime.now(),
+              children: [
+                Node(
+                  id: const Uuid().v4(),
+                  title: 'Node 2.1.1.1',
+                  createdAt: DateTime.now(),
+                  children: [
+                    Node(
+                      id: const Uuid().v4(),
+                      title: 'Node 2.1.1.1.1',
+                      createdAt: DateTime.now(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+
+    return [rootNode1, rootNode2];
+  }
+
+  Future<void> _saveData() async {
+    try {
+      final Map<String, dynamic> data = {
+        'notebooks': _notebooks.map((notebook) => notebook.toJson()).toList()
+      };
+      await _storageManager.write('nodes_notebooks', data);
+    } catch (e) {
+      debugPrint('Error saving notebooks: $e');
+    }
+  }
+
+  Future<void> addNotebook(String title, IconData icon, {Color color = Colors.blue}) async {
+    final newNotebook = Notebook(
+      id: const Uuid().v4(),
+      title: title,
+      icon: icon,
+      color: color,
+    );
+    
+    _notebooks.add(newNotebook);
+    if (_notebooks.length == 1) {
+      _selectedNotebook = newNotebook;
+    }
+    
+    notifyListeners();
+    await _saveData();
+  }
+
+  Future<void> updateNotebook(Notebook notebook) async {
+    final index = _notebooks.indexWhere((n) => n.id == notebook.id);
+    if (index != -1) {
+      _notebooks[index] = notebook;
+      if (_selectedNotebook?.id == notebook.id) {
+        _selectedNotebook = notebook;
+      }
+      notifyListeners();
+      await _saveData();
+    }
+  }
+
+  Future<void> deleteNotebook(String notebookId) async {
+    _notebooks.removeWhere((notebook) => notebook.id == notebookId);
+    
+    if (_selectedNotebook?.id == notebookId) {
+      _selectedNotebook = _notebooks.isNotEmpty ? _notebooks.first : null;
+    }
+    
+    notifyListeners();
+    await _saveData();
+  }
+
+  // Node operations
+  Future<void> addNode(String notebookId, Node node, {String? parentId}) async {
+    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    if (notebookIndex == -1) return;
+
+    if (parentId == null || parentId.isEmpty) {
+      // Add as root node
+      _notebooks[notebookIndex].nodes.add(node);
+    } else {
+      // Add as child node
+      _addChildNode(_notebooks[notebookIndex].nodes, parentId, node);
+    }
+
+    notifyListeners();
+    await _saveData();
+  }
+
+  bool _addChildNode(List<Node> nodes, String parentId, Node newNode) {
+    for (int i = 0; i < nodes.length; i++) {
+      if (nodes[i].id == parentId) {
+        newNode.parentId = parentId;
+        nodes[i].children.add(newNode);
+        return true;
+      }
+      
+      if (nodes[i].children.isNotEmpty) {
+        if (_addChildNode(nodes[i].children, parentId, newNode)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  Future<void> updateNode(String notebookId, Node updatedNode) async {
+    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    if (notebookIndex == -1) return;
+
+    _updateNodeInList(_notebooks[notebookIndex].nodes, updatedNode);
+    
+    notifyListeners();
+    await _saveData();
+  }
+
+  bool _updateNodeInList(List<Node> nodes, Node updatedNode) {
+    for (int i = 0; i < nodes.length; i++) {
+      if (nodes[i].id == updatedNode.id) {
+        // Preserve children and expanded state
+        updatedNode.children = nodes[i].children;
+        updatedNode.isExpanded = nodes[i].isExpanded;
+        nodes[i] = updatedNode;
+        return true;
+      }
+      
+      if (nodes[i].children.isNotEmpty) {
+        if (_updateNodeInList(nodes[i].children, updatedNode)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  Future<void> deleteNode(String notebookId, String nodeId) async {
+    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    if (notebookIndex == -1) return;
+
+    _deleteNodeFromList(_notebooks[notebookIndex].nodes, nodeId);
+    
+    notifyListeners();
+    await _saveData();
+  }
+
+  bool _deleteNodeFromList(List<Node> nodes, String nodeId) {
+    for (int i = 0; i < nodes.length; i++) {
+      if (nodes[i].id == nodeId) {
+        nodes.removeAt(i);
+        return true;
+      }
+      
+      if (nodes[i].children.isNotEmpty) {
+        if (_deleteNodeFromList(nodes[i].children, nodeId)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  Future<void> toggleNodeExpansion(String notebookId, String nodeId) async {
+    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    if (notebookIndex == -1) return;
+
+    _toggleNodeExpansionInList(_notebooks[notebookIndex].nodes, nodeId);
+    
+    notifyListeners();
+  }
+
+  bool _toggleNodeExpansionInList(List<Node> nodes, String nodeId) {
+    for (int i = 0; i < nodes.length; i++) {
+      if (nodes[i].id == nodeId) {
+        nodes[i].isExpanded = !nodes[i].isExpanded;
+        return true;
+      }
+      
+      if (nodes[i].children.isNotEmpty) {
+        if (_toggleNodeExpansionInList(nodes[i].children, nodeId)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  List<String> getNodePath(String notebookId, String nodeId) {
+    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    if (notebookIndex == -1) return [];
+
+    List<String> path = [];
+    _findNodePath(_notebooks[notebookIndex].nodes, nodeId, path);
+    return path.reversed.toList();
+  }
+
+  bool _findNodePath(List<Node> nodes, String nodeId, List<String> path) {
+    for (final node in nodes) {
+      if (node.id == nodeId) {
+        path.add(node.title);
+        return true;
+      }
+      
+      if (node.children.isNotEmpty) {
+        if (_findNodePath(node.children, nodeId, path)) {
+          path.add(node.title);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+}
