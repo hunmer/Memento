@@ -60,7 +60,7 @@ class DayController extends ChangeNotifier {
       _memorialDays = jsonList.map((json) => MemorialDay.fromJson(json)).toList();
     } catch (e) {
       // 如果文件不存在或读取失败，加载测试数据
-      _memorialDays = MemorialDay.generateTestData();
+      // _memorialDays = MemorialDay.generateTestData();
       await _saveMemorialDays();
     }
     // 如果不使用自定义排序，则按剩余天数排序

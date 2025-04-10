@@ -48,126 +48,12 @@ class NodesController extends ChangeNotifier {
         if (_notebooks.isNotEmpty && _selectedNotebook == null) {
           _selectedNotebook = _notebooks.first;
         }
-      } else {
-        // Create a default notebook with sample nodes if none exists
-        _createDefaultNotebook();
       }
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading notebooks: $e');
-      // Create a default notebook if there's an error
-      _createDefaultNotebook();
       notifyListeners();
     }
-  }
-
-  void _createDefaultNotebook() {
-    final defaultNotebook = Notebook(
-      id: const Uuid().v4(),
-      title: 'Default Notebook',
-      nodes: _createSampleNodes(),
-    );
-    _notebooks = [defaultNotebook];
-    _selectedNotebook = defaultNotebook;
-    _saveData();
-  }
-
-  List<Node> _createSampleNodes() {
-    final rootNode1 = Node(
-      id: const Uuid().v4(),
-      title: 'Node 1',
-      createdAt: DateTime.now(),
-      children: [
-        Node(
-          id: const Uuid().v4(),
-          title: 'Node 1.1',
-          createdAt: DateTime.now(),
-          children: [
-            Node(
-              id: const Uuid().v4(),
-              title: 'Node 1.1.1',
-              createdAt: DateTime.now(),
-              children: [
-                Node(
-                  id: const Uuid().v4(),
-                  title: 'Node 1.1.1.1',
-                  createdAt: DateTime.now(),
-                  children: [
-                    Node(
-                      id: const Uuid().v4(),
-                      title: 'Node 1.1.1.1.1',
-                      createdAt: DateTime.now(),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        Node(
-          id: const Uuid().v4(),
-          title: 'Node 1.2',
-          createdAt: DateTime.now(),
-          children: [
-            Node(
-              id: const Uuid().v4(),
-              title: 'Node 1.2.1',
-              createdAt: DateTime.now(),
-              children: [
-                Node(
-                  id: const Uuid().v4(),
-                  title: 'Node 1.2.1.1',
-                  createdAt: DateTime.now(),
-                  children: [
-                    Node(
-                      id: const Uuid().v4(),
-                      title: 'Node 1.2.1.1.1',
-                      createdAt: DateTime.now(),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-
-    final rootNode2 = Node(
-      id: const Uuid().v4(),
-      title: 'Node 2',
-      createdAt: DateTime.now(),
-      children: [
-        Node(
-          id: const Uuid().v4(),
-          title: 'Node 2.1',
-          createdAt: DateTime.now(),
-          children: [
-            Node(
-              id: const Uuid().v4(),
-              title: 'Node 2.1.1',
-              createdAt: DateTime.now(),
-              children: [
-                Node(
-                  id: const Uuid().v4(),
-                  title: 'Node 2.1.1.1',
-                  createdAt: DateTime.now(),
-                  children: [
-                    Node(
-                      id: const Uuid().v4(),
-                      title: 'Node 2.1.1.1.1',
-                      createdAt: DateTime.now(),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-
-    return [rootNode1, rootNode2];
   }
 
   Future<void> _saveData() async {
