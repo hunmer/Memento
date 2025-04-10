@@ -36,7 +36,7 @@ EOF
 
 # 构建发布版APK
 echo "Building release APK..."
-flutter build apk --target-platform android-arm64 --release
+flutter build apk --target-platform android-arm64 --release  --no-tree-shake-icons
 
 # 检查构建结果
 if [ $? -eq 0 ]; then
