@@ -23,18 +23,8 @@ class NodeItem extends StatelessWidget {
     final controller = Provider.of<NodesController>(context);
     final l10n = NodesLocalizations.of(context);
 
-    Color? statusColor;
-    switch (node.status) {
-      case NodeStatus.todo:
-        statusColor = Colors.grey;
-        break;
-      case NodeStatus.doing:
-        statusColor = Colors.blue;
-        break;
-      case NodeStatus.done:
-        statusColor = Colors.green;
-        break;
-    }
+    // 使用节点自身的颜色
+    Color nodeColor = node.color;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +68,7 @@ class NodeItem extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: statusColor,
+                      color: nodeColor,
                     ),
                   ),
                   Expanded(
@@ -141,11 +131,87 @@ class NodeItem extends StatelessWidget {
     NodesController controller,
     NodesLocalizations l10n,
   ) {
+    // 定义常用颜色列表
+    final List<Color> commonColors = [
+      Colors.grey,
+      Colors.red,
+      Colors.orange,
+      Colors.amber,
+      Colors.yellow,
+      Colors.lime,
+      Colors.green,
+      Colors.teal,
+      Colors.cyan,
+      Colors.blue,
+      Colors.indigo,
+      Colors.purple,
+      Colors.pink,
+    ];
+    
     showModalBottomSheet(
       context: context,
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Node Color',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: commonColors.length,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemBuilder: (context, index) {
+                final color = commonColors[index];
+                final isSelected = node.color.value == color.value;
+                
+                return GestureDetector(
+                  onTap: () {
+                    // 更新节点颜色并保存
+                    final updatedNode = Node(
+                      id: node.id,
+                      title: node.title,
+                      createdAt: node.createdAt,
+                      tags: node.tags,
+                      status: node.status,
+                      startDate: node.startDate,
+                      endDate: node.endDate,
+                      customFields: node.customFields,
+                      notes: node.notes,
+                      parentId: node.parentId,
+                      children: node.children,
+                      isExpanded: node.isExpanded,
+                      pathValue: node.pathValue,
+                      color: color,
+                    );
+                    controller.updateNode(notebookId, updatedNode);
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: isSelected 
+                          ? Border.all(color: Colors.black, width: 2) 
+                          : null,
+                    ),
+                    child: isSelected 
+                        ? const Icon(Icons.check, color: Colors.white, size: 20) 
+                        : null,
+                  ),
+                );
+              },
+            ),
+          ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.edit),
             title: Text(l10n.editNode),

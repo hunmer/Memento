@@ -4,6 +4,7 @@ import '../../controllers/nodes_controller.dart';
 import '../../models/node.dart';
 import '../../l10n/nodes_localizations.dart';
 import 'components/breadcrumbs.dart';
+import 'components/color_picker_section.dart';
 import 'components/tags_section.dart';
 import 'components/status_dropdown.dart';
 import 'components/date_section.dart';
@@ -29,6 +30,7 @@ class NodeEditScreenState extends State<NodeEditScreen> {
   late TextEditingController _titleController;
   late List<String> _tags;
   late NodeStatus _status;
+  late Color _color;
   DateTime? _startDate;
   DateTime? _endDate;
   late List<CustomField> _customFields;
@@ -40,6 +42,7 @@ class NodeEditScreenState extends State<NodeEditScreen> {
     _titleController = TextEditingController(text: widget.node.title);
     _tags = List.from(widget.node.tags);
     _status = widget.node.status;
+    _color = widget.node.color;
     _startDate = widget.node.startDate;
     _endDate = widget.node.endDate;
     _customFields = List.from(widget.node.customFields);
@@ -106,6 +109,15 @@ class NodeEditScreenState extends State<NodeEditScreen> {
                 if (!_tags.contains(tag)) {
                   setState(() => _tags.add(tag));
                 }
+              },
+            ),
+            const SizedBox(height: 16),
+            
+            // 颜色选择器
+            ColorPickerSection(
+              selectedColor: _color,
+              onColorChanged: (color) {
+                setState(() => _color = color);
               },
             ),
             const SizedBox(height: 16),
@@ -197,6 +209,7 @@ class NodeEditScreenState extends State<NodeEditScreen> {
       createdAt: widget.node.createdAt,
       pathValue: pathValue,
       children: widget.isNew ? [] : widget.node.children,
+      color: _color,
     );
 
     if (widget.isNew) {

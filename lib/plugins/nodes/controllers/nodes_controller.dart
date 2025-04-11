@@ -174,23 +174,29 @@ class NodesController extends ChangeNotifier {
     final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
     if (notebookIndex == -1) return;
 
-    // 首先找到并删除原节点
-    final oldNode = findNodeById(notebookId, updatedNode.id);
-    if (oldNode != null) {
-      _deleteNodeFromList(_notebooks[notebookIndex].nodes, updatedNode.id);
-    }
+    // 尝试在原位置更新节点
+    final updated = _updateNodeInList(_notebooks[notebookIndex].nodes, updatedNode);
+    
+    // 如果找不到节点（罕见情况），则删除旧节点并添加新节点
+    if (!updated) {
+      // 首先找到并删除原节点
+      final oldNode = findNodeById(notebookId, updatedNode.id);
+      if (oldNode != null) {
+        _deleteNodeFromList(_notebooks[notebookIndex].nodes, updatedNode.id);
+      }
 
-    // 然后在新的位置添加更新后的节点
-    if (updatedNode.parentId.isEmpty) {
-      // 如果是根节点，直接添加到根节点列表
-      _notebooks[notebookIndex].nodes.add(updatedNode);
-    } else {
-      // 否则添加为子节点
-      final success = _addChildNode(_notebooks[notebookIndex].nodes, updatedNode.parentId, updatedNode);
-      if (!success) {
-        // 如果找不到父节点，作为根节点添加
-        debugPrint('Parent node not found: ${updatedNode.parentId}, adding as root node');
+      // 然后在新的位置添加更新后的节点
+      if (updatedNode.parentId.isEmpty) {
+        // 如果是根节点，直接添加到根节点列表
         _notebooks[notebookIndex].nodes.add(updatedNode);
+      } else {
+        // 否则添加为子节点
+        final success = _addChildNode(_notebooks[notebookIndex].nodes, updatedNode.parentId, updatedNode);
+        if (!success) {
+          // 如果找不到父节点，作为根节点添加
+          debugPrint('Parent node not found: ${updatedNode.parentId}, adding as root node');
+          _notebooks[notebookIndex].nodes.add(updatedNode);
+        }
       }
     }
     
@@ -201,9 +207,13 @@ class NodesController extends ChangeNotifier {
   bool _updateNodeInList(List<Node> nodes, Node updatedNode) {
     for (int i = 0; i < nodes.length; i++) {
       if (nodes[i].id == updatedNode.id) {
-        // Preserve children and expanded state
-        updatedNode.children = nodes[i].children;
-        updatedNode.isExpanded = nodes[i].isExpanded;
+        // 保留原节点的子节点和展开状态
+        final List<Node> originalChildren = nodes[i].children;
+        final bool originalExpandedState = nodes[i].isExpanded;
+        
+        // 更新节点，但保留位置、子节点和展开状态
+        updatedNode.children = originalChildren;
+        updatedNode.isExpanded = originalExpandedState;
         nodes[i] = updatedNode;
         return true;
       }

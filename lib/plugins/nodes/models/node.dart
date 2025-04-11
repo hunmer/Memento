@@ -37,6 +37,7 @@ class Node {
   List<Node> children;
   bool isExpanded;
   String pathValue;
+  Color color;
 
   Node({
     required this.id,
@@ -52,6 +53,7 @@ class Node {
     List<Node>? children,
     this.isExpanded = true,
     this.pathValue = '',
+    this.color = Colors.grey,
   }) : 
     tags = tags ?? [],
     customFields = customFields ?? [],
@@ -70,6 +72,7 @@ class Node {
     'parentId': parentId,
     'children': children.map((child) => child.toJson()).toList(),
     'pathValue': pathValue,
+    'color': color.value,
   };
 
   factory Node.fromJson(Map<String, dynamic> json) {
@@ -94,6 +97,7 @@ class Node {
       parentId: json['parentId'] as String,
       children: childrenList,
       pathValue: json['pathValue'] as String? ?? '',
+      color: Color(json['color'] as int? ?? Colors.grey.value),
     );
   }
 }
