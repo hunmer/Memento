@@ -44,8 +44,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           ListTile(
-            leading: const Icon(Icons.color_lens),
-            title: const Text('深色主题'),
+            leading: const Icon(Icons.language),
+            title: Text(_controller.isChineseLocale ? '语言 (中文)' : 'Language (English)'),
+            subtitle: Text(_controller.isChineseLocale ? '点击切换到英文' : 'Tap to switch to Chinese'),
+            onTap: _controller.toggleLanguage,
+          ),
+          ListTile(
+            leading: const Icon(Icons.brightness_4),
+            title: const Text('深色模式'),
+            subtitle: const Text('切换应用主题'),
             trailing: Switch(
               value: _controller.isDarkMode,
               onChanged: (value) => _controller.toggleTheme(),

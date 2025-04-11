@@ -3,18 +3,29 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../../plugins/chat/l10n/chat_localizations.dart';
+import '../../../plugins/day/l10n/day_localizations.dart';
+import '../../../plugins/nodes/l10n/nodes_localizations.dart' as nodes_l10n;
 import '../../../main.dart';
 import '../../../core/plugin_base.dart';
+import '../../../screens/home_screen.dart';
 import '../widgets/plugin_selection_dialog.dart';
 import '../widgets/folder_selection_dialog.dart';
 
 class SettingsScreenController extends ChangeNotifier {
   bool isDarkMode = false;
   final BuildContext context;
-  bool _mounted = true;
+  final bool _mounted = true;
 
   SettingsScreenController(this.context);
 
+  // 获取当前语言设置
+  Locale get currentLocale => Localizations.localeOf(context);
+
+  // 判断是否为中文
+  bool get isChineseLocale => currentLocale.languageCode == 'zh';
   void initTheme() {
     if (!_mounted) return;
     // 从当前主题获取初始值
@@ -33,10 +44,12 @@ class SettingsScreenController extends ChangeNotifier {
   }
 
   Future<void> exportData() async {
+    if (!_mounted) return;
     try {
       // 获取所有插件
       final plugins = globalPluginManager.allPlugins;
 
+      if (!_mounted) return;
       // 显示插件选择对话框
       final selectedPlugins = await showDialog<List<String>>(
         context: context,
@@ -87,11 +100,13 @@ class SettingsScreenController extends ChangeNotifier {
         // 删除临时目录
         await tempDir.delete(recursive: true);
 
+        if (!_mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('数据已导出到: $savePath')),
         );
       }
     } catch (e) {
+      if (!_mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('导出失败: $e')),
       );
@@ -131,6 +146,7 @@ class SettingsScreenController extends ChangeNotifier {
   }
 
   Future<void> importData() async {
+    if (!_mounted) return;
     try {
       // 打开文件选择器
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -155,6 +171,7 @@ class SettingsScreenController extends ChangeNotifier {
         }
         final folders = folderSet.toList();
 
+        if (!_mounted) return;
         // 显示文件夹选择对话框
         final selectedFolders = await showDialog<List<String>>(
           context: context,
@@ -164,6 +181,7 @@ class SettingsScreenController extends ChangeNotifier {
         );
 
         if (selectedFolders != null && selectedFolders.isNotEmpty) {
+          if (!_mounted) return;
           // 显示导入方式选择对话框
           final importMethod = await showDialog<String>(
             context: context,
@@ -218,16 +236,21 @@ class SettingsScreenController extends ChangeNotifier {
               }
             }
 
+            if (!_mounted) return;
             // 重新加载应用
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('数据导入成功，正在重新加载应用...')),
             );
-            // TODO: 实现应用重新加载逻辑
-            // 例如：Phoenix.rebirth(context);
+            // TODO: 实现应用重新加载逻辑，可以通过重新构建主应用来实现
+            // 例如：Navigator.of(context).pushAndRemoveUntil(
+            //   MaterialPageRoute(builder: (_) => const MyApp()),
+            //   (route) => false,
+            // );
           }
         }
       }
     } catch (e) {
+      if (!_mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('导入失败: $e')),
       );
@@ -245,6 +268,55 @@ class SettingsScreenController extends ChangeNotifier {
           const SizedBox(height: 20),
           const Text('这是一个用于管理插件的应用程序。'),
         ],
+      ),
+    );
+  }
+
+  // 切换语言
+  Future<void> toggleLanguage() async {
+    if (!_mounted) return;
+    final newLocale = isChineseLocale ? const Locale('en') : const Locale('zh');
+    
+    // 保存语言设置到配置管理器
+    await globalConfigManager.setLocale(newLocale);
+    
+    // 使用 MaterialApp 的 Locale 设置来切换语言
+    if (!_mounted) return;
+    final navigator = Navigator.of(context);
+    final currentRoute = ModalRoute.of(context);
+    if (currentRoute == null) return;
+    
+    navigator.pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => MaterialApp(
+          title: 'Memento',
+          debugShowCheckedModeBanner: false, // 关闭调试横幅
+          home: const HomeScreen(), // 始终返回到主屏幕
+          locale: newLocale,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            ChatLocalizations.delegate,
+            DayLocalizationsDelegate.delegate,
+            nodes_l10n.NodesLocalizationsDelegate.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('zh', ''),
+            Locale('en', ''),
+          ],
+          theme: Theme.of(context), // 保持原主题
+        ),
+      ),
+    );
+
+    if (!_mounted) return;
+    // 显示切换提示
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isChineseLocale ? 'Switched to English' : '已切换到中文'),
+        duration: const Duration(seconds: 1),
       ),
     );
   }

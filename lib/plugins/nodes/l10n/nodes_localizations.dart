@@ -120,3 +120,22 @@ class NodesLocalizations {
   String get copiedToClipboard => _localizedValues[locale.languageCode]?['copiedToClipboard'] ?? 'Copied to clipboard';
   String get nodesCleared => _localizedValues[locale.languageCode]?['nodesCleared'] ?? 'All nodes cleared';
 }
+
+class NodesLocalizationsDelegate extends LocalizationsDelegate<NodesLocalizations> {
+  const NodesLocalizationsDelegate();
+
+  static const NodesLocalizationsDelegate delegate = NodesLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) {
+    return ['en', 'zh'].contains(locale.languageCode);
+  }
+
+  @override
+  Future<NodesLocalizations> load(Locale locale) async {
+    return NodesLocalizations(locale);
+  }
+
+  @override
+  bool shouldReload(NodesLocalizationsDelegate old) => false;
+}

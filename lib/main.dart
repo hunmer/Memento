@@ -4,7 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/day/l10n/day_localizations.dart';
-import 'plugins/nodes/l10n/nodes_localizations.dart';
+import 'plugins/nodes/l10n/nodes_localizations.dart' as nodes_l10n;
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
@@ -92,7 +92,7 @@ class MyApp extends StatelessWidget {
         AppLocalizations.delegate,
         ChatLocalizations.delegate, // 添加聊天插件的本地化代理
         DayLocalizationsDelegate.delegate, // 添加纪念日插件的本地化代理
-        NodesLocalizationsDelegate.delegate, // 添加笔记插件的本地化代理
+        NodesPlugin().localizationsDelegate, // 添加笔记插件的本地化代理
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -101,7 +101,7 @@ class MyApp extends StatelessWidget {
         Locale('zh', ''), // 中文
         Locale('en', ''), // 英文
       ],
-      locale: const Locale('en', ''), 
+      locale: globalConfigManager.getLocale() ?? const Locale('en', ''), // 使用保存的语言设置，默认英文
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
