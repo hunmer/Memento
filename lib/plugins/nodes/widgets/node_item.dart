@@ -42,9 +42,26 @@ class NodeItem extends StatelessWidget {
         GestureDetector(
           onLongPress: () => _showNodeActions(context, controller, l10n),
           child: InkWell(
-            onTap: node.children.isNotEmpty
-                ? () => controller.toggleNodeExpansion(notebookId, node.id)
-                : null,
+            onTap: () {
+              if (node.children.isNotEmpty) {
+                // 如果有子节点，切换折叠状态
+                controller.toggleNodeExpansion(notebookId, node.id);
+              } else {
+                // 如果没有子节点，直接进入编辑界面
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChangeNotifierProvider<NodesController>.value(
+                      value: controller,
+                      child: NodeEditScreen(
+                        notebookId: notebookId,
+                        node: node,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            },
             child: Padding(
               padding: EdgeInsets.only(left: depth * 24.0),
               child: Row(
