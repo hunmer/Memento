@@ -316,4 +316,25 @@ class NodesController extends ChangeNotifier {
     }
     return null;
   }
+
+  // 获取节点的所有同级节点（包括自身）
+  List<Node> getSiblingNodes(String notebookId, String nodeId) {
+    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    if (notebookIndex == -1) return [];
+
+    // 如果是根节点，返回所有根节点
+    final targetNode = findNodeById(notebookId, nodeId);
+    if (targetNode == null) return [];
+
+    if (targetNode.parentId.isEmpty) {
+      return _notebooks[notebookIndex].nodes;
+    }
+
+    // 找到父节点
+    final parentNode = findNodeById(notebookId, targetNode.parentId);
+    if (parentNode == null) return [];
+
+    // 返回父节点的所有子节点
+    return parentNode.children;
+  }
 }
