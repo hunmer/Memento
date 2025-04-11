@@ -124,24 +124,33 @@ class NodesController extends ChangeNotifier {
     final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
     if (notebookIndex == -1) return;
 
+    debugPrint('【NodesController】开始添加新节点: ${node.title}');
+    debugPrint('【NodesController】节点 parentId: ${node.parentId}, 传入的 parentId: $parentId');
+
     // 使用节点自身的 parentId，如果没有则使用传入的 parentId
     final effectiveParentId = node.parentId.isNotEmpty ? node.parentId : (parentId ?? '');
+    debugPrint('【NodesController】最终使用的 parentId: $effectiveParentId');
 
     if (effectiveParentId.isEmpty) {
+      debugPrint('【NodesController】添加为根节点');
       // Add as root node
       _notebooks[notebookIndex].nodes.add(node);
     } else {
+      debugPrint('【NodesController】尝试添加为子节点');
       // Add as child node
       final success = _addChildNode(_notebooks[notebookIndex].nodes, effectiveParentId, node);
       if (!success) {
         // 如果找不到父节点，作为根节点添加
-        debugPrint('Parent node not found: $effectiveParentId, adding as root node');
+        debugPrint('【NodesController】未找到父节点: $effectiveParentId, 添加为根节点');
         _notebooks[notebookIndex].nodes.add(node);
+      } else {
+        debugPrint('【NodesController】成功添加为子节点');
       }
     }
 
     notifyListeners();
     await _saveData();
+    debugPrint('【NodesController】节点添加完成，已通知UI更新');
   }
 
   bool _addChildNode(List<Node> nodes, String parentId, Node newNode) {

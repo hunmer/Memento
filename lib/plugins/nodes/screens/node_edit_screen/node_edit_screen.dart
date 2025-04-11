@@ -174,6 +174,15 @@ class NodeEditScreenState extends State<NodeEditScreen> {
   }
 
   void _saveNode(BuildContext context, NodesController controller) {
+    // 计算节点的完整路径值
+    String pathValue = _titleController.text;
+    if (widget.node.parentId.isNotEmpty) {
+      final parentNode = controller.findNodeById(widget.notebookId, widget.node.parentId);
+      if (parentNode != null) {
+        pathValue = '${parentNode.pathValue}/$pathValue';
+      }
+    }
+
     // 创建更新后的节点对象
     final updatedNode = Node(
       id: widget.node.id,
@@ -186,6 +195,8 @@ class NodeEditScreenState extends State<NodeEditScreen> {
       customFields: _customFields,
       notes: _notesController.text,
       createdAt: widget.node.createdAt,
+      pathValue: pathValue,
+      children: widget.isNew ? [] : widget.node.children,
     );
 
     if (widget.isNew) {
