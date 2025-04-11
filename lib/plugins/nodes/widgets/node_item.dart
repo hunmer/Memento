@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 import '../controllers/nodes_controller.dart';
 import '../models/node.dart';
 import '../screens/node_edit_screen.dart';
 import '../l10n/nodes_localizations.dart';
-import 'package:uuid/uuid.dart';
+
+class _StatusInfo {
+  final Color color;
+  final Color textColor;
+  final String label;
+
+  const _StatusInfo({
+    required this.color,
+    required this.textColor,
+    required this.label,
+  });
+}
 
 class NodeItem extends StatelessWidget {
   final Node node;
@@ -17,6 +29,95 @@ class NodeItem extends StatelessWidget {
     required this.notebookId,
     required this.depth,
   }) : super(key: key);
+  
+  Widget _buildStatusButton(
+    BuildContext context,
+    NodesController controller,
+    NodeStatus status,
+    String label,
+    Color backgroundColor,
+    Color textColor,
+  ) {
+    final isSelected = node.status == status;
+    
+    return InkWell(
+      onTap: () {
+        // 更新节点状态并保存
+        final updatedNode = Node(
+          id: node.id,
+          title: node.title,
+          createdAt: node.createdAt,
+          tags: node.tags,
+          status: status,
+          startDate: node.startDate,
+          endDate: node.endDate,
+          customFields: node.customFields,
+          notes: node.notes,
+          parentId: node.parentId,
+          pathValue: node.pathValue,
+          color: node.color,
+        );
+        controller.updateNode(notebookId, updatedNode);
+        Navigator.pop(context);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected 
+              ? Border.all(color: textColor, width: 2) 
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(BuildContext context, NodeStatus status) {
+    final Map<NodeStatus, _StatusInfo> statusInfo = {
+      NodeStatus.todo: _StatusInfo(
+        color: Colors.grey.shade200,
+        textColor: Colors.grey.shade700,
+        label: 'TODO',
+      ),
+      NodeStatus.doing: _StatusInfo(
+        color: Colors.blue.shade100,
+        textColor: Colors.blue.shade700,
+        label: 'DOING',
+      ),
+      NodeStatus.done: _StatusInfo(
+        color: Colors.green.shade100,
+        textColor: Colors.green.shade700,
+        label: 'DONE',
+      ),
+    };
+
+    final info = statusInfo[status]!;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      margin: const EdgeInsets.only(left: 8),
+      decoration: BoxDecoration(
+        color: info.color,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        info.label,
+        style: TextStyle(
+          fontSize: 12,
+          color: info.textColor,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,12 +178,19 @@ class NodeItem extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            node.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  node.title,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              _buildStatusBadge(context, node.status),
+                            ],
                           ),
                           if (node.tags.isNotEmpty)
                             Wrap(
@@ -210,6 +318,43 @@ class NodeItem extends StatelessWidget {
                 );
               },
             ),
+          ),
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Node Status',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildStatusButton(
+                context, 
+                controller, 
+                NodeStatus.todo, 
+                'TODO',
+                Colors.grey.shade200,
+                Colors.grey.shade700,
+              ),
+              _buildStatusButton(
+                context, 
+                controller, 
+                NodeStatus.doing, 
+                'DOING',
+                Colors.blue.shade100,
+                Colors.blue.shade700,
+              ),
+              _buildStatusButton(
+                context, 
+                controller, 
+                NodeStatus.done, 
+                'DONE',
+                Colors.green.shade100,
+                Colors.green.shade700,
+              ),
+            ],
           ),
           const Divider(),
           ListTile(
