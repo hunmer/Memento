@@ -242,6 +242,32 @@ class NodesController extends ChangeNotifier {
     return path.reversed.toList();
   }
 
+  List<String> getNodePathIds(String notebookId, String nodeId) {
+    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    if (notebookIndex == -1) return [];
+
+    List<String> pathIds = [];
+    _findNodePathIds(_notebooks[notebookIndex].nodes, nodeId, pathIds);
+    return pathIds.reversed.toList();
+  }
+
+  bool _findNodePathIds(List<Node> nodes, String nodeId, List<String> pathIds) {
+    for (final node in nodes) {
+      if (node.id == nodeId) {
+        pathIds.add(node.id);
+        return true;
+      }
+      
+      if (node.children.isNotEmpty) {
+        if (_findNodePathIds(node.children, nodeId, pathIds)) {
+          pathIds.add(node.id);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   bool _findNodePath(List<Node> nodes, String nodeId, List<String> path) {
     for (final node in nodes) {
       if (node.id == nodeId) {
@@ -257,5 +283,29 @@ class NodesController extends ChangeNotifier {
       }
     }
     return false;
+  }
+
+  // 通过ID查找节点
+  Node? findNodeById(String notebookId, String nodeId) {
+    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    if (notebookIndex == -1) return null;
+    
+    return _findNodeInList(_notebooks[notebookIndex].nodes, nodeId);
+  }
+
+  Node? _findNodeInList(List<Node> nodes, String nodeId) {
+    for (final node in nodes) {
+      if (node.id == nodeId) {
+        return node;
+      }
+      
+      if (node.children.isNotEmpty) {
+        final foundNode = _findNodeInList(node.children, nodeId);
+        if (foundNode != null) {
+          return foundNode;
+        }
+      }
+    }
+    return null;
   }
 }

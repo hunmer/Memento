@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/nodes_controller.dart';
@@ -72,13 +73,10 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Node path (breadcrumbs)
             if (!widget.isNew) ...[
               _buildBreadcrumbs(context, controller),
               const SizedBox(height: 16),
             ],
-
-            // Title
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
@@ -87,8 +85,6 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Tags
             Wrap(
               spacing: 8,
               children: [
@@ -105,8 +101,6 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Status
             DropdownButtonFormField<NodeStatus>(
               value: _status,
               decoration: InputDecoration(
@@ -138,8 +132,6 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-
-            // Dates
             Row(
               children: [
                 Expanded(
@@ -164,8 +156,6 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Custom fields
             Card(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,8 +192,6 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Notes
             TextField(
               controller: _notesController,
               decoration: InputDecoration(
@@ -217,6 +205,55 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildBreadcrumbs(BuildContext context, NodesController controller) {
+    final path = controller.getNodePath(widget.notebookId, widget.node.id);
+    // 获取节点路径的ID列表
+    final nodeIds = controller.getNodePathIds(widget.notebookId, widget.node.id);
+    
+    return Wrap(
+      spacing: 4,
+      children: [
+        for (int i = 0; i < path.length; i++)
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () {
+                // 如果不是当前节点（最后一个元素），则导航到该节点
+                if (i < path.length - 1 && i < nodeIds.length) {
+                  // 导航到所选节点
+                  final selectedNodeId = nodeIds[i];
+                  final selectedNode = controller.findNodeById(widget.notebookId, selectedNodeId);
+                  
+                  if (selectedNode != null) {
+                    // 使用 Navigator.pop 返回上一级，然后打开新页面
+                    Navigator.pop(context);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider<NodesController>.value(
+                          value: controller,
+                          child: NodeEditScreen(
+                            notebookId: widget.notebookId,
+                            node: selectedNode,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: Text(
+                i == 0 ? path[i] : '/${path[i]}',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -270,38 +307,6 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
         }
       });
     }
-  }
-
-  Widget _buildBreadcrumbs(BuildContext context, NodesController controller) {
-    final path = controller.getNodePath(widget.notebookId, widget.node.id);
-    final pathValues = widget.node.pathValue?.split('/') ?? [];
-    
-    return Wrap(
-      spacing: 4,
-      children: [
-        for (int i = 0; i < path.length; i++)
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {
-                if (i < pathValues.length) {
-                  setState(() {
-                    widget.node.parentId = pathValues[i];
-                    widget.node.pathValue = pathValues.sublist(0, i + 1).join('/');
-                  });
-                }
-              },
-              child: Text(
-                i == 0 ? path[i] : '/${path[i]}',
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
   }
 
   void _showAddCustomFieldDialog(BuildContext context) {
@@ -368,7 +373,7 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
       notes: _notesController.text,
       parentId: widget.node.parentId,
       children: widget.node.children,
-      pathValue: widget.node.pathValue,
+      pathValue: widget.node.pathValue, // Stores a single node ID
     );
 
     if (widget.isNew) {
