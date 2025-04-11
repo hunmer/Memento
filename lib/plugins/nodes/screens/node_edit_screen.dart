@@ -74,13 +74,7 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
           children: [
             // Node path (breadcrumbs)
             if (!widget.isNew) ...[
-              Wrap(
-                spacing: 8,
-                children: controller
-                    .getNodePath(widget.notebookId, widget.node.id)
-                    .map((title) => Chip(label: Text(title)))
-                    .toList(),
-              ),
+              _buildBreadcrumbs(context, controller),
               const SizedBox(height: 16),
             ],
 
@@ -216,7 +210,9 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
                 labelText: l10n.notes,
                 border: const OutlineInputBorder(),
               ),
-              maxLines: 5,
+              maxLines: null,
+              minLines: 1,
+              keyboardType: TextInputType.multiline,
             ),
           ],
         ),
@@ -274,6 +270,38 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
         }
       });
     }
+  }
+
+  Widget _buildBreadcrumbs(BuildContext context, NodesController controller) {
+    final path = controller.getNodePath(widget.notebookId, widget.node.id);
+    final pathValues = widget.node.pathValue?.split('/') ?? [];
+    
+    return Wrap(
+      spacing: 4,
+      children: [
+        for (int i = 0; i < path.length; i++)
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () {
+                if (i < pathValues.length) {
+                  setState(() {
+                    widget.node.parentId = pathValues[i];
+                    widget.node.pathValue = pathValues.sublist(0, i + 1).join('/');
+                  });
+                }
+              },
+              child: Text(
+                i == 0 ? path[i] : '/${path[i]}',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   void _showAddCustomFieldDialog(BuildContext context) {
@@ -340,6 +368,7 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
       notes: _notesController.text,
       parentId: widget.node.parentId,
       children: widget.node.children,
+      pathValue: widget.node.pathValue,
     );
 
     if (widget.isNew) {
