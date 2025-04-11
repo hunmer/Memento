@@ -21,22 +21,28 @@ class NodeBreadcrumbs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('【Breadcrumbs】build方法被调用');
     List<String> path = [];
     List<String> nodeIds = [];
     
+    debugPrint('【Breadcrumbs】isNew: $isNew, parentId: ${node.parentId}');
     if (isNew && node.parentId.isNotEmpty) {
       // 如果是新节点且有父节点，显示父节点的路径
       final parentNode = controller.findNodeById(notebookId, node.parentId);
       if (parentNode != null) {
+        debugPrint('【Breadcrumbs】找到父节点: ${parentNode.title}');
         path = controller.getNodePath(notebookId, parentNode.id);
         nodeIds = controller.getNodePathIds(notebookId, parentNode.id);
+        debugPrint('【Breadcrumbs】父节点路径: $path');
         // 添加"新节点"作为路径的最后一个元素
         path.add(NodesLocalizations.of(context).addNode);
       }
     } else if (!isNew) {
       // 如果是编辑现有节点，显示节点自身的路径
+      debugPrint('【Breadcrumbs】编辑现有节点: ${node.title}');
       path = controller.getNodePath(notebookId, node.id);
       nodeIds = controller.getNodePathIds(notebookId, node.id);
+      debugPrint('【Breadcrumbs】当前节点路径: $path');
     }
     
     if (path.isEmpty) {
@@ -80,8 +86,13 @@ class NodeBreadcrumbs extends StatelessWidget {
                             pathValue: '${selectedNode.pathValue}/${node.title}',
                           );
 
+                          debugPrint('【Breadcrumbs】开始更新节点: ${updatedNode.title}');
                           // 更新节点树中的节点
                           await controller.updateNode(notebookId, updatedNode);
+                          debugPrint('【Breadcrumbs】节点更新完成，准备通知UI更新');
+                          // 通知监听器更新UI
+                          controller.notifyListeners();
+                          debugPrint('【Breadcrumbs】已发送UI更新通知');
 
                           // 检查widget是否仍然挂载
                           if (!currentContext.mounted) return;
@@ -90,6 +101,7 @@ class NodeBreadcrumbs extends StatelessWidget {
                           Navigator.pop(currentContext);
                           if (!currentContext.mounted) return;
                           
+                          debugPrint('【Breadcrumbs】准备打开新的编辑页面');
                           Navigator.of(currentContext).push(
                             MaterialPageRoute(
                               builder: (context) => ChangeNotifierProvider<NodesController>.value(
@@ -128,8 +140,10 @@ class NodeBreadcrumbs extends StatelessWidget {
   }
 
   Widget _buildSiblingSelector(BuildContext context, String nodeId, int index) {
+    debugPrint('【Breadcrumbs】构建同级节点选择器: nodeId=$nodeId, index=$index');
     // 获取同级节点列表
     final siblings = controller.getSiblingNodes(notebookId, nodeId);
+    debugPrint('【Breadcrumbs】找到${siblings.length}个同级节点');
     
     // 如果没有同级节点或只有一个节点（自身），则不显示选择器
     if (siblings.length <= 1) {
@@ -143,6 +157,7 @@ class NodeBreadcrumbs extends StatelessWidget {
           final RenderBox button = context.findRenderObject() as RenderBox;
           final Offset offset = button.localToGlobal(Offset.zero);
           
+          debugPrint('【Breadcrumbs】显示同级节点菜单');
           final selectedNode = await showMenu<Node>(
             context: context,
             position: RelativeRect.fromLTRB(
@@ -178,14 +193,20 @@ class NodeBreadcrumbs extends StatelessWidget {
                 pathValue: '${selectedNode.pathValue}/${node.title}',
               );
 
+              debugPrint('【Breadcrumbs】从菜单选择了节点: ${selectedNode.title}');
               // 更新节点树中的节点
               await controller.updateNode(notebookId, updatedNode);
+              debugPrint('【Breadcrumbs】节点更新完成，准备通知UI更新');
+              // 通知监听器更新UI
+              controller.notifyListeners();
+              debugPrint('【Breadcrumbs】已发送UI更新通知');
 
               // 返回上一级，然后用更新后的节点重新打开编辑页面
               if (!context.mounted) return;
               Navigator.pop(context);
               if (!context.mounted) return;
               
+              debugPrint('【Breadcrumbs】准备打开新的编辑页面（菜单选择后）');
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ChangeNotifierProvider<NodesController>.value(

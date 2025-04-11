@@ -165,7 +165,25 @@ class NodesController extends ChangeNotifier {
     final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
     if (notebookIndex == -1) return;
 
-    _updateNodeInList(_notebooks[notebookIndex].nodes, updatedNode);
+    // 首先找到并删除原节点
+    final oldNode = findNodeById(notebookId, updatedNode.id);
+    if (oldNode != null) {
+      _deleteNodeFromList(_notebooks[notebookIndex].nodes, updatedNode.id);
+    }
+
+    // 然后在新的位置添加更新后的节点
+    if (updatedNode.parentId.isEmpty) {
+      // 如果是根节点，直接添加到根节点列表
+      _notebooks[notebookIndex].nodes.add(updatedNode);
+    } else {
+      // 否则添加为子节点
+      final success = _addChildNode(_notebooks[notebookIndex].nodes, updatedNode.parentId, updatedNode);
+      if (!success) {
+        // 如果找不到父节点，作为根节点添加
+        debugPrint('Parent node not found: ${updatedNode.parentId}, adding as root node');
+        _notebooks[notebookIndex].nodes.add(updatedNode);
+      }
+    }
     
     notifyListeners();
     await _saveData();
