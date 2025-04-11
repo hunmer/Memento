@@ -73,10 +73,9 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!widget.isNew) ...[
-              _buildBreadcrumbs(context, controller),
-              const SizedBox(height: 16),
-            ],
+            // 始终显示面包屑，但对于新节点，显示父节点的路径
+            _buildBreadcrumbs(context, controller),
+            const SizedBox(height: 16),
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
@@ -209,9 +208,28 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
   }
 
   Widget _buildBreadcrumbs(BuildContext context, NodesController controller) {
-    final path = controller.getNodePath(widget.notebookId, widget.node.id);
-    // 获取节点路径的ID列表
-    final nodeIds = controller.getNodePathIds(widget.notebookId, widget.node.id);
+    List<String> path = [];
+    List<String> nodeIds = [];
+    
+    if (widget.isNew && widget.node.parentId.isNotEmpty) {
+      // 如果是新节点且有父节点，显示父节点的路径
+      final parentNode = controller.findNodeById(widget.notebookId, widget.node.parentId);
+      if (parentNode != null) {
+        path = controller.getNodePath(widget.notebookId, parentNode.id);
+        nodeIds = controller.getNodePathIds(widget.notebookId, parentNode.id);
+        // 添加"新节点"作为路径的最后一个元素
+        path.add(NodesLocalizations.of(context).addNode);
+      }
+    } else if (!widget.isNew) {
+      // 如果是编辑现有节点，显示节点自身的路径
+      path = controller.getNodePath(widget.notebookId, widget.node.id);
+      nodeIds = controller.getNodePathIds(widget.notebookId, widget.node.id);
+    }
+    
+    if (path.isEmpty) {
+      // 如果路径为空（例如新的根节点），则不显示任何内容
+      return const SizedBox.shrink();
+    }
     
     return Wrap(
       spacing: 4,
@@ -237,6 +255,7 @@ class _NodeEditScreenState extends State<NodeEditScreen> {
                           child: NodeEditScreen(
                             notebookId: widget.notebookId,
                             node: selectedNode,
+                            isNew: false, // 确保不是新节点
                           ),
                         ),
                       ),
