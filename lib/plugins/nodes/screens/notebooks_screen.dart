@@ -8,16 +8,7 @@ import 'nodes_screen.dart';
 import '../../../widgets/circle_icon_picker.dart';
 
 class NotebooksScreen extends StatelessWidget {
-  static const List<IconData> _availableIcons = [
-    Icons.book,
-    Icons.work,
-    Icons.school,
-    Icons.home,
-    Icons.favorite,
-    Icons.star,
-  ];
-
-  const NotebooksScreen({Key? key}) : super(key: key);
+  const NotebooksScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +66,8 @@ class NotebooksScreen extends StatelessWidget {
                   ],
                 ),
               );
-              if (result ?? false) {
-                controller.deleteNotebook(notebook.id);
+              if (result == true) {
+                Provider.of<NodesController>(context, listen: false).deleteNotebook(notebook.id);
               }
               return false;
             },
@@ -132,7 +123,7 @@ class NotebooksScreen extends StatelessWidget {
 
   void _showAddNotebookDialog(BuildContext context) {
     final l10n = NodesLocalizations.of(context);
-    final controller = Provider.of<NodesController>(context, listen: false);
+    final nodesController = Provider.of<NodesController>(context, listen: false);
     final titleController = TextEditingController();
     IconData selectedIcon = Icons.book;
     Color selectedColor = Colors.blue;
@@ -178,7 +169,7 @@ class NotebooksScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     if (titleController.text.isNotEmpty) {
-                      controller.addNotebook(titleController.text, selectedIcon, color: selectedColor);
+                      nodesController.addNotebook(titleController.text, selectedIcon, color: selectedColor);
                       Navigator.pop(context);
                     }
                   },
@@ -194,7 +185,6 @@ class NotebooksScreen extends StatelessWidget {
 
   void _showNotebookActions(BuildContext parentContext, Notebook notebook) {
     final l10n = NodesLocalizations.of(parentContext);
-    final controller = Provider.of<NodesController>(parentContext, listen: false);
 
     showModalBottomSheet(
       context: parentContext,
@@ -225,10 +215,10 @@ class NotebooksScreen extends StatelessWidget {
 
   void _showEditNotebookDialog(BuildContext context, Notebook notebook) {
     final l10n = NodesLocalizations.of(context);
-    final controller = Provider.of<NodesController>(context, listen: false);
+    final nodesController = Provider.of<NodesController>(context, listen: false);
     final titleController = TextEditingController(text: notebook.title);
     IconData selectedIcon = notebook.icon;
-    Color selectedColor = notebook.color ?? Colors.blue;
+    Color selectedColor = notebook.color;
     
     showDialog(
       context: context,
@@ -278,7 +268,7 @@ class NotebooksScreen extends StatelessWidget {
                         color: selectedColor,
                         nodes: notebook.nodes,
                       );
-                      controller.updateNotebook(updatedNotebook);
+                      nodesController.updateNotebook(updatedNotebook);
                       Navigator.pop(context);
                     }
                   },
@@ -294,7 +284,7 @@ class NotebooksScreen extends StatelessWidget {
 
   void _showDeleteNotebookDialog(BuildContext context, Notebook notebook) {
     final l10n = NodesLocalizations.of(context);
-    final controller = Provider.of<NodesController>(context, listen: false);
+    final nodesController = Provider.of<NodesController>(context, listen: false);
 
     showDialog(
       context: context,
@@ -308,7 +298,7 @@ class NotebooksScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              controller.deleteNotebook(notebook.id);
+              nodesController.deleteNotebook(notebook.id);
               Navigator.pop(context);
             },
             child: Text(l10n.deleteNode),
