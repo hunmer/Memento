@@ -189,8 +189,12 @@ class NodeEditScreenState extends State<NodeEditScreen> {
     );
 
     if (widget.isNew) {
-      // 添加新节点
-      controller.addNode(widget.notebookId, updatedNode);
+      // 添加新节点，确保传递父节点ID
+      controller.addNode(
+        widget.notebookId,
+        updatedNode,
+        parentId: widget.node.parentId,
+      );
     } else {
       // 更新现有节点
       controller.updateNode(widget.notebookId, updatedNode);

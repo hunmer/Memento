@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 import 'package:provider/provider.dart';
 import '../../../controllers/nodes_controller.dart';
 import '../../../models/node.dart';
@@ -12,12 +13,12 @@ class NodeBreadcrumbs extends StatelessWidget {
   final NodesController controller;
 
   const NodeBreadcrumbs({
-    Key? key,
+    super.key,
     required this.notebookId,
     required this.node,
     required this.isNew,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,28 +52,54 @@ class NodeBreadcrumbs extends StatelessWidget {
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              onTap: () {
+              onTap: () async {
                 // 如果不是当前节点（最后一个元素），则导航到该节点
                 if (i < path.length - 1 && i < nodeIds.length) {
-                  // 导航到所选节点
+                  // 将当前编辑的节点设置为所选节点的子节点
                   final selectedNodeId = nodeIds[i];
                   final selectedNode = controller.findNodeById(notebookId, selectedNodeId);
+                  final currentContext = context;
                   
                   if (selectedNode != null) {
-                    // 使用 Navigator.pop 返回上一级，然后打开新页面
-                    Navigator.pop(context);
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ChangeNotifierProvider<NodesController>.value(
-                          value: controller,
-                          child: NodeEditScreen(
-                            notebookId: notebookId,
-                            node: selectedNode,
-                            isNew: false, // 确保不是新节点
+                    try {
+                      // 创建一个新的节点，保持原有的信息，但更新父节点ID
+                      final updatedNode = Node(
+                        id: node.id,
+                        title: node.title,
+                        createdAt: node.createdAt,
+                        tags: node.tags,
+                        status: node.status,
+                        startDate: node.startDate,
+                        endDate: node.endDate,
+                        customFields: node.customFields,
+                        notes: node.notes,
+                        parentId: selectedNode.id, // 更新父节点ID
+                        children: node.children,
+                        pathValue: '${selectedNode.pathValue}/${node.title}',
+                      );
+
+                      // 检查widget是否仍然挂载
+                      if (!currentContext.mounted) return;
+
+                      // 使用 Navigator.pop 返回上一级，然后用更新后的节点重新打开编辑页面
+                      Navigator.pop(currentContext);
+                      if (!currentContext.mounted) return;
+                      
+                      Navigator.of(currentContext).push(
+                        MaterialPageRoute(
+                          builder: (context) => ChangeNotifierProvider<NodesController>.value(
+                            value: controller,
+                            child: NodeEditScreen(
+                              notebookId: notebookId,
+                              node: updatedNode,
+                              isNew: isNew, // 保持原有的isNew状态
+                            ),
                           ),
                         ),
-                      ),
-                    );
+                      );
+                    } catch (e) {
+                      debugPrint('Error updating node: $e');
+                    }
                   }
                 }
               },

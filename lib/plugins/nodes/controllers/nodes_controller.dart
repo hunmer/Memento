@@ -124,12 +124,20 @@ class NodesController extends ChangeNotifier {
     final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
     if (notebookIndex == -1) return;
 
-    if (parentId == null || parentId.isEmpty) {
+    // 使用节点自身的 parentId，如果没有则使用传入的 parentId
+    final effectiveParentId = node.parentId.isNotEmpty ? node.parentId : (parentId ?? '');
+
+    if (effectiveParentId.isEmpty) {
       // Add as root node
       _notebooks[notebookIndex].nodes.add(node);
     } else {
       // Add as child node
-      _addChildNode(_notebooks[notebookIndex].nodes, parentId, node);
+      final success = _addChildNode(_notebooks[notebookIndex].nodes, effectiveParentId, node);
+      if (!success) {
+        // 如果找不到父节点，作为根节点添加
+        debugPrint('Parent node not found: $effectiveParentId, adding as root node');
+        _notebooks[notebookIndex].nodes.add(node);
+      }
     }
 
     notifyListeners();
