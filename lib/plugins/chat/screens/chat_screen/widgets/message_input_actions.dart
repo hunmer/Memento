@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import '../../../services/file_service.dart';
+import '../../../models/file_message.dart';
+import '../../../models/message.dart';
+import 'package:path/path.dart' as path;
+import 'package:image_picker/image_picker.dart';
 
 class MessageInputAction {
   final String title;
@@ -12,13 +18,20 @@ class MessageInputAction {
   });
 }
 
+typedef OnFileSelected = void Function(FileMessage fileMessage);
+typedef OnSendMessage = void Function(String content, {Map<String, dynamic>? metadata, MessageType? type});
+
 class MessageInputActionsDrawer extends StatelessWidget {
   final List<MessageInputAction> actions;
+  final OnFileSelected? onFileSelected;
+  final OnSendMessage? onSendMessage;
 
   const MessageInputActionsDrawer({
-    Key? key,
+    super.key,
     required this.actions,
-  }) : super(key: key);
+    this.onFileSelected,
+    this.onSendMessage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +128,11 @@ class MessageInputActionsDrawer extends StatelessWidget {
 }
 
 // 预定义的操作列表
-List<MessageInputAction> getDefaultMessageInputActions(BuildContext context) {
+List<MessageInputAction> getDefaultMessageInputActions(
+  BuildContext context, {
+  OnFileSelected? onFileSelected,
+  OnSendMessage? onSendMessage,
+}) {
   return [
     MessageInputAction(
       title: '文本样式',
@@ -130,30 +147,208 @@ List<MessageInputAction> getDefaultMessageInputActions(BuildContext context) {
     MessageInputAction(
       title: '文件',
       icon: Icons.attach_file,
-      onTap: () {
-        // 文件功能
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('文件功能待实现')),
-        );
+      onTap: () async {
+        BuildContext? currentContext = context;
+        
+        final fileMessage = await FileService.pickFile();
+        if (fileMessage != null && currentContext.mounted) {
+          // 调用回调函数发送文件消息
+          onFileSelected?.call(fileMessage);
+          
+          // 如果提供了onSendMessage回调，创建文件类型的消息
+          if (onSendMessage != null) {
+            // 创建文件消息内容
+            final fileContent = '📎 ${fileMessage.fileName} (${fileMessage.formattedSize})';
+            
+            // 创建文件元数据
+            final fileMetadata = {
+              Message.metadataKeyFileInfo: {
+                'id': fileMessage.id,
+                'fileName': fileMessage.fileName,
+                'filePath': fileMessage.filePath,
+                'fileSize': fileMessage.fileSize,
+                'extension': fileMessage.extension,
+                'mimeType': fileMessage.mimeType,
+              }
+            };
+            
+            // 发送文件消息
+            onSendMessage(fileContent, metadata: fileMetadata, type: MessageType.file);
+          }
+          
+          // 显示文件选择成功的提示
+          final messenger = ScaffoldMessenger.of(currentContext);
+          if (messenger.mounted) {
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text('已发送文件: ${fileMessage.fileName}'),
+                duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
       },
     ),
     MessageInputAction(
       title: '图片',
       icon: Icons.image,
-      onTap: () {
-        // 图片功能
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('图片功能待实现')),
-        );
+      onTap: () async {
+        BuildContext? currentContext = context;
+        
+        try {
+          // 使用ImagePicker选择图片
+          final ImagePicker picker = ImagePicker();
+          final XFile? image = await picker.pickImage(
+            source: ImageSource.gallery,
+            imageQuality: 80, // 图片质量
+          );
+          
+          if (image != null && currentContext.mounted) {
+            // 将图片转换为文件
+            final File imageFile = File(image.path);
+            
+            // 保存图片到应用目录
+            final savedFile = await FileService.saveImage(imageFile);
+            final fileMessage = await FileMessage.fromFile(savedFile);
+            
+            // 调用回调函数发送图片消息
+            onFileSelected?.call(fileMessage);
+            
+            // 如果提供了onSendMessage回调，创建图片类型的消息
+            if (onSendMessage != null) {
+              // 创建图片消息内容
+              final fileContent = '🖼️ 图片: ${fileMessage.fileName}';
+              
+              // 创建图片元数据
+              final fileMetadata = {
+                Message.metadataKeyFileInfo: {
+                  'id': fileMessage.id,
+                  'fileName': fileMessage.fileName,
+                  'filePath': fileMessage.filePath,
+                  'fileSize': fileMessage.fileSize,
+                  'extension': fileMessage.extension,
+                  'mimeType': 'image/${fileMessage.extension.replaceAll('.', '')}',
+                  'isImage': true,
+                }
+              };
+              
+              // 发送图片消息
+              onSendMessage(fileContent, metadata: fileMetadata, type: MessageType.image);
+            }
+            
+            // 显示图片选择成功的提示
+            if (currentContext.mounted) {
+              ScaffoldMessenger.of(currentContext).showSnackBar(
+                SnackBar(
+                  content: Text('已发送图片: ${path.basename(image.path)}'),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          }
+        } catch (e) {
+          if (currentContext.mounted) {
+            ScaffoldMessenger.of(currentContext).showSnackBar(
+              SnackBar(
+                content: Text('选择图片失败: $e'),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
       },
     ),
     MessageInputAction(
       title: '视频',
       icon: Icons.videocam,
+      onTap: () async {
+        BuildContext? currentContext = context;
+        
+        try {
+          // 使用ImagePicker选择视频
+          final ImagePicker picker = ImagePicker();
+          final XFile? video = await picker.pickVideo(
+            source: ImageSource.gallery,
+            maxDuration: const Duration(minutes: 10), // 限制视频长度
+          );
+          
+          if (video != null && currentContext.mounted) {
+            // 将视频转换为文件
+            final File videoFile = File(video.path);
+            
+            // 保存视频到应用目录
+            final savedFile = await FileService.saveVideo(videoFile);
+            final fileMessage = await FileMessage.fromFile(savedFile);
+            
+            // 调用回调函数发送视频消息
+            onFileSelected?.call(fileMessage);
+            
+            // 如果提供了onSendMessage回调，创建视频类型的消息
+            if (onSendMessage != null) {
+              // 创建视频消息内容
+              final fileContent = '🎬 视频: ${fileMessage.fileName} (${fileMessage.formattedSize})';
+              
+              // 创建视频元数据
+              final fileMetadata = {
+                Message.metadataKeyFileInfo: {
+                  'id': fileMessage.id,
+                  'fileName': fileMessage.fileName,
+                  'filePath': fileMessage.filePath,
+                  'fileSize': fileMessage.fileSize,
+                  'extension': fileMessage.extension,
+                  'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
+                  'isVideo': true,
+                }
+              };
+              
+              // 发送视频消息
+              onSendMessage(fileContent, metadata: fileMetadata, type: MessageType.video);
+            }
+            
+            // 显示视频选择成功的提示
+            if (currentContext.mounted) {
+              ScaffoldMessenger.of(currentContext).showSnackBar(
+                SnackBar(
+                  content: Text('已发送视频: ${path.basename(video.path)}'),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          }
+        } catch (e) {
+          if (currentContext.mounted) {
+            ScaffoldMessenger.of(currentContext).showSnackBar(
+              SnackBar(
+                content: Text('选择视频失败: $e'),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
+      },
+    ),
+    MessageInputAction(
+      title: '位置',
+      icon: Icons.location_on,
       onTap: () {
-        // 视频功能
+        // 位置功能
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('视频功能待实现')),
+          const SnackBar(content: Text('位置功能待实现')),
+        );
+      },
+    ),
+    MessageInputAction(
+      title: '联系人',
+      icon: Icons.person,
+      onTap: () {
+        // 联系人功能
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('联系人功能待实现')),
         );
       },
     ),

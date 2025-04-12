@@ -1,8 +1,10 @@
 import 'user.dart';
 
-enum MessageType { received, sent }
+enum MessageType { received, sent, file, image, video }
 
 class Message {
+  static const String metadataKeyFileInfo = 'fileInfo';
+
   final String id;
   String content; // 改为非final以支持编辑
   final User user;

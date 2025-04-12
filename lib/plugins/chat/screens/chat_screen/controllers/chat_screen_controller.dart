@@ -236,7 +236,7 @@ class ChatScreenController extends ChangeNotifier {
     }
   }
 
-  Future<void> sendMessage(String content) async {
+  Future<void> sendMessage(String content, {Map<String, dynamic>? metadata, MessageType? type}) async {
     if (content.trim().isEmpty) return;
     
     try {
@@ -245,7 +245,8 @@ class ChatScreenController extends ChangeNotifier {
         content: content,
         user: currentUser,
         date: DateTime.now(),
-        type: MessageType.sent,
+        type: type ?? MessageType.sent,
+        metadata: metadata,
       );
       
       // 添加消息到本地列表

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 import 'message_input_actions.dart';
+import '../../../models/message.dart';
 
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
-  final Function(String) onSendMessage;
+  final Function(String, {Map<String, dynamic>? metadata, MessageType? type}) onSendMessage;
   final Function(String) onSaveDraft;
 
   const MessageInput({
@@ -58,7 +59,7 @@ class _MessageInputState extends State<MessageInput> {
         } else if (!HardwareKeyboard.instance.isShiftPressed) {
           // Enter (不按Shift): 发送消息
           if (widget.controller.text.trim().isNotEmpty) {
-            widget.onSendMessage(widget.controller.text.trim());
+            widget.onSendMessage(widget.controller.text.trim(), type: MessageType.sent);
             widget.controller.clear();
             // 保持焦点但阻止换行
             _focusNode.requestFocus();
@@ -99,7 +100,10 @@ class _MessageInputState extends State<MessageInput> {
                         context: context,
                         backgroundColor: Colors.transparent,
                         builder: (context) => MessageInputActionsDrawer(
-                          actions: getDefaultMessageInputActions(context),
+                          actions: getDefaultMessageInputActions(
+                            context,
+                            onSendMessage: widget.onSendMessage,
+                          ),
                         ),
                       );
                     },
@@ -157,7 +161,7 @@ class _MessageInputState extends State<MessageInput> {
               ),
               onPressed: () {
                 if (widget.controller.text.trim().isNotEmpty) {
-                  widget.onSendMessage(widget.controller.text.trim());
+                  widget.onSendMessage(widget.controller.text.trim(), type: MessageType.sent);
                   widget.controller.clear();
                   _focusNode.requestFocus(); // 保持焦点
                 }
