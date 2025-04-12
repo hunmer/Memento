@@ -27,9 +27,22 @@ class ChannelGroupSelector extends StatelessWidget {
                 selected: isSelected,
                 label: Text(group),
                 onSelected: (_) => onGroupSelected(group),
-                backgroundColor: Colors.grey[200],
-                selectedColor: Colors.blue[100],
-                checkmarkColor: Colors.blue,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[800]
+                    : Colors.grey[200],
+                selectedColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.blue[900]
+                    : Colors.blue[100],
+                checkmarkColor: Theme.of(context).colorScheme.onPrimary,
+                labelStyle: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? isSelected
+                          ? Colors.white
+                          : Colors.grey[300]
+                      : isSelected
+                          ? Colors.black87
+                          : Colors.grey[700],
+                ),
               ),
             );
           }).toList(),

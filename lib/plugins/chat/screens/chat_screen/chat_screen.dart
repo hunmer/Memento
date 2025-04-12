@@ -5,6 +5,7 @@ import '../../models/message.dart';
 import '../../chat_plugin.dart';
 import '../../../../services/image_service.dart';
 import '../channel_info_screen.dart';
+import '../user_profile_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 import 'controllers/chat_screen_controller.dart';
@@ -186,6 +187,15 @@ class _ChatScreenState extends State<ChatScreen> {
     await _controller.setFixedSymbol(message, symbol);
   }
 
+  void _navigateToUserProfile(Message message) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserProfileScreen(user: message.user),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -229,6 +239,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   onSetFixedSymbol: _setFixedSymbol,
                   onToggleMessageSelection: _controller.toggleMessageSelection,
                   scrollController: _controller.scrollController,
+                  onAvatarTap: _navigateToUserProfile,
+                  showAvatar: ChatPlugin.instance.showAvatarInChat,
                 ),
               ),
               MessageInput(

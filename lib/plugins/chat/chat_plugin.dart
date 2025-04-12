@@ -12,23 +12,35 @@ import 'screens/channel_list/channel_list_screen.dart';
 import 'screens/timeline/timeline_screen.dart';
 
 class ChatPlugin extends BasePlugin {
-  // 新增：插件设置
-  late bool _showAvatarInChannelList;
+  // 插件设置
+  bool _showAvatarInChat = true;  // 提供默认值
 
-  bool get showAvatarInChannelList => _showAvatarInChannelList;
+  bool get showAvatarInChat => _showAvatarInChat;
 
-  // 新增：设置是否在聊天列表显示自己的头像
-  Future<void> setShowAvatarInChannelList(bool value) async {
-    _showAvatarInChannelList = value;
-    // 保存设置到本地存储
-    await storage.write('chat/settings', {'showAvatarInChannelList': value});
+  Future<void> setShowAvatarInChat(bool value) async {
+    _showAvatarInChat = value;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  // 保存设置
+  Future<void> _saveSettings() async {
+    await storage.write('chat/settings', {
+      'showAvatarInChat': _showAvatarInChat,
+    });
   }
 
   // 初始化插件设置
   Future<void> _initializeSettings() async {
-    // 从存储中加载设置
-    final settings = await storage.read('chat/settings');
-    _showAvatarInChannelList = settings['showAvatarInChannelList'] ?? true;
+    try {
+      // 从存储中加载设置
+      final settings = await storage.read('chat/settings');
+      _showAvatarInChat = settings['showAvatarInChat'] ?? true;
+    } catch (e) {
+      // 如果读取失败，使用默认值
+      debugPrint('Error loading chat settings: $e');
+      _showAvatarInChat = true;
+    }
   }
 
   @override
@@ -39,11 +51,11 @@ class ChatPlugin extends BasePlugin {
         return Column(
           children: [
             SwitchListTile(
-              title: Text(l10n.showAvatarInChannelList),
-              value: _showAvatarInChannelList,
+              title: const Text('在聊天中显示头像'),
+              value: _showAvatarInChat,
               onChanged: (bool value) {
                 setState(() {
-                  setShowAvatarInChannelList(value);
+                  setShowAvatarInChat(value);
                 });
               },
             ),

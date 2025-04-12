@@ -78,8 +78,16 @@ class _MessageInputState extends State<MessageInput> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[800]
+                    : Colors.grey[200],
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[700]!
+                      : Colors.grey[300]!,
+                  width: 1,
+                ),
               ),
               child: KeyboardListener(
                 focusNode: _keyboardListenerFocusNode,
@@ -88,10 +96,20 @@ class _MessageInputState extends State<MessageInput> {
                     : null,
                 child: TextField(
                   controller: widget.controller,
-                  decoration: const InputDecoration(
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black87,
+                  ),
+                  decoration: InputDecoration(
                     hintText: '输入消息...',
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[400]
+                          : Colors.grey[600],
+                    ),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   ),
                   onChanged: widget.onSaveDraft,
                   maxLines: null,
@@ -107,11 +125,14 @@ class _MessageInputState extends State<MessageInput> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Theme.of(context).colorScheme.primary,
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white),
+              icon: Icon(
+                Icons.send,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
               onPressed: () {
                 if (widget.controller.text.trim().isNotEmpty) {
                   widget.onSendMessage(widget.controller.text.trim());
