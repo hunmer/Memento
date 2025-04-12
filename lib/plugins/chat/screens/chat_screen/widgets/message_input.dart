@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
+import 'message_input_actions.dart';
 
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
@@ -89,12 +90,30 @@ class _MessageInputState extends State<MessageInput> {
                   width: 1,
                 ),
               ),
-              child: KeyboardListener(
-                focusNode: _keyboardListenerFocusNode,
-                onKeyEvent: Platform.isMacOS || Platform.isWindows || Platform.isLinux
-                    ? _handleKeyPress
-                    : null,
-                child: TextField(
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => MessageInputActionsDrawer(
+                          actions: getDefaultMessageInputActions(context),
+                        ),
+                      );
+                    },
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[400]
+                        : Colors.grey[600],
+                  ),
+                  Expanded(
+                    child: KeyboardListener(
+                      focusNode: _keyboardListenerFocusNode,
+                      onKeyEvent: Platform.isMacOS || Platform.isWindows || Platform.isLinux
+                          ? _handleKeyPress
+                          : null,
+                      child: TextField(
                   controller: widget.controller,
                   style: TextStyle(
                     color: Theme.of(context).brightness == Brightness.dark
@@ -116,7 +135,10 @@ class _MessageInputState extends State<MessageInput> {
                   keyboardType: TextInputType.multiline,
                   textInputAction: TextInputAction.none,
                   focusNode: _focusNode,
-                ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
