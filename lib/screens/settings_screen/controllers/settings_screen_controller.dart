@@ -44,55 +44,11 @@ class SettingsScreenController extends ChangeNotifier {
     // 保存主题设置到配置管理器
     await globalConfigManager.setThemeMode(newThemeMode);
     
-    // 检查组件是否还在树中
-    if (!_mounted) return;
-    
-    // 更新全局主题
-    final navigator = Navigator.of(currentContext);
-    final currentRoute = ModalRoute.of(currentContext);
-    if (currentRoute == null) return;
-
-    // 获取当前语言环境
-    final currentLocaleSnapshot = currentLocale;
-    
     // 重建应用以应用新主题
-    navigator.pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => MaterialApp(
-          title: 'Memento',
-          debugShowCheckedModeBanner: false,
-          home: const HomeScreen(),
-          locale: currentLocaleSnapshot,
-          themeMode: newThemeMode,
-          theme: ThemeData(
-            colorScheme: const ColorScheme.light(
-              primary: Colors.blue,
-              secondary: Colors.blueAccent,
-            ),
-            useMaterial3: true,
-          ),
-          darkTheme: ThemeData(
-            colorScheme: const ColorScheme.dark(
-              primary: Colors.blue,
-              secondary: Colors.blueAccent,
-            ),
-            useMaterial3: true,
-          ),
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            ChatLocalizations.delegate,
-            DayLocalizationsDelegate.delegate,
-            nodes_l10n.NodesLocalizationsDelegate.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('zh', ''),
-            Locale('en', ''),
-          ],
-        ),
-      ),
+    if (!_mounted) return;
+    await _rebuildApplication(
+      currentContext: currentContext,
+      newThemeMode: newThemeMode,
     );
 
     // 显示切换提示
@@ -336,28 +292,49 @@ class SettingsScreenController extends ChangeNotifier {
     );
   }
 
-  // 切换语言
-  Future<void> toggleLanguage() async {
+  /// 重建应用以应用新的设置
+  Future<void> _rebuildApplication({
+    required BuildContext currentContext,
+    Locale? newLocale,
+    ThemeMode? newThemeMode,
+  }) async {
     if (!_mounted) return;
-    final newLocale = isChineseLocale ? const Locale('en') : const Locale('zh');
     
-    // 保存语言设置到配置管理器
-    await globalConfigManager.setLocale(newLocale);
-    
-    // 使用 MaterialApp 的 Locale 设置来切换语言
-    if (!_mounted) return;
-    final navigator = Navigator.of(context);
-    final currentRoute = ModalRoute.of(context);
+    final navigator = Navigator.of(currentContext);
+    final currentRoute = ModalRoute.of(currentContext);
     if (currentRoute == null) return;
-    
+
+    // 获取当前或新的主题模式
+    final effectiveThemeMode = newThemeMode ?? (Theme.of(currentContext).brightness == Brightness.dark 
+        ? ThemeMode.dark 
+        : ThemeMode.light);
+
+    // 获取当前或新的区域设置
+    final effectiveLocale = newLocale ?? Localizations.localeOf(currentContext);
+
     navigator.pushReplacement(
       MaterialPageRoute(
         builder: (context) => MaterialApp(
           title: 'Memento',
-          debugShowCheckedModeBanner: false, // 关闭调试横幅
-          home: const HomeScreen(), // 始终返回到主屏幕
-          locale: newLocale,
-          localizationsDelegates: [
+          debugShowCheckedModeBanner: false,
+          home: const HomeScreen(),
+          locale: effectiveLocale,
+          themeMode: effectiveThemeMode,
+          theme: ThemeData(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.blue,
+              secondary: Colors.blueAccent,
+            ),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: const ColorScheme.dark(
+              primary: Colors.blue,
+              secondary: Colors.blueAccent,
+            ),
+            useMaterial3: true,
+          ),
+          localizationsDelegates: const [
             AppLocalizations.delegate,
             ChatLocalizations.delegate,
             DayLocalizationsDelegate.delegate,
@@ -370,9 +347,23 @@ class SettingsScreenController extends ChangeNotifier {
             Locale('zh', ''),
             Locale('en', ''),
           ],
-          theme: Theme.of(context), // 保持原主题
         ),
       ),
+    );
+  }
+
+  // 切换语言
+  Future<void> toggleLanguage() async {
+    if (!_mounted) return;
+    final newLocale = isChineseLocale ? const Locale('en') : const Locale('zh');
+    
+    // 保存语言设置到配置管理器
+    await globalConfigManager.setLocale(newLocale);
+    
+    // 重建应用以应用新语言
+    await _rebuildApplication(
+      currentContext: context,
+      newLocale: newLocale,
     );
 
     if (!_mounted) return;
