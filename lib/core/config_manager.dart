@@ -55,6 +55,40 @@ class ConfigManager {
     return null;
   }
   
+  /// 获取主题模式
+  ThemeMode getThemeMode() {
+    final dynamic themeMode = _appConfig['themeMode'];
+    if (themeMode is! String) return ThemeMode.system;
+    
+    switch (themeMode) {
+      case 'dark':
+        return ThemeMode.dark;
+      case 'light':
+        return ThemeMode.light;
+      default:
+        return ThemeMode.system;
+    }
+  }
+
+  /// 设置主题模式
+  Future<void> setThemeMode(ThemeMode mode) async {
+    String themeModeStr;
+    switch (mode) {
+      case ThemeMode.dark:
+        themeModeStr = 'dark';
+        break;
+      case ThemeMode.light:
+        themeModeStr = 'light';
+        break;
+      case ThemeMode.system:
+        themeModeStr = 'system';
+        break;
+    }
+    
+    _appConfig['themeMode'] = themeModeStr;
+    await saveAppConfig();
+  }
+
   /// 设置语言
   Future<void> setLocale(Locale locale) async {
     String localeStr = locale.languageCode;

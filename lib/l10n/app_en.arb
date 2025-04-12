@@ -96,5 +96,17 @@
     "chatPluginDescription": "A plugin for chatting with other users",
     "@chatPluginDescription": {
         "description": "Description of the chat plugin"
+    },
+    "switchedToDarkTheme": "Switched to dark theme",
+    "@switchedToDarkTheme": {
+        "description": "Message shown when switching to dark theme"
+    },
+    "switchedToLightTheme": "Switched to light theme",
+    "@switchedToLightTheme": {
+        "description": "Message shown when switching to light theme"
+    },
+    "darkMode": "Dark Mode",
+    "@darkMode": {
+        "description": "Label for dark mode toggle"
     }
 }

@@ -26,21 +26,85 @@ class SettingsScreenController extends ChangeNotifier {
 
   // 判断是否为中文
   bool get isChineseLocale => currentLocale.languageCode == 'zh';
-  void initTheme() {
+  Future<void> initTheme() async {
     if (!_mounted) return;
-    // 从当前主题获取初始值
-    isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    // 从配置管理器获取保存的主题设置
+    final savedThemeMode = globalConfigManager.getThemeMode();
+    isDarkMode = savedThemeMode == ThemeMode.dark;
     notifyListeners();
   }
 
-  void toggleTheme() {
+  Future<void> toggleTheme() async {
+    // 保存当前BuildContext，因为后面要在异步操作后使用
+    final currentContext = context;
+    
     isDarkMode = !isDarkMode;
-    notifyListeners();
+    final newThemeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+    
+    // 保存主题设置到配置管理器
+    await globalConfigManager.setThemeMode(newThemeMode);
+    
+    // 检查组件是否还在树中
+    if (!_mounted) return;
+    
+    // 更新全局主题
+    final navigator = Navigator.of(currentContext);
+    final currentRoute = ModalRoute.of(currentContext);
+    if (currentRoute == null) return;
+
+    // 获取当前语言环境
+    final currentLocaleSnapshot = currentLocale;
+    
+    // 重建应用以应用新主题
+    navigator.pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => MaterialApp(
+          title: 'Memento',
+          debugShowCheckedModeBanner: false,
+          home: const HomeScreen(),
+          locale: currentLocaleSnapshot,
+          themeMode: newThemeMode,
+          theme: ThemeData(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.blue,
+              secondary: Colors.blueAccent,
+            ),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: const ColorScheme.dark(
+              primary: Colors.blue,
+              secondary: Colors.blueAccent,
+            ),
+            useMaterial3: true,
+          ),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            ChatLocalizations.delegate,
+            DayLocalizationsDelegate.delegate,
+            nodes_l10n.NodesLocalizationsDelegate.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('zh', ''),
+            Locale('en', ''),
+          ],
+        ),
+      ),
+    );
 
     // 显示切换提示
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(isDarkMode ? '已切换到深色主题' : '已切换到浅色主题')),
+    if (!_mounted) return;
+    ScaffoldMessenger.of(currentContext).showSnackBar(
+      SnackBar(
+        content: Text(isDarkMode ? '已切换到深色主题' : '已切换到浅色主题'),
+        duration: const Duration(seconds: 1),
+      ),
     );
+    
+    notifyListeners();
   }
 
   Future<void> exportData() async {

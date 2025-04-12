@@ -92,5 +92,17 @@
     "chatPluginDescription": "用于与其他用户聊天的插件",
     "@chatPluginDescription": {
         "description": "聊天插件的描述"
+    },
+    "switchedToDarkTheme": "已切换到深色主题",
+    "@switchedToDarkTheme": {
+        "description": "切换到深色主题时显示的消息"
+    },
+    "switchedToLightTheme": "已切换到浅色主题",
+    "@switchedToLightTheme": {
+        "description": "切换到浅色主题时显示的消息"
+    },
+    "darkMode": "深色模式",
+    "@darkMode": {
+        "description": "深色模式切换标签"
     }
 }
