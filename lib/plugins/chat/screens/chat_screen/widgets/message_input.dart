@@ -103,6 +103,9 @@ class _MessageInputState extends State<MessageInput> {
                           actions: getDefaultMessageInputActions(
                             context,
                             onSendMessage: widget.onSendMessage,
+                            onFileSelected: (fileMessage) {
+                              // 文件选择后的回调已经在 getDefaultMessageInputActions 中处理
+                            },
                           ),
                         ),
                       );

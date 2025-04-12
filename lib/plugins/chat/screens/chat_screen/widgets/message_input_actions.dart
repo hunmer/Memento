@@ -148,10 +148,11 @@ List<MessageInputAction> getDefaultMessageInputActions(
       title: '文件',
       icon: Icons.attach_file,
       onTap: () async {
-        BuildContext? currentContext = context;
+        // 保存 context 的引用
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
         
         final fileMessage = await FileService.pickFile();
-        if (fileMessage != null && currentContext.mounted) {
+        if (fileMessage != null) {
           // 调用回调函数发送文件消息
           onFileSelected?.call(fileMessage);
           
@@ -177,16 +178,13 @@ List<MessageInputAction> getDefaultMessageInputActions(
           }
           
           // 显示文件选择成功的提示
-          final messenger = ScaffoldMessenger.of(currentContext);
-          if (messenger.mounted) {
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text('已发送文件: ${fileMessage.fileName}'),
-                duration: const Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('已发送文件: ${fileMessage.fileName}'),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       },
     ),
@@ -194,7 +192,8 @@ List<MessageInputAction> getDefaultMessageInputActions(
       title: '图片',
       icon: Icons.image,
       onTap: () async {
-        BuildContext? currentContext = context;
+        // 保存 context 的引用
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
         
         try {
           // 使用ImagePicker选择图片
@@ -204,7 +203,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
             imageQuality: 80, // 图片质量
           );
           
-          if (image != null && currentContext.mounted) {
+          if (image != null) {
             // 将图片转换为文件
             final File imageFile = File(image.path);
             
@@ -238,26 +237,22 @@ List<MessageInputAction> getDefaultMessageInputActions(
             }
             
             // 显示图片选择成功的提示
-            if (currentContext.mounted) {
-              ScaffoldMessenger.of(currentContext).showSnackBar(
-                SnackBar(
-                  content: Text('已发送图片: ${path.basename(image.path)}'),
-                  duration: const Duration(seconds: 2),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            }
-          }
-        } catch (e) {
-          if (currentContext.mounted) {
-            ScaffoldMessenger.of(currentContext).showSnackBar(
+            scaffoldMessenger.showSnackBar(
               SnackBar(
-                content: Text('选择图片失败: $e'),
-                backgroundColor: Colors.red,
+                content: Text('已发送图片: ${path.basename(image.path)}'),
+                duration: const Duration(seconds: 2),
                 behavior: SnackBarBehavior.floating,
               ),
             );
           }
+        } catch (e) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('选择图片失败: $e'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       },
     ),
@@ -265,7 +260,8 @@ List<MessageInputAction> getDefaultMessageInputActions(
       title: '视频',
       icon: Icons.videocam,
       onTap: () async {
-        BuildContext? currentContext = context;
+        // 保存 context 的引用
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
         
         try {
           // 使用ImagePicker选择视频
@@ -275,7 +271,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
             maxDuration: const Duration(minutes: 10), // 限制视频长度
           );
           
-          if (video != null && currentContext.mounted) {
+          if (video != null) {
             // 将视频转换为文件
             final File videoFile = File(video.path);
             
@@ -309,26 +305,22 @@ List<MessageInputAction> getDefaultMessageInputActions(
             }
             
             // 显示视频选择成功的提示
-            if (currentContext.mounted) {
-              ScaffoldMessenger.of(currentContext).showSnackBar(
-                SnackBar(
-                  content: Text('已发送视频: ${path.basename(video.path)}'),
-                  duration: const Duration(seconds: 2),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            }
-          }
-        } catch (e) {
-          if (currentContext.mounted) {
-            ScaffoldMessenger.of(currentContext).showSnackBar(
+            scaffoldMessenger.showSnackBar(
               SnackBar(
-                content: Text('选择视频失败: $e'),
-                backgroundColor: Colors.red,
+                content: Text('已发送视频: ${path.basename(video.path)}'),
+                duration: const Duration(seconds: 2),
                 behavior: SnackBarBehavior.floating,
               ),
             );
           }
+        } catch (e) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('选择视频失败: $e'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       },
     ),
