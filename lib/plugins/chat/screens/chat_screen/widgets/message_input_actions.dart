@@ -5,6 +5,7 @@ import '../../../models/file_message.dart';
 import '../../../models/message.dart';
 import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
+import 'package:logging/logging.dart';
 
 class MessageInputAction {
   final String title;
@@ -133,6 +134,9 @@ List<MessageInputAction> getDefaultMessageInputActions(
   OnFileSelected? onFileSelected,
   OnSendMessage? onSendMessage,
 }) {
+  // 创建FileService实例
+  final fileService = FileService();
+  final logger = Logger('MessageInputActions');
   return [
     MessageInputAction(
       title: '文本样式',
@@ -151,7 +155,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
         // 保存 context 的引用
         final scaffoldMessenger = ScaffoldMessenger.of(context);
         
-        final fileMessage = await FileService.pickFile();
+        final fileMessage = await fileService.pickFile();
         if (fileMessage != null) {
           // 调用回调函数发送文件消息
           onFileSelected?.call(fileMessage);
@@ -208,16 +212,15 @@ List<MessageInputAction> getDefaultMessageInputActions(
             final File imageFile = File(image.path);
             
             // 保存图片到应用目录
-            final savedFile = await FileService.saveImage(imageFile);
+            final savedFile = await fileService.saveImage(imageFile);
             final fileMessage = await FileMessage.fromFile(savedFile);
-            
             // 调用回调函数发送图片消息
             onFileSelected?.call(fileMessage);
             
             // 如果提供了onSendMessage回调，创建图片类型的消息
             if (onSendMessage != null) {
-              // 创建图片消息内容
-              final fileContent = '🖼️ 图片: ${fileMessage.fileName}';
+              // 创建Markdown格式的图片消息内容
+              final fileContent = '![${fileMessage.fileName}](${fileMessage.filePath} "${fileMessage.fileName}")';
               
               // 创建图片元数据
               final fileMetadata = {
@@ -276,28 +279,52 @@ List<MessageInputAction> getDefaultMessageInputActions(
             final File videoFile = File(video.path);
             
             // 保存视频到应用目录
-            final savedFile = await FileService.saveVideo(videoFile);
+            final savedFile = await fileService.saveVideo(videoFile);
             final fileMessage = await FileMessage.fromFile(savedFile);
-            
+            logger.info('保存视频文件: ${savedFile.path}');
             // 调用回调函数发送视频消息
             onFileSelected?.call(fileMessage);
             
             // 如果提供了onSendMessage回调，创建视频类型的消息
             if (onSendMessage != null) {
-              // 创建视频消息内容
-              final fileContent = '🎬 视频: ${fileMessage.fileName} (${fileMessage.formattedSize})';
+              // 尝试获取视频封面
+              String? thumbnailPath;
+              try {
+                thumbnailPath = await fileService.getVideoThumbnail(savedFile.path);
+              } catch (e) {
+                logger.warning('获取视频封面失败: $e');
+                // 如果获取封面失败，使用默认视频图标
+                thumbnailPath = null;
+              }
               
-              // 创建视频元数据
+              // 创建Markdown格式的视频消息内容
+              String fileContent;
+              if (thumbnailPath != null) {
+                // 如果有封面，使用封面图片
+                fileContent = '[![${fileMessage.fileName}](${thumbnailPath} "${fileMessage.fileName} - 点击播放")](${fileMessage.filePath})';
+              } else {
+                // 如果没有封面，使用纯文本格式
+                fileContent = '🎥 ${fileMessage.fileName} (${fileMessage.formattedSize})';
+              }
+              
+              // 创建视频元数据，包含封面路径（如果有的话）
+              final Map<String, dynamic> fileInfo = {
+                'id': fileMessage.id,
+                'fileName': fileMessage.fileName,
+                'filePath': fileMessage.filePath,
+                'fileSize': fileMessage.fileSize,
+                'extension': fileMessage.extension,
+                'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
+                'isVideo': true,
+              };
+              
+              // 只有在成功生成缩略图的情况下才添加缩略图路径
+              if (thumbnailPath != null) {
+                fileInfo['thumbnailPath'] = thumbnailPath;
+              }
+              
               final fileMetadata = {
-                Message.metadataKeyFileInfo: {
-                  'id': fileMessage.id,
-                  'fileName': fileMessage.fileName,
-                  'filePath': fileMessage.filePath,
-                  'fileSize': fileMessage.fileSize,
-                  'extension': fileMessage.extension,
-                  'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
-                  'isVideo': true,
-                }
+                Message.metadataKeyFileInfo: fileInfo
               };
               
               // 发送视频消息

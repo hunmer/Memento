@@ -26,11 +26,12 @@ class FileMessage {
   
   // 根据文件路径确定文件类型
   static FileMessageType _determineFileType(String filePath) {
-    if (FileService.isImage(filePath)) {
+    final fileService = FileService();
+    if (fileService.isImage(filePath)) {
       return FileMessageType.image;
-    } else if (FileService.isVideo(filePath)) {
+    } else if (fileService.isVideo(filePath)) {
       return FileMessageType.video;
-    } else if (FileService.isAudio(filePath)) {
+    } else if (fileService.isAudio(filePath)) {
       return FileMessageType.audio;
     } else {
       final ext = path.extension(filePath).toLowerCase();
@@ -73,7 +74,8 @@ class FileMessage {
   // 从文件创建FileMessage
   static Future<FileMessage> fromFile(File file) async {
     final stats = await file.stat();
-    final mimeType = FileService.getMimeType(file.path);
+    final fileService = FileService();
+    final mimeType = fileService.getMimeType(file.path);
     final fileType = _determineFileType(file.path);
     
     return FileMessage(

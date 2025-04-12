@@ -1,14 +1,13 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
+import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail.dart';
 import '../models/file_message.dart';
 
 class FileService {
-  // 应用文件存储目录
-  static Future<Directory> get _appFilesDir async {
+  Future<Directory> get _appFilesDir async {
     final appDir = await getApplicationDocumentsDirectory();
     final filesDir = Directory('${appDir.path}/chat_files');
     if (!await filesDir.exists()) {
@@ -18,7 +17,7 @@ class FileService {
   }
 
   // 选择文件
-  static Future<FileMessage?> pickFile() async {
+  Future<FileMessage?> pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.any,
       allowMultiple: false,
@@ -33,7 +32,7 @@ class FileService {
   }
 
   // 保存文件到应用目录
-  static Future<File> _saveFile(File sourceFile, {String? subdirectory}) async {
+  Future<File> _saveFile(File sourceFile, {String? subdirectory}) async {
     final filesDir = await _appFilesDir;
     String targetDir = filesDir.path;
     
@@ -57,17 +56,17 @@ class FileService {
   }
 
   // 保存图片到应用目录
-  static Future<File> saveImage(File imageFile) async {
+  Future<File> saveImage(File imageFile) async {
     return await _saveFile(imageFile, subdirectory: 'images');
   }
 
   // 保存视频到应用目录
-  static Future<File> saveVideo(File videoFile) async {
+  Future<File> saveVideo(File videoFile) async {
     return await _saveFile(videoFile, subdirectory: 'videos');
   }
 
   // 删除文件
-  static Future<bool> deleteFile(String filePath) async {
+  Future<bool> deleteFile(String filePath) async {
     try {
       final file = File(filePath);
       if (await file.exists()) {
@@ -76,13 +75,13 @@ class FileService {
       }
       return false;
     } catch (e) {
-      print('删除文件错误: $e');
+      _logError('删除文件错误: $e');
       return false;
     }
   }
 
   // 获取文件MIME类型
-  static String? getMimeType(String filePath) {
+  String? getMimeType(String filePath) {
     final ext = path.extension(filePath).toLowerCase();
     switch (ext) {
       case '.pdf':
@@ -101,33 +100,7 @@ class FileService {
         return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
       case '.txt':
         return 'text/plain';
-      case '.png':
-        return 'image/png';
-      case '.jpg':
-      case '.jpeg':
-        return 'image/jpeg';
-      case '.gif':
-        return 'image/gif';
-      case '.mp3':
-        return 'audio/mpeg';
-      case '.mp4':
-        return 'video/mp4';
-      case '.zip':
-        return 'application/zip';
-      // 新增视频格式支持
-      case '.mp4':
-        return 'video/mp4';
-      case '.mov':
-        return 'video/quicktime';
-      case '.avi':
-        return 'video/x-msvideo';
-      case '.wmv':
-        return 'video/x-ms-wmv';
-      case '.flv':
-        return 'video/x-flv';
-      case '.webm':
-        return 'video/webm';
-      // 新增图片格式支持
+      // 图片格式
       case '.png':
         return 'image/png';
       case '.jpg':
@@ -141,13 +114,31 @@ class FileService {
         return 'image/webp';
       case '.svg':
         return 'image/svg+xml';
+      // 音频格式
+      case '.mp3':
+        return 'audio/mpeg';
+      // 视频格式
+      case '.mp4':
+        return 'video/mp4';
+      case '.mov':
+        return 'video/quicktime';
+      case '.avi':
+        return 'video/x-msvideo';
+      case '.wmv':
+        return 'video/x-ms-wmv';
+      case '.flv':
+        return 'video/x-flv';
+      case '.webm':
+        return 'video/webm';
+      case '.zip':
+        return 'application/zip';
       default:
         return 'application/octet-stream';
     }
   }
 
   // 获取文件类型
-  static FileType getFileType(String filePath) {
+  FileType getFileType(String filePath) {
     final ext = path.extension(filePath).toLowerCase();
     switch (ext) {
       case '.jpg':
@@ -176,17 +167,76 @@ class FileService {
   }
 
   // 检查文件是否为图片
-  static bool isImage(String filePath) {
+  bool isImage(String filePath) {
     return getFileType(filePath) == FileType.image;
   }
 
   // 检查文件是否为视频
-  static bool isVideo(String filePath) {
+  bool isVideo(String filePath) {
     return getFileType(filePath) == FileType.video;
   }
 
   // 检查文件是否为音频
-  static bool isAudio(String filePath) {
+  bool isAudio(String filePath) {
     return getFileType(filePath) == FileType.audio;
+  }
+
+  // 获取视频缩略图
+  Future<String?> getVideoThumbnail(String videoPath) async {
+    try {
+      // 首先检查视频文件是否存在，并获取绝对路径
+      final videoFile = File(videoPath);
+      if (!await videoFile.exists()) {
+        _logError('视频文件不存在: $videoPath');
+        return null;
+      }
+      final absoluteVideoPath = videoFile.absolute.path;
+      
+      final filesDir = await _appFilesDir;
+      final thumbnailsDir = Directory('${filesDir.path}/thumbnails');
+      
+      // 确保缩略图目录存在
+      if (!await thumbnailsDir.exists()) {
+        await thumbnailsDir.create(recursive: true);
+      }
+
+      // 生成唯一的缩略图文件名并确保是绝对路径
+      final uuid = const Uuid().v4();
+      final thumbnailFile = File('${thumbnailsDir.path}/$uuid.jpg');
+      final absoluteThumbnailPath = thumbnailFile.absolute.path;
+
+      try {
+        // 使用 fc_native_video_thumbnail 生成缩略图，使用绝对路径
+        final plugin = FcNativeVideoThumbnail();
+        final thumbnailGenerated = await plugin.getVideoThumbnail(
+          srcFile: absoluteVideoPath,
+          destFile: absoluteThumbnailPath,
+          width: 200, 
+          height: 200,
+          format: 'jpeg',
+          quality: 75,
+        );
+        
+        // 检查缩略图是否成功生成
+        if (thumbnailGenerated && await thumbnailFile.exists()) {
+          return absoluteThumbnailPath;
+        } else {
+          _logError('缩略图生成失败，返回值为空或文件不存在');
+          return null;
+        }
+      } catch (thumbnailError) {
+        _logError('视频缩略图生成失败: $thumbnailError');
+        return null;
+      }
+    } catch (e) {
+      _logError('处理视频缩略图时出错: $e');
+      return null;
+    }
+  }
+
+  // 记录错误信息
+  void _logError(String message) {
+    // TODO: 替换为proper logging
+    print(message);
   }
 }
