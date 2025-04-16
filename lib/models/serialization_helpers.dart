@@ -74,7 +74,7 @@ class MessageSerializer {
     return {
       'id': message.id,
       'content': message.content,
-      'userId': message.user.id,
+      'user': UserSerializer.toJson(message.user),
       'date': message.date.toIso8601String(),
       'type': message.type.toString().split('.').last,
       'editedAt': message.editedAt?.toIso8601String(),
@@ -83,12 +83,8 @@ class MessageSerializer {
   }
 
   static Message fromJson(Map<String, dynamic> json, List<User> users) {
-    // 查找用户
-    final userId = json['userId'] as String;
-    final user = users.firstWhere(
-      (u) => u.id == userId,
-      orElse: () => User(id: userId, username: 'Unknown User'),
-    );
+    // 从消息中直接获取完整的用户信息
+    final user = UserSerializer.fromJson(json['user'] as Map<String, dynamic>);
 
     return Message(
       id: json['id'] as String,

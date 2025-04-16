@@ -3,7 +3,7 @@ import 'dart:math';
 import '../l10n/chat_localizations.dart';
 import '../models/user.dart';
 import '../models/message.dart';
-import '../widgets/message_bubble.dart';
+import 'chat_screen/widgets/message_bubble.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -58,7 +58,16 @@ class _ChatScreenState extends State<ChatScreen> {
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
-                return MessageBubble(message: message);
+                return MessageBubble(
+                  message: message,
+                  isSelected: false,
+                  isMultiSelectMode: false,
+                  onEdit: () {},
+                  onDelete: () {},
+                  onCopy: () {},
+                  onSetFixedSymbol: (_) {},
+                  showAvatar: true,
+                );
               },
             ),
           ),

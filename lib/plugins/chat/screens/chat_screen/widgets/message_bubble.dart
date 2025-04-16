@@ -33,19 +33,15 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCurrentUser = message.type == MessageType.sent;
-    
+
     return GestureDetector(
-      onLongPress: onLongPress, 
+      onLongPress: onLongPress,
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.blue.withAlpha(25)
-              : Colors.transparent,
-          border: isSelected
-              ? Border.all(color: Colors.blue, width: 1)
-              : null,
+          color: isSelected ? Colors.blue.withAlpha(25) : Colors.transparent,
+          border: isSelected ? Border.all(color: Colors.blue, width: 1) : null,
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
@@ -53,26 +49,36 @@ class MessageBubble extends StatelessWidget {
               isCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!isCurrentUser && showAvatar)
+            if (!isCurrentUser && showAvatar) ...[
               GestureDetector(
                 onTap: onAvatarTap,
                 child: CircleAvatar(
-                  backgroundImage: message.user.iconPath != null
-                      ? NetworkImage(message.user.iconPath!)
-                      : null,
-                  child: message.user.iconPath == null
-                      ? Text(message.user.username.isNotEmpty
-                          ? message.user.username[0]
-                          : '?')
-                      : null,
+                  backgroundImage:
+                      message.user.iconPath != null
+                          ? NetworkImage(message.user.iconPath!)
+                          : null,
+                  child:
+                      message.user.iconPath == null
+                          ? Text(
+                            message.user.username.isNotEmpty
+                                ? message.user.username[0]
+                                : '?',
+                          )
+                          : null,
                 ),
               ),
-            const SizedBox(width: 8),
+              const SizedBox(width: 8),
+            ],
+            if (isCurrentUser && showAvatar) ...[
+              const Spacer(),
+              const SizedBox(width: 8),
+            ],
             Flexible(
               child: Column(
-                crossAxisAlignment: isCurrentUser
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    isCurrentUser
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
                 children: [
                   if (!isCurrentUser) // 只有非当前用户的消息才显示用户名
                     Text(
@@ -83,8 +89,7 @@ class MessageBubble extends StatelessWidget {
                         color: Colors.grey[600],
                       ),
                     ),
-                  if (!isCurrentUser)
-                    const SizedBox(height: 2),
+                  if (!isCurrentUser) const SizedBox(height: 2),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -97,11 +102,16 @@ class MessageBubble extends StatelessWidget {
                             if (message.fixedSymbol != null)
                               Container(
                                 margin: const EdgeInsets.only(top: 2),
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 1,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.amber.shade100,
                                   borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: Colors.amber.shade200),
+                                  border: Border.all(
+                                    color: Colors.amber.shade200,
+                                  ),
                                 ),
                                 child: Text(
                                   message.fixedSymbol!,
@@ -136,9 +146,10 @@ class MessageBubble extends StatelessWidget {
                         ),
                         padding: const EdgeInsets.all(10.0),
                         decoration: BoxDecoration(
-                          color: isCurrentUser
-                              ? Colors.blue[100]
-                              : Colors.grey[200],
+                          color:
+                              isCurrentUser
+                                  ? Colors.blue[100]
+                                  : Colors.grey[200],
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                         child: Row(
@@ -165,11 +176,16 @@ class MessageBubble extends StatelessWidget {
                             if (message.fixedSymbol != null)
                               Container(
                                 margin: const EdgeInsets.only(top: 2),
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 1,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.amber.shade100,
                                   borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: Colors.amber.shade200),
+                                  border: Border.all(
+                                    color: Colors.amber.shade200,
+                                  ),
                                 ),
                                 child: Text(
                                   message.fixedSymbol!,
@@ -202,7 +218,28 @@ class MessageBubble extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            if (isCurrentUser && showAvatar) ...[
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: onAvatarTap,
+                child: CircleAvatar(
+                  backgroundImage:
+                      message.user.iconPath != null
+                          ? NetworkImage(message.user.iconPath!)
+                          : null,
+                  child:
+                      message.user.iconPath == null
+                          ? Text(
+                            message.user.username.isNotEmpty
+                                ? message.user.username[0]
+                                : '?',
+                          )
+                          : null,
+                ),
+              ),
+            ] else if (!isCurrentUser && !showAvatar) ...[
+              const SizedBox(width: 8),
+            ],
           ],
         ),
       ),

@@ -13,7 +13,7 @@ import 'screens/timeline/timeline_screen.dart';
 
 class ChatPlugin extends BasePlugin {
   // 插件设置
-  bool _showAvatarInChat = true;  // 提供默认值
+  bool _showAvatarInChat = true; // 提供默认值
 
   bool get showAvatarInChat => _showAvatarInChat;
 
@@ -108,9 +108,9 @@ class ChatPlugin extends BasePlugin {
   // 获取频道列表的getter
   List<Channel> get channels => _channels;
 
-  late String _name =  'Chat';
-  late String _description =  'A plugin for chatting with other users';
-  
+  late String _name = 'Chat';
+  late String _description = 'A plugin for chatting with other users';
+
   @override
   String get name => _name;
 
@@ -119,7 +119,7 @@ class ChatPlugin extends BasePlugin {
 
   @override
   String get description => _description;
-  
+
   @override
   String get author => 'Zhuanz';
 
@@ -292,17 +292,17 @@ class ChatPlugin extends BasePlugin {
     try {
       // 确保目录存在
       await storage.createDirectory('chat/draft');
-      
+
       // 检查频道是否存在
       final index = _channels.indexWhere((c) => c.id == channelId);
       if (index == -1) {
         debugPrint('Cannot save draft: Channel $channelId not found');
         return;
       }
-      
+
       // 检查草稿文件是否存在
       final draftExists = await storage.fileExists('chat/draft/$channelId');
-      
+
       if (draft.trim().isEmpty) {
         // 如果草稿为空且文件存在，删除草稿文件
         if (draftExists) {
@@ -316,7 +316,7 @@ class ChatPlugin extends BasePlugin {
 
       // 更新内存中的频道草稿
       _channels[index].draft = draft.trim().isEmpty ? null : draft;
-      
+
       // 通知监听器数据已更新，以便更新UI
       notifyListeners();
     } catch (e) {
@@ -330,7 +330,7 @@ class ChatPlugin extends BasePlugin {
       debugPrint('ChatPlugin is not initialized yet. Cannot load draft.');
       return null;
     }
-    
+
     try {
       // 先检查文件是否存在
       final fileExists = await storage.fileExists('chat/draft/$channelId');
@@ -340,7 +340,7 @@ class ChatPlugin extends BasePlugin {
         await storage.write('chat/draft/$channelId', {'draft': ''});
         return null;
       }
-      
+
       // 读取草稿数据
       final draftData = await storage.read('chat/draft/$channelId');
       if (draftData.isNotEmpty && draftData.containsKey('draft')) {
@@ -375,7 +375,7 @@ class ChatPlugin extends BasePlugin {
       await Future.wait([
         storage.delete('chat/channel/$channelId'),
         storage.delete('chat/messages/$channelId'),
-        storage.delete('chat/draft/$channelId')
+        storage.delete('chat/draft/$channelId'),
       ]);
 
       // 从内存中移除频道
@@ -398,8 +398,24 @@ class ChatPlugin extends BasePlugin {
     try {
       // 删除消息数据
       await storage.delete('chat/messages/$channelId');
+
+      // 重新初始化一个空的消息文件
+      await storage.write('chat/messages/$channelId', {'messages': []});
+
+      // 更新内存中的频道消息
+      final channelIndex = _channels.indexWhere((c) => c.id == channelId);
+      if (channelIndex != -1) {
+        _channels[channelIndex].messages.clear();
+        _channels[channelIndex].lastMessage = null;
+      }
+
+      // 通知监听器数据已更新
+      notifyListeners();
+
+      debugPrint('Successfully cleared messages for channel $channelId');
     } catch (e) {
       debugPrint('Error deleting channel messages: $e');
+      rethrow; // 重新抛出异常，让调用者知道删除失败
     }
   }
 
@@ -442,13 +458,9 @@ class ChatPlugin extends BasePlugin {
           'channel': ChannelSerializer.toJson(channel),
         }),
         // 初始化空消息列表
-        storage.write('chat/messages/${channel.id}', {
-          'messages': [],
-        }),
+        storage.write('chat/messages/${channel.id}', {'messages': []}),
         // 初始化空草稿
-        storage.write('chat/draft/${channel.id}', {
-          'draft': '',
-        }),
+        storage.write('chat/draft/${channel.id}', {'draft': ''}),
       ]);
 
       // 更新频道列表
@@ -463,10 +475,10 @@ class ChatPlugin extends BasePlugin {
     } catch (e) {
       // 如果创建过程中出现错误，需要清理已创建的内容
       debugPrint('Error creating channel: $e');
-      
+
       // 从内存中移除
       _channels.removeWhere((c) => c.id == channel.id);
-      
+
       // 尝试清理已创建的文件
       try {
         await Future.wait([
@@ -475,9 +487,11 @@ class ChatPlugin extends BasePlugin {
           storage.delete('chat/draft/${channel.id}'),
         ]);
       } catch (cleanupError) {
-        debugPrint('Error cleaning up after failed channel creation: $cleanupError');
+        debugPrint(
+          'Error cleaning up after failed channel creation: $cleanupError',
+        );
       }
-      
+
       // 重新抛出异常
       rethrow;
     }
@@ -487,10 +501,10 @@ class ChatPlugin extends BasePlugin {
   Widget buildMainView(BuildContext context) {
     // 更新本地化文本
     updateLocalizedStrings(context);
-    
+
     final l10n = ChatLocalizations.of(context);
     final theme = Theme.of(context);
-    
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -529,7 +543,7 @@ class ChatPlugin extends BasePlugin {
     // 设置默认名称和描述（以防在initialize前使用）
     _name = 'Chat';
     _description = 'A plugin for chatting with other users';
-    
+
     // 初始化插件
     await initialize();
 

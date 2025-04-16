@@ -355,12 +355,23 @@ class ChatScreenController extends ChangeNotifier {
 
   Future<void> clearMessages() async {
     try {
+      // 清空内存中的消息
       messages.clear();
+
+      // 删除存储中的消息
+      await chatPlugin.deleteChannelMessages(channel.id);
+
+      // 保存空消息列表到存储
       await chatPlugin.saveMessages(channel.id, messages);
+
+      // 通知UI更新
       notifyListeners();
+
+      _logger.info('Messages cleared successfully');
     } catch (e) {
-      // Handle error
       _logger.warning('Error clearing messages: $e');
+      // 如果清空失败，重新加载消息
+      await _loadMessages();
     }
   }
 
