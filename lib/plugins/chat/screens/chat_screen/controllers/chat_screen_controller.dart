@@ -34,16 +34,42 @@ class ChatScreenController extends ChangeNotifier {
     required this.chatPlugin,
     required this.audioPlayer,
   }) {
-    _loadMessages();
+    // 初始化时计算并加载最后一页
+    _initializeAndLoadLastPage();
     _setupScrollListener();
     _initializeCurrentUser();
-    
-    // 在初始化完成后请求滚动到最新消息
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  }
+
+  void _initializeAndLoadLastPage() async {
+    // 获取最新的消息总数
+    final channelIndex = chatPlugin.channels.indexWhere(
+      (c) => c.id == channel.id,
+    );
+    if (channelIndex != -1) {
+      final totalMessages = chatPlugin.channels[channelIndex].messages.length;
+
+      // 计算总页数（向上取整）
+      final totalPages = (totalMessages / pageSize).ceil();
+
+      // 设置当前页为第一页，显示最新消息
+      currentPage = 1;
+
+      _logger.info('Initializing chat screen:');
+      _logger.info('- Total messages: $totalMessages');
+      _logger.info('- Total pages: $totalPages');
+      _logger.info('- Starting at page: $currentPage');
+
+      // 加载第一页消息
+      await _loadMessages();
+
+      // 确保滚动到最新消息
       if (messages.isNotEmpty) {
-        requestScrollToLatest();
+        // 使用延迟以确保布局完成
+        Future.delayed(const Duration(milliseconds: 100), () {
+          requestScrollToLatest();
+        });
       }
-    });
+    }
   }
 
   void _initializeCurrentUser() {
@@ -67,39 +93,53 @@ class ChatScreenController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 从ChatPlugin加载最新的消息，而不是使用传入的channel.messages
-      final channelIndex = chatPlugin.channels.indexWhere((c) => c.id == channel.id);
+      // 从ChatPlugin加载最新的消息
+      final channelIndex = chatPlugin.channels.indexWhere(
+        (c) => c.id == channel.id,
+      );
       if (channelIndex == -1) {
         _logger.warning('Channel not found in ChatPlugin');
         return;
       }
-      
-      // 获取最新的消息列表
-      final latestMessages = chatPlugin.channels[channelIndex].messages;
-      
-      // 清空现有消息，确保不会重复
-      if (currentPage == 1) {
-        messages.clear();
-      }
-      
-      // 分页加载消息
+
+      // 获取最新的消息列表并按时间倒序排序
+      final allMessages = List<Message>.from(
+        chatPlugin.channels[channelIndex].messages,
+      )..sort((a, b) => b.date.compareTo(a.date));
+
+      // 计算当前页的消息范围
+      final totalMessages = allMessages.length;
       final startIndex = (currentPage - 1) * pageSize;
       final endIndex = startIndex + pageSize;
-      
-      if (startIndex < latestMessages.length) {
-        final newMessages = latestMessages.sublist(
+
+      _logger.info(
+        'Loading messages: Page $currentPage, Total: $totalMessages, Range: $startIndex-$endIndex',
+      );
+
+      // 确保不会超出范围
+      if (startIndex < totalMessages) {
+        final pageMessages = allMessages.sublist(
           startIndex,
-          endIndex < latestMessages.length ? endIndex : latestMessages.length,
+          endIndex < totalMessages ? endIndex : totalMessages,
         );
-        messages.addAll(newMessages);
+
+        // 如果是第一页，清空现有消息
+        if (currentPage == 1) {
+          messages.clear();
+          messages.addAll(pageMessages);
+          // 第一页加载完成后滚动到顶部
+          requestScrollToLatest();
+        } else {
+          // 如果是加载更多消息，添加到现有消息列表末尾
+          messages.addAll(pageMessages);
+        }
+
+        _logger.info(
+          'Loaded ${pageMessages.length} messages for page $currentPage',
+        );
       }
-      
+
       _updateDatesWithMessages();
-      
-      // 在加载完消息后请求滚动到最新位置
-      if (currentPage == 1) {
-        requestScrollToLatest();
-      }
     } catch (e) {
       // Handle error
       _logger.warning('Error loading messages: $e');
@@ -110,8 +150,26 @@ class ChatScreenController extends ChangeNotifier {
   }
 
   Future<void> _loadMoreMessages() async {
-    currentPage++;
-    await _loadMessages();
+    if (isLoading) return;
+
+    // 获取总消息数
+    final channelIndex = chatPlugin.channels.indexWhere(
+      (c) => c.id == channel.id,
+    );
+    if (channelIndex == -1) return;
+
+    final totalMessages = chatPlugin.channels[channelIndex].messages.length;
+    final totalPages = (totalMessages / pageSize).ceil();
+
+    _logger.info('Current page: $currentPage, Total pages: $totalPages');
+
+    // 如果还有更早的消息页可以加载
+    if (currentPage < totalPages) {
+      currentPage++;
+      await _loadMessages();
+    } else {
+      _logger.info('No more messages to load');
+    }
   }
 
   void _updateDatesWithMessages() {
@@ -193,7 +251,7 @@ class ChatScreenController extends ChangeNotifier {
       _logger.warning('Error deleting message: $e');
     }
   }
-  
+
   Future<void> setFixedSymbol(Message message, String? symbol) async {
     try {
       final index = messages.indexWhere((m) => m.id == message.id);
@@ -218,7 +276,7 @@ class ChatScreenController extends ChangeNotifier {
   void _tryScrollToLatest() {
     // 如果不需要滚动，直接返回
     if (!_needsScroll) return;
-    
+
     // 如果ScrollController还没有附加到视图，等待下一帧
     if (!scrollController.hasClients) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _tryScrollToLatest());
@@ -236,9 +294,13 @@ class ChatScreenController extends ChangeNotifier {
     }
   }
 
-  Future<void> sendMessage(String content, {Map<String, dynamic>? metadata, MessageType? type}) async {
+  Future<void> sendMessage(
+    String content, {
+    Map<String, dynamic>? metadata,
+    MessageType? type,
+  }) async {
     if (content.trim().isEmpty) return;
-    
+
     try {
       final newMessage = Message(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -248,12 +310,14 @@ class ChatScreenController extends ChangeNotifier {
         type: type ?? MessageType.sent,
         metadata: metadata,
       );
-      
+
       // 添加消息到本地列表
       messages.insert(0, newMessage);
-      
+
       // 获取ChatPlugin中的频道索引
-      final channelIndex = chatPlugin.channels.indexWhere((c) => c.id == channel.id);
+      final channelIndex = chatPlugin.channels.indexWhere(
+        (c) => c.id == channel.id,
+      );
       if (channelIndex != -1) {
         // 直接使用ChatPlugin的addMessage方法，它会同时更新内存和存储
         await chatPlugin.addMessage(channel.id, newMessage);
@@ -261,17 +325,17 @@ class ChatScreenController extends ChangeNotifier {
         // 如果找不到频道，则使用旧方法保存
         await chatPlugin.saveMessages(channel.id, messages);
       }
-      
+
       // 清除草稿
       draftController.clear();
       await chatPlugin.saveDraft(channel.id, '');
-      
+
       // 请求滚动到最新消息
       requestScrollToLatest();
-      
+
       // 通知UI更新
       notifyListeners();
-      
+
       // 在主线程上播放声音
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
