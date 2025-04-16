@@ -37,13 +37,13 @@ class SettingsScreenController extends ChangeNotifier {
   Future<void> toggleTheme() async {
     // 保存当前BuildContext，因为后面要在异步操作后使用
     final currentContext = context;
-    
+
     isDarkMode = !isDarkMode;
     final newThemeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-    
+
     // 保存主题设置到配置管理器
     await globalConfigManager.setThemeMode(newThemeMode);
-    
+
     // 重建应用以应用新主题
     if (!_mounted) return;
     await _rebuildApplication(
@@ -59,7 +59,7 @@ class SettingsScreenController extends ChangeNotifier {
         duration: const Duration(seconds: 1),
       ),
     );
-    
+
     notifyListeners();
   }
 
@@ -83,7 +83,7 @@ class SettingsScreenController extends ChangeNotifier {
       }
 
       // 创建一个临时目录来存储要压缩的文件
-      final tempDir = await Directory.systemTemp.createTemp('memento_export_');
+      final tempDir = await Directory.systemTemp.createTemp('memento_temp_');
 
       // 为每个选中的插件创建一个目录并复制数据
       for (final pluginId in selectedPlugins) {
@@ -114,22 +114,42 @@ class SettingsScreenController extends ChangeNotifier {
 
       if (savePath != null) {
         zipFile.create(savePath);
-        await zipFile.addDirectory(tempDir);
+
+        // 逐个添加插件目录到 ZIP
+        for (final pluginId in selectedPlugins) {
+          final pluginDir = Directory('${tempDir.path}/$pluginId');
+          if (await pluginDir.exists()) {
+            // 遍历插件目录中的所有文件和子目录
+            await for (final entity in pluginDir.list(recursive: true)) {
+              if (entity is File) {
+                // 计算相对于插件目录的路径
+                final relativePath = path.relative(
+                  entity.path,
+                  from: pluginDir.path,
+                );
+                // 在 ZIP 中使用 pluginId 作为顶级目录
+                final zipPath = path.join(pluginId, relativePath);
+                await zipFile.addFile(entity, zipPath);
+              }
+            }
+          }
+        }
+
         zipFile.close();
 
         // 删除临时目录
         await tempDir.delete(recursive: true);
 
         if (!_mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('数据已导出到: $savePath')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('数据已导出到: $savePath')));
       }
     } catch (e) {
       if (!_mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('导出失败: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('导出失败: $e')));
     }
   }
 
@@ -146,16 +166,12 @@ class SettingsScreenController extends ChangeNotifier {
         if (entity is Directory) {
           // 使用path包获取平台无关的路径分隔符
           final basename = path.basename(entity.path);
-          var newDirectory = Directory(
-            path.join(destination.path, basename),
-          );
+          var newDirectory = Directory(path.join(destination.path, basename));
           await newDirectory.create();
           await _copyDirectory(entity.absolute, newDirectory);
         } else if (entity is File) {
           final basename = path.basename(entity.path);
-          await entity.copy(
-            path.join(destination.path, basename),
-          );
+          await entity.copy(path.join(destination.path, basename));
         }
       }
     } catch (e) {
@@ -244,10 +260,13 @@ class SettingsScreenController extends ChangeNotifier {
 
               for (final file in archive) {
                 // 使用path包处理路径分隔符
-                if (file.name.startsWith('$folder${path.separator}') || 
-                    file.name.startsWith('$folder/')) {  // 兼容ZIP中可能使用的'/'分隔符
+                if (file.name.startsWith('$folder${path.separator}') ||
+                    file.name.startsWith('$folder/')) {
+                  // 兼容ZIP中可能使用的'/'分隔符
                   final relativePath = file.name.substring(folder.length + 1);
-                  final targetFile = File(path.join(pluginDir.path, relativePath));
+                  final targetFile = File(
+                    path.join(pluginDir.path, relativePath),
+                  );
                   if (importMethod == 'overwrite' || !targetFile.existsSync()) {
                     await targetFile.create(recursive: true);
                     await targetFile.writeAsBytes(file.content);
@@ -257,38 +276,45 @@ class SettingsScreenController extends ChangeNotifier {
             }
 
             if (!_mounted) return;
-            // 重新加载应用
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('数据导入成功，正在重新加载应用...')),
+            // 显示导入成功提示
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('数据导入成功，正在重新加载应用...')));
+
+            // 重建应用以加载新导入的数据
+            await _rebuildApplication(
+              currentContext: context,
+              // 保持当前的主题和语言设置
+              newThemeMode:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? ThemeMode.dark
+                      : ThemeMode.light,
+              newLocale: Localizations.localeOf(context),
             );
-            // TODO: 实现应用重新加载逻辑，可以通过重新构建主应用来实现
-            // 例如：Navigator.of(context).pushAndRemoveUntil(
-            //   MaterialPageRoute(builder: (_) => const MyApp()),
-            //   (route) => false,
-            // );
           }
         }
       }
     } catch (e) {
       if (!_mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('导入失败: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('导入失败: $e')));
     }
   }
 
   void showAboutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AboutDialog(
-        applicationName: '插件管理器',
-        applicationVersion: '1.0.0',
-        applicationLegalese: '© 2023 插件管理器',
-        children: [
-          const SizedBox(height: 20),
-          const Text('这是一个用于管理插件的应用程序。'),
-        ],
-      ),
+      builder:
+          (context) => AboutDialog(
+            applicationName: '插件管理器',
+            applicationVersion: '1.0.0',
+            applicationLegalese: '© 2023 插件管理器',
+            children: [
+              const SizedBox(height: 20),
+              const Text('这是一个用于管理插件的应用程序。'),
+            ],
+          ),
     );
   }
 
@@ -299,55 +325,55 @@ class SettingsScreenController extends ChangeNotifier {
     ThemeMode? newThemeMode,
   }) async {
     if (!_mounted) return;
-    
+
     final navigator = Navigator.of(currentContext);
     final currentRoute = ModalRoute.of(currentContext);
     if (currentRoute == null) return;
 
     // 获取当前或新的主题模式
-    final effectiveThemeMode = newThemeMode ?? (Theme.of(currentContext).brightness == Brightness.dark 
-        ? ThemeMode.dark 
-        : ThemeMode.light);
+    final effectiveThemeMode =
+        newThemeMode ??
+        (Theme.of(currentContext).brightness == Brightness.dark
+            ? ThemeMode.dark
+            : ThemeMode.light);
 
     // 获取当前或新的区域设置
     final effectiveLocale = newLocale ?? Localizations.localeOf(currentContext);
 
     navigator.pushReplacement(
       MaterialPageRoute(
-        builder: (context) => MaterialApp(
-          title: 'Memento',
-          debugShowCheckedModeBanner: false,
-          home: const HomeScreen(),
-          locale: effectiveLocale,
-          themeMode: effectiveThemeMode,
-          theme: ThemeData(
-            colorScheme: const ColorScheme.light(
-              primary: Colors.blue,
-              secondary: Colors.blueAccent,
+        builder:
+            (context) => MaterialApp(
+              title: 'Memento',
+              debugShowCheckedModeBanner: false,
+              home: const HomeScreen(),
+              locale: effectiveLocale,
+              themeMode: effectiveThemeMode,
+              theme: ThemeData(
+                colorScheme: const ColorScheme.light(
+                  primary: Colors.blue,
+                  secondary: Colors.blueAccent,
+                ),
+                useMaterial3: true,
+              ),
+              darkTheme: ThemeData(
+                colorScheme: const ColorScheme.dark(
+                  primary: Colors.blue,
+                  secondary: Colors.blueAccent,
+                ),
+                useMaterial3: true,
+              ),
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                ChatLocalizations.delegate,
+                DayLocalizationsDelegate.delegate,
+                nodes_l10n.NodesLocalizationsDelegate.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [Locale('zh', ''), Locale('en', '')],
             ),
-            useMaterial3: true,
-          ),
-          darkTheme: ThemeData(
-            colorScheme: const ColorScheme.dark(
-              primary: Colors.blue,
-              secondary: Colors.blueAccent,
-            ),
-            useMaterial3: true,
-          ),
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            ChatLocalizations.delegate,
-            DayLocalizationsDelegate.delegate,
-            nodes_l10n.NodesLocalizationsDelegate.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('zh', ''),
-            Locale('en', ''),
-          ],
-        ),
       ),
     );
   }
@@ -356,15 +382,12 @@ class SettingsScreenController extends ChangeNotifier {
   Future<void> toggleLanguage() async {
     if (!_mounted) return;
     final newLocale = isChineseLocale ? const Locale('en') : const Locale('zh');
-    
+
     // 保存语言设置到配置管理器
     await globalConfigManager.setLocale(newLocale);
-    
+
     // 重建应用以应用新语言
-    await _rebuildApplication(
-      currentContext: context,
-      newLocale: newLocale,
-    );
+    await _rebuildApplication(currentContext: context, newLocale: newLocale);
 
     if (!_mounted) return;
     // 显示切换提示
