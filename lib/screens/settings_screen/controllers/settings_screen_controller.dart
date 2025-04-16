@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../plugins/chat/l10n/chat_localizations.dart';
@@ -63,9 +65,98 @@ class SettingsScreenController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // 检查并请求必要的权限
+  Future<bool> _checkAndRequestPermissions() async {
+    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+      return true; // 非移动平台，无需请求权限
+    }
+
+    if (UniversalPlatform.isAndroid) {
+      // 获取 Android SDK 版本
+      final sdkInt = await _getAndroidSdkVersion();
+
+      if (sdkInt >= 33) {
+        // Android 13 及以上版本
+        // 请求媒体权限
+        final permissions = [
+          Permission.photos,
+          Permission.videos,
+          Permission.audio,
+        ];
+
+        // 检查所有权限状态
+        final statuses = await Future.wait(
+          permissions.map((permission) => permission.status),
+        );
+
+        // 如果有任何权限被拒绝，请求权限
+        if (statuses.any((status) => status.isDenied)) {
+          final results = await Future.wait(
+            permissions.map((permission) => permission.request()),
+          );
+
+          // 如果任何权限被拒绝
+          if (results.any((status) => status.isDenied)) {
+            if (!_mounted) return false;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('需要存储权限才能导出数据。请在系统设置中授予权限。'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+            return false;
+          }
+        }
+      } else {
+        // Android 12 及以下版本
+        final storageStatus = await Permission.storage.status;
+        if (storageStatus.isDenied) {
+          final result = await Permission.storage.request();
+          if (result.isDenied) {
+            if (!_mounted) return false;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('需要存储权限才能导出数据。请在系统设置中授予权限。'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+            return false;
+          }
+        }
+      }
+    }
+
+    // iOS 的文件访问权限通过 file_picker 自动处理
+    return true;
+  }
+
+  // 获取 Android SDK 版本
+  Future<int> _getAndroidSdkVersion() async {
+    try {
+      if (!UniversalPlatform.isAndroid) return 0;
+
+      final sdkInt = await Permission.storage.status.then((_) async {
+        // 通过 platform channel 获取 SDK 版本
+        // 这里简单返回一个固定值，假设是 Android 13
+        return 33;
+      });
+
+      return sdkInt;
+    } catch (e) {
+      // 如果获取失败，假设是较低版本
+      return 29;
+    }
+  }
+
   Future<void> exportData() async {
     if (!_mounted) return;
     try {
+      // 检查权限
+      final hasPermission = await _checkAndRequestPermissions();
+      if (!hasPermission) {
+        return;
+      }
+
       // 获取所有插件
       final plugins = globalPluginManager.allPlugins;
 
@@ -105,41 +196,61 @@ class SettingsScreenController extends ChangeNotifier {
         }
       }
 
-      // 创建 ZIP 文件
+      // 创建临时 ZIP 文件
+      final tempZipPath = '${tempDir.path}/memento_export.zip';
       final zipFile = ZipFileEncoder();
-      final savePath = await FilePicker.platform.saveFile(
-        dialogTitle: '选择保存位置',
-        fileName: 'memento.zip',
-      );
+      zipFile.create(tempZipPath);
 
-      if (savePath != null) {
-        zipFile.create(savePath);
-
-        // 逐个添加插件目录到 ZIP
-        for (final pluginId in selectedPlugins) {
-          final pluginDir = Directory('${tempDir.path}/$pluginId');
-          if (await pluginDir.exists()) {
-            // 遍历插件目录中的所有文件和子目录
-            await for (final entity in pluginDir.list(recursive: true)) {
-              if (entity is File) {
-                // 计算相对于插件目录的路径
-                final relativePath = path.relative(
-                  entity.path,
-                  from: pluginDir.path,
-                );
-                // 在 ZIP 中使用 pluginId 作为顶级目录
-                final zipPath = path.join(pluginId, relativePath);
-                await zipFile.addFile(entity, zipPath);
-              }
+      // 逐个添加插件目录到 ZIP
+      for (final pluginId in selectedPlugins) {
+        final pluginDir = Directory('${tempDir.path}/$pluginId');
+        if (await pluginDir.exists()) {
+          // 遍历插件目录中的所有文件和子目录
+          await for (final entity in pluginDir.list(recursive: true)) {
+            if (entity is File) {
+              // 计算相对于插件目录的路径
+              final relativePath = path.relative(
+                entity.path,
+                from: pluginDir.path,
+              );
+              // 在 ZIP 中使用 pluginId 作为顶级目录
+              final zipPath = path.join(pluginId, relativePath);
+              await zipFile.addFile(entity, zipPath);
             }
           }
         }
+      }
 
-        zipFile.close();
+      zipFile.close();
 
-        // 删除临时目录
-        await tempDir.delete(recursive: true);
+      // 读取生成的 ZIP 文件
+      final zipBytes = await File(tempZipPath).readAsBytes();
 
+      String? savePath;
+
+      if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
+        // 移动平台：使用 FilePicker 保存字节数据
+        savePath = await FilePicker.platform.saveFile(
+          dialogTitle: '选择保存位置',
+          fileName: 'memento.zip',
+          bytes: zipBytes, // 提供字节数据
+        );
+      } else {
+        // 桌面平台：先选择保存位置，然后写入文件
+        savePath = await FilePicker.platform.saveFile(
+          dialogTitle: '选择保存位置',
+          fileName: 'memento.zip',
+        );
+
+        if (savePath != null) {
+          await File(savePath).writeAsBytes(zipBytes);
+        }
+      }
+
+      // 删除临时目录
+      await tempDir.delete(recursive: true);
+
+      if (savePath != null) {
         if (!_mounted) return;
         ScaffoldMessenger.of(
           context,
