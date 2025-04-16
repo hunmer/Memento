@@ -92,20 +92,24 @@ class CheckinItem {
     };
   }
 
+  // 预定义常用Material图标常量
+  static const Map<int, IconData> materialIcons = {
+    0xe3a9: Icons.check, // check图标
+    0xe5ca: Icons.arrow_back, // arrow_back图标
+    0xe5cd: Icons.arrow_forward, // arrow_forward图标
+    0xe7fd: Icons.person, // person图标
+    0xe0be: Icons.home, // home图标
+  };
+
   // 从Map创建对象
   factory CheckinItem.fromJson(Map<String, dynamic> json) {
-    // 使用预定义的MaterialIcons中的图标
-    final iconData = IconData(
-      json['icon'] as int,
-      fontFamily: 'MaterialIcons',
-      fontPackage: null,
-      matchTextDirection: false,
-    );
+    // 使用预定义的MaterialIcons常量
+    final icon = materialIcons[json['icon'] as int] ?? Icons.help_outline;
 
     return CheckinItem(
       id: json['id'],
       name: json['name'],
-      icon: iconData,
+      icon: icon,
       color: Color(json['color']),
       group: json['group'] ?? '默认分组',
       checkInRecords: (json['checkInRecords'] as Map<String, dynamic>).map(

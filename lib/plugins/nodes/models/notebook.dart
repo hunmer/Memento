@@ -25,13 +25,24 @@ class Notebook {
   };
 
   factory Notebook.fromJson(Map<String, dynamic> json) {
-    final nodesList = (json['nodes'] as List<dynamic>)
-        .map((e) => Node.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final nodesList =
+        (json['nodes'] as List<dynamic>)
+            .map((e) => Node.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+    // 预定义常用Material图标常量
+    const materialIcons = {
+      0xe3a9: Icons.check, // check图标
+      0xe5ca: Icons.arrow_back, // arrow_back图标
+      0xe5cd: Icons.arrow_forward, // arrow_forward图标
+      0xe7fd: Icons.person, // person图标
+      0xe0be: Icons.home, // home图标
+    };
+
     return Notebook(
       id: json['id'] as String,
       title: json['title'] as String,
-      icon: IconData(json['icon'] as int, fontFamily: 'MaterialIcons'),
+      icon: materialIcons[json['icon'] as int] ?? Icons.book,
       color: Color(json['color'] as int? ?? Colors.blue.value),
       nodes: nodesList,
     );

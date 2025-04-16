@@ -1,112 +1,12 @@
+
 {
-    "channels": "Channels",
-    "@channels": {
-        "description": "Title for the channels list"
-    },
-    "newChannel": "New Channel",
-    "@newChannel": {
-        "description": "Button text for creating a new channel"
-    },
-    "channelName": "Channel Name",
-    "@channelName": {
-        "description": "Label for channel name input field"
-    },
-    "channelGroups": "Channel Groups",
-    "@channelGroups": {
-        "description": "Label for channel groups input field"
-    },
-    "channelGroupsHint": "e.g., Work, Study, Entertainment",
-    "@channelGroupsHint": {
-        "description": "Hint text for channel groups input field"
-    },
-    "cancel": "Cancel",
-    "@cancel": {
-        "description": "Cancel button text"
-    },
-    "create": "Create",
-    "@create": {
-        "description": "Create button text"
-    },
-    "editChannel": "Edit Channel",
-    "@editChannel": {
-        "description": "Title for edit channel dialog"
-    },
-    "save": "Save",
-    "@save": {
-        "description": "Save button text"
-    },
-    "deleteChannel": "Delete Channel",
-    "@deleteChannel": {
-        "description": "Title for delete channel dialog"
-    },
-    "deleteChannelConfirmation": "Are you sure you want to delete the channel \"{channelTitle}\"? This action cannot be undone.",
-    "@deleteChannelConfirmation": {
-        "description": "Confirmation prompt for deleting a channel",
-        "placeholders": {
-            "channelTitle": {
-                "type": "String",
-                "example": "Work Channel"
-            }
-        }
-    },
-    "delete": "Delete",
-    "@delete": {
-        "description": "Delete button text"
-    },
-    "selectIcon": "Select Icon:",
-    "@selectIcon": {
-        "description": "Text prompt for selecting an icon"
-    },
-    "selectChannelGroup": "Select Channel Group",
-    "@selectChannelGroup": {
-        "description": "Title for select channel group dialog"
-    },
-    "noChannels": "There are no channels here",
-    "@noChannels": {
-        "description": "Text shown when there are no channels"
-    },
-    "clickToAddChannel": "Click the top right corner to add a channel",
-    "@clickToAddChannel": {
-        "description": "Prompt text for adding a channel"
-    },
-    "draft": "Draft",
-    "@draft": {
-        "description": "Draft label text"
-    },
-    "noMessages": "No messages",
-    "@noMessages": {
-        "description": "Text shown when there are no messages"
-    },
-    "appTitle": "Memento",
-    "@appTitle": {
-        "description": "The application title"
-    },
-    "pluginManager": "Plugin Manager",
-    "@pluginManager": {
-        "description": "Title for the plugin manager screen"
-    },
-    "showAvatarInChannelList": "Show avatar in channel list",
-    "@showAvatarInChannelList": {
-        "description": "Option to show avatar in channel list"
-    },
-    "chatPluginName": "Chat",
-    "@chatPluginName": {
-        "description": "Name of the chat plugin"
-    },
-    "chatPluginDescription": "A plugin for chatting with other users",
-    "@chatPluginDescription": {
-        "description": "Description of the chat plugin"
-    },
-    "switchedToDarkTheme": "Switched to dark theme",
-    "@switchedToDarkTheme": {
-        "description": "Message shown when switching to dark theme"
-    },
-    "switchedToLightTheme": "Switched to light theme",
-    "@switchedToLightTheme": {
-        "description": "Message shown when switching to light theme"
-    },
-    "darkMode": "Dark Mode",
-    "@darkMode": {
-        "description": "Label for dark mode toggle"
-    }
+  "@@locale": "en",
+  "appTitle": "My Flutter App",
+  "pluginManager": "Plugin Manager",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "@pluginManager": {
+    "description": "Title for plugin management section"
+  }
 }

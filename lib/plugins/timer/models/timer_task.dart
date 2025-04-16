@@ -27,22 +27,27 @@ class TimerTask {
 
   // 从JSON构造
   factory TimerTask.fromJson(Map<String, dynamic> json) {
-    // 使用预定义的MaterialIcons中的图标
-    final iconData =
+    // 预定义常用Material图标常量
+    const materialIcons = {
+      0xe3a9: Icons.check, // check图标
+      0xe5ca: Icons.arrow_back, // arrow_back图标
+      0xe5cd: Icons.arrow_forward, // arrow_forward图标
+      0xe7fd: Icons.person, // person图标
+      0xe0be: Icons.home, // home图标
+      0xe425: Icons.timer, // timer图标
+    };
+
+    // 使用预定义的MaterialIcons常量
+    final icon =
         json['icon'] != null
-            ? IconData(
-              json['icon'] as int,
-              fontFamily: 'MaterialIcons',
-              fontPackage: null,
-              matchTextDirection: false,
-            )
-            : Icons.timer; // 提供一个默认图标
+            ? materialIcons[json['icon'] as int] ?? Icons.timer
+            : Icons.timer;
 
     return TimerTask(
       id: json['id'] as String,
       name: json['name'] as String,
       color: Color(json['color'] as int),
-      icon: iconData,
+      icon: icon,
       timerItems:
           (json['timerItems'] as List)
               .map((item) => TimerItem.fromJson(item))

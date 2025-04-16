@@ -3,7 +3,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
-import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail.dart';
 import '../models/file_message.dart';
 
 class FileService {
@@ -35,7 +34,7 @@ class FileService {
   Future<File> _saveFile(File sourceFile, {String? subdirectory}) async {
     final filesDir = await _appFilesDir;
     String targetDir = filesDir.path;
-    
+
     // 如果指定了子目录，创建它
     if (subdirectory != null) {
       targetDir = '${filesDir.path}/$subdirectory';
@@ -50,7 +49,7 @@ class FileService {
     final uuid = const Uuid().v4();
     final uniqueFileName = '$uuid$extension';
     final targetFile = File('$targetDir/$uniqueFileName');
-    
+
     // 复制文件到目标目录
     return await sourceFile.copy(targetFile.path);
   }
@@ -191,10 +190,10 @@ class FileService {
         return null;
       }
       final absoluteVideoPath = videoFile.absolute.path;
-      
+
       final filesDir = await _appFilesDir;
       final thumbnailsDir = Directory('${filesDir.path}/thumbnails');
-      
+
       // 确保缩略图目录存在
       if (!await thumbnailsDir.exists()) {
         await thumbnailsDir.create(recursive: true);
@@ -207,23 +206,23 @@ class FileService {
 
       try {
         // 使用 fc_native_video_thumbnail 生成缩略图，使用绝对路径
-        final plugin = FcNativeVideoThumbnail();
-        final thumbnailGenerated = await plugin.getVideoThumbnail(
-          srcFile: absoluteVideoPath,
-          destFile: absoluteThumbnailPath,
-          width: 200, 
-          height: 200,
-          format: 'jpeg',
-          quality: 75,
-        );
-        
-        // 检查缩略图是否成功生成
-        if (thumbnailGenerated && await thumbnailFile.exists()) {
-          return absoluteThumbnailPath;
-        } else {
-          _logError('缩略图生成失败，返回值为空或文件不存在');
-          return null;
-        }
+        // final plugin = FcNativeVideoThumbnail();
+        // final thumbnailGenerated = await plugin.getVideoThumbnail(
+        //   srcFile: absoluteVideoPath,
+        //   destFile: absoluteThumbnailPath,
+        //   width: 200,
+        //   height: 200,
+        //   format: 'jpeg',
+        //   quality: 75,
+        // );
+
+        // // 检查缩略图是否成功生成
+        // if (thumbnailGenerated && await thumbnailFile.exists()) {
+        //   return absoluteThumbnailPath;
+        // } else {
+        //   _logError('缩略图生成失败，返回值为空或文件不存在');
+        //   return null;
+        // }
       } catch (thumbnailError) {
         _logError('视频缩略图生成失败: $thumbnailError');
         return null;
