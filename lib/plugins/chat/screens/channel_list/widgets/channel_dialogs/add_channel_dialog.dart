@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../../../../models/channel.dart';
 import '../../../../../../widgets/circle_icon_picker.dart';
 import '../../../../l10n/chat_localizations.dart';
-// import '../../../../models/serialization_helpers.dart';
 
 class AddChannelDialog extends StatefulWidget {
-  final Function(Channel) onAddChannel;
+  // 修改为支持异步操作的回调
+  final Future<void> Function(Channel) onAddChannel;
 
   const AddChannelDialog({super.key, required this.onAddChannel});
 
@@ -43,7 +43,9 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _groupController,
-                decoration: const InputDecoration(labelText: 'Channel Group (Optional)'),
+                decoration: const InputDecoration(
+                  labelText: 'Channel Group (Optional)',
+                ),
               ),
               const SizedBox(height: 16),
               CircleIconPicker(
@@ -70,25 +72,53 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
           child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              final newChannel = Channel(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
-                title: _titleController.text,
-                groups: _groupController.text.isNotEmpty
-                    ? [_groupController.text]
-                    : ['Default'],
-                icon: _selectedIcon,
-                backgroundColor: _selectedColor,
-                priority: 0,
-                members: [], // 添加空的成员列表
-                messages: [], // 添加空的消息列表
+              // 显示加载指示器
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return const Center(child: CircularProgressIndicator());
+                },
               );
-              widget.onAddChannel(newChannel);
-              Navigator.of(context).pop();
+
+              try {
+                final newChannel = Channel(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  title: _titleController.text,
+                  groups:
+                      _groupController.text.isNotEmpty
+                          ? [_groupController.text]
+                          : ['默认'], // 修改为中文的"默认"，与其他地方保持一致
+                  icon: _selectedIcon,
+                  backgroundColor: _selectedColor,
+                  priority: 0,
+                  members: [], // 添加空的成员列表
+                  messages: [], // 添加空的消息列表
+                );
+
+                // 异步调用添加频道
+                await widget.onAddChannel(newChannel);
+
+                // 关闭加载指示器和对话框
+                if (context.mounted) {
+                  Navigator.of(context).pop(); // 关闭加载指示器
+                  Navigator.of(context).pop(); // 关闭添加频道对话框
+                }
+              } catch (e) {
+                // 关闭加载指示器
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  // 显示错误提示
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('创建频道失败: $e')));
+                }
+              }
             }
           },
-          child: Text(ChatLocalizations.of(context)?.newChannel ?? 'New Channel'),
+          child: Text(MaterialLocalizations.of(context).okButtonLabel),
         ),
       ],
     );

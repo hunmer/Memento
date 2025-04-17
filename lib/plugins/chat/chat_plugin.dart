@@ -218,6 +218,7 @@ class ChatPlugin extends BasePlugin {
 
         // 按优先级和最后消息时间排序
         _channels.sort(Channel.compare);
+        print('Loaded ${_channels.length} channels.');
       }
     } catch (e) {
       debugPrint('Error loading channels: $e');

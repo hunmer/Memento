@@ -11,10 +11,7 @@ class ChannelListController extends ChangeNotifier {
   late SharedPreferences prefs;
   List<String> availableGroups = ["全部", "默认", "未分组"]; // 可用的频道组列表
 
-  ChannelListController({
-    required this.channels,
-    required this.chatPlugin,
-  }) {
+  ChannelListController({required this.channels, required this.chatPlugin}) {
     _initializePrefs();
     _updateAvailableGroups();
     chatPlugin.addListener(_onChannelsUpdated);
@@ -55,18 +52,19 @@ class ChannelListController extends ChangeNotifier {
     if (selectedGroup == "全部") {
       sortedChannels = List<Channel>.from(channels)..sort(Channel.compare);
     } else if (selectedGroup == "未分组") {
-      sortedChannels = channels.where((channel) => channel.groups.isEmpty).toList()
-        ..sort(Channel.compare);
+      sortedChannels =
+          channels.where((channel) => channel.groups.isEmpty).toList()
+            ..sort(Channel.compare);
     } else if (selectedGroup == "默认") {
-      sortedChannels = channels
-          .where((channel) => channel.groups.contains("默认"))
-          .toList()
-        ..sort(Channel.compare);
+      sortedChannels =
+          channels.where((channel) => channel.groups.contains("默认")).toList()
+            ..sort(Channel.compare);
     } else {
-      sortedChannels = channels
-          .where((channel) => channel.groups.contains(selectedGroup))
-          .toList()
-        ..sort(Channel.compare);
+      sortedChannels =
+          channels
+              .where((channel) => channel.groups.contains(selectedGroup))
+              .toList()
+            ..sort(Channel.compare);
     }
   }
 
@@ -79,11 +77,10 @@ class ChannelListController extends ChangeNotifier {
     _updateSortedChannels();
   }
 
-  void addChannel(Channel channel) {
-    channels.add(channel);
+  Future<void> addChannel(Channel channel) async {
+    await ChatPlugin.instance.createChannel(channel);
     _updateAvailableGroups();
     _updateSortedChannels();
-    ChatPlugin.instance.saveChannels();
     notifyListeners();
   }
 

@@ -103,7 +103,9 @@ class MyApp extends StatelessWidget {
         Locale('zh', ''), // 中文
         Locale('en', ''), // 英文
       ],
-      locale: globalConfigManager.getLocale() ?? const Locale('en', ''), // 使用保存的语言设置，默认英文
+      locale:
+          globalConfigManager.getLocale() ??
+          const Locale('en', ''), // 使用保存的语言设置，默认英文
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -122,7 +124,8 @@ class MyApp extends StatelessWidget {
         );
       },
       home: const HomeScreen(),
-      onGenerateTitle: (BuildContext context) => AppLocalizations.of(context)!.appTitle,
+      onGenerateTitle:
+          (BuildContext context) => AppLocalizations.of(context)!.appTitle,
     );
   }
 }

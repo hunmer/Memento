@@ -50,7 +50,9 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ChatLocalizations.of(context)?.channelList ?? 'Channel List'),
+        title: Text(
+          ChatLocalizations.of(context)?.channelList ?? 'Channel List',
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -68,26 +70,29 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
             },
           ),
           Expanded(
-            child: _controller.sortedChannels.isEmpty
-                ? EmptyChannelView(onAddChannel: _showAddChannelDialog)
-                : ReorderableListView.builder(
-                    itemCount: _controller.sortedChannels.length,
-                    onReorder: _controller.reorderChannels,
-                    itemBuilder: (context, index) {
-                      final channel = _controller.sortedChannels[index];
-                      return Padding(
-                        key: ValueKey(channel.id),
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: ChannelTile(
-                          channel: channel,
-                          onTap: () => _navigateToChat(channel),
-                          onEdit: (channel) => _showEditChannelDialog(channel),
-                          onDelete: (channel) => _showDeleteChannelDialog(channel),
-                        ),
-                      );
-                    },
-                    buildDefaultDragHandles: false,
-                  ),
+            child:
+                _controller.sortedChannels.isEmpty
+                    ? EmptyChannelView(onAddChannel: _showAddChannelDialog)
+                    : ReorderableListView.builder(
+                      itemCount: _controller.sortedChannels.length,
+                      onReorder: _controller.reorderChannels,
+                      itemBuilder: (context, index) {
+                        final channel = _controller.sortedChannels[index];
+                        return Padding(
+                          key: ValueKey(channel.id),
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: ChannelTile(
+                            channel: channel,
+                            onTap: () => _navigateToChat(channel),
+                            onEdit:
+                                (channel) => _showEditChannelDialog(channel),
+                            onDelete:
+                                (channel) => _showDeleteChannelDialog(channel),
+                          ),
+                        );
+                      },
+                      buildDefaultDragHandles: false,
+                    ),
           ),
         ],
       ),
@@ -97,29 +102,34 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   void _showAddChannelDialog() {
     showDialog(
       context: context,
-      builder: (context) => AddChannelDialog(
-        onAddChannel: _controller.addChannel,
-      ),
+      builder:
+          (context) => AddChannelDialog(
+            onAddChannel: (channel) async {
+              await _controller.addChannel(channel);
+            },
+          ),
     );
   }
 
   void _showEditChannelDialog(Channel channel) {
     showDialog(
       context: context,
-      builder: (context) => EditChannelDialog(
-        channel: channel,
-        onUpdateChannel: _controller.updateChannel,
-      ),
+      builder:
+          (context) => EditChannelDialog(
+            channel: channel,
+            onUpdateChannel: _controller.updateChannel,
+          ),
     );
   }
 
   void _showDeleteChannelDialog(Channel channel) {
     showDialog(
       context: context,
-      builder: (context) => DeleteChannelDialog(
-        channel: channel,
-        onDeleteChannel: _controller.deleteChannel,
-      ),
+      builder:
+          (context) => DeleteChannelDialog(
+            channel: channel,
+            onDeleteChannel: _controller.deleteChannel,
+          ),
     );
   }
 

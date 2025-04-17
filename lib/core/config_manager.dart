@@ -18,48 +18,60 @@ class ConfigManager {
     if (!kIsWeb) {
       await _storage.createDirectory('configs');
     }
-    
+
     // 加载应用级配置
     await _loadAppConfig();
   }
-  
+
   /// 加载应用级配置
   Future<void> _loadAppConfig() async {
     try {
-      final configStr = await _storage.readString('configs/$_appConfigKey.json');
+      final configStr = await _storage.readString(
+        'configs/$_appConfigKey.json',
+      );
       _appConfig.addAll(jsonDecode(configStr) as Map<String, dynamic>);
     } catch (e) {
-      // 如果没有找到配置文件或解析失败，使用默认配置
-      debugPrint('未找到应用配置或解析失败: $e');
+      // 如果没有找到配置文件或解析失败，使用默认配置并创建配置文件
+      debugPrint('未找到应用配置或解析失败，将创建默认配置: $e');
+      _appConfig.addAll(_getDefaultConfig());
+      await saveAppConfig(); // 保存默认配置到文件
     }
   }
-  
+
+  /// 获取默认配置
+  Map<String, dynamic> _getDefaultConfig() {
+    return {'themeMode': 'system', 'locale': 'zh_CN'};
+  }
+
   /// 保存应用级配置
   Future<void> saveAppConfig() async {
-    await _storage.writeString('configs/$_appConfigKey.json', jsonEncode(_appConfig));
+    await _storage.writeString(
+      'configs/$_appConfigKey.json',
+      jsonEncode(_appConfig),
+    );
   }
-  
+
   /// 获取语言设置
   Locale? getLocale() {
     if (!_appConfig.containsKey('locale')) return null;
-    
+
     final localeStr = _appConfig['locale'] as String;
     final parts = localeStr.split('_');
-    
+
     if (parts.length == 1) {
       return Locale(parts[0]);
     } else if (parts.length > 1) {
       return Locale(parts[0], parts[1]);
     }
-    
+
     return null;
   }
-  
+
   /// 获取主题模式
   ThemeMode getThemeMode() {
     final dynamic themeMode = _appConfig['themeMode'];
     if (themeMode is! String) return ThemeMode.system;
-    
+
     switch (themeMode) {
       case 'dark':
         return ThemeMode.dark;
@@ -84,7 +96,7 @@ class ConfigManager {
         themeModeStr = 'system';
         break;
     }
-    
+
     _appConfig['themeMode'] = themeModeStr;
     await saveAppConfig();
   }
@@ -95,7 +107,7 @@ class ConfigManager {
     if (locale.countryCode != null && locale.countryCode!.isNotEmpty) {
       localeStr += '_${locale.countryCode}';
     }
-    
+
     _appConfig['locale'] = localeStr;
     await saveAppConfig();
   }
