@@ -158,11 +158,31 @@ class NotesController {
   }
 
   // 删除笔记
-  Future<void> deleteNote(Note note) async {
-    final notes = _notes[note.folderId];
-    if (notes != null) {
-      notes.removeWhere((n) => n.id == note.id);
-      await _saveNotes();
+  Future<void> deleteNote(String noteId) async {
+    // 查找包含该笔记的文件夹
+    for (var entry in _notes.entries) {
+      final notes = entry.value;
+      final noteIndex = notes.indexWhere((note) => note.id == noteId);
+      if (noteIndex != -1) {
+        notes.removeAt(noteIndex);
+        await _saveNotes();
+        break;
+      }
+    }
+  }
+
+  // 通过Note对象删除笔记
+  Future<void> deleteNoteObject(Note note) async {
+    await deleteNote(note.id);
+  }
+
+  // 重命名文件夹
+  Future<void> renameFolder(String folderId, String newName) async {
+    final folder = _folders[folderId];
+    if (folder != null) {
+      folder.name = newName;
+      folder.updatedAt = DateTime.now();
+      await _saveFolders();
     }
   }
 
