@@ -15,6 +15,14 @@ class GoodsPlugin extends BasePlugin {
 
   List<Warehouse> get warehouses => _warehouses;
 
+  Warehouse? getWarehouse(String id) {
+    try {
+      return _warehouses.firstWhere((w) => w.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
   void addListener(Function() listener) {
     _listeners.add(listener);
   }
@@ -51,7 +59,7 @@ class GoodsPlugin extends BasePlugin {
   Future<void> initialize() async {
     // 确保物品管理数据目录存在
     await storage.createDirectory('goods');
-    
+
     // 加载仓库数据
     await _loadWarehouses();
   }
@@ -59,11 +67,14 @@ class GoodsPlugin extends BasePlugin {
   Future<void> _loadWarehouses() async {
     try {
       _warehouses.clear();
-      
+
       final warehousesData = await storage.read('goods/warehouses');
-      if (warehousesData.isNotEmpty && warehousesData.containsKey('warehouses')) {
-        final List<String> warehouseIds = List<String>.from(warehousesData['warehouses']);
-        
+      if (warehousesData.isNotEmpty &&
+          warehousesData.containsKey('warehouses')) {
+        final List<String> warehouseIds = List<String>.from(
+          warehousesData['warehouses'],
+        );
+
         for (var warehouseId in warehouseIds) {
           final data = await storage.read('goods/warehouse/$warehouseId');
           if (data.isNotEmpty && data.containsKey('warehouse')) {
@@ -107,10 +118,10 @@ class GoodsPlugin extends BasePlugin {
     try {
       await storage.delete('goods/warehouse/$warehouseId');
       _warehouses.removeWhere((w) => w.id == warehouseId);
-      
+
       final warehouseIds = _warehouses.map((w) => w.id).toList();
       await storage.write('goods/warehouses', {'warehouses': warehouseIds});
-      
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error deleting warehouse: $e');
@@ -122,13 +133,13 @@ class GoodsPlugin extends BasePlugin {
     try {
       final warehouse = _warehouses.firstWhere((w) => w.id == warehouseId);
       final itemIndex = warehouse.items.indexWhere((i) => i.id == item.id);
-      
+
       if (itemIndex != -1) {
         warehouse.items[itemIndex] = item;
       } else {
         warehouse.items.add(item);
       }
-      
+
       await saveWarehouse(warehouse);
     } catch (e) {
       debugPrint('Error saving goods item: $e');

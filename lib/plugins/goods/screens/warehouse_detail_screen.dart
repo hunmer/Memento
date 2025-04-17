@@ -18,6 +18,22 @@ class WarehouseDetailScreen extends StatefulWidget {
 class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
   bool _isGridView = true;
   String _sortBy = 'none'; // none, price, lastUsed
+  late Warehouse _warehouse;
+
+  @override
+  void initState() {
+    super.initState();
+    _warehouse = widget.warehouse;
+  }
+
+  Future<void> _refreshWarehouse() async {
+    final updatedWarehouse = GoodsPlugin.instance.getWarehouse(_warehouse.id);
+    if (updatedWarehouse != null && mounted) {
+      setState(() {
+        _warehouse = updatedWarehouse;
+      });
+    }
+  }
 
   void _showAddItemDialog() {
     showDialog(
@@ -26,12 +42,10 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
           (context) => Dialog(
             child: GoodsItemForm(
               onSubmit: (GoodsItem item) async {
-                await GoodsPlugin.instance.saveGoodsItem(
-                  widget.warehouse.id,
-                  item,
-                );
+                await GoodsPlugin.instance.saveGoodsItem(_warehouse.id, item);
                 if (context.mounted) {
                   Navigator.of(context).pop();
+                  await _refreshWarehouse();
                 }
               },
             ),
@@ -89,7 +103,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
   }
 
   List<GoodsItem> _getSortedItems() {
-    final items = List<GoodsItem>.from(widget.warehouse.items);
+    final items = List<GoodsItem>.from(_warehouse.items);
     switch (_sortBy) {
       case 'price':
         items.sort(
@@ -97,17 +111,33 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
         );
         break;
       case 'lastUsed':
-        items.sort((a, b) {
-          final aDate = a.lastUsedDate;
-          final bDate = b.lastUsedDate;
-          if (aDate == null && bDate == null) return 0;
-          if (aDate == null) return 1;
-          if (bDate == null) return -1;
-          return bDate.compareTo(aDate);
-        });
+        items.sort(
+          (a, b) => (b.lastUsedDate ?? DateTime(1970)).compareTo(
+            a.lastUsedDate ?? DateTime(1970),
+          ),
+        );
         break;
     }
     return items;
+  }
+
+  void _showEditItemDialog(GoodsItem item) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => Dialog(
+            child: GoodsItemForm(
+              initialData: item,
+              onSubmit: (item) async {
+                await GoodsPlugin.instance.saveGoodsItem(_warehouse.id, item);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  await _refreshWarehouse();
+                }
+              },
+            ),
+          ),
+    );
   }
 
   @override
@@ -118,7 +148,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Text(widget.warehouse.title),
+            Text(_warehouse.title),
             const SizedBox(width: 8),
             Text(
               '(${items.length})',
@@ -127,6 +157,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
           ],
         ),
         actions: [
+          // 视图切换按钮
           IconButton(
             icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
             onPressed: () {
@@ -135,6 +166,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
               });
             },
           ),
+          // 排序按钮
           PopupMenuButton<String>(
             icon: const Icon(Icons.sort),
             onSelected: (value) {
@@ -148,10 +180,11 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                   const PopupMenuItem(value: 'price', child: Text('按价格排序')),
                   const PopupMenuItem(
                     value: 'lastUsed',
-                    child: Text('按最近使用排序'),
+                    child: Text('按最后使用时间'),
                   ),
                 ],
           ),
+          // 更多选项按钮
           IconButton(
             icon: const Icon(Icons.more_vert),
             onPressed: _showMoreOptions,
@@ -164,62 +197,26 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                 padding: const EdgeInsets.all(16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 1,
-                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.75,
                   mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
                 ),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
+                  final item = items[index];
                   return GoodsItemCard(
-                    item: items[index],
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (context) => Dialog(
-                              child: GoodsItemForm(
-                                initialData: items[index],
-                                onSubmit: (item) async {
-                                  await GoodsPlugin.instance.saveGoodsItem(
-                                    widget.warehouse.id,
-                                    item,
-                                  );
-                                  if (context.mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                              ),
-                            ),
-                      );
-                    },
+                    item: item,
+                    onTap: () => _showEditItemDialog(item),
                   );
                 },
               )
               : ListView.builder(
                 itemCount: items.length,
                 itemBuilder: (context, index) {
+                  final item = items[index];
                   return GoodsItemListTile(
-                    item: items[index],
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (context) => Dialog(
-                              child: GoodsItemForm(
-                                initialData: items[index],
-                                onSubmit: (item) async {
-                                  await GoodsPlugin.instance.saveGoodsItem(
-                                    widget.warehouse.id,
-                                    item,
-                                  );
-                                  if (context.mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                              ),
-                            ),
-                      );
-                    },
+                    item: item,
+                    onTap: () => _showEditItemDialog(item),
                   );
                 },
               ),
