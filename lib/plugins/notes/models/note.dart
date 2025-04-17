@@ -40,4 +40,23 @@ class Note {
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
     );
   }
+  
+  // 创建一个新的Note对象，同时允许更新特定字段
+  Note copyWith({
+    String? title,
+    String? content,
+    String? folderId,
+    DateTime? updatedAt,
+    List<String>? tags,
+  }) {
+    return Note(
+      id: this.id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      folderId: folderId ?? this.folderId,
+      createdAt: this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      tags: tags ?? this.tags,
+    );
+  }
 }

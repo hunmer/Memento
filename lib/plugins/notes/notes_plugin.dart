@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../base_plugin.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';

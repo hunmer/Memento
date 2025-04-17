@@ -115,13 +115,6 @@ class NotesController {
         .toList();
   }
 
-  // 获取文件夹的子文件夹
-  List<Folder> getFolderChildren(String parentId) {
-    return _folders.values
-        .where((folder) => folder.parentId == parentId)
-        .toList();
-  }
-
   // 获取文件夹中的笔记
   List<Note> getFolderNotes(String folderId) {
     return _notes[folderId] ?? [];

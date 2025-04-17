@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import '../controllers/notes_controller.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/note.dart';
 
 class NoteEditScreen extends StatefulWidget {
-  final NotesController controller;
   final Note? note;
-  final String? folderId;
+  final Function(String title, String content) onSave;
 
   const NoteEditScreen({
-    super.key,
-    required this.controller,
+    Key? key,
     this.note,
-    this.folderId,
-  }) : assert(note != null || folderId != null, 'Either note or folderId must be provided');
+    required this.onSave,
+  }) : super(key: key);
 
   @override
   State<NoteEditScreen> createState() => _NoteEditScreenState();
@@ -21,141 +19,206 @@ class NoteEditScreen extends StatefulWidget {
 class _NoteEditScreenState extends State<NoteEditScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
-  bool _isEdited = false;
+  bool _isPreviewMode = false;
+  final FocusNode _contentFocusNode = FocusNode();
+  int _currentCursorPosition = 0;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title ?? '');
     _contentController = TextEditingController(text: widget.note?.content ?? '');
-
-    _titleController.addListener(_onTextChanged);
-    _contentController.addListener(_onTextChanged);
-  }
-
-  void _onTextChanged() {
-    if (!_isEdited) {
-      setState(() {
-        _isEdited = true;
-      });
-    }
+    _contentController.addListener(() {
+      _currentCursorPosition = _contentController.selection.baseOffset;
+    });
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
+    _contentFocusNode.dispose();
     super.dispose();
   }
 
-  Future<void> _saveNote() async {
-    final String title = _titleController.text.trim();
-    final String content = _contentController.text;
-
-    if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Title cannot be empty')),
+  void _insertMarkdownSyntax(String syntax, {String? closingSyntax}) {
+    final text = _contentController.text;
+    final selection = _contentController.selection;
+    
+    if (selection.isValid) {
+      final selectedText = text.substring(selection.start, selection.end);
+      final beforeText = text.substring(0, selection.start);
+      final afterText = text.substring(selection.end);
+      
+      final newText = closingSyntax != null
+          ? '$beforeText$syntax$selectedText$closingSyntax$afterText'
+          : '$beforeText$syntax$selectedText$afterText';
+      
+      _contentController.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(
+          offset: selection.start + syntax.length + selectedText.length + (closingSyntax?.length ?? 0),
+        ),
       );
-      return;
+    } else {
+      final beforeText = text.substring(0, _currentCursorPosition);
+      final afterText = text.substring(_currentCursorPosition);
+      
+      final newText = closingSyntax != null
+          ? '$beforeText$syntax$closingSyntax$afterText'
+          : '$beforeText$syntax$afterText';
+      
+      _contentController.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(
+          offset: _currentCursorPosition + syntax.length,
+        ),
+      );
     }
-
-    try {
-      if (widget.note != null) {
-        // 更新现有笔记
-        widget.note!.title = title;
-        widget.note!.content = content;
-        widget.note!.updatedAt = DateTime.now();
-        await widget.controller.updateNote(widget.note!);
-      } else {
-        // 创建新笔记
-        await widget.controller.createNote(
-          title,
-          content,
-          widget.folderId!,
-        );
-      }
-      if (mounted) {
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save note: $e')),
-        );
-      }
-    }
+    
+    _contentFocusNode.requestFocus();
   }
 
-  Future<bool> _onWillPop() async {
-    if (!_isEdited) return true;
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Discard changes?'),
-        content: const Text('You have unsaved changes. Do you want to discard them?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('CANCEL'),
+  Widget _buildMarkdownToolbar() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.format_bold),
+            tooltip: '粗体',
+            onPressed: () => _insertMarkdownSyntax('**', closingSyntax: '**'),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('DISCARD'),
+          IconButton(
+            icon: const Icon(Icons.format_italic),
+            tooltip: '斜体',
+            onPressed: () => _insertMarkdownSyntax('*', closingSyntax: '*'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.format_strikethrough),
+            tooltip: '删除线',
+            onPressed: () => _insertMarkdownSyntax('~~', closingSyntax: '~~'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.format_list_bulleted),
+            tooltip: '无序列表',
+            onPressed: () => _insertMarkdownSyntax('- '),
+          ),
+          IconButton(
+            icon: const Icon(Icons.format_list_numbered),
+            tooltip: '有序列表',
+            onPressed: () => _insertMarkdownSyntax('1. '),
+          ),
+          IconButton(
+            icon: const Icon(Icons.format_quote),
+            tooltip: '引用',
+            onPressed: () => _insertMarkdownSyntax('> '),
+          ),
+          IconButton(
+            icon: const Icon(Icons.code),
+            tooltip: '代码块',
+            onPressed: () => _insertMarkdownSyntax('```\\n', closingSyntax: '\\n```'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.link),
+            tooltip: '链接',
+            onPressed: () => _insertMarkdownSyntax('[链接文字](', closingSyntax: ')'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.image),
+            tooltip: '图片',
+            onPressed: () => _insertMarkdownSyntax('![图片描述](', closingSyntax: ')'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.title),
+            tooltip: '标题',
+            onPressed: () => _insertMarkdownSyntax('# '),
+          ),
+          IconButton(
+            icon: const Icon(Icons.horizontal_rule),
+            tooltip: '分隔线',
+            onPressed: () => _insertMarkdownSyntax('---\\n'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.table_chart),
+            tooltip: '表格',
+            onPressed: () => _insertMarkdownSyntax('''
+| 列1 | 列2 | 列3 |
+|-----|-----|-----|
+| 内容 | 内容 | 内容 |
+'''),
           ),
         ],
       ),
     );
-
-    return result ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.note == null ? 'New Note' : 'Edit Note'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _saveNote,
-            ),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  hintText: 'Title',
-                  border: OutlineInputBorder(),
-                ),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: TextField(
-                  controller: _contentController,
-                  decoration: const InputDecoration(
-                    hintText: 'Write your note here...',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
-                ),
-              ),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: TextField(
+          controller: _titleController,
+          style: const TextStyle(color: Colors.black),
+          decoration: const InputDecoration(
+            hintText: '输入标题...',
+            hintStyle: TextStyle(color: Colors.black54),
+            border: InputBorder.none,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(_isPreviewMode ? Icons.edit : Icons.preview),
+            tooltip: _isPreviewMode ? '编辑模式' : '预览模式',
+            onPressed: () {
+              setState(() {
+                _isPreviewMode = !_isPreviewMode;
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: () {
+              final title = _titleController.text.trim();
+              final content = _contentController.text.trim();
+              if (title.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('请输入标题')),
+                );
+                return;
+              }
+              widget.onSave(title, content);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          if (!_isPreviewMode) _buildMarkdownToolbar(),
+          Expanded(
+            child: _isPreviewMode
+                ? Markdown(
+                    data: _contentController.text,
+                    selectable: true,
+                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                      tableColumnWidth: const IntrinsicColumnWidth(),
+                    ),
+                  )
+                : TextField(
+                    controller: _contentController,
+                    focusNode: _contentFocusNode,
+                    maxLines: null,
+                    expands: true,
+                    textAlignVertical: TextAlignVertical.top,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(16),
+                      hintText: '输入内容...',
+                      border: InputBorder.none,
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }

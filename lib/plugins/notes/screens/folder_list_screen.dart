@@ -101,8 +101,15 @@ class _FolderListScreenState extends State<FolderListScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => NoteEditScreen(
-                        controller: widget.controller,
                         note: note,
+                        onSave: (title, content) {
+                          final updatedNote = note.copyWith(
+                            title: title,
+                            content: content,
+                            updatedAt: DateTime.now(),
+                          );
+                          widget.controller.updateNote(updatedNote);
+                        },
                       ),
                     ),
                   ).then((_) => _loadCurrentFolder());
@@ -136,8 +143,9 @@ class _FolderListScreenState extends State<FolderListScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => NoteEditScreen(
-                            controller: widget.controller,
-                            folderId: currentFolderId,
+                            onSave: (title, content) {
+                              widget.controller.createNote(title, content, currentFolderId);
+                            },
                           ),
                         ),
                       ).then((_) => _loadCurrentFolder());

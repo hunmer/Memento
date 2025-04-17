@@ -56,8 +56,9 @@ class _NotesScreenState extends State<NotesScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => NoteEditScreen(
-          controller: widget.controller,
-          folderId: _currentFolderId,
+          onSave: (title, content) async {
+            await widget.controller.createNote(title, content, _currentFolderId);
+          },
         ),
       ),
     );
@@ -69,8 +70,19 @@ class _NotesScreenState extends State<NotesScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => NoteEditScreen(
-          controller: widget.controller,
           note: note,
+          onSave: (title, content) async {
+            final updatedNote = Note(
+              id: note.id,
+              title: title,
+              content: content,
+              folderId: note.folderId,
+              createdAt: note.createdAt,
+              updatedAt: DateTime.now(),
+              tags: note.tags,
+            );
+            await widget.controller.updateNote(updatedNote);
+          },
         ),
       ),
     );
@@ -407,9 +419,9 @@ class _NotesScreenState extends State<NotesScreen> {
                 // 如果没有子文件夹，直接选择当前文件夹
                 Navigator.pop(context, folder);
               } else {
-                // 如果有子文件夹，展示子文件夹选择对话框
+                // 如果有子文件夹，显示子文件夹选择对话框
                 final selectedFolder = await _showFolderSelectionDialog(null, parentFolder: folder);
-                if (selectedFolder != null) {
+                if (selectedFolder != null && mounted) {
                   Navigator.pop(context, selectedFolder);
                 }
               }
