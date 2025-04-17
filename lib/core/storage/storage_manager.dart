@@ -340,4 +340,22 @@ class StorageManager {
       return '$_basePath/$pluginId';
     }
   }
+
+  /// 确保插件目录存在
+  Future<void> ensurePluginDirectoryExists(String pluginId) async {
+    final pluginPath = getPluginStoragePath(pluginId);
+    await ensureDirectoryExists(pluginPath);
+  }
+
+  /// 读取插件文件
+  Future<String> readPluginFile(String pluginId, String fileName) async {
+    final pluginPath = getPluginStoragePath(pluginId);
+    return await readString('$pluginPath/$fileName');
+  }
+
+  /// 写入插件文件
+  Future<void> writePluginFile(String pluginId, String fileName, String content) async {
+    final pluginPath = getPluginStoragePath(pluginId);
+    await writeString('$pluginPath/$fileName', content);
+  }
 }

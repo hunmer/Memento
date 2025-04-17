@@ -13,20 +13,15 @@ class NotesController {
 
   Future<void> initialize() async {
     // 确保插件目录存在
-    final pluginPath = _storage.getPluginStoragePath('notes');
-    await _storage.ensureDirectoryExists('notes');
-    
+    await _storage.ensurePluginDirectoryExists('notes');
     await _loadFolders();
     await _loadNotes();
   }
 
   Future<void> _loadFolders() async {
     try {
-      // 确保插件存储目录存在
-      final pluginPath = _storage.getPluginStoragePath('notes');
-      
       // 读取文件内容为字符串
-      final data = await _storage.readString('$pluginPath/folders.json').catchError((_) => '');
+      final data = await _storage.readPluginFile('notes', 'folders.json').catchError((_) => '');
       
       if (data.isNotEmpty) {
         final List<dynamic> jsonList = json.decode(data);
@@ -54,11 +49,8 @@ class NotesController {
 
   Future<void> _loadNotes() async {
     try {
-      // 获取插件存储路径
-      final pluginPath = _storage.getPluginStoragePath('notes');
-      
       // 读取文件内容为字符串
-      final data = await _storage.readString('$pluginPath/notes.json').catchError((_) => '');
+      final data = await _storage.readPluginFile('notes', 'notes.json').catchError((_) => '');
       
       if (data.isNotEmpty) {
         final List<dynamic> jsonList = json.decode(data);
@@ -75,10 +67,9 @@ class NotesController {
 
   Future<void> _saveFolders() async {
     try {
-      final pluginPath = _storage.getPluginStoragePath('notes');
       final jsonList = _folders.values.map((f) => f.toJson()).toList();
       final jsonString = json.encode(jsonList);
-      await _storage.writeString('$pluginPath/folders.json', jsonString);
+      await _storage.writePluginFile('notes', 'folders.json', jsonString);
     } catch (e) {
       debugPrint('Error saving folders: $e');
       rethrow;
@@ -87,11 +78,10 @@ class NotesController {
 
   Future<void> _saveNotes() async {
     try {
-      final pluginPath = _storage.getPluginStoragePath('notes');
       final allNotes = _notes.values.expand((notes) => notes).toList();
       final jsonList = allNotes.map((n) => n.toJson()).toList();
       final jsonString = json.encode(jsonList);
-      await _storage.writeString('$pluginPath/notes.json', jsonString);
+      await _storage.writePluginFile('notes', 'notes.json', jsonString);
     } catch (e) {
       debugPrint('Error saving notes: $e');
       rethrow;
