@@ -18,6 +18,7 @@ import 'plugins/todo/todo_plugin.dart'; // 任务插件
 import 'plugins/day/day_plugin.dart'; // 纪念日插件
 import 'plugins/nodes/nodes_plugin.dart'; // 笔记插件
 import 'plugins/notes/notes_plugin.dart'; // Notes插件
+import 'plugins/goods/goods_plugin.dart'; // 物品插件
 
 // 全局单例实例
 late final StorageManager globalStorage;
@@ -64,6 +65,7 @@ void main() async {
       DayPlugin.instance,
       NodesPlugin(), // 添加笔记插件
       NotesPlugin(), // 添加Notes插件
+      GoodsPlugin.instance, // 添加物品插件
     ];
 
     // 遍历并注册插件
