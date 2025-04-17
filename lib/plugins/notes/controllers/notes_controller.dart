@@ -102,6 +102,18 @@ class NotesController {
   Folder? getFolder(String id) {
     return _folders[id];
   }
+  
+  // 获取所有文件夹
+  List<Folder> getAllFolders() {
+    return _folders.values.toList();
+  }
+  
+  // 获取指定文件夹的子文件夹
+  List<Folder> getFolderChildren(String parentId) {
+    return _folders.values
+        .where((folder) => folder.parentId == parentId)
+        .toList();
+  }
 
   // 获取文件夹的子文件夹
   List<Folder> getFolderChildren(String parentId) {
@@ -174,6 +186,44 @@ class NotesController {
   // 通过Note对象删除笔记
   Future<void> deleteNoteObject(Note note) async {
     await deleteNote(note.id);
+  }
+  
+  // 移动笔记到其他文件夹
+  Future<void> moveNote(String noteId, String targetFolderId) async {
+    Note? noteToMove;
+    String? sourceFolderId;
+    
+    // 查找笔记
+    for (var entry in _notes.entries) {
+      final notes = entry.value;
+      final index = notes.indexWhere((note) => note.id == noteId);
+      if (index != -1) {
+        noteToMove = notes[index];
+        sourceFolderId = entry.key;
+        notes.removeAt(index);
+        break;
+      }
+    }
+    
+    // 如果找到笔记，将其添加到目标文件夹
+    if (noteToMove != null && sourceFolderId != null) {
+      // 创建一个新的笔记对象，更新文件夹ID
+      final movedNote = Note(
+        id: noteToMove.id,
+        title: noteToMove.title,
+        content: noteToMove.content,
+        folderId: targetFolderId,
+        createdAt: noteToMove.createdAt,
+        updatedAt: DateTime.now(), // 更新时间戳
+        tags: noteToMove.tags,
+      );
+      
+      // 添加到新文件夹
+      _notes.putIfAbsent(targetFolderId, () => []).add(movedNote);
+      
+      // 保存更改
+      await _saveNotes();
+    }
   }
 
   // 重命名文件夹
