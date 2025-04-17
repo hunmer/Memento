@@ -90,7 +90,7 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
                   groups:
                       _groupController.text.isNotEmpty
                           ? [_groupController.text]
-                          : ['默认'], // 修改为中文的"默认"，与其他地方保持一致
+                          : [], // 如果不填分组则使用空列表，归类于未分组
                   icon: _selectedIcon,
                   backgroundColor: _selectedColor,
                   priority: 0,

@@ -7,9 +7,9 @@ class ChannelListController extends ChangeNotifier {
   final List<Channel> channels;
   final ChatPlugin chatPlugin;
   late List<Channel> sortedChannels = [];
-  String selectedGroup = "默认"; // 当前选择的频道组
+  String selectedGroup = "全部"; // 当前选择的频道组
   late SharedPreferences prefs;
-  List<String> availableGroups = ["全部", "默认", "未分组"]; // 可用的频道组列表
+  List<String> availableGroups = ["全部", "未分组"]; // 可用的频道组列表
 
   ChannelListController({required this.channels, required this.chatPlugin}) {
     _initializePrefs();
@@ -30,14 +30,14 @@ class ChannelListController extends ChangeNotifier {
 
   Future<void> _initializePrefs() async {
     prefs = await SharedPreferences.getInstance();
-    selectedGroup = prefs.getString('selectedGroup') ?? "默认";
+    selectedGroup = prefs.getString('selectedGroup') ?? "全部";
     _updateSortedChannels();
     notifyListeners();
   }
 
   Future<void> loadSelectedGroup() async {
     prefs = await SharedPreferences.getInstance();
-    selectedGroup = prefs.getString('selectedGroup') ?? "默认";
+    selectedGroup = prefs.getString('selectedGroup') ?? "全部";
     notifyListeners();
   }
 
@@ -55,10 +55,6 @@ class ChannelListController extends ChangeNotifier {
       sortedChannels =
           channels.where((channel) => channel.groups.isEmpty).toList()
             ..sort(Channel.compare);
-    } else if (selectedGroup == "默认") {
-      sortedChannels =
-          channels.where((channel) => channel.groups.contains("默认")).toList()
-            ..sort(Channel.compare);
     } else {
       sortedChannels =
           channels
@@ -69,7 +65,7 @@ class ChannelListController extends ChangeNotifier {
   }
 
   void _updateAvailableGroups() {
-    Set<String> groups = {"全部", "默认", "未分组"};
+    Set<String> groups = {"全部", "未分组"};
     for (var channel in channels) {
       groups.addAll(channel.groups);
     }
