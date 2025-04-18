@@ -3,6 +3,7 @@ import '../bill_plugin.dart';
 import '../models/account.dart';
 import '../models/bill.dart';
 import 'package:flutter/services.dart';
+import '../../../widgets/icon_picker_dialog.dart';
 
 class BillEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -21,31 +22,13 @@ class BillEditScreen extends StatefulWidget {
 }
 
 class _BillEditScreenState extends State<BillEditScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _amountController = TextEditingController();
-  final _noteController = TextEditingController();
+  late final GlobalKey<FormState> _formKey;
+  late final TextEditingController _titleController;
+  late final TextEditingController _amountController;
+  late final TextEditingController _noteController;
   String? _tag;
   bool _isExpense = true;
   IconData _selectedIcon = Icons.shopping_cart;
-
-  final List<IconData> _availableIcons = [
-    Icons.shopping_cart,
-    Icons.restaurant,
-    Icons.local_gas_station,
-    Icons.directions_bus,
-    Icons.home,
-    Icons.school,
-    Icons.local_hospital,
-    Icons.sports_basketball,
-    Icons.movie,
-    Icons.shopping_bag,
-    Icons.attach_money,
-    Icons.card_giftcard,
-    Icons.work,
-    Icons.flight,
-    Icons.hotel,
-  ];
 
   final List<String> _availableTags = [
     '未分类',
@@ -65,6 +48,10 @@ class _BillEditScreenState extends State<BillEditScreen> {
   @override
   void initState() {
     super.initState();
+    _formKey = GlobalKey<FormState>();
+    _titleController = TextEditingController();
+    _amountController = TextEditingController();
+    _noteController = TextEditingController();
     if (widget.bill != null) {
       _titleController.text = widget.bill!.title;
       _amountController.text = widget.bill!.absoluteAmount.toString();
@@ -92,8 +79,10 @@ class _BillEditScreenState extends State<BillEditScreen> {
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              _buildIconSelector(),
+              const SizedBox(height: 16),
               _buildTypeSelector(),
               const SizedBox(height: 16),
               _buildTitleField(),
@@ -103,8 +92,6 @@ class _BillEditScreenState extends State<BillEditScreen> {
               _buildTagSelector(),
               const SizedBox(height: 16),
               _buildNoteField(),
-              const SizedBox(height: 16),
-              _buildIconSelector(),
               const SizedBox(height: 24),
               _buildSubmitButton(),
             ],
@@ -214,119 +201,112 @@ class _BillEditScreenState extends State<BillEditScreen> {
   }
 
   Widget _buildIconSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('选择图标'),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children:
-              _availableIcons.map((IconData icon) {
-                final isSelected = _selectedIcon.codePoint == icon.codePoint;
-                return InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedIcon = icon;
-                    });
-                  },
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: isSelected ? Theme.of(context).primaryColor : null,
-                      border: Border.all(
-                        color:
-                            isSelected
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: isSelected ? Colors.white : Colors.grey,
-                    ),
-                  ),
-                );
-              }).toList(),
+    return GestureDetector(
+      onTap: () async {
+        final IconData? selectedIcon = await showDialog<IconData>(
+          context: context,
+          builder: (context) => IconPickerDialog(currentIcon: _selectedIcon),
+        );
+        if (selectedIcon != null) {
+          setState(() {
+            _selectedIcon = selectedIcon;
+          });
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withValues(
+            alpha: 26, // 0.1 * 255 ≈ 26
+            red: Theme.of(context).colorScheme.primary.r,
+            green: Theme.of(context).colorScheme.primary.g,
+            blue: Theme.of(context).colorScheme.primary.b,
+          ),
+          borderRadius: BorderRadius.circular(16),
         ),
-      ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _selectedIcon,
+              size: 48,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '点击选择图标',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
+      height: 48,
       child: ElevatedButton(
-        onPressed: _saveBill,
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-        ),
-        child: Text(
-          widget.bill == null ? '添加' : '保存',
-          style: const TextStyle(fontSize: 16),
-        ),
+        onPressed: () async {
+          if (_formKey.currentState!.validate()) {
+            final amount = double.parse(_amountController.text);
+            final bill = Bill(
+              id: widget.bill?.id,
+              title: _titleController.text,
+              amount: _isExpense ? -amount : amount,
+              accountId: widget.account.id,
+              tag: _tag,
+              note:
+                  _noteController.text.isNotEmpty ? _noteController.text : null,
+              icon: _selectedIcon,
+              createdAt: widget.bill?.createdAt,
+            );
+
+            try {
+              // 创建账户的副本
+              Account updatedAccount;
+
+              if (widget.bill == null) {
+                // 创建新账单
+                updatedAccount = widget.account.copyWith(
+                  bills: [...widget.account.bills, bill],
+                );
+              } else {
+                // 更新现有账单
+                updatedAccount = widget.account.copyWith(
+                  bills:
+                      widget.account.bills
+                          .map(
+                            (existingBill) =>
+                                existingBill.id == bill.id
+                                    ? bill
+                                    : existingBill,
+                          )
+                          .toList(),
+                );
+              }
+              // 调用插件的保存账户方法
+              await widget.billPlugin.saveAccount(updatedAccount);
+
+              if (!mounted) return;
+              Navigator.pop(context);
+            } catch (e) {
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('保存失败: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
+        child: Text(widget.bill == null ? '添加' : '保存'),
       ),
     );
-  }
-
-  void _saveBill() async {
-    if (_formKey.currentState!.validate()) {
-      final title = _titleController.text;
-      final amountText = _amountController.text;
-      final note = _noteController.text.isEmpty ? null : _noteController.text;
-
-      double amount = double.parse(amountText);
-      if (_isExpense) {
-        amount = -amount; // 支出为负数
-      }
-
-      try {
-        if (widget.bill == null) {
-          // 创建新账单
-          final newBill = Bill(
-            title: title,
-            amount: amount,
-            accountId: widget.account.id,
-            tag: _tag,
-            note: note,
-            icon: _selectedIcon,
-          );
-
-          // 更新账户中的账单列表
-          final updatedBills = [...widget.account.bills, newBill];
-          final updatedAccount = widget.account.copyWith(bills: updatedBills);
-          await widget.billPlugin.saveAccount(updatedAccount);
-        } else {
-          // 更新现有账单
-          final updatedBill = widget.bill!.copyWith(
-            title: title,
-            amount: amount,
-            tag: _tag,
-            note: note,
-            icon: _selectedIcon,
-          );
-
-          // 更新账户中的账单列表
-          final updatedBills =
-              widget.account.bills.map((bill) {
-                return bill.id == updatedBill.id ? updatedBill : bill;
-              }).toList();
-
-          final updatedAccount = widget.account.copyWith(bills: updatedBills);
-          await widget.billPlugin.saveAccount(updatedAccount);
-        }
-
-        if (mounted) {
-          Navigator.pop(context, true);
-        }
-      } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
-      }
-    }
   }
 }

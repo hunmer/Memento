@@ -47,6 +47,27 @@ class Account {
     );
   }
 
+  // 添加账单
+  void addBill(Bill bill) {
+    // 确保新账单有一个唯一的ID
+    if (bill.id == null) {
+      bill = bill.copyWith(id: const Uuid().v4());
+    }
+    bills.add(bill);
+    calculateTotal();
+  }
+
+  // 更新账单
+  void updateBill(Bill updatedBill) {
+    final index = bills.indexWhere((bill) => bill.id == updatedBill.id);
+    if (index != -1) {
+      bills[index] = updatedBill;
+      calculateTotal();
+    } else {
+      throw Exception('Bill not found');
+    }
+  }
+
   // 转换为JSON
   Map<String, dynamic> toJson() {
     calculateTotal(); // 保存前更新总金额
@@ -71,7 +92,7 @@ class Account {
     List<Bill>? bills,
   }) {
     return Account(
-      id: id,
+      id: this.id,
       title: title ?? this.title,
       icon: icon ?? this.icon,
       backgroundColor: backgroundColor ?? this.backgroundColor,

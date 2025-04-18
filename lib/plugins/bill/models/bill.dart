@@ -20,9 +20,8 @@ class Bill {
     this.note,
     DateTime? createdAt,
     required this.icon,
-  }) : 
-    id = id ?? const Uuid().v4(),
-    createdAt = createdAt ?? DateTime.now();
+  }) : id = id ?? const Uuid().v4(),
+       createdAt = createdAt ?? DateTime.now();
 
   // 从JSON创建账单
   factory Bill.fromJson(Map<String, dynamic> json) {
@@ -60,6 +59,7 @@ class Bill {
 
   // 创建账单副本
   Bill copyWith({
+    String? id,
     String? title,
     String? tag,
     double? amount,
@@ -69,7 +69,7 @@ class Bill {
     IconData? icon,
   }) {
     return Bill(
-      id: id,
+      id: id ?? this.id,
       title: title ?? this.title,
       tag: tag ?? this.tag,
       amount: amount ?? this.amount,
