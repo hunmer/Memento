@@ -88,6 +88,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     }
     _accounts.add(account);
     await _saveAccounts();
+    notifyListeners();
   }
 
   // 更新账户信息
@@ -101,6 +102,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     }
     _accounts[index] = account;
     await _saveAccounts();
+    notifyListeners();
   }
 
   // 删除账户

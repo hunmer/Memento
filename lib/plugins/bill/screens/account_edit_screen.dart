@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
-import '../widgets/circle_icon_picker.dart';
+import '../../../widgets/circle_icon_picker.dart';
 
 class AccountEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -57,14 +57,14 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
         child: Column(
           children: [
             CircleIconPicker(
-              selectedIcon: _selectedIcon,
-              selectedColor: _selectedColor,
-              onIconChanged: (icon) {
+              currentIcon: _selectedIcon,
+              backgroundColor: _selectedColor,
+              onIconSelected: (icon) {
                 setState(() {
                   _selectedIcon = icon;
                 });
               },
-              onColorChanged: (color) {
+              onColorSelected: (color) {
                 setState(() {
                   _selectedColor = color;
                 });

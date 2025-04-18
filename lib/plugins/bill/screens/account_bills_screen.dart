@@ -79,11 +79,27 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    widget.billPlugin.addListener(_handlePluginUpdate);
+  }
+
+  @override
+  void dispose() {
+    widget.billPlugin.removeListener(_handlePluginUpdate);
+    super.dispose();
+  }
+
+  void _handlePluginUpdate() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   Widget _buildBody() {
     return StatefulBuilder(
       builder: (context, setState) {
-        widget.billPlugin.addListener(() => setState(() {}));
-
         final statistics = widget.billPlugin.getStatistics(
           bills: widget.account.bills,
           range: _selectedRange,
@@ -143,8 +159,32 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
           color: Colors.white,
         ),
       ),
+      confirmDismiss: (direction) async {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('确认删除'),
+            content: const Text('确定要删除这条账单记录吗？'),
+            actions: [
+              TextButton(
+                child: const Text('取消'),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              TextButton(
+                child: const Text('删除'),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
+          ),
+        );
+        if (confirmed == true) {
+          await widget.billPlugin.deleteBill(widget.account.id, bill.id);
+          return true;
+        }
+        return false;
+      },
       onDismissed: (direction) {
-        widget.billPlugin.deleteBill(widget.account.id, bill.id);
+        // 空实现，因为删除操作已在confirmDismiss中完成
       },
       child: ListTile(
         leading: CircleAvatar(
