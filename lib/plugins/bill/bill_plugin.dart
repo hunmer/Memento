@@ -5,6 +5,7 @@ import '../../core/plugin_base.dart';
 import '../../core/storage/storage_manager.dart';
 import 'screens/bill_list_screen.dart';
 import 'screens/bill_stats_screen.dart';
+import 'screens/account_list_screen.dart';
 import 'models/account.dart';
 import 'models/bill.dart';
 import 'models/bill_statistics.dart';
@@ -242,24 +243,16 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   }
 
   Widget buildPluginEntryWidget(BuildContext context) {
-    // 如果没有账户，显示创建账户的提示
+    // 如果没有账户，跳转到账户列表页面
     if (_accounts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('还没有账户，请先创建一个账户'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: 实现创建账户的逻辑
-                // 可以导航到创建账户的页面
-              },
-              child: const Text('创建账户'),
-            ),
-          ],
-        ),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => AccountListScreen(billPlugin: this),
+          ),
+        );
+      });
+      return const Center(child: CircularProgressIndicator());
     }
 
     // 默认选择第一个账户
@@ -267,29 +260,28 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
     return DefaultTabController(
       length: 2,
-      child: Column(
-        children: [
-          const TabBar(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('账单管理'),
+          bottom: const TabBar(
             tabs: [
               Tab(text: '账单列表'),
               Tab(text: '统计分析'),
             ],
           ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                BillListScreen(
-                  billPlugin: this,
-                  account: defaultAccount,
-                ),
-                BillStatsScreen(
-                  billPlugin: this,
-                  account: defaultAccount,
-                ),
-              ],
+        ),
+        body: TabBarView(
+          children: [
+            BillListScreen(
+              billPlugin: this,
+              account: defaultAccount,
             ),
-          ),
-        ],
+            BillStatsScreen(
+              billPlugin: this,
+              account: defaultAccount,
+            ),
+          ],
+        ),
       ),
     );
   }
