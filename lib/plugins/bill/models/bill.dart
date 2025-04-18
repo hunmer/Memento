@@ -10,6 +10,7 @@ class Bill {
   String? note;
   DateTime createdAt;
   IconData icon;
+  Color iconColor;
 
   Bill({
     String? id,
@@ -20,8 +21,10 @@ class Bill {
     this.note,
     DateTime? createdAt,
     required this.icon,
+    Color? iconColor,
   }) : id = id ?? const Uuid().v4(),
-       createdAt = createdAt ?? DateTime.now();
+       createdAt = createdAt ?? DateTime.now(),
+       iconColor = iconColor ?? Colors.blue;
 
   // 从JSON创建账单
   factory Bill.fromJson(Map<String, dynamic> json) {
@@ -38,6 +41,10 @@ class Bill {
         fontFamily: json['iconFontFamily'] as String?,
         fontPackage: json['iconFontPackage'] as String?,
       ),
+      iconColor:
+          json['iconColor'] != null
+              ? Color(json['iconColor'] as int)
+              : Colors.blue,
     );
   }
 
@@ -54,6 +61,7 @@ class Bill {
       'iconCodePoint': icon.codePoint,
       'iconFontFamily': icon.fontFamily,
       'iconFontPackage': icon.fontPackage,
+      'iconColor': iconColor.value,
     };
   }
 
@@ -67,6 +75,7 @@ class Bill {
     String? note,
     DateTime? createdAt,
     IconData? icon,
+    Color? iconColor,
   }) {
     return Bill(
       id: id ?? this.id,
@@ -77,6 +86,7 @@ class Bill {
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
       icon: icon ?? this.icon,
+      iconColor: iconColor ?? this.iconColor,
     );
   }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/bill.dart';
-import 'bill_edit_screen.dart';
+import 'bill_edit_screen.dart' as bill_edit;
 import '../bill_plugin.dart';
 import '../models/account.dart';
 import '../models/statistic_range.dart';
@@ -114,9 +114,7 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
               totalExpense: statistics.totalExpense,
               balance: statistics.balance,
             ),
-            Expanded(
-              child: _buildBillsList(widget.account.bills),
-            ),
+            Expanded(child: _buildBillsList(widget.account.bills)),
           ],
         );
       },
@@ -125,9 +123,7 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
 
   Widget _buildBillsList(List<Bill> bills) {
     if (bills.isEmpty) {
-      return const Center(
-        child: Text('暂无账单记录'),
-      );
+      return const Center(child: Text('暂无账单记录'));
     }
 
     // 对账单按日期排序
@@ -154,28 +150,26 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
         color: Colors.red,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.delete, color: Colors.white),
       ),
       confirmDismiss: (direction) async {
         final confirmed = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('确认删除'),
-            content: const Text('确定要删除这条账单记录吗？'),
-            actions: [
-              TextButton(
-                child: const Text('取消'),
-                onPressed: () => Navigator.pop(context, false),
+          builder:
+              (context) => AlertDialog(
+                title: const Text('确认删除'),
+                content: const Text('确定要删除这条账单记录吗？'),
+                actions: [
+                  TextButton(
+                    child: const Text('取消'),
+                    onPressed: () => Navigator.pop(context, false),
+                  ),
+                  TextButton(
+                    child: const Text('删除'),
+                    onPressed: () => Navigator.pop(context, true),
+                  ),
+                ],
               ),
-              TextButton(
-                child: const Text('删除'),
-                onPressed: () => Navigator.pop(context, true),
-              ),
-            ],
-          ),
         );
         if (confirmed == true) {
           await widget.billPlugin.deleteBill(widget.account.id, bill.id);
@@ -188,22 +182,16 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
       },
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: widget.account.backgroundColor.withAlpha(51), // 0.2 * 255 ≈ 51
-          child: Icon(
-            bill.icon,
-            color: widget.account.backgroundColor,
-          ),
+          backgroundColor: widget.account.backgroundColor.withAlpha(
+            51,
+          ), // 0.2 * 255 ≈ 51
+          child: Icon(bill.icon, color: widget.account.backgroundColor),
         ),
         title: Text(bill.title),
-        subtitle: bill.tag != null
-            ? Text(bill.tag!)
-            : null,
+        subtitle: bill.tag != null ? Text(bill.tag!) : null,
         trailing: Text(
           '${isExpense ? '-' : '+'}¥${bill.absoluteAmount.toStringAsFixed(2)}',
-          style: TextStyle(
-            color: amountColor,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: amountColor, fontWeight: FontWeight.bold),
         ),
         onTap: () => _editBill(context, bill),
       ),
@@ -214,10 +202,11 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BillEditScreen(
-          billPlugin: widget.billPlugin,
-          account: widget.account,
-        ),
+        builder:
+            (context) => bill_edit.BillEditScreen(
+              billPlugin: widget.billPlugin,
+              account: widget.account,
+            ),
       ),
     );
   }
@@ -226,11 +215,12 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BillEditScreen(
-          billPlugin: widget.billPlugin,
-          account: widget.account,
-          bill: bill,
-        ),
+        builder:
+            (context) => bill_edit.BillEditScreen(
+              billPlugin: widget.billPlugin,
+              account: widget.account,
+              bill: bill,
+            ),
       ),
     );
   }
@@ -240,12 +230,10 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
       context: context,
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
-      initialDateRange: _customStartDate != null && _customEndDate != null
-          ? DateTimeRange(
-              start: _customStartDate!,
-              end: _customEndDate!,
-            )
-          : null,
+      initialDateRange:
+          _customStartDate != null && _customEndDate != null
+              ? DateTimeRange(start: _customStartDate!, end: _customEndDate!)
+              : null,
     );
 
     if (picked != null && mounted) {

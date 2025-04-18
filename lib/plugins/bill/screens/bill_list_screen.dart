@@ -32,32 +32,40 @@ class _BillListScreenState extends State<BillListScreen> {
     super.initState();
     _loadBills();
   }
-  
+
   Future<void> _loadBills() async {
     setState(() {
       _isLoading = true;
     });
 
     // 从账户中获取账单并转换为BillModel
-    final bills = widget.account.bills.map((bill) => BillModel(
-      id: bill.id,
-      title: bill.title,
-      amount: bill.absoluteAmount,
-      date: bill.createdAt,
-      icon: bill.icon,
-      color: widget.account.backgroundColor,
-      category: bill.tag ?? '未分类',
-      note: bill.note,
-      isExpense: bill.isExpense,
-    )).toList();
-    
+    final bills =
+        widget.account.bills
+            .map(
+              (bill) => BillModel(
+                id: bill.id,
+                title: bill.title,
+                amount: bill.absoluteAmount,
+                date: bill.createdAt,
+                icon: bill.icon,
+                color: bill.iconColor,
+                category: bill.tag ?? '未分类',
+                note: bill.note,
+                isExpense: bill.isExpense,
+              ),
+            )
+            .toList();
+
     setState(() {
       _bills = bills;
       _isLoading = false;
     });
   }
 
-  Future<void> _navigateToBillEdit(BuildContext context, [BillModel? billModel]) async {
+  Future<void> _navigateToBillEdit(
+    BuildContext context, [
+    BillModel? billModel,
+  ]) async {
     Bill? bill;
     if (billModel != null) {
       bill = Bill(
@@ -69,31 +77,33 @@ class _BillListScreenState extends State<BillListScreen> {
         note: billModel.note,
         createdAt: billModel.date,
         icon: billModel.icon,
+        iconColor: billModel.color,
       );
     }
 
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BillEditScreen(
-          billPlugin: widget.billPlugin,
-          account: widget.account,
-          bill: bill,
-        ),
+        builder:
+            (context) => BillEditScreen(
+              billPlugin: widget.billPlugin,
+              account: widget.account,
+              bill: bill,
+            ),
       ),
     );
-    
+
     if (result == true) {
       _loadBills();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // 计算总收入和总支出
     double totalIncome = 0;
     double totalExpense = 0;
-    
+
     for (var bill in widget.account.bills) {
       if (bill.amount > 0) {
         totalIncome += bill.amount;
@@ -101,9 +111,9 @@ class _BillListScreenState extends State<BillListScreen> {
         totalExpense += bill.amount.abs();
       }
     }
-    
+
     final balance = totalIncome - totalExpense;
-    
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -113,67 +123,66 @@ class _BillListScreenState extends State<BillListScreen> {
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
-                    children: [
-                      // 账单统计卡片
-                      Card(
-                        margin: const EdgeInsets.all(16),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              const Text(
-                                '账单概览',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                  children: [
+                    // 账单统计卡片
+                    Card(
+                      margin: const EdgeInsets.all(16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            const Text(
+                              '账单概览',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _buildStatItem(
+                                  '收入',
+                                  totalIncome,
+                                  Colors.green,
+                                  Icons.arrow_downward,
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  _buildStatItem(
-                                    '收入',
-                                    totalIncome,
-                                    Colors.green,
-                                    Icons.arrow_downward,
-                                  ),
-                                  _buildStatItem(
-                                    '支出',
-                                    totalExpense,
-                                    Colors.red,
-                                    Icons.arrow_upward,
-                                  ),
-                                  _buildStatItem(
-                                    '结余',
-                                    balance,
-                                    balance >= 0 ? Colors.blue : Colors.orange,
-                                    Icons.account_balance_wallet,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                _buildStatItem(
+                                  '支出',
+                                  totalExpense,
+                                  Colors.red,
+                                  Icons.arrow_upward,
+                                ),
+                                _buildStatItem(
+                                  '结余',
+                                  balance,
+                                  balance >= 0 ? Colors.blue : Colors.orange,
+                                  Icons.account_balance_wallet,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      
-                      // 账单列表
-                      Expanded(
-                        child: _bills.isEmpty
-                            ? const Center(
-                                child: Text('暂无账单记录，点击右下角添加'),
-                              )
-                            : ListView.builder(
+                    ),
+
+                    // 账单列表
+                    Expanded(
+                      child:
+                          _bills.isEmpty
+                              ? const Center(child: Text('暂无账单记录，点击右下角添加'))
+                              : ListView.builder(
                                 itemCount: _bills.length,
                                 itemBuilder: (context, index) {
                                   final bill = _bills[index];
                                   return _buildBillItem(context, bill);
                                 },
                               ),
-                      ),
-                    ],
-                  ),
-            
+                    ),
+                  ],
+                ),
+
             // 统计分析页
             BillStatsScreen(
               billPlugin: widget.billPlugin,
@@ -188,37 +197,36 @@ class _BillListScreenState extends State<BillListScreen> {
       ),
     );
   }
-  
-  Widget _buildStatItem(String title, double amount, Color color, IconData icon) {
+
+  Widget _buildStatItem(
+    String title,
+    double amount,
+    Color color,
+    IconData icon,
+  ) {
     final formatter = NumberFormat.currency(symbol: '¥', decimalDigits: 2);
-    
+
     return Column(
       children: [
         Icon(icon, color: color),
         const SizedBox(height: 4),
         Text(
           title,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         Text(
           formatter.format(amount),
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
         ),
       ],
     );
   }
-  
+
   Widget _buildBillItem(BuildContext context, BillModel bill) {
     final formatter = NumberFormat.currency(symbol: '¥', decimalDigits: 2);
     final dateFormatter = DateFormat('yyyy-MM-dd');
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(

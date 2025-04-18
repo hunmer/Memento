@@ -3,7 +3,7 @@ import '../bill_plugin.dart';
 import '../models/account.dart';
 import '../models/bill.dart';
 import 'package:flutter/services.dart';
-import '../../../widgets/icon_picker_dialog.dart';
+import '../../../widgets/circle_icon_picker.dart';
 
 class BillEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -29,6 +29,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
   String? _tag;
   bool _isExpense = true;
   IconData _selectedIcon = Icons.shopping_cart;
+  Color _selectedColor = Colors.blue;
 
   final List<String> _availableTags = [
     '未分类',
@@ -59,6 +60,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
       _tag = widget.bill!.tag;
       _isExpense = widget.bill!.isExpense;
       _selectedIcon = widget.bill!.icon;
+      _selectedColor = widget.bill!.iconColor;
     }
   }
 
@@ -201,112 +203,74 @@ class _BillEditScreenState extends State<BillEditScreen> {
   }
 
   Widget _buildIconSelector() {
-    return GestureDetector(
-      onTap: () async {
-        final IconData? selectedIcon = await showDialog<IconData>(
-          context: context,
-          builder: (context) => IconPickerDialog(currentIcon: _selectedIcon),
-        );
-        if (selectedIcon != null) {
-          setState(() {
-            _selectedIcon = selectedIcon;
-          });
-        }
+    return CircleIconPicker(
+      currentIcon: _selectedIcon,
+      backgroundColor: _selectedColor,
+      onIconSelected: (IconData icon) {
+        setState(() {
+          _selectedIcon = icon;
+        });
       },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withValues(
-            alpha: 26, // 0.1 * 255 ≈ 26
-            red: Theme.of(context).colorScheme.primary.r,
-            green: Theme.of(context).colorScheme.primary.g,
-            blue: Theme.of(context).colorScheme.primary.b,
-          ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              _selectedIcon,
-              size: 48,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '点击选择图标',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
+      onColorSelected: (Color color) {
+        setState(() {
+          _selectedColor = color;
+        });
+      },
     );
   }
 
   Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton(
-        onPressed: () async {
-          if (_formKey.currentState!.validate()) {
-            final amount = double.parse(_amountController.text);
-            final bill = Bill(
-              id: widget.bill?.id,
-              title: _titleController.text,
-              amount: _isExpense ? -amount : amount,
-              accountId: widget.account.id,
-              tag: _tag,
-              note:
-                  _noteController.text.isNotEmpty ? _noteController.text : null,
-              icon: _selectedIcon,
-              createdAt: widget.bill?.createdAt,
-            );
+    return ElevatedButton(
+      onPressed: () async {
+        if (_formKey.currentState!.validate()) {
+          final amount = double.parse(_amountController.text);
+          final bill = Bill(
+            id: widget.bill?.id,
+            title: _titleController.text,
+            amount: _isExpense ? -amount : amount,
+            accountId: widget.account.id,
+            tag: _tag ?? '未分类',
+            note: _noteController.text.isNotEmpty ? _noteController.text : null,
+            icon: _selectedIcon,
+            iconColor: _selectedColor,
+            createdAt: widget.bill?.createdAt,
+          );
 
-            try {
-              // 创建账户的副本
-              Account updatedAccount;
+          try {
+            // 创建账户的副本
+            Account updatedAccount;
 
-              if (widget.bill == null) {
-                // 创建新账单
-                updatedAccount = widget.account.copyWith(
-                  bills: [...widget.account.bills, bill],
-                );
-              } else {
-                // 更新现有账单
-                updatedAccount = widget.account.copyWith(
-                  bills:
-                      widget.account.bills
-                          .map(
-                            (existingBill) =>
-                                existingBill.id == bill.id
-                                    ? bill
-                                    : existingBill,
-                          )
-                          .toList(),
-                );
-              }
-              // 调用插件的保存账户方法
-              await widget.billPlugin.saveAccount(updatedAccount);
-
-              if (!mounted) return;
-              Navigator.pop(context);
-            } catch (e) {
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('保存失败: $e'),
-                  backgroundColor: Colors.red,
-                ),
+            if (widget.bill == null) {
+              // 创建新账单
+              updatedAccount = widget.account.copyWith(
+                bills: [...widget.account.bills, bill],
+              );
+            } else {
+              // 更新现有账单
+              updatedAccount = widget.account.copyWith(
+                bills:
+                    widget.account.bills
+                        .map(
+                          (existingBill) =>
+                              existingBill.id == bill.id ? bill : existingBill,
+                        )
+                        .toList(),
               );
             }
+            // 调用插件的保存账户方法
+            await widget.billPlugin.saveAccount(updatedAccount);
+
+            if (!mounted) return;
+            Navigator.pop(context);
+          } catch (e) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('保存失败: $e'), backgroundColor: Colors.red),
+            );
           }
-        },
-        child: Text(widget.bill == null ? '添加' : '保存'),
-      ),
+        }
+      },
+      child: Text(widget.bill == null ? '添加' : '保存'),
     );
   }
 }
