@@ -42,6 +42,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   Widget buildMainView(BuildContext context) {
     return buildPluginEntryWidget(context);
   }
+
   static const String _accountsKey = 'accounts';
   final List<Account> _accounts = [];
 
@@ -70,14 +71,16 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   Future<void> _saveAccounts() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final accountsJson = _accounts
-          .map((account) => jsonEncode(account.toJson()))
-          .toList();
-      await prefs.setStringList(_accountsKey, accountsJson);
+      final accountsJson =
+          _accounts.map((account) => jsonEncode(account.toJson())).toList();
+      final success = await prefs.setStringList(_accountsKey, accountsJson);
+      if (!success) {
+        throw '保存账户数据失败';
+      }
       notifyListeners();
     } catch (e) {
       debugPrint('保存账户失败: $e');
-      throw '保存账户失败';
+      throw '保存账户失败: $e';
     }
   }
 
@@ -125,22 +128,31 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     switch (range) {
       case StatisticRange.week:
         final weekStart = now.subtract(Duration(days: now.weekday - 1));
-        filteredBills = bills.where((bill) => bill.createdAt.isAfter(weekStart)).toList();
+        filteredBills =
+            bills.where((bill) => bill.createdAt.isAfter(weekStart)).toList();
         break;
       case StatisticRange.month:
         final monthStart = DateTime(now.year, now.month, 1);
-        filteredBills = bills.where((bill) => bill.createdAt.isAfter(monthStart)).toList();
+        filteredBills =
+            bills.where((bill) => bill.createdAt.isAfter(monthStart)).toList();
         break;
       case StatisticRange.year:
         final yearStart = DateTime(now.year, 1, 1);
-        filteredBills = bills.where((bill) => bill.createdAt.isAfter(yearStart)).toList();
+        filteredBills =
+            bills.where((bill) => bill.createdAt.isAfter(yearStart)).toList();
         break;
       case StatisticRange.custom:
         if (startDate != null && endDate != null) {
-          filteredBills = bills.where((bill) =>
-            bill.createdAt.isAfter(startDate) &&
-            bill.createdAt.isBefore(endDate.add(const Duration(days: 1)))
-          ).toList();
+          filteredBills =
+              bills
+                  .where(
+                    (bill) =>
+                        bill.createdAt.isAfter(startDate) &&
+                        bill.createdAt.isBefore(
+                          endDate.add(const Duration(days: 1)),
+                        ),
+                  )
+                  .toList();
         }
         break;
       case StatisticRange.all:
@@ -190,7 +202,9 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   @override
   Future<void> loadSettings(Map<String, dynamic> defaultSettings) async {
     try {
-      final storedSettings = await storage.read('${getPluginStoragePath()}/settings.json');
+      final storedSettings = await storage.read(
+        '${getPluginStoragePath()}/settings.json',
+      );
       if (storedSettings.isNotEmpty) {
         _settings = Map<String, dynamic>.from(storedSettings);
       } else {
@@ -265,12 +279,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('账单管理'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: '账单列表'),
-              Tab(text: '统计分析'),
-            ],
-          ),
+          bottom: const TabBar(tabs: [Tab(text: '账单列表'), Tab(text: '统计分析')]),
           actions: [
             IconButton(
               icon: const Icon(Icons.list),
@@ -286,14 +295,8 @@ class BillPlugin extends PluginBase with ChangeNotifier {
         ),
         body: TabBarView(
           children: [
-            BillListScreen(
-              billPlugin: this,
-              account: defaultAccount,
-            ),
-            BillStatsScreen(
-              billPlugin: this,
-              account: defaultAccount,
-            ),
+            BillListScreen(billPlugin: this, account: defaultAccount),
+            BillStatsScreen(billPlugin: this, account: defaultAccount),
           ],
         ),
       ),

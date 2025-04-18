@@ -17,9 +17,8 @@ class Account {
     required this.backgroundColor,
     this.totalAmount = 0.0,
     List<Bill>? bills,
-  }) : 
-    id = id ?? const Uuid().v4(),
-    bills = bills ?? [];
+  }) : id = id ?? const Uuid().v4(),
+       bills = bills ?? [];
 
   // 计算总金额
   void calculateTotal() {
@@ -28,6 +27,7 @@ class Account {
 
   // 从JSON创建账户
   factory Account.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> billsJson = json['bills'] as List<dynamic>? ?? [];
     return Account(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -38,12 +38,18 @@ class Account {
       ),
       backgroundColor: Color(json['backgroundColor'] as int),
       totalAmount: (json['totalAmount'] as num).toDouble(),
-      bills: [], // 账单会在另外的文件中加载
+      bills:
+          billsJson
+              .map(
+                (billJson) => Bill.fromJson(billJson as Map<String, dynamic>),
+              )
+              .toList(),
     );
   }
 
   // 转换为JSON
   Map<String, dynamic> toJson() {
+    calculateTotal(); // 保存前更新总金额
     return {
       'id': id,
       'title': title,
@@ -52,6 +58,7 @@ class Account {
       'iconFontPackage': icon.fontPackage,
       'backgroundColor': backgroundColor.value,
       'totalAmount': totalAmount,
+      'bills': bills.map((bill) => bill.toJson()).toList(),
     };
   }
 
