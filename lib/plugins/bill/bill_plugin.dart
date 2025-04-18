@@ -269,6 +269,18 @@ class BillPlugin extends PluginBase with ChangeNotifier {
               Tab(text: '统计分析'),
             ],
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.list),
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => AccountListScreen(billPlugin: this),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         body: TabBarView(
           children: [

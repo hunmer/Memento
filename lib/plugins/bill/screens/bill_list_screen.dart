@@ -6,6 +6,8 @@ import '../models/account.dart';
 import '../bill_plugin.dart';
 import '../services/bill_service.dart';
 import 'bill_edit_screen.dart';
+import 'account_list_screen.dart';
+import 'bill_stats_screen.dart';
 
 class BillListScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -102,73 +104,87 @@ class _BillListScreenState extends State<BillListScreen> {
     
     final balance = totalIncome - totalExpense;
     
-    return Scaffold(
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // 账单统计卡片
-                Card(
-                  margin: const EdgeInsets.all(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        const Text(
-                          '账单概览',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: TabBarView(
+          children: [
+            // 账单列表页
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    children: [
+                      // 账单统计卡片
+                      Card(
+                        margin: const EdgeInsets.all(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              const Text(
+                                '账单概览',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  _buildStatItem(
+                                    '收入',
+                                    totalIncome,
+                                    Colors.green,
+                                    Icons.arrow_downward,
+                                  ),
+                                  _buildStatItem(
+                                    '支出',
+                                    totalExpense,
+                                    Colors.red,
+                                    Icons.arrow_upward,
+                                  ),
+                                  _buildStatItem(
+                                    '结余',
+                                    balance,
+                                    balance >= 0 ? Colors.blue : Colors.orange,
+                                    Icons.account_balance_wallet,
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStatItem(
-                              '收入',
-                              totalIncome,
-                              Colors.green,
-                              Icons.arrow_downward,
-                            ),
-                            _buildStatItem(
-                              '支出',
-                              totalExpense,
-                              Colors.red,
-                              Icons.arrow_upward,
-                            ),
-                            _buildStatItem(
-                              '结余',
-                              balance,
-                              balance >= 0 ? Colors.blue : Colors.orange,
-                              Icons.account_balance_wallet,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                      
+                      // 账单列表
+                      Expanded(
+                        child: _bills.isEmpty
+                            ? const Center(
+                                child: Text('暂无账单记录，点击右下角添加'),
+                              )
+                            : ListView.builder(
+                                itemCount: _bills.length,
+                                itemBuilder: (context, index) {
+                                  final bill = _bills[index];
+                                  return _buildBillItem(context, bill);
+                                },
+                              ),
+                      ),
+                    ],
                   ),
-                ),
-                
-                // 账单列表
-                Expanded(
-                  child: _bills.isEmpty
-                      ? const Center(
-                          child: Text('暂无账单记录，点击右下角添加'),
-                        )
-                      : ListView.builder(
-                          itemCount: _bills.length,
-                          itemBuilder: (context, index) {
-                            final bill = _bills[index];
-                            return _buildBillItem(context, bill);
-                          },
-                        ),
-                ),
-              ],
+            
+            // 统计分析页
+            BillStatsScreen(
+              billPlugin: widget.billPlugin,
+              account: widget.account,
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToBillEdit(context),
-        child: const Icon(Icons.add),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _navigateToBillEdit(context),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
