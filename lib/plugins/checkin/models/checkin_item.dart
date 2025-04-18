@@ -7,7 +7,8 @@ class CheckinItem {
   final IconData icon;
   final Color color;
   String group;
-  final Map<DateTime, bool> checkInRecords;
+  // 打卡记录，包含时间范围和备注
+  final Map<DateTime, CheckinRecord> checkInRecords;
 
   CheckinItem({
     String? id,
@@ -15,7 +16,7 @@ class CheckinItem {
     required this.icon,
     Color? color,
     String? group,
-    Map<DateTime, bool>? checkInRecords,
+    Map<DateTime, CheckinRecord>? checkInRecords,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        color = color ?? Colors.blue,
        group = group ?? '默认分组',
@@ -25,27 +26,47 @@ class CheckinItem {
   bool isCheckedToday() {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    return checkInRecords[todayDate] ?? false;
+    return checkInRecords.containsKey(todayDate);
   }
 
-  // 打卡
-  Future<void> checkIn() async {
+  // 获取今天的打卡记录列表
+  List<CheckinRecord> getTodayRecords() {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    checkInRecords[todayDate] = true;
+    final records = <CheckinRecord>[];
+    checkInRecords.forEach((date, record) {
+      if (date.year == todayDate.year &&
+          date.month == todayDate.month &&
+          date.day == todayDate.day) {
+        records.add(record);
+      }
+    });
+    return records..sort((a, b) => b.checkinTime.compareTo(a.checkinTime));
+  }
+
+  // 添加打卡记录
+  Future<void> addCheckinRecord(CheckinRecord record) async {
+    final checkinTime = record.checkinTime;
+    final recordDate = DateTime(
+      checkinTime.year,
+      checkinTime.month,
+      checkinTime.day,
+      checkinTime.hour,
+      checkinTime.minute,
+      checkinTime.second,
+    );
+    checkInRecords[recordDate] = record;
     await CheckinPlugin.shared.triggerSave();
   }
 
   // 取消打卡
-  Future<void> cancelCheckIn() async {
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    checkInRecords[todayDate] = false;
+  Future<void> cancelCheckinRecord(DateTime recordTime) async {
+    checkInRecords.remove(recordTime);
     await CheckinPlugin.shared.triggerSave();
   }
 
   // 获取指定月份的打卡记录
-  Map<DateTime, bool> getMonthlyRecords(int year, int month) {
+  Map<DateTime, CheckinRecord> getMonthlyRecords(int year, int month) {
     return checkInRecords.entries
         .where((entry) => entry.key.year == year && entry.key.month == month)
         .fold({}, (map, entry) {
@@ -62,7 +83,17 @@ class CheckinItem {
 
     for (int i = 0; i < 365; i++) {
       final date = todayDate.subtract(Duration(days: i));
-      if (checkInRecords[date] ?? false) {
+      final dateRecords =
+          checkInRecords.entries
+              .where(
+                (entry) =>
+                    entry.key.year == date.year &&
+                    entry.key.month == date.month &&
+                    entry.key.day == date.day,
+              )
+              .toList();
+
+      if (dateRecords.isNotEmpty) {
         consecutiveDays++;
       } else {
         break;
@@ -87,7 +118,7 @@ class CheckinItem {
       'color': color.value,
       'group': group,
       'checkInRecords': checkInRecords.map(
-        (key, value) => MapEntry(key.toIso8601String(), value),
+        (key, value) => MapEntry(key.toIso8601String(), value.toJson()),
       ),
     };
   }
@@ -113,8 +144,44 @@ class CheckinItem {
       color: Color(json['color']),
       group: json['group'] ?? '默认分组',
       checkInRecords: (json['checkInRecords'] as Map<String, dynamic>).map(
-        (key, value) => MapEntry(DateTime.parse(key), value as bool),
+        (key, value) => MapEntry(
+          DateTime.parse(key),
+          CheckinRecord.fromJson(value as Map<String, dynamic>),
+        ),
       ),
+    );
+  }
+}
+
+// 打卡记录类
+class CheckinRecord {
+  final DateTime startTime;
+  final DateTime endTime;
+  final DateTime checkinTime;
+  final String? note;
+
+  CheckinRecord({
+    required this.startTime,
+    required this.endTime,
+    required this.checkinTime,
+    this.note,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'startTime': startTime.toIso8601String(),
+      'endTime': endTime.toIso8601String(),
+      'checkinTime': checkinTime.toIso8601String(),
+      'note': note,
+    };
+  }
+
+  factory CheckinRecord.fromJson(Map<String, dynamic> json) {
+    return CheckinRecord(
+      startTime: DateTime.parse(json['startTime'] as String),
+      endTime: DateTime.parse(json['endTime'] as String),
+      checkinTime: DateTime.parse(json['checkinTime'] as String),
+      note: json['note'] as String?,
     );
   }
 }

@@ -69,19 +69,6 @@ class CheckinPlugin extends BasePlugin {
                   .toList();
         }
       }
-
-      // 如果没有数据或数据为空，初始化默认打卡项目
-      if (_checkinItems.isEmpty) {
-        _checkinItems = [
-          CheckinItem(name: '早起', icon: Icons.wb_sunny),
-          CheckinItem(name: '早睡', icon: Icons.nightlight_round),
-          CheckinItem(name: '运动', icon: Icons.fitness_center),
-          CheckinItem(name: '读书', icon: Icons.book),
-          CheckinItem(name: '做饭', icon: Icons.restaurant),
-        ];
-        // 保存默认数据
-        await _saveCheckinItems();
-      }
     } catch (e) {
       debugPrint('初始化打卡项目失败: $e');
       // 使用默认数据

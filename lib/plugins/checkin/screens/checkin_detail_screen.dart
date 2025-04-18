@@ -27,18 +27,45 @@ class CheckinDetailScreen extends StatelessWidget {
         onPressed: () async {
           if (!checkinItem.isCheckedToday()) {
             await AudioService().playCheckInSound();
-            checkinItem.checkIn();
+
+            // 创建一个默认的打卡记录
+            final now = DateTime.now();
+            final record = CheckinRecord(
+              startTime: now,
+              endTime: now,
+              checkinTime: now,
+              note: '快速打卡',
+            );
+
+            await checkinItem.addCheckinRecord(record);
           } else {
-            checkinItem.cancelCheckIn();
+            // 获取今天的所有打卡记录并取消第一个
+            final todayRecords = checkinItem.getTodayRecords();
+            if (todayRecords.isNotEmpty) {
+              // 找到对应的记录键
+              DateTime? recordKey;
+              checkinItem.checkInRecords.forEach((key, value) {
+                if (value == todayRecords.first) {
+                  recordKey = key;
+                }
+              });
+
+              if (recordKey != null) {
+                await checkinItem.cancelCheckinRecord(recordKey!);
+              }
+            }
           }
+
           // 刷新页面
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => CheckinDetailScreen(checkinItem: checkinItem),
-            ),
-          );
+          if (context.mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) => CheckinDetailScreen(checkinItem: checkinItem),
+              ),
+            );
+          }
         },
         backgroundColor: checkinItem.color,
         child: Icon(checkinItem.isCheckedToday() ? Icons.close : Icons.check),
@@ -50,8 +77,7 @@ class CheckinDetailScreen extends StatelessWidget {
     final consecutiveDays = checkinItem.getConsecutiveDays();
     final now = DateTime.now();
     final monthlyRecords = checkinItem.getMonthlyRecords(now.year, now.month);
-    final monthlyCount =
-        monthlyRecords.values.where((checked) => checked).length;
+    final monthlyCount = monthlyRecords.length;
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -107,7 +133,13 @@ class CheckinDetailScreen extends StatelessWidget {
       itemCount: dates.length,
       itemBuilder: (context, index) {
         final date = dates[index];
-        final isChecked = checkinItem.checkInRecords[date] ?? false;
+        // 检查该日期是否有打卡记录
+        final hasRecord = checkinItem.checkInRecords.keys.any(
+          (key) =>
+              key.year == date.year &&
+              key.month == date.month &&
+              key.day == date.day,
+        );
 
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
@@ -117,14 +149,16 @@ class CheckinDetailScreen extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color:
-                    isChecked
-                        ? checkinItem.color.withOpacity(0.1)
+                    hasRecord
+                        ? checkinItem.color.withAlpha(
+                          25,
+                        ) // 使用withAlpha代替withOpacity
                         : Colors.grey.shade100,
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isChecked ? Icons.check_circle : Icons.circle_outlined,
-                color: isChecked ? checkinItem.color : Colors.grey,
+                hasRecord ? Icons.check_circle : Icons.circle_outlined,
+                color: hasRecord ? checkinItem.color : Colors.grey,
               ),
             ),
             title: Text(
@@ -132,9 +166,9 @@ class CheckinDetailScreen extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             trailing: Text(
-              isChecked ? '已打卡' : '未打卡',
+              hasRecord ? '已打卡' : '未打卡',
               style: TextStyle(
-                color: isChecked ? checkinItem.color : Colors.grey,
+                color: hasRecord ? checkinItem.color : Colors.grey,
               ),
             ),
           ),

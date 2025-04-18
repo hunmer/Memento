@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
 import '../widgets/checkin_form_dialog.dart';
+import 'package:intl/intl.dart';
 import '../screens/checkin_detail_screen.dart';
 import '../../../widgets/circle_icon_picker.dart';
 import '../checkin_plugin.dart';
@@ -68,12 +69,28 @@ class CheckinListController {
     double completionRate =
         totalItems > 0 ? completedItems / totalItems * 100 : 0;
 
+    // 计算今日总打卡次数
+    int todayCheckins = 0;
+    for (var item in checkinItems) {
+      todayCheckins += item.getTodayRecords().length;
+    }
+
     return {
       'groupStats': groupStats,
       'totalItems': totalItems,
       'completedItems': completedItems,
       'completionRate': completionRate,
+      'todayCheckins': todayCheckins, // 添加今日打卡总次数
     };
+  }
+
+  // 获取今日打卡记录总数
+  int getTotalRecordsToday() {
+    int totalRecords = 0;
+    for (var item in checkinItems) {
+      totalRecords += item.getTodayRecords().length;
+    }
+    return totalRecords;
   }
 
   // 获取特定分组的统计信息
@@ -211,137 +228,163 @@ class CheckinListController {
   }
 
   // 显示打卡成功对话框
-  void showCheckinSuccessDialog(CheckinItem item) {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    scaffoldMessenger.clearSnackBars(); // 清除所有现有的 SnackBar
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Text('${item.name}打卡成功！连续打卡${item.getConsecutiveDays()}天'),
-        backgroundColor: item.color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 3), // 设置显示时间为3秒
-        action: SnackBarAction(
-          label: '查看详情',
-          textColor: Colors.white,
-          onPressed: () {
-            scaffoldMessenger.hideCurrentSnackBar(); // 点击时立即隐藏当前 SnackBar
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CheckinDetailScreen(checkinItem: item),
+  void showCheckinSuccessDialog(CheckinItem item, CheckinRecord record) {
+    final streak = item.getConsecutiveDays();
+    final timeFormat = DateFormat('HH:mm');
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green),
+                const SizedBox(width: 8),
+                const Text('打卡成功'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('您已成功完成 ${item.name} 的打卡'),
+                const SizedBox(height: 8),
+                Text(
+                  '时间段: ${timeFormat.format(record.startTime)} - ${timeFormat.format(record.endTime)}',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                if (record.note != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '备注: ${record.note}',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                if (streak > 1)
+                  Text(
+                    '连续打卡天数: $streak',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                    ),
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('确定'),
               ),
-            );
-          },
-        ),
-      ),
+            ],
+          ),
     );
   }
 
   // 显示分组管理对话框
   void showGroupManagementDialog() {
+    BuildContext dialogContext;
     showDialog(
       context: context,
-      builder:
-          (BuildContext dialogContext) => StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return AlertDialog(
-                title: const Text('分组管理'),
-                content: SizedBox(
-                  width: double.maxFinite,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (groups.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(
-                            child: Text(
-                              '暂无分组',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        Flexible(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: groups.length,
-                            itemBuilder: (context, index) {
-                              final group = groups[index];
-                              final items = groupedItems[group] ?? [];
-                              final completedCount =
-                                  items
-                                      .where((item) => item.isCheckedToday())
-                                      .length;
-
-                              return ListTile(
-                                leading: const Icon(Icons.folder_outlined),
-                                title: Text(group),
-                                subtitle: Text(
-                                  '${items.length}个项目，$completedCount个已打卡',
-                                  style: TextStyle(
-                                    color:
-                                        completedCount > 0
-                                            ? Colors.green
-                                            : Colors.grey,
-                                  ),
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (items.isEmpty)
-                                      IconButton(
-                                        icon: const Icon(Icons.delete_outline),
-                                        tooltip: '删除空分组',
-                                        onPressed: () {
-                                          // 空分组不需要特别处理，因为分组是根据打卡项目动态生成的
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                    IconButton(
-                                      icon: const Icon(Icons.edit_outlined),
-                                      tooltip: '编辑分组',
-                                      onPressed: () {
-                                        _showEditOrCreateGroupDialog(
-                                          group: group,
-                                          items: items,
-                                          parentContext: dialogContext,
-                                          onGroupUpdated: () => setState(() {}),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+      builder: (BuildContext context) {
+        dialogContext = context;
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('管理分组'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (groups.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(
+                          child: Text(
+                            '暂无分组',
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                         ),
-                    ],
-                  ),
+                      )
+                    else
+                      Flexible(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: groups.length,
+                          itemBuilder: (context, index) {
+                            final group = groups[index];
+                            final items = groupedItems[group] ?? [];
+                            final completedCount =
+                                items
+                                    .where((item) => item.isCheckedToday())
+                                    .length;
+
+                            return ListTile(
+                              leading: const Icon(Icons.folder_outlined),
+                              title: Text(group),
+                              subtitle: Text(
+                                '${items.length}个项目，$completedCount个已打卡',
+                                style: TextStyle(
+                                  color:
+                                      completedCount > 0
+                                          ? Colors.green
+                                          : Colors.grey,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (items.isEmpty)
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline),
+                                      tooltip: '删除空分组',
+                                      onPressed: () {
+                                        // 空分组不需要特别处理，因为分组是根据打卡项目动态生成的
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  IconButton(
+                                    icon: const Icon(Icons.edit_outlined),
+                                    tooltip: '编辑分组',
+                                    onPressed: () {
+                                      _showEditOrCreateGroupDialog(
+                                        group: group,
+                                        items: items,
+                                        parentContext: dialogContext,
+                                        onGroupUpdated: () => setState(() {}),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('关闭'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _showEditOrCreateGroupDialog(
-                        parentContext: dialogContext,
-                        onGroupUpdated: () => setState(() {}),
-                      );
-                    },
-                    child: const Text('新建'),
-                  ),
-                ],
-              );
-            },
-          ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('关闭'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _showEditOrCreateGroupDialog(
+                      parentContext: dialogContext,
+                      onGroupUpdated: () => setState(() {}),
+                    );
+                  },
+                  child: const Text('新建'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     ).then((_) {
       // 关闭对话框后刷新界面
       onStateChanged();

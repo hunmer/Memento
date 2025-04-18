@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../controllers/checkin_list_controller.dart';
 import '../models/checkin_item.dart';
+import '../widgets/checkin_record_dialog.dart';
+import '../screens/checkin_record_screen.dart';
 import 'package:intl/intl.dart';
 
 class CheckinListScreen extends StatefulWidget {
@@ -72,17 +74,10 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
                 ),
                 _buildStatCard(
                   context,
-                  '已完成',
-                  '${statistics['completedItems']}',
-                  Icons.check_circle,
+                  '今日打卡数',
+                  '${statistics['todayCheckins'] ?? 0}',
+                  Icons.today,
                   color: Colors.green,
-                ),
-                _buildStatCard(
-                  context,
-                  '完成率',
-                  '${statistics['completionRate'].toStringAsFixed(0)}%',
-                  Icons.pie_chart,
-                  color: Theme.of(context).colorScheme.primary,
                 ),
               ],
             ),
@@ -333,18 +328,25 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
         ],
       );
     } else {
-      trailing = Checkbox(
-        value: item.isCheckedToday(),
-        onChanged: (value) {
-          if (value ?? false) {
-            item.checkIn();
-            controller.showCheckinSuccessDialog(item);
-          } else {
-            item.cancelCheckIn();
-          }
-          _handleStateChanged();
-        },
-        activeColor: item.color,
+      trailing = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('打卡'),
+            onPressed: () async {
+              final record = await showDialog<CheckinRecord>(
+                context: context,
+                builder: (context) => CheckinRecordDialog(checkinItem: item),
+              );
+              if (record != null) {
+                await item.addCheckinRecord(record);
+                _handleStateChanged();
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: item.color),
+          ),
+        ],
       );
     }
 
@@ -357,26 +359,49 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           if (!isEditMode) _buildWeekCircles(item),
         ],
       ),
-      trailing: trailing,
       onTap:
           isEditMode
               ? null
-              : () {
+              : () async {
                 if (item.isCheckedToday()) {
-                  item.cancelCheckIn();
-                } else {
-                  item.checkIn();
-                  controller.showCheckinSuccessDialog(item);
+                  // 获取今天的所有打卡记录并取消第一个
+                  final todayRecords = item.getTodayRecords();
+                  if (todayRecords.isNotEmpty) {
+                    // 找到对应的记录键
+                    DateTime? recordKey;
+                    item.checkInRecords.forEach((key, value) {
+                      if (value == todayRecords.first) {
+                        recordKey = key;
+                      }
+                    });
+
+                    if (recordKey != null) {
+                      await item.cancelCheckinRecord(recordKey!);
+                    }
+                  }
                 }
                 _handleStateChanged();
+
+                // 打开详情页面
+                if (mounted) {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => CheckinRecordScreen(checkinItem: item),
+                    ),
+                  );
+                  _handleStateChanged();
+                }
               },
+      trailing: trailing,
     );
 
     // 编辑模式下添加视觉反馈
     if (isEditMode) {
       return Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+          border: Border.all(color: Colors.grey.withAlpha(51), width: 1),
           borderRadius: BorderRadius.circular(4),
         ),
         margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
@@ -452,13 +477,13 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
       mainAxisSize: MainAxisSize.min,
       children:
           weekDays.map((date) {
-            final isChecked =
-                item.checkInRecords[DateTime(
-                  date.year,
-                  date.month,
-                  date.day,
-                )] ??
-                false;
+            // 检查该日期是否有打卡记录
+            final hasRecord = item.checkInRecords.keys.any(
+              (key) =>
+                  key.year == date.year &&
+                  key.month == date.month &&
+                  key.day == date.day,
+            );
             final isToday =
                 date.day == today.day &&
                 date.month == today.month &&
@@ -471,23 +496,79 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color:
-                    isChecked
+                    hasRecord
                         ? Colors.green
                         : (isToday
-                            ? Colors.blue.withOpacity(0.3)
-                            : Colors.grey.withOpacity(0.2)),
+                            ? Colors.blue.withAlpha(77)
+                            : Colors.grey.withAlpha(51)),
                 border:
                     isToday ? Border.all(color: Colors.blue, width: 2) : null,
               ),
-              child: Center(
-                child: Text(
-                  dateFormat.format(date),
-                  style: TextStyle(
-                    color: isChecked || isToday ? Colors.white : Colors.black,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+              child: Stack(
+                clipBehavior: Clip.none, // 允许子组件超出边界
+                children: [
+                  Center(
+                    child: Text(
+                      dateFormat.format(date),
+                      style: TextStyle(
+                        color:
+                            hasRecord || isToday ? Colors.white : Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                  // 获取当日记录数量
+                  Builder(
+                    builder: (context) {
+                      // 计算当日记录数量
+                      final recordCount =
+                          item.checkInRecords.entries
+                              .where(
+                                (entry) =>
+                                    entry.key.year == date.year &&
+                                    entry.key.month == date.month &&
+                                    entry.key.day == date.day,
+                              )
+                              .length;
+
+                      // 如果记录数量大于1，显示红点和数量
+                      if (recordCount > 1) {
+                        return Positioned(
+                          right: -6, // 向右偏移以显示在圆圈外
+                          bottom: -6, // 向下偏移以显示在圆圈外
+                          child: Container(
+                            width: 14,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 1),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withAlpha(40),
+                                  blurRadius: 2,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                recordCount.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink(); // 如果没有多条记录，不显示任何内容
+                    },
+                  ),
+                ],
               ),
             );
           }).toList(),
