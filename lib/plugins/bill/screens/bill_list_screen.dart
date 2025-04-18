@@ -24,13 +24,26 @@ class BillListScreen extends StatefulWidget {
 }
 
 class _BillListScreenState extends State<BillListScreen> {
+  late final void Function() _billPluginListener;
   List<BillModel> _bills = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _billPluginListener = () {
+      if (mounted) {
+        _loadBills();
+      }
+    };
+    widget.billPlugin.addListener(_billPluginListener);
     _loadBills();
+  }
+
+  @override
+  void dispose() {
+    widget.billPlugin.removeListener(_billPluginListener);
+    super.dispose();
   }
 
   Future<void> _loadBills() async {
@@ -81,7 +94,7 @@ class _BillListScreenState extends State<BillListScreen> {
       );
     }
 
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder:
@@ -92,10 +105,7 @@ class _BillListScreenState extends State<BillListScreen> {
             ),
       ),
     );
-
-    if (result == true) {
-      _loadBills();
-    }
+    // 不需要手动调用 _loadBills()，因为 billPlugin 的监听器会自动处理
   }
 
   @override
