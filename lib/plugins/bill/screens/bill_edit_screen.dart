@@ -48,6 +48,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
   ];
 
   final List<String> _availableTags = [
+    '未分类',
     '食品',
     '交通',
     '住宿',
@@ -85,9 +86,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.bill == null ? '添加账单' : '编辑账单'),
-      ),
+      appBar: AppBar(title: Text(widget.bill == null ? '添加账单' : '编辑账单')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -191,12 +190,10 @@ class _BillEditScreenState extends State<BillEditScreen> {
         labelText: '分类',
         border: OutlineInputBorder(),
       ),
-      items: _availableTags.map((String tag) {
-        return DropdownMenuItem<String>(
-          value: tag,
-          child: Text(tag),
-        );
-      }).toList(),
+      items:
+          _availableTags.map((String tag) {
+            return DropdownMenuItem<String>(value: tag, child: Text(tag));
+          }).toList(),
       onChanged: (String? newValue) {
         setState(() {
           _tag = newValue;
@@ -225,31 +222,35 @@ class _BillEditScreenState extends State<BillEditScreen> {
         Wrap(
           spacing: 12,
           runSpacing: 12,
-          children: _availableIcons.map((IconData icon) {
-            final isSelected = _selectedIcon.codePoint == icon.codePoint;
-            return InkWell(
-              onTap: () {
-                setState(() {
-                  _selectedIcon = icon;
-                });
-              },
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: isSelected ? Theme.of(context).primaryColor : null,
-                  border: Border.all(
-                    color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+          children:
+              _availableIcons.map((IconData icon) {
+                final isSelected = _selectedIcon.codePoint == icon.codePoint;
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedIcon = icon;
+                    });
+                  },
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isSelected ? Theme.of(context).primaryColor : null,
+                      border: Border.all(
+                        color:
+                            isSelected
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: isSelected ? Colors.white : Colors.grey,
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: isSelected ? Colors.white : Colors.grey,
-                ),
-              ),
-            );
-          }).toList(),
+                );
+              }).toList(),
         ),
       ],
     );
@@ -276,7 +277,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
       final title = _titleController.text;
       final amountText = _amountController.text;
       final note = _noteController.text.isEmpty ? null : _noteController.text;
-      
+
       double amount = double.parse(amountText);
       if (_isExpense) {
         amount = -amount; // 支出为负数
@@ -309,10 +310,11 @@ class _BillEditScreenState extends State<BillEditScreen> {
           );
 
           // 更新账户中的账单列表
-          final updatedBills = widget.account.bills.map((bill) {
-            return bill.id == updatedBill.id ? updatedBill : bill;
-          }).toList();
-          
+          final updatedBills =
+              widget.account.bills.map((bill) {
+                return bill.id == updatedBill.id ? updatedBill : bill;
+              }).toList();
+
           final updatedAccount = widget.account.copyWith(bills: updatedBills);
           await widget.billPlugin.saveAccount(updatedAccount);
         }
@@ -321,9 +323,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
           Navigator.pop(context, true);
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
       }
     }
   }
