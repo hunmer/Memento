@@ -260,6 +260,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
             // 调用插件的保存账户方法
             await widget.billPlugin.saveAccount(updatedAccount);
 
+            // 确保数据更新后通知监听器
+            widget.billPlugin.notifyListeners();
+
             if (!mounted) return;
             Navigator.pop(context);
           } catch (e) {

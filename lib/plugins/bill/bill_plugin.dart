@@ -77,7 +77,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       if (!success) {
         throw '保存账户数据失败';
       }
-      notifyListeners();
     } catch (e) {
       debugPrint('保存账户失败: $e');
       throw '保存账户失败: $e';
@@ -91,6 +90,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     }
     _accounts.add(account);
     await _saveAccounts();
+    // 确保在数据保存成功后再通知监听器
     notifyListeners();
   }
 
