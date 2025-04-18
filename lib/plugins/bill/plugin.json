@@ -1,0 +1,8 @@
+{
+  "id": "bill_plugin",
+  "name": "Bill",
+  "version": "1.0.0",
+  "description": "A bill management plugin for tracking expenses and income",
+  "author": "Zhuanz",
+  "main": "bill_plugin.dart"
+}
