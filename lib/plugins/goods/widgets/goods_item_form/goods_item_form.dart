@@ -74,52 +74,47 @@ class _GoodsItemFormState extends State<GoodsItemForm>
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            AppBar(
-              automaticallyImplyLeading: false,
-              title: const Text('编辑物品'),
-              bottom: const TabBar(
-                tabs: [Tab(text: '基本信息'), Tab(text: '使用记录')],
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text('编辑物品'),
+          bottom: TabBar(
+            tabs: [Tab(text: '基本信息'), Tab(text: '使用记录')],
+          ),
+          actions: [
+            if (widget.initialData != null && widget.onDelete != null)
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('确认删除'),
+                      content: const Text('确定要删除这个物品吗？此操作不可恢复。'),
+                      actions: [
+                        TextButton(
+                          child: const Text('取消'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                          child: const Text('删除'),
+                          onPressed: () {
+                            Navigator.pop(context); // 关闭确认对话框
+                            widget.onDelete!(widget.initialData!);
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-              actions: [
-                if (widget.initialData != null && widget.onDelete != null)
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              title: const Text('确认删除'),
-                              content: const Text('确定要删除这个物品吗？此操作不可恢复。'),
-                              actions: [
-                                TextButton(
-                                  child: const Text('取消'),
-                                  onPressed: () => Navigator.pop(context),
-                                ),
-                                TextButton(
-                                  child: const Text('删除'),
-                                  onPressed: () {
-                                    Navigator.pop(context); // 关闭确认对话框
-                                    widget.onDelete!(widget.initialData!);
-                                  },
-                                ),
-                              ],
-                            ),
-                      );
-                    },
-                  ),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [_buildBasicInfoTab(), _buildUsageRecordsTab()],
-              ),
-            ),
           ],
+        ),
+        body: Form(
+          key: _formKey,
+          child: TabBarView(
+            children: [_buildBasicInfoTab(), _buildUsageRecordsTab()],
+          ),
         ),
       ),
     );
@@ -164,7 +159,7 @@ class _GoodsItemFormState extends State<GoodsItemForm>
                         child: ImagePickerWidget(
                           imagePath: _imagePath,
                           onImageSelected: (path) async {
-                            if (path != null) {
+                            if (path.isNotEmpty) {
                               final imageFile = File(path);
                               final imageBytes = await imageFile.readAsBytes();
                               await _showCropDialog(imageBytes);
@@ -277,21 +272,6 @@ class _GoodsItemFormState extends State<GoodsItemForm>
           ),
         ),
         const SizedBox(height: 16),
-        // 使用记录
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: UsageRecordsList(
-              records: _usageRecords,
-              onRecordsChanged: (records) {
-                setState(() {
-                  _usageRecords = records;
-                });
-              },
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
         // 自定义字段
         Card(
           child: Padding(
@@ -323,32 +303,24 @@ class _GoodsItemFormState extends State<GoodsItemForm>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // 使用记录列表
-        if (_usageRecords.isNotEmpty)
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('使用记录', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  UsageRecordsList(
-                    records: _usageRecords,
-                    onDelete: (index) {
-                      setState(() {
-                        _usageRecords.removeAt(index);
-                      });
-                    },
-                  ),
-                ],
-              ),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                UsageRecordsList(
+                  records: _usageRecords,
+                  onRecordsChanged: (records) {
+                    setState(() {
+                      _usageRecords = records;
+                    });
+                  },
+                ),
+              ],
             ),
-          )
-        else
-          const Center(
-            child: Padding(padding: EdgeInsets.all(16), child: Text('暂无使用记录')),
           ),
+        ),
       ],
     );
   }
@@ -375,14 +347,18 @@ class _GoodsItemFormState extends State<GoodsItemForm>
     }
   }
 
-  @override
   Future<void> _showCropDialog(Uint8List imageBytes) async {
     final cropController = CropController();
 
     await showDialog(
       context: context,
-      builder:
-          (context) => Dialog(
+      builder: (context) => Dialog(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            maxWidth: MediaQuery.of(context).size.width * 0.9,
+          ),
+          child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -432,7 +408,9 @@ class _GoodsItemFormState extends State<GoodsItemForm>
                 ),
               ],
             ),
-          ),
+          )
+        ),
+      ),
     );
   }
 
@@ -456,7 +434,7 @@ class _GoodsItemFormState extends State<GoodsItemForm>
       await imageFile.writeAsBytes(croppedData);
 
       // 如果有旧图片且不是默认图片，则删除
-      if (_imagePath != null && _imagePath!.contains('goods_images')) {
+      if (_imagePath != null && _imagePath!.isNotEmpty && _imagePath!.contains('goods_images')) {
         try {
           final oldFile = File(_imagePath!);
           if (await oldFile.exists()) {
@@ -489,12 +467,5 @@ class _GoodsItemFormState extends State<GoodsItemForm>
     }
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    _priceController.dispose();
-    _stockController.dispose();
-    super.dispose();
-  }
+  // 此处已在上面定义过dispose方法，无需重复
 }

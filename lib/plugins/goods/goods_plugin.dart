@@ -158,6 +158,18 @@ class GoodsPlugin extends BasePlugin {
     }
   }
 
+  Future<void> clearWarehouse(String warehouseId) async {
+    try {
+      final warehouse = _warehouses.firstWhere((w) => w.id == warehouseId);
+      // 创建一个新的仓库对象，但清空物品列表
+      final clearedWarehouse = warehouse.copyWith(items: []);
+      await saveWarehouse(clearedWarehouse);
+    } catch (e) {
+      debugPrint('Error clearing warehouse: $e');
+      rethrow;
+    }
+  }
+
   @override
   Future<void> registerToApp(
     PluginManager pluginManager,

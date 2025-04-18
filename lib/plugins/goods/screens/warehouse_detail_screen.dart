@@ -64,8 +64,39 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                 leading: const Icon(Icons.edit),
                 title: const Text('编辑仓库'),
                 onTap: () {
-                  // TODO: Implement warehouse editing
                   Navigator.pop(context);
+                  // 实现仓库编辑功能
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('编辑仓库'),
+                      content: TextField(
+                        controller: TextEditingController(text: _warehouse.title),
+                        decoration: const InputDecoration(
+                          labelText: '仓库名称',
+                        ),
+                        onChanged: (value) {
+                          _warehouse = _warehouse.copyWith(title: value);
+                        },
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text('取消'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                          child: const Text('保存'),
+                          onPressed: () async {
+                            await GoodsPlugin.instance.saveWarehouse(_warehouse);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              await _refreshWarehouse();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
               ListTile(
@@ -92,8 +123,9 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                   );
 
                   if (confirm == true && context.mounted) {
-                    // TODO: Implement clear warehouse
+                    await GoodsPlugin.instance.clearWarehouse(_warehouse.id);
                     Navigator.pop(context);
+                    await _refreshWarehouse();
                   }
                 },
               ),
@@ -137,12 +169,6 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
               },
               onDelete: (item) async {
                 await GoodsPlugin.instance.deleteGoodsItem(_warehouse.id, item.id);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  await _refreshWarehouse();
-                }
-              },
-                await GoodsPlugin.instance.saveGoodsItem(_warehouse.id, item);
                 if (context.mounted) {
                   Navigator.pop(context);
                   await _refreshWarehouse();
