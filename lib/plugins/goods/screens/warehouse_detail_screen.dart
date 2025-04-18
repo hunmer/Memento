@@ -135,6 +135,19 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                   await _refreshWarehouse();
                 }
               },
+              onDelete: (item) async {
+                await GoodsPlugin.instance.deleteGoodsItem(_warehouse.id, item.id);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  await _refreshWarehouse();
+                }
+              },
+                await GoodsPlugin.instance.saveGoodsItem(_warehouse.id, item);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  await _refreshWarehouse();
+                }
+              },
             ),
           ),
     );

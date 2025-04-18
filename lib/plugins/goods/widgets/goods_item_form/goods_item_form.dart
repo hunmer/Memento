@@ -16,14 +16,22 @@ import 'custom_fields_list.dart';
 class GoodsItemForm extends StatefulWidget {
   final GoodsItem? initialData;
   final Function(GoodsItem) onSubmit;
+  final Function(GoodsItem)? onDelete;
 
-  const GoodsItemForm({super.key, this.initialData, required this.onSubmit});
+  const GoodsItemForm({
+    super.key,
+    this.initialData,
+    required this.onSubmit,
+    this.onDelete,
+  });
 
   @override
   State<GoodsItemForm> createState() => _GoodsItemFormState();
 }
 
-class _GoodsItemFormState extends State<GoodsItemForm> {
+class _GoodsItemFormState extends State<GoodsItemForm>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -40,6 +48,7 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     if (widget.initialData != null) {
       final item = widget.initialData!;
       _nameController.text = item.title;
@@ -56,201 +65,291 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // 基础信息部分
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // 图标和图片选择
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // 图标选择
-                        CircleIconPicker(
-                          currentIcon: _icon ?? Icons.image,
-                          backgroundColor: _iconColor ?? Colors.blue,
-                          onIconSelected: (icon) {
-                            setState(() {
-                              _icon = icon;
-                            });
-                          },
-                          onColorSelected: (color) {
-                            setState(() {
-                              _iconColor = color;
-                            });
-                          },
-                        ),
-                        const SizedBox(width: 24),
-                        // 图片选择
-                        Card(
-                          elevation: 2,
-                          child: ImagePickerWidget(
-                            imagePath: _imagePath,
-                            onImageSelected: (path) async {
-                              if (path != null) {
-                                final imageFile = File(path);
-                                final imageBytes =
-                                    await imageFile.readAsBytes();
-                                await _showCropDialog(imageBytes);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: '商品名称',
-                      hintText: '输入商品名称',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入商品名称';
-                      }
-                      return null;
+    return DefaultTabController(
+      length: 2,
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            AppBar(
+              automaticallyImplyLeading: false,
+              title: const Text('编辑物品'),
+              bottom: const TabBar(
+                tabs: [Tab(text: '基本信息'), Tab(text: '使用记录')],
+              ),
+              actions: [
+                if (widget.initialData != null && widget.onDelete != null)
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder:
+                            (context) => AlertDialog(
+                              title: const Text('确认删除'),
+                              content: const Text('确定要删除这个物品吗？此操作不可恢复。'),
+                              actions: [
+                                TextButton(
+                                  child: const Text('取消'),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                                TextButton(
+                                  child: const Text('删除'),
+                                  onPressed: () {
+                                    Navigator.pop(context); // 关闭确认对话框
+                                    widget.onDelete!(widget.initialData!);
+                                  },
+                                ),
+                              ],
+                            ),
+                      );
                     },
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: '商品描述',
-                      hintText: '输入商品描述',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 3,
-                  ),
-                ],
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [_buildBasicInfoTab(), _buildUsageRecordsTab()],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // 价格与库存
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Row(
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBasicInfoTab() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // 基础信息部分
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // 图标和图片选择
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _priceController,
-                          decoration: const InputDecoration(
-                            labelText: '价格',
-                            hintText: '输入价格',
-                            prefixText: '¥',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return '请输入价格';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return '请输入有效的价格';
-                            }
-                            return null;
-                          },
-                        ),
+                      // 图标选择
+                      CircleIconPicker(
+                        currentIcon: _icon ?? Icons.image,
+                        backgroundColor: _iconColor ?? Colors.blue,
+                        onIconSelected: (icon) {
+                          setState(() {
+                            _icon = icon;
+                          });
+                        },
+                        onColorSelected: (color) {
+                          setState(() {
+                            _iconColor = color;
+                          });
+                        },
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _stockController,
-                          decoration: const InputDecoration(
-                            labelText: '库存',
-                            hintText: '输入库存',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return '请输入库存';
+                      const SizedBox(width: 24),
+                      // 图片选择
+                      Card(
+                        elevation: 2,
+                        child: ImagePickerWidget(
+                          imagePath: _imagePath,
+                          onImageSelected: (path) async {
+                            if (path != null) {
+                              final imageFile = File(path);
+                              final imageBytes = await imageFile.readAsBytes();
+                              await _showCropDialog(imageBytes);
                             }
-                            if (int.tryParse(value) == null) {
-                              return '请输入有效的库存数量';
-                            }
-                            return null;
                           },
                         ),
                       ),
                     ],
                   ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: '商品名称',
+                    hintText: '输入商品名称',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入商品名称';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: '商品描述',
+                    hintText: '输入商品描述',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 价格与库存
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _priceController,
+                        decoration: const InputDecoration(
+                          labelText: '价格',
+                          hintText: '输入价格',
+                          prefixText: '¥',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '请输入价格';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return '请输入有效的价格';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _stockController,
+                        decoration: const InputDecoration(
+                          labelText: '库存',
+                          hintText: '输入库存',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '请输入库存';
+                          }
+                          if (int.tryParse(value) == null) {
+                            return '请输入有效的库存数量';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 标签
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: TagInputField(
+              tags: _tags,
+              onTagsChanged: (tags) {
+                setState(() {
+                  _tags = tags;
+                });
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 使用记录
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: UsageRecordsList(
+              records: _usageRecords,
+              onRecordsChanged: (records) {
+                setState(() {
+                  _usageRecords = records;
+                });
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 自定义字段
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: CustomFieldsList(
+              fields: _customFields,
+              onFieldsChanged: (fields) {
+                setState(() {
+                  _customFields = fields;
+                });
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        // 提交按钮
+        ElevatedButton(
+          onPressed: _submitForm,
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Text('保存商品'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUsageRecordsTab() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // 使用记录列表
+        if (_usageRecords.isNotEmpty)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('使用记录', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  UsageRecordsList(
+                    records: _usageRecords,
+                    onDelete: (index) {
+                      setState(() {
+                        _usageRecords.removeAt(index);
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
+          )
+        else
+          const Center(
+            child: Padding(padding: EdgeInsets.all(16), child: Text('暂无使用记录')),
           ),
-          const SizedBox(height: 16),
-          // 标签
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: TagInputField(
-                tags: _tags,
-                onTagsChanged: (tags) {
-                  setState(() {
-                    _tags = tags;
-                  });
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // 使用记录
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: UsageRecordsList(
-                records: _usageRecords,
-                onRecordsChanged: (records) {
-                  setState(() {
-                    _usageRecords = records;
-                  });
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // 自定义字段
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: CustomFieldsList(
-                fields: _customFields,
-                onFieldsChanged: (fields) {
-                  setState(() {
-                    _customFields = fields;
-                  });
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          // 提交按钮
-          ElevatedButton(
-            onPressed: _submitForm,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text('保存商品'),
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 
