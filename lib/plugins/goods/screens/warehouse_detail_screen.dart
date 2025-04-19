@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/warehouse.dart';
+import '../widgets/warehouse_form.dart';
 import '../models/goods_item.dart';
 import '../goods_plugin.dart';
 import '../widgets/goods_item_card.dart';
@@ -68,34 +69,21 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                   // 实现仓库编辑功能
                   showDialog(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('编辑仓库'),
-                      content: TextField(
-                        controller: TextEditingController(text: _warehouse.title),
-                        decoration: const InputDecoration(
-                          labelText: '仓库名称',
+                    builder:
+                        (context) => Dialog(
+                          child: WarehouseForm(
+                            warehouse: _warehouse,
+                            onSave: (warehouse) async {
+                              await GoodsPlugin.instance.saveWarehouse(
+                                warehouse,
+                              );
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                                await _refreshWarehouse();
+                              }
+                            },
+                          ),
                         ),
-                        onChanged: (value) {
-                          _warehouse = _warehouse.copyWith(title: value);
-                        },
-                      ),
-                      actions: [
-                        TextButton(
-                          child: const Text('取消'),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        TextButton(
-                          child: const Text('保存'),
-                          onPressed: () async {
-                            await GoodsPlugin.instance.saveWarehouse(_warehouse);
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                              await _refreshWarehouse();
-                            }
-                          },
-                        ),
-                      ],
-                    ),
                   );
                 },
               ),
@@ -126,6 +114,43 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                     await GoodsPlugin.instance.clearWarehouse(_warehouse.id);
                     Navigator.pop(context);
                     await _refreshWarehouse();
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_forever, color: Colors.red),
+                title: const Text('删除仓库', style: TextStyle(color: Colors.red)),
+                onTap: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder:
+                        (context) => AlertDialog(
+                          title: const Text('确认删除'),
+                          content: Text(
+                            '确定要删除仓库"${_warehouse.title}"吗？\n删除后将无法恢复，仓库内所有物品也将被删除。',
+                          ),
+                          actions: [
+                            TextButton(
+                              child: const Text('取消'),
+                              onPressed: () => Navigator.pop(context, false),
+                            ),
+                            TextButton(
+                              child: const Text('删除'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                              onPressed: () => Navigator.pop(context, true),
+                            ),
+                          ],
+                        ),
+                  );
+
+                  if (confirm == true && context.mounted) {
+                    await GoodsPlugin.instance.deleteWarehouse(_warehouse.id);
+                    // 关闭底部菜单
+                    Navigator.pop(context);
+                    // 返回上一页
+                    Navigator.pop(context);
                   }
                 },
               ),
@@ -168,7 +193,10 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                 }
               },
               onDelete: (item) async {
-                await GoodsPlugin.instance.deleteGoodsItem(_warehouse.id, item.id);
+                await GoodsPlugin.instance.deleteGoodsItem(
+                  _warehouse.id,
+                  item.id,
+                );
                 if (context.mounted) {
                   Navigator.pop(context);
                   await _refreshWarehouse();
