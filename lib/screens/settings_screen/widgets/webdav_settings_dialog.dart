@@ -21,7 +21,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
   late TextEditingController _usernameController;
   late TextEditingController _passwordController;
   late TextEditingController _dataPathController;
-  
+
   bool _isConnecting = false;
   bool _isConnected = false;
   String _statusMessage = '';
@@ -29,21 +29,21 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
   @override
   void initState() {
     super.initState();
-    
-    // 初始化控制器
+
+    // 初始化控制器，设置默认值
     _urlController = TextEditingController(
-      text: widget.initialConfig?['url'] ?? 'https://',
+      text: widget.initialConfig?['url'] ?? 'http://127.0.0.1:8080',
     );
     _usernameController = TextEditingController(
-      text: widget.initialConfig?['username'] ?? '',
+      text: widget.initialConfig?['username'] ?? 'admin',
     );
     _passwordController = TextEditingController(
-      text: widget.initialConfig?['password'] ?? '',
+      text: widget.initialConfig?['password'] ?? '123456',
     );
     _dataPathController = TextEditingController(
       text: widget.initialConfig?['dataPath'] ?? '/app_data',
     );
-    
+
     _isConnected = widget.initialConfig?['isConnected'] == true;
   }
 
@@ -109,38 +109,39 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
   void _showSyncOptionsDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('数据同步选项'),
-        content: const Text(
-          '请选择同步方式：\n'
-          '- 将本地数据上传到WebDAV\n'
-          '- 将WebDAV数据下载到本地\n'
-          '- 跳过数据同步'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _syncLocalToWebDAV();
-            },
-            child: const Text('上传到WebDAV'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('数据同步选项'),
+            content: const Text(
+              '请选择同步方式：\n'
+              '- 将本地数据上传到WebDAV\n'
+              '- 将WebDAV数据下载到本地\n'
+              '- 跳过数据同步',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _syncLocalToWebDAV();
+                },
+                child: const Text('上传到WebDAV'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _syncWebDAVToLocal();
+                },
+                child: const Text('下载到本地'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(true); // 关闭设置对话框并返回成功
+                },
+                child: const Text('跳过同步'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _syncWebDAVToLocal();
-            },
-            child: const Text('下载到本地'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop(true); // 关闭设置对话框并返回成功
-            },
-            child: const Text('跳过同步'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -205,7 +206,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
                   if (value == null || value.isEmpty) {
                     return '请输入WebDAV服务器地址';
                   }
-                  if (!value.startsWith('http://') && 
+                  if (!value.startsWith('http://') &&
                       !value.startsWith('https://')) {
                     return '地址必须以http://或https://开头';
                   }
@@ -216,9 +217,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _usernameController,
-                decoration: const InputDecoration(
-                  labelText: '用户名',
-                ),
+                decoration: const InputDecoration(labelText: '用户名'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return '请输入用户名';
@@ -230,9 +229,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: '密码',
-                ),
+                decoration: const InputDecoration(labelText: '密码'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -273,9 +270,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
                   ),
                 ),
               if (_isConnecting)
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                const Center(child: CircularProgressIndicator()),
             ],
           ),
         ),
