@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as io;
+import 'package:webdav_client/webdav_client.dart';
 
 import 'storage_interface.dart';
 import 'mobile_storage.dart';
@@ -16,6 +18,11 @@ class StorageManager {
   late String _basePath;
   final Map<String, dynamic> _cache = {};
   late StorageInterface _storage;
+
+  // WebDAV相关
+  Client? _webdavClient;
+  String? _webdavBasePath;
+  bool _useWebDAV = false;
 
   /// 创建存储管理器实例
   /// 注意：使用前需要调用 initialize() 方法确保初始化完成
@@ -33,7 +40,89 @@ class StorageManager {
   /// 初始化存储管理器
   Future<void> initialize() async {
     await _initBasePath();
+    await _initWebDAV();
   }
+
+  /// 初始化WebDAV连接
+  Future<void> _initWebDAV() async {
+    try {
+      // 检查是否存在WebDAV配置
+      if (await fileExists('webdav_config.json')) {
+        final config = await readJson('webdav_config.json');
+        if (config['isConnected'] == true) {
+          // 配置WebDAV客户端
+          _webdavClient = newClient(
+            config['url'],
+            user: config['username'],
+            password: config['password'],
+            debug: true,
+          );
+
+          _webdavBasePath = config['dataPath'];
+          _useWebDAV = true;
+
+          // 测试连接
+          try {
+            await _webdavClient!.ping();
+            debugPrint('WebDAV连接成功');
+          } catch (e) {
+            debugPrint('WebDAV连接失败: $e');
+            _useWebDAV = false;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('初始化WebDAV失败: $e');
+      _useWebDAV = false;
+    }
+  }
+
+  /// 配置WebDAV
+  Future<void> configureWebDAV({
+    required String url,
+    required String username,
+    required String password,
+    required String dataPath,
+    required bool enabled,
+  }) async {
+    if (enabled) {
+      _webdavClient = newClient(
+        url,
+        user: username,
+        password: password,
+        debug: true,
+      );
+
+      _webdavBasePath = dataPath;
+      _useWebDAV = true;
+
+      // 保存配置
+      await writeJson('webdav_config.json', {
+        'url': url,
+        'username': username,
+        'password': password,
+        'dataPath': dataPath,
+        'isConnected': true,
+      });
+
+      // 确保远程目录存在
+      try {
+        await _webdavClient!.mkdir(dataPath);
+      } catch (e) {
+        // 目录可能已存在，忽略错误
+      }
+    } else {
+      _useWebDAV = false;
+      _webdavClient = null;
+      _webdavBasePath = null;
+
+      // 保存配置
+      await writeJson('webdav_config.json', {'isConnected': false});
+    }
+  }
+
+  /// 检查WebDAV是否已配置
+  bool get isWebDAVConfigured => _useWebDAV && _webdavClient != null;
 
   /// 获取基础路径
   String get basePath => _basePath;
@@ -111,6 +200,29 @@ class StorageManager {
         }
 
         await file.writeAsString(content);
+
+        // 如果WebDAV已配置，同时写入WebDAV
+        if (_useWebDAV && _webdavClient != null && _webdavBasePath != null) {
+          try {
+            final webdavPath = '$_webdavBasePath/$path';
+
+            // 确保WebDAV目录存在
+            final dirPath = webdavPath.substring(
+              0,
+              webdavPath.lastIndexOf('/'),
+            );
+            try {
+              await _webdavClient!.mkdir(dirPath);
+            } catch (e) {
+              // 目录可能已存在，忽略错误
+            }
+
+            // 写入WebDAV文件
+            await _webdavClient!.write(
+              webdavPath,
+              Uint8List.fromList(content.codeUnits),
+            );
+        }
       } catch (e) {
         debugPrint('写入文件失败: $path - $e');
         // 失败时只保留在缓存中
@@ -138,6 +250,20 @@ class StorageManager {
     }
 
     try {
+      // 如果WebDAV已配置且优先使用，尝试从WebDAV读取
+      if (_useWebDAV && _webdavClient != null && _webdavBasePath != null) {
+        try {
+          final webdavPath = '$_webdavBasePath/$path';
+          final bytes = await _webdavClient!.read(webdavPath);
+          final content = utf8.decode(bytes);
+          _cache[path] = content;
+          return content;
+        } catch (e) {
+          debugPrint('从WebDAV读取失败，尝试本地读取: $path - $e');
+          // 如果WebDAV读取失败，继续尝试本地读取
+        }
+      }
+
       // 非Web平台读取文件
       final filePath = '$_basePath/$path';
       final file = io.File(filePath);
@@ -197,6 +323,16 @@ class StorageManager {
 
       if (await file.exists()) {
         await file.delete();
+      }
+
+      // 如果WebDAV已配置，同时删除WebDAV中的文件
+      if (_useWebDAV && _webdavClient != null && _webdavBasePath != null) {
+        try {
+          final webdavPath = '$_webdavBasePath/$path';
+          await _webdavClient!.remove(webdavPath);
+        } catch (e) {
+          debugPrint('WebDAV删除文件失败: $path - $e');
+        }
       }
     } catch (e) {
       debugPrint('删除文件失败: $path - $e');
@@ -305,6 +441,16 @@ class StorageManager {
 
         // 从缓存中删除所有相关项
         _cache.removeWhere((key, _) => key.startsWith(path));
+
+        // 如果WebDAV已配置，同时删除WebDAV中的目录
+        if (_useWebDAV && _webdavClient != null && _webdavBasePath != null) {
+          try {
+            final webdavPath = '$_webdavBasePath/$path';
+            await _webdavClient!.remove(webdavPath);
+          } catch (e) {
+            debugPrint('WebDAV删除目录失败: $path - $e');
+          }
+        }
       } catch (e) {
         debugPrint('删除目录失败: $path - $e');
       }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import './controllers/settings_screen_controller.dart';
 import './widgets/plugin_selection_dialog.dart';
 import './widgets/folder_selection_dialog.dart';
+import './widgets/webdav_settings_dialog.dart';
+import './controllers/webdav_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -12,16 +14,21 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late SettingsScreenController _controller;
+  late WebDAVController _webdavController;
 
   @override
   void initState() {
     super.initState();
     _controller = SettingsScreenController(context);
+    _webdavController = WebDAVController(context);
     _controller.addListener(() {
       if (mounted) {
         setState(() {});
       }
     });
+
+    // 检查WebDAV配置
+    _checkWebDAVConfig();
   }
 
   @override
@@ -35,6 +42,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  // WebDAV配置状态
+  bool _isWebDAVConnected = false;
+
+  // 检查WebDAV配置
+  Future<void> _checkWebDAVConfig() async {
+    final config = await _webdavController.getWebDAVConfig();
+    if (mounted) {
+      setState(() {
+        _isWebDAVConnected = config?['isConnected'] == true;
+      });
+    }
+  }
+
+  // 显示WebDAV设置对话框
+  Future<void> _showWebDAVSettings() async {
+    final config = await _webdavController.getWebDAVConfig();
+    if (!mounted) return;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => WebDAVSettingsDialog(
+            controller: _webdavController,
+            initialConfig: config,
+          ),
+    );
+
+    if (result == true) {
+      // 重新检查WebDAV状态
+      await _checkWebDAVConfig();
+    }
   }
 
   @override
@@ -90,6 +130,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('从备份恢复整个应用数据（覆盖现有数据）'),
             onTap: _controller.importAllData,
             trailing: const Icon(Icons.warning, color: Colors.orange),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.cloud),
+            title: const Text('WebDAV 同步'),
+            subtitle: Text(_isWebDAVConnected ? '已连接' : '未连接'),
+            trailing:
+                _isWebDAVConnected
+                    ? const Icon(Icons.check_circle, color: Colors.green)
+                    : null,
+            onTap: _showWebDAVSettings,
           ),
           const Divider(),
           ListTile(
