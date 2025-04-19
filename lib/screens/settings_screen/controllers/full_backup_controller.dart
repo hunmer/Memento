@@ -7,12 +7,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../utils/file_utils.dart';
+import 'dart:async';
 import '../../../main.dart';
 
 class FullBackupController {
   final BuildContext context;
   bool _mounted = true;
   String _appVersion = "1.0.0"; // 默认版本号
+  final _progressController = StreamController<double>.broadcast();
+  Stream<double> get progressStream => _progressController.stream;
 
   FullBackupController(this.context) {
     _initPackageInfo();
@@ -34,10 +37,38 @@ class FullBackupController {
 
   void dispose() {
     _mounted = false;
+    _progressController.close();
   }
 
   Future<void> exportAllData() async {
+    // 显示进度对话框
+    if (!_mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => StreamBuilder<double>(
+            stream: progressStream,
+            builder: (context, snapshot) {
+              return AlertDialog(
+                title: const Text('正在备份'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LinearProgressIndicator(value: snapshot.data),
+                    const SizedBox(height: 16),
+                    Text(
+                      '已完成: ${((snapshot.data ?? 0) * 100).toStringAsFixed(1)}%',
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+    );
+
     try {
+      _progressController.add(0.0); // 初始进度
       // 获取应用文档目录
       final appDir = await getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
@@ -91,13 +122,17 @@ class FullBackupController {
       await archiveFile.copy(savedFile);
       await archiveFile.delete(); // 删除临时文件
 
+      // 关闭进度对话框
       if (_mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('数据导出成功')));
       }
     } catch (e) {
+      // 关闭进度对话框
       if (_mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('导出失败: $e')));
@@ -249,16 +284,49 @@ class FullBackupController {
     String basePath,
     Archive archive,
   ) async {
-    final entities = directory.listSync();
-    for (final entity in entities) {
-      final relativePath = entity.path.substring(basePath.length + 1);
-      if (entity is File) {
-        final bytes = await entity.readAsBytes();
-        archive.addFile(ArchiveFile(relativePath, bytes.length, bytes));
-      } else if (entity is Directory) {
-        await _addFilesToArchive(entity, basePath, archive);
+    // 首先计算总文件数
+    int totalFiles = 0;
+    int processedFiles = 0;
+
+    Future<void> countFiles(Directory dir) async {
+      final entities = dir.listSync();
+      for (final entity in entities) {
+        if (entity is File) {
+          totalFiles++;
+        } else if (entity is Directory) {
+          await countFiles(entity);
+        }
       }
     }
+
+    await countFiles(directory);
+
+    // 添加文件到压缩包
+    Future<void> addFiles(Directory dir) async {
+      final entities = dir.listSync();
+      for (final entity in entities) {
+        if (!_mounted) return;
+
+        final relativePath = entity.path.substring(basePath.length + 1);
+        if (entity is File) {
+          final bytes = await entity.readAsBytes();
+          archive.addFile(ArchiveFile(relativePath, bytes.length, bytes));
+          processedFiles++;
+
+          // 更新进度
+          if (_mounted && totalFiles > 0) {
+            _progressController.add(processedFiles / totalFiles);
+          }
+
+          // 让出CPU时间片
+          await Future.delayed(Duration.zero);
+        } else if (entity is Directory) {
+          await addFiles(entity);
+        }
+      }
+    }
+
+    await addFiles(directory);
   }
 
   void _restartApp(BuildContext context) {

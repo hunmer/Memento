@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:crop_your_image/crop_your_image.dart';
-import 'dart:typed_data';
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../../models/goods_item.dart';
@@ -418,7 +420,63 @@ class _GoodsItemFormState extends State<GoodsItemForm>
     );
   }
 
+  Future<Uint8List> _compressImage(
+    Uint8List imageData, {
+    int maxWidth = 800,
+    int quality = 85,
+  }) async {
+    try {
+      // 解码图片
+      final codec = await ui.instantiateImageCodec(imageData);
+      final frame = await codec.getNextFrame();
+      final originalImage = frame.image;
+
+      // 计算新的宽度和高度，保持宽高比
+      double ratio = originalImage.width / originalImage.height;
+      int targetWidth = originalImage.width;
+      int targetHeight = originalImage.height;
+
+      if (targetWidth > maxWidth) {
+        targetWidth = maxWidth;
+        targetHeight = (maxWidth / ratio).round();
+      }
+
+      // 创建缩放后的图片
+      final ui.Image resizedImage = await originalImage
+          .toByteData(format: ui.ImageByteFormat.rawRgba)
+          .then((byteData) async {
+            final completer = Completer<ui.Image>();
+            ui.decodeImageFromPixels(
+              byteData!.buffer.asUint8List(),
+              originalImage.width,
+              originalImage.height,
+              ui.PixelFormat.rgba8888,
+              completer.complete,
+            );
+            return completer.future;
+          });
+
+      // 将图片编码为JPEG格式，并应用质量压缩
+      final byteData = await resizedImage.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      final compressedData = byteData!.buffer.asUint8List();
+
+      // 释放资源
+      originalImage.dispose();
+      resizedImage.dispose();
+
+      return compressedData;
+    } catch (e) {
+      debugPrint('压缩图片失败: $e');
+      return imageData; // 如果压缩失败，返回原图
+    }
+  }
+
   Future<void> _saveAndSetCroppedImage(Uint8List croppedData) async {
+    // 压缩图片
+    final compressedData = await _compressImage(croppedData);
+
     try {
       // 获取应用文档目录
       final appDir = await getApplicationDocumentsDirectory();
@@ -435,7 +493,7 @@ class _GoodsItemFormState extends State<GoodsItemForm>
 
       // 保存裁剪后的图片到永久存储
       final imageFile = File(imagePath);
-      await imageFile.writeAsBytes(croppedData);
+      await imageFile.writeAsBytes(compressedData);
 
       // 如果有旧图片且不是默认图片，则删除
       if (_imagePath != null &&
@@ -465,7 +523,7 @@ class _GoodsItemFormState extends State<GoodsItemForm>
         '${tempDir.path}/cropped_${DateTime.now().millisecondsSinceEpoch}.jpg',
       );
 
-      await tempFile.writeAsBytes(croppedData);
+      await tempFile.writeAsBytes(compressedData);
 
       setState(() {
         _imagePath = tempFile.path;

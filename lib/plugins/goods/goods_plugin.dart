@@ -90,6 +90,14 @@ class GoodsPlugin extends BasePlugin {
 
   Future<void> saveWarehouse(Warehouse warehouse) async {
     try {
+      // 更新内存中的仓库信息
+      final index = _warehouses.indexWhere((w) => w.id == warehouse.id);
+      if (index != -1) {
+        _warehouses[index] = warehouse;
+      } else {
+        _warehouses.add(warehouse);
+      }
+
       // 保存仓库信息
       await storage.write('goods/warehouse/${warehouse.id}', {
         'warehouse': warehouse.toJson(),
@@ -98,14 +106,6 @@ class GoodsPlugin extends BasePlugin {
       // 更新仓库列表
       final warehouseIds = _warehouses.map((w) => w.id).toList();
       await storage.write('goods/warehouses', {'warehouses': warehouseIds});
-
-      // 更新内存中的仓库信息
-      final index = _warehouses.indexWhere((w) => w.id == warehouse.id);
-      if (index != -1) {
-        _warehouses[index] = warehouse;
-      } else {
-        _warehouses.add(warehouse);
-      }
 
       notifyListeners();
     } catch (e) {
