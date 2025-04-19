@@ -16,16 +16,17 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
   void _showAddWarehouseDialog() {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        child: WarehouseForm(
-          onSave: (Warehouse warehouse) async {
-            await GoodsPlugin.instance.saveWarehouse(warehouse);
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-      ),
+      builder:
+          (context) => Dialog(
+            child: WarehouseForm(
+              onSave: (Warehouse warehouse) async {
+                await GoodsPlugin.instance.saveWarehouse(warehouse);
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ),
     );
   }
 
@@ -70,26 +71,33 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
           ),
         ],
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 1,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: warehouses.length,
-        itemBuilder: (context, index) {
-          final warehouse = warehouses[index];
-          return WarehouseCard(
-            warehouse: warehouse,
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => WarehouseDetailScreen(
-                    warehouse: warehouse,
-                  ),
-                ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // 根据屏幕宽度决定布局
+          final isWideScreen = constraints.maxWidth > 600; // 平板或桌面端阈值
+
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isWideScreen ? 2 : 1, // 宽屏显示两列，窄屏显示一列
+              childAspectRatio: isWideScreen ? 1.5 : 2.5, // 调整长宽比
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: warehouses.length,
+            itemBuilder: (context, index) {
+              final warehouse = warehouses[index];
+              return WarehouseCard(
+                warehouse: warehouse,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder:
+                          (context) =>
+                              WarehouseDetailScreen(warehouse: warehouse),
+                    ),
+                  );
+                },
               );
             },
           );

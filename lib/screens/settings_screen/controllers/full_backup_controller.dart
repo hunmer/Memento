@@ -13,7 +13,6 @@ import '../../../main.dart';
 class FullBackupController {
   final BuildContext context;
   bool _mounted = true;
-  String _appVersion = "1.0.0"; // 默认版本号
   final _progressController = StreamController<double>.broadcast();
   Stream<double> get progressStream => _progressController.stream;
 
@@ -24,15 +23,10 @@ class FullBackupController {
   Future<void> _initPackageInfo() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
-      _appVersion = packageInfo.version;
     } catch (e) {
       debugPrint('获取应用版本信息失败: $e');
       // 使用默认版本号
     }
-  }
-
-  String _getAppVersion() {
-    return _appVersion;
   }
 
   void dispose() {
@@ -80,13 +74,6 @@ class FullBackupController {
       // 创建一个 ZipEncoder 实例
       final encoder = ZipEncoder();
       final archive = Archive();
-
-      // 添加版本信息
-      final versionBytes = utf8.encode(_getAppVersion());
-      archive.addFile(
-        ArchiveFile('version.txt', versionBytes.length, versionBytes),
-      );
-
       // 递归添加所有文件到压缩包
       await _addFilesToArchive(appDir, appDir.path, archive);
 
@@ -194,40 +181,10 @@ class FullBackupController {
       // 解压缩文件
       final archive = ZipDecoder().decodeBytes(bytes);
 
-      // 检查版本兼容性
+      // 版本信息不再验证，只检查文件是否存在
       final versionFile = archive.findFile('version.txt');
-      if (versionFile == null) throw Exception('无效的备份文件：缺少版本信息');
-
-      final exportVersion = utf8.decode(versionFile.content as List<int>);
-      final currentVersion = _getAppVersion();
-
-      if (!FileUtils.isVersionCompatible(exportVersion, currentVersion)) {
-        if (!_mounted) return;
-
-        final bool? proceed = await showDialog<bool>(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('版本不兼容'),
-                content: Text(
-                  '备份文件版本($exportVersion)与当前应用版本($currentVersion)不兼容。\n'
-                  '继续导入可能会导致数据损坏或应用崩溃。\n\n'
-                  '是否仍要继续？',
-                ),
-                actions: [
-                  TextButton(
-                    child: const Text('取消'),
-                    onPressed: () => Navigator.of(context).pop(false),
-                  ),
-                  TextButton(
-                    child: const Text('继续'),
-                    onPressed: () => Navigator.of(context).pop(true),
-                  ),
-                ],
-              ),
-        );
-
-        if (!_mounted || proceed != true) return;
+      if (versionFile == null) {
+        debugPrint('备份文件缺少版本信息，但仍将继续导入');
       }
 
       // 获取应用文档目录

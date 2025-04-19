@@ -1,14 +1,6 @@
 import 'dart:io';
 
 class FileUtils {
-  /// 检查版本兼容性
-  /// 当前简单实现：只要主版本号相同即认为兼容
-  static bool isVersionCompatible(String version1, String version2) {
-    final v1Major = version1.split('.')[0];
-    final v2Major = version2.split('.')[0];
-    return v1Major == v2Major;
-  }
-
   /// 复制目录及其所有内容到目标位置
   static Future<void> copyDirectory(
     Directory source,

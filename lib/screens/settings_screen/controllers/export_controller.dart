@@ -16,14 +16,15 @@ class ExportController {
   final PermissionController _permissionController;
 
   ExportController(this.context)
-      : _mounted = true,
-        _permissionController = PermissionController(context);
+    : _mounted = true,
+      _permissionController = PermissionController(context);
 
   Future<void> exportData() async {
     if (!_mounted) return;
     try {
       // 检查权限
-      final hasPermission = await _permissionController.checkAndRequestPermissions();
+      final hasPermission =
+          await _permissionController.checkAndRequestPermissions();
       if (!hasPermission) {
         return;
       }
@@ -51,22 +52,23 @@ class ExportController {
         if (!_mounted) return;
         final proceed = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('数据完整性警告'),
-            content: Text(
-              '以下插件的数据可能不完整或已损坏：\n${invalidPlugins.join('\n')}\n\n是否仍要继续导出？',
-            ),
-            actions: [
-              TextButton(
-                child: const Text('取消'),
-                onPressed: () => Navigator.of(context).pop(false),
+          builder:
+              (context) => AlertDialog(
+                title: const Text('数据完整性警告'),
+                content: Text(
+                  '以下插件的数据可能不完整或已损坏：\n${invalidPlugins.join('\n')}\n\n是否仍要继续导出？',
+                ),
+                actions: [
+                  TextButton(
+                    child: const Text('取消'),
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
+                  TextButton(
+                    child: const Text('继续'),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
+                ],
               ),
-              TextButton(
-                child: const Text('继续'),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-          ),
         );
 
         if (proceed != true) {
@@ -89,20 +91,6 @@ class ExportController {
 
       // 创建一个临时目录来存储要压缩的文件
       final tempDir = await Directory.systemTemp.createTemp('memento_temp_');
-
-      // 创建元数据文件
-      final metadataFile = File('${tempDir.path}/metadata.json');
-      await metadataFile.writeAsString(
-        json.encode({
-          'exportDate': DateTime.now().toIso8601String(),
-          'appVersion': '1.0.0', // 替换为实际的应用版本
-          'plugins': plugins
-              .map(
-                (p) => {'id': p.id, 'name': p.name, 'version': p.version},
-              )
-              .toList(),
-        }),
-      );
 
       // 为每个选中的插件创建一个目录并复制数据
       for (final pluginId in selectedPlugins) {

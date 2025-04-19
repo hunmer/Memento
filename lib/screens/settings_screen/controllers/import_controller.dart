@@ -72,68 +72,21 @@ class ImportController {
           }
         }
 
-        // 检查元数据文件
-        final metadataFile = File('${tempDir.path}/metadata.json');
-        if (!await metadataFile.exists()) {
-          throw Exception('导入文件格式不正确：缺少元数据文件');
-        }
-
-        // 解析元数据
-        final metadata = json.decode(await metadataFile.readAsString());
-        final exportVersion = metadata['appVersion'] as String? ?? '0.0.0';
-        const currentVersion = '1.0.0'; // 替换为实际的应用版本
-
-        // 检查版本兼容性
-        if (!FileUtils.isVersionCompatible(exportVersion, currentVersion)) {
-          if (!_mounted) return;
-          final proceed = await showDialog<bool>(
-            context: context,
-            builder:
-                (context) => AlertDialog(
-                  title: const Text('版本不兼容'),
-                  content: Text(
-                    '导出文件版本($exportVersion)与当前应用版本($currentVersion)不兼容。\n'
-                    '导入可能会导致数据损坏或应用崩溃。\n\n'
-                    '是否仍要继续？',
-                  ),
-                  actions: [
-                    TextButton(
-                      child: const Text('取消'),
-                      onPressed: () => Navigator.of(context).pop(false),
-                    ),
-                    TextButton(
-                      child: const Text('继续'),
-                      onPressed: () => Navigator.of(context).pop(true),
-                    ),
-                  ],
-                ),
-          );
-
-          if (!_mounted || proceed != true) {
-            return;
-          }
-        }
-
-        // 获取导出的插件列表
-        final exportedPlugins =
-            (metadata['plugins'] as List<dynamic>)
-                .map(
-                  (p) => {
-                    'id': p['id'] as String,
-                    'name': p['name'] as String,
-                    'version': p['version'] as String,
-                  },
-                )
-                .toList();
-
         // 获取当前已安装的插件
         final installedPlugins = globalPluginManager.allPlugins;
-        final installedPluginIds = installedPlugins.map((p) => p.id).toSet();
+
+        // 获取ZIP中的所有顶级目录作为可用插件ID
+        final availablePluginIds =
+            archive.files
+                .where((file) => file.name.contains('/')) // 包含/表示是文件夹内的文件
+                .map((file) => file.name.split('/')[0]) // 获取第一级目录名
+                .toSet(); // 使用Set去重
 
         // 找出可导入的插件（已安装的插件中存在于导出文件中的插件）
         final availablePlugins =
-            exportedPlugins
-                .where((p) => installedPluginIds.contains(p['id']))
+            installedPlugins
+                .where((p) => availablePluginIds.contains(p.id))
+                .map((p) => {'id': p.id, 'name': p.name})
                 .toList();
 
         if (availablePlugins.isEmpty) {
@@ -150,14 +103,7 @@ class ImportController {
         final selectedPlugins = await showDialog<List<String>>(
           context: context,
           builder: (BuildContext context) {
-            return FolderSelectionDialog(
-              items:
-                  availablePlugins
-                      .map(
-                        (p) => {'id': p['id'] ?? '', 'name': p['name'] ?? ''},
-                      )
-                      .toList(),
-            );
+            return FolderSelectionDialog(items: availablePlugins);
           },
         );
 

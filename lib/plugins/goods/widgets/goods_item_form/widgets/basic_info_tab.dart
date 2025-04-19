@@ -279,15 +279,13 @@ class BasicInfoTab extends StatelessWidget {
           );
         },
       );
-    } else if (controller.imagePath!.startsWith('file://')) {
-      // 本地图片（新的文件URL格式）
-      final file = File(controller.imagePath!.replaceFirst('file://', ''));
-      if (file.existsSync()) {
-        return Image.file(file, width: 60, height: 60, fit: BoxFit.cover);
-      }
     } else {
-      // 旧的本地图片路径格式
-      final file = File(controller.imagePath!);
+      // 本地图片：移除 file:// 前缀（如果存在）
+      final path =
+          controller.imagePath!.startsWith('file://')
+              ? controller.imagePath!.replaceFirst('file://', '')
+              : controller.imagePath!;
+      final file = File(path);
       if (file.existsSync()) {
         return Image.file(file, width: 60, height: 60, fit: BoxFit.cover);
       }
@@ -312,11 +310,18 @@ class BasicInfoTab extends StatelessWidget {
       if (result != null && result['url'] != null) {
         final path = result['url'];
         if (path.isNotEmpty) {
-          // 删除旧图片
-          await ImageUtils.deleteImage(controller.imagePath);
+          // 删除旧图片（移除 file:// 前缀后再删除）
+          if (controller.imagePath != null) {
+            final oldPath =
+                controller.imagePath!.startsWith('file://')
+                    ? controller.imagePath!.replaceFirst('file://', '')
+                    : controller.imagePath!;
+            await ImageUtils.deleteImage(oldPath);
+          }
 
-          // 更新图片路径
-          controller.imagePath = path;
+          // 更新图片路径（保留 file:// 前缀）
+          controller.imagePath =
+              path.startsWith('file://') ? path : 'file://$path';
           onStateChanged();
         }
       }

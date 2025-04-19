@@ -37,6 +37,51 @@ class _WarehouseFormState extends State<WarehouseForm> {
     }
   }
 
+  Widget _buildWarehouseImage() {
+    if (_imageUrl == null || _imageUrl!.isEmpty) {
+      return const Icon(Icons.image, size: 40);
+    }
+
+    if (_imageUrl!.startsWith('file://')) {
+      final path = _imageUrl!.replaceFirst('file://', '');
+      final file = File(path);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          fit: BoxFit.cover,
+          errorBuilder:
+              (context, error, stackTrace) =>
+                  const Icon(Icons.broken_image, size: 40),
+        );
+      } else {
+        return const Icon(Icons.broken_image, size: 40);
+      }
+    } else if (_imageUrl!.startsWith('http://') ||
+        _imageUrl!.startsWith('https://')) {
+      return Image.network(
+        _imageUrl!,
+        fit: BoxFit.cover,
+        errorBuilder:
+            (context, error, stackTrace) =>
+                const Icon(Icons.broken_image, size: 40),
+      );
+    } else {
+      // 尝试作为本地路径处理
+      final file = File(_imageUrl!);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          fit: BoxFit.cover,
+          errorBuilder:
+              (context, error, stackTrace) =>
+                  const Icon(Icons.broken_image, size: 40),
+        );
+      } else {
+        return const Icon(Icons.broken_image, size: 40);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -79,6 +124,8 @@ class _WarehouseFormState extends State<WarehouseForm> {
                             (context) => ImagePickerDialog(
                               initialUrl: _imageUrl,
                               saveDirectory: 'warehouse_images',
+                              enableCrop: true, // 启用裁切功能
+                              cropAspectRatio: 16 / 9, // 设置裁切比例为16:9，适合仓库展示
                             ),
                       );
                       if (result != null) {
@@ -97,27 +144,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
                           _imageUrl != null && _imageUrl!.isNotEmpty
                               ? ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child:
-                                    _imageUrl!.startsWith('file://')
-                                        ? Image.file(
-                                          File(
-                                            _imageUrl!.replaceFirst(
-                                              'file://',
-                                              '',
-                                            ),
-                                          ),
-                                          fit: BoxFit.cover,
-                                        )
-                                        : Image.network(
-                                          _imageUrl!,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  const Icon(
-                                                    Icons.broken_image,
-                                                    size: 40,
-                                                  ),
-                                        ),
+                                child: _buildWarehouseImage(),
                               )
                               : const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
