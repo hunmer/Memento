@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 import 'package:path_provider/path_provider.dart';
 import '../../../core/storage/storage_manager.dart';
 import 'package:mime/mime.dart';
+import 'dart:async';
 
 class WebDAVController {
   final BuildContext context;
@@ -53,13 +53,13 @@ class WebDAVController {
       // 确保 StorageManager 已初始化
       await storageManager.initialize();
 
-      await storageManager.writeJson('webdav_config.json', {
-        'url': url,
-        'username': username,
-        'password': password,
-        'dataPath': dataPath,
-        'isConnected': true,
-      });
+      await storageManager.saveWebDAVConfig(
+        url: url,
+        username: username,
+        password: password,
+        dataPath: dataPath,
+        enabled: true,
+      );
 
       return true;
     } catch (e) {
@@ -99,9 +99,13 @@ class WebDAVController {
     _isConnected = false;
 
     final StorageManager storageManager = StorageManager();
-    await storageManager.writeJson('webdav_config.json', {
-      'isConnected': false,
-    });
+    await storageManager.saveWebDAVConfig(
+      url: '',
+      username: '',
+      password: '',
+      dataPath: '',
+      enabled: false,
+    );
   }
 
   // 从本地同步到WebDAV
@@ -284,23 +288,23 @@ class WebDAVController {
   Future<Map<String, dynamic>?> getWebDAVConfig() async {
     try {
       final StorageManager storageManager = StorageManager();
-      if (await storageManager.fileExists('webdav_config.json')) {
-        final config = await storageManager.readJson('webdav_config.json');
-        if (config['isConnected'] == true) {
-          // 如果有保存的连接，尝试重新连接
-          final connected = await connect(
-            url: config['url'],
-            username: config['username'],
-            password: config['password'],
-            dataPath: config['dataPath'],
-          );
+      await storageManager.initialize();
 
-          if (connected) {
-            return config;
-          }
+      final config = await storageManager.getWebDAVConfig();
+      if (config != null && config['isConnected'] == true) {
+        // 如果有保存的连接，尝试重新连接
+        final connected = await connect(
+          url: config['url'],
+          username: config['username'],
+          password: config['password'],
+          dataPath: config['dataPath'],
+        );
+
+        if (connected) {
+          return config;
         }
-        return config;
       }
+      return config;
     } catch (e) {
       debugPrint('获取WebDAV配置失败: $e');
 
@@ -308,5 +312,299 @@ class WebDAVController {
       if (!context.mounted) return null;
     }
     return null;
+  }
+
+  // 监控文件变化并同步到WebDAV
+  StreamSubscription<FileSystemEvent>? _fileWatcher;
+
+  // 启动文件监控
+  Future<bool> startFileMonitoring() async {
+    if (!_isConnected || _client == null) {
+      debugPrint('WebDAV未连接，无法启动文件监控');
+      return false;
+    }
+
+    try {
+      // 获取本地应用数据目录
+      final directory = await getApplicationDocumentsDirectory();
+      final localPath = '${directory.path}/app_data';
+      final localDir = Directory(localPath);
+
+      // 确保目录存在
+      if (!await localDir.exists()) {
+        await localDir.create(recursive: true);
+      }
+
+      // 停止现有监控
+      await stopFileMonitoring();
+
+      // 清空待处理的文件变更
+      _pendingFileChanges.clear();
+      _isProcessingChanges = false;
+      if (_debounceTimer != null) {
+        _debounceTimer!.cancel();
+        _debounceTimer = null;
+      }
+
+      // 启动新监控
+      _fileWatcher = localDir.watch(recursive: true).listen((event) {
+        _handleFileChange(event);
+      });
+
+      debugPrint('文件监控已启动，监控目录: $localPath');
+      return true;
+    } catch (e) {
+      debugPrint('启动文件监控失败: $e');
+      return false;
+    }
+  }
+
+  // 停止文件监控
+  Future<void> stopFileMonitoring() async {
+    // 取消文件监控
+    if (_fileWatcher != null) {
+      await _fileWatcher!.cancel();
+      _fileWatcher = null;
+      debugPrint('文件监控已停止');
+    }
+
+    // 取消防抖定时器
+    if (_debounceTimer != null) {
+      _debounceTimer!.cancel();
+      _debounceTimer = null;
+    }
+
+    // 清空待处理的变更
+    _pendingFileChanges.clear();
+    _isProcessingChanges = false;
+  }
+
+  // 文件变化队列和处理锁
+  final Map<String, DateTime> _pendingFileChanges = {};
+  bool _isProcessingChanges = false;
+  Timer? _debounceTimer;
+
+  // 处理文件变化事件
+  void _handleFileChange(FileSystemEvent event) {
+    final fileName = event.path.split('/').last;
+
+    // 忽略临时文件、隐藏文件和配置文件
+    if (event.path.contains('.tmp') ||
+        fileName.startsWith('.') ||
+        fileName == 'webdav_config.json') {
+      return;
+    }
+
+    debugPrint('检测到文件变化: ${event.type} - ${event.path}');
+
+    // 将变更添加到队列，使用最新的时间戳
+    _pendingFileChanges[event.path] = DateTime.now();
+
+    // 取消现有定时器
+    _debounceTimer?.cancel();
+
+    // 设置防抖定时器，等待文件操作完成后再处理
+    _debounceTimer = Timer(const Duration(seconds: 2), () {
+      _processFileChanges();
+    });
+  }
+
+  // 处理文件变化队列
+  Future<void> _processFileChanges() async {
+    if (_isProcessingChanges || _pendingFileChanges.isEmpty) return;
+
+    _isProcessingChanges = true;
+
+    try {
+      // 按时间戳排序，先处理早期的变更
+      final sortedPaths =
+          _pendingFileChanges.keys.toList()..sort(
+            (a, b) =>
+                _pendingFileChanges[a]!.compareTo(_pendingFileChanges[b]!),
+          );
+
+      for (final path in sortedPaths) {
+        // 移除已处理的项目
+        final timestamp = _pendingFileChanges.remove(path);
+        if (timestamp == null) continue;
+
+        // 检查文件是否存在决定操作类型
+        final file = File(path);
+        if (await file.exists()) {
+          await _syncFileToWebDAV(path);
+        } else {
+          await _deleteFileFromWebDAV(path);
+        }
+
+        // 每个操作之间稍作延迟，避免并发问题
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    } finally {
+      _isProcessingChanges = false;
+
+      // 如果处理过程中有新的变更，继续处理
+      if (_pendingFileChanges.isNotEmpty) {
+        // 稍作延迟再处理
+        Timer(const Duration(seconds: 1), () {
+          _processFileChanges();
+        });
+      }
+    }
+  }
+
+  // 同步单个文件到WebDAV
+  Future<void> _syncFileToWebDAV(String localFilePath) async {
+    if (!_isConnected || _client == null) return;
+
+    // 检查是否是配置文件
+    final fileName = localFilePath.split('/').last;
+    if (fileName == 'webdav_config.json') {
+      debugPrint('跳过同步配置文件: $fileName');
+      return;
+    }
+
+    // 添加延迟，避免文件仍在写入过程中
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // 最大重试次数
+    const maxRetries = 3;
+    int retryCount = 0;
+
+    while (retryCount < maxRetries) {
+      try {
+        final config = await getWebDAVConfig();
+        if (config == null || !config['isConnected']) return;
+
+        final remotePath = config['dataPath'];
+        final directory = await getApplicationDocumentsDirectory();
+        final localBasePath = '${directory.path}/app_data';
+
+        // 计算相对路径
+        final relativePath = localFilePath.substring(localBasePath.length + 1);
+        final remoteFilePath = '$remotePath/$relativePath';
+
+        // 确保远程目录存在
+        final remoteDir = remoteFilePath.substring(
+          0,
+          remoteFilePath.lastIndexOf('/'),
+        );
+        try {
+          await _client!.mkdir(remoteDir);
+        } catch (e) {
+          // 目录可能已存在，忽略错误
+        }
+
+        // 上传文件
+        final file = File(localFilePath);
+        if (await file.exists()) {
+          // 检查文件是否可以被读取（不被锁定）
+          try {
+            final randomAccessFile = await file.open(mode: FileMode.read);
+            await randomAccessFile.close();
+          } catch (e) {
+            debugPrint('文件被锁定，无法读取: $localFilePath');
+            // 如果文件被锁定，等待一段时间后重试
+            await Future.delayed(const Duration(seconds: 1));
+            retryCount++;
+            continue;
+          }
+
+          // 获取文件的MIME类型
+          String? mimeType = lookupMimeType(localFilePath);
+          mimeType ??= 'application/octet-stream'; // 默认MIME类型
+
+          // 设置请求头
+          _client!.setHeaders({
+            'Content-Type': mimeType,
+            'Overwrite': 'T', // 覆盖已存在的文件
+          });
+
+          // 检查远程文件是否存在
+          try {
+            final response = await _client!.read(remoteFilePath);
+            if (response != null) {
+              debugPrint('远程文件已存在，将覆盖: $remoteFilePath');
+            }
+          } catch (e) {
+            // 文件不存在或其他错误，继续上传
+            debugPrint('检查远程文件时出错（可能是文件不存在）: $e');
+          }
+
+          // 上传文件
+          await _client!.writeFromFile(localFilePath, remoteFilePath);
+          debugPrint('文件已同步到WebDAV: $remoteFilePath');
+          return; // 成功后退出循环
+        }
+      } catch (e) {
+        debugPrint('同步文件到WebDAV失败 (尝试 ${retryCount + 1}/$maxRetries): $e');
+        if (e.toString().contains('Locked')) {
+          // 如果是锁定错误，等待更长时间
+          await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+        } else {
+          // 其他错误，短暂等待
+          await Future.delayed(const Duration(seconds: 1));
+        }
+        retryCount++;
+      }
+    }
+
+    if (retryCount == maxRetries) {
+      debugPrint('同步文件到WebDAV失败: 已达到最大重试次数 $maxRetries');
+    }
+  }
+
+  // 从WebDAV删除文件
+  Future<void> _deleteFileFromWebDAV(String localFilePath) async {
+    if (!_isConnected || _client == null) return;
+
+    // 最大重试次数
+    const maxRetries = 3;
+    int retryCount = 0;
+
+    while (retryCount < maxRetries) {
+      try {
+        final config = await getWebDAVConfig();
+        if (config == null || !config['isConnected']) return;
+
+        final remotePath = config['dataPath'];
+        final directory = await getApplicationDocumentsDirectory();
+        final localBasePath = '${directory.path}/app_data';
+
+        // 计算相对路径
+        final relativePath = localFilePath.substring(localBasePath.length + 1);
+        final remoteFilePath = '$remotePath/$relativePath';
+
+        // 检查文件是否存在并尝试删除
+        try {
+          await _client!.remove(remoteFilePath);
+          debugPrint('文件已从WebDAV删除: $remoteFilePath');
+          return; // 成功删除后退出
+        } catch (e) {
+          if (e.toString().contains('404')) {
+            debugPrint('远程文件不存在，无需删除: $remoteFilePath');
+            return;
+          }
+          // 其他错误则继续重试
+          throw e;
+        }
+        await _client!.remove(remoteFilePath);
+        debugPrint('文件已从WebDAV删除: $remoteFilePath');
+        return; // 成功后退出循环
+      } catch (e) {
+        debugPrint('从WebDAV删除文件失败 (尝试 ${retryCount + 1}/$maxRetries): $e');
+        if (e.toString().contains('Locked')) {
+          // 如果是锁定错误，等待更长时间
+          await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+        } else {
+          // 其他错误，短暂等待
+          await Future.delayed(const Duration(seconds: 1));
+        }
+        retryCount++;
+      }
+    }
+
+    if (retryCount == maxRetries) {
+      debugPrint('从WebDAV删除文件失败: 已达到最大重试次数 $maxRetries');
+    }
   }
 }

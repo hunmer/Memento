@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import '../controllers/webdav_controller.dart';
+import '../../../core/storage/storage_manager.dart';
 
 class WebDAVSettingsDialog extends StatefulWidget {
   final WebDAVController controller;
   final Map<String, dynamic>? initialConfig;
 
   const WebDAVSettingsDialog({
-    Key? key,
+    super.key,
     required this.controller,
     this.initialConfig,
-  }) : super(key: key);
+  });
 
   @override
   State<WebDAVSettingsDialog> createState() => _WebDAVSettingsDialogState();
@@ -24,6 +25,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
 
   bool _isConnecting = false;
   bool _isConnected = false;
+  bool _autoSync = false;
   String _statusMessage = '';
 
   @override
@@ -44,7 +46,13 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       text: widget.initialConfig?['dataPath'] ?? '/app_data',
     );
 
-    _isConnected = widget.initialConfig?['isConnected'] == true;
+    _isConnected = widget.initialConfig?['enabled'] == true;
+    _autoSync = widget.initialConfig?['autoSync'] == true;
+
+    // 如果已连接且开启了自动同步，启动文件监控
+    if (_isConnected && _autoSync) {
+      widget.controller.startFileMonitoring();
+    }
   }
 
   @override
@@ -96,53 +104,28 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       _statusMessage = '正在断开连接...';
     });
 
+    // 停止文件监控
+    await widget.controller.stopFileMonitoring();
     await widget.controller.disconnect();
+
+    // 更新配置，禁用 WebDAV 和自动同步
+    final storageManager = StorageManager();
+    await storageManager.initialize();
+    await storageManager.saveWebDAVConfig(
+      url: _urlController.text,
+      username: _usernameController.text,
+      password: _passwordController.text,
+      dataPath: _dataPathController.text,
+      enabled: false,
+      autoSync: false,
+    );
 
     setState(() {
       _isConnecting = false;
       _isConnected = false;
+      _autoSync = false;
       _statusMessage = '已断开连接';
     });
-  }
-
-  // 显示数据同步选项对话框
-  void _showSyncOptionsDialog() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('数据同步选项'),
-            content: const Text(
-              '请选择同步方式：\n'
-              '- 将本地数据上传到WebDAV\n'
-              '- 将WebDAV数据下载到本地\n'
-              '- 跳过数据同步',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await _syncLocalToWebDAV();
-                },
-                child: const Text('上传到WebDAV'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await _syncWebDAVToLocal();
-                },
-                child: const Text('下载到本地'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop(true); // 关闭设置对话框并返回成功
-                },
-                child: const Text('跳过同步'),
-              ),
-            ],
-          ),
-    );
   }
 
   // 将本地数据同步到WebDAV
@@ -158,11 +141,6 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       _isConnecting = false;
       _statusMessage = success ? '上传成功!' : '上传失败，请检查连接';
     });
-
-    if (success) {
-      if (!mounted) return;
-      Navigator.of(context).pop(true); // 关闭对话框并返回成功
-    }
   }
 
   // 将WebDAV数据同步到本地
@@ -178,11 +156,6 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       _isConnecting = false;
       _statusMessage = success ? '下载成功!' : '下载失败，请检查连接';
     });
-
-    if (success) {
-      if (!mounted) return;
-      Navigator.of(context).pop(true); // 关闭对话框并返回成功
-    }
   }
 
   @override
@@ -258,6 +231,20 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
                 enabled: !_isConnected,
               ),
               const SizedBox(height: 16),
+              if (_isConnected)
+                SwitchListTile(
+                  title: const Text('自动同步'),
+                  subtitle: const Text('监控本地文件变化并自动同步到WebDAV (不包含配置文件)'),
+                  value: _autoSync,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _autoSync = value;
+                      _statusMessage =
+                          value ? '自动同步已开启，点击完成后生效' : '自动同步已关闭，点击完成后生效';
+                    });
+                  },
+                ),
+              const SizedBox(height: 8),
               if (_statusMessage.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -276,27 +263,55 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop(false);
-          },
-          child: const Text('取消'),
-        ),
         if (!_isConnected)
           TextButton(
             onPressed: _isConnecting ? null : _testConnection,
             child: const Text('测试连接'),
           )
-        else
+        else ...[
           TextButton(
             onPressed: _isConnecting ? null : _disconnect,
             child: const Text('断开连接'),
           ),
-        if (_isConnected)
           TextButton(
-            onPressed: _isConnecting ? null : _showSyncOptionsDialog,
-            child: const Text('确定'),
+            onPressed: _isConnecting ? null : _syncWebDAVToLocal,
+            child: const Text('下载'),
           ),
+          TextButton(
+            onPressed: _isConnecting ? null : _syncLocalToWebDAV,
+            child: const Text('上传'),
+          ),
+          TextButton(
+            onPressed: () async {
+              // 在异步操作前获取context的引用
+              final currentContext = context;
+
+              // 保存当前配置，包括自动同步状态
+              final storageManager = StorageManager();
+              await storageManager.initialize();
+              await storageManager.saveWebDAVConfig(
+                url: _urlController.text,
+                username: _usernameController.text,
+                password: _passwordController.text,
+                dataPath: _dataPathController.text,
+                enabled: _isConnected,
+                autoSync: _autoSync,
+              );
+
+              // 完成时根据自动同步设置决定是否启动文件监控
+              if (_isConnected && _autoSync) {
+                await widget.controller.startFileMonitoring();
+              } else {
+                await widget.controller.stopFileMonitoring();
+              }
+
+              // 使用mounted检查和保存的context引用
+              if (!mounted) return;
+              Navigator.of(currentContext).pop(true);
+            },
+            child: const Text('完成'),
+          ),
+        ],
       ],
     );
   }

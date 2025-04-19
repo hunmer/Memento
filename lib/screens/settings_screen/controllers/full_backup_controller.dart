@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
@@ -81,33 +82,60 @@ class FullBackupController {
       final archiveData = encoder.encode(archive);
       if (archiveData == null) throw Exception('Failed to create archive');
 
+      // 确保 archiveData 是有效的字节列表
+      final List<int> validBytes = List<int>.from(archiveData);
+
       final archiveFile = File(archivePath);
-      await archiveFile.writeAsBytes(archiveData);
+      await archiveFile.writeAsBytes(validBytes);
 
       if (!_mounted) return;
 
-      // 让用户选择保存位置
-      final savedFile = await FilePicker.platform.saveFile(
-        dialogTitle: '选择备份保存位置',
-        fileName: 'full_backup_$timestamp.zip',
-        allowedExtensions: ['zip'],
-        type: FileType.custom,
-      );
+      if (Platform.isAndroid || Platform.isIOS) {
+        // 在移动平台上使用分享功能来保存文件
+        final result = await FilePicker.platform.saveFile(
+          dialogTitle: '选择备份保存位置',
+          fileName: 'full_backup_$timestamp.zip',
+          allowedExtensions: ['zip'],
+          type: FileType.custom,
+          bytes: Uint8List.fromList(validBytes), // 转换为Uint8List类型
+        );
 
-      if (!_mounted) return;
+        if (!_mounted) return;
 
-      if (savedFile == null) {
-        if (_mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('导出已取消')));
+        if (result == null) {
+          if (_mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('导出已取消')));
+          }
+          return;
         }
-        return;
+      } else {
+        // 在桌面平台上使用文件系统API
+        final savedFile = await FilePicker.platform.saveFile(
+          dialogTitle: '选择备份保存位置',
+          fileName: 'full_backup_$timestamp.zip',
+          allowedExtensions: ['zip'],
+          type: FileType.custom,
+        );
+
+        if (!_mounted) return;
+
+        if (savedFile == null) {
+          if (_mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('导出已取消')));
+          }
+          return;
+        }
+
+        // 移动文件到用户选择的位置
+        await archiveFile.copy(savedFile);
       }
 
-      // 移动文件到用户选择的位置
-      await archiveFile.copy(savedFile);
-      await archiveFile.delete(); // 删除临时文件
+      // 删除临时文件
+      await archiveFile.delete();
 
       // 关闭进度对话框
       if (_mounted) {
@@ -178,8 +206,11 @@ class FullBackupController {
       final file = File(result.files.first.path!);
       final bytes = await file.readAsBytes();
 
+      // 确保字节是有效的 List<int>
+      final validBytes = List<int>.from(bytes);
+
       // 解压缩文件
-      final archive = ZipDecoder().decodeBytes(bytes);
+      final archive = ZipDecoder().decodeBytes(validBytes);
 
       // 版本信息不再验证，只检查文件是否存在
       final versionFile = archive.findFile('version.txt');
@@ -199,7 +230,9 @@ class FullBackupController {
         if (file.isFile) {
           final outFile = File('${appDir.path}/${file.name}');
           await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content as List<int>);
+          // 确保内容是有效的 List<int>
+          final validContent = List<int>.from(file.content as List<dynamic>);
+          await outFile.writeAsBytes(validContent);
         }
       }
 
@@ -267,7 +300,11 @@ class FullBackupController {
         final relativePath = entity.path.substring(basePath.length + 1);
         if (entity is File) {
           final bytes = await entity.readAsBytes();
-          archive.addFile(ArchiveFile(relativePath, bytes.length, bytes));
+          // 确保字节是有效的 List<int>
+          final validBytes = List<int>.from(bytes);
+          archive.addFile(
+            ArchiveFile(relativePath, validBytes.length, validBytes),
+          );
           processedFiles++;
 
           // 更新进度
