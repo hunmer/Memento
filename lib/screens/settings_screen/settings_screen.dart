@@ -23,7 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     });
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -45,8 +45,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           ListTile(
             leading: const Icon(Icons.language),
-            title: Text(_controller.isChineseLocale ? '语言 (中文)' : 'Language (English)'),
-            subtitle: Text(_controller.isChineseLocale ? '点击切换到英文' : 'Tap to switch to Chinese'),
+            title: Text(
+              _controller.isChineseLocale ? '语言 (中文)' : 'Language (English)',
+            ),
+            subtitle: Text(
+              _controller.isChineseLocale
+                  ? '点击切换到英文'
+                  : 'Tap to switch to Chinese',
+            ),
             onTap: _controller.toggleLanguage,
           ),
           ListTile(
@@ -61,15 +67,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.upload),
-            title: const Text('导出数据'),
-            subtitle: const Text('将应用数据导出到文件'),
+            title: const Text('导出应用数据'),
+            subtitle: const Text('将插件数据导出到文件'),
             onTap: _controller.exportData,
           ),
           ListTile(
             leading: const Icon(Icons.download),
-            title: const Text('导入数据'),
-            subtitle: const Text('从文件导入应用数据'),
+            title: const Text('导入应用数据'),
+            subtitle: const Text('从文件导入插件数据'),
             onTap: _controller.importData,
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.backup),
+            title: const Text('完整备份'),
+            subtitle: const Text('备份整个应用数据目录'),
+            onTap: _controller.exportAllData,
+          ),
+          ListTile(
+            leading: const Icon(Icons.restore),
+            title: const Text('完整恢复'),
+            subtitle: const Text('从备份恢复整个应用数据（覆盖现有数据）'),
+            onTap: _controller.importAllData,
+            trailing: const Icon(Icons.warning, color: Colors.orange),
           ),
           const Divider(),
           ListTile(

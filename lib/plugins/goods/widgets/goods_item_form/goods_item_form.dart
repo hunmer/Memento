@@ -49,6 +49,7 @@ class _GoodsItemFormState extends State<GoodsItemForm>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _stockController.text = '1'; // 设置库存默认值为1
     if (widget.initialData != null) {
       final item = widget.initialData!;
       _nameController.text = item.title;
@@ -78,9 +79,7 @@ class _GoodsItemFormState extends State<GoodsItemForm>
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: const Text('编辑物品'),
-          bottom: TabBar(
-            tabs: [Tab(text: '基本信息'), Tab(text: '使用记录')],
-          ),
+          bottom: TabBar(tabs: [Tab(text: '基本信息'), Tab(text: '使用记录')]),
           actions: [
             if (widget.initialData != null && widget.onDelete != null)
               IconButton(
@@ -88,23 +87,24 @@ class _GoodsItemFormState extends State<GoodsItemForm>
                 onPressed: () {
                   showDialog(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('确认删除'),
-                      content: const Text('确定要删除这个物品吗？此操作不可恢复。'),
-                      actions: [
-                        TextButton(
-                          child: const Text('取消'),
-                          onPressed: () => Navigator.pop(context),
+                    builder:
+                        (context) => AlertDialog(
+                          title: const Text('确认删除'),
+                          content: const Text('确定要删除这个物品吗？此操作不可恢复。'),
+                          actions: [
+                            TextButton(
+                              child: const Text('取消'),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            TextButton(
+                              child: const Text('删除'),
+                              onPressed: () {
+                                Navigator.pop(context); // 关闭确认对话框
+                                widget.onDelete!(widget.initialData!);
+                              },
+                            ),
+                          ],
                         ),
-                        TextButton(
-                          child: const Text('删除'),
-                          onPressed: () {
-                            Navigator.pop(context); // 关闭确认对话框
-                            widget.onDelete!(widget.initialData!);
-                          },
-                        ),
-                      ],
-                    ),
                   );
                 },
               ),
@@ -352,65 +352,69 @@ class _GoodsItemFormState extends State<GoodsItemForm>
 
     await showDialog(
       context: context,
-      builder: (context) => Dialog(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-            maxWidth: MediaQuery.of(context).size.width * 0.9,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    '裁剪图片',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(
-                  width: 300,
-                  height: 300,
-                  child: Crop(
-                    controller: cropController,
-                    image: imageBytes,
-                    aspectRatio: 1,
-                    onCropped: (result) {
-                      switch (result) {
-                        case CropSuccess(:final croppedImage):
-                          // 保存裁剪后的图片
-                          _saveAndSetCroppedImage(croppedImage);
-                          Navigator.of(context).pop();
-                        case CropFailure(:final cause):
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('裁剪失败: $cause')),
-                          );
-                      }
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('取消'),
+      builder:
+          (context) => Dialog(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.8,
+                maxWidth: MediaQuery.of(context).size.width * 0.9,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        '裁剪图片',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      ElevatedButton(
-                        onPressed: () => cropController.crop(),
-                        child: const Text('确定'),
+                    ),
+                    SizedBox(
+                      width: 300,
+                      height: 300,
+                      child: Crop(
+                        controller: cropController,
+                        image: imageBytes,
+                        aspectRatio: 1,
+                        onCropped: (result) {
+                          switch (result) {
+                            case CropSuccess(:final croppedImage):
+                              // 保存裁剪后的图片
+                              _saveAndSetCroppedImage(croppedImage);
+                              Navigator.of(context).pop();
+                            case CropFailure(:final cause):
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('裁剪失败: $cause')),
+                              );
+                          }
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('取消'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => cropController.crop(),
+                            child: const Text('确定'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          )
-        ),
-      ),
+          ),
     );
   }
 
@@ -434,7 +438,9 @@ class _GoodsItemFormState extends State<GoodsItemForm>
       await imageFile.writeAsBytes(croppedData);
 
       // 如果有旧图片且不是默认图片，则删除
-      if (_imagePath != null && _imagePath!.isNotEmpty && _imagePath!.contains('goods_images')) {
+      if (_imagePath != null &&
+          _imagePath!.isNotEmpty &&
+          _imagePath!.contains('goods_images')) {
         try {
           final oldFile = File(_imagePath!);
           if (await oldFile.exists()) {

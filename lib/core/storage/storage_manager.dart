@@ -354,8 +354,17 @@ class StorageManager {
   }
 
   /// 写入插件文件
-  Future<void> writePluginFile(String pluginId, String fileName, String content) async {
+  Future<void> writePluginFile(
+    String pluginId,
+    String fileName,
+    String content,
+  ) async {
     final pluginPath = getPluginStoragePath(pluginId);
     await writeString('$pluginPath/$fileName', content);
+  }
+
+  /// 清除内存缓存
+  void clearMemoryCache() {
+    _cache.clear();
   }
 }
