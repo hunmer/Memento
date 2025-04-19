@@ -81,36 +81,14 @@ class _GoodsItemFormState extends State<GoodsItemForm>
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: const Text('编辑物品'),
-          bottom: TabBar(tabs: [Tab(text: '基本信息'), Tab(text: '使用记录')]),
+          leading: TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('取消'),
+          ),
           actions: [
-            if (widget.initialData != null && widget.onDelete != null)
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder:
-                        (context) => AlertDialog(
-                          title: const Text('确认删除'),
-                          content: const Text('确定要删除这个物品吗？此操作不可恢复。'),
-                          actions: [
-                            TextButton(
-                              child: const Text('取消'),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            TextButton(
-                              child: const Text('删除'),
-                              onPressed: () {
-                                Navigator.pop(context); // 关闭确认对话框
-                                widget.onDelete!(widget.initialData!);
-                              },
-                            ),
-                          ],
-                        ),
-                  );
-                },
-              ),
+            TextButton(onPressed: _submitForm, child: const Text('保存')),
           ],
+          bottom: TabBar(tabs: [Tab(text: '基本信息'), Tab(text: '使用记录')]),
         ),
         body: Form(
           key: _formKey,
@@ -288,15 +266,45 @@ class _GoodsItemFormState extends State<GoodsItemForm>
             ),
           ),
         ),
-        const SizedBox(height: 24),
-        // 提交按钮
-        ElevatedButton(
-          onPressed: _submitForm,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text('保存商品'),
+        const SizedBox(height: 16),
+        if (widget.initialData != null && widget.onDelete != null) ...[
+          OutlinedButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                barrierDismissible: false, // 禁止点击外部关闭对话框
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('确认删除'),
+                      content: const Text('确定要删除这个物品吗？此操作不可恢复。'),
+                      actions: [
+                        TextButton(
+                          child: const Text('取消'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        TextButton(
+                          child: const Text(
+                            '删除',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context); // 关闭确认对话框
+                            widget.onDelete!(widget.initialData!);
+                          },
+                        ),
+                      ],
+                    ),
+              );
+            },
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48), // 设置按钮高度
+              foregroundColor: Colors.red, // 设置文字和边框颜色为红色
+              side: const BorderSide(color: Colors.red), // 设置边框颜色为红色
+            ),
+            child: const Text('删除商品'),
           ),
-        ),
+        ],
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -354,6 +362,7 @@ class _GoodsItemFormState extends State<GoodsItemForm>
 
     await showDialog(
       context: context,
+      barrierDismissible: false, // 禁止点击外部关闭对话框
       builder:
           (context) => Dialog(
             child: ConstrainedBox(

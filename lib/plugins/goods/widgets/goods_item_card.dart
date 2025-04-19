@@ -25,20 +25,46 @@ class GoodsItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  // 标题和价格行
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (item.purchasePrice != null)
+                        Text(
+                          '¥${item.purchasePrice!.toStringAsFixed(2)}',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                    ],
                   ),
-                  if (item.purchasePrice != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      '¥${item.purchasePrice!.toStringAsFixed(2)}',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                  const SizedBox(height: 4),
+
+                  // 使用记录信息行
+                  if (item.usageRecords.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Icon(Icons.history, size: 12, color: Colors.grey[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${_formatLastUsed(item.lastUsedDate)} · ${item.usageRecords.length}次使用',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[600], fontSize: 11),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 4),
                   ],
                   if (item.tags.isNotEmpty) ...[
                     const SizedBox(height: 4),
@@ -52,8 +78,8 @@ class GoodsItemCard extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(4),
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 tag,
@@ -70,6 +96,46 @@ class GoodsItemCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return '今天';
+    } else if (difference.inDays == 1) {
+      return '昨天';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays}天前';
+    } else {
+      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    }
+  }
+
+  String _formatLastUsed(DateTime? dateTime) {
+    if (dateTime == null) return '从未使用';
+
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) {
+      return '刚刚';
+    } else if (difference.inHours < 1) {
+      return '${difference.inMinutes}分钟前';
+    } else if (difference.inDays < 1) {
+      return '${difference.inHours}小时前';
+    } else if (difference.inDays == 1) {
+      return '昨天';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays}天前';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return '$months个月前';
+    } else {
+      final years = (difference.inDays / 365).floor();
+      return '$years年前';
+    }
   }
 
   Widget _buildIcon() {
