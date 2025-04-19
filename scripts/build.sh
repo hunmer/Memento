@@ -88,6 +88,41 @@ flutter pub get
 # 构建 Android
 if is_platform_enabled "android"; then
     echo -e "${YELLOW}Building Android APK...${NC}"
+    
+    # 设置签名密钥变量
+    KEYSTORE_PATH="android/app/upload-keystore.jks"
+    KEY_ALIAS="upload"
+    STORE_PASSWORD="android"
+    KEY_PASSWORD="android"
+    
+    # 检查密钥库是否存在
+    if [ ! -f "$KEYSTORE_PATH" ]; then
+        echo -e "${YELLOW}Creating new keystore...${NC}"
+        
+        # 创建目录（如果不存在）
+        mkdir -p android/app
+        
+        # 生成新的密钥库
+        keytool -genkey -v \
+                -keystore "$KEYSTORE_PATH" \
+                -alias "$KEY_ALIAS" \
+                -keyalg RSA \
+                -keysize 2048 \
+                -validity 10000 \
+                -storepass "$STORE_PASSWORD" \
+                -keypass "$KEY_PASSWORD" \
+                -dname "CN=hunmer, OU=Your Organization, O=Your Company, L=Your City, S=Your State, C=Your Country"
+    fi
+    
+    # 创建或更新 key.properties 文件
+    echo -e "${YELLOW}Creating key.properties...${NC}"
+    cat > android/key.properties << EOF
+storePassword=$STORE_PASSWORD
+keyPassword=$KEY_PASSWORD
+keyAlias=$KEY_ALIAS
+storeFile=upload-keystore.jks
+EOF
+    
     flutter build apk --release --no-tree-shake-icons
     mkdir -p "$OUTPUT_DIR"
     if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
