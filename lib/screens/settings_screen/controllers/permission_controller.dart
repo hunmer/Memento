@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -8,7 +9,75 @@ class PermissionController {
 
   PermissionController(this.context) : _mounted = true;
 
-  // 检查并请求必要的权限
+  // 获取所需的权限列表
+  List<Permission> _getRequiredPermissions() {
+    if (!UniversalPlatform.isAndroid) {
+      return [];
+    }
+    return [Permission.photos, Permission.videos, Permission.audio];
+  }
+
+  // 检查单个权限的状态
+  Future<bool> _checkSinglePermission(Permission permission) async {
+    final status = await permission.status;
+    return status.isGranted;
+  }
+
+  // 请求单个权限
+  Future<bool> _requestSinglePermission(Permission permission) async {
+    try {
+      final result = await permission.request();
+      return result.isGranted;
+    } catch (e) {
+      debugPrint('请求权限失败: $e');
+      return false;
+    }
+  }
+
+  // 显示权限说明对话框
+  Future<bool> _showPermissionDialog(String permissionName) async {
+    if (!_mounted) return false;
+
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('需要$permissionName权限'),
+              content: Text('应用需要$permissionName权限来正常工作，是否授予权限？'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('暂不授予'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                TextButton(
+                  child: const Text('授予权限'),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  // 获取权限的显示名称
+  String _getPermissionName(Permission permission) {
+    switch (permission) {
+      case Permission.photos:
+        return '照片';
+      case Permission.videos:
+        return '视频';
+      case Permission.audio:
+        return '音频';
+      case Permission.storage:
+        return '存储';
+      default:
+        return '未知';
+    }
+  }
+
+  // 检查并逐个请求必要的权限
   Future<bool> checkAndRequestPermissions() async {
     if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
       return true; // 非移动平台，无需请求权限
@@ -19,47 +88,56 @@ class PermissionController {
       final sdkInt = await _getAndroidSdkVersion();
 
       if (sdkInt >= 33) {
-        // Android 13 及以上版本
-        // 请求媒体权限
-        final permissions = [
-          Permission.photos,
-          Permission.videos,
-          Permission.audio,
-        ];
+        // Android 13 及以上版本需要单独请求媒体权限
+        final permissions = _getRequiredPermissions();
 
-        // 检查所有权限状态
-        final statuses = await Future.wait(
-          permissions.map((permission) => permission.status),
-        );
+        for (final permission in permissions) {
+          // 检查权限状态
+          final isGranted = await _checkSinglePermission(permission);
+          if (!isGranted) {
+            // 显示权限说明对话框
+            final permissionName = _getPermissionName(permission);
+            final shouldRequest = await _showPermissionDialog(permissionName);
 
-        // 如果有任何权限被拒绝，请求权限
-        if (statuses.any((status) => status.isDenied)) {
-          final results = await Future.wait(
-            permissions.map((permission) => permission.request()),
-          );
+            if (!shouldRequest || !_mounted) {
+              // 用户拒绝显示权限对话框
+              return false;
+            }
 
-          // 如果任何权限被拒绝
-          if (results.any((status) => status.isDenied)) {
-            if (!_mounted) return false;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('需要存储权限才能导出数据。请在系统设置中授予权限。'),
-                duration: Duration(seconds: 3),
-              ),
-            );
-            return false;
+            // 请求单个权限
+            final granted = await _requestSinglePermission(permission);
+            if (!granted) {
+              if (!_mounted) return false;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('需要$permissionName权限才能继续。请在系统设置中授予权限。'),
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+              return false;
+            }
           }
         }
       } else {
         // Android 12 及以下版本
-        final storageStatus = await Permission.storage.status;
-        if (storageStatus.isDenied) {
-          final result = await Permission.storage.request();
-          if (result.isDenied) {
+        final isGranted = await _checkSinglePermission(Permission.storage);
+        if (!isGranted) {
+          // 显示权限说明对话框
+          final shouldRequest = await _showPermissionDialog('存储');
+
+          if (!shouldRequest || !_mounted) {
+            return false;
+          }
+
+          // 请求存储权限
+          final granted = await _requestSinglePermission(Permission.storage);
+          if (!granted) {
             if (!_mounted) return false;
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('需要存储权限才能导出数据。请在系统设置中授予权限。'),
+                content: Text('需要存储权限才能继续。请在系统设置中授予权限。'),
                 duration: Duration(seconds: 3),
               ),
             );
@@ -69,6 +147,8 @@ class PermissionController {
       }
     }
 
+    // iOS 的文件访问权限通过 file_picker 自动处理
+    return true;
     // iOS 的文件访问权限通过 file_picker 自动处理
     return true;
   }
