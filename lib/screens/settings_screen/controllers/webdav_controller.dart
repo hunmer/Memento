@@ -1,12 +1,14 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:webdav_client/webdav_client.dart';
+import 'package:webdav_client/webdav_client.dart' as webdav;
 import 'package:path_provider/path_provider.dart';
 import '../../../core/storage/storage_manager.dart';
+import 'package:mime/mime.dart';
 
 class WebDAVController {
   final BuildContext context;
-  Client? _client;
+  webdav.Client? _client;
   bool _isConnected = false;
 
   WebDAVController(this.context);
@@ -26,11 +28,11 @@ class WebDAVController {
         throw FormatException('URL必须以 http:// 或 https:// 开头');
       }
 
-      final client = newClient(
+      final client = webdav.newClient(
         url,
         user: username,
         password: password,
-        debug: true,
+        debug: false,
       );
 
       // 测试连接
@@ -84,20 +86,7 @@ class WebDAVController {
         errorMessage = e.toString();
       }
 
-      // 显示错误消息
-      if (!context.mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('WebDAV连接失败：$errorMessage'),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: '知道了',
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          ),
-        ),
-      );
+      // 只记录错误日志，不显示SnackBar
       debugPrint('WebDAV连接失败: $errorMessage');
       _isConnected = false;
       return false;
@@ -118,6 +107,7 @@ class WebDAVController {
   // 从本地同步到WebDAV
   Future<bool> syncLocalToWebDAV() async {
     if (!_isConnected || _client == null) {
+      debugPrint('WebDAV未连接或客户端为空');
       return false;
     }
 
@@ -129,26 +119,30 @@ class WebDAVController {
       // 获取本地应用数据目录
       final directory = await getApplicationDocumentsDirectory();
       final localPath = '${directory.path}/app_data';
+      final localDir = Directory(localPath);
+
+      // 检查本地目录是否存在
+      if (!await localDir.exists()) {
+        debugPrint('本地目录不存在：$localPath');
+        await localDir.create(recursive: true);
+      }
+
+      // 检查本地目录是否为空
+      final entities = await localDir.list().toList();
+      if (entities.isEmpty) {
+        debugPrint('本地目录为空：$localPath');
+        return false;
+      }
+
+      debugPrint('开始上传本地文件，源目录：$localPath，目标路径：$remotePath');
 
       // 递归上传本地文件到WebDAV
-      return await _uploadDirectory(Directory(localPath), '', remotePath);
+      return await _uploadDirectory(localDir, '', remotePath);
     } catch (e) {
       debugPrint('同步本地到WebDAV失败: $e');
 
-      // 显示错误消息
+      // 只记录错误日志，不显示SnackBar
       if (!context.mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('同步本地到WebDAV失败：${e.toString()}'),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: '知道了',
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          ),
-        ),
-      );
       return false;
     }
   }
@@ -160,47 +154,65 @@ class WebDAVController {
     String remotePath,
   ) async {
     try {
-      final entities = dir.listSync();
+      final entities = await dir.list().toList();
+      debugPrint('正在处理目录：${dir.path}，包含 ${entities.length} 个项目');
 
       for (var entity in entities) {
         final name = entity.path.split('/').last;
         final currentRelativePath =
             relativePath.isEmpty ? name : '$relativePath/$name';
-        final remoteFilePath = '$remotePath/$currentRelativePath';
 
         if (entity is File) {
           // 上传文件
-          await _client!.writeFromFile(entity.path, remoteFilePath);
+          final remoteFilePath = '$remotePath/$currentRelativePath';
+          debugPrint('正在上传文件：${entity.path} -> $remoteFilePath');
+          try {
+            // 获取文件的MIME类型
+            String? mimeType = lookupMimeType(entity.path);
+            mimeType ??= 'application/octet-stream'; // 默认MIME类型
+
+            debugPrint('上传文件MIME类型: $mimeType');
+
+            // 设置请求头
+            _client!.setHeaders({'Content-Type': mimeType});
+
+            // 直接使用 writeFromFile 方法上传
+            await _client!.writeFromFile(entity.path, remoteFilePath);
+            debugPrint('文件上传成功：$remoteFilePath');
+          } catch (e) {
+            debugPrint('文件上传失败：$remoteFilePath, 错误：$e');
+            return false;
+          }
         } else if (entity is Directory) {
           // 创建远程目录
+          final remoteDirPath = '$remotePath/$currentRelativePath';
           try {
-            await _client!.mkdir(remoteFilePath);
+            debugPrint('创建远程目录：$remoteDirPath');
+            await _client!.mkdir(remoteDirPath);
           } catch (e) {
             // 目录可能已存在，忽略错误
+            debugPrint('目录可能已存在：$remoteDirPath');
           }
 
-          // 递归处理子目录
-          await _uploadDirectory(entity, currentRelativePath, remotePath);
+          // 递归处理子目录，注意：这里传递正确的远程目录路径
+          final subDirResult = await _uploadDirectory(
+            entity,
+            currentRelativePath,
+            remotePath, // 保持根路径不变，相对路径会在递归中构建
+          );
+          if (!subDirResult) {
+            debugPrint('处理子目录失败：${entity.path}');
+            return false;
+          }
         }
       }
+      debugPrint('目录 ${dir.path} 处理完成');
       return true;
     } catch (e) {
       debugPrint('上传目录失败: $e');
 
-      // 显示错误消息
+      // 只记录错误日志，不显示SnackBar
       if (!context.mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('上传目录失败：${e.toString()}'),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: '知道了',
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          ),
-        ),
-      );
       return false;
     }
   }
@@ -225,20 +237,8 @@ class WebDAVController {
     } catch (e) {
       debugPrint('同步WebDAV到本地失败: $e');
 
-      // 显示错误消息
+      // 只记录错误日志，不显示SnackBar
       if (!context.mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('同步WebDAV到本地失败：${e.toString()}'),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: '知道了',
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          ),
-        ),
-      );
       return false;
     }
   }
@@ -274,20 +274,8 @@ class WebDAVController {
     } catch (e) {
       debugPrint('下载目录失败: $e');
 
-      // 显示错误消息
+      // 只记录错误日志，不显示SnackBar
       if (!context.mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('下载目录失败：${e.toString()}'),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: '知道了',
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          ),
-        ),
-      );
       return false;
     }
   }
@@ -316,20 +304,8 @@ class WebDAVController {
     } catch (e) {
       debugPrint('获取WebDAV配置失败: $e');
 
-      // 显示错误消息
+      // 只记录错误日志，不显示SnackBar
       if (!context.mounted) return null;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('获取WebDAV配置失败：${e.toString()}'),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: '知道了',
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          ),
-        ),
-      );
     }
     return null;
   }

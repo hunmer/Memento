@@ -301,7 +301,7 @@ class BasicInfoTab extends StatelessWidget {
         builder:
             (context) => ImagePickerDialog(
               initialUrl: controller.imagePath,
-              saveDirectory: 'goods_images',
+              saveDirectory: 'app_data/goods_images',
               enableCrop: true, // 启用裁剪功能
               cropAspectRatio: 1, // 设置裁剪比例为1:1
             ),

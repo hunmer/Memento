@@ -68,8 +68,8 @@ class ImageUtils {
       // 获取应用文档目录
       final appDir = await getApplicationDocumentsDirectory();
 
-      // 创建商品图片存储目录
-      final goodsImageDir = Directory('${appDir.path}/goods_images');
+      // 创建商品图片存储目录在 app_data 下
+      final goodsImageDir = Directory('${appDir.path}/app_data/goods_images');
       if (!await goodsImageDir.exists()) {
         await goodsImageDir.create(recursive: true);
       }
@@ -99,7 +99,7 @@ class ImageUtils {
   static Future<void> deleteImage(String? imagePath) async {
     if (imagePath != null &&
         imagePath.isNotEmpty &&
-        imagePath.contains('goods_images')) {
+        imagePath.contains('app_data/goods_images')) {
       try {
         final file = File(imagePath);
         if (await file.exists()) {

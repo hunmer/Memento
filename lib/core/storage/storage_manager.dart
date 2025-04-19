@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show debugPrint;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as io;
 import 'package:webdav_client/webdav_client.dart';
-import 'package:dio/dio.dart';
 
 import 'storage_interface.dart';
 import 'mobile_storage.dart';
@@ -78,9 +78,12 @@ class StorageManager {
             config['url'],
             user: config['username'],
             password: config['password'],
-            debug: true,
+            debug: false,
           );
-
+          _webdavClient!.setHeaders({'accept-charset': 'utf-8'});
+          _webdavClient!.setConnectTimeout(8000);
+          _webdavClient!.setSendTimeout(8000);
+          _webdavClient!.setReceiveTimeout(8000);
           _webdavBasePath = config['dataPath'];
           _useWebDAV = true;
 
@@ -113,9 +116,13 @@ class StorageManager {
         url,
         user: username,
         password: password,
-        debug: true,
+        debug: false,
       );
 
+      _webdavClient!.setHeaders({'accept-charset': 'utf-8'});
+      _webdavClient!.setConnectTimeout(8000);
+      _webdavClient!.setSendTimeout(8000);
+      _webdavClient!.setReceiveTimeout(8000);
       _webdavBasePath = dataPath;
       _useWebDAV = true;
 
@@ -330,7 +337,7 @@ class StorageManager {
             // 目录可能已存在，忽略错误
           }
 
-          // 直接写入WebDAV文件，明确指定Content-Type
+          // 直接写入WebDAV文件
           await _webdavClient!.write(
             webdavPath,
             Uint8List.fromList(jsonString.codeUnits),
