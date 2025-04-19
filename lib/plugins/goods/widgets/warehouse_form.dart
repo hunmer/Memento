@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/warehouse.dart';
 import '../../../widgets/circle_icon_picker.dart';
-import 'image_picker_dialog.dart';
+import '../../../widgets/image_picker_dialog.dart';
 
 class WarehouseForm extends StatefulWidget {
   final Warehouse? warehouse;
@@ -73,15 +73,17 @@ class _WarehouseFormState extends State<WarehouseForm> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () async {
-                      final result = await showDialog<String>(
+                      final result = await showDialog<Map<String, dynamic>>(
                         context: context,
                         builder:
-                            (context) =>
-                                ImagePickerDialog(initialUrl: _imageUrl),
+                            (context) => ImagePickerDialog(
+                              initialUrl: _imageUrl,
+                              saveDirectory: 'warehouse_images',
+                            ),
                       );
                       if (result != null) {
                         setState(() {
-                          _imageUrl = result;
+                          _imageUrl = result['url'] as String;
                         });
                       }
                     },

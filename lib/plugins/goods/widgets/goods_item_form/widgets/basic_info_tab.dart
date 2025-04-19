@@ -3,7 +3,7 @@ import 'package:crop_your_image/crop_your_image.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import '../../../../../widgets/circle_icon_picker.dart';
-import '../image_picker_widget.dart';
+import '../../../../../widgets/image_picker_dialog.dart';
 import '../tag_input_field.dart';
 import '../custom_fields_list.dart';
 import '../controllers/form_controller.dart';
@@ -104,15 +104,33 @@ class BasicInfoTab extends StatelessWidget {
           const SizedBox(width: 24),
           Card(
             elevation: 2,
-            child: ImagePickerWidget(
-              imagePath: controller.imagePath,
-              onImageSelected: (path) async {
-                if (path.isNotEmpty) {
-                  final imageFile = File(path);
-                  final imageBytes = await imageFile.readAsBytes();
-                  await _showCropDialog(context, imageBytes);
-                }
-              },
+            child: SizedBox(
+              height: 60,
+              width: 60,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(4),
+                onTap: () => _pickAndCropImage(context),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.grey.shade300),
+                    color: Colors.grey.shade50,
+                  ),
+                  child:
+                      controller.imagePath != null
+                          ? ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: _buildImage(),
+                          )
+                          : Center(
+                            child: Icon(
+                              Icons.add_photo_alternate,
+                              size: 30,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                ),
+              ),
             ),
           ),
         ],
@@ -242,86 +260,76 @@ class BasicInfoTab extends StatelessWidget {
     );
   }
 
-  Future<void> _showCropDialog(
-    BuildContext context,
-    Uint8List imageBytes,
-  ) async {
-    final cropController = CropController();
+  Widget _buildImage() {
+    if (controller.imagePath == null) return const SizedBox();
 
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => Dialog(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
-                maxWidth: MediaQuery.of(context).size.width * 0.9,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        '裁剪图片',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 300,
-                      height: 300,
-                      child: Crop(
-                        controller: cropController,
-                        image: imageBytes,
-                        aspectRatio: 1,
-                        onCropped: (result) async {
-                          switch (result) {
-                            case CropSuccess(:final croppedImage):
-                              // 删除旧图片
-                              await ImageUtils.deleteImage(
-                                controller.imagePath,
-                              );
-                              // 保存新图片
-                              final newPath = await ImageUtils.saveImage(
-                                croppedImage,
-                              );
-                              controller.imagePath = newPath;
-                              onStateChanged();
-                              Navigator.of(context).pop();
-                            case CropFailure(:final cause):
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('裁剪失败: $cause')),
-                              );
-                          }
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('取消'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => cropController.crop(),
-                            child: const Text('确定'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    if (controller.imagePath!.startsWith('http://') ||
+        controller.imagePath!.startsWith('https://')) {
+      // 网络图片
+      return Image.network(
+        controller.imagePath!,
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(
+            Icons.broken_image,
+            size: 30,
+            color: Colors.grey.shade600,
+          );
+        },
+      );
+    } else if (controller.imagePath!.startsWith('file://')) {
+      // 本地图片（新的文件URL格式）
+      final file = File(controller.imagePath!.replaceFirst('file://', ''));
+      if (file.existsSync()) {
+        return Image.file(file, width: 60, height: 60, fit: BoxFit.cover);
+      }
+    } else {
+      // 旧的本地图片路径格式
+      final file = File(controller.imagePath!);
+      if (file.existsSync()) {
+        return Image.file(file, width: 60, height: 60, fit: BoxFit.cover);
+      }
+    }
+
+    return Icon(Icons.broken_image, size: 30, color: Colors.grey.shade600);
+  }
+
+  Future<void> _pickAndCropImage(BuildContext context) async {
+    try {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder:
+            (context) => ImagePickerDialog(
+              initialUrl: controller.imagePath,
+              saveDirectory: 'goods_images',
+              enableCrop: true, // 启用裁剪功能
+              cropAspectRatio: 1, // 设置裁剪比例为1:1
             ),
+      );
+
+      if (result != null && result['url'] != null) {
+        final path = result['url'];
+        if (path.isNotEmpty) {
+          // 删除旧图片
+          await ImageUtils.deleteImage(controller.imagePath);
+
+          // 更新图片路径
+          controller.imagePath = path;
+          onStateChanged();
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('选择图片失败: ${e.toString()}'),
+            backgroundColor: Colors.red,
           ),
-    );
+        );
+      }
+      debugPrint('选择图片时出错: $e');
+    }
   }
 }
