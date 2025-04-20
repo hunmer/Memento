@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../models/message.dart';
+import '../../../models/file_message.dart';
 import 'message_bubble.dart';
 import '../widgets/date_separator.dart';
 import '../../../utils/date_formatter.dart';
 import '../../../chat_plugin.dart';
+import '../../../../../widgets/file_preview/index.dart';
 
 class MessageList extends StatelessWidget {
   final List<dynamic> items;
@@ -78,7 +80,32 @@ class MessageList extends StatelessWidget {
                   onTap:
                       isMultiSelectMode
                           ? () => onToggleMessageSelection(item.id)
-                          : null,
+                          : () {
+                            if (item.type == MessageType.file &&
+                                item.metadata != null &&
+                                item.metadata![Message.metadataKeyFileInfo] !=
+                                    null) {
+                              final fileInfo =
+                                  item.metadata![Message.metadataKeyFileInfo]
+                                      as Map<String, dynamic>;
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => FilePreviewScreen(
+                                        filePath:
+                                            fileInfo['filePath'] as String,
+                                        fileName:
+                                            fileInfo['fileName'] as String,
+                                        mimeType:
+                                            fileInfo['mimeType'] as String? ??
+                                            'application/octet-stream',
+                                        fileSize: fileInfo['fileSize'] as int,
+                                      ),
+                                ),
+                              );
+                            }
+                          },
                   onAvatarTap:
                       onAvatarTap != null ? () => onAvatarTap!(item) : null,
                   showAvatar: showAvatar,

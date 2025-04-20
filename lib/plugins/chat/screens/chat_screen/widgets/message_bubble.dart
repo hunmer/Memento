@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../../plugins/chat/models/message.dart';
+import '../../../../../plugins/chat/models/file_message.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../../../plugins/chat/widgets/image_message_widget.dart';
+import '../../../../../widgets/file_preview/index.dart';
 
 class MessageBubble extends StatelessWidget {
   final Message message;
@@ -156,7 +158,7 @@ class MessageBubble extends StatelessWidget {
                                         : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
-                              child: _buildMessageContent(),
+                              child: _buildMessageContent(context),
                             ),
                           ),
                           if (!isCurrentUser) ...[
@@ -245,7 +247,7 @@ class MessageBubble extends StatelessWidget {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildMessageContent() {
+  Widget _buildMessageContent(BuildContext context) {
     final isCurrentUser = message.user.id == currentUserId;
 
     // 根据消息类型选择不同的渲染方式
@@ -258,6 +260,75 @@ class MessageBubble extends StatelessWidget {
         );
         break;
       case MessageType.video:
+      case MessageType.file:
+        if (message.metadata?[Message.metadataKeyFileInfo] != null) {
+          final fileInfo = FileMessage.fromJson(
+            Map<String, dynamic>.from(
+              message.metadata![Message.metadataKeyFileInfo],
+            ),
+          );
+          content = GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder:
+                      (BuildContext ctx) => FilePreviewScreen(
+                        filePath: fileInfo.filePath,
+                        fileName: fileInfo.fileName,
+                        mimeType:
+                            fileInfo.mimeType ?? 'application/octet-stream',
+                        fileSize: fileInfo.fileSize,
+                      ),
+                ),
+              );
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  fileInfo.getIcon(),
+                  size: 24,
+                  color: isCurrentUser ? Colors.blue[800] : Colors.grey[800],
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        fileInfo.fileName,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        fileInfo.formattedSize,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color:
+                              isCurrentUser
+                                  ? Colors.blue[800]
+                                  : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          content = MarkdownBody(
+            data: message.content,
+            styleSheet: MarkdownStyleSheet(
+              p: const TextStyle(fontSize: 14),
+              blockSpacing: 0,
+              listIndent: 8,
+            ),
+          );
+        }
+        break;
       case MessageType.sent:
       case MessageType.received:
       default:
