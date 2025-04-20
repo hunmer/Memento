@@ -81,29 +81,38 @@ class MessageList extends StatelessWidget {
                       isMultiSelectMode
                           ? () => onToggleMessageSelection(item.id)
                           : () {
-                            if (item.type == MessageType.file &&
+                            if (item is Message &&
+                                (item.type == MessageType.file ||
+                                    item.type == MessageType.video ||
+                                    item.type == MessageType.image) &&
                                 item.metadata != null &&
                                 item.metadata![Message.metadataKeyFileInfo] !=
                                     null) {
-                              final fileInfo =
-                                  item.metadata![Message.metadataKeyFileInfo]
-                                      as Map<String, dynamic>;
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => FilePreviewScreen(
-                                        filePath:
-                                            fileInfo['filePath'] as String,
-                                        fileName:
-                                            fileInfo['fileName'] as String,
-                                        mimeType:
-                                            fileInfo['mimeType'] as String? ??
-                                            'application/octet-stream',
-                                        fileSize: fileInfo['fileSize'] as int,
-                                      ),
-                                ),
-                              );
+                              try {
+                                final fileInfo = FileMessage.fromJson(
+                                  Map<String, dynamic>.from(
+                                    item.metadata![Message.metadataKeyFileInfo],
+                                  ),
+                                );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => FilePreviewScreen(
+                                          filePath: fileInfo.filePath,
+                                          fileName: fileInfo.fileName,
+                                          mimeType:
+                                              fileInfo.mimeType ??
+                                              'application/octet-stream',
+                                          fileSize: fileInfo.fileSize,
+                                        ),
+                                  ),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('无法打开文件: $e')),
+                                );
+                              }
                             }
                           },
                   onAvatarTap:
