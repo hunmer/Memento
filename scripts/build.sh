@@ -46,6 +46,20 @@ if [ -f "$CONFIG_FILE" ]; then
         echo -e "${YELLOW}No platforms specified in config file. Building for current platform only.${NC}"
         PLATFORMS=""
     fi
+    
+    # 读取iOS相关配置
+    if jq -e '.build.ios' "$CONFIG_FILE" &> /dev/null; then
+        # 如果未设置环境变量，则从配置文件读取
+        if [ -z "$APPLE_DEVELOPMENT_TEAM_ID" ]; then
+            APPLE_DEVELOPMENT_TEAM_ID=$(jq -r '.build.ios.teamId' "$CONFIG_FILE")
+            echo -e "${GREEN}Using Team ID from config: $APPLE_DEVELOPMENT_TEAM_ID${NC}"
+        fi
+        
+        if [ -z "$PROVISIONING_PROFILE_NAME" ]; then
+            PROVISIONING_PROFILE_NAME=$(jq -r '.build.ios.provisioningProfile' "$CONFIG_FILE")
+            echo -e "${GREEN}Using Provisioning Profile from config: $PROVISIONING_PROFILE_NAME${NC}"
+        fi
+    fi
 else
     echo -e "${YELLOW}Config file not found at $CONFIG_FILE. Building for current platform only.${NC}"
     PLATFORMS=""
@@ -84,6 +98,25 @@ fi
 # 获取依赖
 echo -e "${YELLOW}Getting dependencies...${NC}"
 flutter pub get
+
+# 构建 iOS
+if is_platform_enabled "ios"; then
+    echo -e "${YELLOW}Building iOS IPA...${NC}"
+    # 添加--tree-shake-icons=false来避免图标树摇动错误
+    flutter build ios --release --no-codesign --tree-shake-icons
+    
+    # 创建 Payload 目录
+    mkdir -p Payload
+    cp -r build/ios/iphoneos/Runner.app Payload/
+    
+    # 压缩成 IPA
+    zip -r "$OUTPUT_DIR/app.ipa" Payload
+    
+    # 清理临时文件
+    rm -rf Payload
+    
+    echo -e "${GREEN}iOS IPA built successfully at $OUTPUT_DIR/app.ipa${NC}"
+fi
 
 # 构建 Android
 if is_platform_enabled "android"; then

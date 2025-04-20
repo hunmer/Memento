@@ -1,53 +1,11 @@
 import 'package:flutter/material.dart';
+import '../constants/app_icons.dart';
 import '../plugins/chat/models/channel.dart';
 import '../plugins/chat/models/message.dart';
 import '../plugins/chat/models/user.dart';
 
-// 预定义的图标映射表，使用常量构造函数
-final Map<String, IconData> predefinedIcons = {
-  'message': Icons.message,
-  'person': Icons.person,
-  'group': Icons.group,
-  'star': Icons.star,
-  'favorite': Icons.favorite,
-  'home': Icons.home,
-  'settings': Icons.settings,
-  'work': Icons.work,
-  'school': Icons.school,
-  'event': Icons.event,
-  'chat': Icons.chat,
-  'chat_bubble': Icons.chat_bubble,
-  'notifications': Icons.notifications,
-  'people': Icons.people,
-  'sports': Icons.sports,
-  'music_note': Icons.music_note,
-  'movie': Icons.movie,
-  'book': Icons.book,
-  'shopping_cart': Icons.shopping_cart,
-  'email': Icons.email,
-  'phone': Icons.phone,
-  'camera': Icons.camera,
-  'photo': Icons.photo,
-  'video_camera_back': Icons.video_camera_back,
-  'restaurant': Icons.restaurant,
-  'local_cafe': Icons.local_cafe,
-  'local_bar': Icons.local_bar,
-  'local_hotel': Icons.local_hotel,
-  'flight': Icons.flight,
-  'directions_car': Icons.directions_car,
-  'directions_bike': Icons.directions_bike,
-  'pets': Icons.pets,
-  'nature': Icons.nature,
-  'park': Icons.park,
-  'beach_access': Icons.beach_access,
-  'ac_unit': Icons.ac_unit,
-  'whatshot': Icons.whatshot,
-  'sports_esports': Icons.sports_esports,
-  'sports_basketball': Icons.sports_basketball,
-  'sports_football': Icons.sports_football,
-  'celebration': Icons.celebration,
-  'cake': Icons.cake,
-};
+// 使用 AppIcons 中的预定义图标映射表
+final Map<String, IconData> predefinedIcons = AppIcons.predefinedIcons;
 
 /// 用户序列化/反序列化
 class UserSerializer {
@@ -151,7 +109,7 @@ class ChannelSerializer {
         predefinedIcons.entries
             .firstWhere(
               (entry) => entry.value == icon,
-              orElse: () => const MapEntry('message', Icons.message), // 默认图标
+              orElse: () => const MapEntry('default', AppIcons.defaultIcon),
             )
             .key;
     return iconName;
@@ -159,8 +117,7 @@ class ChannelSerializer {
 
   // 将字符串（图标名称）转换为IconData
   static IconData _stringToIconData(String iconName) {
-    // 从预定义图标中获取，如果不存在则使用默认图标
-    return predefinedIcons[iconName] ?? Icons.message;
+    return AppIcons.getIconByName(iconName);
   }
 }
 

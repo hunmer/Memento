@@ -8,7 +8,7 @@ import '../models/file_message.dart';
 class FileService {
   Future<Directory> get _appFilesDir async {
     final appDir = await getApplicationDocumentsDirectory();
-    final filesDir = Directory('${appDir.path}/chat_files');
+    final filesDir = Directory('${appDir.path}/app_data/chat_files');
     if (!await filesDir.exists()) {
       await filesDir.create(recursive: true);
     }

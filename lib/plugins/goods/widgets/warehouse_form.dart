@@ -123,7 +123,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
                         builder:
                             (context) => ImagePickerDialog(
                               initialUrl: _imageUrl,
-                              saveDirectory: 'warehouse_images',
+                              saveDirectory: 'app_data/warehouse_images',
                               enableCrop: true, // 启用裁切功能
                               cropAspectRatio: 16 / 9, // 设置裁切比例为16:9，适合仓库展示
                             ),
