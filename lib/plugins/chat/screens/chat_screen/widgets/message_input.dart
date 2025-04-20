@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
-import 'message_input_actions.dart';
+import 'message_input_actions/message_input_actions_drawer.dart';
+import 'message_input_actions/message_input_actions_builder.dart';
 import '../../../models/message.dart';
 
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
-  final Function(String, {Map<String, dynamic>? metadata, MessageType? type}) onSendMessage;
+  final Function(String, {Map<String, dynamic>? metadata, MessageType? type})
+  onSendMessage;
   final Function(String) onSaveDraft;
 
   const MessageInput({
@@ -52,14 +54,15 @@ class _MessageInputState extends State<MessageInput> {
           );
           widget.controller.value = widget.controller.value.copyWith(
             text: newText,
-            selection: TextSelection.collapsed(
-              offset: selection.start + 1,
-            ),
+            selection: TextSelection.collapsed(offset: selection.start + 1),
           );
         } else if (!HardwareKeyboard.instance.isShiftPressed) {
           // Enter (不按Shift): 发送消息
           if (widget.controller.text.trim().isNotEmpty) {
-            widget.onSendMessage(widget.controller.text.trim(), type: MessageType.sent);
+            widget.onSendMessage(
+              widget.controller.text.trim(),
+              type: MessageType.sent,
+            );
             widget.controller.clear();
             // 保持焦点但阻止换行
             _focusNode.requestFocus();
@@ -80,14 +83,16 @@ class _MessageInputState extends State<MessageInput> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.grey[800]
-                    : Colors.grey[200],
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[800]
+                        : Colors.grey[200],
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey[700]!
-                      : Colors.grey[300]!,
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[700]!
+                          : Colors.grey[300]!,
                   width: 1,
                 ),
               ),
@@ -99,49 +104,60 @@ class _MessageInputState extends State<MessageInput> {
                       showModalBottomSheet(
                         context: context,
                         backgroundColor: Colors.transparent,
-                        builder: (context) => MessageInputActionsDrawer(
-                          actions: getDefaultMessageInputActions(
-                            context,
-                            onSendMessage: widget.onSendMessage,
-                            onFileSelected: (fileMessage) {
-                              // 文件选择后的回调已经在 getDefaultMessageInputActions 中处理
-                            },
-                          ),
-                        ),
+                        builder:
+                            (context) => MessageInputActionsDrawer(
+                              actions:
+                                  MessageInputActionsBuilder.getDefaultActions(
+                                    context,
+                                    onSendMessage: widget.onSendMessage,
+                                    onFileSelected: (fileMessage) {
+                                      // 文件选择后的回调已经在 getDefaultActions 中处理
+                                    },
+                                  ),
+                            ),
                       );
                     },
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey[400]
-                        : Colors.grey[600],
+                    color:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey[400]
+                            : Colors.grey[600],
                   ),
                   Expanded(
                     child: KeyboardListener(
                       focusNode: _keyboardListenerFocusNode,
-                      onKeyEvent: Platform.isMacOS || Platform.isWindows || Platform.isLinux
-                          ? _handleKeyPress
-                          : null,
+                      onKeyEvent:
+                          Platform.isMacOS ||
+                                  Platform.isWindows ||
+                                  Platform.isLinux
+                              ? _handleKeyPress
+                              : null,
                       child: TextField(
-                  controller: widget.controller,
-                  style: TextStyle(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black87,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: '输入消息...',
-                    hintStyle: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.grey[400]
-                          : Colors.grey[600],
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  ),
-                  onChanged: widget.onSaveDraft,
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                  textInputAction: TextInputAction.none,
-                  focusNode: _focusNode,
+                        controller: widget.controller,
+                        style: TextStyle(
+                          color:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: '输入消息...',
+                          hintStyle: TextStyle(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                        ),
+                        onChanged: widget.onSaveDraft,
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.none,
+                        focusNode: _focusNode,
                       ),
                     ),
                   ),
@@ -158,13 +174,20 @@ class _MessageInputState extends State<MessageInput> {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: Icon(
-                Icons.send,
-                color: Theme.of(context).colorScheme.onPrimary,
+              icon: Container(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.send,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  size: 20, // 适当调整图标大小
+                ),
               ),
               onPressed: () {
                 if (widget.controller.text.trim().isNotEmpty) {
-                  widget.onSendMessage(widget.controller.text.trim(), type: MessageType.sent);
+                  widget.onSendMessage(
+                    widget.controller.text.trim(),
+                    type: MessageType.sent,
+                  );
                   widget.controller.clear();
                   _focusNode.requestFocus(); // 保持焦点
                 }
