@@ -196,6 +196,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
               Message.metadataKeyFileInfo: {
                 'id': fileMessage.id,
                 'fileName': fileMessage.fileName,
+                'originalFileName': fileMessage.originalFileName,
                 'filePath': fileMessage.filePath,
                 'fileSize': fileMessage.fileSize,
                 'extension': fileMessage.extension,
@@ -240,10 +241,14 @@ List<MessageInputAction> getDefaultMessageInputActions(
           if (image != null) {
             // 将图片转换为文件
             final File imageFile = File(image.path);
+            final originalFileName = path.basename(image.path);
 
             // 保存图片到应用目录
             final savedFile = await fileService.saveImage(imageFile);
-            final fileMessage = await FileMessage.fromFile(savedFile);
+            final fileMessage = await FileMessage.fromFile(
+              savedFile,
+              originalFileName: originalFileName,
+            );
             // 调用回调函数发送图片消息
             onFileSelected?.call(fileMessage);
 
@@ -257,6 +262,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
                 Message.metadataKeyFileInfo: {
                   'id': fileMessage.id,
                   'fileName': fileMessage.fileName,
+                  'originalFileName': fileMessage.originalFileName,
                   'filePath': fileMessage.filePath, // 存储相对路径
                   'fileSize': fileMessage.fileSize,
                   'extension': fileMessage.extension,
@@ -312,10 +318,14 @@ List<MessageInputAction> getDefaultMessageInputActions(
           if (video != null) {
             // 将视频转换为文件
             final File videoFile = File(video.path);
+            final originalFileName = path.basename(video.path);
 
             // 保存视频到应用目录
             final savedFile = await fileService.saveVideo(videoFile);
-            final fileMessage = await FileMessage.fromFile(savedFile);
+            final fileMessage = await FileMessage.fromFile(
+              savedFile,
+              originalFileName: originalFileName,
+            );
             logger.info('保存视频文件: ${savedFile.path}');
             // 调用回调函数发送视频消息
             onFileSelected?.call(fileMessage);
@@ -350,6 +360,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
               final Map<String, dynamic> fileInfo = {
                 'id': fileMessage.id,
                 'fileName': fileMessage.fileName,
+                'originalFileName': fileMessage.originalFileName,
                 'filePath': fileMessage.filePath,
                 'fileSize': fileMessage.fileSize,
                 'extension': fileMessage.extension,

@@ -8,7 +8,8 @@ enum FileMessageType { document, image, video, audio, other }
 
 class FileMessage {
   final String id;
-  final String fileName;
+  final String fileName; // 存储系统中的文件名（UUID）
+  final String originalFileName; // 原始上传时的文件名
   final String filePath;
   final int fileSize;
   final DateTime timestamp;
@@ -18,6 +19,7 @@ class FileMessage {
   FileMessage({
     required this.id,
     required this.fileName,
+    required this.originalFileName,
     required this.filePath,
     required this.fileSize,
     required this.timestamp,
@@ -82,15 +84,23 @@ class FileMessage {
   }
 
   // 从文件创建FileMessage
-  static Future<FileMessage> fromFile(File file, {String? relativePath}) async {
+  static Future<FileMessage> fromFile(
+    File file, {
+    String? relativePath,
+    String? systemFileName,
+    String? originalFileName,
+  }) async {
     final stats = await file.stat();
     final fileService = FileService();
     final mimeType = fileService.getMimeType(file.path);
     final fileType = _determineFileType(file.path);
+    // 如果没有提供原始文件名，则使用文件路径的基本名称
+    final fileName = originalFileName ?? path.basename(file.path);
 
     return FileMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      fileName: path.basename(file.path),
+      fileName: systemFileName ?? path.basename(file.path), // 系统文件名（UUID）
+      originalFileName: fileName, // 保存原始文件名
       filePath: relativePath ?? file.path, // 使用相对路径
       fileSize: stats.size,
       timestamp: DateTime.now(),
@@ -109,7 +119,8 @@ class FileMessage {
     return {
       'id': id,
       'fileName': fileName,
-      'filePath': filePath,
+      'originalFileName': originalFileName, // 添加原始文件名
+      'filePath': filePath, // 存储相对路径
       'fileSize': fileSize,
       'timestamp': timestamp.toIso8601String(),
       'mimeType': mimeType,
@@ -119,6 +130,13 @@ class FileMessage {
 
   // 从Map创建FileMessage
   factory FileMessage.fromJson(Map<String, dynamic> json) {
+    // 确保必要的字段存在
+    if (!json.containsKey('fileName') || !json.containsKey('filePath')) {
+      throw FormatException(
+        'Invalid file message format: missing required fields',
+      );
+    }
+
     // 解析文件类型
     FileMessageType fileType;
     if (json.containsKey('type') && json['type'] != null) {
@@ -140,15 +158,28 @@ class FileMessage {
       }
     } else {
       // 如果没有类型信息，尝试从文件路径推断
-      fileType = _determineFileType(json['filePath']);
+      fileType = _determineFileType(json['filePath'] ?? '');
+    }
+
+    // 处理文件名和路径
+    String fileName = json['fileName'];
+    String filePath = json['filePath'];
+
+    // 如果是URI编码的路径，进行解码
+    if (filePath.contains('%')) {
+      filePath = Uri.decodeFull(filePath);
     }
 
     return FileMessage(
-      id: json['id'],
-      fileName: json['fileName'],
-      filePath: json['filePath'],
-      fileSize: json['fileSize'],
-      timestamp: DateTime.parse(json['timestamp']),
+      id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      fileName: fileName,
+      originalFileName: json['originalFileName'] ?? fileName,
+      filePath: filePath,
+      fileSize: json['fileSize'] ?? 0,
+      timestamp:
+          json.containsKey('timestamp') && json['timestamp'] != null
+              ? DateTime.parse(json['timestamp'])
+              : DateTime.now(),
       mimeType: json['mimeType'],
       type: fileType,
     );

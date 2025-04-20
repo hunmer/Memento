@@ -1,10 +1,19 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 import '../models/file_message.dart';
 import '../../../utils/image_utils.dart';
+
+// 用于返回保存文件的结果
+class SaveFileResult {
+  final File savedFile;
+  final String systemFileName;
+
+  SaveFileResult(this.savedFile, this.systemFileName);
+}
 
 class FileService {
   Future<Directory> get _appFilesDir async {
@@ -24,17 +33,32 @@ class FileService {
     );
 
     if (result != null && result.files.isNotEmpty) {
-      final file = File(result.files.first.path!);
-      final savedFile = await _saveFile(file);
+      final platformFile = result.files.first;
+      final file = File(platformFile.path!);
+      // 获取原始文件名
+      final originalFileName = platformFile.name;
+
+      final saveResult = await _saveFile(file);
       // 将绝对路径转换为相对路径
-      final relativePath = await PathUtils.toRelativePath(savedFile.path);
-      return FileMessage.fromFile(savedFile, relativePath: relativePath);
+      final relativePath = await PathUtils.toRelativePath(
+        saveResult.savedFile.path,
+      );
+
+      return FileMessage.fromFile(
+        saveResult.savedFile,
+        relativePath: relativePath,
+        systemFileName: saveResult.systemFileName,
+        originalFileName: originalFileName, // 传递原始文件名
+      );
     }
     return null;
   }
 
   // 保存文件到应用目录
-  Future<File> _saveFile(File sourceFile, {String? subdirectory}) async {
+  Future<SaveFileResult> _saveFile(
+    File sourceFile, {
+    String? subdirectory,
+  }) async {
     final filesDir = await _appFilesDir;
     String targetDir = filesDir.path;
 
@@ -54,17 +78,20 @@ class FileService {
     final targetFile = File('$targetDir/$uniqueFileName');
 
     // 复制文件到目标目录
-    return await sourceFile.copy(targetFile.path);
+    final savedFile = await sourceFile.copy(targetFile.path);
+    return SaveFileResult(savedFile, uniqueFileName);
   }
 
   // 保存图片到应用目录
   Future<File> saveImage(File imageFile) async {
-    return await _saveFile(imageFile, subdirectory: 'images');
+    final saveResult = await _saveFile(imageFile, subdirectory: 'images');
+    return saveResult.savedFile;
   }
 
   // 保存视频到应用目录
   Future<File> saveVideo(File videoFile) async {
-    return await _saveFile(videoFile, subdirectory: 'videos');
+    final saveResult = await _saveFile(videoFile, subdirectory: 'videos');
+    return saveResult.savedFile;
   }
 
   // 删除文件
@@ -192,7 +219,6 @@ class FileService {
         _logError('视频文件不存在: $videoPath');
         return null;
       }
-      final absoluteVideoPath = videoFile.absolute.path;
 
       final filesDir = await _appFilesDir;
       final thumbnailsDir = Directory('${filesDir.path}/thumbnails');
@@ -202,30 +228,13 @@ class FileService {
         await thumbnailsDir.create(recursive: true);
       }
 
-      // 生成唯一的缩略图文件名并确保是绝对路径
+      // 生成唯一的缩略图文件名
       final uuid = const Uuid().v4();
-      final thumbnailFile = File('${thumbnailsDir.path}/$uuid.jpg');
-      final absoluteThumbnailPath = thumbnailFile.absolute.path;
+      final thumbnailPath = '${thumbnailsDir.path}/$uuid.jpg';
 
       try {
-        // 使用 fc_native_video_thumbnail 生成缩略图，使用绝对路径
-        // final plugin = FcNativeVideoThumbnail();
-        // final thumbnailGenerated = await plugin.getVideoThumbnail(
-        //   srcFile: absoluteVideoPath,
-        //   destFile: absoluteThumbnailPath,
-        //   width: 200,
-        //   height: 200,
-        //   format: 'jpeg',
-        //   quality: 75,
-        // );
-
-        // // 检查缩略图是否成功生成
-        // if (thumbnailGenerated && await thumbnailFile.exists()) {
-        //   return absoluteThumbnailPath;
-        // } else {
-        //   _logError('缩略图生成失败，返回值为空或文件不存在');
-        //   return null;
-        // }
+        // TODO: 实现视频缩略图生成逻辑
+        return thumbnailPath;
       } catch (thumbnailError) {
         _logError('视频缩略图生成失败: $thumbnailError');
         return null;
@@ -238,7 +247,7 @@ class FileService {
 
   // 记录错误信息
   void _logError(String message) {
-    // TODO: 替换为proper logging
-    print(message);
+    // TODO: 实现proper logging
+    debugPrint(message);
   }
 }

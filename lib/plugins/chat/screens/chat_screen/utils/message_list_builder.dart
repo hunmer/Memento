@@ -55,11 +55,14 @@ class MessageListBuilder {
         mimeType = 'application/octet-stream';
     }
 
+    // 对文件名进行URL编码，避免特殊字符导致的问题
+    String encodedFileName = Uri.encodeFull(fileName);
+
     return {
       Message.metadataKeyFileInfo: {
         'id': id,
-        'fileName': fileName,
-        'filePath': fileName, // 实际路径应该根据你的文件存储策略来设置
+        'fileName': encodedFileName,
+        'filePath': encodedFileName, // 实际路径应该根据你的文件存储策略来设置
         'fileSize': size.toInt(),
         'mimeType': mimeType,
         'timestamp': DateTime.now().toIso8601String(),

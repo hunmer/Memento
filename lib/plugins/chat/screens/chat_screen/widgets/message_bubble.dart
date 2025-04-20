@@ -154,7 +154,7 @@ class MessageBubble extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color:
                                     isCurrentUser
-                                        ? Colors.blue[100]
+                                        ? Color(0xFFD6E4FF) // 更深的蓝色背景，提高对比度
                                         : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
@@ -288,7 +288,7 @@ class MessageBubble extends StatelessWidget {
                 Icon(
                   fileInfo.getIcon(),
                   size: 24,
-                  color: isCurrentUser ? Colors.blue[800] : Colors.grey[800],
+                  color: isCurrentUser ? Colors.blue[900] : Colors.grey[800],
                 ),
                 const SizedBox(width: 8),
                 Flexible(
@@ -297,8 +297,12 @@ class MessageBubble extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        fileInfo.fileName,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        fileInfo.originalFileName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color:
+                              isCurrentUser ? Colors.blue[900] : Colors.black87,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -308,8 +312,8 @@ class MessageBubble extends StatelessWidget {
                           fontSize: 12,
                           color:
                               isCurrentUser
-                                  ? Colors.blue[800]
-                                  : Colors.grey[600],
+                                  ? Colors.blue[700]
+                                  : Colors.grey[700],
                         ),
                       ),
                     ],

@@ -45,17 +45,25 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
     });
 
     try {
-      // 检查路径是否为相对路径（以./开头）
-      if (widget.filePath.startsWith('./')) {
-        // 使用 path_provider 获取应用文档目录作为基础路径
+      // 解码 URI 编码的路径
+      String resolvedPath = Uri.decodeFull(widget.filePath);
+
+      // 如果是相对路径（不是以 / 开头），则转换为绝对路径
+      if (!path.isAbsolute(resolvedPath)) {
+        // 移除可能的 './' 前缀
+        if (resolvedPath.startsWith('./')) {
+          resolvedPath = resolvedPath.substring(2);
+        }
+
+        // 获取应用文档目录作为基础路径
         final appDocDir = await getApplicationDocumentsDirectory();
-        // 移除相对路径的 './' 前缀，然后拼接到应用文档目录
-        final relativePath = widget.filePath.substring(2); // 去掉 './'
-        _absoluteFilePath = path.join(appDocDir.path, relativePath);
-      } else {
-        _absoluteFilePath = widget.filePath;
+        resolvedPath = path.join(appDocDir.path, resolvedPath);
       }
 
+      // 规范化路径（处理 .. 和 . 等特殊路径）
+      _absoluteFilePath = path.normalize(resolvedPath);
+
+      // 验证文件是否存在
       // 验证文件是否存在
       final file = File(_absoluteFilePath);
       if (!await file.exists()) {
@@ -91,7 +99,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
 
   Future<void> _shareFile() async {
     try {
-      final file = File(widget.filePath);
+      final file = File(_absoluteFilePath);
       if (await file.exists()) {
         await Share.shareXFiles([
           XFile(widget.filePath),
@@ -114,7 +122,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
 
   Future<void> _showInFolder() async {
     try {
-      final file = File(widget.filePath);
+      final file = File(_absoluteFilePath);
       if (await file.exists()) {
         if (Platform.isAndroid || Platform.isIOS) {
           // 移动端显示文件信息
@@ -128,7 +136,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('文件名：${widget.fileName}'),
-                      Text('路径：${widget.filePath}'),
+                      Text('路径：${_absoluteFilePath}'),
                       Text('大小：${_formatFileSize(widget.fileSize)}'),
                       Text('类型：${widget.mimeType}'),
                     ],
@@ -222,7 +230,35 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
             ),
       );
     } else if (_isVideo) {
-      return VideoPreview(filePath: _absoluteFilePath);
+      try {
+        return VideoPreview(filePath: _absoluteFilePath);
+      } catch (e) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.videocam_off,
+                size: 72,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Text('视频加载失败', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              Text(
+                '无法播放此视频，可能是格式不支持或文件损坏',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _shareFile,
+                child: const Text('尝试使用其他应用打开'),
+              ),
+            ],
+          ),
+        );
+      }
     } else {
       // 普通文件预览
       return Center(

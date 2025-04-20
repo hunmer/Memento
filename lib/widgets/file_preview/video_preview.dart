@@ -19,14 +19,25 @@ class _VideoPreviewState extends State<VideoPreview> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.file(File(widget.filePath))
-      ..initialize().then((_) {
-        if (mounted) {
-          setState(() {
-            _isInitialized = true;
-          });
-        }
-      });
+    _initializeController();
+  }
+
+  Future<void> _initializeController() async {
+    try {
+      _controller = VideoPlayerController.file(File(widget.filePath));
+      await _controller.initialize();
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('视频加载失败: ${e.toString()}')));
+      }
+    }
   }
 
   @override
@@ -45,7 +56,16 @@ class _VideoPreviewState extends State<VideoPreview> {
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text('正在加载视频...', style: Theme.of(context).textTheme.bodyMedium),
+          ],
+        ),
+      );
     }
 
     return Column(
@@ -86,17 +106,7 @@ class _PlayPauseOverlay extends StatelessWidget {
           child:
               controller.value.isPlaying
                   ? const SizedBox.shrink()
-                  : Container(
-                    color: Colors.black26,
-                    child: const Center(
-                      child: Icon(
-                        Icons.play_arrow,
-                        color: Colors.white,
-                        size: 100.0,
-                        semanticLabel: 'Play',
-                      ),
-                    ),
-                  ),
+                  : Container(color: Colors.black26),
         ),
         GestureDetector(
           onTap: () {
