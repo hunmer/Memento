@@ -34,5 +34,9 @@
 	<string>This app requires access to the Downloads folder for importing and exporting data.</string>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>This app requires access to the Desktop folder for importing and exporting data.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to record videos for chat messages.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires microphone access to record audio for videos and voice messages.</string>
 </dict>
 </plist>
