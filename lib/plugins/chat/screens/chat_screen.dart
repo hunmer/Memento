@@ -67,6 +67,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   onCopy: () {},
                   onSetFixedSymbol: (_) {},
                   showAvatar: true,
+                  currentUserId: currentUser.id,
                 );
               },
             ),

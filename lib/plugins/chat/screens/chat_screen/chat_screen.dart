@@ -38,23 +38,21 @@ class _ChatScreenState extends State<ChatScreen> {
       chatPlugin: ChatPlugin.instance,
       audioPlayer: AudioPlayer(),
     );
-    
+
     // 加载频道草稿
     _loadChannelDraft();
   }
 
   Future<void> _loadChannelDraft() async {
     final chatPlugin = ChatPlugin.instance;
-    
+
     if (!mounted) return;
 
     // 检查插件是否已初始化
     if (chatPlugin.isInitialized) {
       try {
         final draft = await chatPlugin.loadDraft(widget.channel.id);
-        if (draft != null && 
-            draft.isNotEmpty && 
-            mounted) {
+        if (draft != null && draft.isNotEmpty && mounted) {
           setState(() {
             // 增加额外的空值检查
             if (_controller.draftController.hasListeners) {
@@ -86,40 +84,46 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.editMessage(message);
     showDialog(
       context: context,
-      builder: (context) => EditMessageDialog(
-        message: message,
-        controller: _controller.editingController,
-        onCancel: () {
-          _controller.cancelEdit();
-          Navigator.of(context).pop();
-        },
-        onSave: () {
-          _controller.saveEditedMessage();
-          Navigator.of(context).pop();
-        },
-      ),
+      builder:
+          (context) => EditMessageDialog(
+            message: message,
+            controller: _controller.editingController,
+            onCancel: () {
+              _controller.cancelEdit();
+              Navigator.of(context).pop();
+            },
+            onSave: () {
+              _controller.saveEditedMessage();
+              Navigator.of(context).pop();
+            },
+          ),
     );
   }
 
   void _showClearConfirmationDialog() {
     showDialog(
       context: context,
-      builder: (context) => ClearMessagesDialog(
-        onConfirm: () {
-          _controller.clearMessages();
-          Navigator.of(context).pop();
-        },
-        onCancel: () => Navigator.of(context).pop(),
-      ),
+      builder:
+          (context) => ClearMessagesDialog(
+            onConfirm: () {
+              _controller.clearMessages();
+              Navigator.of(context).pop();
+            },
+            onCancel: () => Navigator.of(context).pop(),
+          ),
     );
   }
 
   void _showDatePickerDialog() {
     // 从消息中提取唯一的日期
-    final dates = _controller.messages.map((msg) {
-      return DateTime(msg.date.year, msg.date.month, msg.date.day);
-    }).toSet().toList();
-    
+    final dates =
+        _controller.messages
+            .map((msg) {
+              return DateTime(msg.date.year, msg.date.month, msg.date.day);
+            })
+            .toSet()
+            .toList();
+
     // 计算每个日期的消息数量
     final dateCountMap = <DateTime, int>{};
     for (final msg in _controller.messages) {
@@ -132,55 +136,58 @@ class _ChatScreenState extends State<ChatScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => CalendarDatePickerDialog(
-        availableDates: dates,
-        selectedDate: _controller.selectedDate,
-        dateCountMap: dateCountMap,
-        onDateSelected: (date) {
-          setState(() {
-            _controller.selectedDate = date;
-          });
-        },
-      ),
+      builder:
+          (context) => CalendarDatePickerDialog(
+            availableDates: dates,
+            selectedDate: _controller.selectedDate,
+            dateCountMap: dateCountMap,
+            onDateSelected: (date) {
+              setState(() {
+                _controller.selectedDate = date;
+              });
+            },
+          ),
     );
   }
 
   void _copySelectedMessages() {
-    final selectedMessages = _controller.messages
-        .where((msg) => _controller.selectedMessageIds.contains(msg.id))
-        .toList();
-    
+    final selectedMessages =
+        _controller.messages
+            .where((msg) => _controller.selectedMessageIds.contains(msg.id))
+            .toList();
+
     if (selectedMessages.isEmpty) return;
 
     final textToCopy = selectedMessages
         .map((msg) => '${msg.user.username}: ${msg.content}')
         .join('\n\n');
-    
+
     Clipboard.setData(ClipboardData(text: textToCopy));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('已复制所选消息')),
-    );
-    
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('已复制所选消息')));
+
     _controller.toggleMultiSelectMode();
   }
 
   void _deleteSelectedMessages() async {
-    final selectedMessages = _controller.messages
-        .where((msg) => _controller.selectedMessageIds.contains(msg.id))
-        .toList();
-    
+    final selectedMessages =
+        _controller.messages
+            .where((msg) => _controller.selectedMessageIds.contains(msg.id))
+            .toList();
+
     for (var message in selectedMessages) {
       await _controller.deleteMessage(message);
     }
-    
+
     _controller.toggleMultiSelectMode();
   }
 
   void _copyMessageToClipboard(Message message) {
     Clipboard.setData(ClipboardData(text: message.content));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('已复制消息内容')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('已复制消息内容')));
   }
 
   void _setFixedSymbol(Message message, String? symbol) async {
@@ -201,10 +208,11 @@ class _ChatScreenState extends State<ChatScreen> {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        final messageItems = MessageListBuilder.buildMessageListWithDateSeparators(
-          _controller.messages,
-          _controller.selectedDate,
-        );
+        final messageItems =
+            MessageListBuilder.buildMessageListWithDateSeparators(
+              _controller.messages,
+              _controller.selectedDate,
+            );
 
         return Scaffold(
           appBar: ChatAppBar(
@@ -216,7 +224,8 @@ class _ChatScreenState extends State<ChatScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChannelInfoScreen(channel: widget.channel),
+                  builder:
+                      (context) => ChannelInfoScreen(channel: widget.channel),
                 ),
               );
             },
@@ -234,13 +243,18 @@ class _ChatScreenState extends State<ChatScreen> {
                   isMultiSelectMode: _controller.isMultiSelectMode,
                   selectedMessageIds: _controller.selectedMessageIds,
                   onMessageEdit: _showEditDialog,
-                  onMessageDelete: (message) => _controller.deleteMessage(message),
+                  onMessageDelete:
+                      (message) => _controller.deleteMessage(message),
                   onMessageCopy: _copyMessageToClipboard,
                   onSetFixedSymbol: _setFixedSymbol,
                   onToggleMessageSelection: _controller.toggleMessageSelection,
                   scrollController: _controller.scrollController,
                   onAvatarTap: _navigateToUserProfile,
                   showAvatar: ChatPlugin.instance.showAvatarInChat,
+                  currentUserId:
+                      ChatPlugin.instance.isInitialized
+                          ? ChatPlugin.instance.currentUser.id
+                          : '',
                 ),
               ),
               MessageInput(

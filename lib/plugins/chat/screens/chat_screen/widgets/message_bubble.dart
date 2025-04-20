@@ -15,6 +15,7 @@ class MessageBubble extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onAvatarTap;
   final bool showAvatar;
+  final String currentUserId;
 
   const MessageBubble({
     super.key,
@@ -25,6 +26,7 @@ class MessageBubble extends StatelessWidget {
     required this.onDelete,
     required this.onCopy,
     required this.onSetFixedSymbol,
+    required this.currentUserId,
     this.onLongPress,
     this.onTap,
     this.onAvatarTap,
@@ -33,7 +35,7 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCurrentUser = message.type == MessageType.sent;
+    final isCurrentUser = message.user.id == currentUserId;
 
     return GestureDetector(
       onLongPress: onLongPress,
@@ -46,9 +48,8 @@ class MessageBubble extends StatelessWidget {
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
-          mainAxisAlignment:
-              isCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (!isCurrentUser && showAvatar) ...[
               GestureDetector(
@@ -70,11 +71,8 @@ class MessageBubble extends StatelessWidget {
               ),
               const SizedBox(width: 8),
             ],
-            if (isCurrentUser && showAvatar) ...[
-              const Spacer(),
-              const SizedBox(width: 8),
-            ],
-            Flexible(
+            if (isCurrentUser && showAvatar) const SizedBox(width: 8),
+            Expanded(
               child: Column(
                 crossAxisAlignment:
                     isCurrentUser
@@ -91,121 +89,126 @@ class MessageBubble extends StatelessWidget {
                       ),
                     ),
                   if (!isCurrentUser) const SizedBox(height: 2),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (isCurrentUser) ...[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            if (message.fixedSymbol != null)
-                              Container(
-                                margin: const EdgeInsets.only(top: 2),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.shade100,
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(
-                                    color: Colors.amber.shade200,
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (isCurrentUser) ...[
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (message.fixedSymbol != null)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 1,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber.shade100,
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(
+                                        color: Colors.amber.shade200,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      message.fixedSymbol!,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.amber.shade800,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  message.fixedSymbol!,
+                                Text(
+                                  _formatTime(message.date),
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.amber.shade800,
+                                    fontSize: 10,
+                                    color: Colors.grey[600],
                                   ),
                                 ),
-                              ),
-                            Text(
-                              _formatTime(message.date),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey[600],
-                              ),
+                                if (message.isEdited)
+                                  Text(
+                                    '(已编辑)',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                              ],
                             ),
-                            if (message.isEdited)
-                              Text(
-                                '(已编辑)',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
+                            const SizedBox(width: 4),
                           ],
-                        ),
-                        const SizedBox(width: 4),
-                      ],
-                      Container(
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.7,
-                        ),
-                        padding: const EdgeInsets.all(10.0),
-                        decoration: BoxDecoration(
-                          color:
-                              isCurrentUser
-                                  ? Colors.blue[100]
-                                  : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [Flexible(child: _buildMessageContent())],
-                        ),
-                      ),
-                      if (!isCurrentUser) ...[
-                        const SizedBox(width: 4),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            if (message.fixedSymbol != null)
-                              Container(
-                                margin: const EdgeInsets.only(top: 2),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.shade100,
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(
-                                    color: Colors.amber.shade200,
+                          Container(
+                            constraints: BoxConstraints(
+                              maxWidth: constraints.maxWidth * 0.7,
+                              minWidth: 0,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(10.0),
+                              decoration: BoxDecoration(
+                                color:
+                                    isCurrentUser
+                                        ? Colors.blue[100]
+                                        : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: _buildMessageContent(),
+                            ),
+                          ),
+                          if (!isCurrentUser) ...[
+                            const SizedBox(width: 4),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (message.fixedSymbol != null)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 1,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber.shade100,
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(
+                                        color: Colors.amber.shade200,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      message.fixedSymbol!,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.amber.shade800,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  message.fixedSymbol!,
+                                Text(
+                                  _formatTime(message.date),
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.amber.shade800,
+                                    fontSize: 10,
+                                    color: Colors.grey[600],
                                   ),
                                 ),
-                              ),
-                            Text(
-                              _formatTime(message.date),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey[600],
-                              ),
+                                if (message.isEdited)
+                                  Text(
+                                    '(已编辑)',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                              ],
                             ),
-                            if (message.isEdited)
-                              Text(
-                                '(已编辑)',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
                           ],
-                        ),
-                      ],
-                    ],
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -243,34 +246,34 @@ class MessageBubble extends StatelessWidget {
   }
 
   Widget _buildMessageContent() {
+    final isCurrentUser = message.user.id == currentUserId;
+
     // 根据消息类型选择不同的渲染方式
+    Widget content;
     switch (message.type) {
       case MessageType.image:
-        return ImageMessageWidget(
+        content = ImageMessageWidget(
           message: message,
-          isOutgoing: message.metadata?['isOutgoing'] as bool? ?? false,
+          isOutgoing: isCurrentUser,
         );
+        break;
       case MessageType.video:
-        // 如果有视频消息组件，可以在这里使用
-        return MarkdownBody(
-          data: message.content,
-          styleSheet: MarkdownStyleSheet(p: const TextStyle(fontSize: 16)),
-        );
       case MessageType.sent:
-        return MarkdownBody(
-          data: message.content,
-          styleSheet: MarkdownStyleSheet(p: const TextStyle(fontSize: 16)),
-        );
       case MessageType.received:
-        return MarkdownBody(
-          data: message.content,
-          styleSheet: MarkdownStyleSheet(p: const TextStyle(fontSize: 16)),
-        );
       default:
-        return MarkdownBody(
+        content = MarkdownBody(
           data: message.content,
-          styleSheet: MarkdownStyleSheet(p: const TextStyle(fontSize: 16)),
+          styleSheet: MarkdownStyleSheet(
+            p: const TextStyle(fontSize: 14),
+            blockSpacing: 0,
+            listIndent: 8,
+          ),
         );
     }
+
+    return DefaultTextStyle(
+      style: const TextStyle(fontSize: 14, height: 1.4),
+      child: content,
+    );
   }
 }

@@ -73,9 +73,27 @@ class ChatScreenController extends ChangeNotifier {
   }
 
   void _initializeCurrentUser() {
-    // 这里应该从某个地方获取当前用户信息
-    // 暂时使用一个默认用户，你需要根据实际情况修改这里
-    currentUser = User(id: 'current_user', username: 'Current User');
+    try {
+      // 检查 ChatPlugin 是否已初始化
+      if (chatPlugin.isInitialized) {
+        currentUser = chatPlugin.currentUser;
+      } else {
+        // 如果 ChatPlugin 尚未初始化，使用一个默认用户并稍后重试
+        currentUser = User(id: 'current_user', username: 'Current User');
+
+        // 延迟重试获取当前用户
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (chatPlugin.isInitialized) {
+            currentUser = chatPlugin.currentUser;
+            notifyListeners();
+          }
+        });
+      }
+    } catch (e) {
+      _logger.warning('Error initializing current user: $e');
+      // 使用默认用户作为备选
+      currentUser = User(id: 'current_user', username: 'Current User');
+    }
   }
 
   void _setupScrollListener() {

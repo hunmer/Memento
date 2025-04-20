@@ -3,6 +3,7 @@ import '../../../models/message.dart';
 import 'message_bubble.dart';
 import '../widgets/date_separator.dart';
 import '../../../utils/date_formatter.dart';
+import '../../../chat_plugin.dart';
 
 class MessageList extends StatelessWidget {
   final List<dynamic> items;
@@ -16,6 +17,7 @@ class MessageList extends StatelessWidget {
   final ScrollController scrollController;
   final void Function(Message)? onAvatarTap;
   final bool showAvatar;
+  final String? currentUserId;
 
   const MessageList({
     super.key,
@@ -30,6 +32,7 @@ class MessageList extends StatelessWidget {
     required this.onSetFixedSymbol,
     required this.onToggleMessageSelection,
     required this.scrollController,
+    this.currentUserId,
   });
 
   @override
@@ -47,7 +50,9 @@ class MessageList extends StatelessWidget {
         if (item is DateTime) {
           // 如果项目本身是日期，直接显示日期分隔符
           return DateSeparator(date: item);
-        } else if (item is Message && nextItem is Message && _shouldShowDateSeparator(item, nextItem)) {
+        } else if (item is Message &&
+            nextItem is Message &&
+            _shouldShowDateSeparator(item, nextItem)) {
           // 如果当前消息和下一条消息不是同一天，显示日期分隔符
           dateSeparator = DateSeparator(date: item.date);
         }
@@ -70,11 +75,15 @@ class MessageList extends StatelessWidget {
                   onCopy: () => onMessageCopy(item),
                   onSetFixedSymbol: (symbol) => onSetFixedSymbol(item, symbol),
                   onLongPress: null, // 移除重复的长按处理
-                  onTap: isMultiSelectMode
-                      ? () => onToggleMessageSelection(item.id)
-                      : null,
-                  onAvatarTap: onAvatarTap != null ? () => onAvatarTap!(item) : null,
+                  onTap:
+                      isMultiSelectMode
+                          ? () => onToggleMessageSelection(item.id)
+                          : null,
+                  onAvatarTap:
+                      onAvatarTap != null ? () => onAvatarTap!(item) : null,
                   showAvatar: showAvatar,
+                  currentUserId:
+                      currentUserId ?? ChatPlugin.instance.currentUser.id,
                 ),
               ),
             ],
@@ -91,116 +100,124 @@ class MessageList extends StatelessWidget {
 
   void _showFixedSymbolDialog(BuildContext context, Message message) {
     final TextEditingController symbolController = TextEditingController();
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Set Fixed Symbol'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: symbolController,
-              decoration: const InputDecoration(
-                labelText: 'Symbol',
-                hintText: 'Enter symbol or leave empty to remove',
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Set Fixed Symbol'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: symbolController,
+                  decoration: const InputDecoration(
+                    labelText: 'Symbol',
+                    hintText: 'Enter symbol or leave empty to remove',
+                  ),
+                  maxLength: 1, // 限制只能输入一个字符
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children:
+                      ['⭐', '📌', '❤️', '🔥', '✨']
+                          .map(
+                            (symbol) => ActionChip(
+                              label: Text(symbol),
+                              onPressed: () {
+                                symbolController.text = symbol;
+                              },
+                            ),
+                          )
+                          .toList(),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
               ),
-              maxLength: 1, // 限制只能输入一个字符
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: ['⭐', '📌', '❤️', '🔥', '✨'].map((symbol) => 
-                ActionChip(
-                  label: Text(symbol),
-                  onPressed: () {
-                    symbolController.text = symbol;
-                  },
-                )
-              ).toList(),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+              TextButton(
+                onPressed: () {
+                  final symbol =
+                      symbolController.text.isEmpty
+                          ? null
+                          : symbolController.text;
+                  onSetFixedSymbol(message, symbol);
+                  Navigator.pop(context);
+                },
+                child: const Text('Set'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              final symbol = symbolController.text.isEmpty ? null : symbolController.text;
-              onSetFixedSymbol(message, symbol);
-              Navigator.pop(context);
-            },
-            child: const Text('Set'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showMessageOptions(BuildContext context, Message message) {
     showDialog(
       context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text('Message Options'),
-        children: [
-          // 设置固定字符选项
-          SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context);
-              _showFixedSymbolDialog(context, message);
-            },
-            child: const Row(
-              children: [
-                Icon(Icons.push_pin, size: 20),
-                SizedBox(width: 8),
-                Text('Set Fixed Symbol'),
-              ],
-            ),
-          ),
-          const Divider(),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context);
-                onMessageEdit(message);
-              },
-              child: const Row(
-                children: [
-                  Icon(Icons.edit, size: 20),
-                  SizedBox(width: 8),
-                  Text('Edit'),
-                ],
+      builder:
+          (context) => SimpleDialog(
+            title: const Text('Message Options'),
+            children: [
+              // 设置固定字符选项
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _showFixedSymbolDialog(context, message);
+                },
+                child: const Row(
+                  children: [
+                    Icon(Icons.push_pin, size: 20),
+                    SizedBox(width: 8),
+                    Text('Set Fixed Symbol'),
+                  ],
+                ),
               ),
-            ),
-          SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context);
-              onMessageCopy(message);
-            },
-            child: const Row(
-              children: [
-                Icon(Icons.copy, size: 20),
-                SizedBox(width: 8),
-                Text('Copy'),
-              ],
-            ),
-          ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context);
-                onMessageDelete(message);
-              },
-              child: const Row(
-                children: [
-                  Icon(Icons.delete, size: 20),
-                  SizedBox(width: 8),
-                  Text('Delete'),
-                ],
+              const Divider(),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  onMessageEdit(message);
+                },
+                child: const Row(
+                  children: [
+                    Icon(Icons.edit, size: 20),
+                    SizedBox(width: 8),
+                    Text('Edit'),
+                  ],
+                ),
               ),
-            ),
-        ],
-      ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  onMessageCopy(message);
+                },
+                child: const Row(
+                  children: [
+                    Icon(Icons.copy, size: 20),
+                    SizedBox(width: 8),
+                    Text('Copy'),
+                  ],
+                ),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  onMessageDelete(message);
+                },
+                child: const Row(
+                  children: [
+                    Icon(Icons.delete, size: 20),
+                    SizedBox(width: 8),
+                    Text('Delete'),
+                  ],
+                ),
+              ),
+            ],
+          ),
     );
   }
 }

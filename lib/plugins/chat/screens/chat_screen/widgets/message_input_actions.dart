@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import '../../../../../widgets/markdown_editor/index.dart';
 import '../../../services/file_service.dart';
 import '../../../models/file_message.dart';
 import '../../../models/message.dart';
@@ -144,13 +145,32 @@ List<MessageInputAction> getDefaultMessageInputActions(
   final logger = Logger('MessageInputActions');
   return [
     MessageInputAction(
-      title: '文本样式',
+      title: '高级编辑',
       icon: Icons.text_fields,
       onTap: () {
-        // 文本样式功能
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('文本样式功能待实现')));
+        showDialog(
+          context: context,
+          builder:
+              (context) => Dialog(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  child: MarkdownEditor(
+                    showTitle: false,
+                    contentHint: '在此输入消息内容...',
+                    showPreviewButton: true,
+                    onSave: (_, content) {
+                      if (content.isNotEmpty) {
+                        // 发送消息
+                        onSendMessage?.call(content, type: MessageType.sent);
+                      }
+                      Navigator.of(context).pop();
+                    },
+                    onCancel: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ),
+        );
       },
     ),
     MessageInputAction(
@@ -304,15 +324,15 @@ List<MessageInputAction> getDefaultMessageInputActions(
             if (onSendMessage != null) {
               // 尝试获取视频封面
               String? thumbnailPath;
-              try {
-                thumbnailPath = await fileService.getVideoThumbnail(
-                  savedFile.path,
-                );
-              } catch (e) {
-                logger.warning('获取视频封面失败: $e');
-                // 如果获取封面失败，使用默认视频图标
-                thumbnailPath = null;
-              }
+              // try {
+              //   thumbnailPath = await fileService.getVideoThumbnail(
+              //     savedFile.path,
+              //   );
+              // } catch (e) {
+              //   logger.warning('获取视频封面失败: $e');
+              //   // 如果获取封面失败，使用默认视频图标
+              //   thumbnailPath = null;
+              // }
 
               // 创建Markdown格式的视频消息内容
               String fileContent;
@@ -371,26 +391,6 @@ List<MessageInputAction> getDefaultMessageInputActions(
             ),
           );
         }
-      },
-    ),
-    MessageInputAction(
-      title: '位置',
-      icon: Icons.location_on,
-      onTap: () {
-        // 位置功能
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('位置功能待实现')));
-      },
-    ),
-    MessageInputAction(
-      title: '联系人',
-      icon: Icons.person,
-      onTap: () {
-        // 联系人功能
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('联系人功能待实现')));
       },
     ),
   ];

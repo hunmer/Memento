@@ -73,14 +73,13 @@ class ChatPlugin extends BasePlugin {
     return _instance!;
   }
 
-  // 检查插件是否已初始化
+  // 检查插件是否已完全初始化
   bool get isInitialized {
     try {
-      // 尝试访问存储管理器，如果成功则表示已初始化
+      // 检查存储管理器和当前用户是否都已初始化
       storage;
-      return true;
+      return _currentUser != null;
     } catch (e) {
-      // 如果抛出异常，表示存储管理器未初始化
       return false;
     }
   }
@@ -89,8 +88,23 @@ class ChatPlugin extends BasePlugin {
   final List<Function()> _listeners = [];
 
   // 当前用户
-  late User _currentUser;
-  User get currentUser => _currentUser;
+  User? _currentUser;
+  User get currentUser {
+    if (_currentUser == null) {
+      // 创建一个默认用户，避免抛出异常
+      _currentUser = User(id: 'default_user', username: 'Default User');
+      debugPrint(
+        'Warning: Using default user because ChatPlugin is not properly initialized.',
+      );
+    }
+    return _currentUser!;
+  }
+
+  // 设置当前用户
+  void setCurrentUser(User user) {
+    _currentUser = user;
+    notifyListeners();
+  }
 
   void addListener(Function() listener) {
     _listeners.add(listener);
@@ -131,6 +145,22 @@ class ChatPlugin extends BasePlugin {
   Future<void> initialize() async {
     // 加载插件设置
     await _initializeSettings();
+
+    // 设置默认用户（如果尚未设置）
+    if (_currentUser == null) {
+      // 尝试从存储中加载用户信息
+      final userData = await storage.read('chat/current_user');
+      if (userData.isNotEmpty && userData.containsKey('user')) {
+        _currentUser = UserSerializer.fromJson(userData['user']);
+      } else {
+        // 如果没有存储的用户信息，创建默认用户
+        _currentUser = User(id: 'default_user', username: 'Default User');
+        // 保存默认用户信息
+        await storage.write('chat/current_user', {
+          'user': UserSerializer.toJson(_currentUser!),
+        });
+      }
+    }
 
     // 加载默认数据和频道
     await _initializeDefaultData();
