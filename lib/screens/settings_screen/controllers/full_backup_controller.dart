@@ -334,12 +334,6 @@ class FullBackupController {
               (dialogContext) => AlertDialog(
                 title: const Text('需要重启'),
                 content: const Text('数据已导入完成，需要重启应用才能生效。'),
-                actions: [
-                  TextButton(
-                    child: const Text('立即重启'),
-                    onPressed: () => restartApp(dialogContext),
-                  ),
-                ],
               ),
         );
       } catch (e, stackTrace) {
@@ -443,57 +437,5 @@ class FullBackupController {
     }
 
     await addFiles(directory);
-  }
-
-  Future<void> restartApp(BuildContext dialogContext) async {
-    try {
-      // 显示重启中对话框
-      showDialog(
-        context: dialogContext,
-        barrierDismissible: false,
-        builder:
-            (context) => const AlertDialog(
-              title: Text('正在重启'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('正在准备重启应用...'),
-                ],
-              ),
-            ),
-      );
-
-      // 清理缓存
-      globalStorage.clearMemoryCache();
-
-      // 短暂延迟确保清理完成
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      if (!_mounted) return;
-
-      // 关闭所有对话框
-      Navigator.of(
-        dialogContext,
-        rootNavigator: true,
-      ).popUntil((route) => route.isFirst);
-
-      // 重启应用
-      Navigator.of(dialogContext).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const MyApp()),
-        (route) => false, // 移除所有路由
-      );
-    } catch (e) {
-      debugPrint('重启应用失败: $e');
-      if (!_mounted) return;
-
-      ScaffoldMessenger.of(dialogContext).showSnackBar(
-        const SnackBar(
-          content: Text('重启失败，请手动关闭并重新打开应用'),
-          duration: Duration(seconds: 5),
-        ),
-      );
-    }
   }
 }

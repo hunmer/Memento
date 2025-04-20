@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/webdav_controller.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../widgets/backup_progress_dialog.dart';
 
 class WebDAVSettingsDialog extends StatefulWidget {
   final WebDAVController controller;
@@ -308,6 +309,14 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               // 使用mounted检查和保存的context引用
               if (!mounted) return;
               Navigator.of(currentContext).pop(true);
+
+              // 显示提示
+              ScaffoldMessenger.of(currentContext).showSnackBar(
+                const SnackBar(
+                  content: Text('设置已保存'),
+                  backgroundColor: Colors.green,
+                ),
+              );
             },
             child: const Text('完成'),
           ),

@@ -3,6 +3,7 @@ import 'base_settings_controller.dart';
 import 'export_controller.dart';
 import 'import_controller.dart';
 import 'full_backup_controller.dart';
+import 'webdav_sync_controller.dart';
 
 class SettingsScreenController extends ChangeNotifier {
   final BuildContext context;
@@ -10,12 +11,14 @@ class SettingsScreenController extends ChangeNotifier {
   final ExportController _exportController;
   final ImportController _importController;
   final FullBackupController _fullBackupController;
+  final WebDAVSyncController _webdavSyncController;
 
   SettingsScreenController(this.context)
     : _baseController = BaseSettingsController(context),
       _exportController = ExportController(context),
       _importController = ImportController(context),
-      _fullBackupController = FullBackupController(context);
+      _fullBackupController = FullBackupController(context),
+      _webdavSyncController = WebDAVSyncController(context);
 
   // 主题相关
   bool get isDarkMode => _baseController.isDarkMode;
@@ -39,4 +42,10 @@ class SettingsScreenController extends ChangeNotifier {
   // 全量数据备份与恢复
   Future<void> exportAllData() => _fullBackupController.exportAllData();
   Future<void> importAllData() => _fullBackupController.importAllData();
+
+  // WebDAV同步相关
+  bool get isWebDAVConnected => _webdavSyncController.isConnected;
+  Future<bool> uploadAllToWebDAV() => _webdavSyncController.uploadAllToWebDAV();
+  Future<bool> downloadAllFromWebDAV() =>
+      _webdavSyncController.downloadAllFromWebDAV();
 }

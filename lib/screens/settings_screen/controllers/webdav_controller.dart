@@ -5,13 +5,20 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/storage/storage_manager.dart';
 import 'package:mime/mime.dart';
 import 'dart:async';
+import '../widgets/backup_progress_dialog.dart';
 
 class WebDAVController {
   final BuildContext context;
   webdav.Client? _client;
   bool _isConnected = false;
+  final _progressController = StreamController<BackupProgress>.broadcast();
+  Stream<BackupProgress> get progressStream => _progressController.stream;
 
   WebDAVController(this.context);
+
+  void dispose() {
+    _progressController.close();
+  }
 
   bool get isConnected => _isConnected;
 
@@ -139,9 +146,44 @@ class WebDAVController {
       }
 
       debugPrint('开始上传本地文件，源目录：$localPath，目标路径：$remotePath');
+      // 显示进度对话框
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder:
+              (dialogContext) => BackupProgressDialog(
+                progressStream: progressStream,
+                title: '从WebDAV下载',
+                onCancel: () {
+                  Navigator.of(dialogContext).pop();
+                  if (dialogContext.mounted) {
+                    ScaffoldMessenger.of(
+                      dialogContext,
+                    ).showSnackBar(const SnackBar(content: Text('下载已取消')));
+                  }
+                },
+              ),
+        );
+      }
+      // 更新初始进度
+      _progressController.add(
+        BackupProgress(
+          totalProgress: 0,
+          currentOperation: '准备上传...',
+          recentFiles: [],
+        ),
+      );
 
       // 递归上传本地文件到WebDAV
-      return await _uploadDirectory(localDir, '', remotePath);
+      final result = await _uploadDirectory(localDir, '', remotePath);
+
+      // 关闭进度对话框
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      return result;
     } catch (e) {
       debugPrint('同步本地到WebDAV失败: $e');
 
@@ -161,6 +203,19 @@ class WebDAVController {
       final entities = await dir.list().toList();
       debugPrint('正在处理目录：${dir.path}，包含 ${entities.length} 个项目');
 
+      // 计算总文件数
+      int totalFiles = 0;
+      int processedFiles = 0;
+      for (var entity in entities) {
+        if (entity is File) {
+          totalFiles++;
+        } else if (entity is Directory) {
+          final subFiles =
+              await entity.list(recursive: true).where((e) => e is File).length;
+          totalFiles += subFiles;
+        }
+      }
+
       for (var entity in entities) {
         final name = entity.path.split('/').last;
         final currentRelativePath =
@@ -170,6 +225,19 @@ class WebDAVController {
           // 上传文件
           final remoteFilePath = '$remotePath/$currentRelativePath';
           debugPrint('正在上传文件：${entity.path} -> $remoteFilePath');
+
+          // 更新进度
+          processedFiles++;
+          final progress =
+              totalFiles > 0 ? (processedFiles / totalFiles).toDouble() : 0.0;
+          _progressController.add(
+            BackupProgress(
+              totalProgress: progress,
+              currentOperation: '正在上传 ($processedFiles/$totalFiles)',
+              recentFiles: [currentRelativePath],
+            ),
+          );
+
           try {
             // 获取文件的MIME类型
             String? mimeType = lookupMimeType(entity.path);
@@ -236,8 +304,45 @@ class WebDAVController {
       final directory = await getApplicationDocumentsDirectory();
       final localPath = '${directory.path}/app_data';
 
+      // 显示进度对话框
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder:
+              (dialogContext) => BackupProgressDialog(
+                progressStream: progressStream,
+                title: '从WebDAV下载',
+                onCancel: () {
+                  Navigator.of(dialogContext).pop();
+                  if (dialogContext.mounted) {
+                    ScaffoldMessenger.of(
+                      dialogContext,
+                    ).showSnackBar(const SnackBar(content: Text('下载已取消')));
+                  }
+                },
+              ),
+        );
+      }
+
+      // 更新初始进度
+      _progressController.add(
+        BackupProgress(
+          totalProgress: 0,
+          currentOperation: '准备下载...',
+          recentFiles: [],
+        ),
+      );
+
       // 递归下载WebDAV文件到本地
-      return await _downloadDirectory(remotePath, Directory(localPath));
+      final result = await _downloadDirectory(remotePath, Directory(localPath));
+
+      // 关闭进度对话框
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      return result;
     } catch (e) {
       debugPrint('同步WebDAV到本地失败: $e');
 
@@ -255,26 +360,82 @@ class WebDAVController {
         await localDir.create(recursive: true);
       }
 
+      // 更新进度
+      _progressController.add(
+        BackupProgress(
+          totalProgress: 0,
+          currentOperation: '扫描远程文件...',
+          recentFiles: [],
+        ),
+      );
+
       // 列出远程目录内容
-      final files = await _client!.readDir(remotePath);
+      await _client!.readDir(remotePath);
 
-      for (var file in files) {
-        final name = file.name;
-        if (name == null) continue;
+      // 计算总文件数（包括子目录中的文件）
+      int totalFiles = 0;
+      int processedFiles = 0;
 
-        final localFilePath = '${localDir.path}/$name';
-        final remoteFilePath = '$remotePath/$name';
-
-        if (file.isDir ?? false) {
-          // 处理目录
-          final newLocalDir = Directory(localFilePath);
-          await _downloadDirectory(remoteFilePath, newLocalDir);
-        } else {
-          // 下载文件到本地
-          await _client!.read2File(remoteFilePath, localFilePath);
+      Future<void> countFiles(String path) async {
+        final items = await _client!.readDir(path);
+        for (var item in items) {
+          if (item.name == null) continue;
+          if (item.isDir ?? false) {
+            await countFiles('$path/${item.name!}');
+          } else {
+            totalFiles++;
+          }
         }
       }
-      return true;
+
+      await countFiles(remotePath);
+
+      // 更新进度
+      _progressController.add(
+        BackupProgress(
+          totalProgress: 0,
+          currentOperation: '开始下载 ($totalFiles 个文件)...',
+          recentFiles: [],
+        ),
+      );
+
+      Future<bool> downloadFiles(String path, Directory dir) async {
+        final items = await _client!.readDir(path);
+
+        for (var file in items) {
+          final name = file.name;
+          if (name == null) continue;
+
+          final localFilePath = '${dir.path}/$name';
+          final remoteFilePath = '$path/$name';
+
+          if (file.isDir ?? false) {
+            // 处理目录
+            final newLocalDir = Directory(localFilePath);
+            if (!await downloadFiles(remoteFilePath, newLocalDir)) {
+              return false;
+            }
+          } else {
+            // 更新进度
+            processedFiles++;
+            final progress =
+                totalFiles > 0 ? (processedFiles / totalFiles).toDouble() : 0.0;
+            _progressController.add(
+              BackupProgress(
+                totalProgress: progress,
+                currentOperation: '正在下载 ($processedFiles/$totalFiles)',
+                recentFiles: [remoteFilePath.substring(remotePath.length + 1)],
+              ),
+            );
+
+            // 下载文件到本地
+            await _client!.read2File(remoteFilePath, localFilePath);
+          }
+        }
+        return true;
+      }
+
+      return await downloadFiles(remotePath, localDir);
     } catch (e) {
       debugPrint('下载目录失败: $e');
 
@@ -426,7 +587,7 @@ class WebDAVController {
       for (final path in sortedPaths) {
         // 移除已处理的项目
         final timestamp = _pendingFileChanges.remove(path);
-        if (timestamp == null) continue;
+        if (timestamp == null) continue; // 这里的检查是必要的，因为timestamp可能为null
 
         // 检查文件是否存在决定操作类型
         final file = File(path);
@@ -585,11 +746,8 @@ class WebDAVController {
             return;
           }
           // 其他错误则继续重试
-          throw e;
+          rethrow;
         }
-        await _client!.remove(remoteFilePath);
-        debugPrint('文件已从WebDAV删除: $remoteFilePath');
-        return; // 成功后退出循环
       } catch (e) {
         debugPrint('从WebDAV删除文件失败 (尝试 ${retryCount + 1}/$maxRetries): $e');
         if (e.toString().contains('Locked')) {
