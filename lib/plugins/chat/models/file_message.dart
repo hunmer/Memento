@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import '../services/file_service.dart';
+import '../../../utils/image_utils.dart';
 
 enum FileMessageType { document, image, video, audio, other }
 
@@ -23,7 +24,7 @@ class FileMessage {
     this.mimeType,
     FileMessageType? type,
   }) : type = type ?? _determineFileType(filePath);
-  
+
   // 根据文件路径确定文件类型
   static FileMessageType _determineFileType(String filePath) {
     final fileService = FileService();
@@ -35,22 +36,31 @@ class FileMessage {
       return FileMessageType.audio;
     } else {
       final ext = path.extension(filePath).toLowerCase();
-      if (['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'].contains(ext)) {
+      if ([
+        '.pdf',
+        '.doc',
+        '.docx',
+        '.xls',
+        '.xlsx',
+        '.ppt',
+        '.pptx',
+        '.txt',
+      ].contains(ext)) {
         return FileMessageType.document;
       }
       return FileMessageType.other;
     }
   }
-  
+
   // 检查是否为图片
   bool get isImage => type == FileMessageType.image;
-  
+
   // 检查是否为视频
   bool get isVideo => type == FileMessageType.video;
-  
+
   // 检查是否为音频
   bool get isAudio => type == FileMessageType.audio;
-  
+
   // 检查是否为文档
   bool get isDocument => type == FileMessageType.document;
 
@@ -72,21 +82,26 @@ class FileMessage {
   }
 
   // 从文件创建FileMessage
-  static Future<FileMessage> fromFile(File file) async {
+  static Future<FileMessage> fromFile(File file, {String? relativePath}) async {
     final stats = await file.stat();
     final fileService = FileService();
     final mimeType = fileService.getMimeType(file.path);
     final fileType = _determineFileType(file.path);
-    
+
     return FileMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       fileName: path.basename(file.path),
-      filePath: file.path,
+      filePath: relativePath ?? file.path, // 使用相对路径
       fileSize: stats.size,
       timestamp: DateTime.now(),
       mimeType: mimeType,
       type: fileType,
     );
+  }
+
+  // 获取文件的绝对路径
+  Future<String> getAbsolutePath() async {
+    return await PathUtils.toAbsolutePath(filePath);
   }
 
   // 转换为Map
@@ -127,7 +142,7 @@ class FileMessage {
       // 如果没有类型信息，尝试从文件路径推断
       fileType = _determineFileType(json['filePath']);
     }
-    
+
     return FileMessage(
       id: json['id'],
       fileName: json['fileName'],
@@ -138,7 +153,7 @@ class FileMessage {
       type: fileType,
     );
   }
-  
+
   // 获取文件图标
   IconData getIcon() {
     switch (type) {

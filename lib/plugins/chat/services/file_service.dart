@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 import '../models/file_message.dart';
+import '../../../utils/image_utils.dart';
 
 class FileService {
   Future<Directory> get _appFilesDir async {
@@ -25,7 +26,9 @@ class FileService {
     if (result != null && result.files.isNotEmpty) {
       final file = File(result.files.first.path!);
       final savedFile = await _saveFile(file);
-      return FileMessage.fromFile(savedFile);
+      // 将绝对路径转换为相对路径
+      final relativePath = await PathUtils.toRelativePath(savedFile.path);
+      return FileMessage.fromFile(savedFile, relativePath: relativePath);
     }
     return null;
   }

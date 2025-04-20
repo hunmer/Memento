@@ -4,6 +4,38 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+/// 全局工具类，用于路径转换
+class PathUtils {
+  /// 将绝对路径转换为相对路径
+  /// [absolutePath] 绝对路径
+  /// 返回相对于应用数据目录的路径，格式为 ./xxx/xxx
+  static Future<String> toRelativePath(String absolutePath) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final appDataPath = path.join(appDir.path, 'app_data');
+
+    if (absolutePath.startsWith(appDataPath)) {
+      final relativePath = absolutePath.substring(appDir.path.length);
+      if (relativePath.startsWith('/app_data/')) {
+        return '.${relativePath.substring('/app_data'.length)}';
+      }
+    }
+
+    // 如果不是应用数据目录下的文件，返回原路径
+    return absolutePath;
+  }
+
+  /// 获取绝对路径
+  /// [relativePath] 相对路径
+  /// 返回绝对路径
+  static Future<String> toAbsolutePath(String? relativePath) async {
+    if (relativePath == null || !relativePath.startsWith('./')) {
+      return relativePath ?? '';
+    }
+    final appDir = await getApplicationDocumentsDirectory();
+    return path.join(appDir.path, 'app_data', relativePath.substring(2));
+  }
+}
+
 class ImageUtils {
   /// 将图片保存到应用数据目录，并返回相对路径
   /// [imageFile] 源图片文件

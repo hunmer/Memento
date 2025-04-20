@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../../plugins/chat/models/message.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import '../../../../../plugins/chat/widgets/image_message_widget.dart';
 
 class MessageBubble extends StatelessWidget {
   final Message message;
@@ -155,16 +156,7 @@ class MessageBubble extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Flexible(
-                              child: MarkdownBody(
-                                data: message.content,
-                                styleSheet: MarkdownStyleSheet(
-                                  p: const TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ),
-                          ],
+                          children: [Flexible(child: _buildMessageContent())],
                         ),
                       ),
                       if (!isCurrentUser) ...[
@@ -248,5 +240,37 @@ class MessageBubble extends StatelessWidget {
 
   String _formatTime(DateTime date) {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildMessageContent() {
+    // 根据消息类型选择不同的渲染方式
+    switch (message.type) {
+      case MessageType.image:
+        return ImageMessageWidget(
+          message: message,
+          isOutgoing: message.metadata?['isOutgoing'] as bool? ?? false,
+        );
+      case MessageType.video:
+        // 如果有视频消息组件，可以在这里使用
+        return MarkdownBody(
+          data: message.content,
+          styleSheet: MarkdownStyleSheet(p: const TextStyle(fontSize: 16)),
+        );
+      case MessageType.sent:
+        return MarkdownBody(
+          data: message.content,
+          styleSheet: MarkdownStyleSheet(p: const TextStyle(fontSize: 16)),
+        );
+      case MessageType.received:
+        return MarkdownBody(
+          data: message.content,
+          styleSheet: MarkdownStyleSheet(p: const TextStyle(fontSize: 16)),
+        );
+      default:
+        return MarkdownBody(
+          data: message.content,
+          styleSheet: MarkdownStyleSheet(p: const TextStyle(fontSize: 16)),
+        );
+    }
   }
 }

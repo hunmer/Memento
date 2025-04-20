@@ -88,6 +88,10 @@ class ChatPlugin extends BasePlugin {
   final List<Channel> _channels = [];
   final List<Function()> _listeners = [];
 
+  // 当前用户
+  late User _currentUser;
+  User get currentUser => _currentUser;
+
   void addListener(Function() listener) {
     _listeners.add(listener);
   }

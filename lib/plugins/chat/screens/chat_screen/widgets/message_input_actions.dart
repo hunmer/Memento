@@ -20,7 +20,12 @@ class MessageInputAction {
 }
 
 typedef OnFileSelected = void Function(FileMessage fileMessage);
-typedef OnSendMessage = void Function(String content, {Map<String, dynamic>? metadata, MessageType? type});
+typedef OnSendMessage =
+    void Function(
+      String content, {
+      Map<String, dynamic>? metadata,
+      MessageType? type,
+    });
 
 class MessageInputActionsDrawer extends StatelessWidget {
   final List<MessageInputAction> actions;
@@ -55,10 +60,7 @@ class MessageInputActionsDrawer extends StatelessWidget {
             children: [
               Text(
                 '选择操作',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
               IconButton(
                 icon: Icon(Icons.close),
@@ -76,7 +78,8 @@ class MessageInputActionsDrawer extends StatelessWidget {
                 mainAxisSpacing: 24.0,
               ),
               itemCount: actions.length,
-              itemBuilder: (context, index) => _buildActionItem(context, actions[index]),
+              itemBuilder:
+                  (context, index) => _buildActionItem(context, actions[index]),
             ),
           ),
         ],
@@ -98,9 +101,10 @@ class MessageInputActionsDrawer extends StatelessWidget {
             width: 60.0,
             height: 60.0,
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[800]
-                  : Colors.grey[200],
+              color:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[800]
+                      : Colors.grey[200],
               borderRadius: BorderRadius.circular(16.0),
             ),
             child: Icon(
@@ -114,9 +118,10 @@ class MessageInputActionsDrawer extends StatelessWidget {
             action.title,
             style: TextStyle(
               fontSize: 14.0,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[300]
-                  : Colors.grey[700],
+              color:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[300]
+                      : Colors.grey[700],
             ),
             textAlign: TextAlign.center,
             maxLines: 1,
@@ -143,9 +148,9 @@ List<MessageInputAction> getDefaultMessageInputActions(
       icon: Icons.text_fields,
       onTap: () {
         // 文本样式功能
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('文本样式功能待实现')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('文本样式功能待实现')));
       },
     ),
     MessageInputAction(
@@ -154,17 +159,18 @@ List<MessageInputAction> getDefaultMessageInputActions(
       onTap: () async {
         // 保存 context 的引用
         final scaffoldMessenger = ScaffoldMessenger.of(context);
-        
+
         final fileMessage = await fileService.pickFile();
         if (fileMessage != null) {
           // 调用回调函数发送文件消息
           onFileSelected?.call(fileMessage);
-          
+
           // 如果提供了onSendMessage回调，创建文件类型的消息
           if (onSendMessage != null) {
             // 创建文件消息内容
-            final fileContent = '📎 ${fileMessage.fileName} (${fileMessage.formattedSize})';
-            
+            final fileContent =
+                '📎 ${fileMessage.fileName} (${fileMessage.formattedSize})';
+
             // 创建文件元数据
             final fileMetadata = {
               Message.metadataKeyFileInfo: {
@@ -174,13 +180,17 @@ List<MessageInputAction> getDefaultMessageInputActions(
                 'fileSize': fileMessage.fileSize,
                 'extension': fileMessage.extension,
                 'mimeType': fileMessage.mimeType,
-              }
+              },
             };
-            
+
             // 发送文件消息
-            onSendMessage(fileContent, metadata: fileMetadata, type: MessageType.file);
+            onSendMessage(
+              fileContent,
+              metadata: fileMetadata,
+              type: MessageType.file,
+            );
           }
-          
+
           // 显示文件选择成功的提示
           scaffoldMessenger.showSnackBar(
             SnackBar(
@@ -198,7 +208,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
       onTap: () async {
         // 保存 context 的引用
         final scaffoldMessenger = ScaffoldMessenger.of(context);
-        
+
         try {
           // 使用ImagePicker选择图片
           final ImagePicker picker = ImagePicker();
@@ -206,39 +216,44 @@ List<MessageInputAction> getDefaultMessageInputActions(
             source: ImageSource.gallery,
             imageQuality: 80, // 图片质量
           );
-          
+
           if (image != null) {
             // 将图片转换为文件
             final File imageFile = File(image.path);
-            
+
             // 保存图片到应用目录
             final savedFile = await fileService.saveImage(imageFile);
             final fileMessage = await FileMessage.fromFile(savedFile);
             // 调用回调函数发送图片消息
             onFileSelected?.call(fileMessage);
-            
+
             // 如果提供了onSendMessage回调，创建图片类型的消息
             if (onSendMessage != null) {
-              // 创建Markdown格式的图片消息内容
-              final fileContent = '![${fileMessage.fileName}](${fileMessage.filePath} "${fileMessage.fileName}")';
-              
+              // 创建图片占位内容，不包含实际路径
+              final fileContent = '[图片] ${fileMessage.fileName}';
+
               // 创建图片元数据
               final fileMetadata = {
                 Message.metadataKeyFileInfo: {
                   'id': fileMessage.id,
                   'fileName': fileMessage.fileName,
-                  'filePath': fileMessage.filePath,
+                  'filePath': fileMessage.filePath, // 存储相对路径
                   'fileSize': fileMessage.fileSize,
                   'extension': fileMessage.extension,
-                  'mimeType': 'image/${fileMessage.extension.replaceAll('.', '')}',
+                  'mimeType':
+                      'image/${fileMessage.extension.replaceAll('.', '')}',
                   'isImage': true,
-                }
+                },
               };
-              
-              // 发送图片消息
-              onSendMessage(fileContent, metadata: fileMetadata, type: MessageType.image);
+
+              // 发送图片消息，类型为image
+              onSendMessage(
+                fileContent,
+                metadata: fileMetadata,
+                type: MessageType.image,
+              );
             }
-            
+
             // 显示图片选择成功的提示
             scaffoldMessenger.showSnackBar(
               SnackBar(
@@ -265,7 +280,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
       onTap: () async {
         // 保存 context 的引用
         final scaffoldMessenger = ScaffoldMessenger.of(context);
-        
+
         try {
           // 使用ImagePicker选择视频
           final ImagePicker picker = ImagePicker();
@@ -273,40 +288,44 @@ List<MessageInputAction> getDefaultMessageInputActions(
             source: ImageSource.gallery,
             maxDuration: const Duration(minutes: 10), // 限制视频长度
           );
-          
+
           if (video != null) {
             // 将视频转换为文件
             final File videoFile = File(video.path);
-            
+
             // 保存视频到应用目录
             final savedFile = await fileService.saveVideo(videoFile);
             final fileMessage = await FileMessage.fromFile(savedFile);
             logger.info('保存视频文件: ${savedFile.path}');
             // 调用回调函数发送视频消息
             onFileSelected?.call(fileMessage);
-            
+
             // 如果提供了onSendMessage回调，创建视频类型的消息
             if (onSendMessage != null) {
               // 尝试获取视频封面
               String? thumbnailPath;
               try {
-                thumbnailPath = await fileService.getVideoThumbnail(savedFile.path);
+                thumbnailPath = await fileService.getVideoThumbnail(
+                  savedFile.path,
+                );
               } catch (e) {
                 logger.warning('获取视频封面失败: $e');
                 // 如果获取封面失败，使用默认视频图标
                 thumbnailPath = null;
               }
-              
+
               // 创建Markdown格式的视频消息内容
               String fileContent;
               if (thumbnailPath != null) {
                 // 如果有封面，使用封面图片
-                fileContent = '[![${fileMessage.fileName}](${thumbnailPath} "${fileMessage.fileName} - 点击播放")](${fileMessage.filePath})';
+                fileContent =
+                    '[![${fileMessage.fileName}](${thumbnailPath} "${fileMessage.fileName} - 点击播放")](${fileMessage.filePath})';
               } else {
                 // 如果没有封面，使用纯文本格式
-                fileContent = '🎥 ${fileMessage.fileName} (${fileMessage.formattedSize})';
+                fileContent =
+                    '🎥 ${fileMessage.fileName} (${fileMessage.formattedSize})';
               }
-              
+
               // 创建视频元数据，包含封面路径（如果有的话）
               final Map<String, dynamic> fileInfo = {
                 'id': fileMessage.id,
@@ -314,23 +333,26 @@ List<MessageInputAction> getDefaultMessageInputActions(
                 'filePath': fileMessage.filePath,
                 'fileSize': fileMessage.fileSize,
                 'extension': fileMessage.extension,
-                'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
+                'mimeType':
+                    'video/${fileMessage.extension.replaceAll('.', '')}',
                 'isVideo': true,
               };
-              
+
               // 只有在成功生成缩略图的情况下才添加缩略图路径
               if (thumbnailPath != null) {
                 fileInfo['thumbnailPath'] = thumbnailPath;
               }
-              
-              final fileMetadata = {
-                Message.metadataKeyFileInfo: fileInfo
-              };
-              
+
+              final fileMetadata = {Message.metadataKeyFileInfo: fileInfo};
+
               // 发送视频消息
-              onSendMessage(fileContent, metadata: fileMetadata, type: MessageType.video);
+              onSendMessage(
+                fileContent,
+                metadata: fileMetadata,
+                type: MessageType.video,
+              );
             }
-            
+
             // 显示视频选择成功的提示
             scaffoldMessenger.showSnackBar(
               SnackBar(
@@ -356,9 +378,9 @@ List<MessageInputAction> getDefaultMessageInputActions(
       icon: Icons.location_on,
       onTap: () {
         // 位置功能
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('位置功能待实现')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('位置功能待实现')));
       },
     ),
     MessageInputAction(
@@ -366,9 +388,9 @@ List<MessageInputAction> getDefaultMessageInputActions(
       icon: Icons.person,
       onTap: () {
         // 联系人功能
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('联系人功能待实现')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('联系人功能待实现')));
       },
     ),
   ];
