@@ -1,6 +1,6 @@
 import 'user.dart';
 
-enum MessageType { received, sent, file, image, video }
+enum MessageType { received, sent, file, image, video, audio }
 
 class Message {
   static const String metadataKeyFileInfo = 'fileInfo';
@@ -60,5 +60,36 @@ class Message {
   // 设置固定符号
   void setFixedSymbol(String? symbol) {
     fixedSymbol = symbol;
+  }
+
+  // 判断是否为音频消息
+  bool get isAudioMessage => type == MessageType.audio;
+
+  // 获取音频消息的元数据
+  Map<String, dynamic>? get audioMetadata {
+    if (isAudioMessage &&
+        metadata != null &&
+        metadata!.containsKey(metadataKeyFileInfo)) {
+      return metadata![metadataKeyFileInfo] as Map<String, dynamic>;
+    }
+    return null;
+  }
+
+  // 获取音频消息的时长（秒）
+  int get audioDuration {
+    final data = audioMetadata;
+    if (data != null && data.containsKey('duration')) {
+      return data['duration'] as int;
+    }
+    return 0;
+  }
+
+  // 获取音频消息的文件路径
+  String? get audioFilePath {
+    final data = audioMetadata;
+    if (data != null && data.containsKey('filePath')) {
+      return data['filePath'] as String;
+    }
+    return null;
   }
 }

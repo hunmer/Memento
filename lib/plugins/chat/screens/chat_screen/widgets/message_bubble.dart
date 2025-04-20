@@ -4,6 +4,7 @@ import '../../../../../plugins/chat/models/file_message.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../../../plugins/chat/widgets/image_message_widget.dart';
 import '../../../../../widgets/file_preview/index.dart';
+import 'audio_message_bubble.dart';
 
 class MessageBubble extends StatelessWidget {
   final Message message;
@@ -253,6 +254,12 @@ class MessageBubble extends StatelessWidget {
     // 根据消息类型选择不同的渲染方式
     Widget content;
     switch (message.type) {
+      case MessageType.audio:
+        content = AudioMessageBubble(
+          message: message,
+          isCurrentUser: isCurrentUser,
+        );
+        break;
       case MessageType.image:
         content = ImageMessageWidget(
           message: message,

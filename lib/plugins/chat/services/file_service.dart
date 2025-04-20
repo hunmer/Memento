@@ -94,6 +94,12 @@ class FileService {
     return saveResult.savedFile;
   }
 
+  // 保存音频到应用目录
+  Future<File> saveAudio(File audioFile) async {
+    final saveResult = await _saveFile(audioFile, subdirectory: 'audios');
+    return saveResult.savedFile;
+  }
+
   // 删除文件
   Future<bool> deleteFile(String filePath) async {
     try {

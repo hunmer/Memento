@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'dart:async';
 import '../../../../../widgets/markdown_editor/index.dart';
 import '../../../services/file_service.dart';
 import '../../../models/file_message.dart';
 import '../../../models/message.dart';
 import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
-import 'package:logging/logging.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../../utils/image_utils.dart'; // 导入 PathUtils 类
+import 'package:record/record.dart'; // 导入录音功能
+import 'package:path_provider/path_provider.dart';
+import 'record_audio_dialog.dart'; // 导入录音对话框组件
 
 class MessageInputAction {
   final String title;
@@ -60,12 +64,12 @@ class MessageInputActionsDrawer extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 '选择操作',
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
               IconButton(
-                icon: Icon(Icons.close),
+                icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -73,7 +77,7 @@ class MessageInputActionsDrawer extends StatelessWidget {
           const SizedBox(height: 24.0),
           Expanded(
             child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 childAspectRatio: 0.8,
                 crossAxisSpacing: 16.0,
@@ -87,6 +91,14 @@ class MessageInputActionsDrawer extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // 格式化时长
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String minutes = twoDigits(duration.inMinutes.remainder(60));
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
   }
 
   Widget _buildActionItem(BuildContext context, MessageInputAction action) {
@@ -143,8 +155,138 @@ List<MessageInputAction> getDefaultMessageInputActions(
 }) {
   // 创建FileService实例
   final fileService = FileService();
-  final logger = Logger('MessageInputActions');
+
+  // 格式化时长
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String minutes = twoDigits(duration.inMinutes.remainder(60));
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
+  }
+
   return [
+    MessageInputAction(
+      title: '录制音频',
+      icon: Icons.mic,
+      onTap: () async {
+        // 保存 context 的引用
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+        // 创建录音实例
+        final recorder = AudioRecorder();
+
+        // 检查录音权限
+        if (await recorder.hasPermission()) {
+          // 显示录音对话框
+          if (context.mounted) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder:
+                  (dialogContext) => RecordAudioDialog(
+                    onStop: (File audioFile, Duration duration) async {
+                      try {
+                        debugPrint(
+                          '音频录制完成: ${audioFile.path}, 时长: ${duration.inSeconds}秒',
+                        );
+
+                        // 获取原始文件名
+                        final originalFileName = path.basename(audioFile.path);
+
+                        // 保存音频到应用目录
+                        debugPrint('开始保存音频...');
+                        final savedFile = await fileService.saveAudio(
+                          audioFile,
+                        );
+                        debugPrint('音频已保存: ${savedFile.path}');
+
+                        // 获取相对路径
+                        final relativePath = await PathUtils.toRelativePath(
+                          savedFile.path,
+                        );
+                        debugPrint('相对路径: $relativePath');
+
+                        // 创建文件消息
+                        final fileMessage = await FileMessage.fromFile(
+                          savedFile,
+                          relativePath: relativePath,
+                          originalFileName: originalFileName,
+                        );
+
+                        // 调用回调函数发送音频消息
+                        onFileSelected?.call(fileMessage);
+
+                        // 如果提供了onSendMessage回调，创建音频类型的消息
+                        if (onSendMessage != null) {
+                          // 创建音频消息内容
+                          final durationText = _formatDuration(duration);
+                          final fileContent = '🎵 语音消息 ($durationText)';
+
+                          // 创建音频元数据
+                          final Map<String, dynamic> fileInfo = {
+                            'id': fileMessage.id,
+                            'fileName': fileMessage.fileName,
+                            'originalFileName': fileMessage.originalFileName,
+                            'filePath': fileMessage.filePath,
+                            'fileSize': fileMessage.fileSize,
+                            'extension': fileMessage.extension,
+                            'mimeType':
+                                'audio/${fileMessage.extension.replaceAll('.', '')}',
+                            'isAudio': true,
+                            'duration': duration.inSeconds, // 添加音频时长信息
+                          };
+
+                          final fileMetadata = {
+                            Message.metadataKeyFileInfo: fileInfo,
+                          };
+
+                          // 发送音频消息
+                          onSendMessage.call(
+                            fileContent,
+                            metadata: fileMetadata,
+                            type: MessageType.audio,
+                          );
+                        }
+
+                        // 显示音频发送成功的提示
+                        if (scaffoldMessenger.mounted) {
+                          scaffoldMessenger.showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '已发送语音消息: ${_formatDuration(duration)}',
+                              ),
+                              duration: const Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        debugPrint('处理音频时出错: $e');
+                        if (scaffoldMessenger.mounted) {
+                          scaffoldMessenger.showSnackBar(
+                            SnackBar(
+                              content: Text('处理音频失败: $e'),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+            );
+          }
+        } else {
+          scaffoldMessenger.showSnackBar(
+            const SnackBar(
+              content: Text('没有录音权限'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+    ),
     MessageInputAction(
       title: '高级编辑',
       icon: Icons.text_fields,
@@ -306,8 +448,8 @@ List<MessageInputAction> getDefaultMessageInputActions(
       },
     ),
     MessageInputAction(
-      title: '视频',
-      icon: Icons.videocam,
+      title: '选择视频',
+      icon: Icons.video_library,
       onTap: () async {
         // 保存 context 的引用
         final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -334,7 +476,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
               relativePath: relativePath,
               originalFileName: originalFileName,
             );
-            logger.info('保存视频文件: ${savedFile.path}');
+            debugPrint('保存视频文件: ${savedFile.path}');
             // 调用回调函数发送视频消息
             onFileSelected?.call(fileMessage);
 
@@ -405,6 +547,148 @@ List<MessageInputAction> getDefaultMessageInputActions(
           scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text('选择视频失败: $e'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+    ),
+    MessageInputAction(
+      title: '拍摄视频',
+      icon: Icons.videocam,
+      onTap: () async {
+        // 保存 context 的引用
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+        try {
+          print('开始拍摄视频...');
+          // 使用ImagePicker启动相机拍摄视频
+          final ImagePicker picker = ImagePicker();
+          final XFile? video = await picker.pickVideo(
+            source: ImageSource.camera,
+            maxDuration: const Duration(minutes: 10), // 限制视频长度为10分钟
+          );
+
+          if (video != null) {
+            debugPrint('视频拍摄完成: ${video.path}');
+
+            try {
+              // 将视频转换为文件
+              final File videoFile = File(video.path);
+              if (!await videoFile.exists()) {
+                debugPrint('警告：视频文件不存在: ${video.path}');
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text('视频文件不存在'),
+                    backgroundColor: Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
+
+              final originalFileName = path.basename(video.path);
+              debugPrint('原始文件名: $originalFileName');
+
+              // 保存视频到应用目录
+              debugPrint('开始保存视频...');
+              final savedFile = await fileService.saveVideo(videoFile);
+              debugPrint('视频已保存: ${savedFile.path}');
+
+              // 获取相对路径
+              final relativePath = await PathUtils.toRelativePath(
+                savedFile.path,
+              );
+              debugPrint('相对路径: $relativePath');
+
+              debugPrint('创建文件消息...');
+              final fileMessage = await FileMessage.fromFile(
+                savedFile,
+                relativePath: relativePath,
+                originalFileName: originalFileName,
+              );
+              debugPrint('文件消息已创建: ${fileMessage.id}');
+
+              // 调用回调函数发送视频消息
+              debugPrint('调用onFileSelected回调...');
+              onFileSelected?.call(fileMessage);
+              debugPrint('onFileSelected回调已调用');
+
+              // 如果提供了onSendMessage回调，创建视频类型的消息
+              if (onSendMessage != null) {
+                debugPrint('准备发送消息...');
+                // 创建纯文本格式的视频消息内容
+                final fileContent =
+                    '🎥 ${fileMessage.fileName} (${fileMessage.formattedSize})';
+                debugPrint('消息内容: $fileContent');
+
+                // 创建视频元数据
+                final Map<String, dynamic> fileInfo = {
+                  'id': fileMessage.id,
+                  'fileName': fileMessage.fileName,
+                  'originalFileName': fileMessage.originalFileName,
+                  'filePath': fileMessage.filePath,
+                  'fileSize': fileMessage.fileSize,
+                  'extension': fileMessage.extension,
+                  'mimeType':
+                      'video/${fileMessage.extension.replaceAll('.', '')}',
+                  'isVideo': true,
+                };
+
+                final fileMetadata = {Message.metadataKeyFileInfo: fileInfo};
+                debugPrint('元数据已创建');
+
+                // 发送视频消息
+                debugPrint('调用onSendMessage回调...');
+                try {
+                  onSendMessage.call(
+                    fileContent,
+                    metadata: fileMetadata,
+                    type: MessageType.video,
+                  );
+                  debugPrint('消息已发送');
+                } catch (sendError) {
+                  debugPrint('错误：发送消息时出错: $sendError');
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text('发送消息失败: $sendError'),
+                      backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              } else {
+                debugPrint('警告：onSendMessage回调为null');
+              }
+
+              // 显示视频拍摄成功的提示
+              scaffoldMessenger.showSnackBar(
+                SnackBar(
+                  content: Text('已发送视频: ${path.basename(video.path)}'),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            } catch (processingError) {
+              debugPrint('错误：处理视频时出错: $processingError');
+              scaffoldMessenger.showSnackBar(
+                SnackBar(
+                  content: Text('处理视频失败: $processingError'),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          } else {
+            debugPrint('未获取到视频文件，可能是用户取消了拍摄或拍摄过程中出现问题');
+            // 不显示取消提示，因为这可能是完成拍摄后的正常流程
+          }
+        } catch (e) {
+          debugPrint('错误：拍摄视频过程中出错: $e');
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('拍摄视频失败: $e'),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
