@@ -150,17 +150,24 @@ class MessageBubble extends StatelessWidget {
                               maxWidth: constraints.maxWidth * 0.7,
                               minWidth: 0,
                             ),
-                            child: Container(
-                              padding: const EdgeInsets.all(10.0),
-                              decoration: BoxDecoration(
-                                color:
-                                    isCurrentUser
-                                        ? Color(0xFFD6E4FF) // 更深的蓝色背景，提高对比度
-                                        : Colors.grey[200],
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: _buildMessageContent(context),
-                            ),
+                            child:
+                                _shouldShowBackground()
+                                    ? Container(
+                                      padding: const EdgeInsets.all(10.0),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            isCurrentUser
+                                                ? const Color(
+                                                  0xFFD6E4FF,
+                                                ) // 更深的蓝色背景，提高对比度
+                                                : Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(
+                                          12.0,
+                                        ),
+                                      ),
+                                      child: _buildMessageContent(context),
+                                    )
+                                    : _buildMessageContent(context),
                           ),
                           if (!isCurrentUser) ...[
                             const SizedBox(width: 4),
@@ -246,6 +253,13 @@ class MessageBubble extends StatelessWidget {
 
   String _formatTime(DateTime date) {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  // 判断是否应该显示背景
+  bool _shouldShowBackground() {
+    // 音频和图片消息不显示背景
+    return message.type != MessageType.audio &&
+        message.type != MessageType.image;
   }
 
   Widget _buildMessageContent(BuildContext context) {
