@@ -175,6 +175,9 @@ List<MessageInputAction> getDefaultMessageInputActions(
         // 创建录音实例
         final recorder = AudioRecorder();
 
+        // 确保初始化录音器
+        await recorder.dispose();
+
         // 检查录音权限
         if (await recorder.hasPermission()) {
           // 显示录音对话框
@@ -195,6 +198,7 @@ List<MessageInputAction> getDefaultMessageInputActions(
 
                         // 保存音频到应用目录
                         debugPrint('开始保存音频...');
+                        await recorder.dispose(); // 确保释放录音资源
                         final savedFile = await fileService.saveAudio(
                           audioFile,
                         );
