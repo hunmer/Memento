@@ -2,23 +2,48 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import '../models/goods_item.dart';
 
-class GoodsItemCard extends StatelessWidget {
+class GoodsItemCard extends StatefulWidget {
   final GoodsItem item;
   final VoidCallback? onTap;
 
   const GoodsItemCard({super.key, required this.item, this.onTap});
 
   @override
+  State<GoodsItemCard> createState() => _GoodsItemCardState();
+}
+
+class _GoodsItemCardState extends State<GoodsItemCard> {
+  String? _resolvedImageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveImageUrl();
+  }
+
+  Future<void> _resolveImageUrl() async {
+    if (widget.item.imageUrl != null) {
+      final url = await widget.item.getImageUrl();
+      if (mounted) {
+        setState(() {
+          _resolvedImageUrl = url;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: item.imageUrl != null ? _buildImage() : _buildIcon(),
+              child:
+                  widget.item.imageUrl != null ? _buildImage() : _buildIcon(),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -31,15 +56,15 @@ class GoodsItemCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          item.title,
+                          widget.item.title,
                           style: Theme.of(context).textTheme.titleMedium,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (item.purchasePrice != null)
+                      if (widget.item.purchasePrice != null)
                         Text(
-                          '¥${item.purchasePrice!.toStringAsFixed(2)}',
+                          '¥${widget.item.purchasePrice!.toStringAsFixed(2)}',
                           style: Theme.of(
                             context,
                           ).textTheme.titleMedium?.copyWith(
@@ -52,13 +77,13 @@ class GoodsItemCard extends StatelessWidget {
                   const SizedBox(height: 4),
 
                   // 使用记录信息行
-                  if (item.usageRecords.isNotEmpty) ...[
+                  if (widget.item.usageRecords.isNotEmpty) ...[
                     Row(
                       children: [
                         Icon(Icons.history, size: 12, color: Colors.grey[600]),
                         const SizedBox(width: 4),
                         Text(
-                          '${_formatLastUsed(item.lastUsedDate)} · ${item.usageRecords.length}次使用',
+                          '${_formatLastUsed(widget.item.lastUsedDate)} · ${widget.item.usageRecords.length}次使用',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.grey[600], fontSize: 11),
                         ),
@@ -66,12 +91,12 @@ class GoodsItemCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                   ],
-                  if (item.tags.isNotEmpty) ...[
+                  if (widget.item.tags.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Wrap(
                       spacing: 4,
                       children:
-                          item.tags.map((tag) {
+                          widget.item.tags.map((tag) {
                             return Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 6,
@@ -98,20 +123,7 @@ class GoodsItemCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      return '今天';
-    } else if (difference.inDays == 1) {
-      return '昨天';
-    } else if (difference.inDays < 30) {
-      return '${difference.inDays}天前';
-    } else {
-      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    }
-  }
+  // 移除未使用的方法
 
   String _formatLastUsed(DateTime? dateTime) {
     if (dateTime == null) return '从未使用';
@@ -140,9 +152,9 @@ class GoodsItemCard extends StatelessWidget {
 
   Widget _buildIcon() {
     return Container(
-      color: item.iconColor ?? Colors.grey[200],
+      color: widget.item.iconColor ?? Colors.grey[200],
       child: Icon(
-        item.icon ?? Icons.inventory_2,
+        widget.item.icon ?? Icons.inventory_2,
         size: 48,
         color: Colors.white,
       ),
@@ -150,7 +162,10 @@ class GoodsItemCard extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    final imageUrl = item.imageUrl!;
+    if (_resolvedImageUrl == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final imageUrl = _resolvedImageUrl!;
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       // 网络图片
       return Image.network(

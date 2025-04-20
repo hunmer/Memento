@@ -1,12 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'usage_record.dart';
 import 'custom_field.dart';
 
 class GoodsItem {
   final String id;
   final String title;
-  final String? imageUrl;
+  String? _imageUrl;
   final IconData? icon;
+
+  // 获取图片URL，如果是相对路径则转换为绝对路径
+  Future<String?> getImageUrl() async {
+    if (_imageUrl == null) return null;
+    if (_imageUrl!.startsWith('./goods_images/')) {
+      final appDir = await getApplicationDocumentsDirectory();
+      return '${appDir.path}/app_data/${_imageUrl!.substring(2)}';
+    }
+    return _imageUrl;
+  }
+
+  // 同步获取相对路径
+  String? get imageUrl => _imageUrl;
+
+  // 设置图片URL，如果是绝对路径则转换为相对路径
+  set imageUrl(String? value) {
+    if (value != null && value.contains('goods_images/')) {
+      // 提取goods_images/之后的部分作为相对路径
+      _imageUrl = './goods_images/${value.split('goods_images/').last}';
+    } else {
+      _imageUrl = value;
+    }
+  }
+
   final Color? iconColor;
   final List<String> tags;
   final DateTime? purchaseDate;
@@ -18,7 +43,7 @@ class GoodsItem {
   GoodsItem({
     required this.id,
     required this.title,
-    this.imageUrl,
+    String? imageUrl,
     this.icon,
     this.iconColor,
     List<String>? tags,
@@ -27,16 +52,19 @@ class GoodsItem {
     List<UsageRecord>? usageRecords,
     List<CustomField>? customFields,
     this.notes,
-  }) : 
-    tags = tags ?? [],
-    usageRecords = usageRecords ?? [],
-    customFields = customFields ?? [];
+  }) : tags = tags ?? [],
+       usageRecords = usageRecords ?? [],
+       customFields = customFields ?? [] {
+    this.imageUrl = imageUrl; // 使用setter来设置图片路径
+  }
 
   DateTime? get lastUsedDate {
     if (usageRecords.isEmpty) return null;
     return usageRecords
-        .reduce((value, element) => 
-            value.date.isAfter(element.date) ? value : element)
+        .reduce(
+          (value, element) =>
+              value.date.isAfter(element.date) ? value : element,
+        )
         .date;
   }
 
@@ -44,25 +72,28 @@ class GoodsItem {
     return GoodsItem(
       id: json['id'] as String,
       title: json['title'] as String,
-      imageUrl: json['imageUrl'] as String?,
-      icon: json['iconData'] != null
-          ? IconData(json['iconData'] as int, fontFamily: 'MaterialIcons')
-          : null,
-      iconColor: json['iconColor'] != null
-          ? Color(json['iconColor'] as int)
-          : null,
+      imageUrl: json['imageUrl'] as String?, // 通过setter设置
+      icon:
+          json['iconData'] != null
+              ? IconData(json['iconData'] as int, fontFamily: 'MaterialIcons')
+              : null,
+      iconColor:
+          json['iconColor'] != null ? Color(json['iconColor'] as int) : null,
       tags: (json['tags'] as List?)?.map((e) => e as String).toList() ?? [],
-      purchaseDate: json['purchaseDate'] != null
-          ? DateTime.parse(json['purchaseDate'] as String)
-          : null,
+      purchaseDate:
+          json['purchaseDate'] != null
+              ? DateTime.parse(json['purchaseDate'] as String)
+              : null,
       purchasePrice: json['purchasePrice'] as double?,
-      usageRecords: (json['usageRecords'] as List?)
-          ?.map((e) => UsageRecord.fromJson(e))
-          .toList() ??
+      usageRecords:
+          (json['usageRecords'] as List?)
+              ?.map((e) => UsageRecord.fromJson(e))
+              .toList() ??
           [],
-      customFields: (json['customFields'] as List?)
-          ?.map((e) => CustomField.fromJson(e))
-          .toList() ??
+      customFields:
+          (json['customFields'] as List?)
+              ?.map((e) => CustomField.fromJson(e))
+              .toList() ??
           [],
       notes: json['notes'] as String?,
     );
@@ -72,7 +103,7 @@ class GoodsItem {
     return {
       'id': id,
       'title': title,
-      'imageUrl': imageUrl,
+      'imageUrl': _imageUrl, // 保存相对路径
       'iconData': icon?.codePoint,
       'iconColor': iconColor?.value,
       'tags': tags,
@@ -99,7 +130,7 @@ class GoodsItem {
     return GoodsItem(
       id: id,
       title: title ?? this.title,
-      imageUrl: imageUrl ?? this.imageUrl,
+      imageUrl: imageUrl ?? this._imageUrl, // 使用原始存储的相对路径
       icon: icon ?? this.icon,
       iconColor: iconColor ?? this.iconColor,
       tags: tags ?? List.from(this.tags),
