@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../services/file_service.dart';
 import 'handlers/index.dart';
+import 'handlers/local_video_handler.dart';
 import 'types.dart';
 
 /// 构建消息输入动作列表
@@ -86,14 +87,29 @@ class MessageInputActionsBuilder {
       ),
     );
 
-    // 添加视频动作
+    // 添加录像动作
     // 在Web平台上不支持视频拍摄，但我们仍然显示按钮，点击后会提示不支持
     actions.add(
       MessageInputAction(
-        title: '视频',
+        title: '录像',
         icon: Icons.videocam,
         onTap:
             () => handleVideoSelection(
+              context: context,
+              fileService: fileService,
+              onFileSelected: onFileSelected,
+              onSendMessage: onSendMessage,
+            ),
+      ),
+    );
+
+    // 添加视频选择动作
+    actions.add(
+      MessageInputAction(
+        title: '视频',
+        icon: Icons.video_library,
+        onTap:
+            () => handleLocalVideoSelection(
               context: context,
               fileService: fileService,
               onFileSelected: onFileSelected,
