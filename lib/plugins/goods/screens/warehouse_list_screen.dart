@@ -21,9 +21,7 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
             child: WarehouseForm(
               onSave: (Warehouse warehouse) async {
                 await GoodsPlugin.instance.saveWarehouse(warehouse);
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
+                // 移除多余的pop，因为WarehouseForm中已经有pop操作
               },
             ),
           ),

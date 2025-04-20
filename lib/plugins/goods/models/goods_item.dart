@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'usage_record.dart';
 import 'custom_field.dart';
+import 'path_constants.dart';
 
 class GoodsItem {
   final String id;
@@ -12,11 +13,11 @@ class GoodsItem {
   // 获取图片URL，如果是相对路径则转换为绝对路径
   Future<String?> getImageUrl() async {
     if (_imageUrl == null) return null;
-    if (_imageUrl!.startsWith('./goods_images/')) {
-      final appDir = await getApplicationDocumentsDirectory();
-      return '${appDir.path}/app_data/${_imageUrl!.substring(2)}';
-    }
-    return _imageUrl;
+    final appDir = await getApplicationDocumentsDirectory();
+    // 使用清理路径方法确保没有多余斜杠
+    return GoodsPathConstants.cleanPath(
+      GoodsPathConstants.toAbsolutePath(appDir.path, _imageUrl),
+    );
   }
 
   // 同步获取相对路径
@@ -24,12 +25,7 @@ class GoodsItem {
 
   // 设置图片URL，如果是绝对路径则转换为相对路径
   set imageUrl(String? value) {
-    if (value != null && value.contains('goods_images/')) {
-      // 提取goods_images/之后的部分作为相对路径
-      _imageUrl = './goods_images/${value.split('goods_images/').last}';
-    } else {
-      _imageUrl = value;
-    }
+    _imageUrl = GoodsPathConstants.toRelativePath(value);
   }
 
   final Color? iconColor;
@@ -103,7 +99,7 @@ class GoodsItem {
     return {
       'id': id,
       'title': title,
-      'imageUrl': _imageUrl, // 保存相对路径
+      'imageUrl': _imageUrl, // 已经是相对路径
       'iconData': icon?.codePoint,
       'iconColor': iconColor?.value,
       'tags': tags,
@@ -130,7 +126,7 @@ class GoodsItem {
     return GoodsItem(
       id: id,
       title: title ?? this.title,
-      imageUrl: imageUrl ?? this._imageUrl, // 使用原始存储的相对路径
+      imageUrl: imageUrl ?? this._imageUrl, // 使用已存储的相对路径
       icon: icon ?? this.icon,
       iconColor: iconColor ?? this.iconColor,
       tags: tags ?? List.from(this.tags),

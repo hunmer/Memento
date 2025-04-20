@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
+import '../utils/image_utils.dart';
 
 class ImagePickerDialog extends StatefulWidget {
   final String? initialUrl;
@@ -89,24 +90,24 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                         source: ImageSource.gallery,
                       );
                       if (image != null) {
-                        // 获取应用文档目录
-                        final appDir = await getApplicationDocumentsDirectory();
-                        final imagesDir = Directory(
-                          path.join(appDir.path, widget.saveDirectory),
-                        );
-                        if (!await imagesDir.exists()) {
-                          await imagesDir.create(recursive: true);
-                        }
+                        // 保存图片并获取相对路径
+                        final relativePath =
+                            await ImageUtils.saveImageToAppDirectory(
+                              File(image.path),
+                              widget.saveDirectory,
+                            );
 
-                        // 生成唯一文件名
-                        final fileName =
-                            '${const Uuid().v4()}${path.extension(image.path)}';
-                        final savedImage = File(
-                          path.join(imagesDir.path, fileName),
+                        // 获取保存后的文件路径
+                        final savedImagePath = await ImageUtils.getAbsolutePath(
+                          relativePath,
                         );
+                        final savedImage = File(savedImagePath);
 
-                        // 复制图片到应用目录
-                        await File(image.path).copy(savedImage.path);
+                        // 确认文件是否成功保存
+                        final fileExists = await savedImage.exists();
+                        debugPrint(
+                          '图片保存路径: $savedImagePath, 文件是否存在: $fileExists',
+                        );
 
                         // 读取图片字节数据
                         final bytes = await File(image.path).readAsBytes();
@@ -119,11 +120,10 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                             savedImage.path,
                           );
                         } else {
-                          // 直接返回本地文件路径和字节数据
-                          Navigator.of(context).pop({
-                            'url': 'file://${savedImage.path}',
-                            'bytes': bytes,
-                          });
+                          // 返回相对路径和字节数据
+                          Navigator.of(
+                            context,
+                          ).pop({'url': relativePath, 'bytes': bytes});
                         }
                       }
                     } catch (e) {
@@ -147,24 +147,24 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                         source: ImageSource.camera,
                       );
                       if (photo != null) {
-                        // 获取应用文档目录
-                        final appDir = await getApplicationDocumentsDirectory();
-                        final imagesDir = Directory(
-                          path.join(appDir.path, widget.saveDirectory),
-                        );
-                        if (!await imagesDir.exists()) {
-                          await imagesDir.create(recursive: true);
-                        }
+                        // 保存图片并获取相对路径
+                        final relativePath =
+                            await ImageUtils.saveImageToAppDirectory(
+                              File(photo.path),
+                              widget.saveDirectory,
+                            );
 
-                        // 生成唯一文件名
-                        final fileName =
-                            '${const Uuid().v4()}${path.extension(photo.path)}';
-                        final savedImage = File(
-                          path.join(imagesDir.path, fileName),
+                        // 获取保存后的文件路径
+                        final savedImagePath = await ImageUtils.getAbsolutePath(
+                          relativePath,
                         );
+                        final savedImage = File(savedImagePath);
 
-                        // 复制图片到应用目录
-                        await File(photo.path).copy(savedImage.path);
+                        // 确认文件是否成功保存
+                        final fileExists = await savedImage.exists();
+                        debugPrint(
+                          '图片保存路径: $savedImagePath, 文件是否存在: $fileExists',
+                        );
 
                         // 读取图片字节数据
                         final bytes = await File(photo.path).readAsBytes();
@@ -177,11 +177,10 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                             savedImage.path,
                           );
                         } else {
-                          // 直接返回本地文件路径和字节数据
-                          Navigator.of(context).pop({
-                            'url': 'file://${savedImage.path}',
-                            'bytes': bytes,
-                          });
+                          // 返回相对路径和字节数据
+                          Navigator.of(
+                            context,
+                          ).pop({'url': relativePath, 'bytes': bytes});
                         }
                       }
                     } catch (e) {
@@ -264,30 +263,18 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                   await originalFile.delete();
                                 }
 
-                                // 保存裁剪后的图片
-                                final appDir =
-                                    await getApplicationDocumentsDirectory();
-                                final imagesDir = Directory(
-                                  path.join(appDir.path, widget.saveDirectory),
-                                );
-                                if (!await imagesDir.exists()) {
-                                  await imagesDir.create(recursive: true);
-                                }
-
-                                // 生成新的文件名
-                                final fileName = '${const Uuid().v4()}.jpg';
-                                final savedImage = File(
-                                  path.join(imagesDir.path, fileName),
-                                );
-
-                                // 写入裁剪后的图片数据
-                                await savedImage.writeAsBytes(croppedImage);
+                                // 保存裁剪后的图片并获取相对路径
+                                final relativePath =
+                                    await ImageUtils.saveBytesToAppDirectory(
+                                      croppedImage,
+                                      widget.saveDirectory,
+                                    );
 
                                 // 返回新的文件路径和字节数据
                                 if (context.mounted) {
                                   Navigator.of(context).pop();
                                   Navigator.of(context).pop({
-                                    'url': 'file://${savedImage.path}',
+                                    'url': relativePath,
                                     'bytes': croppedImage,
                                   });
                                 }
@@ -314,12 +301,17 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           TextButton(
-                            onPressed: () {
+                            onPressed: () async {
                               Navigator.of(context).pop();
-                              Navigator.of(context).pop({
-                                'url': 'file://$originalImagePath',
-                                'bytes': imageBytes,
-                              });
+                              // 获取原始图片的相对路径
+                              final appDir =
+                                  await getApplicationDocumentsDirectory();
+                              final relativePath =
+                                  './${widget.saveDirectory}/${path.basename(originalImagePath)}';
+
+                              Navigator.of(
+                                context,
+                              ).pop({'url': relativePath, 'bytes': imageBytes});
                             },
                             child: const Text('取消'),
                           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:crop_your_image/crop_your_image.dart';
 import 'dart:io';
 import 'dart:typed_data';
@@ -7,7 +8,9 @@ import '../../../../../widgets/image_picker_dialog.dart';
 import '../tag_input_field.dart';
 import '../custom_fields_list.dart';
 import '../controllers/form_controller.dart';
-import '../utils/image_utils.dart';
+import '../../../../../utils/image_utils.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class BasicInfoTab extends StatelessWidget {
   final GoodsItemFormController controller;
@@ -261,6 +264,36 @@ class BasicInfoTab extends StatelessWidget {
   }
 
   Widget _buildImage() {
+    final imagePath = controller.imagePath;
+    if (imagePath == null) {
+      return const Icon(Icons.broken_image);
+    }
+
+    // 处理网络图片
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder:
+            (context, error, stackTrace) => const Icon(Icons.broken_image),
+      );
+    }
+
+    // 处理本地图片，使用 ImageUtils 获取绝对路径
+    return FutureBuilder<String>(
+      future: ImageUtils.getAbsolutePath(imagePath),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          return Image.file(
+            File(snapshot.data!),
+            fit: BoxFit.cover,
+            errorBuilder:
+                (context, error, stackTrace) => const Icon(Icons.broken_image),
+          );
+        }
+        return const Icon(Icons.broken_image);
+      },
+    );
     if (controller.imagePath == null) return const SizedBox();
 
     if (controller.imagePath!.startsWith('http://') ||
@@ -280,48 +313,50 @@ class BasicInfoTab extends StatelessWidget {
         },
       );
     } else {
-      // 本地图片：移除 file:// 前缀（如果存在）
-      final path =
-          controller.imagePath!.startsWith('file://')
-              ? controller.imagePath!.replaceFirst('file://', '')
-              : controller.imagePath!;
-      final file = File(path);
-      if (file.existsSync()) {
-        return Image.file(file, width: 60, height: 60, fit: BoxFit.cover);
-      }
+      // 本地图片
+      return FutureBuilder<String>(
+        future: ImageUtils.getAbsolutePath(controller.imagePath),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            final file = File(snapshot.data!);
+            if (file.existsSync()) {
+              return Image.file(file, width: 60, height: 60, fit: BoxFit.cover);
+            }
+          }
+          return Icon(
+            Icons.broken_image,
+            size: 30,
+            color: Colors.grey.shade600,
+          );
+        },
+      );
     }
-
-    return Icon(Icons.broken_image, size: 30, color: Colors.grey.shade600);
   }
 
   Future<void> _pickAndCropImage(BuildContext context) async {
     try {
+      // 弹出图片选择对话框
       final result = await showDialog<Map<String, dynamic>>(
         context: context,
         builder:
             (context) => ImagePickerDialog(
               initialUrl: controller.imagePath,
-              saveDirectory: 'app_data/goods_images',
-              enableCrop: true, // 启用裁剪功能
-              cropAspectRatio: 1, // 设置裁剪比例为1:1
+              saveDirectory: 'goods_images', // 使用专门的目录存储商品图片
+              enableCrop: true,
+              cropAspectRatio: 1, // 使用1:1的裁剪比例
             ),
       );
 
       if (result != null && result['url'] != null) {
         final path = result['url'];
         if (path.isNotEmpty) {
-          // 删除旧图片（移除 file:// 前缀后再删除）
+          // 删除旧图片
           if (controller.imagePath != null) {
-            final oldPath =
-                controller.imagePath!.startsWith('file://')
-                    ? controller.imagePath!.replaceFirst('file://', '')
-                    : controller.imagePath!;
-            await ImageUtils.deleteImage(oldPath);
+            await ImageUtils.deleteImage(controller.imagePath);
           }
 
-          // 更新图片路径（保留 file:// 前缀）
-          controller.imagePath =
-              path.startsWith('file://') ? path : 'file://$path';
+          // 更新图片路径
+          controller.imagePath = path;
           onStateChanged();
         }
       }

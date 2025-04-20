@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../models/warehouse.dart';
 import '../../../widgets/circle_icon_picker.dart';
 import '../../../widgets/image_picker_dialog.dart';
+import '../../../utils/image_utils.dart';
 
 class WarehouseForm extends StatefulWidget {
   final Warehouse? warehouse;
@@ -42,22 +43,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
       return const Icon(Icons.image, size: 40);
     }
 
-    if (_imageUrl!.startsWith('file://')) {
-      final path = _imageUrl!.replaceFirst('file://', '');
-      final file = File(path);
-      if (file.existsSync()) {
-        return Image.file(
-          file,
-          fit: BoxFit.cover,
-          errorBuilder:
-              (context, error, stackTrace) =>
-                  const Icon(Icons.broken_image, size: 40),
-        );
-      } else {
-        return const Icon(Icons.broken_image, size: 40);
-      }
-    } else if (_imageUrl!.startsWith('http://') ||
-        _imageUrl!.startsWith('https://')) {
+    if (_imageUrl!.startsWith('http://') || _imageUrl!.startsWith('https://')) {
       return Image.network(
         _imageUrl!,
         fit: BoxFit.cover,
@@ -65,21 +51,26 @@ class _WarehouseFormState extends State<WarehouseForm> {
             (context, error, stackTrace) =>
                 const Icon(Icons.broken_image, size: 40),
       );
-    } else {
-      // 尝试作为本地路径处理
-      final file = File(_imageUrl!);
-      if (file.existsSync()) {
-        return Image.file(
-          file,
-          fit: BoxFit.cover,
-          errorBuilder:
-              (context, error, stackTrace) =>
-                  const Icon(Icons.broken_image, size: 40),
-        );
-      } else {
-        return const Icon(Icons.broken_image, size: 40);
-      }
     }
+
+    return FutureBuilder<String>(
+      future: ImageUtils.getAbsolutePath(_imageUrl),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          final file = File(snapshot.data!);
+          if (file.existsSync()) {
+            return Image.file(
+              file,
+              fit: BoxFit.cover,
+              errorBuilder:
+                  (context, error, stackTrace) =>
+                      const Icon(Icons.broken_image, size: 40),
+            );
+          }
+        }
+        return const Icon(Icons.broken_image, size: 40);
+      },
+    );
   }
 
   @override
@@ -123,9 +114,9 @@ class _WarehouseFormState extends State<WarehouseForm> {
                         builder:
                             (context) => ImagePickerDialog(
                               initialUrl: _imageUrl,
-                              saveDirectory: 'app_data/warehouse_images',
+                              saveDirectory: 'warehouse_images',
                               enableCrop: true, // 启用裁切功能
-                              cropAspectRatio: 16 / 9, // 设置裁切比例为16:9，适合仓库展示
+                              cropAspectRatio: 1 / 1,
                             ),
                       );
                       if (result != null) {
@@ -193,9 +184,9 @@ class _WarehouseFormState extends State<WarehouseForm> {
                         icon: _icon,
                         iconColor: _iconColor,
                         imageUrl: _imageUrl,
-                        items: widget.warehouse?.items ?? [],
                       );
                       widget.onSave(warehouse);
+                      Navigator.of(context).pop();
                     }
                   },
                   child: const Text('保存'),

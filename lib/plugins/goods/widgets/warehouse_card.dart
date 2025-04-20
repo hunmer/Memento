@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/warehouse.dart';
 import 'package:intl/intl.dart';
+import '../../../utils/image_utils.dart';
 
 class WarehouseCard extends StatelessWidget {
   final Warehouse warehouse;
@@ -96,27 +97,47 @@ class WarehouseCard extends StatelessWidget {
   }
 
   Widget _buildCoverImage() {
-    if (warehouse.imageUrl != null && warehouse.imageUrl!.isNotEmpty) {
-      Widget imageWidget;
-
-      if (warehouse.imageUrl!.startsWith('file://')) {
-        imageWidget = Image.file(
-          File(warehouse.imageUrl!.replaceFirst('file://', '')),
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _buildDefaultCover(),
-        );
-      } else {
-        imageWidget = Image.network(
-          warehouse.imageUrl!,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _buildDefaultCover(),
-        );
-      }
-
-      return SizedBox(height: double.infinity, child: imageWidget);
+    if (warehouse.imageUrl == null || warehouse.imageUrl!.isEmpty) {
+      return _buildDefaultCover();
     }
 
-    return _buildDefaultCover();
+    if (warehouse.imageUrl!.startsWith('http://') ||
+        warehouse.imageUrl!.startsWith('https://')) {
+      return SizedBox(
+        height: double.infinity,
+        child: Image.network(
+          warehouse.imageUrl!,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('Error loading network image: $error');
+            return _buildDefaultCover();
+          },
+        ),
+      );
+    }
+
+    return FutureBuilder<String>(
+      future: ImageUtils.getAbsolutePath(warehouse.imageUrl),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          final file = File(snapshot.data!);
+          if (file.existsSync()) {
+            return SizedBox(
+              height: double.infinity,
+              child: Image.file(
+                file,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Error loading local image: $error');
+                  return _buildDefaultCover();
+                },
+              ),
+            );
+          }
+        }
+        return _buildDefaultCover();
+      },
+    );
   }
 
   Widget _buildDefaultCover() {
