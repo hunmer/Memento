@@ -59,16 +59,23 @@ class FileMessageWidget extends StatelessWidget {
   }
 
   Future<void> _openFile() async {
-    final file = File(fileMessage.filePath);
-    if (await file.exists()) {
-      final uri = Uri.file(file.path);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
+    try {
+      // 获取文件的绝对路径
+      final absolutePath = await fileMessage.getAbsolutePath();
+      final file = File(absolutePath);
+
+      if (await file.exists()) {
+        final uri = Uri.file(file.path);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.platformDefault);
+        } else {
+          debugPrint('无法打开文件: ${file.path}');
+        }
       } else {
-        debugPrint('无法打开文件: ${file.path}');
+        debugPrint('文件不存在: ${file.path}');
       }
-    } else {
-      debugPrint('文件不存在: ${file.path}');
+    } catch (e) {
+      debugPrint('打开文件时发生错误: $e');
     }
   }
 
@@ -79,9 +86,10 @@ class FileMessageWidget extends StatelessWidget {
         maxWidth: MediaQuery.of(context).size.width * 0.7,
       ),
       decoration: BoxDecoration(
-        color: isOutgoing
-            ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-            : Theme.of(context).cardColor,
+        color:
+            isOutgoing
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).dividerColor.withOpacity(0.1),

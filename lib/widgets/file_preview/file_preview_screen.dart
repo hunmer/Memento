@@ -64,20 +64,34 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
       _absoluteFilePath = path.normalize(resolvedPath);
 
       // 验证文件是否存在
-      // 验证文件是否存在
       final file = File(_absoluteFilePath);
-      if (!await file.exists()) {
+      final fileExists = await file.exists();
+      print('文件路径: $resolvedPath');
+      if (!fileExists) {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('文件不存在或无法访问')));
+          // 清空文件路径，这样 _buildPreviewContent 会显示错误界面
+          setState(() {
+            _absoluteFilePath = '';
+          });
         }
+      } else {
+        // 文件存在，更新状态
+        setState(() {
+          _absoluteFilePath = file.path;
+        });
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('文件路径解析错误: $e')));
+        // 出错时也清空文件路径
+        setState(() {
+          _absoluteFilePath = '';
+        });
       }
     } finally {
       if (mounted) {
@@ -173,7 +187,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_absoluteFilePath.isEmpty) {
+    if (_absoluteFilePath.isEmpty || !File(_absoluteFilePath).existsSync()) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -189,6 +203,12 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
             Text(
               '文件路径解析失败或文件不存在',
               style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '文件路径: ${_absoluteFilePath.isEmpty ? "未设置" : _absoluteFilePath}',
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
             ),
           ],
         ),

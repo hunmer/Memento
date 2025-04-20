@@ -28,11 +28,25 @@ class PathUtils {
   /// [relativePath] 相对路径
   /// 返回绝对路径
   static Future<String> toAbsolutePath(String? relativePath) async {
-    if (relativePath == null || !relativePath.startsWith('./')) {
-      return relativePath ?? '';
+    if (relativePath == null || relativePath.isEmpty) {
+      return '';
     }
+
+    // 如果已经是绝对路径，直接返回
+    if (path.isAbsolute(relativePath)) {
+      return relativePath;
+    }
+
     final appDir = await getApplicationDocumentsDirectory();
-    return path.join(appDir.path, 'app_data', relativePath.substring(2));
+
+    // 移除开头的 './'（如果存在）
+    final normalizedPath =
+        relativePath.startsWith('./')
+            ? relativePath.substring(2)
+            : relativePath;
+
+    // 直接拼接路径，不添加 'app_data' 前缀
+    return path.join(appDir.path, normalizedPath);
   }
 }
 

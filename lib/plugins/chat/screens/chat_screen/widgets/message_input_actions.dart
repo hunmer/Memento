@@ -7,6 +7,7 @@ import '../../../models/message.dart';
 import 'package:path/path.dart' as path;
 import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
+import '../../../../../utils/image_utils.dart'; // 导入 PathUtils 类
 
 class MessageInputAction {
   final String title;
@@ -191,13 +192,14 @@ List<MessageInputAction> getDefaultMessageInputActions(
             final fileContent =
                 '📎 ${fileMessage.fileName} (${fileMessage.formattedSize})';
 
-            // 创建文件元数据
+            // 创建文件元数据，使用相对路径
             final fileMetadata = {
               Message.metadataKeyFileInfo: {
                 'id': fileMessage.id,
                 'fileName': fileMessage.fileName,
                 'originalFileName': fileMessage.originalFileName,
-                'filePath': fileMessage.filePath,
+                'filePath':
+                    fileMessage.filePath, // FileService.pickFile() 已经返回相对路径
                 'fileSize': fileMessage.fileSize,
                 'extension': fileMessage.extension,
                 'mimeType': fileMessage.mimeType,
@@ -245,8 +247,11 @@ List<MessageInputAction> getDefaultMessageInputActions(
 
             // 保存图片到应用目录
             final savedFile = await fileService.saveImage(imageFile);
+            // 获取相对路径
+            final relativePath = await PathUtils.toRelativePath(savedFile.path);
             final fileMessage = await FileMessage.fromFile(
               savedFile,
+              relativePath: relativePath,
               originalFileName: originalFileName,
             );
             // 调用回调函数发送图片消息
@@ -322,8 +327,11 @@ List<MessageInputAction> getDefaultMessageInputActions(
 
             // 保存视频到应用目录
             final savedFile = await fileService.saveVideo(videoFile);
+            // 获取相对路径
+            final relativePath = await PathUtils.toRelativePath(savedFile.path);
             final fileMessage = await FileMessage.fromFile(
               savedFile,
+              relativePath: relativePath,
               originalFileName: originalFileName,
             );
             logger.info('保存视频文件: ${savedFile.path}');

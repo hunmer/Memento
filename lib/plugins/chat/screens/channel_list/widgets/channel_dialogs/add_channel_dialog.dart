@@ -30,6 +30,21 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const SizedBox(height: 16),
+              CircleIconPicker(
+                currentIcon: _selectedIcon,
+                backgroundColor: _selectedColor,
+                onIconSelected: (icon) {
+                  setState(() {
+                    _selectedIcon = icon;
+                  });
+                },
+                onColorSelected: (color) {
+                  setState(() {
+                    _selectedColor = color;
+                  });
+                },
+              ),
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(labelText: 'Channel Name'),
@@ -46,21 +61,6 @@ class _AddChannelDialogState extends State<AddChannelDialog> {
                 decoration: const InputDecoration(
                   labelText: 'Channel Group (Optional)',
                 ),
-              ),
-              const SizedBox(height: 16),
-              CircleIconPicker(
-                currentIcon: _selectedIcon,
-                backgroundColor: _selectedColor,
-                onIconSelected: (icon) {
-                  setState(() {
-                    _selectedIcon = icon;
-                  });
-                },
-                onColorSelected: (color) {
-                  setState(() {
-                    _selectedColor = color;
-                  });
-                },
               ),
             ],
           ),
