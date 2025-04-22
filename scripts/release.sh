@@ -92,44 +92,6 @@ fi
 echo -e "${YELLOW}Creating GitHub Release...${NC}"
 RELEASE_NOTES="release_notes.md"
 
-# 生成发布说明
-cat > $RELEASE_NOTES << EOL
-# Memento $VERSION
-
-## 构建信息
-- 构建时间: $(date)
-- Flutter 版本: $(flutter --version | head -n 1)
-
-## 下载
-EOL
-
-# 添加可用的下载链接
-for file in $OUTPUT_DIR/*; do
-    if [ -f "$file" ]; then
-        filename=$(basename "$file")
-        case "$filename" in
-            *web.zip)
-                echo "- 🌐 Web: $filename" >> $RELEASE_NOTES
-                ;;
-            *ios.ipa)
-                echo "- 🍎 iOS: $filename" >> $RELEASE_NOTES
-                ;;
-            *android.apk)
-                echo "- 📱 Android: $filename" >> $RELEASE_NOTES
-                ;;
-            *.dmg)
-                echo "- 🖥️ macOS: $filename" >> $RELEASE_NOTES
-                ;;
-            *linux.tar.gz)
-                echo "- 🐧 Linux: $filename" >> $RELEASE_NOTES
-                ;;
-            *windows.zip)
-                echo "- 🪟 Windows: $filename" >> $RELEASE_NOTES
-                ;;
-        esac
-    fi
-done
-
 # 创建 GitHub Release
 echo -e "${YELLOW}Creating GitHub Release for $GITHUB_USER/$GITHUB_REPO...${NC}"
 if ! gh release create "v$VERSION" --repo "$GITHUB_USER/$GITHUB_REPO" --title "Memento v$VERSION" --notes-file $RELEASE_NOTES; then

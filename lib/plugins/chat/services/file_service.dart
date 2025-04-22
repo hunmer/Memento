@@ -19,7 +19,7 @@ class FileService {
   Future<Directory> get _appFilesDir async {
     final appDir = await getApplicationDocumentsDirectory();
     // 确保使用相对路径
-    final filesDir = Directory('chat_files');
+    final filesDir = Directory('app_data/chat/chat_files');
     final absoluteFilesDir = Directory('${appDir.path}/${filesDir.path}');
     if (!await absoluteFilesDir.exists()) {
       await absoluteFilesDir.create(recursive: true);
@@ -41,12 +41,9 @@ class FileService {
       final originalFileName = platformFile.name;
 
       final saveResult = await _saveFile(file);
-      // 直接构造相对路径，不依赖于 PathUtils
-      final relativePath = './chat_files/${saveResult.systemFileName}';
 
       return FileMessage.fromFile(
         saveResult.savedFile,
-        relativePath: relativePath,
         systemFileName: saveResult.systemFileName,
         originalFileName: originalFileName, // 传递原始文件名
       );

@@ -16,18 +16,16 @@ Future<void> handleLocalVideoSelection({
   required OnSendMessage? onSendMessage,
 }) async {
   final scaffoldMessenger = ScaffoldMessenger.of(context);
-  
+
   try {
     debugPrint('开始选择本地视频...');
     // 使用ImagePicker从相册选择视频
     final ImagePicker picker = ImagePicker();
-    final XFile? video = await picker.pickVideo(
-      source: ImageSource.gallery,
-    );
+    final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
 
     if (video != null) {
       debugPrint('本地视频选择完成: ${video.path}');
-      
+
       try {
         // 将视频转换为文件
         final File videoFile = File(video.path);
@@ -51,16 +49,9 @@ Future<void> handleLocalVideoSelection({
         final savedFile = await fileService.saveVideo(videoFile);
         debugPrint('视频已保存: ${savedFile.path}');
 
-        // 获取相对路径
-        final relativePath = await PathUtils.toRelativePath(
-          savedFile.path,
-        );
-        debugPrint('相对路径: $relativePath');
-
         debugPrint('创建文件消息...');
         final fileMessage = await FileMessage.fromFile(
           savedFile,
-          relativePath: relativePath,
           originalFileName: originalFileName,
         );
         debugPrint('文件消息已创建: ${fileMessage.id}');
@@ -86,8 +77,7 @@ Future<void> handleLocalVideoSelection({
             'filePath': fileMessage.filePath,
             'fileSize': fileMessage.fileSize,
             'extension': fileMessage.extension,
-            'mimeType':
-                'video/${fileMessage.extension.replaceAll('.', '')}',
+            'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
             'isVideo': true,
           };
 

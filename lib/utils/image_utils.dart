@@ -45,8 +45,13 @@ class PathUtils {
             ? relativePath.substring(2)
             : relativePath;
 
-    // 直接拼接路径，不添加 'app_data' 前缀
-    return path.join(appDir.path, normalizedPath);
+    // 检查路径是否已经包含 app_data
+    if (normalizedPath.startsWith('app_data/')) {
+      return path.join(appDir.path, normalizedPath);
+    } else {
+      // 添加 app_data 前缀
+      return path.join(appDir.path, 'app_data', normalizedPath);
+    }
   }
 }
 
@@ -124,11 +129,31 @@ class ImageUtils {
   /// 获取图片的绝对路径
   /// [relativePath] 相对路径
   static Future<String> getAbsolutePath(String? relativePath) async {
-    if (relativePath == null || !relativePath.startsWith('./')) {
-      return relativePath ?? '';
+    if (relativePath == null || relativePath.isEmpty) {
+      return '';
     }
+
+    // 如果已经是绝对路径，直接返回
+    if (path.isAbsolute(relativePath)) {
+      return relativePath;
+    }
+
+    if (!relativePath.startsWith('./')) {
+      // 不是相对路径格式，可能是旧数据，尝试处理
+      final appDir = await getApplicationDocumentsDirectory();
+      return path.join(appDir.path, relativePath);
+    }
+
     final appDir = await getApplicationDocumentsDirectory();
-    return path.join(appDir.path, 'app_data', relativePath.substring(2));
+    final pathWithoutPrefix = relativePath.substring(2); // 移除 './' 前缀
+
+    // 检查路径是否已经包含 app_data
+    if (pathWithoutPrefix.startsWith('app_data/')) {
+      return path.join(appDir.path, pathWithoutPrefix);
+    } else {
+      // 添加 app_data 前缀
+      return path.join(appDir.path, 'app_data', pathWithoutPrefix);
+    }
   }
 
   /// 删除指定的图片文件

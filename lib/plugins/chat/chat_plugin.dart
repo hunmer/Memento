@@ -254,6 +254,7 @@ class ChatPlugin extends BasePlugin {
                       (m) => MessageSerializer.fromJson(
                         m as Map<String, dynamic>,
                         members,
+                        storage,
                       ),
                     )
                     .toList();
@@ -327,8 +328,11 @@ class ChatPlugin extends BasePlugin {
   // 保存消息
   Future<void> saveMessages(String channelId, List<Message> messages) async {
     // 保存消息
+    final messageJsonFutures = messages.map((m) => MessageSerializer.toJson(m));
+    final messageJsonList = await Future.wait(messageJsonFutures);
+
     await storage.write('chat/messages/$channelId', {
-      'messages': messages.map((m) => MessageSerializer.toJson(m)).toList(),
+      'messages': messageJsonList,
     });
 
     // 更新频道的最后一条消息
@@ -578,9 +582,7 @@ class ChatPlugin extends BasePlugin {
             // 频道列表标签页
             ChannelListScreen(channels: _channels, chatPlugin: this),
             // 时间线标签页
-            TimelineScreen(
-              chatPlugin: this,
-            ),
+            TimelineScreen(chatPlugin: this),
           ],
         ),
         bottomNavigationBar: TabBar(

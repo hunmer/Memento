@@ -86,7 +86,6 @@ class FileMessage {
   // 从文件创建FileMessage
   static Future<FileMessage> fromFile(
     File file, {
-    String? relativePath,
     String? systemFileName,
     String? originalFileName,
   }) async {
@@ -101,7 +100,7 @@ class FileMessage {
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       fileName: systemFileName ?? path.basename(file.path), // 系统文件名（UUID）
       originalFileName: fileName, // 保存原始文件名
-      filePath: relativePath ?? file.path, // 使用相对路径
+      filePath: file.path,
       fileSize: stats.size,
       timestamp: DateTime.now(),
       mimeType: mimeType,

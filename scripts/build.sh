@@ -102,8 +102,8 @@ flutter pub get
 # 构建 iOS
 if is_platform_enabled "ios"; then
     echo -e "${YELLOW}Building iOS IPA...${NC}"
-    # 添加--tree-shake-icons=false来避免图标树摇动错误
-    flutter build ios --release --no-codesign --tree-shake-icons
+    # 完全禁用图标树摇动，并添加额外的编译选项
+    flutter build ios --release --no-codesign --no-tree-shake-icons --no-pub
     
     # 创建 Payload 目录
     mkdir -p Payload
@@ -127,7 +127,9 @@ if is_platform_enabled "android"; then
     KEY_ALIAS="upload"
     STORE_PASSWORD="android"
     KEY_PASSWORD="android"
-    
+
+    # 定义支持的 Android 架构
+    ANDROID_ARCHS=("arm64-v8a" "armeabi-v7a" "x86_64" "x86")
     # 检查密钥库是否存在
     if [ ! -f "$KEYSTORE_PATH" ]; then
         echo -e "${YELLOW}Creating new keystore...${NC}"
@@ -156,15 +158,45 @@ keyAlias=$KEY_ALIAS
 storeFile=upload-keystore.jks
 EOF
     
-    flutter build apk --release --no-tree-shake-icons
+    # 为每个架构构建单独的APK
+    for arch in "${ANDROID_ARCHS[@]}"; do
+        echo -e "${YELLOW}Building Android APK for $arch...${NC}"
+        flutter build apk --release --no-tree-shake-icons --target-platform=android-arm64 --split-per-abi
+    done
+
+    # 移动并重命名生成的APK文件
     mkdir -p "$OUTPUT_DIR"
-    if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
-        cp "build/app/outputs/flutter-apk/app-release.apk" "$OUTPUT_DIR/memento-$VERSION-android.apk"
-        echo -e "${GREEN}Successfully built Android APK: $OUTPUT_DIR/memento-$VERSION-android.apk${NC}"
-    else
-        echo -e "${RED}Error: Android APK build failed or file not found${NC}"
-        exit 1
+    
+    # 检查并移动每个架构的APK
+    if [ -f "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" ]; then
+        cp "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" "$OUTPUT_DIR/memento-$VERSION-android-arm64-v8a.apk"
+        echo -e "${GREEN}Successfully built Android APK (arm64-v8a): $OUTPUT_DIR/memento-$VERSION-android-arm64-v8a.apk${NC}"
     fi
+    
+    if [ -f "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk" ]; then
+        cp "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk" "$OUTPUT_DIR/memento-$VERSION-android-armeabi-v7a.apk"
+        echo -e "${GREEN}Successfully built Android APK (armeabi-v7a): $OUTPUT_DIR/memento-$VERSION-android-armeabi-v7a.apk${NC}"
+    fi
+    
+    if [ -f "build/app/outputs/flutter-apk/app-x86_64-release.apk" ]; then
+        cp "build/app/outputs/flutter-apk/app-x86_64-release.apk" "$OUTPUT_DIR/memento-$VERSION-android-x86_64.apk"
+        echo -e "${GREEN}Successfully built Android APK (x86_64): $OUTPUT_DIR/memento-$VERSION-android-x86_64.apk${NC}"
+    fi
+    
+    if [ -f "build/app/outputs/flutter-apk/app-x86-release.apk" ]; then
+        cp "build/app/outputs/flutter-apk/app-x86-release.apk" "$OUTPUT_DIR/memento-$VERSION-android-x86.apk"
+        echo -e "${GREEN}Successfully built Android APK (x86): $OUTPUT_DIR/memento-$VERSION-android-x86.apk${NC}"
+    fi
+
+    # 构建通用APK（包含所有架构）
+    # echo -e "${YELLOW}Building universal Android APK...${NC}"
+    # flutter build apk --release --no-tree-shake-icons
+    # if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
+    #     cp "build/app/outputs/flutter-apk/app-release.apk" "$OUTPUT_DIR/memento-$VERSION-android-universal.apk"
+    #     echo -e "${GREEN}Successfully built universal Android APK: $OUTPUT_DIR/memento-$VERSION-android-universal.apk${NC}"
+    # else
+    #     echo -e "${RED}Error: Universal Android APK build failed or file not found${NC}"
+    # fi
 else
     echo -e "${YELLOW}Skipping Android build (not in platform list)${NC}"
 fi
@@ -184,98 +216,58 @@ else
     echo -e "${YELLOW}Skipping Web build (not in platform list)${NC}"
 fi
 
-# 检查是否在 macOS 上构建 iOS 和 macOS
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # 构建 iOS
-    if is_platform_enabled "ios"; then
-        echo -e "${YELLOW}Building iOS...${NC}"
+
+# 构建 macOS
+if is_platform_enabled "macos"; then
+    echo -e "${YELLOW}Building macOS...${NC}"
+    flutter build macos --release --no-tree-shake-icons
+    
+    # 确保输出目录存在
+    mkdir -p "$OUTPUT_DIR"
+    
+    # 检查构建目录
+    BUILD_DIR="build/macos/Build/Products/Release"
+    if [ -d "$BUILD_DIR/Memento.app" ] || [ -d "$BUILD_DIR/Runner.app" ]; then
+        # 确定应用名称
+        APP_NAME="Runner.app"
+        if [ -d "$BUILD_DIR/Memento.app" ]; then
+            APP_NAME="Memento.app"
+        fi
         
-        # 检查是否有必要的证书和配置文件
-        if [ -z "$APPLE_DEVELOPMENT_TEAM_ID" ] || [ -z "$PROVISIONING_PROFILE_NAME" ]; then
-            echo -e "${RED}Error: APPLE_DEVELOPMENT_TEAM_ID and PROVISIONING_PROFILE_NAME must be set for iOS builds${NC}"
+        echo -e "${YELLOW}Packaging $APP_NAME into DMG...${NC}"
+        
+        # 检查 create-dmg 是否安装
+        if ! command -v create-dmg &> /dev/null; then
+            echo -e "${RED}Error: create-dmg is not installed. Please install it using 'brew install create-dmg'${NC}"
             exit 1
         fi
-
-        # 使用xcodebuild构建和打包
-        xcodebuild -workspace ios/Runner.xcworkspace \
-                   -scheme Runner \
-                   -configuration Release \
-                   -archivePath build/ios/archive/Runner.xcarchive \
-                   archive \
-                   CODE_SIGN_IDENTITY="iPhone Developer" \
-                   DEVELOPMENT_TEAM="$APPLE_DEVELOPMENT_TEAM_ID" \
-                   PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_NAME"
-
-        # 导出 .ipa 文件
-        xcodebuild -exportArchive \
-                   -archivePath build/ios/archive/Runner.xcarchive \
-                   -exportOptionsPlist ios/ExportOptions.plist \
-                   -exportPath build/ios/ipa
-
-        if [ -f "build/ios/ipa/Runner.ipa" ]; then
-            mkdir -p "$OUTPUT_DIR"
-            mv "build/ios/ipa/Runner.ipa" "$OUTPUT_DIR/apmementop-$VERSION-ios.ipa"
-            echo -e "${GREEN}Successfully built iOS .ipa: $OUTPUT_DIR/memento-$VERSION-ios.ipa${NC}"
+        
+        # 创建 DMG 文件
+        DMG_NAME="memento-$VERSION.dmg"
+        if create-dmg \
+            --volname "Memento" \
+            --volicon "assets/icon/app_icon.icns" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "$APP_NAME" 175 120 \
+            --hide-extension "$APP_NAME" \
+            --app-drop-link 425 120 \
+            "$OUTPUT_DIR/$DMG_NAME" \
+            "$BUILD_DIR/$APP_NAME"; then
+            echo -e "${GREEN}Successfully created macOS DMG: $OUTPUT_DIR/$DMG_NAME${NC}"
         else
-            echo -e "${RED}Error: iOS .ipa build failed${NC}"
+            echo -e "${RED}Error: Failed to create DMG${NC}"
             exit 1
         fi
     else
-        echo -e "${YELLOW}Skipping iOS build (not in platform list)${NC}"
+        echo -e "${RED}Error: macOS build failed or directory not found${NC}"
+        echo -e "${YELLOW}Checking build directory content:${NC}"
+        ls -la "$BUILD_DIR"
+        exit 1
     fi
-
-    # 构建 macOS
-    if is_platform_enabled "macos"; then
-        echo -e "${YELLOW}Building macOS...${NC}"
-        flutter build macos --release --no-tree-shake-icons
-        
-        # 确保输出目录存在
-        mkdir -p "$OUTPUT_DIR"
-        
-        # 检查构建目录
-        BUILD_DIR="build/macos/Build/Products/Release"
-        if [ -d "$BUILD_DIR/Memento.app" ] || [ -d "$BUILD_DIR/Runner.app" ]; then
-            # 确定应用名称
-            APP_NAME="Runner.app"
-            if [ -d "$BUILD_DIR/Memento.app" ]; then
-                APP_NAME="Memento.app"
-            fi
-            
-            echo -e "${YELLOW}Packaging $APP_NAME into DMG...${NC}"
-            
-            # 检查 create-dmg 是否安装
-            if ! command -v create-dmg &> /dev/null; then
-                echo -e "${RED}Error: create-dmg is not installed. Please install it using 'brew install create-dmg'${NC}"
-                exit 1
-            fi
-            
-            # 创建 DMG 文件
-            DMG_NAME="memento-$VERSION.dmg"
-            if create-dmg \
-              --volname "Memento" \
-              --volicon "assets/icon/app_icon.icns" \
-              --window-pos 200 120 \
-              --window-size 600 400 \
-              --icon-size 100 \
-              --icon "$APP_NAME" 175 120 \
-              --hide-extension "$APP_NAME" \
-              --app-drop-link 425 120 \
-              "$OUTPUT_DIR/$DMG_NAME" \
-              "$BUILD_DIR/$APP_NAME"; then
-                echo -e "${GREEN}Successfully created macOS DMG: $OUTPUT_DIR/$DMG_NAME${NC}"
-            else
-                echo -e "${RED}Error: Failed to create DMG${NC}"
-                exit 1
-            fi
-        else
-            echo -e "${RED}Error: macOS build failed or directory not found${NC}"
-            echo -e "${YELLOW}Checking build directory content:${NC}"
-            ls -la "$BUILD_DIR"
-            exit 1
-        fi
-    else
-        echo -e "${YELLOW}Skipping macOS build (not in platform list)${NC}"
-    fi
+else
+    echo -e "${YELLOW}Skipping macOS build (not in platform list)${NC}"
 fi
 
 # 检查是否在 Linux 上构建

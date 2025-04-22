@@ -1,7 +1,7 @@
 class GoodsPathConstants {
   // 图片相关路径常量
-  static const String goodsImagesDir = 'goods_images';
-  static const String warehouseImagesDir = 'warehouse_images';
+  static const String goodsImagesDir = 'goods/goods_images';
+  static const String warehouseImagesDir = 'goods/warehouse_images';
   static const String relativePrefix = './';
   static const String appDataDir = 'app_data';
 

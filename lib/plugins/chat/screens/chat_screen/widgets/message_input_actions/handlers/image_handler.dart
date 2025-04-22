@@ -49,14 +49,9 @@ Future<void> handleImageSelection({
         final savedFile = await fileService.saveImage(imageFile);
         debugPrint('图片已保存: ${savedFile.path}');
 
-        // 获取相对路径
-        final relativePath = await PathUtils.toRelativePath(savedFile.path);
-        debugPrint('相对路径: $relativePath');
-
         debugPrint('创建文件消息...');
         final fileMessage = await FileMessage.fromFile(
           savedFile,
-          relativePath: relativePath,
           originalFileName: originalFileName,
         );
         debugPrint('文件消息已创建: ${fileMessage.id}');

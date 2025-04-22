@@ -294,43 +294,6 @@ class BasicInfoTab extends StatelessWidget {
         return const Icon(Icons.broken_image);
       },
     );
-    if (controller.imagePath == null) return const SizedBox();
-
-    if (controller.imagePath!.startsWith('http://') ||
-        controller.imagePath!.startsWith('https://')) {
-      // 网络图片
-      return Image.network(
-        controller.imagePath!,
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Icon(
-            Icons.broken_image,
-            size: 30,
-            color: Colors.grey.shade600,
-          );
-        },
-      );
-    } else {
-      // 本地图片
-      return FutureBuilder<String>(
-        future: ImageUtils.getAbsolutePath(controller.imagePath),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            final file = File(snapshot.data!);
-            if (file.existsSync()) {
-              return Image.file(file, width: 60, height: 60, fit: BoxFit.cover);
-            }
-          }
-          return Icon(
-            Icons.broken_image,
-            size: 30,
-            color: Colors.grey.shade600,
-          );
-        },
-      );
-    }
   }
 
   Future<void> _pickAndCropImage(BuildContext context) async {
@@ -341,7 +304,7 @@ class BasicInfoTab extends StatelessWidget {
         builder:
             (context) => ImagePickerDialog(
               initialUrl: controller.imagePath,
-              saveDirectory: 'goods_images', // 使用专门的目录存储商品图片
+              saveDirectory: 'goods/goods_images', // 使用专门的目录存储商品图片
               enableCrop: true,
               cropAspectRatio: 1, // 使用1:1的裁剪比例
             ),

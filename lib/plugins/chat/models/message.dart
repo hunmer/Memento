@@ -1,7 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import 'user.dart';
+import 'package:flutter/foundation.dart';
+import '../../../core/storage/storage_manager.dart';
 
 enum MessageType { received, sent, file, image, video, audio }
+
+/// 文件路径转换工具类
+class FilePathConverter {
+  /// 将相对路径转换为绝对路径
+  static String toAbsolutePath(String relativePath, StorageManager storage) {
+    if (relativePath.startsWith('./')) {
+      relativePath = relativePath.substring(2);
+    }
+    return path.join(storage.basePath, relativePath);
+  }
+
+  /// 将绝对路径转换为相对路径
+  static String toRelativePath(String absolutePath, StorageManager storage) {
+    final basePath = storage.basePath;
+    if (absolutePath.startsWith(basePath)) {
+      String relativePath = absolutePath.substring(basePath.length + 1);
+      return './$relativePath';
+    }
+    return absolutePath;
+  }
+}
 
 class Message {
   static const String metadataKeyFileInfo = 'fileInfo';
@@ -89,12 +113,45 @@ class Message {
     return 0;
   }
 
-  // 获取音频消息的文件路径
-  String? get audioFilePath {
+  // 获取音频消息的文件路径（返回绝对路径）
+  String? audioFilePathWithStorage(StorageManager storage) {
     final data = audioMetadata;
     if (data != null && data.containsKey('filePath')) {
+      String filePath = data['filePath'] as String;
+      // 如果是相对路径，转换为绝对路径
+      if (filePath.startsWith('./')) {
+        return FilePathConverter.toAbsolutePath(filePath, storage);
+      }
+      return filePath;
+    }
+    return null;
+  }
+
+  // 获取原始文件路径（用于存储，保持相对路径）
+  String? get originalFilePath {
+    final data = metadata?[metadataKeyFileInfo];
+    if (data != null &&
+        data is Map<String, dynamic> &&
+        data.containsKey('filePath')) {
       return data['filePath'] as String;
     }
     return null;
+  }
+
+  // 设置文件路径（自动转换为相对路径进行存储）
+  void setFilePath(String absolutePath, StorageManager storage) {
+    if (metadata == null) {
+      metadata = {};
+    }
+    if (!metadata!.containsKey(metadataKeyFileInfo)) {
+      metadata![metadataKeyFileInfo] = {};
+    }
+
+    final relativePath = FilePathConverter.toRelativePath(
+      absolutePath,
+      storage,
+    );
+    (metadata![metadataKeyFileInfo] as Map<String, dynamic>)['filePath'] =
+        relativePath;
   }
 }

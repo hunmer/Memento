@@ -15,7 +15,7 @@ class AudioMessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 获取音频文件路径
-    final audioPath = message.audioFilePath;
+    final audioPath = message.originalFilePath;
     if (audioPath == null) {
       return const Text('无效的音频消息');
     }
@@ -24,15 +24,14 @@ class AudioMessageBubble extends StatelessWidget {
     final duration = message.audioDuration;
 
     // 设置颜色
-    final primaryColor = isCurrentUser 
-        ? Theme.of(context).primaryColor 
-        : Colors.grey.shade700;
-    final backgroundColor = isCurrentUser
-        ? Theme.of(context).primaryColor.withOpacity(0.1)
-        : Colors.grey.shade200;
-    final progressColor = isCurrentUser
-        ? Theme.of(context).primaryColor
-        : Colors.grey.shade500;
+    final primaryColor =
+        isCurrentUser ? Theme.of(context).primaryColor : Colors.grey.shade700;
+    final backgroundColor =
+        isCurrentUser
+            ? Theme.of(context).primaryColor.withOpacity(0.1)
+            : Colors.grey.shade200;
+    final progressColor =
+        isCurrentUser ? Theme.of(context).primaryColor : Colors.grey.shade500;
 
     return Container(
       constraints: BoxConstraints(
@@ -50,7 +49,7 @@ class AudioMessageBubble extends StatelessWidget {
             backgroundColor: backgroundColor,
             progressColor: progressColor,
           ),
-          
+
           // 如果消息被编辑过，显示编辑标记
           if (message.isEdited)
             Padding(

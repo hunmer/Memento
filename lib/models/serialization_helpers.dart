@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../constants/app_icons.dart';
+import '../core/storage/storage_manager.dart';
 import '../plugins/chat/models/channel.dart';
-import '../plugins/chat/models/message.dart';
+import '../plugins/chat/models/message.dart' hide FilePathConverter;
 import '../plugins/chat/models/user.dart';
+import '../utils/color_extensions.dart';
+import 'file_path_converter.dart';
 
 // 使用 AppIcons 中的预定义图标映射表
 final Map<String, IconData> predefinedIcons = AppIcons.predefinedIcons;
@@ -28,7 +31,29 @@ class UserSerializer {
 
 /// 消息序列化/反序列化
 class MessageSerializer {
-  static Map<String, dynamic> toJson(Message message) {
+  static Future<Map<String, dynamic>> toJson(Message message) async {
+    // 获取原始的 metadata
+    final metadata =
+        message.metadata != null
+            ? Map<String, dynamic>.from(message.metadata!)
+            : <String, dynamic>{};
+
+    // 确保文件路径是相对路径格式
+    if (metadata.containsKey(Message.metadataKeyFileInfo)) {
+      final fileInfo =
+          metadata[Message.metadataKeyFileInfo] as Map<String, dynamic>;
+      if (fileInfo.containsKey('filePath')) {
+        final filePath = fileInfo['filePath'] as String;
+        // 使用传入的StorageManager实例
+        final StorageManager storage = StorageManager();
+        await storage.initialize();
+        // 使用FilePathConverter将绝对路径转换为相对路径
+        fileInfo['filePath'] = FilePathConverter.toRelativePath(
+          filePath,
+          storage,
+        );
+      }
+    }
     return {
       'id': message.id,
       'content': message.content,
@@ -37,14 +62,33 @@ class MessageSerializer {
       'type': message.type.toString().split('.').last,
       'editedAt': message.editedAt?.toIso8601String(),
       'fixedSymbol': message.fixedSymbol,
-      'bubbleColor': message.bubbleColor?.value, // 添加bubbleColor字段
-      'metadata': message.metadata,
+      'bubbleColor': message.bubbleColor?.toHex(),
+      'metadata': metadata,
     };
   }
 
-  static Message fromJson(Map<String, dynamic> json, List<User> users) {
+  static Message fromJson(
+    Map<String, dynamic> json,
+    List<User> users,
+    StorageManager storage,
+  ) {
     // 从消息中直接获取完整的用户信息
     final user = UserSerializer.fromJson(json['user'] as Map<String, dynamic>);
+
+    // 处理 metadata 中的文件路径，转换为绝对路径
+    final metadata = json['metadata'] as Map<String, dynamic>?;
+    if (metadata != null && metadata.containsKey(Message.metadataKeyFileInfo)) {
+      final fileInfo =
+          metadata[Message.metadataKeyFileInfo] as Map<String, dynamic>;
+      if (fileInfo.containsKey('filePath')) {
+        final filePath = fileInfo['filePath'] as String;
+        // 使用FilePathConverter将相对路径转换为绝对路径
+        fileInfo['filePath'] = FilePathConverter.toAbsolutePath(
+          filePath,
+          storage,
+        );
+      }
+    }
 
     return Message(
       id: json['id'] as String,
@@ -60,7 +104,10 @@ class MessageSerializer {
               ? DateTime.parse(json['editedAt'] as String)
               : null,
       fixedSymbol: json['fixedSymbol'] as String?,
-      bubbleColor: json['bubbleColor'] != null ? Color(json['bubbleColor'] as int) : null,
+      bubbleColor:
+          json['bubbleColor'] != null
+              ? HexColor.fromHex(json['bubbleColor'] as String)
+              : null,
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
@@ -76,7 +123,7 @@ class ChannelSerializer {
       'priority': channel.priority,
       'members': channel.members.map((u) => UserSerializer.toJson(u)).toList(),
       'groups': channel.groups,
-      'backgroundColor': channel.backgroundColor.value,
+      'backgroundColor': channel.backgroundColor.toHex(),
       'fixedSymbol': channel.fixedSymbol,
     };
   }
@@ -99,9 +146,10 @@ class ChannelSerializer {
       members: members,
       messages: messages ?? [],
       groups: (json['groups'] as List<dynamic>?)?.cast<String>() ?? [],
-      backgroundColor: Color(
-        json['backgroundColor'] as int? ?? Colors.blue.value,
-      ),
+      backgroundColor:
+          json['backgroundColor'] != null
+              ? HexColor.fromHex(json['backgroundColor'] as String)
+              : Colors.blue,
       fixedSymbol: json['fixedSymbol'] as String?,
     );
   }
@@ -127,17 +175,26 @@ class ChannelSerializer {
 
 /// 消息列表序列化/反序列化
 class MessagesSerializer {
-  static Map<String, dynamic> toJson(List<Message> messages) {
-    return {
-      'messages': messages.map((m) => MessageSerializer.toJson(m)).toList(),
-    };
+  static Future<Map<String, dynamic>> toJson(List<Message> messages) async {
+    final messageJsonList = await Future.wait(
+      messages.map((m) => MessageSerializer.toJson(m)),
+    );
+    return {'messages': messageJsonList};
   }
 
-  static List<Message> fromJson(Map<String, dynamic> json, List<User> users) {
+  static List<Message> fromJson(
+    Map<String, dynamic> json,
+    List<User> users,
+    StorageManager storage,
+  ) {
     final List<dynamic> messagesJson = json['messages'] as List<dynamic>;
     return messagesJson
         .map(
-          (m) => MessageSerializer.fromJson(m as Map<String, dynamic>, users),
+          (m) => MessageSerializer.fromJson(
+            m as Map<String, dynamic>,
+            users,
+            storage,
+          ),
         )
         .toList();
   }

@@ -16,7 +16,7 @@ Future<void> handleVideoSelection({
   required OnSendMessage? onSendMessage,
 }) async {
   final scaffoldMessenger = ScaffoldMessenger.of(context);
-  
+
   // 检查是否在Web平台上
   if (kIsWeb) {
     scaffoldMessenger.showSnackBar(
@@ -28,20 +28,18 @@ Future<void> handleVideoSelection({
     );
     return;
   }
-  
+
   // 检查是否在macOS平台上
   if (Platform.isMacOS) {
     try {
       debugPrint('在macOS上使用文件选择器选择视频...');
       // 在macOS上使用图片选择器从相册选择视频
       final ImagePicker picker = ImagePicker();
-      final XFile? video = await picker.pickVideo(
-        source: ImageSource.gallery,
-      );
-      
+      final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
+
       if (video != null) {
         debugPrint('视频选择完成: ${video.path}');
-        
+
         try {
           // 将视频转换为文件
           final File videoFile = File(video.path);
@@ -65,16 +63,9 @@ Future<void> handleVideoSelection({
           final savedFile = await fileService.saveVideo(videoFile);
           debugPrint('视频已保存: ${savedFile.path}');
 
-          // 获取相对路径
-          final relativePath = await PathUtils.toRelativePath(
-            savedFile.path,
-          );
-          debugPrint('相对路径: $relativePath');
-
           debugPrint('创建文件消息...');
           final fileMessage = await FileMessage.fromFile(
             savedFile,
-            relativePath: relativePath,
             originalFileName: originalFileName,
           );
           debugPrint('文件消息已创建: ${fileMessage.id}');
@@ -100,8 +91,7 @@ Future<void> handleVideoSelection({
               'filePath': fileMessage.filePath,
               'fileSize': fileMessage.fileSize,
               'extension': fileMessage.extension,
-              'mimeType':
-                  'video/${fileMessage.extension.replaceAll('.', '')}',
+              'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
               'isVideo': true,
             };
 
@@ -176,7 +166,7 @@ Future<void> handleVideoSelection({
 
     if (video != null) {
       debugPrint('视频拍摄完成: ${video.path}');
-      
+
       try {
         // 将视频转换为文件
         final File videoFile = File(video.path);
@@ -200,16 +190,9 @@ Future<void> handleVideoSelection({
         final savedFile = await fileService.saveVideo(videoFile);
         debugPrint('视频已保存: ${savedFile.path}');
 
-        // 获取相对路径
-        final relativePath = await PathUtils.toRelativePath(
-          savedFile.path,
-        );
-        debugPrint('相对路径: $relativePath');
-
         debugPrint('创建文件消息...');
         final fileMessage = await FileMessage.fromFile(
           savedFile,
-          relativePath: relativePath,
           originalFileName: originalFileName,
         );
         debugPrint('文件消息已创建: ${fileMessage.id}');
@@ -235,8 +218,7 @@ Future<void> handleVideoSelection({
             'filePath': fileMessage.filePath,
             'fileSize': fileMessage.fileSize,
             'extension': fileMessage.extension,
-            'mimeType':
-                'video/${fileMessage.extension.replaceAll('.', '')}',
+            'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
             'isVideo': true,
           };
 
