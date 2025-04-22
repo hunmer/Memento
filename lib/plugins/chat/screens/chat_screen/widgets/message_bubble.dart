@@ -19,6 +19,7 @@ class MessageBubble extends StatelessWidget {
   final VoidCallback? onAvatarTap;
   final bool showAvatar;
   final String currentUserId;
+  final bool isHighlighted;
 
   const MessageBubble({
     super.key,
@@ -34,6 +35,7 @@ class MessageBubble extends StatelessWidget {
     this.onTap,
     this.onAvatarTap,
     this.showAvatar = true,
+    this.isHighlighted = false,
   });
 
   @override
@@ -46,8 +48,12 @@ class MessageBubble extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.withAlpha(25) : Colors.transparent,
-          border: isSelected ? Border.all(color: Colors.blue, width: 1) : null,
+          color: isHighlighted 
+              ? Colors.yellow.withAlpha(50)
+              : (isSelected ? Colors.blue.withAlpha(25) : Colors.transparent),
+          border: isSelected 
+              ? Border.all(color: Colors.blue, width: 1) 
+              : (isHighlighted ? Border.all(color: Colors.yellow.shade700, width: 1) : null),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
@@ -156,11 +162,12 @@ class MessageBubble extends StatelessWidget {
                                       padding: const EdgeInsets.all(10.0),
                                       decoration: BoxDecoration(
                                         color:
-                                            isCurrentUser
+                                            message.bubbleColor ??
+                                            (isCurrentUser
                                                 ? const Color(
                                                   0xFFD6E4FF,
                                                 ) // 更深的蓝色背景，提高对比度
-                                                : Colors.grey[200],
+                                                : Colors.grey[200]),
                                         borderRadius: BorderRadius.circular(
                                           12.0,
                                         ),

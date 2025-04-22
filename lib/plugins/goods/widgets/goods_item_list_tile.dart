@@ -4,9 +4,15 @@ import '../models/goods_item.dart';
 
 class GoodsItemListTile extends StatefulWidget {
   final GoodsItem item;
+  final String? warehouseTitle;
   final VoidCallback? onTap;
 
-  const GoodsItemListTile({super.key, required this.item, this.onTap});
+  const GoodsItemListTile({
+    super.key,
+    required this.item,
+    this.warehouseTitle,
+    this.onTap,
+  });
 
   @override
   State<GoodsItemListTile> createState() => _GoodsItemListTileState();
@@ -116,17 +122,47 @@ class _GoodsItemListTileState extends State<GoodsItemListTile> {
       );
     }
 
+    // Add warehouse info
+    if (widget.warehouseTitle != null) {
+      if (content.isNotEmpty) {
+        content.add(const SizedBox(height: 4));
+      }
+      content.add(
+        Row(
+          children: [
+            Icon(Icons.warehouse, size: 12, color: Colors.grey[600]),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                widget.warehouseTitle!,
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: Colors.grey[600]),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
     // Add last used date
     if (widget.item.lastUsedDate != null) {
       if (content.isNotEmpty) {
         content.add(const SizedBox(height: 4));
       }
       content.add(
-        Text(
-          '最后使用: ${widget.item.lastUsedDate.toString().split(' ')[0]}',
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+        Row(
+          children: [
+            Icon(Icons.history, size: 12, color: Colors.grey[600]),
+            const SizedBox(width: 4),
+            Text(
+              '最后使用: ${widget.item.lastUsedDate.toString().split(' ')[0]}',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+            ),
+          ],
         ),
       );
     }

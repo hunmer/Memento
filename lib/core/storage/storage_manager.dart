@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show debugPrint;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as io;
+import 'package:path/path.dart' as path;
 
 import 'storage_interface.dart';
 import 'mobile_storage.dart';
@@ -19,8 +20,8 @@ class StorageManager {
   late StorageInterface _storage;
 
   /// 检查文件是否存在
-  Future<bool> _checkFileExists(String path) async {
-    final file = io.File('$_basePath/$path');
+  Future<bool> _checkFileExists(String filePath) async {
+    final file = io.File(path.join(_basePath, filePath));
     return await file.exists();
   }
 
@@ -133,92 +134,100 @@ class StorageManager {
   }
 
   /// 创建目录
-  Future<void> createDirectory(String path) async {
+  Future<void> createDirectory(String dirPath) async {
     await _ensureInitialized();
 
     // Web平台不支持目录创建，直接返回
     if (kIsWeb) {
-      debugPrint('Web平台跳过目录创建: $path');
+      debugPrint('Web平台跳过目录创建: $dirPath');
       return;
     }
 
-    final dirPath = '$_basePath/$path';
-    final directory = io.Directory(dirPath);
+    final fullPath = path.join(_basePath, dirPath);
+    final directory = io.Directory(fullPath);
 
     if (!await directory.exists()) {
-      await directory.create(recursive: true);
+      try {
+        await directory.create(recursive: true);
+        debugPrint('创建目录成功: $fullPath');
+      } catch (e) {
+        debugPrint('创建目录失败: $fullPath - $e');
+        throw Exception('创建目录失败: $fullPath - $e');
+      }
     }
   }
 
   /// 写入字符串
-  Future<void> writeString(String path, String content) async {
+  Future<void> writeString(String filePath, String content) async {
     await _ensureInitialized();
 
     // 更新内存缓存
-    _cache[path] = content;
+    _cache[filePath] = content;
 
     if (kIsWeb) {
       // Web平台使用抽象接口
-      await _storage.saveData(path, content);
+      await _storage.saveData(filePath, content);
     } else {
       // 非Web平台使用文件系统
-      final filePath = '$_basePath/$path';
-      final file = io.File(filePath);
+      final fullPath = path.join(_basePath, filePath);
+      final file = io.File(fullPath);
 
       // 确保目录存在
       final directory = file.parent;
       if (!await directory.exists()) {
-        await directory.create(recursive: true);
+        try {
+          await directory.create(recursive: true);
+        } catch (e) {
+          debugPrint('创建目录失败: ${directory.path} - $e');
+          throw Exception('创建目录失败: ${directory.path} - $e');
+        }
       }
 
-      await file.writeAsString(content);
-
-      // 这里可以添加文件变化监控代码，用于后续同步到WebDAV
-
       try {
-        // 文件写入成功后的处理
+        await file.writeAsString(content);
+        debugPrint('文件写入成功: $fullPath');
       } catch (e) {
-        debugPrint('写入文件失败: $path - $e');
-        // 失败时只保留在缓存中
+        debugPrint('写入文件失败: $fullPath - $e');
+        throw Exception('写入文件失败: $fullPath - $e');
       }
     }
   }
 
   /// 读取字符串
-  Future<String> readString(String path) async {
+  Future<String> readString(String filePath) async {
     await _ensureInitialized();
 
     // 先检查缓存
-    if (_cache.containsKey(path)) {
-      return _cache[path] as String;
+    if (_cache.containsKey(filePath)) {
+      return _cache[filePath] as String;
     }
 
     if (kIsWeb) {
       // Web平台使用抽象接口
-      final content = await _storage.loadData(path);
+      final content = await _storage.loadData(filePath);
       if (content != null) {
-        _cache[path] = content;
+        _cache[filePath] = content;
         return content;
       }
-      throw Exception('文件不存在: $path (Web平台)');
+      throw Exception('文件不存在: $filePath (Web平台)');
     }
 
     // 从本地文件系统读取
     try {
       // 非Web平台读取文件
-      final filePath = '$_basePath/$path';
-      final file = io.File(filePath);
+      final fullPath = path.join(_basePath, filePath);
+      final file = io.File(fullPath);
 
       if (!await file.exists()) {
-        throw io.FileSystemException('文件不存在', filePath);
+        throw io.FileSystemException('文件不存在', fullPath);
       }
 
       final content = await file.readAsString();
-      _cache[path] = content;
+      _cache[filePath] = content;
       return content;
     } catch (e) {
-      debugPrint('读取文件失败: $path - $e');
-      throw Exception('读取文件失败: $path - $e');
+      debugPrint('读取文件失败: $filePath - $e');
+      throw Exception('读取文件失败: $filePath - $e');
     }
   }
 
@@ -247,22 +256,22 @@ class StorageManager {
   }
 
   /// 删除文件
-  Future<void> deleteFile(String path) async {
+  Future<void> deleteFile(String filePath) async {
     await _ensureInitialized();
 
     // 无论是否Web平台，都从缓存中移除
-    _cache.remove(path);
+    _cache.remove(filePath);
 
     if (kIsWeb) {
       // Web平台使用抽象接口
-      await _storage.removeData(path);
+      await _storage.removeData(filePath);
       return;
     }
 
     try {
       // 非Web平台删除文件
-      final filePath = '$_basePath/$path';
-      final file = io.File(filePath);
+      final fullPath = path.join(_basePath, filePath);
+      final file = io.File(fullPath);
 
       if (await file.exists()) {
         await file.delete();
@@ -270,37 +279,37 @@ class StorageManager {
 
       // 这里可以添加文件删除事件监控代码，用于后续同步到WebDAV
     } catch (e) {
-      debugPrint('删除文件失败: $path - $e');
+      // debugPrint('删除文件失败: $fullPath - $e');
     }
   }
 
   /// 检查文件是否存在
-  Future<bool> fileExists(String path) async {
+  Future<bool> fileExists(String filePath) async {
     await _ensureInitialized();
 
     // 先检查缓存
-    if (_cache.containsKey(path)) {
+    if (_cache.containsKey(filePath)) {
       return true;
     }
 
     // 使用抽象接口
     if (kIsWeb) {
-      return await _storage.hasData(path);
+      return await _storage.hasData(filePath);
     }
 
     try {
       // 非Web平台检查文件系统
-      final filePath = '$_basePath/$path';
-      final file = io.File(filePath);
+      final fullPath = path.join(_basePath, filePath);
+      final file = io.File(fullPath);
       return file.exists();
     } catch (e) {
-      debugPrint('检查文件是否存在失败: $path - $e');
+      // debugPrint('检查文件是否存在失败: $fullPath - $e');
       return false;
     }
   }
 
   /// 确保目录存在
-  Future<void> ensureDirectoryExists(String path) async {
+  Future<void> ensureDirectoryExists(String dirPath) async {
     await _ensureInitialized();
 
     // Web平台不需要创建目录
@@ -310,13 +319,15 @@ class StorageManager {
 
     try {
       // 非Web平台创建目录
-      final dirPath = '$_basePath/$path';
-      final directory = io.Directory(dirPath);
+      final fullPath = path.join(_basePath, dirPath);
+      final directory = io.Directory(fullPath);
       if (!await directory.exists()) {
         await directory.create(recursive: true);
+        debugPrint('创建目录成功: $fullPath');
       }
     } catch (e) {
-      debugPrint('创建目录失败: $path - $e');
+      debugPrint('创建目录失败: $dirPath - $e');
+      throw Exception('创建目录失败: $dirPath - $e');
     }
   }
 
@@ -351,20 +362,20 @@ class StorageManager {
   }
 
   /// 删除目录及其所有内容
-  Future<void> deleteDirectory(String path) async {
+  Future<void> deleteDirectory(String dirPath) async {
     await _ensureInitialized();
 
     if (kIsWeb) {
       // Web平台使用抽象接口
-      await _storage.clearWithPrefix(path);
+      await _storage.clearWithPrefix(dirPath);
 
       // 从缓存中删除所有相关项
-      _cache.removeWhere((key, _) => key.startsWith(path));
+      _cache.removeWhere((key, _) => key.startsWith(dirPath));
     } else {
       try {
         // 非Web平台删除目录
-        final dirPath = '$_basePath/$path';
-        final directory = io.Directory(dirPath);
+        final fullPath = path.join(_basePath, dirPath);
+        final directory = io.Directory(fullPath);
 
         if (await directory.exists()) {
           // 递归删除目录及其内容
@@ -375,11 +386,11 @@ class StorageManager {
         }
 
         // 从缓存中删除所有相关项
-        _cache.removeWhere((key, _) => key.startsWith(path));
+        _cache.removeWhere((key, _) => key.startsWith(dirPath));
 
         // 这里可以添加目录删除事件监控代码，用于后续同步到WebDAV
       } catch (e) {
-        debugPrint('删除目录失败: $path - $e');
+        // debugPrint('删除目录失败: $fullPath - $e');
       }
     }
   }
@@ -408,9 +419,9 @@ class StorageManager {
   String getPluginStoragePath(String pluginId) {
     // 返回插件的完整存储路径
     if (kIsWeb) {
-      return 'web_app_data/$pluginId';
+      return path.join('web_app_data', pluginId);
     } else {
-      return '$_basePath/$pluginId';
+      return path.join(_basePath, pluginId);
     }
   }
 
@@ -423,7 +434,7 @@ class StorageManager {
   /// 读取插件文件
   Future<String> readPluginFile(String pluginId, String fileName) async {
     final pluginPath = getPluginStoragePath(pluginId);
-    return await readString('$pluginPath/$fileName');
+    return await readString(path.join(pluginPath, fileName));
   }
 
   /// 写入插件文件
@@ -433,7 +444,7 @@ class StorageManager {
     String content,
   ) async {
     final pluginPath = getPluginStoragePath(pluginId);
-    await writeString('$pluginPath/$fileName', content);
+    await writeString(path.join(pluginPath, fileName), content);
   }
 
   /// 清除内存缓存

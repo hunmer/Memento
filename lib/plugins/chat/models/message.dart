@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'user.dart';
 
 enum MessageType { received, sent, file, image, video, audio }
@@ -12,6 +13,7 @@ class Message {
   final MessageType type;
   DateTime? editedAt; // 添加编辑时间字段
   String? fixedSymbol; // 添加固定符号字段
+  Color? bubbleColor; // 添加气泡颜色字段
   Map<String, dynamic>? metadata; // 添加元数据字段，用于存储额外信息
 
   Message({
@@ -22,6 +24,7 @@ class Message {
     DateTime? date,
     this.editedAt,
     this.fixedSymbol,
+    this.bubbleColor,
     this.metadata,
   }) : date = date ?? DateTime.now();
 
@@ -34,6 +37,7 @@ class Message {
     MessageType? type,
     DateTime? editedAt,
     String? fixedSymbol,
+    Color? bubbleColor,
     Map<String, dynamic>? metadata,
   }) {
     return Message(
@@ -44,6 +48,7 @@ class Message {
       type: type ?? this.type,
       editedAt: editedAt ?? this.editedAt,
       fixedSymbol: fixedSymbol ?? this.fixedSymbol,
+      bubbleColor: bubbleColor ?? this.bubbleColor,
       metadata: metadata ?? this.metadata,
     );
   }

@@ -4,9 +4,15 @@ import '../models/goods_item.dart';
 
 class GoodsItemCard extends StatefulWidget {
   final GoodsItem item;
+  final String? warehouseTitle;
   final VoidCallback? onTap;
 
-  const GoodsItemCard({super.key, required this.item, this.onTap});
+  const GoodsItemCard({
+    super.key,
+    required this.item,
+    this.warehouseTitle,
+    this.onTap,
+  });
 
   @override
   State<GoodsItemCard> createState() => _GoodsItemCardState();

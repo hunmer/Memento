@@ -37,7 +37,8 @@ class MessageSerializer {
       'type': message.type.toString().split('.').last,
       'editedAt': message.editedAt?.toIso8601String(),
       'fixedSymbol': message.fixedSymbol,
-      'metadata': message.metadata, // 添加metadata字段
+      'bubbleColor': message.bubbleColor?.value, // 添加bubbleColor字段
+      'metadata': message.metadata,
     };
   }
 
@@ -59,7 +60,8 @@ class MessageSerializer {
               ? DateTime.parse(json['editedAt'] as String)
               : null,
       fixedSymbol: json['fixedSymbol'] as String?,
-      metadata: json['metadata'] as Map<String, dynamic>?, // 添加metadata字段
+      bubbleColor: json['bubbleColor'] != null ? Color(json['bubbleColor'] as int) : null,
+      metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
 }

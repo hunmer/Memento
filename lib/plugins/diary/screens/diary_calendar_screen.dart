@@ -76,6 +76,8 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                 (context) => DiaryEditorScreen(
                   date: normalizedSelectedDay,
                   storage: widget.storage,
+                  initialTitle:
+                      _diaryEntries[normalizedSelectedDay]?.title ?? '',
                   initialContent:
                       _diaryEntries[normalizedSelectedDay]?.content ?? '',
                 ),
@@ -184,6 +186,12 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                         DateFormat('yyyy年MM月dd日').format(_selectedDay),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
+                      const SizedBox(width: 8),
+                      if (_diaryEntries[_selectedDay]?.title.isNotEmpty ?? false)
+                        Text(
+                          ' - ${_diaryEntries[_selectedDay]!.title}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       const SizedBox(width: 8),
                       if (_diaryEntries[_selectedDay]?.mood != null)
                         Text(

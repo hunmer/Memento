@@ -1,5 +1,6 @@
 // import 'dart:io'; // 移除，因为在Web平台不可用
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'l10n/chat_localizations.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -10,12 +11,24 @@ import 'models/user.dart';
 import '../../models/serialization_helpers.dart';
 import 'screens/channel_list/channel_list_screen.dart';
 import 'screens/timeline/timeline_screen.dart';
+import 'utils/message_operations.dart';
 
 class ChatPlugin extends BasePlugin {
+  // 音频播放器实例
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   // 插件设置
   bool _showAvatarInChat = true; // 提供默认值
+  bool _playSoundOnSend = true; // 发送消息时播放提示音
 
   bool get showAvatarInChat => _showAvatarInChat;
+  bool get playSoundOnSend => _playSoundOnSend;
+
+  Future<void> setPlaySoundOnSend(bool value) async {
+    _playSoundOnSend = value;
+    await _saveSettings();
+    notifyListeners();
+  }
 
   Future<void> setShowAvatarInChat(bool value) async {
     _showAvatarInChat = value;
@@ -27,6 +40,7 @@ class ChatPlugin extends BasePlugin {
   Future<void> _saveSettings() async {
     await storage.write('chat/settings', {
       'showAvatarInChat': _showAvatarInChat,
+      'playSoundOnSend': _playSoundOnSend,
     });
   }
 
@@ -36,10 +50,12 @@ class ChatPlugin extends BasePlugin {
       // 从存储中加载设置
       final settings = await storage.read('chat/settings');
       _showAvatarInChat = settings['showAvatarInChat'] ?? true;
+      _playSoundOnSend = settings['playSoundOnSend'] ?? true;
     } catch (e) {
       // 如果读取失败，使用默认值
       debugPrint('Error loading chat settings: $e');
       _showAvatarInChat = true;
+      _playSoundOnSend = true;
     }
   }
 
@@ -56,6 +72,15 @@ class ChatPlugin extends BasePlugin {
               onChanged: (bool value) {
                 setState(() {
                   setShowAvatarInChat(value);
+                });
+              },
+            ),
+            SwitchListTile(
+              title: const Text('发送消息播放提示音'),
+              value: _playSoundOnSend,
+              onChanged: (bool value) {
+                setState(() {
+                  setPlaySoundOnSend(value);
                 });
               },
             ),
@@ -454,6 +479,11 @@ class ChatPlugin extends BasePlugin {
     }
   }
 
+  // 检查是否应该播放消息提示音
+  bool shouldPlayMessageSound() {
+    return _playSoundOnSend;
+  }
+
   // 添加新消息
   Future<void> addMessage(String channelId, Message message) async {
     // 找到对应频道
@@ -548,7 +578,9 @@ class ChatPlugin extends BasePlugin {
             // 频道列表标签页
             ChannelListScreen(channels: _channels, chatPlugin: this),
             // 时间线标签页
-            TimelineScreen(chatPlugin: this),
+            TimelineScreen(
+              chatPlugin: this,
+            ),
           ],
         ),
         bottomNavigationBar: TabBar(

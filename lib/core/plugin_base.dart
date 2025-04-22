@@ -105,15 +105,7 @@ abstract class PluginBase {
   Widget buildSettingsView(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          title: const Text('数据存储位置'),
-          subtitle: Text(storage.getPluginStoragePath(id)),
-          trailing: const Icon(Icons.folder),
-          onTap: () async {
-            // TODO: 实现目录选择功能
-          },
-        ),
-        const Divider(),
+      
       ],
     );
   }

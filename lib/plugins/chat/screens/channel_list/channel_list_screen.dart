@@ -7,8 +7,7 @@ import 'controllers/channel_list_controller.dart';
 import 'widgets/channel_tile.dart';
 import 'widgets/empty_channel_view.dart';
 import 'widgets/channel_group_selector.dart';
-import 'widgets/channel_dialogs/add_channel_dialog.dart';
-import 'widgets/channel_dialogs/edit_channel_dialog.dart';
+import 'widgets/channel_dialogs/channel_dialog.dart';
 import 'widgets/channel_dialogs/delete_channel_dialog.dart';
 
 class ChannelListScreen extends StatefulWidget {
@@ -102,23 +101,22 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   void _showAddChannelDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => AddChannelDialog(
-            onAddChannel: (channel) async {
-              await _controller.addChannel(channel);
-            },
-          ),
+      builder: (context) => ChannelDialog(
+        onAddChannel: (channel) async {
+          await _controller.addChannel(channel);
+        },
+      ),
     );
   }
 
   void _showEditChannelDialog(Channel channel) {
     showDialog(
       context: context,
-      builder:
-          (context) => EditChannelDialog(
-            channel: channel,
-            onUpdateChannel: _controller.updateChannel,
-          ),
+      builder: (context) => ChannelDialog(
+        isEditMode: true,
+        channel: channel,
+        onUpdateChannel: _controller.updateChannel,
+      ),
     );
   }
 

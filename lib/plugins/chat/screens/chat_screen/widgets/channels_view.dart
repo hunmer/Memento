@@ -13,6 +13,7 @@ class ChannelsView extends StatelessWidget {
   final Future<void> Function(Message) onMessageDelete;
   final Function(Message) onMessageCopy;
   final Function(Message, String?) onSetFixedSymbol;
+  final Function(Message, Color?) onSetBubbleColor;
   
   const ChannelsView({
     super.key,
@@ -22,6 +23,7 @@ class ChannelsView extends StatelessWidget {
     required this.onMessageDelete,
     required this.onMessageCopy,
     required this.onSetFixedSymbol,
+    required this.onSetBubbleColor,
   });
 
   @override
@@ -45,6 +47,7 @@ class ChannelsView extends StatelessWidget {
             onMessageDelete: onMessageDelete,
             onMessageCopy: onMessageCopy,
             onSetFixedSymbol: onSetFixedSymbol,
+            onSetBubbleColor: onSetBubbleColor,
             onToggleMessageSelection: controller.toggleMessageSelection,
             scrollController: controller.scrollController,
           ),

@@ -10,8 +10,15 @@ class TimelineController extends ChangeNotifier {
   final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
-  // 分页相关
-  static const int pageSize = 50;
+  // 消息操作回调
+  void Function(Message)? onMessageEdit;
+  Future<void> Function(Message)? onMessageDelete;
+  void Function(Message)? onMessageCopy;
+  void Function(Message, String?)? onSetFixedSymbol;
+  void Function(Message, Color?)? onSetBubbleColor;
+
+  // 分页相关 - 增加每页加载的消息数量
+  static const int pageSize = 100; // 增加每页显示的消息数量
   int _currentPage = 1;
   bool _hasMoreMessages = true;
 
@@ -25,9 +32,14 @@ class TimelineController extends ChangeNotifier {
   final TimelineFilter filter = TimelineFilter();
   bool _isFilterActive = false;
 
-  TimelineController(this._chatPlugin) {
-    debugPrint('Timeline: 初始化控制器...');
-
+  TimelineController(
+    this._chatPlugin, {
+    this.onMessageEdit,
+    this.onMessageDelete,
+    this.onMessageCopy,
+    this.onSetFixedSymbol,
+    this.onSetBubbleColor,
+  }) {
     // 监听搜索输入变化
     searchController.addListener(_onSearchChanged);
 
@@ -36,10 +48,8 @@ class TimelineController extends ChangeNotifier {
 
     // 设置滚动监听（延迟添加以确保 ScrollController 已准备就绪）
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint('Timeline: 添加滚动监听器...');
       if (!scrollController.hasListeners) {
         scrollController.addListener(_onScroll);
-        debugPrint('Timeline: 滚动监听器已添加');
       }
     });
 
@@ -65,7 +75,6 @@ class TimelineController extends ChangeNotifier {
 
   /// 从所有频道加载所有消息
   void _loadAllMessages() {
-    debugPrint('Timeline: 开始加载所有消息...');
     _isLoading = true;
     notifyListeners();
 
@@ -118,7 +127,6 @@ class TimelineController extends ChangeNotifier {
 
   /// 根据搜索查询和高级过滤器过滤消息
   void _filterMessages() {
-    debugPrint('Timeline: 开始过滤消息...');
 
     // 先应用基本的搜索过滤
     List<Message> result = List<Message>.from(_allMessages);
@@ -267,7 +275,6 @@ class TimelineController extends ChangeNotifier {
 
   /// 手动检查并重新添加滚动监听器（可从UI层调用）
   void ensureScrollListenerActive() {
-    debugPrint('Timeline: 手动检查滚动监听器');
     _ensureScrollListener();
 
     // 立即检查是否需要加载更多
@@ -282,7 +289,8 @@ class TimelineController extends ChangeNotifier {
           'Timeline: 主动检查滚动位置 - 距底部: $distanceToBottom, 视口高度: $viewportHeight',
         );
 
-        if (distanceToBottom < viewportHeight * 0.5) {
+        // 减小触发阈值，使加载更多更容易触发
+        if (distanceToBottom < viewportHeight * 1.0) {
           debugPrint('Timeline: 主动触发加载更多');
           _loadMoreMessages();
         }
@@ -301,6 +309,41 @@ class TimelineController extends ChangeNotifier {
       return _chatPlugin.channels.firstWhere((c) => c.id == channelId);
     } catch (e) {
       return null;
+    }
+  }
+
+  /// 处理消息编辑
+  void handleMessageEdit(Message message) {
+    if (onMessageEdit != null) {
+      onMessageEdit!(message);
+    }
+  }
+
+  /// 处理消息删除
+  Future<void> handleMessageDelete(Message message) async {
+    if (onMessageDelete != null) {
+      await onMessageDelete!(message);
+    }
+  }
+
+  /// 处理消息复制
+  void handleMessageCopy(Message message) {
+    if (onMessageCopy != null) {
+      onMessageCopy!(message);
+    }
+  }
+
+  /// 处理设置固定标记
+  void handleSetFixedSymbol(Message message, String? symbol) {
+    if (onSetFixedSymbol != null) {
+      onSetFixedSymbol!(message, symbol);
+    }
+  }
+
+  /// 处理设置气泡颜色
+  void handleSetBubbleColor(Message message, Color? color) {
+    if (onSetBubbleColor != null) {
+      onSetBubbleColor!(message, color);
     }
   }
 
@@ -393,11 +436,8 @@ class TimelineController extends ChangeNotifier {
 
   /// 滚动监听
   void _onScroll() {
-    debugPrint('Timeline: onScroll 被触发');
-
-    // 检查是否接近底部（距离底部20%的位置）
+    // 检查是否接近底部
     if (!scrollController.hasClients) {
-      debugPrint('Timeline: ScrollController 还没有准备好');
       return;
     }
 
@@ -409,18 +449,10 @@ class TimelineController extends ChangeNotifier {
       final distanceToBottom = maxScroll - currentScroll;
       final viewportHeight = scrollController.position.viewportDimension;
 
-      // 当滚动到距离底部不足一个屏幕高度的50%时触发加载
-      final threshold = viewportHeight * 0.5;
-
-      debugPrint(
-        'Timeline: 滚动位置 - 当前: $currentScroll, 最大: $maxScroll, '
-        '距底部: $distanceToBottom, 视口高度: $viewportHeight, 阈值: $threshold',
-      );
+      // 当滚动到距离底部不足一个屏幕高度时触发加载（增大阈值）
+      final threshold = viewportHeight * 1.0;
 
       if (distanceToBottom < threshold) {
-        debugPrint(
-          'Timeline: 触发滚动加载 - 距离底部: $distanceToBottom, 阈值: $threshold',
-        );
         _loadMoreMessages();
       }
     } catch (e) {
@@ -431,7 +463,6 @@ class TimelineController extends ChangeNotifier {
   /// 确保滚动监听器已添加
   void _ensureScrollListener() {
     if (!scrollController.hasListeners) {
-      debugPrint('Timeline: 重新添加滚动监听器');
       scrollController.addListener(_onScroll);
     }
   }
@@ -441,7 +472,14 @@ class TimelineController extends ChangeNotifier {
     debugPrint('Timeline: 初始化时间线...');
     _resetPagination();
     _loadAllMessages();
-    _ensureScrollListener(); // 确保滚动监听器已添加
+    
+    // 确保初始加载足够的消息以填满瀑布流视图
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_displayMessages.length < pageSize && _hasMoreMessages) {
+        _loadMoreMessages();
+      }
+      _ensureScrollListener();
+    });
   }
 
   /// 重置分页状态

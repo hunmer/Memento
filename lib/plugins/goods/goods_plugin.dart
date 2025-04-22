@@ -3,6 +3,7 @@ import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import 'screens/warehouse_list_screen.dart';
+import 'screens/goods_main_screen.dart';
 import 'models/warehouse.dart';
 import 'models/goods_item.dart';
 
@@ -93,7 +94,13 @@ class GoodsPlugin extends BasePlugin {
       // 更新内存中的仓库信息
       final index = _warehouses.indexWhere((w) => w.id == warehouse.id);
       if (index != -1) {
-        _warehouses[index] = warehouse;
+        // 保持现有物品列表，除非明确要求更新
+        final existingWarehouse = _warehouses[index];
+        final updatedWarehouse = warehouse.copyWith(
+          items: warehouse.items.isEmpty ? existingWarehouse.items : warehouse.items,
+        );
+        _warehouses[index] = updatedWarehouse;
+        warehouse = updatedWarehouse; // 更新引用以保存正确的数据
       } else {
         _warehouses.add(warehouse);
       }
@@ -186,6 +193,6 @@ class GoodsPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return const WarehouseListScreen();
+    return const GoodsMainScreen();
   }
 }

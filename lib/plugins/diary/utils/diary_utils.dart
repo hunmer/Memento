@@ -67,6 +67,7 @@ class DiaryUtils {
     StorageManager storage,
     DateTime date,
     String content, {
+    String title = '',
     String? mood,
   }) async {
     try {
@@ -84,6 +85,7 @@ class DiaryUtils {
         final existingEntry = DiaryEntry.fromJson(existingData);
 
         newEntry = existingEntry.copyWith(
+          title: title,
           content: content,
           mood: mood,
           updatedAt: now,
@@ -92,6 +94,7 @@ class DiaryUtils {
         // 创建新条目
         newEntry = DiaryEntry(
           date: normalizedDate,
+          title: title,
           content: content,
           mood: mood,
           createdAt: now,

@@ -12,6 +12,8 @@ class MarkdownEditor extends StatefulWidget {
   final bool showSaveButton;
   final bool showPreviewButton;
   final bool autofocus;
+  final List<Widget>? actions;
+  final List<Widget>? extraActions;
 
   const MarkdownEditor({
     Key? key,
@@ -25,6 +27,8 @@ class MarkdownEditor extends StatefulWidget {
     this.showSaveButton = true,
     this.showPreviewButton = true,
     this.autofocus = true,
+    this.actions,
+    this.extraActions,
   }) : super(key: key);
 
   @override
@@ -184,7 +188,13 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   }
 
   List<Widget> _buildActions() {
-    return [
+    // 如果提供了自定义actions，则使用自定义actions
+    if (widget.actions != null && widget.actions!.isNotEmpty) {
+      return widget.actions!;
+    }
+    
+    // 否则使用默认actions
+    final defaultActions = <Widget>[
       if (widget.showPreviewButton)
         IconButton(
           icon: Icon(_isPreviewMode ? Icons.edit : Icons.preview),
@@ -216,6 +226,13 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
           onPressed: widget.onCancel,
         ),
     ];
+    
+    // 如果有额外的actions，添加到默认actions后面
+    if (widget.extraActions != null && widget.extraActions!.isNotEmpty) {
+      defaultActions.addAll(widget.extraActions!);
+    }
+    
+    return defaultActions;
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -128,6 +129,28 @@ class MyApp extends StatelessWidget {
         );
       },
       home: const HomeScreen(),
+      onGenerateRoute: (settings) {
+        if (settings.name?.startsWith('/channel/') ?? false) {
+          final channelId = settings.name!.substring('/channel/'.length);
+          final args = settings.arguments as Map<String, dynamic>?;
+          final channel = args?['channel'];
+          final initialMessage = args?['initialMessage'];
+          final highlightMessage = args?['highlightMessage'];
+          final autoScroll = args?['autoScroll'] as bool? ?? false;
+
+          if (channel != null) {
+            return MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                channel: channel,
+                initialMessage: initialMessage,
+                highlightMessage: highlightMessage,
+                autoScroll: autoScroll,
+              ),
+            );
+          }
+        }
+        return null;
+      },
       onGenerateTitle:
           (BuildContext context) => AppLocalizations.of(context)!.appTitle,
     );

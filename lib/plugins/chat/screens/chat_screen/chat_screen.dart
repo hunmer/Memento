@@ -6,8 +6,8 @@ import '../../chat_plugin.dart';
 import '../../../../services/image_service.dart';
 import '../channel_info_screen.dart';
 import '../user_profile_screen.dart';
-import 'package:audioplayers/audioplayers.dart';
-
+import '../../utils/message_operations.dart'; // 添加消息操作工具类
+// 移除未使用的导入
 import 'controllers/chat_screen_controller.dart';
 import 'widgets/chat_app_bar.dart';
 import 'widgets/message_list.dart';
@@ -19,8 +19,17 @@ import 'utils/message_list_builder.dart';
 
 class ChatScreen extends StatefulWidget {
   final Channel channel;
+  final Message? initialMessage;
+  final Message? highlightMessage;
+  final bool autoScroll;
 
-  const ChatScreen({super.key, required this.channel});
+  const ChatScreen({
+    super.key, 
+    required this.channel,
+    this.initialMessage,
+    this.highlightMessage,
+    this.autoScroll = false,
+  });
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -28,7 +37,8 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   late ChatScreenController _controller;
-  final ImageService _imageService = ImageService();
+  late MessageOperations _messageOperations;
+  // 移除未使用的字段
 
   @override
   void initState() {
@@ -36,8 +46,13 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller = ChatScreenController(
       channel: widget.channel,
       chatPlugin: ChatPlugin.instance,
-      audioPlayer: AudioPlayer(),
+      initialMessage: widget.initialMessage,
+      highlightMessage: widget.highlightMessage,
+      autoScroll: widget.autoScroll,
     );
+    
+    // 初始化消息操作工具类
+    _messageOperations = MessageOperations(context);
 
     // 加载频道草稿
     _loadChannelDraft();
@@ -54,8 +69,8 @@ class _ChatScreenState extends State<ChatScreen> {
         final draft = await chatPlugin.loadDraft(widget.channel.id);
         if (draft != null && draft.isNotEmpty && mounted) {
           setState(() {
-            // 增加额外的空值检查
-            if (_controller.draftController.hasListeners) {
+            // 检查控制器是否可用
+            if (_controller.draftController.text != draft) {
               _controller.draftController.text = draft;
             }
           });
@@ -77,43 +92,42 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    // MessageOperations不需要dispose
     super.dispose();
   }
 
+  // 更新消息列表
+  void _updateMessages() {
+    setState(() {
+      // 重新加载消息
+      _controller.messages = ChatPlugin.instance.channels
+          .firstWhere((c) => c.id == widget.channel.id)
+          .messages;
+    });
+  }
+
   void _showEditDialog(Message message) {
-    _controller.editMessage(message);
-    showDialog(
-      context: context,
-      builder:
-          (context) => EditMessageDialog(
-            message: message,
-            controller: _controller.editingController,
-            onCancel: () {
-              _controller.cancelEdit();
-              Navigator.of(context).pop();
-            },
-            onSave: () {
-              _controller.saveEditedMessage();
-              Navigator.of(context).pop();
-            },
-          ),
-    );
+    // 使用MessageOperations处理消息编辑
+    _messageOperations.editMessage(message);
+    // 注意：由于我们使用了统一的消息操作处理器，不再需要自定义对话框
+    // 如果需要保留自定义对话框，可以在MessageOperations中添加支持自定义UI的方法
   }
 
   void _showClearConfirmationDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => ClearMessagesDialog(
-            onConfirm: () {
-              _controller.clearMessages();
-              Navigator.of(context).pop();
-            },
-            onCancel: () => Navigator.of(context).pop(),
-          ),
+      builder: (context) => ClearMessagesDialog(
+        onConfirm: () async {
+          await _controller.clearMessages();
+          _updateMessages(); // 更新消息列表
+          Navigator.of(context).pop();
+        },
+        onCancel: () {
+          Navigator.of(context).pop();
+        },
+      ),
     );
   }
-
   void _showDatePickerDialog() {
     // 从消息中提取唯一的日期
     final dates =
@@ -177,21 +191,25 @@ class _ChatScreenState extends State<ChatScreen> {
             .toList();
 
     for (var message in selectedMessages) {
-      await _controller.deleteMessage(message);
+      await _messageOperations.deleteMessage(message);
     }
 
     _controller.toggleMultiSelectMode();
   }
 
   void _copyMessageToClipboard(Message message) {
-    Clipboard.setData(ClipboardData(text: message.content));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('已复制消息内容')));
+    // 使用MessageOperations处理消息复制
+    _messageOperations.copyMessage(message);
   }
 
   void _setFixedSymbol(Message message, String? symbol) async {
-    await _controller.setFixedSymbol(message, symbol);
+    // 使用MessageOperations设置固定符号
+    await _messageOperations.setFixedSymbol(message, symbol);
+  }
+
+  void _setBubbleColor(Message message, Color? color) {
+    // 使用MessageOperations设置气泡颜色
+    _messageOperations.setBubbleColor(message, color);
   }
 
   void _navigateToUserProfile(Message message) {
@@ -244,9 +262,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   selectedMessageIds: _controller.selectedMessageIds,
                   onMessageEdit: _showEditDialog,
                   onMessageDelete:
-                      (message) => _controller.deleteMessage(message),
+                      (message) => _messageOperations.deleteMessage(message),
                   onMessageCopy: _copyMessageToClipboard,
                   onSetFixedSymbol: _setFixedSymbol,
+                  onSetBubbleColor: _setBubbleColor,
                   onToggleMessageSelection: _controller.toggleMessageSelection,
                   scrollController: _controller.scrollController,
                   onAvatarTap: _navigateToUserProfile,
@@ -255,6 +274,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       ChatPlugin.instance.isInitialized
                           ? ChatPlugin.instance.currentUser.id
                           : '',
+                  highlightedMessage: _controller.highlightMessage,
+                  shouldHighlight: _controller.highlightMessage != null,
                 ),
               ),
               MessageInput(
