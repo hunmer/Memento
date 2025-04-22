@@ -74,7 +74,7 @@ class TimelineController extends ChangeNotifier {
   }
 
   /// 从所有频道加载所有消息
-  void _loadAllMessages() {
+  Future<void> _loadAllMessages() async {
     _isLoading = true;
     notifyListeners();
 
@@ -84,20 +84,19 @@ class TimelineController extends ChangeNotifier {
       // 从所有频道收集消息
       for (final channel in _chatPlugin.channels) {
         // 为每条消息添加频道信息，以便在时间线中显示来源
-        final messagesWithChannel =
-            channel.messages.map((message) {
-              // 创建一个带有频道信息的消息副本
-              return message.copyWith(
-                // 我们可以在元数据中存储频道信息
-                metadata: {
-                  'channelId': channel.id,
-                  'channelName': channel.title,
-                  'channelColor': channel.backgroundColor.value.toRadixString(
-                    16,
-                  ),
-                },
-              );
-            }).toList();
+        final messagesWithChannel = await Future.wait(
+          channel.messages.map((message) async {
+            // 创建一个带有频道信息的消息副本
+            return await message.copyWith(
+              // 我们可以在元数据中存储频道信息
+              metadata: {
+                'channelId': channel.id,
+                'channelName': channel.title,
+                'channelColor': channel.backgroundColor.value.toRadixString(16),
+              },
+            );
+          }),
+        );
 
         _allMessages.addAll(messagesWithChannel);
       }
@@ -127,7 +126,6 @@ class TimelineController extends ChangeNotifier {
 
   /// 根据搜索查询和高级过滤器过滤消息
   void _filterMessages() {
-
     // 先应用基本的搜索过滤
     List<Message> result = List<Message>.from(_allMessages);
 
@@ -237,7 +235,7 @@ class TimelineController extends ChangeNotifier {
   /// 刷新时间线数据
   Future<void> refreshTimeline() async {
     _resetPagination();
-    _loadAllMessages();
+    await _loadAllMessages();
     _ensureScrollListener(); // 确保滚动监听器已添加
     return Future.value();
   }
@@ -468,11 +466,11 @@ class TimelineController extends ChangeNotifier {
   }
 
   /// 初始化时间线
-  void _initializeTimeline() {
+  Future<void> _initializeTimeline() async {
     debugPrint('Timeline: 初始化时间线...');
     _resetPagination();
-    _loadAllMessages();
-    
+    await _loadAllMessages();
+
     // 确保初始加载足够的消息以填满瀑布流视图
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_displayMessages.length < pageSize && _hasMoreMessages) {

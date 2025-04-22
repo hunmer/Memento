@@ -77,25 +77,26 @@ class MessageListBuilder {
   }
 
   /// 构建带有日期分隔符的消息列表
-  static List<dynamic> buildMessageListWithDateSeparators(
+  static Future<List<dynamic>> buildMessageListWithDateSeparators(
     List<Message> messages,
     DateTime? selectedDate,
-  ) {
+  ) async {
     if (messages.isEmpty) {
       return [];
     }
 
     // 创建消息列表的副本，并确保文件类型消息的metadata正确设置
-    List<Message> filteredMessages =
-        messages.map((msg) {
-          if (msg.metadata == null) {
-            final metadata = _parseFileInfo(msg.content, msg.type);
-            if (metadata != null) {
-              return msg.copyWith(metadata: metadata);
-            }
+    List<Message> filteredMessages = await Future.wait(
+      messages.map((msg) async {
+        if (msg.metadata == null) {
+          final metadata = _parseFileInfo(msg.content, msg.type);
+          if (metadata != null) {
+            return await msg.copyWith(metadata: metadata);
           }
-          return msg;
-        }).toList();
+        }
+        return msg;
+      }),
+    );
 
     // 如果选择了日期，过滤出该日期的消息
     if (selectedDate != null) {

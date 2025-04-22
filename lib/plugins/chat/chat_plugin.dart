@@ -8,7 +8,6 @@ import '../../core/config_manager.dart';
 import 'models/channel.dart';
 import 'models/message.dart';
 import 'models/user.dart';
-import '../../models/serialization_helpers.dart';
 import 'screens/channel_list/channel_list_screen.dart';
 import 'screens/timeline/timeline_screen.dart';
 import 'utils/message_operations.dart';
@@ -176,13 +175,13 @@ class ChatPlugin extends BasePlugin {
       // 尝试从存储中加载用户信息
       final userData = await storage.read('chat/current_user');
       if (userData.isNotEmpty && userData.containsKey('user')) {
-        _currentUser = UserSerializer.fromJson(userData['user']);
+        _currentUser = User.fromJson(userData['user'] as Map<String, dynamic>);
       } else {
         // 如果没有存储的用户信息，创建默认用户
         _currentUser = User(id: 'default_user', username: 'Default User');
         // 保存默认用户信息
         await storage.write('chat/current_user', {
-          'user': UserSerializer.toJson(_currentUser!),
+          'user': _currentUser!.toJson(),
         });
       }
     }
@@ -236,9 +235,7 @@ class ChatPlugin extends BasePlugin {
               channelJson['members'] as List<dynamic>;
           final List<User> members =
               membersJson
-                  .map(
-                    (m) => UserSerializer.fromJson(m as Map<String, dynamic>),
-                  )
+                  .map((m) => User.fromJson(m as Map<String, dynamic>))
                   .toList();
 
           // 加载消息
@@ -248,16 +245,11 @@ class ChatPlugin extends BasePlugin {
           if (messagesData.isNotEmpty && messagesData.containsKey('messages')) {
             final List<dynamic> messagesJson =
                 messagesData['messages'] as List<dynamic>;
-            messages =
-                messagesJson
-                    .map(
-                      (m) => MessageSerializer.fromJson(
-                        m as Map<String, dynamic>,
-                        members,
-                        storage,
-                      ),
-                    )
-                    .toList();
+            messages = await Future.wait(
+              messagesJson.map(
+                (m) => Message.fromJson(m as Map<String, dynamic>, members),
+              ),
+            );
           }
 
           // 加载草稿
@@ -268,10 +260,7 @@ class ChatPlugin extends BasePlugin {
           }
 
           // 创建频道对象
-          final channel = ChannelSerializer.fromJson(
-            channelJson,
-            messages: messages,
-          );
+          final channel = Channel.fromJson(channelJson, messages: messages);
           channel.draft = draft;
           _channels.add(channel);
         }
@@ -289,7 +278,7 @@ class ChatPlugin extends BasePlugin {
   Future<void> saveChannel(Channel channel) async {
     // 保存频道信息
     await storage.write('chat/channel/${channel.id}', {
-      'channel': ChannelSerializer.toJson(channel),
+      'channel': channel.toJson(),
     });
 
     // 更新频道列表
@@ -328,7 +317,7 @@ class ChatPlugin extends BasePlugin {
   // 保存消息
   Future<void> saveMessages(String channelId, List<Message> messages) async {
     // 保存消息
-    final messageJsonFutures = messages.map((m) => MessageSerializer.toJson(m));
+    final messageJsonFutures = messages.map((m) => m.toJson());
     final messageJsonList = await Future.wait(messageJsonFutures);
 
     await storage.write('chat/messages/$channelId', {
@@ -489,7 +478,11 @@ class ChatPlugin extends BasePlugin {
   }
 
   // 添加新消息
-  Future<void> addMessage(String channelId, Message message) async {
+  Future<void> addMessage(
+    String channelId,
+    Future<Message> messageFuture,
+  ) async {
+    final message = await messageFuture;
     // 找到对应频道
     final channelIndex = _channels.indexWhere((c) => c.id == channelId);
     if (channelIndex == -1) return;
@@ -524,7 +517,7 @@ class ChatPlugin extends BasePlugin {
       await Future.wait([
         // 保存频道基本信息
         storage.write('chat/channel/${channel.id}', {
-          'channel': ChannelSerializer.toJson(channel),
+          'channel': channel.toJson(),
         }),
         // 初始化空消息列表
         storage.write('chat/messages/${channel.id}', {'messages': []}),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../utils/color_extension.dart';
 import 'message.dart';
 import 'user.dart';
 
@@ -75,6 +76,65 @@ class Channel {
       fixedSymbol: fixedSymbol ?? this.fixedSymbol,
       draft: draft ?? this.draft,
       lastMessage: lastMessage ?? _lastMessage,
+    );
+  }
+
+  /// 将频道转换为JSON格式
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'icon': icon.codePoint,
+      'iconFontFamily': icon.fontFamily,
+      'iconFontPackage': icon.fontPackage,
+      'backgroundColor': backgroundColor.toHex(),
+      'members': members.map((member) => member.toJson()).toList(),
+      'priority': priority,
+      'groups': groups,
+      'fixedSymbol': fixedSymbol,
+      'lastMessageTime': lastMessageTime.toIso8601String(),
+    };
+  }
+
+  /// 从JSON格式创建Channel实例
+  static Channel fromJson(
+    Map<String, dynamic> json, {
+    List<Message> messages = const [],
+  }) {
+    // 解析成员列表
+    final List<dynamic> membersJson = json['members'] as List<dynamic>;
+    final List<User> members =
+        membersJson
+            .map((m) => User.fromJson(m as Map<String, dynamic>))
+            .toList();
+
+    // 解析图标
+    final IconData icon = IconData(
+      json['icon'] as int,
+      fontFamily: json['iconFontFamily'] as String?,
+      fontPackage: json['iconFontPackage'] as String?,
+    );
+
+    // 解析背景颜色
+    final Color backgroundColor =
+        json['backgroundColor'] != null
+            ? HexColor.fromHex(json['backgroundColor'] as String)
+            : Colors.blue;
+
+    return Channel(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      icon: icon,
+      backgroundColor: backgroundColor,
+      members: members,
+      messages: messages,
+      priority: json['priority'] as int? ?? 0,
+      groups:
+          json['groups'] != null
+              ? List<String>.from(json['groups'] as List<dynamic>)
+              : const [],
+      fixedSymbol: json['fixedSymbol'] as String?,
+      lastMessage: messages.isNotEmpty ? messages.last : null,
     );
   }
 }

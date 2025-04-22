@@ -17,10 +17,24 @@ class PathUtils {
       final relativePath = absolutePath.substring(appDir.path.length);
       if (relativePath.startsWith('/app_data/')) {
         return '.${relativePath.substring('/app_data'.length)}';
+      } else if (relativePath.startsWith('/')) {
+        // 处理其他可能的情况
+        return '.${relativePath}';
       }
     }
 
-    // 如果不是应用数据目录下的文件，返回原路径
+    // 如果已经是相对路径格式，直接返回
+    if (absolutePath.startsWith('./')) {
+      return absolutePath;
+    }
+
+    // 如果不是应用数据目录下的文件，尝试构造相对路径
+    final fileName = path.basename(absolutePath);
+    if (fileName.contains('.')) {
+      return './chat/chat_files/$fileName';
+    }
+
+    // 最后的回退方案，返回原路径
     return absolutePath;
   }
 
@@ -50,7 +64,25 @@ class PathUtils {
       return path.join(appDir.path, normalizedPath);
     } else {
       // 添加 app_data 前缀
-      return path.join(appDir.path, 'app_data', normalizedPath);
+      final result = path.join(appDir.path, 'app_data', normalizedPath);
+      // 确认文件是否存在，如果不存在，尝试其他可能的路径
+      if (!await File(result).exists()) {
+        // 尝试直接在应用目录下查找
+        final directPath = path.join(appDir.path, normalizedPath);
+        if (await File(directPath).exists()) {
+          return directPath;
+        }
+        // 尝试在 chat_files 目录下查找
+        final chatFilesPath = path.join(
+          appDir.path,
+          'app_data/chat/chat_files',
+          path.basename(normalizedPath),
+        );
+        if (await File(chatFilesPath).exists()) {
+          return chatFilesPath;
+        }
+      }
+      return result;
     }
   }
 }

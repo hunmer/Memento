@@ -21,8 +21,24 @@ Future<void> handleFileSelection({
       debugPrint('文件选择完成: ${fileMessage.filePath}');
 
       try {
-        // 文件已经由 FileService.pickFile() 方法保存，无需再次检查和保存
-        debugPrint('文件已选择: ${fileMessage.fileName}');
+        // 获取文件的绝对路径
+        final absolutePath = await fileMessage.getAbsolutePath();
+        final file = File(absolutePath);
+
+        // 验证文件是否存在
+        if (!await file.exists()) {
+          debugPrint('警告：文件不存在: $absolutePath');
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('文件不存在或无法访问'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+
+        debugPrint('文件已选择并验证: ${fileMessage.fileName}, 路径: $absolutePath');
 
         // 调用回调函数发送文件消息
         onFileSelected?.call(fileMessage);
@@ -33,12 +49,17 @@ Future<void> handleFileSelection({
           final fileContent =
               '📎 ${fileMessage.fileName} (${fileMessage.formattedSize})';
 
+          // 获取文件的绝对路径以验证
+          final absolutePath = await fileMessage.getAbsolutePath();
+          debugPrint('发送消息时的文件路径: $absolutePath');
+
           // 创建文件元数据
           final Map<String, dynamic> fileInfo = {
             'id': fileMessage.id,
             'fileName': fileMessage.fileName,
             'originalFileName': fileMessage.originalFileName,
-            'filePath': fileMessage.filePath,
+            'filePath': fileMessage.filePath, // 使用相对路径存储
+            'absolutePath': absolutePath, // 额外存储绝对路径用于调试
             'fileSize': fileMessage.fileSize,
             'extension': fileMessage.extension,
             'mimeType': 'application/octet-stream',

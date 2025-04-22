@@ -33,8 +33,8 @@ class MessageSerializer {
     };
   }
 
-  static Message fromJson(Map<String, dynamic> json) {
-    return Message(
+  static Future<Message> fromJson(Map<String, dynamic> json) async {
+    return Message.create(
       id: json['id'] as String,
       content: json['content'] as String,
       user: UserSerializer.fromJson(json['user'] as Map<String, dynamic>),
@@ -42,9 +42,10 @@ class MessageSerializer {
         (type) => type.toString().split('.').last == json['type'],
       ),
       date: DateTime.parse(json['date'] as String),
-      editedAt: json['editedAt'] != null 
-          ? DateTime.parse(json['editedAt'] as String)
-          : null,
+      editedAt:
+          json['editedAt'] != null
+              ? DateTime.parse(json['editedAt'] as String)
+              : null,
       fixedSymbol: json['fixedSymbol'] as String?,
       metadata: json['metadata'] as Map<String, dynamic>?,
     );

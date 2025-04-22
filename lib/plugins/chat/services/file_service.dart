@@ -40,13 +40,23 @@ class FileService {
       // 获取原始文件名
       final originalFileName = platformFile.name;
 
+      // 保存文件到应用目录
       final saveResult = await _saveFile(file);
+      debugPrint('文件已保存到: ${saveResult.savedFile.path}');
 
-      return FileMessage.fromFile(
+      // 创建FileMessage对象
+      final fileMessage = await FileMessage.fromFile(
         saveResult.savedFile,
         systemFileName: saveResult.systemFileName,
         originalFileName: originalFileName, // 传递原始文件名
       );
+
+      // 验证文件路径
+      final absolutePath = await fileMessage.getAbsolutePath();
+      final fileExists = await File(absolutePath).exists();
+      debugPrint('文件路径验证: $absolutePath, 文件存在: $fileExists');
+
+      return fileMessage;
     }
     return null;
   }

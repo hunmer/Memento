@@ -24,7 +24,7 @@ class ChatScreen extends StatefulWidget {
   final bool autoScroll;
 
   const ChatScreen({
-    super.key, 
+    super.key,
     required this.channel,
     this.initialMessage,
     this.highlightMessage,
@@ -50,7 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
       highlightMessage: widget.highlightMessage,
       autoScroll: widget.autoScroll,
     );
-    
+
     // 初始化消息操作工具类
     _messageOperations = MessageOperations(context);
 
@@ -100,9 +100,10 @@ class _ChatScreenState extends State<ChatScreen> {
   void _updateMessages() {
     setState(() {
       // 重新加载消息
-      _controller.messages = ChatPlugin.instance.channels
-          .firstWhere((c) => c.id == widget.channel.id)
-          .messages;
+      _controller.messages =
+          ChatPlugin.instance.channels
+              .firstWhere((c) => c.id == widget.channel.id)
+              .messages;
     });
   }
 
@@ -116,18 +117,20 @@ class _ChatScreenState extends State<ChatScreen> {
   void _showClearConfirmationDialog() {
     showDialog(
       context: context,
-      builder: (context) => ClearMessagesDialog(
-        onConfirm: () async {
-          await _controller.clearMessages();
-          _updateMessages(); // 更新消息列表
-          Navigator.of(context).pop();
-        },
-        onCancel: () {
-          Navigator.of(context).pop();
-        },
-      ),
+      builder:
+          (context) => ClearMessagesDialog(
+            onConfirm: () async {
+              await _controller.clearMessages();
+              _updateMessages(); // 更新消息列表
+              Navigator.of(context).pop();
+            },
+            onCancel: () {
+              Navigator.of(context).pop();
+            },
+          ),
     );
   }
+
   void _showDatePickerDialog() {
     // 从消息中提取唯一的日期
     final dates =
@@ -226,65 +229,72 @@ class _ChatScreenState extends State<ChatScreen> {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        final messageItems =
-            MessageListBuilder.buildMessageListWithDateSeparators(
-              _controller.messages,
-              _controller.selectedDate,
-            );
+        return FutureBuilder<List<dynamic>>(
+          future: MessageListBuilder.buildMessageListWithDateSeparators(
+            _controller.messages,
+            _controller.selectedDate,
+          ),
+          builder: (context, snapshot) {
+            final messageItems = snapshot.data ?? [];
 
-        return Scaffold(
-          appBar: ChatAppBar(
-            channel: widget.channel,
-            isMultiSelectMode: _controller.isMultiSelectMode,
-            selectedCount: _controller.selectedMessageIds.length,
-            onShowDatePicker: _showDatePickerDialog,
-            onShowChannelInfo: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => ChannelInfoScreen(channel: widget.channel),
-                ),
-              );
-            },
-            onCopySelected: _copySelectedMessages,
-            onDeleteSelected: _deleteSelectedMessages,
-            onShowClearConfirmation: _showClearConfirmationDialog,
-            onExitMultiSelect: _controller.toggleMultiSelectMode,
-            onEnterMultiSelect: _controller.toggleMultiSelectMode,
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: MessageList(
-                  items: messageItems,
-                  isMultiSelectMode: _controller.isMultiSelectMode,
-                  selectedMessageIds: _controller.selectedMessageIds,
-                  onMessageEdit: _showEditDialog,
-                  onMessageDelete:
-                      (message) => _messageOperations.deleteMessage(message),
-                  onMessageCopy: _copyMessageToClipboard,
-                  onSetFixedSymbol: _setFixedSymbol,
-                  onSetBubbleColor: _setBubbleColor,
-                  onToggleMessageSelection: _controller.toggleMessageSelection,
-                  scrollController: _controller.scrollController,
-                  onAvatarTap: _navigateToUserProfile,
-                  showAvatar: ChatPlugin.instance.showAvatarInChat,
-                  currentUserId:
-                      ChatPlugin.instance.isInitialized
-                          ? ChatPlugin.instance.currentUser.id
-                          : '',
-                  highlightedMessage: _controller.highlightMessage,
-                  shouldHighlight: _controller.highlightMessage != null,
-                ),
+            return Scaffold(
+              appBar: ChatAppBar(
+                channel: widget.channel,
+                isMultiSelectMode: _controller.isMultiSelectMode,
+                selectedCount: _controller.selectedMessageIds.length,
+                onShowDatePicker: _showDatePickerDialog,
+                onShowChannelInfo: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) =>
+                              ChannelInfoScreen(channel: widget.channel),
+                    ),
+                  );
+                },
+                onCopySelected: _copySelectedMessages,
+                onDeleteSelected: _deleteSelectedMessages,
+                onShowClearConfirmation: _showClearConfirmationDialog,
+                onExitMultiSelect: _controller.toggleMultiSelectMode,
+                onEnterMultiSelect: _controller.toggleMultiSelectMode,
               ),
-              MessageInput(
-                controller: _controller.draftController,
-                onSendMessage: _controller.sendMessage,
-                onSaveDraft: _controller.saveDraft,
+              body: Column(
+                children: [
+                  Expanded(
+                    child: MessageList(
+                      items: messageItems,
+                      isMultiSelectMode: _controller.isMultiSelectMode,
+                      selectedMessageIds: _controller.selectedMessageIds,
+                      onMessageEdit: _showEditDialog,
+                      onMessageDelete:
+                          (message) =>
+                              _messageOperations.deleteMessage(message),
+                      onMessageCopy: _copyMessageToClipboard,
+                      onSetFixedSymbol: _setFixedSymbol,
+                      onSetBubbleColor: _setBubbleColor,
+                      onToggleMessageSelection:
+                          _controller.toggleMessageSelection,
+                      scrollController: _controller.scrollController,
+                      onAvatarTap: _navigateToUserProfile,
+                      showAvatar: ChatPlugin.instance.showAvatarInChat,
+                      currentUserId:
+                          ChatPlugin.instance.isInitialized
+                              ? ChatPlugin.instance.currentUser.id
+                              : '',
+                      highlightedMessage: _controller.highlightMessage,
+                      shouldHighlight: _controller.highlightMessage != null,
+                    ),
+                  ),
+                  MessageInput(
+                    controller: _controller.draftController,
+                    onSendMessage: _controller.sendMessage,
+                    onSaveDraft: _controller.saveDraft,
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

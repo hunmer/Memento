@@ -96,11 +96,18 @@ class FileMessage {
     // 如果没有提供原始文件名，则使用文件路径的基本名称
     final fileName = originalFileName ?? path.basename(file.path);
 
+    // 确保文件路径使用正确的相对路径格式
+    String relativePath = await PathUtils.toRelativePath(file.path);
+    // 确保路径以 './' 开头
+    if (!relativePath.startsWith('./')) {
+      relativePath = './${relativePath.replaceFirst('app_data/', '')}';
+    }
+
     return FileMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       fileName: systemFileName ?? path.basename(file.path), // 系统文件名（UUID）
       originalFileName: fileName, // 保存原始文件名
-      filePath: file.path,
+      filePath: relativePath, // 使用相对路径
       fileSize: stats.size,
       timestamp: DateTime.now(),
       mimeType: mimeType,
@@ -110,7 +117,11 @@ class FileMessage {
 
   // 获取文件的绝对路径
   Future<String> getAbsolutePath() async {
-    return await PathUtils.toAbsolutePath(filePath);
+    if (filePath.startsWith('./')) {
+      return await PathUtils.toAbsolutePath(filePath);
+    }
+    // 处理可能没有 './' 前缀的旧数据
+    return await PathUtils.toAbsolutePath('./$filePath');
   }
 
   // 转换为Map

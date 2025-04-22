@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'custom_dialog.dart';
-import '../models/serialization_helpers.dart'; // 导入预定义图标映射表
+import '../constants/app_icons.dart';
 
 class IconPickerDialog extends StatefulWidget {
   final IconData currentIcon;
@@ -23,8 +23,8 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
   void initState() {
     super.initState();
     selectedIcon = widget.currentIcon;
-    // 从预定义图标映射表中获取所有图标
-    allIcons = predefinedIcons.values.toList();
+    // 从AppIcons中获取所有预定义图标
+    allIcons = AppIcons.predefinedIcons.values.toList();
   }
 
   @override

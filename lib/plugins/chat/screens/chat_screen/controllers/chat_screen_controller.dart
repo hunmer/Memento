@@ -46,7 +46,9 @@ class ChatScreenController extends ChangeNotifier {
   void _initializeAndLoadLastPage() async {
     // 获取最新的消息总数
     print('Searching for channel with id: ${channel.id}');
-    print('Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}');
+    print(
+      'Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}',
+    );
     final channelIndex = chatPlugin.channels.indexWhere(
       (c) => c.id == channel.id,
     );
@@ -71,7 +73,9 @@ class ChatScreenController extends ChangeNotifier {
       // 如果需要定位到特定消息
       if (initialMessage != null && autoScroll) {
         // 查找消息在列表中的位置
-        final messageIndex = messages.indexWhere((m) => m.id == initialMessage!.id);
+        final messageIndex = messages.indexWhere(
+          (m) => m.id == initialMessage!.id,
+        );
         if (messageIndex != -1) {
           // 使用延迟以确保布局完成
           Future.delayed(const Duration(milliseconds: 100), () {
@@ -115,7 +119,7 @@ class ChatScreenController extends ChangeNotifier {
         });
       }
     } catch (e) {
-     print('Error initializing current user: $e');
+      print('Error initializing current user: $e');
       // 使用默认用户作为备选
       currentUser = User(id: 'current_user', username: 'Current User');
     }
@@ -138,13 +142,15 @@ class ChatScreenController extends ChangeNotifier {
     try {
       // 从ChatPlugin加载最新的消息
       print('Loading messages - Searching for channel with id: ${channel.id}');
-      print('Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}');
+      print(
+        'Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}',
+      );
       final channelIndex = chatPlugin.channels.indexWhere(
         (c) => c.id == channel.id,
       );
       print('Found channel at index: $channelIndex');
       if (channelIndex == -1) {
-       print('Channel not found in ChatPlugin');
+        print('Channel not found in ChatPlugin');
         return;
       }
 
@@ -180,15 +186,13 @@ class ChatScreenController extends ChangeNotifier {
           messages.addAll(pageMessages);
         }
 
-        print(
-          'Loaded ${pageMessages.length} messages for page $currentPage',
-        );
+        print('Loaded ${pageMessages.length} messages for page $currentPage');
       }
 
       _updateDatesWithMessages();
     } catch (e) {
       // Handle error
-     print('Error loading messages: $e');
+      print('Error loading messages: $e');
     } finally {
       isLoading = false;
       notifyListeners();
@@ -262,7 +266,7 @@ class ChatScreenController extends ChangeNotifier {
   Future<void> saveEditedMessage() async {
     if (messageBeingEdited == null) return;
 
-    final editedMessage = Message(
+    final editedMessage = await Message.create(
       id: messageBeingEdited!.id,
       content: editingController.text,
       user: messageBeingEdited!.user,
@@ -279,7 +283,7 @@ class ChatScreenController extends ChangeNotifier {
       }
     } catch (e) {
       // Handle error
-     print('Error updating message: $e');
+      print('Error updating message: $e');
     } finally {
       messageBeingEdited = null;
       editingController.clear();
@@ -294,7 +298,7 @@ class ChatScreenController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       // Handle error
-     print('Error deleting message: $e');
+      print('Error deleting message: $e');
     }
   }
 
@@ -308,7 +312,7 @@ class ChatScreenController extends ChangeNotifier {
       }
     } catch (e) {
       // Handle error
-     print('Error setting fixed symbol: $e');
+      print('Error setting fixed symbol: $e');
     }
   }
 
@@ -348,7 +352,7 @@ class ChatScreenController extends ChangeNotifier {
     if (content.trim().isEmpty) return;
 
     try {
-      final newMessage = Message(
+      final newMessage = await Message.create(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         content: content,
         user: currentUser,
@@ -362,14 +366,16 @@ class ChatScreenController extends ChangeNotifier {
 
       // 获取ChatPlugin中的频道索引
       print('Sending message - Searching for channel with id: ${channel.id}');
-      print('Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}');
+      print(
+        'Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}',
+      );
       final channelIndex = chatPlugin.channels.indexWhere(
         (c) => c.id == channel.id,
       );
       print('Found channel at index: $channelIndex');
       if (channelIndex != -1) {
         // 直接使用ChatPlugin的addMessage方法，它会同时更新内存和存储
-        await chatPlugin.addMessage(channel.id, newMessage);
+        await chatPlugin.addMessage(channel.id, Future.value(newMessage));
       } else {
         // 如果找不到频道，则使用旧方法保存
         await chatPlugin.saveMessages(channel.id, messages);
@@ -392,12 +398,12 @@ class ChatScreenController extends ChangeNotifier {
           try {
             await _audioService.playMessageSentSound();
           } catch (e) {
-           print('Error playing audio: $e');
+            print('Error playing audio: $e');
           }
         });
       }
     } catch (e) {
-     print('Error sending message: $e');
+      print('Error sending message: $e');
     }
   }
 
@@ -421,7 +427,7 @@ class ChatScreenController extends ChangeNotifier {
 
       print('Messages cleared successfully');
     } catch (e) {
-     print('Error clearing messages: $e');
+      print('Error clearing messages: $e');
       // 如果清空失败，重新加载消息
       await _loadMessages();
     }
@@ -432,31 +438,35 @@ class ChatScreenController extends ChangeNotifier {
       final index = messages.indexWhere((m) => m.id == message.id);
       if (index != -1) {
         // 创建消息的新副本并更新颜色
-        messages[index] = messages[index].copyWith(bubbleColor: color);
-        
+        messages[index] = await messages[index].copyWith(bubbleColor: color);
+
         // 获取ChatPlugin中的频道索引
-        print('Setting bubble color - Searching for channel with id: ${channel.id}');
-        print('Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}');
+        print(
+          'Setting bubble color - Searching for channel with id: ${channel.id}',
+        );
+        print(
+          'Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}',
+        );
         final channelIndex = chatPlugin.channels.indexWhere(
           (c) => c.id == channel.id,
         );
         print('Found channel at index: $channelIndex');
-        
+
         if (channelIndex != -1) {
           // 保存到存储
           await chatPlugin.saveMessages(channel.id, messages);
           print('Successfully updated bubble color for message ${message.id}');
         } else {
-         print('Channel not found in ChatPlugin');
+          print('Channel not found in ChatPlugin');
         }
-        
+
         // 通知监听器更新UI
         notifyListeners();
       } else {
-       print('Message not found in the list');
+        print('Message not found in the list');
       }
     } catch (e) {
-     print('Error setting bubble color: $e');
+      print('Error setting bubble color: $e');
       // 可以在这里添加错误处理，比如显示一个提示
     }
   }
@@ -464,17 +474,21 @@ class ChatScreenController extends ChangeNotifier {
   Future<void> _loadUntilMessageFound() async {
     if (initialMessage == null) return;
 
-    final channelIndex = chatPlugin.channels.indexWhere((c) => c.id == channel.id);
+    final channelIndex = chatPlugin.channels.indexWhere(
+      (c) => c.id == channel.id,
+    );
     if (channelIndex == -1) return;
 
     final allMessages = chatPlugin.channels[channelIndex].messages;
-    final targetMessageIndex = allMessages.indexWhere((m) => m.id == initialMessage!.id);
-    
+    final targetMessageIndex = allMessages.indexWhere(
+      (m) => m.id == initialMessage!.id,
+    );
+
     if (targetMessageIndex == -1) return;
 
     // 计算目标消息所在的页码
     final targetPage = (targetMessageIndex / pageSize).ceil();
-    
+
     // 加载直到目标页
     while (currentPage < targetPage) {
       currentPage++;
@@ -484,7 +498,9 @@ class ChatScreenController extends ChangeNotifier {
     // 等待布局完成后滚动到目标消息
     Future.delayed(const Duration(milliseconds: 100), () {
       if (scrollController.hasClients) {
-        final messageIndex = messages.indexWhere((m) => m.id == initialMessage!.id);
+        final messageIndex = messages.indexWhere(
+          (m) => m.id == initialMessage!.id,
+        );
         if (messageIndex != -1) {
           final itemHeight = 80.0; // 估计每个消息项的高度
           final offset = messageIndex * itemHeight;
