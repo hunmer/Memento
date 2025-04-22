@@ -153,13 +153,9 @@ class Message {
       );
       if (fileInfo.containsKey('filePath')) {
         final filePath = fileInfo['filePath'] as String;
-        // 如果已经是相对路径，不需要再转换
-        if (!filePath.startsWith('./')) {
-          // 使用FilePathConverter将绝对路径转换为相对路径
-          fileInfo['filePath'] = await FilePathConverter.toRelativePath(
-            filePath,
-          );
-        }
+        fileInfo['filePath'] = (await FilePathConverter.toRelativePath(
+          filePath,
+        )).replaceAll('./app_data/', './');
       }
       // 更新转换后的fileInfo
       messageMetadata[Message.metadataKeyFileInfo] = fileInfo;
