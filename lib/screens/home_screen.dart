@@ -281,6 +281,26 @@ class _HomeScreenState extends State<HomeScreen> {
               : LayoutBuilder(
                 builder: (context, constraints) {
                   int crossAxisCount = 2;
+                  // 先对插件列表进行排序，将宽卡片放在前面
+                  plugins.sort((a, b) {
+                    final aSize = _getCardSize(a.id);
+                    final bSize = _getCardSize(b.id);
+                    // 宽卡片优先排在前面
+                    if (aSize == CardSize.wide && bSize != CardSize.wide) {
+                      return -1;
+                    } else if (aSize != CardSize.wide &&
+                        bSize == CardSize.wide) {
+                      return 1;
+                    }
+                    // 如果卡片大小相同，则按照原有顺序排序
+                    final indexA = _pluginOrder.indexOf(a.id);
+                    final indexB = _pluginOrder.indexOf(b.id);
+                    if (indexA == -1 && indexB == -1) return 0;
+                    if (indexA == -1) return 1;
+                    if (indexB == -1) return -1;
+                    return indexA.compareTo(indexB);
+                  });
+
                   // 创建布局模式
                   final List<QuiltedGridTile> pattern = [];
                   for (var plugin in plugins) {
