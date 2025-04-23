@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../models/message.dart';
 import '../../../models/channel.dart';
@@ -32,6 +33,9 @@ class TimelineController extends ChangeNotifier {
   final TimelineFilter filter = TimelineFilter();
   bool _isFilterActive = false;
 
+  // 用于防抖的计时器
+  Timer? _searchDebounce;
+
   TimelineController(
     this._chatPlugin, {
     this.onMessageEdit,
@@ -64,9 +68,15 @@ class TimelineController extends ChangeNotifier {
   bool get hasMoreMessages => _hasMoreMessages;
 
   void _onSearchChanged() {
-    _searchQuery = searchController.text;
-    _filterMessages();
-    notifyListeners();
+    // 取消之前的计时器
+    _searchDebounce?.cancel();
+    
+    // 设置新的计时器，300ms 后执行搜索
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      _searchQuery = searchController.text;
+      _filterMessages();
+      notifyListeners();
+    });
   }
 
   void _onChatDataChanged() {
@@ -126,6 +136,11 @@ class TimelineController extends ChangeNotifier {
 
   /// 根据搜索查询和高级过滤器过滤消息
   void _filterMessages() {
+    // 如果正在加载中，不执行过滤
+    if (_isLoading) {
+      return;
+    }
+    
     // 先应用基本的搜索过滤
     List<Message> result = List<Message>.from(_allMessages);
 
@@ -222,12 +237,14 @@ class TimelineController extends ChangeNotifier {
 
     _filteredMessages = result;
 
-    // 确保加载第一页数据
+    // 重置分页状态
     _currentPage = 1;
     _hasMoreMessages = true;
-
-    // 不要在这里调用 _loadCurrentPage()，因为此时可能仍处于 _isLoading 状态
-    // 改为在 _loadAllMessages 的 finally 块中调用
+    
+    // 使用微任务确保在当前构建周期之后加载数据
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCurrentPage();
+    });
 
     debugPrint('Timeline: 过滤后共有 ${_filteredMessages.length} 条消息');
   }
@@ -242,33 +259,57 @@ class TimelineController extends ChangeNotifier {
 
   /// 应用高级过滤器
   void applyFilter(TimelineFilter newFilter) {
-    filter.includeChannels = newFilter.includeChannels;
-    filter.includeUsernames = newFilter.includeUsernames;
-    filter.includeContent = newFilter.includeContent;
-    filter.startDate = newFilter.startDate;
-    filter.endDate = newFilter.endDate;
-    filter.selectedChannelIds = newFilter.selectedChannelIds;
-    filter.selectedUserIds = newFilter.selectedUserIds;
+    // 使用微任务确保在当前构建周期之后执行过滤操作
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      filter.includeChannels = newFilter.includeChannels;
+      filter.includeUsernames = newFilter.includeUsernames;
+      filter.includeContent = newFilter.includeContent;
+      filter.startDate = newFilter.startDate;
+      filter.endDate = newFilter.endDate;
+      filter.selectedChannelIds = newFilter.selectedChannelIds;
+      filter.selectedUserIds = newFilter.selectedUserIds;
 
-    // 检查过滤器是否有效
-    _isFilterActive =
-        filter.selectedChannelIds.isNotEmpty ||
-        filter.selectedUserIds.isNotEmpty ||
-        filter.startDate != null ||
-        filter.endDate != null ||
-        !filter.includeChannels ||
-        !filter.includeUsernames ||
-        !filter.includeContent;
+      // 检查过滤器是否有效
+      _isFilterActive =
+          filter.selectedChannelIds.isNotEmpty ||
+          filter.selectedUserIds.isNotEmpty ||
+          filter.startDate != null ||
+          filter.endDate != null ||
+          !filter.includeChannels ||
+          !filter.includeUsernames ||
+          !filter.includeContent;
 
-    _filterMessages();
+      _filterMessages();
+      notifyListeners();
+    });
   }
 
   /// 重置过滤器
   void resetFilter() {
-    filter.reset();
-    _isFilterActive = false;
-    _filterMessages();
-    _ensureScrollListener(); // 确保滚动监听器已添加
+    // 使用微任务确保在当前构建周期之后执行过滤操作
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      filter.reset();
+      _isFilterActive = false;
+      _filterMessages();
+      _ensureScrollListener(); // 确保滚动监听器已添加
+      notifyListeners();
+    });
+  }
+
+  /// 清空搜索并更新结果
+  void clearSearch() {
+    // 取消可能正在进行的搜索防抖
+    _searchDebounce?.cancel();
+    
+    // 清空搜索控制器
+    searchController.clear();
+    
+    // 使用微任务确保在当前构建周期之后执行过滤操作
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchQuery = '';
+      _filterMessages();
+      notifyListeners();
+    });
   }
 
   /// 手动检查并重新添加滚动监听器（可从UI层调用）
@@ -319,8 +360,19 @@ class TimelineController extends ChangeNotifier {
 
   /// 处理消息删除
   Future<void> handleMessageDelete(Message message) async {
-    if (onMessageDelete != null) {
-      await onMessageDelete!(message);
+    try {
+      if (onMessageDelete != null) {
+        await onMessageDelete!(message);
+      }
+      
+      // 从各个列表中移除消息
+      removeMessage(message);
+      
+      debugPrint('Timeline: 成功删除消息 ${message.id}');
+    } catch (e) {
+      debugPrint('Timeline: 删除消息失败: $e');
+      // 如果删除失败，刷新时间线以确保显示正确的状态
+      await refreshTimeline();
     }
   }
 
@@ -488,8 +540,48 @@ class TimelineController extends ChangeNotifier {
     debugPrint('Timeline: 重置分页状态');
   }
 
+  /// 从列表中删除单个消息，不刷新整个时间线
+  void removeMessage(Message message) {
+    // 从所有消息列表中移除
+    _allMessages.removeWhere((m) => m.id == message.id);
+    
+    // 从过滤后的消息列表中移除
+    _filteredMessages.removeWhere((m) => m.id == message.id);
+    
+    // 从当前显示的消息列表中移除
+    _displayMessages.removeWhere((m) => m.id == message.id);
+    
+    debugPrint('Timeline: 移除了单条消息 ${message.id}');
+    notifyListeners();
+  }
+
+  /// 更新单个消息，不刷新整个时间线
+  void updateMessage(Message message) {
+    // 查找并更新所有消息列表中的消息
+    final allIndex = _allMessages.indexWhere((m) => m.id == message.id);
+    if (allIndex != -1) {
+      _allMessages[allIndex] = message;
+    }
+    
+    // 查找并更新过滤后消息列表中的消息
+    final filteredIndex = _filteredMessages.indexWhere((m) => m.id == message.id);
+    if (filteredIndex != -1) {
+      _filteredMessages[filteredIndex] = message;
+    }
+    
+    // 查找并更新当前显示的消息列表中的消息
+    final displayIndex = _displayMessages.indexWhere((m) => m.id == message.id);
+    if (displayIndex != -1) {
+      _displayMessages[displayIndex] = message;
+    }
+    
+    debugPrint('Timeline: 更新了单条消息 ${message.id}');
+    notifyListeners();
+  }
+
   @override
   void dispose() {
+    _searchDebounce?.cancel(); // 取消搜索防抖计时器
     searchController.dispose();
     scrollController.removeListener(_onScroll); // 先移除监听器
     scrollController.dispose();

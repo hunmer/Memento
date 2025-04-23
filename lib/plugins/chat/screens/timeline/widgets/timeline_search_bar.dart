@@ -46,7 +46,7 @@ class TimelineSearchBar extends StatelessWidget {
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
-                          controller.searchController.clear();
+                          controller.clearSearch(); // 使用公开方法清空搜索
                         },
                       )
                     : null,

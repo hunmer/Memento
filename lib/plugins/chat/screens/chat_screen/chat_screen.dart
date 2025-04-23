@@ -107,11 +107,9 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void _showEditDialog(Message message) {
-    // 使用MessageOperations处理消息编辑
-    _messageOperations.editMessage(message);
-    // 注意：由于我们使用了统一的消息操作处理器，不再需要自定义对话框
-    // 如果需要保留自定义对话框，可以在MessageOperations中添加支持自定义UI的方法
+  void _showEditDialog(Message message) async {
+    await _messageOperations.editMessage(message);
+    _updateMessages(); // 更新消息列表
   }
 
   void _showClearConfirmationDialog() {
@@ -187,6 +185,13 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.toggleMultiSelectMode();
   }
 
+  /// 删除单条消息并更新状态
+  Future<void> _deleteMessage(Message message) async {
+    await _messageOperations.deleteMessage(message);
+    _updateMessages(); // 更新消息列表
+  }
+
+  /// 删除多条选中的消息
   void _deleteSelectedMessages() async {
     final selectedMessages =
         _controller.messages
@@ -194,7 +199,7 @@ class _ChatScreenState extends State<ChatScreen> {
             .toList();
 
     for (var message in selectedMessages) {
-      await _messageOperations.deleteMessage(message);
+      await _deleteMessage(message);
     }
 
     _controller.toggleMultiSelectMode();
@@ -208,11 +213,13 @@ class _ChatScreenState extends State<ChatScreen> {
   void _setFixedSymbol(Message message, String? symbol) async {
     // 使用MessageOperations设置固定符号
     await _messageOperations.setFixedSymbol(message, symbol);
+    _updateMessages(); // 更新消息列表
   }
 
-  void _setBubbleColor(Message message, Color? color) {
+  void _setBubbleColor(Message message, Color? color) async {
     // 使用MessageOperations设置气泡颜色
-    _messageOperations.setBubbleColor(message, color);
+    await _messageOperations.setBubbleColor(message, color);
+    _updateMessages(); // 更新消息列表
   }
 
   void _navigateToUserProfile(Message message) {
@@ -267,9 +274,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       isMultiSelectMode: _controller.isMultiSelectMode,
                       selectedMessageIds: _controller.selectedMessageIds,
                       onMessageEdit: _showEditDialog,
-                      onMessageDelete:
-                          (message) =>
-                              _messageOperations.deleteMessage(message),
+                      onMessageDelete: _deleteMessage,
                       onMessageCopy: _copyMessageToClipboard,
                       onSetFixedSymbol: _setFixedSymbol,
                       onSetBubbleColor: _setBubbleColor,

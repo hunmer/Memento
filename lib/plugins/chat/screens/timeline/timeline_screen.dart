@@ -55,18 +55,21 @@ class _TimelineScreenState extends State<TimelineScreen> {
       },
       onMessageDelete: (message) async {
         await _messageOperations.deleteMessage(message);
-        await _controller.refreshTimeline();
+        // 删除消息后直接从控制器的消息列表中移除
+        _controller.removeMessage(message);
       },
       onMessageCopy: (message) {
         _messageOperations.copyMessage(message);
       },
       onSetFixedSymbol: (message, symbol) async {
         await _messageOperations.setFixedSymbol(message, symbol);
-        await _controller.refreshTimeline();
+        // 更新单个消息的状态
+        _controller.updateMessage(message);
       },
       onSetBubbleColor: (message, color) async {
         await _messageOperations.setBubbleColor(message, color);
-        await _controller.refreshTimeline();
+        // 更新单个消息的状态
+        _controller.updateMessage(message);
       },
     );
 
