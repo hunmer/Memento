@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
-import 'screens/activity_timeline_screen.dart';
+import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_statistics_screen.dart';
 
 class ActivityPlugin extends BasePlugin {

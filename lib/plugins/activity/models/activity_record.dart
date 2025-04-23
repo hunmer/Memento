@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 class ActivityRecord {
@@ -8,6 +9,7 @@ class ActivityRecord {
   final List<String> tags;
   final String? description;
   final String? mood; // 添加心情字段
+  final Color? color; // 活动颜色
 
   ActivityRecord({
     String? id,
@@ -17,6 +19,7 @@ class ActivityRecord {
     this.tags = const [],
     this.description,
     this.mood, // 心情emoji
+    this.color, // 活动颜色
   }) : id = id ?? const Uuid().v4();
 
   // 计算持续时间（分钟）
@@ -33,6 +36,16 @@ class ActivityRecord {
 
   // 从JSON创建实例
   factory ActivityRecord.fromJson(Map<String, dynamic> json) {
+    // 解析颜色（如果存在）
+    Color? color;
+    if (json['color'] != null) {
+      try {
+        color = Color(int.parse(json['color']));
+      } catch (e) {
+        debugPrint('解析颜色失败: $e');
+      }
+    }
+    
     return ActivityRecord(
       id: json['id'],
       startTime: DateTime.parse(json['startTime']),
@@ -41,6 +54,7 @@ class ActivityRecord {
       tags: List<String>.from(json['tags'] ?? []),
       description: json['description'],
       mood: json['mood'],
+      color: color,
     );
   }
 
@@ -54,6 +68,7 @@ class ActivityRecord {
       'tags': tags,
       'description': description,
       'mood': mood,
+      'color': color?.value.toString(),
     };
   }
 }
