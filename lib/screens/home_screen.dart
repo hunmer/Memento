@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 import '../core/plugin_base.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_bar_widget.dart';
@@ -19,21 +20,53 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<PluginBase>> _pluginsFuture;
   // 存储每个插件卡片的大小
   final Map<String, CardSize> _cardSizes = {};
+  // 是否处于移动模式
+  bool _isReorderMode = false;
+  // 存储插件的顺序
+  List<String> _pluginOrder = [];
 
   // 字符串转换为卡片大小枚举
   CardSize _stringToCardSize(String sizeStr) {
     return sizeStr.toLowerCase() == 'wide' ? CardSize.wide : CardSize.small;
   }
-  
+
   // 获取插件的卡片大小，如果没有设置则返回默认值
   CardSize _getCardSize(String pluginId) {
     return _cardSizes[pluginId] ?? CardSize.small;
   }
-  
+
+  // 加载插件顺序
+  Future<void> _loadPluginOrder() async {
+    try {
+      final orderConfig = await globalConfigManager.getPluginConfig(
+        'plugin_order',
+      );
+      if (orderConfig != null && orderConfig['order'] != null) {
+        final List<dynamic> order = orderConfig['order'] as List<dynamic>;
+        _pluginOrder = order.map((e) => e.toString()).toList();
+      }
+    } catch (e) {
+      debugPrint('Error loading plugin order: $e');
+    }
+  }
+
+  // 保存插件顺序
+  Future<void> _savePluginOrder() async {
+    try {
+      await globalConfigManager.savePluginConfig('plugin_order', {
+        'order': _pluginOrder,
+      });
+    } catch (e) {
+      debugPrint('Error saving plugin order: $e');
+    }
+  }
+
   // 加载插件卡片大小设置
   Future<void> _loadCardSizes() async {
     try {
-      final cardSizesConfig = await globalConfigManager.getPluginConfig('card_sizes');
+      final cardSizesConfig = await globalConfigManager.getPluginConfig(
+        'card_sizes',
+      );
       if (cardSizesConfig != null) {
         final sizes = cardSizesConfig['sizes'] as Map<dynamic, dynamic>?;
         if (sizes != null) {
@@ -56,20 +89,22 @@ class _HomeScreenState extends State<HomeScreen> {
       _cardSizes.forEach((key, value) {
         sizes[key] = value.toString().split('.').last;
       });
-      
-      await globalConfigManager.savePluginConfig('card_sizes', {'sizes': sizes});
+
+      await globalConfigManager.savePluginConfig('card_sizes', {
+        'sizes': sizes,
+      });
     } catch (e) {
       debugPrint('Error saving card sizes: $e');
     }
   }
-  
+
   // 在指定位置显示卡片大小调整菜单
   void _showCardSizeMenu(BuildContext context, PluginBase plugin) {
     try {
       // 获取卡片的位置信息
       final RenderBox button = context.findRenderObject() as RenderBox;
       Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-      
+
       // 计算弹出菜单的位置
       final Offset buttonPosition = button.localToGlobal(Offset.zero);
       final RelativeRect position = RelativeRect.fromLTRB(
@@ -78,14 +113,12 @@ class _HomeScreenState extends State<HomeScreen> {
         buttonPosition.dx + button.size.width,
         buttonPosition.dy + button.size.height * 2,
       );
-      
+
       showMenu<CardSize>(
         context: context,
         position: position,
         elevation: 8.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         items: [
           PopupMenuItem<CardSize>(
             value: CardSize.wide,
@@ -93,20 +126,23 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Icon(
                   Icons.crop_landscape,
-                  color: _getCardSize(plugin.id) == CardSize.wide
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+                  color:
+                      _getCardSize(plugin.id) == CardSize.wide
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '宽卡片',
                   style: TextStyle(
-                    fontWeight: _getCardSize(plugin.id) == CardSize.wide
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    color: _getCardSize(plugin.id) == CardSize.wide
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
+                    fontWeight:
+                        _getCardSize(plugin.id) == CardSize.wide
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                    color:
+                        _getCardSize(plugin.id) == CardSize.wide
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
                   ),
                 ),
               ],
@@ -118,20 +154,23 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Icon(
                   Icons.crop_square,
-                  color: _getCardSize(plugin.id) == CardSize.small
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+                  color:
+                      _getCardSize(plugin.id) == CardSize.small
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '小卡片',
                   style: TextStyle(
-                    fontWeight: _getCardSize(plugin.id) == CardSize.small
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    color: _getCardSize(plugin.id) == CardSize.small
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
+                    fontWeight:
+                        _getCardSize(plugin.id) == CardSize.small
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                    color:
+                        _getCardSize(plugin.id) == CardSize.small
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
                   ),
                 ),
               ],
@@ -159,11 +198,11 @@ class _HomeScreenState extends State<HomeScreen> {
       const Duration(milliseconds: 500),
       () => globalPluginManager.allPlugins,
     ).then((plugins) async {
-      // 加载插件卡片大小设置
-      await _loadCardSizes();
+      // 加载插件卡片大小设置和顺序
+      await Future.wait([_loadCardSizes(), _loadPluginOrder()]);
       // 检查是否有最后打开的插件
       if (!mounted) return plugins;
-      
+
       final config = await globalConfigManager.getPluginConfig(
         'last_opened_plugin',
       );
@@ -191,7 +230,24 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AppBarWidget(titleKey: 'pluginManager'),
+      appBar: AppBar(
+        title: const Text('插件管理'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isReorderMode ? Icons.done : Icons.drag_indicator,
+              color:
+                  _isReorderMode ? Theme.of(context).colorScheme.primary : null,
+            ),
+            onPressed: () {
+              setState(() {
+                _isReorderMode = !_isReorderMode;
+              });
+            },
+            tooltip: _isReorderMode ? '完成排序' : '调整顺序',
+          ),
+        ],
+      ),
       drawer: const AppDrawer(),
       floatingActionButton: null,
       body: FutureBuilder<List<PluginBase>>(
@@ -205,7 +261,20 @@ class _HomeScreenState extends State<HomeScreen> {
             return Center(child: Text('加载插件失败: ${snapshot.error}'));
           }
 
-          final plugins = snapshot.data ?? [];
+          // 创建一个可变的列表副本
+          List<PluginBase> plugins = List.from(snapshot.data ?? []);
+
+          // 根据保存的顺序排序插件
+          if (_pluginOrder.isNotEmpty) {
+            plugins.sort((a, b) {
+              final indexA = _pluginOrder.indexOf(a.id);
+              final indexB = _pluginOrder.indexOf(b.id);
+              if (indexA == -1 && indexB == -1) return 0;
+              if (indexA == -1) return 1;
+              if (indexB == -1) return -1;
+              return indexA.compareTo(indexB);
+            });
+          }
 
           return plugins.isEmpty
               ? const Center(child: Text('没有已安装的插件'))
@@ -217,96 +286,207 @@ class _HomeScreenState extends State<HomeScreen> {
                   for (var plugin in plugins) {
                     final cardSize = _getCardSize(plugin.id);
                     if (cardSize == CardSize.wide) {
-                      pattern.add(QuiltedGridTile(1, crossAxisCount)); // 宽卡片占据整行
+                      pattern.add(
+                        QuiltedGridTile(1, crossAxisCount),
+                      ); // 宽卡片占据整行
                     } else {
                       pattern.add(QuiltedGridTile(1, 1)); // 小卡片占据1x1
                     }
                   }
 
+                  if (_isReorderMode) {
+                    return ReorderableGridView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        mainAxisSpacing: 4,
+                        crossAxisSpacing: 4,
+                        childAspectRatio: 1,
+                      ),
+                      itemCount: plugins.length,
+                      onReorder: (oldIndex, newIndex) {
+                        setState(() {
+                          if (oldIndex < newIndex) {
+                            newIndex -= 1;
+                          }
+                          final PluginBase item = plugins.removeAt(oldIndex);
+                          plugins.insert(newIndex, item);
+
+                          // 更新插件顺序并保存
+                          _pluginOrder = plugins.map((p) => p.id).toList();
+                          _savePluginOrder();
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        final plugin = plugins[index];
+                        final customCardView = plugin.buildCardView(context);
+
+                        return Card(
+                          key: ValueKey(plugin.id),
+                          elevation: 2.0,
+                          child: Stack(
+                            children: [
+                              customCardView ??
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: 64,
+                                          height: 64,
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(
+                                              context,
+                                            ).primaryColor.withAlpha(25),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            plugin.icon ?? Icons.extension,
+                                            size: 36,
+                                            color:
+                                                plugin.color ??
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          plugin.name,
+                                          style:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.titleMedium,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              // 添加一个透明层，显示拖动指示
+                              if (_isReorderMode)
+                                Positioned.fill(
+                                  child: Material(
+                                    color: Colors.black12,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.drag_handle,
+                                        color: Colors.white,
+                                        size: 32,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }
+
+                  // 非移动模式下使用原有的 GridView
                   return GridView.custom(
                     padding: const EdgeInsets.all(16.0),
+                    key: _isReorderMode ? null : const ValueKey('normal_grid'),
                     gridDelegate: SliverQuiltedGridDelegate(
                       crossAxisCount: crossAxisCount,
                       mainAxisSpacing: 4,
                       crossAxisSpacing: 4,
                       pattern: pattern,
                     ),
-                    childrenDelegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final plugin = plugins[index];
-                        // 获取插件自定义卡片视图或使用默认卡片
-                        final customCardView = plugin.buildCardView(context);
+                    childrenDelegate: SliverChildBuilderDelegate((
+                      context,
+                      index,
+                    ) {
+                      final plugin = plugins[index];
+                      // 获取插件自定义卡片视图或使用默认卡片
+                      final customCardView = plugin.buildCardView(context);
 
                       // 使用Builder来获取卡片自己的context
                       Widget cardContent = Builder(
-                        builder: (cardContext) => Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onLongPress: () {
-                              _showCardSizeMenu(cardContext, plugin);
-                            },
-                            child: Card(
-                              elevation: 2.0,
-                              clipBehavior: Clip.antiAlias,
+                        builder:
+                            (cardContext) => Material(
+                              color: Colors.transparent,
                               child: InkWell(
-                                onTap: () {
-                                  globalConfigManager.savePluginConfig(
-                                    'last_opened_plugin',
-                                    {'pluginId': plugin.id},
-                                  );
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => plugin.buildMainView(context),
-                                    ),
-                                  );
+                                onLongPress: () {
+                                  _showCardSizeMenu(cardContext, plugin);
                                 },
-                                child: customCardView ?? Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      // 插件图标
-                                      Container(
-                                        width: 64,
-                                        height: 64,
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).primaryColor.withAlpha(25),
-                                          borderRadius: BorderRadius.circular(12),
+                                child: Card(
+                                  elevation: 2.0,
+                                  clipBehavior: Clip.antiAlias,
+                                  child: InkWell(
+                                    onTap: () {
+                                      globalConfigManager.savePluginConfig(
+                                        'last_opened_plugin',
+                                        {'pluginId': plugin.id},
+                                      );
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) =>
+                                                  plugin.buildMainView(context),
                                         ),
-                                        child: Icon(
-                                          plugin.icon ?? Icons.extension,
-                                          size: 36,
-                                          color: plugin.color ?? Theme.of(context).primaryColor,
+                                      );
+                                    },
+                                    child:
+                                        customCardView ??
+                                        Padding(
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              // 插件图标
+                                              Container(
+                                                width: 64,
+                                                height: 64,
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).primaryColor.withAlpha(25),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                child: Icon(
+                                                  plugin.icon ??
+                                                      Icons.extension,
+                                                  size: 36,
+                                                  color:
+                                                      plugin.color ??
+                                                      Theme.of(
+                                                        context,
+                                                      ).primaryColor,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 16),
+                                              // 插件名称
+                                              Text(
+                                                plugin.name,
+                                                style:
+                                                    Theme.of(
+                                                      context,
+                                                    ).textTheme.titleMedium,
+                                                textAlign: TextAlign.center,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      // 插件名称
-                                      Text(
-                                        plugin.name,
-                                        style:
-                                            Theme.of(context).textTheme.titleMedium,
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
                       );
                       // 直接返回卡片内容，QuiltedGridView会根据pattern参数处理布局
                       return cardContent;
-                      },
-                      childCount: plugins.length,
-                    ),
+                    }, childCount: plugins.length),
                   );
                 },
               );
