@@ -58,29 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: const AppBarWidget(titleKey: 'pluginManager'),
       drawer: const AppDrawer(),
-      floatingActionButton:
-          kIsWeb
-              ? FloatingActionButton(
-                onPressed: () async {
-                  // 测试Web存储
-                  final testKey = 'test_data';
-                  final testContent = DateTime.now().toString();
-                  await globalStorage.writeString(testKey, testContent);
-
-                  final readContent = await globalStorage.readString(testKey);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('存储测试: $readContent'),
-                        duration: const Duration(seconds: 3),
-                      ),
-                    );
-                  }
-                },
-                tooltip: '测试Web存储',
-                child: const Icon(Icons.storage),
-              )
-              : null,
+      floatingActionButton: null,
       body: FutureBuilder<List<PluginBase>>(
         future: _pluginsFuture,
         builder: (context, snapshot) {
@@ -127,6 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: plugins.length,
                     itemBuilder: (context, index) {
                       final plugin = plugins[index];
+                      // 获取插件自定义卡片视图或使用默认卡片
+                      final customCardView = plugin.buildCardView(context);
+                      
                       return Card(
                         elevation: 2.0,
                         clipBehavior: Clip.antiAlias,
@@ -144,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             );
                           },
-                          child: Padding(
+                          child: customCardView ?? Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -160,9 +141,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
-                                    Icons.extension,
+                                    plugin.icon ?? Icons.extension,
                                     size: 36,
-                                    color: Theme.of(context).primaryColor,
+                                    color: plugin.color ?? Theme.of(context).primaryColor,
                                   ),
                                 ),
                                 const SizedBox(height: 16),

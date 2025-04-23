@@ -101,6 +101,10 @@ abstract class PluginBase {
   /// 构建插件主视图
   Widget buildMainView(BuildContext context);
 
+  /// 构建插件卡片视图
+  /// 如果插件需要自定义卡片显示样式，可以重写此方法
+  Widget? buildCardView(BuildContext context) => null;
+
   /// 构建插件设置视图
   Widget buildSettingsView(BuildContext context) {
     return Column(

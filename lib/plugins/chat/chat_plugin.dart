@@ -559,6 +559,139 @@ class ChatPlugin extends BasePlugin {
     }
   }
 
+  // 获取今日消息数量
+  int getTodayMessageCount() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    int count = 0;
+    for (var channel in _channels) {
+      count += channel.messages.where((msg) {
+        final msgDate = DateTime(msg.date.year, msg.date.month, msg.date.day);
+        return msgDate.isAtSameMomentAs(today);
+      }).length;
+    }
+    return count;
+  }
+  
+  // 获取总消息数量
+  int getTotalMessageCount() {
+    int count = 0;
+    for (var channel in _channels) {
+      count += channel.messages.length;
+    }
+    return count;
+  }
+
+  @override
+  Widget? buildCardView(BuildContext context) {
+    // 更新本地化文本
+    updateLocalizedStrings(context);
+    
+    final theme = Theme.of(context);
+    
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon ?? Icons.chat_bubble_outline,
+                  size: 24,
+                  color: color ?? theme.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          
+          // 统计信息卡片
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                // 频道数量
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '频道数量',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    Text(
+                      '${_channels.length}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                
+                // 总消息数量
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '总消息数量',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    Text(
+                      '${getTotalMessageCount()}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                
+                // 今日新增消息
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '今日新增消息',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    Text(
+                      '${getTodayMessageCount()}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: getTodayMessageCount() > 0 ? theme.colorScheme.primary : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget buildMainView(BuildContext context) {
     // 更新本地化文本
