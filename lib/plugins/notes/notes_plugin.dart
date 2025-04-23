@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import '../base_plugin.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
 
 class NotesPlugin extends BasePlugin {
   late NotesController _controller;
+  bool _isInitialized = false;
 
   @override
   String get id => 'notes';
@@ -30,10 +30,115 @@ class NotesPlugin extends BasePlugin {
     try {
       _controller = NotesController(storage);
       await _controller.initialize();
+      _isInitialized = true;
     } catch (e) {
       debugPrint('Failed to initialize NotesPlugin: $e');
       rethrow;
     }
+  }
+
+  // 获取总笔记数
+  int getTotalNotesCount() {
+    if (!_isInitialized) return 0;
+    return _controller.searchNotes(query: '').length;
+  }
+
+  // 获取最近7天的笔记数
+  int getRecentNotesCount() {
+    if (!_isInitialized) return 0;
+    final now = DateTime.now();
+    final sevenDaysAgo = now.subtract(const Duration(days: 7));
+
+    return _controller
+        .searchNotes(query: '', startDate: sevenDaysAgo, endDate: now)
+        .length;
+  }
+
+  @override
+  Widget? buildCardView(BuildContext context) {
+    if (!_isInitialized) return null;
+
+    final theme = Theme.of(context);
+    final totalNotes = getTotalNotesCount();
+    final recentNotes = getRecentNotesCount();
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 24, color: theme.primaryColor),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 统计信息卡片
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 总笔记数
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('总笔记数', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '$totalNotes',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            totalNotes > 0 ? theme.colorScheme.primary : null,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+                // 七日笔记数
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('七日笔记数', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '$recentNotes',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            recentNotes > 0 ? theme.colorScheme.primary : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

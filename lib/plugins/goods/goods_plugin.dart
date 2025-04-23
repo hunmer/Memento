@@ -97,7 +97,10 @@ class GoodsPlugin extends BasePlugin {
         // 保持现有物品列表，除非明确要求更新
         final existingWarehouse = _warehouses[index];
         final updatedWarehouse = warehouse.copyWith(
-          items: warehouse.items.isEmpty ? existingWarehouse.items : warehouse.items,
+          items:
+              warehouse.items.isEmpty
+                  ? existingWarehouse.items
+                  : warehouse.items,
         );
         _warehouses[index] = updatedWarehouse;
         warehouse = updatedWarehouse; // 更新引用以保存正确的数据
@@ -177,6 +180,43 @@ class GoodsPlugin extends BasePlugin {
     }
   }
 
+  // 获取所有物品的总数量
+  int getTotalItemsCount() {
+    int count = 0;
+    for (var warehouse in _warehouses) {
+      count += warehouse.items.length;
+    }
+    return count;
+  }
+
+  // 获取所有物品的总价值
+  double getTotalItemsValue() {
+    double total = 0;
+    for (var warehouse in _warehouses) {
+      for (var item in warehouse.items) {
+        if (item.purchasePrice != null) {
+          total += item.purchasePrice!;
+        }
+      }
+    }
+    return total;
+  }
+
+  // 获取一个月未使用的物品数量
+  int getUnusedItemsCount() {
+    final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
+    int count = 0;
+    for (var warehouse in _warehouses) {
+      for (var item in warehouse.items) {
+        final lastUsed = item.lastUsedDate;
+        if (lastUsed == null || lastUsed.isBefore(oneMonthAgo)) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
   @override
   Future<void> registerToApp(
     PluginManager pluginManager,
@@ -194,5 +234,109 @@ class GoodsPlugin extends BasePlugin {
   @override
   Widget buildMainView(BuildContext context) {
     return const GoodsMainScreen();
+  }
+
+  @override
+  Widget? buildCardView(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon ?? Icons.inventory_2,
+                  size: 24,
+                  color: color ?? theme.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 统计信息卡片
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                // 物品总数量
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('物品总数量', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '${getTotalItemsCount()}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+
+                // 物品总价值
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('物品总价值', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '¥${getTotalItemsValue().toStringAsFixed(2)}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+
+                // 一个月未使用
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('一个月未使用', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '${getUnusedItemsCount()}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            getUnusedItemsCount() > 0
+                                ? theme.colorScheme.error
+                                : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

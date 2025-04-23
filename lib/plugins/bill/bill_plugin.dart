@@ -43,6 +43,106 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     return buildPluginEntryWidget(context);
   }
 
+  @override
+  Widget? buildCardView(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 24, color: color),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 统计信息卡片
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                // 今日财务
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('今日财务', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '¥${getTodayFinance().toStringAsFixed(2)}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            getTodayFinance() >= 0 ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+
+                // 本月财务
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('本月财务', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '¥${getMonthFinance().toStringAsFixed(2)}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            getMonthFinance() >= 0 ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+
+                // 本月记账
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('本月记账', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '${getMonthBillCount()} 笔',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   static const String _accountsKey = 'accounts';
   final List<Account> _accounts = [];
 
@@ -191,6 +291,67 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     _accounts[accountIndex] = account.copyWith(bills: updatedBills);
     await _saveAccounts();
   }
+
+  // 获取今日财务统计（收入和支出总和）
+  double getTodayFinance() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    double total = 0;
+
+    for (var account in _accounts) {
+      for (var bill in account.bills) {
+        if (bill.createdAt.year == today.year &&
+            bill.createdAt.month == today.month &&
+            bill.createdAt.day == today.day) {
+          total += bill.amount;
+        }
+      }
+    }
+    return total;
+  }
+
+  // 获取本月财务统计（收入和支出总和）
+  double getMonthFinance() {
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month, 1);
+    double total = 0;
+
+    for (var account in _accounts) {
+      for (var bill in account.bills) {
+        if (bill.createdAt.isAfter(
+              monthStart.subtract(const Duration(days: 1)),
+            ) &&
+            bill.createdAt.isBefore(DateTime(now.year, now.month + 1, 1))) {
+          total += bill.amount;
+        }
+      }
+    }
+    return total;
+  }
+
+  // 获取本月记账次数
+  int getMonthBillCount() {
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month, 1);
+    int count = 0;
+
+    for (var account in _accounts) {
+      count +=
+          account.bills
+              .where(
+                (bill) =>
+                    bill.createdAt.isAfter(
+                      monthStart.subtract(const Duration(days: 1)),
+                    ) &&
+                    bill.createdAt.isBefore(
+                      DateTime(now.year, now.month + 1, 1),
+                    ),
+              )
+              .length;
+    }
+    return count;
+  }
+
   // 移除静态常量，因为已经在接口实现中定义
 
   @override
