@@ -69,9 +69,8 @@ class PluginCard extends StatelessWidget {
   }
 
   Widget _buildDefaultCard(BuildContext context) {
-    // 根据卡片类型设置不同的样式
-    final isWide = cardSize == CardSize.wide;
-    final isTall = cardSize == CardSize.tall;
+    // 根据卡片大小计算图标大小
+    final iconSize = cardSize.width > 1 || cardSize.height > 1 ? 96.0 : 64.0;
     
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -80,18 +79,18 @@ class PluginCard extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: isTall ? MainAxisAlignment.start : MainAxisAlignment.center,
+              mainAxisAlignment: cardSize.height > 1 ? MainAxisAlignment.start : MainAxisAlignment.center,
               children: [
                 Container(
-                  width: isWide ? 96 : 64,
-                  height: isTall ? 96 : 64,
+                  width: iconSize,
+                  height: iconSize,
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor.withAlpha(25),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     plugin.icon ?? Icons.extension,
-                    size: 36,
+                    size: iconSize * 0.5625, // 36/64 = 0.5625
                     color: plugin.color ?? Theme.of(context).primaryColor,
                   ),
                 ),
@@ -100,7 +99,7 @@ class PluginCard extends StatelessWidget {
                   plugin.name,
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center,
-                  maxLines: 2,
+                  maxLines: cardSize.height > 1 ? 3 : 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

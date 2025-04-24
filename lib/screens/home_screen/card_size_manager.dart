@@ -7,7 +7,7 @@ class CardSizeManager {
 
   // 获取插件的卡片大小，如果没有设置则返回默认值
   CardSize getCardSize(String pluginId) {
-    return cardSizes[pluginId] ?? CardSize.small;
+    return cardSizes[pluginId] ?? const CardSize(width: 1, height: 1);
   }
 
   // 加载插件卡片大小设置
@@ -21,8 +21,11 @@ class CardSizeManager {
         if (sizes != null) {
           sizes.forEach((key, value) {
             final pluginId = key.toString();
-            final sizeStr = value.toString();
-            cardSizes[pluginId] = CardSizeUtils.stringToCardSize(sizeStr);
+            final sizeMap = value as Map<dynamic, dynamic>;
+            cardSizes[pluginId] = CardSize(
+              width: (sizeMap['width'] as num).toInt(),
+              height: (sizeMap['height'] as num).toInt(),
+            );
           });
         }
       }
@@ -34,9 +37,12 @@ class CardSizeManager {
   // 保存插件卡片大小设置
   Future<void> saveCardSizes() async {
     try {
-      final Map<String, String> sizes = {};
+      final Map<String, Map<String, int>> sizes = {};
       cardSizes.forEach((key, value) {
-        sizes[key] = value.toString().split('.').last;
+        sizes[key] = {
+          'width': value.width,
+          'height': value.height,
+        };
       });
 
       await globalConfigManager.savePluginConfig('card_sizes', {
