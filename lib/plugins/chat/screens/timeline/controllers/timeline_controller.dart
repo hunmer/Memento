@@ -70,12 +70,18 @@ class TimelineController extends ChangeNotifier {
   void _onSearchChanged() {
     // 取消之前的计时器
     _searchDebounce?.cancel();
-    
+
     // 设置新的计时器，300ms 后执行搜索
     _searchDebounce = Timer(const Duration(milliseconds: 300), () {
-      _searchQuery = searchController.text;
-      _filterMessages();
-      notifyListeners();
+      final newQuery = searchController.text;
+
+      // 检查搜索查询是否发生了变化
+      if (_searchQuery != newQuery) {
+        debugPrint('Timeline: 搜索查询从 "$_searchQuery" 变为 "$newQuery"');
+        _searchQuery = newQuery;
+        _filterMessages();
+        notifyListeners();
+      }
     });
   }
 
@@ -85,8 +91,10 @@ class TimelineController extends ChangeNotifier {
 
   /// 从所有频道加载所有消息
   Future<void> _loadAllMessages() async {
-    _isLoading = true;
-    notifyListeners();
+    if (!_isLoading) {
+      _isLoading = true;
+      notifyListeners();
+    }
 
     try {
       _allMessages = [];
@@ -114,22 +122,16 @@ class TimelineController extends ChangeNotifier {
       // 按时间排序，最新的消息在前面
       _allMessages.sort((a, b) => b.date.compareTo(a.date));
 
-      // 重置分页状态并过滤消息
-      _resetPagination();
-      _filterMessages();
+      // 初始化时直接使用所有消息，不进行过滤
+      _filteredMessages = List<Message>.from(_allMessages);
 
       debugPrint('Timeline: 加载了 ${_allMessages.length} 条消息');
     } catch (e) {
       debugPrint('Error loading timeline messages: $e');
+      _filteredMessages = [];
     } finally {
-      _isLoading = false;
-
-      // 确保在 _isLoading = false 之后加载第一页
-      if (_filteredMessages.isNotEmpty) {
-        _loadCurrentPage();
-      }
-
-      notifyListeners();
+      // 确保加载第一页消息
+      _loadCurrentPage();
       debugPrint('Timeline: 加载完成，显示 ${_displayMessages.length} 条消息');
     }
   }
@@ -140,7 +142,20 @@ class TimelineController extends ChangeNotifier {
     if (_isLoading) {
       return;
     }
-    
+
+    debugPrint('Timeline: 开始过滤消息...');
+
+    // 如果没有搜索词且过滤器未激活，直接使用所有消息
+    if (_searchQuery.isEmpty && !_isFilterActive) {
+      _filteredMessages = List<Message>.from(_allMessages);
+      debugPrint('Timeline: 无过滤条件，显示所有 ${_allMessages.length} 条消息');
+
+      // 重置分页并加载第一页
+      _resetPagination();
+      _loadCurrentPage();
+      return;
+    }
+
     // 先应用基本的搜索过滤
     List<Message> result = List<Message>.from(_allMessages);
 
@@ -240,7 +255,7 @@ class TimelineController extends ChangeNotifier {
     // 重置分页状态
     _currentPage = 1;
     _hasMoreMessages = true;
-    
+
     // 使用微任务确保在当前构建周期之后加载数据
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCurrentPage();
@@ -300,14 +315,17 @@ class TimelineController extends ChangeNotifier {
   void clearSearch() {
     // 取消可能正在进行的搜索防抖
     _searchDebounce?.cancel();
-    
+
     // 清空搜索控制器
     searchController.clear();
-    
-    // 使用微任务确保在当前构建周期之后执行过滤操作
+
+    // 立即处理清空搜索的情况
+    debugPrint('Timeline: 清空搜索查询');
+    _searchQuery = '';
+    _filterMessages();
+
+    // 使用微任务确保UI更新
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchQuery = '';
-      _filterMessages();
       notifyListeners();
     });
   }
@@ -364,10 +382,10 @@ class TimelineController extends ChangeNotifier {
       if (onMessageDelete != null) {
         await onMessageDelete!(message);
       }
-      
+
       // 从各个列表中移除消息
       removeMessage(message);
-      
+
       debugPrint('Timeline: 成功删除消息 ${message.id}');
     } catch (e) {
       debugPrint('Timeline: 删除消息失败: $e');
@@ -521,15 +539,21 @@ class TimelineController extends ChangeNotifier {
   Future<void> _initializeTimeline() async {
     debugPrint('Timeline: 初始化时间线...');
     _resetPagination();
-    await _loadAllMessages();
 
-    // 确保初始加载足够的消息以填满瀑布流视图
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_displayMessages.length < pageSize && _hasMoreMessages) {
-        _loadMoreMessages();
-      }
-      _ensureScrollListener();
-    });
+    try {
+      // 加载所有消息
+      await _loadAllMessages();
+    } catch (e) {
+      debugPrint('Timeline: 初始化失败: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+
+      // 在下一帧确保滚动监听器
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _ensureScrollListener();
+      });
+    }
   }
 
   /// 重置分页状态
@@ -544,13 +568,13 @@ class TimelineController extends ChangeNotifier {
   void removeMessage(Message message) {
     // 从所有消息列表中移除
     _allMessages.removeWhere((m) => m.id == message.id);
-    
+
     // 从过滤后的消息列表中移除
     _filteredMessages.removeWhere((m) => m.id == message.id);
-    
+
     // 从当前显示的消息列表中移除
     _displayMessages.removeWhere((m) => m.id == message.id);
-    
+
     debugPrint('Timeline: 移除了单条消息 ${message.id}');
     notifyListeners();
   }
@@ -562,19 +586,21 @@ class TimelineController extends ChangeNotifier {
     if (allIndex != -1) {
       _allMessages[allIndex] = message;
     }
-    
+
     // 查找并更新过滤后消息列表中的消息
-    final filteredIndex = _filteredMessages.indexWhere((m) => m.id == message.id);
+    final filteredIndex = _filteredMessages.indexWhere(
+      (m) => m.id == message.id,
+    );
     if (filteredIndex != -1) {
       _filteredMessages[filteredIndex] = message;
     }
-    
+
     // 查找并更新当前显示的消息列表中的消息
     final displayIndex = _displayMessages.indexWhere((m) => m.id == message.id);
     if (displayIndex != -1) {
       _displayMessages[displayIndex] = message;
     }
-    
+
     debugPrint('Timeline: 更新了单条消息 ${message.id}');
     notifyListeners();
   }
