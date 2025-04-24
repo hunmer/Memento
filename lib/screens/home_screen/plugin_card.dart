@@ -1,0 +1,113 @@
+import 'package:flutter/material.dart';
+import '../../core/plugin_base.dart';
+import '../../main.dart';
+import 'card_size.dart';
+
+class PluginCard extends StatelessWidget {
+  final PluginBase plugin;
+  final bool isReorderMode;
+  final CardSize cardSize;
+  final Function(BuildContext) onShowSizeMenu;
+
+  const PluginCard({
+    super.key,
+    required this.plugin,
+    required this.isReorderMode,
+    required this.cardSize,
+    required this.onShowSizeMenu,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final customCardView = plugin.buildCardView(context);
+
+    return Builder(
+      builder: (cardContext) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onLongPress: () => onShowSizeMenu(cardContext),
+          child: Card(
+            elevation: 2.0,
+            clipBehavior: Clip.antiAlias,
+            margin: const EdgeInsets.all(8.0),
+            child: Stack(
+              children: [
+                InkWell(
+                  onTap: () {
+                    globalConfigManager.savePluginConfig(
+                      'last_opened_plugin',
+                      {'pluginId': plugin.id},
+                    );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => plugin.buildMainView(context),
+                      ),
+                    );
+                  },
+                  child: customCardView ?? _buildDefaultCard(context),
+                ),
+                if (isReorderMode)
+                  Positioned.fill(
+                    child: Material(
+                      color: Colors.black12,
+                      child: const Center(
+                        child: Icon(
+                          Icons.drag_handle,
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultCard(BuildContext context) {
+    // 根据卡片类型设置不同的样式
+    final isWide = cardSize == CardSize.wide;
+    final isTall = cardSize == CardSize.tall;
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: isTall ? MainAxisAlignment.start : MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: isWide ? 96 : 64,
+                  height: isTall ? 96 : 64,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withAlpha(25),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    plugin.icon ?? Icons.extension,
+                    size: 36,
+                    color: plugin.color ?? Theme.of(context).primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  plugin.name,
+                  style: Theme.of(context).textTheme.titleMedium,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

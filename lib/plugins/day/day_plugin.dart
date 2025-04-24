@@ -151,12 +151,17 @@ class DayPlugin extends BasePlugin {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('即将到来', style: theme.textTheme.bodyMedium),
-                    Text(
-                      upcomingDays.isNotEmpty ? upcomingDays.join('，') : '无',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color:
-                            totalCount > 0 ? theme.colorScheme.primary : null,
+                    Expanded(
+                      child: Text(
+                        upcomingDays.isNotEmpty ? upcomingDays.join('，') : '无',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color:
+                              totalCount > 0 ? theme.colorScheme.primary : null,
+                        ),
+                        textAlign: TextAlign.end,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                   ],

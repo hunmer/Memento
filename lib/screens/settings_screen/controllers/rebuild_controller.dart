@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../plugins/chat/l10n/chat_localizations.dart';
 import '../../../plugins/day/l10n/day_localizations.dart';
 import '../../../plugins/nodes/l10n/nodes_localizations.dart' as nodes_l10n;
-import '../../../screens/home_screen.dart';
+import '../../../screens/home_screen/home_screen.dart';
 
 class RebuildController {
   /// 重建应用以应用新的设置

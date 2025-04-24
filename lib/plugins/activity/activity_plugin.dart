@@ -148,7 +148,7 @@ class ActivityPlugin extends BasePlugin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('今日活动数', style: theme.textTheme.bodyMedium),
+                        Text('今日活动', style: theme.textTheme.bodyMedium),
                         Text(
                           '$activityCount',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -169,9 +169,9 @@ class ActivityPlugin extends BasePlugin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('今日活动时长', style: theme.textTheme.bodyMedium),
+                        Text('今日时长', style: theme.textTheme.bodyMedium),
                         Text(
-                          '${(activityDuration / 60).toStringAsFixed(1)}小时',
+                          '${(activityDuration / 60).toStringAsFixed(1)}H',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -186,9 +186,9 @@ class ActivityPlugin extends BasePlugin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('今日剩余时间', style: theme.textTheme.bodyMedium),
+                        Text('剩余时间', style: theme.textTheme.bodyMedium),
                         Text(
-                          '${(remainingTime / 60).toStringAsFixed(1)}小时',
+                          '${(remainingTime / 60).toStringAsFixed(1)}H',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color:

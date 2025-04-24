@@ -9,7 +9,7 @@ import 'plugins/day/l10n/day_localizations.dart';
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
-import 'screens/home_screen.dart';
+import 'screens/home_screen/home_screen.dart';
 import 'plugins/chat/chat_plugin.dart'; // 聊天插件
 import 'plugins/diary/diary_plugin.dart'; // 日记插件
 import 'plugins/activity/activity_plugin.dart'; // 活动插件

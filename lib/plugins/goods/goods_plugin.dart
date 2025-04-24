@@ -285,7 +285,7 @@ class GoodsPlugin extends BasePlugin {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('物品总数量', style: theme.textTheme.bodyMedium),
+                    Text('总数量', style: theme.textTheme.bodyMedium),
                     Text(
                       '${getTotalItemsCount()}',
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -302,7 +302,7 @@ class GoodsPlugin extends BasePlugin {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('物品总价值', style: theme.textTheme.bodyMedium),
+                    Text('总价值', style: theme.textTheme.bodyMedium),
                     Text(
                       '¥${getTotalItemsValue().toStringAsFixed(2)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
