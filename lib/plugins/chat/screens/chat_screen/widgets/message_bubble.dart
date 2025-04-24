@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import '../../../../../plugins/chat/models/message.dart';
 import '../../../../../plugins/chat/models/file_message.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -63,19 +66,31 @@ class MessageBubble extends StatelessWidget {
             if (!isCurrentUser && showAvatar) ...[
               GestureDetector(
                 onTap: onAvatarTap,
-                child: CircleAvatar(
-                  backgroundImage:
-                      message.user.iconPath != null
-                          ? NetworkImage(message.user.iconPath!)
-                          : null,
-                  child:
-                      message.user.iconPath == null
-                          ? Text(
-                            message.user.username.isNotEmpty
-                                ? message.user.username[0]
-                                : '?',
-                          )
-                          : null,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                  ),
+                  child: message.user.iconPath != null
+                      ? FutureBuilder<String>(
+                          future: _getAbsolutePath(message.user.iconPath!),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              return ClipOval(
+                                child: Image.file(
+                                  File(snapshot.data!),
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
+                              );
+                            }
+                            return _buildDefaultAvatar();
+                          },
+                        )
+                      : _buildDefaultAvatar(),
                 ),
               ),
               const SizedBox(width: 8),
@@ -234,19 +249,31 @@ class MessageBubble extends StatelessWidget {
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: onAvatarTap,
-                child: CircleAvatar(
-                  backgroundImage:
-                      message.user.iconPath != null
-                          ? NetworkImage(message.user.iconPath!)
-                          : null,
-                  child:
-                      message.user.iconPath == null
-                          ? Text(
-                            message.user.username.isNotEmpty
-                                ? message.user.username[0]
-                                : '?',
-                          )
-                          : null,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                  ),
+                  child: message.user.iconPath != null
+                      ? FutureBuilder<String>(
+                          future: _getAbsolutePath(message.user.iconPath!),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              return ClipOval(
+                                child: Image.file(
+                                  File(snapshot.data!),
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
+                              );
+                            }
+                            return _buildDefaultAvatar();
+                          },
+                        )
+                      : _buildDefaultAvatar(),
                 ),
               ),
             ] else if (!isCurrentUser && !showAvatar) ...[
@@ -378,5 +405,35 @@ class MessageBubble extends StatelessWidget {
       style: const TextStyle(fontSize: 14, height: 1.4),
       child: content,
     );
+  }
+
+  Widget _buildDefaultAvatar() {
+    return Builder(
+      builder: (context) => Center(
+        child: Text(
+          message.user.username.isNotEmpty ? message.user.username[0].toUpperCase() : '?',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<String> _getAbsolutePath(String relativePath) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    
+    // 规范化路径，确保使用正确的路径分隔符
+    String normalizedPath = relativePath.replaceFirst('./', '');
+    normalizedPath = normalizedPath.replaceAll('/', path.separator);
+    
+    // 检查是否需要添加app_data前缀
+    if (!normalizedPath.startsWith('app_data${path.separator}')) {
+      return path.join(appDir.path, 'app_data', normalizedPath);
+    }
+    
+    return path.join(appDir.path, normalizedPath);
   }
 }

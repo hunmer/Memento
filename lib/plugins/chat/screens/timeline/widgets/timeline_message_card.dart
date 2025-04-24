@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:share_plus/share_plus.dart';
 import '../../../models/message.dart';
 import '../../../models/channel.dart';
@@ -70,16 +73,31 @@ class TimelineMessageCard extends StatelessWidget {
             // 头像和用户名
             Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: theme.colorScheme.primary,
-                  radius: isGridView ? 14 : 20,
-                  child: Text(
-                    message.user.username[0].toUpperCase(),
-                    style: TextStyle(
-                      color: theme.colorScheme.onPrimary,
-                      fontSize: isGridView ? 12 : 16,
-                    ),
+                Container(
+                  width: isGridView ? 28 : 40,
+                  height: isGridView ? 28 : 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: theme.colorScheme.primary,
                   ),
+                  child: message.user.iconPath != null
+                      ? FutureBuilder<String>(
+                          future: _getAbsolutePath(message.user.iconPath!),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              return ClipOval(
+                                child: Image.file(
+                                  File(snapshot.data!),
+                                  width: isGridView ? 28 : 40,
+                                  height: isGridView ? 28 : 40,
+                                  fit: BoxFit.cover,
+                                ),
+                              );
+                            }
+                            return _buildDefaultAvatar(theme, isGridView);
+                          },
+                        )
+                      : _buildDefaultAvatar(theme, isGridView),
                 ),
                 SizedBox(width: isGridView ? 8 : 12),
                 Expanded(
@@ -193,5 +211,23 @@ class TimelineMessageCard extends StatelessWidget {
       ),
       ),
     );
+  }
+
+  Widget _buildDefaultAvatar(ThemeData theme, bool isGridView) {
+    return Center(
+      child: Text(
+        message.user.username.isNotEmpty ? message.user.username[0].toUpperCase() : '?',
+        style: TextStyle(
+          color: theme.colorScheme.onPrimary,
+          fontSize: isGridView ? 12 : 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Future<String> _getAbsolutePath(String relativePath) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    return path.join(appDir.path, relativePath.replaceFirst('./', ''));
   }
 }

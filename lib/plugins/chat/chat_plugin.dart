@@ -1,6 +1,9 @@
-// import 'dart:io'; // 移除，因为在Web平台不可用
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'l10n/chat_localizations.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -10,6 +13,7 @@ import 'models/message.dart';
 import 'models/user.dart';
 import 'screens/channel_list/channel_list_screen.dart';
 import 'screens/timeline/timeline_screen.dart';
+import 'screens/profile_edit_dialog.dart';
 import 'utils/message_operations.dart';
 
 class ChatPlugin extends BasePlugin {
@@ -65,23 +69,157 @@ class ChatPlugin extends BasePlugin {
         final l10n = ChatLocalizations.of(context)!;
         return Column(
           children: [
-            SwitchListTile(
-              title: const Text('在聊天中显示头像'),
-              value: _showAvatarInChat,
-              onChanged: (bool value) {
-                setState(() {
-                  setShowAvatarInChat(value);
-                });
-              },
+            // 用户个人资料卡片
+            Card(
+              margin: const EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    const Text(
+                      '个人资料',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        // 用户头像
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                          ),
+                          child: _currentUser?.iconPath != null
+                              ? FutureBuilder<String>(
+                                  future: _getAvatarPath(_currentUser!.iconPath!),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData && snapshot.data != null) {
+                                      return ClipOval(
+                                        child: Image.file(
+                                          File(snapshot.data!),
+                                          width: 60,
+                                          height: 60,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      );
+                                    }
+                                    return Center(
+                                      child: Text(
+                                        _currentUser!.username.isNotEmpty
+                                            ? _currentUser!.username[0].toUpperCase()
+                                            : '?',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Center(
+                                  child: Text(
+                                    _currentUser!.username.isNotEmpty
+                                        ? _currentUser!.username[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(width: 16),
+                        // 用户名和ID
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _currentUser?.username ?? '未知用户',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'ID: ${_currentUser?.id ?? '未知'}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // 编辑按钮
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () async {
+                            final result = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => ProfileEditDialog(
+                                user: _currentUser!,
+                                chatPlugin: this,
+                              ),
+                            );
+                            
+                            if (result == true) {
+                              setState(() {
+                                // 对话框中已经更新了用户信息，这里只需要刷新UI
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-            SwitchListTile(
-              title: const Text('发送消息播放提示音'),
-              value: _playSoundOnSend,
-              onChanged: (bool value) {
-                setState(() {
-                  setPlaySoundOnSend(value);
-                });
-              },
+            const SizedBox(height: 16),
+            // 聊天设置
+            Card(
+              margin: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      '聊天设置',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SwitchListTile(
+                    title: const Text('在聊天中显示头像'),
+                    value: _showAvatarInChat,
+                    onChanged: (bool value) {
+                      setState(() {
+                        setShowAvatarInChat(value);
+                      });
+                    },
+                  ),
+                  SwitchListTile(
+                    title: const Text('发送消息播放提示音'),
+                    value: _playSoundOnSend,
+                    onChanged: (bool value) {
+                      setState(() {
+                        setPlaySoundOnSend(value);
+                      });
+                    },
+                  ),
+                ],
+              ),
             ),
             const Divider(),
             super.buildSettingsView(context),
@@ -89,6 +227,12 @@ class ChatPlugin extends BasePlugin {
         );
       },
     );
+  }
+
+  // 获取头像的绝对路径
+  Future<String> _getAvatarPath(String relativePath) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    return path.join(appDir.path, 'app_data', relativePath.replaceFirst('./', ''));
   }
 
   static ChatPlugin? _instance;
@@ -170,6 +314,9 @@ class ChatPlugin extends BasePlugin {
     // 加载插件设置
     await _initializeSettings();
 
+    // 确保头像目录存在
+    await storage.createDirectory('chat/avatars');
+
     // 设置默认用户（如果尚未设置）
     if (_currentUser == null) {
       // 尝试从存储中加载用户信息
@@ -189,6 +336,87 @@ class ChatPlugin extends BasePlugin {
     // 加载默认数据和频道
     await _initializeDefaultData();
     await _loadChannels();
+
+    // 加载用户头像信息
+    await _loadAvatars();
+  }
+
+  // 用于存储用户头像信息的Map
+  final Map<String, String> _userAvatars = {};
+
+  // 加载所有用户头像
+  Future<void> _loadAvatars() async {
+    try {
+      if (kIsWeb) {
+        // Web平台暂不支持列出目录文件
+        debugPrint('Avatar loading not fully supported on Web platform');
+        return;
+      }
+      
+      // 获取应用文档目录
+      final appDir = await getApplicationDocumentsDirectory();
+      final avatarsDir = Directory(path.join(appDir.path, 'app_data/chat/avatars'));
+      
+      // 检查目录是否存在
+      if (!await avatarsDir.exists()) {
+        await storage.createDirectory('chat/avatars');
+        debugPrint('Created avatars directory');
+        return; // 目录刚创建，还没有文件
+      }
+      
+      // 列出目录中的所有文件
+      final avatarFiles = avatarsDir.listSync();
+      for (var entity in avatarFiles) {
+        if (entity is File) {
+          final fileName = path.basename(entity.path);
+          if (fileName.endsWith('.jpg')) {
+            final username = fileName.substring(0, fileName.length - 4);
+            _userAvatars[username] = './chat/avatars/$fileName';
+          }
+        }
+      }
+      debugPrint('Loaded ${_userAvatars.length} user avatars');
+    } catch (e) {
+      debugPrint('Error loading avatars: $e');
+    }
+  }
+
+  // 获取用户头像路径
+  String? getUserAvatar(String username) {
+    return _userAvatars[username];
+  }
+
+  // 设置用户头像
+  Future<void> setUserAvatar(String username, String avatarPath) async {
+    _userAvatars[username] = avatarPath;
+    notifyListeners();
+  }
+
+  // 更新用户信息，包括头像
+  Future<void> updateCurrentUser({
+    String? username,
+    String? avatarPath,
+  }) async {
+    if (username != null || avatarPath != null) {
+      final updatedUser = User(
+        id: _currentUser!.id,
+        username: username ?? _currentUser!.username,
+        iconPath: avatarPath ?? _currentUser!.iconPath,
+      );
+      _currentUser = updatedUser;
+      
+      // 保存更新后的用户信息
+      await storage.write('chat/current_user', {
+        'user': _currentUser!.toJson(),
+      });
+
+      // 如果更新了头像，同时更新头像映射
+      if (avatarPath != null) {
+        await setUserAvatar(_currentUser!.username, avatarPath);
+      }
+
+      notifyListeners();
+    }
   }
 
   // 更新本地化文本
