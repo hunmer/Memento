@@ -92,48 +92,61 @@ class ChatPlugin extends BasePlugin {
                           height: 60,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Theme.of(context).colorScheme.primaryContainer,
+                            color:
+                                Theme.of(context).colorScheme.primaryContainer,
                           ),
-                          child: _currentUser?.iconPath != null
-                              ? FutureBuilder<String>(
-                                  future: _getAvatarPath(_currentUser!.iconPath!),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData && snapshot.data != null) {
-                                      return ClipOval(
-                                        child: Image.file(
-                                          File(snapshot.data!),
-                                          width: 60,
-                                          height: 60,
-                                          fit: BoxFit.cover,
+                          child:
+                              _currentUser?.iconPath != null
+                                  ? FutureBuilder<String>(
+                                    future: _getAvatarPath(
+                                      _currentUser!.iconPath!,
+                                    ),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData &&
+                                          snapshot.data != null) {
+                                        return ClipOval(
+                                          child: Image.file(
+                                            File(snapshot.data!),
+                                            width: 60,
+                                            height: 60,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        );
+                                      }
+                                      return Center(
+                                        child: Text(
+                                          _currentUser!.username.isNotEmpty
+                                              ? _currentUser!.username[0]
+                                                  .toUpperCase()
+                                              : '?',
+                                          style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimaryContainer,
+                                          ),
                                         ),
                                       );
-                                    }
-                                    return Center(
-                                      child: Text(
-                                        _currentUser!.username.isNotEmpty
-                                            ? _currentUser!.username[0].toUpperCase()
-                                            : '?',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                        ),
+                                    },
+                                  )
+                                  : Center(
+                                    child: Text(
+                                      _currentUser!.username.isNotEmpty
+                                          ? _currentUser!.username[0]
+                                              .toUpperCase()
+                                          : '?',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimaryContainer,
                                       ),
-                                    );
-                                  },
-                                )
-                              : Center(
-                                  child: Text(
-                                    _currentUser!.username.isNotEmpty
-                                        ? _currentUser!.username[0].toUpperCase()
-                                        : '?',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                                     ),
                                   ),
-                                ),
                         ),
                         const SizedBox(width: 16),
                         // 用户名和ID
@@ -164,12 +177,13 @@ class ChatPlugin extends BasePlugin {
                           onPressed: () async {
                             final result = await showDialog<bool>(
                               context: context,
-                              builder: (context) => ProfileEditDialog(
-                                user: _currentUser!,
-                                chatPlugin: this,
-                              ),
+                              builder:
+                                  (context) => ProfileEditDialog(
+                                    user: _currentUser!,
+                                    chatPlugin: this,
+                                  ),
                             );
-                            
+
                             if (result == true) {
                               setState(() {
                                 // 对话框中已经更新了用户信息，这里只需要刷新UI
@@ -229,10 +243,19 @@ class ChatPlugin extends BasePlugin {
     );
   }
 
-  // 获取头像的绝对路径
+  // 获取头像的绝对路径（私有方法）
   Future<String> _getAvatarPath(String relativePath) async {
     final appDir = await getApplicationDocumentsDirectory();
-    return path.join(appDir.path, 'app_data', relativePath.replaceFirst('./', ''));
+    return path.join(
+      appDir.path,
+      'app_data',
+      relativePath.replaceFirst('./', ''),
+    );
+  }
+
+  // 获取头像的绝对路径（公开方法）
+  Future<String> getAvatarPath(String relativePath) async {
+    return _getAvatarPath(relativePath);
   }
 
   static ChatPlugin? _instance;
@@ -352,18 +375,20 @@ class ChatPlugin extends BasePlugin {
         debugPrint('Avatar loading not fully supported on Web platform');
         return;
       }
-      
+
       // 获取应用文档目录
       final appDir = await getApplicationDocumentsDirectory();
-      final avatarsDir = Directory(path.join(appDir.path, 'app_data/chat/avatars'));
-      
+      final avatarsDir = Directory(
+        path.join(appDir.path, 'app_data/chat/avatars'),
+      );
+
       // 检查目录是否存在
       if (!await avatarsDir.exists()) {
         await storage.createDirectory('chat/avatars');
         debugPrint('Created avatars directory');
         return; // 目录刚创建，还没有文件
       }
-      
+
       // 列出目录中的所有文件
       final avatarFiles = avatarsDir.listSync();
       for (var entity in avatarFiles) {
@@ -393,10 +418,7 @@ class ChatPlugin extends BasePlugin {
   }
 
   // 更新用户信息，包括头像
-  Future<void> updateCurrentUser({
-    String? username,
-    String? avatarPath,
-  }) async {
+  Future<void> updateCurrentUser({String? username, String? avatarPath}) async {
     if (username != null || avatarPath != null) {
       final updatedUser = User(
         id: _currentUser!.id,
@@ -404,7 +426,7 @@ class ChatPlugin extends BasePlugin {
         iconPath: avatarPath ?? _currentUser!.iconPath,
       );
       _currentUser = updatedUser;
-      
+
       // 保存更新后的用户信息
       await storage.write('chat/current_user', {
         'user': _currentUser!.toJson(),
