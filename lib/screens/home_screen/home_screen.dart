@@ -91,14 +91,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 TextButton(
                   child: const Text('确定'),
                   onPressed: () {
-                    setState(() {
+                    // 关闭对话框
+                    Navigator.of(context).pop();
+                    
+                    // 使用外部的setState更新HomeScreen状态
+                    this.setState(() {
                       _cardSizeManager.cardSizes[plugin.id] = CardSize(
                         width: currentWidth,
                         height: currentHeight,
                       );
                       _cardSizeManager.saveCardSizes();
                     });
-                    Navigator.of(context).pop();
                   },
                 ),
               ],

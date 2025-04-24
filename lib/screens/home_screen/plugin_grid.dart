@@ -28,38 +28,63 @@ class PluginGrid extends StatelessWidget {
   }
 
   List<PluginBase> _optimizePluginOrder(List<PluginBase> plugins, int crossAxisCount) {
-    // 创建网格占用情况的二维数组
+    // 创建网格占用情况的二维数组，增加行数以适应更高的卡片
+    final maxRows = (plugins.length * 4) ~/ crossAxisCount + 1;
     final gridOccupancy = List.generate(
-      (plugins.length * 4) ~/ crossAxisCount + 1, // 增加行数以适应更高的卡片
+      maxRows,
       (_) => List.filled(crossAxisCount, false),
     );
 
     final result = <PluginBase>[];
-    
-    // 先处理宽度或高度大于1的卡片
-    final customSizeCards = <PluginBase>[];
-    final standardCards = <PluginBase>[];
-    
-    for (final plugin in plugins) {
-      final size = _getCardSize(plugin.id);
-      if (size.width > 1 || size.height > 1) {
-        customSizeCards.add(plugin);
-      } else {
-        standardCards.add(plugin);
+    final remainingPlugins = List<PluginBase>.from(plugins);
+
+    // 用于检查和填充空隙的辅助函数
+    void fillGaps(int upToRow) {
+      // 从上到下，从左到右检查空隙
+      for (int row = 0; row <= upToRow; row++) {
+        for (int col = 0; col < crossAxisCount; col++) {
+          if (!gridOccupancy[row][col]) {
+            // 找出标准大小（1x1）的卡片
+            final standardCardIndex = remainingPlugins.indexWhere((plugin) {
+              final size = _getCardSize(plugin.id);
+              return size.width == 1 && size.height == 1;
+            });
+
+            if (standardCardIndex != -1) {
+              // 找到标准卡片，填充空隙
+              final plugin = remainingPlugins.removeAt(standardCardIndex);
+              gridOccupancy[row][col] = true;
+              result.add(plugin);
+            }
+          }
+        }
       }
     }
-    
-    // 放置自定义大小的卡片
-    for (final plugin in customSizeCards) {
+
+    // 按照卡片大小排序，优先放置大卡片
+    remainingPlugins.sort((a, b) {
+      final sizeA = _getCardSize(a.id);
+      final sizeB = _getCardSize(b.id);
+      final areaA = sizeA.width * sizeA.height;
+      final areaB = sizeB.width * sizeB.height;
+      return areaB.compareTo(areaA); // 大卡片优先
+    });
+
+    // 逐个放置卡片
+    while (remainingPlugins.isNotEmpty) {
+      final plugin = remainingPlugins[0];
       final size = _getCardSize(plugin.id);
       final width = size.width.clamp(1, crossAxisCount);
       final height = size.height.clamp(1, 4);
       
       bool placed = false;
-      for (int row = 0; row < gridOccupancy.length - height + 1 && !placed; row++) {
+      int placedRow = 0;
+
+      // 尝试放置当前卡片
+      for (int row = 0; row < maxRows - height + 1 && !placed; row++) {
         for (int col = 0; col < crossAxisCount - width + 1 && !placed; col++) {
-          // 检查这个区域是否可用
           bool canPlace = true;
+          // 检查区域是否可用
           for (int h = 0; h < height && canPlace; h++) {
             for (int w = 0; w < width && canPlace; w++) {
               if (gridOccupancy[row + h][col + w]) {
@@ -69,36 +94,37 @@ class PluginGrid extends StatelessWidget {
           }
           
           if (canPlace) {
-            // 标记这个区域为已占用
+            // 标记区域为已占用
             for (int h = 0; h < height; h++) {
               for (int w = 0; w < width; w++) {
                 gridOccupancy[row + h][col + w] = true;
               }
             }
-            result.add(plugin);
+            result.add(remainingPlugins.removeAt(0));
             placed = true;
+            placedRow = row + height - 1;
           }
         }
       }
-      
-      // 如果无法放置，则作为标准卡片处理
+
       if (!placed) {
-        standardCards.add(plugin);
-      }
-    }
-    
-    // 放置标准大小的卡片
-    for (final plugin in standardCards) {
-      bool placed = false;
-      for (int row = 0; row < gridOccupancy.length && !placed; row++) {
-        for (int col = 0; col < crossAxisCount && !placed; col++) {
-          if (!gridOccupancy[row][col]) {
-            gridOccupancy[row][col] = true;
-            result.add(plugin);
-            placed = true;
+        // 如果无法按原始大小放置，将其作为1x1处理
+        final plugin = remainingPlugins.removeAt(0);
+        bool standardPlaced = false;
+        for (int row = 0; row < maxRows && !standardPlaced; row++) {
+          for (int col = 0; col < crossAxisCount && !standardPlaced; col++) {
+            if (!gridOccupancy[row][col]) {
+              gridOccupancy[row][col] = true;
+              result.add(plugin);
+              standardPlaced = true;
+              placedRow = row;
+            }
           }
         }
       }
+
+      // 在每次放置卡片后立即填充空隙
+      fillGaps(placedRow);
     }
 
     return result;
