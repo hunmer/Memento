@@ -66,7 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // 检查插件是否已初始化
     if (chatPlugin.isInitialized) {
       try {
-        final draft = await chatPlugin.loadDraft(widget.channel.id);
+        final draft = await chatPlugin.channelService.loadDraft(widget.channel.id);
         if (draft != null && draft.isNotEmpty && mounted) {
           setState(() {
             // 检查控制器是否可用
@@ -101,7 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       // 重新加载消息
       _controller.messages =
-          ChatPlugin.instance.channels
+          ChatPlugin.instance.channelService.channels
               .firstWhere((c) => c.id == widget.channel.id)
               .messages;
     });
@@ -282,10 +282,10 @@ class _ChatScreenState extends State<ChatScreen> {
                           _controller.toggleMessageSelection,
                       scrollController: _controller.scrollController,
                       onAvatarTap: _navigateToUserProfile,
-                      showAvatar: ChatPlugin.instance.showAvatarInChat,
+                      showAvatar: ChatPlugin.instance.settingsService.showAvatarInChat,
                       currentUserId:
                           ChatPlugin.instance.isInitialized
-                              ? ChatPlugin.instance.currentUser.id
+                              ? ChatPlugin.instance.userService.currentUser.id
                               : '',
                       highlightedMessage: _controller.highlightMessage,
                       shouldHighlight: _controller.highlightMessage != null,

@@ -5,15 +5,24 @@ import '../screens/channel_list/channel_list_screen.dart';
 import '../screens/timeline/timeline_screen.dart';
 import '../screens/profile_edit_dialog.dart';
 import '../chat_plugin.dart';
+import 'settings_service.dart';
+import 'user_service.dart';
 
 /// 负责构建聊天插件的UI界面
 class UIService {
+  final SettingsService _settingsService;
+  final UserService _userService;
   final ChatPlugin _plugin;
 
-  UIService(this._plugin);
+  UIService(this._settingsService, this._userService, this._plugin);
+
+  Future<void> initialize() async {
+    // 初始化UI服务相关的内容
+  }
 
   Widget buildCardView(BuildContext context) {
     final theme = Theme.of(context);
+    final channels = _plugin.channelService.channels;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -62,7 +71,7 @@ class UIService {
                   children: [
                     Text('频道数量', style: theme.textTheme.bodyMedium),
                     Text(
-                      '${_plugin.channels.length}',
+                      '${channels.length}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -79,7 +88,7 @@ class UIService {
                   children: [
                     Text('总消息数量', style: theme.textTheme.bodyMedium),
                     Text(
-                      '${_plugin.getTotalMessageCount()}',
+                      '${_plugin.channelService.getTotalMessageCount()}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -96,11 +105,11 @@ class UIService {
                   children: [
                     Text('今日新增消息', style: theme.textTheme.bodyMedium),
                     Text(
-                      '${_plugin.getTodayMessageCount()}',
+                      '${_plugin.channelService.getTodayMessageCount()}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color:
-                            _plugin.getTodayMessageCount() > 0
+                            _plugin.channelService.getTodayMessageCount() > 0
                                 ? theme.colorScheme.primary
                                 : null,
                       ),
@@ -118,6 +127,7 @@ class UIService {
   Widget buildMainView(BuildContext context) {
     final l10n = ChatLocalizations.of(context);
     final theme = Theme.of(context);
+    final channels = _plugin.channelService.channels;
 
     return DefaultTabController(
       length: 2,
@@ -125,7 +135,7 @@ class UIService {
         body: TabBarView(
           children: [
             // 频道列表标签页
-            ChannelListScreen(channels: _plugin.channels, chatPlugin: _plugin),
+            ChannelListScreen(channels: channels, chatPlugin: _plugin),
             // 时间线标签页
             TimelineScreen(chatPlugin: _plugin),
           ],
@@ -148,190 +158,157 @@ class UIService {
     );
   }
 
-  Widget buildSettingsView(BuildContext context) {
-    return StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
-        // final l10n = ChatLocalizations.of(context)!;
-        return Column(
+  Widget buildUserProfileCard(BuildContext context, StateSetter setState) {
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
           children: [
-            // 用户个人资料卡片
-            Card(
-              margin: const EdgeInsets.all(8.0),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Text(
-                      '个人资料',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        // 用户头像
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color:
-                                Theme.of(context).colorScheme.primaryContainer,
-                          ),
-                          child:
-                              _plugin.currentUser.iconPath != null
-                                  ? FutureBuilder<String>(
-                                    future: _plugin.getAvatarPath(
-                                      _plugin.currentUser.iconPath!,
-                                    ),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData &&
-                                          snapshot.data != null) {
-                                        return ClipOval(
-                                          child: Image.file(
-                                            File(snapshot.data!),
-                                            width: 60,
-                                            height: 60,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        );
-                                      }
-                                      return Center(
-                                        child: Text(
-                                          _plugin
-                                                  .currentUser
-                                                  .username
-                                                  .isNotEmpty
-                                              ? _plugin.currentUser.username[0]
-                                                  .toUpperCase()
-                                              : '?',
-                                          style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimaryContainer,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  )
-                                  : Center(
-                                    child: Text(
-                                      _plugin.currentUser.username.isNotEmpty
-                                          ? _plugin.currentUser.username[0]
-                                              .toUpperCase()
-                                          : '?',
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimaryContainer,
-                                      ),
-                                    ),
-                                  ),
-                        ),
-                        const SizedBox(width: 16),
-                        // 用户名和ID
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _plugin.currentUser.username,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                'ID: ${_plugin.currentUser.id}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // 编辑按钮
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () async {
-                            final result = await showDialog<bool>(
-                              context: context,
-                              builder:
-                                  (context) => ProfileEditDialog(
-                                    user: _plugin.currentUser,
-                                    chatPlugin: _plugin,
-                                  ),
-                            );
-
-                            if (result == true) {
-                              setState(() {
-                                // 对话框中已经更新了用户信息，这里只需要刷新UI
-                              });
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+            const Text(
+              '个人资料',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            // 聊天设置
-            Card(
-              margin: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      '聊天设置',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                // 用户头像
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                  ),
+                  child: _buildUserAvatar(context),
+                ),
+                const SizedBox(width: 16),
+                // 用户名和ID
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _userService.currentUser.username,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      Text(
+                        'ID: ${_userService.currentUser.id}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
-                  SwitchListTile(
-                    title: const Text('在聊天中显示头像'),
-                    value: _plugin.showAvatarInChat,
-                    onChanged: (bool value) {
+                ),
+                // 编辑按钮
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async {
+                    final result = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => ProfileEditDialog(
+                        user: _userService.currentUser,
+                        chatPlugin: _plugin,
+                      ),
+                    );
+
+                    if (result == true) {
                       setState(() {
-                        _plugin.setShowAvatarInChat(value);
+                        // 对话框中已经更新了用户信息，这里只需要刷新UI
                       });
-                    },
-                  ),
-                  SwitchListTile(
-                    title: const Text('发送消息播放提示音'),
-                    value: _plugin.playSoundOnSend,
-                    onChanged: (bool value) {
-                      setState(() {
-                        _plugin.setPlaySoundOnSend(value);
-                      });
-                    },
-                  ),
-                ],
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserAvatar(BuildContext context) {
+    final currentUser = _userService.currentUser;
+    if (currentUser.iconPath != null) {
+      return FutureBuilder<String>(
+        future: _userService.getAvatarPath(currentUser.iconPath!),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data != null) {
+            return ClipOval(
+              child: Image.file(
+                File(snapshot.data!),
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+              ),
+            );
+          }
+          return _buildDefaultAvatar(context);
+        },
+      );
+    }
+    return _buildDefaultAvatar(context);
+  }
+
+  Widget _buildDefaultAvatar(BuildContext context) {
+    return Center(
+      child: Text(
+        _userService.currentUser.username.isNotEmpty
+            ? _userService.currentUser.username[0].toUpperCase()
+            : '?',
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+        ),
+      ),
+    );
+  }
+
+  Widget buildChatSettingsCard(BuildContext context, StateSetter setState) {
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              '聊天设置',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const Divider(),
-            // 调用超类的设置视图
-            // 注意：UIService 不是 Widget，所以不能使用 super
-            // 应该使用 _plugin 的超类方法
-            // 调用基类的设置视图
-            _plugin.buildSettingsView(context),
-          ],
-        );
-      },
+          ),
+          SwitchListTile(
+            title: const Text('在聊天中显示头像'),
+            value: _settingsService.showAvatarInChat,
+            onChanged: (bool value) {
+              setState(() {
+                _settingsService.setShowAvatarInChat(value);
+              });
+            },
+          ),
+          SwitchListTile(
+            title: const Text('发送消息播放提示音'),
+            value: _settingsService.playSoundOnSend,
+            onChanged: (bool value) {
+              setState(() {
+                _settingsService.setPlaySoundOnSend(value);
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 }

@@ -21,53 +21,52 @@ class MessageOperations {
     // 显示编辑对话框
     final result = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('编辑消息'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
+      builder: (context) => AlertDialog(
+        title: const Text('编辑消息'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              autofocus: true,
+              maxLines: null,
+              decoration: const InputDecoration(hintText: '输入新的消息内容...'),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                TextField(
-                  controller: controller,
-                  autofocus: true,
-                  maxLines: null,
-                  decoration: const InputDecoration(hintText: '输入新的消息内容...'),
+                IconButton(
+                  icon: const Icon(Icons.format_bold),
+                  onPressed: () => _insertMarkdownStyle(controller, '**'),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.format_bold),
-                      onPressed: () => _insertMarkdownStyle(controller, '**'),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.format_italic),
-                      onPressed: () => _insertMarkdownStyle(controller, '*'),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.format_strikethrough),
-                      onPressed: () => _insertMarkdownStyle(controller, '~~'),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.format_underline),
-                      onPressed: () => _insertMarkdownStyle(controller, '__'),
-                    ),
-                  ],
+                IconButton(
+                  icon: const Icon(Icons.format_italic),
+                  onPressed: () => _insertMarkdownStyle(controller, '*'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.format_strikethrough),
+                  onPressed: () => _insertMarkdownStyle(controller, '~~'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.format_underline),
+                  onPressed: () => _insertMarkdownStyle(controller, '__'),
                 ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('保存'),
-              ),
-            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('保存'),
+          ),
+        ],
+      ),
     );
 
     if (result == true && controller.text.isNotEmpty) {
@@ -77,7 +76,10 @@ class MessageOperations {
         // 更新消息
         channel.messages[index] = updatedMessage;
         // 保存更新后的消息列表
-        await _chatPlugin.saveMessages(channel.id, channel.messages);
+        await _chatPlugin.channelService.saveMessages(
+          channel.id,
+          channel.messages,
+        );
       }
     }
 
@@ -92,21 +94,20 @@ class MessageOperations {
     // 显示确认对话框
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('删除消息'),
-            content: const Text('确定要删除这条消息吗？此操作不可撤销。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('删除'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('删除消息'),
+        content: const Text('确定要删除这条消息吗？此操作不可撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
     );
 
     if (confirmed == true) {
@@ -120,16 +121,19 @@ class MessageOperations {
           ..removeAt(index);
 
         // 保存更新后的消息列表
-        await _chatPlugin.saveMessages(channel.id, updatedMessages);
+        await _chatPlugin.channelService.saveMessages(
+          channel.id,
+          updatedMessages,
+        );
 
         // 更新频道的消息列表
         channel.messages.clear();
         channel.messages.addAll(updatedMessages);
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('删除消息失败: ${e.toString()}')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('删除消息失败: ${e.toString()}')),
+          );
         }
       }
     }
@@ -140,9 +144,9 @@ class MessageOperations {
     if (message.type == MessageType.received ||
         message.type == MessageType.sent) {
       Clipboard.setData(ClipboardData(text: message.content));
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已复制到剪贴板')),
+      );
     }
   }
 
@@ -157,7 +161,10 @@ class MessageOperations {
       // 更新消息
       channel.messages[index] = updatedMessage;
       // 保存更新后的消息列表
-      await _chatPlugin.saveMessages(channel.id, channel.messages);
+      await _chatPlugin.channelService.saveMessages(
+        channel.id,
+        channel.messages,
+      );
     }
   }
 
@@ -172,7 +179,10 @@ class MessageOperations {
       // 更新消息
       channel.messages[index] = updatedMessage;
       // 保存更新后的消息列表
-      await _chatPlugin.saveMessages(channel.id, channel.messages);
+      await _chatPlugin.channelService.saveMessages(
+        channel.id,
+        channel.messages,
+      );
     }
   }
 
@@ -182,23 +192,24 @@ class MessageOperations {
     final channelId = message.metadata?['channelId'] as String?;
     if (channelId != null) {
       try {
-        return _chatPlugin.channels.firstWhere((c) => c.id == channelId);
+        return _chatPlugin.channelService.channels
+            .firstWhere((c) => c.id == channelId);
       } catch (_) {
         // 如果找不到频道，继续尝试其他方法
       }
     }
 
     // 遍历所有频道查找消息
-    for (final channel in _chatPlugin.channels) {
+    for (final channel in _chatPlugin.channelService.channels) {
       if (channel.messages.any((m) => m.id == message.id)) {
         return channel;
       }
     }
 
     // 如果找不到对应的频道，显示错误提示
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('无法找到消息所属的频道')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('无法找到消息所属的频道')),
+    );
     return null;
   }
 
@@ -214,8 +225,7 @@ class MessageOperations {
     controller.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(
-        offset:
-            selection.baseOffset +
+        offset: selection.baseOffset +
             style.length * 2 +
             selection.textInside(text).length,
       ),

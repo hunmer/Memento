@@ -74,7 +74,7 @@ class ChannelListController extends ChangeNotifier {
   }
 
   Future<void> addChannel(Channel channel) async {
-    await ChatPlugin.instance.createChannel(channel);
+    await ChatPlugin.instance.channelService.createChannel(channel);
     _updateAvailableGroups();
     _updateSortedChannels();
     notifyListeners();
@@ -86,13 +86,13 @@ class ChannelListController extends ChangeNotifier {
       channels[index] = updatedChannel;
       _updateAvailableGroups();
       _updateSortedChannels();
-      ChatPlugin.instance.saveChannels();
+      ChatPlugin.instance.channelService.saveChannels();
       notifyListeners();
     }
   }
 
   void deleteChannel(String channelId) {
-    ChatPlugin.instance.deleteChannel(channelId);
+    ChatPlugin.instance.channelService.deleteChannel(channelId);
     _updateSortedChannels();
     notifyListeners();
   }
@@ -113,7 +113,7 @@ class ChannelListController extends ChangeNotifier {
         channels[index].priority = newPriority;
       }
     }
-    ChatPlugin.instance.saveChannels();
+    ChatPlugin.instance.channelService.saveChannels();
     notifyListeners();
   }
 }

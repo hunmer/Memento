@@ -32,7 +32,7 @@ class _FilterDialogState extends State<FilterDialog> {
     _filter = widget.filter.copyWith();
     
     // 获取所有可用的频道和用户
-    _availableChannels = widget.chatPlugin.channels;
+    _availableChannels = widget.chatPlugin.channelService.channels;
     
     // 从所有频道中收集唯一的用户
     final Set<String> userIds = {};

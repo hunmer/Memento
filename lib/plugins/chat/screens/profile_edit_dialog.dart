@@ -97,7 +97,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                     }
 
                     // 更新用户信息
-                    await widget.chatPlugin.updateCurrentUser(
+                    await widget.chatPlugin.userService.updateCurrentUser(
                       username: newUsername,
                       avatarPath: _avatarPath,
                     );

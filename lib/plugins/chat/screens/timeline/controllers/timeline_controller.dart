@@ -100,7 +100,7 @@ class TimelineController extends ChangeNotifier {
       _allMessages = [];
 
       // 从所有频道收集消息
-      for (final channel in _chatPlugin.channels) {
+      for (final channel in _chatPlugin.channelService.channels) {
         // 为每条消息添加频道信息，以便在时间线中显示来源
         final messagesWithChannel = await Future.wait(
           channel.messages.map((message) async {
@@ -116,7 +116,7 @@ class TimelineController extends ChangeNotifier {
           }),
         );
 
-        _allMessages.addAll(messagesWithChannel);
+        _allMessages.addAll(messagesWithChannel.cast<Message>());
       }
 
       // 按时间排序，最新的消息在前面
@@ -363,7 +363,7 @@ class TimelineController extends ChangeNotifier {
     if (channelId == null) return null;
 
     try {
-      return _chatPlugin.channels.firstWhere((c) => c.id == channelId);
+      return _chatPlugin.channelService.channels.firstWhere((c) => c.id == channelId);
     } catch (e) {
       return null;
     }

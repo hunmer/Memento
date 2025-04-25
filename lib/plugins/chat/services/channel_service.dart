@@ -7,7 +7,6 @@ import '../chat_plugin.dart';
 /// 负责管理频道相关的功能
 class ChannelService {
   final ChatPlugin _plugin;
-
   final List<Channel> _channels = [];
 
   // 获取频道列表的getter

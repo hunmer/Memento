@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import '../../../models/channel.dart';
 import '../../../models/user.dart';
 import '../../../models/message.dart';
@@ -45,16 +44,16 @@ class ChatScreenController extends ChangeNotifier {
 
   void _initializeAndLoadLastPage() async {
     // 获取最新的消息总数
-    print('Searching for channel with id: ${channel.id}');
-    print(
-      'Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}',
+    debugPrint('Searching for channel with id: ${channel.id}');
+    debugPrint(
+      'Available channels: ${chatPlugin.channelService.channels.map((c) => '${c.id}').join(', ')}',
     );
-    final channelIndex = chatPlugin.channels.indexWhere(
+    final channelIndex = chatPlugin.channelService.channels.indexWhere(
       (c) => c.id == channel.id,
     );
     print('Found channel at index: $channelIndex');
     if (channelIndex != -1) {
-      final totalMessages = chatPlugin.channels[channelIndex].messages.length;
+      final totalMessages = chatPlugin.channelService.channels[channelIndex].messages.length;
 
       // 计算总页数（向上取整）
       final totalPages = (totalMessages / pageSize).ceil();
@@ -62,10 +61,10 @@ class ChatScreenController extends ChangeNotifier {
       // 设置当前页为第一页，显示最新消息
       currentPage = 1;
 
-      print('Initializing chat screen:');
-      print('- Total messages: $totalMessages');
-      print('- Total pages: $totalPages');
-      print('- Starting at page: $currentPage');
+      debugPrint('Initializing chat screen:');
+      debugPrint('- Total messages: $totalMessages');
+      debugPrint('- Total pages: $totalPages');
+      debugPrint('- Starting at page: $currentPage');
 
       // 加载第一页消息
       await _loadMessages();
@@ -105,7 +104,7 @@ class ChatScreenController extends ChangeNotifier {
     try {
       // 检查 ChatPlugin 是否已初始化
       if (chatPlugin.isInitialized) {
-        currentUser = chatPlugin.currentUser;
+        currentUser = chatPlugin.userService.currentUser;
       } else {
         // 如果 ChatPlugin 尚未初始化，使用一个默认用户并稍后重试
         currentUser = User(id: 'current_user', username: 'Current User');
@@ -113,13 +112,13 @@ class ChatScreenController extends ChangeNotifier {
         // 延迟重试获取当前用户
         Future.delayed(const Duration(milliseconds: 500), () {
           if (chatPlugin.isInitialized) {
-            currentUser = chatPlugin.currentUser;
+        currentUser = chatPlugin.userService.currentUser;
             notifyListeners();
           }
         });
       }
     } catch (e) {
-      print('Error initializing current user: $e');
+      debugPrint('Error initializing current user: $e');
       // 使用默认用户作为备选
       currentUser = User(id: 'current_user', username: 'Current User');
     }
@@ -141,22 +140,22 @@ class ChatScreenController extends ChangeNotifier {
 
     try {
       // 从ChatPlugin加载最新的消息
-      print('Loading messages - Searching for channel with id: ${channel.id}');
-      print(
-        'Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}',
+      debugPrint('Loading messages - Searching for channel with id: ${channel.id}');
+      debugPrint(
+        'Available channels: ${chatPlugin.channelService.channels.map((c) => '${c.id}').join(', ')}',
       );
-      final channelIndex = chatPlugin.channels.indexWhere(
+      final channelIndex = chatPlugin.channelService.channels.indexWhere(
         (c) => c.id == channel.id,
       );
-      print('Found channel at index: $channelIndex');
+      debugPrint('Found channel at index: $channelIndex');
       if (channelIndex == -1) {
-        print('Channel not found in ChatPlugin');
+        debugPrint('Channel not found in ChatPlugin');
         return;
       }
 
       // 获取最新的消息列表并按时间倒序排序
       final allMessages = List<Message>.from(
-        chatPlugin.channels[channelIndex].messages,
+        chatPlugin.channelService.channels[channelIndex].messages,
       )..sort((a, b) => b.date.compareTo(a.date));
 
       // 计算当前页的消息范围
@@ -164,7 +163,7 @@ class ChatScreenController extends ChangeNotifier {
       final startIndex = (currentPage - 1) * pageSize;
       final endIndex = startIndex + pageSize;
 
-      print(
+      debugPrint(
         'Loading messages: Page $currentPage, Total: $totalMessages, Range: $startIndex-$endIndex',
       );
 
@@ -186,13 +185,13 @@ class ChatScreenController extends ChangeNotifier {
           messages.addAll(pageMessages);
         }
 
-        print('Loaded ${pageMessages.length} messages for page $currentPage');
+        debugPrint('Loaded ${pageMessages.length} messages for page $currentPage');
       }
 
       _updateDatesWithMessages();
     } catch (e) {
       // Handle error
-      print('Error loading messages: $e');
+      debugPrint('Error loading messages: $e');
     } finally {
       isLoading = false;
       notifyListeners();
@@ -203,22 +202,22 @@ class ChatScreenController extends ChangeNotifier {
     if (isLoading) return;
 
     // 获取总消息数
-    final channelIndex = chatPlugin.channels.indexWhere(
+    final channelIndex = chatPlugin.channelService.channels.indexWhere(
       (c) => c.id == channel.id,
     );
     if (channelIndex == -1) return;
 
-    final totalMessages = chatPlugin.channels[channelIndex].messages.length;
+    final totalMessages = chatPlugin.channelService.channels[channelIndex].messages.length;
     final totalPages = (totalMessages / pageSize).ceil();
 
-    print('Current page: $currentPage, Total pages: $totalPages');
+    debugPrint('Current page: $currentPage, Total pages: $totalPages');
 
     // 如果还有更早的消息页可以加载
     if (currentPage < totalPages) {
       currentPage++;
       await _loadMessages();
     } else {
-      print('No more messages to load');
+      debugPrint('No more messages to load');
     }
   }
 
@@ -279,11 +278,11 @@ class ChatScreenController extends ChangeNotifier {
       final index = messages.indexWhere((m) => m.id == editedMessage.id);
       if (index != -1) {
         messages[index] = editedMessage;
-        await chatPlugin.saveMessages(channel.id, messages);
+        await chatPlugin.channelService.saveMessages(channel.id, messages);
       }
     } catch (e) {
       // Handle error
-      print('Error updating message: $e');
+      debugPrint('Error updating message: $e');
     } finally {
       messageBeingEdited = null;
       editingController.clear();
@@ -294,11 +293,11 @@ class ChatScreenController extends ChangeNotifier {
   Future<void> deleteMessage(Message message) async {
     try {
       messages.removeWhere((m) => m.id == message.id);
-      await chatPlugin.saveMessages(channel.id, messages);
+      await chatPlugin.channelService.saveMessages(channel.id, messages);
       notifyListeners();
     } catch (e) {
       // Handle error
-      print('Error deleting message: $e');
+      debugPrint('Error deleting message: $e');
     }
   }
 
@@ -307,12 +306,12 @@ class ChatScreenController extends ChangeNotifier {
       final index = messages.indexWhere((m) => m.id == message.id);
       if (index != -1) {
         message.setFixedSymbol(symbol);
-        await chatPlugin.saveMessages(channel.id, messages);
+        await chatPlugin.channelService.saveMessages(channel.id, messages);
         notifyListeners();
       }
     } catch (e) {
       // Handle error
-      print('Error setting fixed symbol: $e');
+      debugPrint('Error setting fixed symbol: $e');
     }
   }
 
@@ -365,25 +364,25 @@ class ChatScreenController extends ChangeNotifier {
       messages.insert(0, newMessage);
 
       // 获取ChatPlugin中的频道索引
-      print('Sending message - Searching for channel with id: ${channel.id}');
-      print(
-        'Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}',
+      debugPrint('Sending message - Searching for channel with id: ${channel.id}');
+      debugPrint(
+        'Available channels: ${chatPlugin.channelService.channels.map((c) => '${c.id}').join(', ')}',
       );
-      final channelIndex = chatPlugin.channels.indexWhere(
+      final channelIndex = chatPlugin.channelService.channels.indexWhere(
         (c) => c.id == channel.id,
       );
-      print('Found channel at index: $channelIndex');
+      debugPrint('Found channel at index: $channelIndex');
       if (channelIndex != -1) {
         // 直接使用ChatPlugin的addMessage方法，它会同时更新内存和存储
-        await chatPlugin.addMessage(channel.id, Future.value(newMessage));
+        await chatPlugin.channelService.addMessage(channel.id, Future.value(newMessage));
       } else {
         // 如果找不到频道，则使用旧方法保存
-        await chatPlugin.saveMessages(channel.id, messages);
+        await chatPlugin.channelService.saveMessages(channel.id, messages);
       }
 
       // 清除草稿
       draftController.clear();
-      await chatPlugin.saveDraft(channel.id, '');
+      await chatPlugin.channelService.saveDraft(channel.id, '');
 
       // 请求滚动到最新消息
       requestScrollToLatest();
@@ -392,23 +391,23 @@ class ChatScreenController extends ChangeNotifier {
       notifyListeners();
 
       // 根据设置决定是否播放提示音
-      if (chatPlugin.shouldPlayMessageSound()) {
+      if (chatPlugin.settingsService.shouldPlayMessageSound()) {
         // 在主线程上播放声音
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           try {
             await _audioService.playMessageSentSound();
           } catch (e) {
-            print('Error playing audio: $e');
+            debugPrint('Error playing audio: $e');
           }
         });
       }
     } catch (e) {
-      print('Error sending message: $e');
+      debugPrint('Error sending message: $e');
     }
   }
 
   void saveDraft(String draft) {
-    chatPlugin.saveDraft(channel.id, draft);
+    chatPlugin.channelService.saveDraft(channel.id, draft);
   }
 
   Future<void> clearMessages() async {
@@ -417,17 +416,17 @@ class ChatScreenController extends ChangeNotifier {
       messages.clear();
 
       // 删除存储中的消息
-      await chatPlugin.deleteChannelMessages(channel.id);
+      await chatPlugin.channelService.deleteChannelMessages(channel.id);
 
       // 保存空消息列表到存储
-      await chatPlugin.saveMessages(channel.id, messages);
+      await chatPlugin.channelService.saveMessages(channel.id, messages);
 
       // 通知UI更新
       notifyListeners();
 
-      print('Messages cleared successfully');
+      debugPrint('Messages cleared successfully');
     } catch (e) {
-      print('Error clearing messages: $e');
+      debugPrint('Error clearing messages: $e');
       // 如果清空失败，重新加载消息
       await _loadMessages();
     }
@@ -441,32 +440,32 @@ class ChatScreenController extends ChangeNotifier {
         messages[index] = await messages[index].copyWith(bubbleColor: color);
 
         // 获取ChatPlugin中的频道索引
-        print(
+        debugPrint(
           'Setting bubble color - Searching for channel with id: ${channel.id}',
         );
-        print(
-          'Available channels: ${chatPlugin.channels.map((c) => '${c.id}').join(', ')}',
+        debugPrint(
+          'Available channels: ${chatPlugin.channelService.channels.map((c) => '${c.id}').join(', ')}',
         );
-        final channelIndex = chatPlugin.channels.indexWhere(
+        final channelIndex = chatPlugin.channelService.channels.indexWhere(
           (c) => c.id == channel.id,
         );
         print('Found channel at index: $channelIndex');
 
         if (channelIndex != -1) {
           // 保存到存储
-          await chatPlugin.saveMessages(channel.id, messages);
-          print('Successfully updated bubble color for message ${message.id}');
+          await chatPlugin.channelService.saveMessages(channel.id, messages);
+          debugPrint('Successfully updated bubble color for message ${message.id}');
         } else {
-          print('Channel not found in ChatPlugin');
+          debugPrint('Channel not found in ChatPlugin');
         }
 
         // 通知监听器更新UI
         notifyListeners();
       } else {
-        print('Message not found in the list');
+        debugPrint('Message not found in the list');
       }
     } catch (e) {
-      print('Error setting bubble color: $e');
+      debugPrint('Error setting bubble color: $e');
       // 可以在这里添加错误处理，比如显示一个提示
     }
   }
@@ -474,12 +473,12 @@ class ChatScreenController extends ChangeNotifier {
   Future<void> _loadUntilMessageFound() async {
     if (initialMessage == null) return;
 
-    final channelIndex = chatPlugin.channels.indexWhere(
+    final channelIndex = chatPlugin.channelService.channels.indexWhere(
       (c) => c.id == channel.id,
     );
     if (channelIndex == -1) return;
 
-    final allMessages = chatPlugin.channels[channelIndex].messages;
+    final allMessages = chatPlugin.channelService.channels[channelIndex].messages;
     final targetMessageIndex = allMessages.indexWhere(
       (m) => m.id == initialMessage!.id,
     );
@@ -510,6 +509,7 @@ class ChatScreenController extends ChangeNotifier {
     });
   }
 
+  @override
   void dispose() {
     scrollController.dispose();
     editingController.dispose();
