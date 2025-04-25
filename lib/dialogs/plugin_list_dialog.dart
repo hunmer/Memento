@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import '../core/plugin_manager.dart';
 
 class PluginListDialog extends StatelessWidget {
-  const PluginListDialog({super.key});
+  final bool sortByRecentlyOpened;
+  
+  const PluginListDialog({
+    super.key,
+    this.sortByRecentlyOpened = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +31,14 @@ class PluginListDialog extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: PluginManager.instance.allPlugins.map((plugin) {
+                  children: PluginManager.instance
+                      .getAllPlugins(sortByRecentlyOpened: sortByRecentlyOpened)
+                      .map((plugin) {
                     return ListTile(
                       title: Text(plugin.name),
                       subtitle: Text(plugin.description),
                       onTap: () {
-                        // 关闭对话框
                         Navigator.of(context).pop();
-                        // 打开插件界面
                         PluginManager.instance.openPlugin(context, plugin);
                       },
                     );
@@ -54,9 +59,11 @@ class PluginListDialog extends StatelessWidget {
 }
 
 /// 显示插件列表对话框
-void showPluginListDialog(BuildContext context) {
+void showPluginListDialog(BuildContext context, {bool sortByRecentlyOpened = true}) {
   showDialog(
     context: context,
-    builder: (context) => const PluginListDialog(),
+    builder: (context) => PluginListDialog(
+      sortByRecentlyOpened: sortByRecentlyOpened,
+  ),
   );
 }
