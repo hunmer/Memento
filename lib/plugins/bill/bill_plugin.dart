@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/plugin_base.dart';
-import '../../core/storage/storage_manager.dart';
+// import '../../core/storage/storage_manager.dart';
 import 'screens/bill_list_screen.dart';
 import 'screens/bill_stats_screen.dart';
 import 'screens/account_list_screen.dart';
@@ -12,14 +12,25 @@ import 'models/bill_statistics.dart';
 import 'models/statistic_range.dart';
 
 class BillPlugin extends PluginBase with ChangeNotifier {
-  Account? _selectedAccount;
+  String? _selectedAccountId;
 
-  Account? get selectedAccount => _selectedAccount;
+  Account? get selectedAccount {
+    if (_selectedAccountId == null) return null;
+    try {
+      return _accounts.firstWhere(
+        (account) => account.id == _selectedAccountId,
+      );
+    } catch (e) {
+      return _accounts.isNotEmpty ? _accounts.first : null;
+    }
+  }
   
   set selectedAccount(Account? account) {
-    _selectedAccount = account;
+    _selectedAccountId = account?.id;
     notifyListeners();
   }
+
+  String? get selectedAccountId => _selectedAccountId;
 
   @override
   String get id => 'bill_plugin';
@@ -87,7 +98,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
           // 统计信息卡片
           Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withAlpha(77),
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),
@@ -225,12 +236,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     
     // 更新账户列表
     _accounts[index] = account;
-    
-    // 如果更新的是当前选中的账户，同步更新选中的账户
-    if (_selectedAccount?.id == account.id) {
-      _selectedAccount = account;
-    }
-    
     // 先保存数据
     await _saveAccounts();
     
@@ -241,9 +246,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   // 删除账户
   Future<void> deleteAccount(String accountId) async {
     _accounts.removeWhere((account) => account.id == accountId);
-    if (_selectedAccount?.id == accountId) {
-      _selectedAccount = _accounts.isNotEmpty ? _accounts.first : null;
-    }
     await _saveAccounts();
     notifyListeners();
   }
@@ -325,12 +327,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     final updatedAccount = account.copyWith(bills: updatedBills);
     updatedAccount.calculateTotal();
     _accounts[accountIndex] = updatedAccount;
-    
-    // 如果更新的是当前选中的账户，同步更新选中的账户
-    if (_selectedAccount?.id == accountId) {
-      _selectedAccount = updatedAccount;
-    }
-    
     await _saveAccounts();
     notifyListeners();
   }
@@ -466,14 +462,14 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       });
       return const Center(child: CircularProgressIndicator());
     }
-
-    // 使用选中的账户，如果没有选中则使用第一个账户
-    final currentAccount = _selectedAccount ?? _accounts.first;
+    if(_selectedAccountId == null && _accounts.isNotEmpty) {
+      _selectedAccountId = _accounts.first.id;
+    }
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('${currentAccount.title}'),
+          title: Text('${selectedAccount?.title}'),
           bottom: const TabBar(tabs: [Tab(text: '账单列表'), Tab(text: '统计分析')]),
           actions: [
             IconButton(
@@ -490,8 +486,8 @@ class BillPlugin extends PluginBase with ChangeNotifier {
         ),
         body: TabBarView(
           children: [
-            BillListScreen(billPlugin: this, account: currentAccount),
-            BillStatsScreen(billPlugin: this, account: currentAccount),
+            BillListScreen(billPlugin: this, accountId: selectedAccount!.id),
+            BillStatsScreen(billPlugin: this, accountId: selectedAccount!.id),
           ],
         ),
       ),

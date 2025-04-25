@@ -11,12 +11,12 @@ import 'bill_stats_screen.dart';
 
 class BillListScreen extends StatefulWidget {
   final BillPlugin billPlugin;
-  final Account account;
+  final String accountId;
 
   const BillListScreen({
     super.key,
     required this.billPlugin,
-    required this.account,
+    required this.accountId,
   });
 
   @override
@@ -75,10 +75,9 @@ class _BillListScreenState extends State<BillListScreen> with TickerProviderStat
     });
 
     try {
-      // 确保使用最新的账户数据
-      final currentAccount = widget.billPlugin.selectedAccount?.id == widget.account.id
-          ? widget.billPlugin.selectedAccount!
-          : widget.account;
+      // 获取当前账户
+      final currentAccount = widget.billPlugin.accounts
+          .firstWhere((account) => account.id == widget.accountId);
 
       // 从账户中获取账单并转换为BillModel
       final bills = currentAccount.bills
@@ -124,7 +123,7 @@ class _BillListScreenState extends State<BillListScreen> with TickerProviderStat
         id: billModel.id,
         title: billModel.title,
         amount: billModel.isExpense ? -billModel.amount : billModel.amount,
-        accountId: widget.account.id,
+        accountId: widget.accountId,
         tag: billModel.category,
         note: billModel.note,
         createdAt: billModel.date,
@@ -139,7 +138,7 @@ class _BillListScreenState extends State<BillListScreen> with TickerProviderStat
         builder:
             (context) => BillEditScreen(
               billPlugin: widget.billPlugin,
-              account: widget.account,
+              accountId: widget.accountId,
               bill: bill,
             ),
       ),
@@ -152,7 +151,9 @@ class _BillListScreenState extends State<BillListScreen> with TickerProviderStat
     double totalIncome = 0;
     double totalExpense = 0;
 
-    for (var bill in widget.account.bills) {
+    final currentAccount = widget.billPlugin.accounts
+        .firstWhere((account) => account.id == widget.accountId);
+    for (var bill in currentAccount.bills) {
       if (bill.amount > 0) {
         totalIncome += bill.amount;
       } else {
@@ -233,7 +234,7 @@ class _BillListScreenState extends State<BillListScreen> with TickerProviderStat
             // 统计分析页
             BillStatsScreen(
               billPlugin: widget.billPlugin,
-              account: widget.account,
+              accountId: widget.accountId,
             ),
           ],
         ),

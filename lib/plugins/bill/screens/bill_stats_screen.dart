@@ -8,12 +8,12 @@ import '../models/bill_model.dart';
 
 class BillStatsScreen extends StatefulWidget {
   final BillPlugin billPlugin;
-  final Account account;
+  final String accountId;
 
   const BillStatsScreen({
     super.key,
     required this.billPlugin,
-    required this.account,
+    required this.accountId,
   });
 
   @override
@@ -66,8 +66,12 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
       _isLoading = true;
     });
 
+    // 获取当前账户
+    final currentAccount = widget.billPlugin.accounts
+        .firstWhere((account) => account.id == widget.accountId);
+        
     // 从账户中获取指定时间范围内的账单
-    final filteredBills = widget.account.bills.where((bill) =>
+    final filteredBills = currentAccount.bills.where((bill) =>
       bill.createdAt.isAfter(_startDate) &&
       bill.createdAt.isBefore(_endDate.add(const Duration(seconds: 1)))
     );
@@ -79,7 +83,7 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
       amount: bill.absoluteAmount,
       date: bill.createdAt,
       icon: bill.icon,
-      color: widget.account.backgroundColor,
+      color: currentAccount.backgroundColor,
       category: bill.tag ?? '未分类',
       note: bill.note,
       isExpense: bill.isExpense,

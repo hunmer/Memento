@@ -8,7 +8,7 @@ import '../../../widgets/circle_icon_picker.dart';
 
 class BillEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
-  final Account account;
+  final String accountId;
   final Bill? bill;
   final VoidCallback? onSaved;
   final VoidCallback? onCancel;
@@ -16,7 +16,7 @@ class BillEditScreen extends StatefulWidget {
   const BillEditScreen({
     super.key,
     required this.billPlugin,
-    required this.account,
+    required this.accountId,
     this.bill,
     this.onSaved,
     this.onCancel,
@@ -253,10 +253,6 @@ class _BillEditScreenState extends State<BillEditScreen> {
           try {
             // 显示保存中提示
             if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('正在保存...'), duration: Duration(milliseconds: 500)),
-            );
-            
             // 解析金额
             final amount = double.parse(_amountController.text);
             
@@ -266,7 +262,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
               id: widget.bill?.id,
               title: _titleController.text,
               amount: _isExpense ? -amount : amount,
-              accountId: widget.account.id,
+              accountId: widget.accountId,
               tag: _tag ?? '未分类',
               note: _noteController.text.isNotEmpty ? _noteController.text : null,
               icon: _selectedIcon,
@@ -277,8 +273,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
             
             // 获取当前账户的最新数据
             final currentAccount = widget.billPlugin.accounts.firstWhere(
-              (a) => a.id == widget.account.id,
-              orElse: () => widget.account,
+              (a) => a.id == widget.accountId,
             );
 
             // 准备更新后的账户数据
@@ -310,15 +305,6 @@ class _BillEditScreenState extends State<BillEditScreen> {
             
             // 返回上一页
             if (!mounted) return;
-            
-            // 显示成功提示
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(widget.bill == null ? '账单添加成功' : '账单更新成功'), 
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-              ),
-            );
             
             // 调用保存回调并返回
             Navigator.of(context).pop();

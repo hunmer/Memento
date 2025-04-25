@@ -219,7 +219,7 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
       MaterialPageRoute(
         builder: (context) => bill_edit.BillEditScreen(
           billPlugin: widget.billPlugin,
-          account: _currentAccount,
+          accountId: _currentAccount.id,
           onSaved: () {
             // 强制更新列表
             _refreshAccountData();
@@ -235,7 +235,7 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
       MaterialPageRoute(
         builder: (context) => bill_edit.BillEditScreen(
           billPlugin: widget.billPlugin,
-          account: _currentAccount,
+          accountId: _currentAccount.id,
           bill: bill,
           onSaved: () {
             // 强制更新列表
