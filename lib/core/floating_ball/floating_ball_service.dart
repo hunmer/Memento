@@ -17,7 +17,13 @@ class FloatingBallService {
     if (_isInitialized) return;
     
     _manager.initDefaultActions(context);
+    _manager.setActionContext(context);
     _isInitialized = true;
+  }
+
+  // 更新上下文
+  void updateContext(BuildContext context) {
+    _manager.setActionContext(context);
   }
 
   /// 显示悬浮球

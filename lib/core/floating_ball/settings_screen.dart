@@ -103,10 +103,10 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
     );
   }
   
-  void _showActionSelectionDialog(FloatingBallGesture gesture) {
-    showDialog(
+  Future<void> _showActionSelectionDialog(FloatingBallGesture gesture) async {
+    final result = await showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: Text('设置${_getGestureName(gesture)}动作'),
           content: SingleChildScrollView(
@@ -116,36 +116,15 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
                 ..._predefinedActions.map((action) {
                   return ListTile(
                     title: Text(action.title),
-                    onTap: () {
-                      final gestureName = _getGestureName(gesture);
-                      if (action.title == '显示提示消息') {
-                        _manager.registerAction(
-                          gesture,
-                          '显示${gestureName}提示',
-                          () => action.creator(context)('${gestureName}手势'),
-                        );
-                      } else {
-                        _manager.registerAction(
-                          gesture,
-                          action.title,
-                          action.creator(context),
-                        );
-                      }
-                      setState(() {
-                        _actions = _manager.getAllActions();
-                      });
-                      Navigator.of(context).pop();
+                    onTap: () async {
+                      Navigator.of(dialogContext).pop(action);
                     },
                   );
                 }).toList(),
                 ListTile(
                   title: const Text('清除动作'),
                   onTap: () {
-                    _manager.clearAction(gesture);
-                    setState(() {
-                      _actions = _manager.getAllActions();
-                    });
-                    Navigator.of(context).pop();
+                    Navigator.of(dialogContext).pop('clear');
                   },
                 ),
               ],
@@ -153,12 +132,42 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('取消'),
             ),
           ],
         );
       },
     );
+    
+    // 处理对话框结果
+    if (result != null) {
+      if (result == 'clear') {
+        await _manager.clearAction(gesture);
+      } else if (result is ({String title, Function(BuildContext) creator})) {
+        final gestureName = _getGestureName(gesture);
+        final action = result;
+        
+        if (action.title == '显示提示消息') {
+          await _manager.registerAction(
+            gesture,
+            '显示${gestureName}提示',
+            () => action.creator(context)('${gestureName}手势'),
+          );
+        } else {
+          await _manager.registerAction(
+            gesture,
+            action.title,
+            action.creator(context),
+          );
+        }
+      }
+      
+      if (mounted) {
+        setState(() {
+          _actions = _manager.getAllActions();
+        });
+      }
+    }
   }
 }

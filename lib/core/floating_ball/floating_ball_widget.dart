@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'dart:async';
 import 'floating_ball_manager.dart';
+import 'floating_ball_service.dart';
 import 'settings_screen.dart';
 
 class FloatingBallWidget extends StatefulWidget {
@@ -38,6 +39,11 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
   void initState() {
     super.initState();
     _loadPosition();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        FloatingBallService().updateContext(context);
+      }
+    });
   }
 
   Future<void> _loadPosition() async {
