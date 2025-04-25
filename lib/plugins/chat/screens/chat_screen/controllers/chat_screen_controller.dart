@@ -360,9 +360,6 @@ class ChatScreenController extends ChangeNotifier {
         metadata: metadata,
       );
 
-      // 添加消息到本地列表
-      messages.insert(0, newMessage);
-
       // 获取ChatPlugin中的频道索引
       debugPrint('Sending message - Searching for channel with id: ${channel.id}');
       debugPrint(
@@ -375,8 +372,13 @@ class ChatScreenController extends ChangeNotifier {
       if (channelIndex != -1) {
         // 直接使用ChatPlugin的addMessage方法，它会同时更新内存和存储
         await chatPlugin.channelService.addMessage(channel.id, Future.value(newMessage));
+        
+        // 更新本地消息列表，与服务中的保持一致
+        messages = List<Message>.from(chatPlugin.channelService.channels[channelIndex].messages)
+          ..sort((a, b) => b.date.compareTo(a.date));
       } else {
-        // 如果找不到频道，则使用旧方法保存
+        // 如果找不到频道，则先添加到本地列表，再使用旧方法保存
+        messages.insert(0, newMessage);
         await chatPlugin.channelService.saveMessages(channel.id, messages);
       }
 
