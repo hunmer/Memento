@@ -41,7 +41,14 @@ class FloatingBallManager {
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
     '打开上次插件': (context) => () {
       if (context.mounted) {
-        final lastPlugin = PluginManager.instance.getLastOpenedPlugin();
+        // 获取当前打开的插件ID（如果有）
+        final currentPluginId = ModalRoute.of(context)?.settings.arguments is Map ? 
+            (ModalRoute.of(context)?.settings.arguments as Map)['pluginId'] : null;
+        
+        // 调用getLastOpenedPlugin时传递当前插件ID作为排除项
+        final lastPlugin = PluginManager.instance.getLastOpenedPlugin(
+          excludePluginId: currentPluginId as String?,
+        );
         if (lastPlugin != null) {
           PluginManager.instance.openPlugin(context, lastPlugin);
         } else {

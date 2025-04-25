@@ -65,17 +65,27 @@ class PluginManager {
   List<PluginBase> get allPlugins => getAllPlugins();
 
   /// 获取最近打开的插件
-  PluginBase? getLastOpenedPlugin() {
+  /// [excludePluginId] 需要排除的插件ID，用于避免返回当前正在使用的插件
+  PluginBase? getLastOpenedPlugin({String? excludePluginId}) {
     if (_pluginAccessTimes.isEmpty || _plugins.isEmpty) {
       return null;
     }
 
-    // 找到访问时间最新的插件ID
-    String? lastOpenedId = _pluginAccessTimes.entries
-        .reduce((a, b) => a.value > b.value ? a : b)
-        .key;
+    // 按访问时间降序排序，并排除指定的插件ID
+    var sortedEntries = _pluginAccessTimes.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
 
-    return getPlugin(lastOpenedId);
+    // 找到第一个不是被排除ID的插件
+    for (var entry in sortedEntries) {
+      if (entry.key != excludePluginId) {
+        var plugin = getPlugin(entry.key);
+        if (plugin != null) {
+          return plugin;
+        }
+      }
+    }
+
+    return null;
   }
 
   /// 根据ID获取插件
@@ -127,9 +137,31 @@ class PluginManager {
 
   /// 打开插件界面
   void openPlugin(BuildContext context, PluginBase plugin) {
+    // 检查当前路由栈中是否已经存在相同的插件
+    bool isPluginAlreadyOpen = false;
+    Navigator.popUntil(context, (route) {
+      if (route.settings.arguments is Map) {
+        final args = route.settings.arguments as Map;
+        if (args['pluginId'] == plugin.id) {
+          isPluginAlreadyOpen = true;
+          return true;
+        }
+      }
+      return false;
+    });
+
+    // 如果插件已经打开，就不再重复打开
+    if (isPluginAlreadyOpen) {
+      return;
+    }
+
+    // 更新访问时间并打开新的插件页面
     _updatePluginAccessTime(plugin.id);
     Navigator.of(context).push(
       MaterialPageRoute(
+        settings: RouteSettings(
+          arguments: {'pluginId': plugin.id}
+        ),
         builder: (context) => Scaffold(
           // 不需要appBar，因为插件界面通常有自己的头部布局
           body: plugin.buildMainView(context),

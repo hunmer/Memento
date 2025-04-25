@@ -18,6 +18,11 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      // 添加返回按钮
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
       title: Text(viewModeController.isGridMode && viewModeController.selectedMinutes > 0
           ? '${viewModeController.selectedMinutes}分钟已选中'
           : '活动时间线'),
