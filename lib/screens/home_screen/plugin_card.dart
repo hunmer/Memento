@@ -23,63 +23,67 @@ class PluginCard extends StatelessWidget {
     final customCardView = plugin.buildCardView(context);
 
     return Builder(
-      builder: (cardContext) => Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onLongPress: () => onShowSizeMenu(cardContext),
-          child: Card(
-            elevation: 2.0,
-            clipBehavior: Clip.antiAlias,
-            margin: const EdgeInsets.all(8.0),
-            child: Stack(
-              children: [
-                InkWell(
-                  onTap: () {
-                    // 使用PluginManager的openPlugin方法
-                    PluginManager.instance.openPlugin(context, plugin);
-                  },
-                  child: customCardView ?? _buildDefaultCard(context),
-                ),
-                if (isReorderMode)
-                  Positioned.fill(
-                    child: Material(
-                      color: Colors.black12,
-                      child: const Center(
-                        child: Icon(
-                          Icons.drag_handle,
-                          color: Colors.white,
-                          size: 32,
+      builder:
+          (cardContext) => Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onLongPress: () => onShowSizeMenu(cardContext),
+              child: Card(
+                elevation: 2.0,
+                clipBehavior: Clip.antiAlias,
+                margin: const EdgeInsets.all(4.0),
+                child: Stack(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        // 使用PluginManager的openPlugin方法
+                        PluginManager.instance.openPlugin(context, plugin);
+                      },
+                      child: customCardView ?? _buildDefaultCard(context),
+                    ),
+                    if (isReorderMode)
+                      Positioned.fill(
+                        child: Material(
+                          color: Colors.black12,
+                          child: const Center(
+                            child: Icon(
+                              Icons.drag_handle,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
   Widget _buildDefaultCard(BuildContext context) {
     // 根据卡片大小计算图标大小
-    final iconSize = cardSize.width > 1 || cardSize.height > 1 ? 96.0 : 64.0;
-    
+    final iconSize = cardSize.width > 1 || cardSize.height > 1 ? 72.0 : 48.0;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: cardSize.height > 1 ? MainAxisAlignment.start : MainAxisAlignment.center,
+              mainAxisAlignment:
+                  cardSize.height > 1
+                      ? MainAxisAlignment.start
+                      : MainAxisAlignment.center,
               children: [
                 Container(
                   width: iconSize,
                   height: iconSize,
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor.withAlpha(25),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     plugin.icon ?? Icons.extension,
@@ -87,7 +91,7 @@ class PluginCard extends StatelessWidget {
                     color: plugin.color ?? Theme.of(context).primaryColor,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 Text(
                   plugin.name,
                   style: Theme.of(context).textTheme.titleMedium,

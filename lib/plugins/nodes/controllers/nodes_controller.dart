@@ -9,7 +9,7 @@ class NodesController extends ChangeNotifier {
   final StorageManager _storageManager;
   List<Notebook> _notebooks = [];
   Notebook? _selectedNotebook;
-  
+
   NodesController(this._storageManager) {
     _loadData();
   }
@@ -25,7 +25,9 @@ class NodesController extends ChangeNotifier {
   }
 
   Future<void> clearNodes(String notebookId) async {
-    final index = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    final index = _notebooks.indexWhere(
+      (notebook) => notebook.id == notebookId,
+    );
     if (index != -1) {
       _notebooks[index].nodes.clear();
       notifyListeners();
@@ -40,11 +42,15 @@ class NodesController extends ChangeNotifier {
 
   Future<void> _loadData() async {
     try {
-      final notebooksData = await _storageManager.read('nodes_notebooks');
+      final notebooksData = await _storageManager.read('nodes/nodes_notebooks');
       if (notebooksData.isNotEmpty) {
-        final List<dynamic> notebooks = notebooksData['notebooks'] as List<dynamic>;
-        _notebooks = notebooks.map((data) => Notebook.fromJson(data as Map<String, dynamic>)).toList();
-        
+        final List<dynamic> notebooks =
+            notebooksData['notebooks'] as List<dynamic>;
+        _notebooks =
+            notebooks
+                .map((data) => Notebook.fromJson(data as Map<String, dynamic>))
+                .toList();
+
         if (_notebooks.isNotEmpty && _selectedNotebook == null) {
           _selectedNotebook = _notebooks.first;
         }
@@ -59,27 +65,31 @@ class NodesController extends ChangeNotifier {
   Future<void> _saveData() async {
     try {
       final Map<String, dynamic> data = {
-        'notebooks': _notebooks.map((notebook) => notebook.toJson()).toList()
+        'notebooks': _notebooks.map((notebook) => notebook.toJson()).toList(),
       };
-      await _storageManager.write('nodes_notebooks', data);
+      await _storageManager.write('nodes/nodes_notebooks', data);
     } catch (e) {
       debugPrint('Error saving notebooks: $e');
     }
   }
 
-  Future<void> addNotebook(String title, IconData icon, {Color color = Colors.blue}) async {
+  Future<void> addNotebook(
+    String title,
+    IconData icon, {
+    Color color = Colors.blue,
+  }) async {
     final newNotebook = Notebook(
       id: const Uuid().v4(),
       title: title,
       icon: icon,
       color: color,
     );
-    
+
     _notebooks.add(newNotebook);
     if (_notebooks.length == 1) {
       _selectedNotebook = newNotebook;
     }
-    
+
     notifyListeners();
     await _saveData();
   }
@@ -98,37 +108,45 @@ class NodesController extends ChangeNotifier {
 
   Future<void> deleteNotebook(String notebookId) async {
     _notebooks.removeWhere((notebook) => notebook.id == notebookId);
-    
+
     if (_selectedNotebook?.id == notebookId) {
       _selectedNotebook = _notebooks.isNotEmpty ? _notebooks.first : null;
     }
-    
+
     notifyListeners();
     await _saveData();
   }
 
   Future<void> reorderNotebooks(int oldIndex, int newIndex) async {
-    if (oldIndex < 0 || newIndex < 0 || oldIndex >= _notebooks.length || newIndex >= _notebooks.length) {
+    if (oldIndex < 0 ||
+        newIndex < 0 ||
+        oldIndex >= _notebooks.length ||
+        newIndex >= _notebooks.length) {
       return;
     }
-    
+
     final Notebook item = _notebooks.removeAt(oldIndex);
     _notebooks.insert(newIndex, item);
-    
+
     notifyListeners();
     await _saveData();
   }
 
   // Node operations
   Future<void> addNode(String notebookId, Node node, {String? parentId}) async {
-    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    final notebookIndex = _notebooks.indexWhere(
+      (notebook) => notebook.id == notebookId,
+    );
     if (notebookIndex == -1) return;
 
     debugPrint('【NodesController】开始添加新节点: ${node.title}');
-    debugPrint('【NodesController】节点 parentId: ${node.parentId}, 传入的 parentId: $parentId');
+    debugPrint(
+      '【NodesController】节点 parentId: ${node.parentId}, 传入的 parentId: $parentId',
+    );
 
     // 使用节点自身的 parentId，如果没有则使用传入的 parentId
-    final effectiveParentId = node.parentId.isNotEmpty ? node.parentId : (parentId ?? '');
+    final effectiveParentId =
+        node.parentId.isNotEmpty ? node.parentId : (parentId ?? '');
     debugPrint('【NodesController】最终使用的 parentId: $effectiveParentId');
 
     if (effectiveParentId.isEmpty) {
@@ -138,7 +156,11 @@ class NodesController extends ChangeNotifier {
     } else {
       debugPrint('【NodesController】尝试添加为子节点');
       // Add as child node
-      final success = _addChildNode(_notebooks[notebookIndex].nodes, effectiveParentId, node);
+      final success = _addChildNode(
+        _notebooks[notebookIndex].nodes,
+        effectiveParentId,
+        node,
+      );
       if (!success) {
         // 如果找不到父节点，作为根节点添加
         debugPrint('【NodesController】未找到父节点: $effectiveParentId, 添加为根节点');
@@ -160,7 +182,7 @@ class NodesController extends ChangeNotifier {
         nodes[i].children.add(newNode);
         return true;
       }
-      
+
       if (nodes[i].children.isNotEmpty) {
         if (_addChildNode(nodes[i].children, parentId, newNode)) {
           return true;
@@ -171,12 +193,17 @@ class NodesController extends ChangeNotifier {
   }
 
   Future<void> updateNode(String notebookId, Node updatedNode) async {
-    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    final notebookIndex = _notebooks.indexWhere(
+      (notebook) => notebook.id == notebookId,
+    );
     if (notebookIndex == -1) return;
 
     // 尝试在原位置更新节点
-    final updated = _updateNodeInList(_notebooks[notebookIndex].nodes, updatedNode);
-    
+    final updated = _updateNodeInList(
+      _notebooks[notebookIndex].nodes,
+      updatedNode,
+    );
+
     // 如果找不到节点（罕见情况），则删除旧节点并添加新节点
     if (!updated) {
       // 首先找到并删除原节点
@@ -191,15 +218,21 @@ class NodesController extends ChangeNotifier {
         _notebooks[notebookIndex].nodes.add(updatedNode);
       } else {
         // 否则添加为子节点
-        final success = _addChildNode(_notebooks[notebookIndex].nodes, updatedNode.parentId, updatedNode);
+        final success = _addChildNode(
+          _notebooks[notebookIndex].nodes,
+          updatedNode.parentId,
+          updatedNode,
+        );
         if (!success) {
           // 如果找不到父节点，作为根节点添加
-          debugPrint('Parent node not found: ${updatedNode.parentId}, adding as root node');
+          debugPrint(
+            'Parent node not found: ${updatedNode.parentId}, adding as root node',
+          );
           _notebooks[notebookIndex].nodes.add(updatedNode);
         }
       }
     }
-    
+
     notifyListeners();
     await _saveData();
   }
@@ -210,14 +243,14 @@ class NodesController extends ChangeNotifier {
         // 保留原节点的子节点和展开状态
         final List<Node> originalChildren = nodes[i].children;
         final bool originalExpandedState = nodes[i].isExpanded;
-        
+
         // 更新节点，但保留位置、子节点和展开状态
         updatedNode.children = originalChildren;
         updatedNode.isExpanded = originalExpandedState;
         nodes[i] = updatedNode;
         return true;
       }
-      
+
       if (nodes[i].children.isNotEmpty) {
         if (_updateNodeInList(nodes[i].children, updatedNode)) {
           return true;
@@ -228,11 +261,13 @@ class NodesController extends ChangeNotifier {
   }
 
   Future<void> deleteNode(String notebookId, String nodeId) async {
-    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    final notebookIndex = _notebooks.indexWhere(
+      (notebook) => notebook.id == notebookId,
+    );
     if (notebookIndex == -1) return;
 
     _deleteNodeFromList(_notebooks[notebookIndex].nodes, nodeId);
-    
+
     notifyListeners();
     await _saveData();
   }
@@ -243,7 +278,7 @@ class NodesController extends ChangeNotifier {
         nodes.removeAt(i);
         return true;
       }
-      
+
       if (nodes[i].children.isNotEmpty) {
         if (_deleteNodeFromList(nodes[i].children, nodeId)) {
           return true;
@@ -254,11 +289,13 @@ class NodesController extends ChangeNotifier {
   }
 
   Future<void> toggleNodeExpansion(String notebookId, String nodeId) async {
-    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    final notebookIndex = _notebooks.indexWhere(
+      (notebook) => notebook.id == notebookId,
+    );
     if (notebookIndex == -1) return;
 
     _toggleNodeExpansionInList(_notebooks[notebookIndex].nodes, nodeId);
-    
+
     notifyListeners();
   }
 
@@ -268,7 +305,7 @@ class NodesController extends ChangeNotifier {
         nodes[i].isExpanded = !nodes[i].isExpanded;
         return true;
       }
-      
+
       if (nodes[i].children.isNotEmpty) {
         if (_toggleNodeExpansionInList(nodes[i].children, nodeId)) {
           return true;
@@ -279,7 +316,9 @@ class NodesController extends ChangeNotifier {
   }
 
   List<String> getNodePath(String notebookId, String nodeId) {
-    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    final notebookIndex = _notebooks.indexWhere(
+      (notebook) => notebook.id == notebookId,
+    );
     if (notebookIndex == -1) return [];
 
     List<String> path = [];
@@ -288,7 +327,9 @@ class NodesController extends ChangeNotifier {
   }
 
   List<String> getNodePathIds(String notebookId, String nodeId) {
-    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    final notebookIndex = _notebooks.indexWhere(
+      (notebook) => notebook.id == notebookId,
+    );
     if (notebookIndex == -1) return [];
 
     List<String> pathIds = [];
@@ -302,7 +343,7 @@ class NodesController extends ChangeNotifier {
         pathIds.add(node.id);
         return true;
       }
-      
+
       if (node.children.isNotEmpty) {
         if (_findNodePathIds(node.children, nodeId, pathIds)) {
           pathIds.add(node.id);
@@ -319,7 +360,7 @@ class NodesController extends ChangeNotifier {
         path.add(node.title);
         return true;
       }
-      
+
       if (node.children.isNotEmpty) {
         if (_findNodePath(node.children, nodeId, path)) {
           path.add(node.title);
@@ -332,9 +373,11 @@ class NodesController extends ChangeNotifier {
 
   // 通过ID查找节点
   Node? findNodeById(String notebookId, String nodeId) {
-    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    final notebookIndex = _notebooks.indexWhere(
+      (notebook) => notebook.id == notebookId,
+    );
     if (notebookIndex == -1) return null;
-    
+
     return _findNodeInList(_notebooks[notebookIndex].nodes, nodeId);
   }
 
@@ -343,7 +386,7 @@ class NodesController extends ChangeNotifier {
       if (node.id == nodeId) {
         return node;
       }
-      
+
       if (node.children.isNotEmpty) {
         final foundNode = _findNodeInList(node.children, nodeId);
         if (foundNode != null) {
@@ -356,7 +399,9 @@ class NodesController extends ChangeNotifier {
 
   // 获取节点的所有同级节点（包括自身）
   List<Node> getSiblingNodes(String notebookId, String nodeId) {
-    final notebookIndex = _notebooks.indexWhere((notebook) => notebook.id == notebookId);
+    final notebookIndex = _notebooks.indexWhere(
+      (notebook) => notebook.id == notebookId,
+    );
     if (notebookIndex == -1) return [];
 
     // 如果是根节点，返回所有根节点

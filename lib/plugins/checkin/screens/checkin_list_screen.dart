@@ -153,8 +153,8 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
                         return Card(
                           key: ValueKey('group_${group}_$groupIndex'),
                           margin: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
+                            horizontal: 0,
+                            vertical: 0,
                           ),
                           elevation: 2,
                           child: Column(
@@ -338,7 +338,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
         children: [
           TextButton.icon(
             icon: const Icon(Icons.add),
-            label: const Text('打卡'),
+            label: const Text(''),
             onPressed: () async {
               final record = await showDialog<CheckinRecord>(
                 context: context,

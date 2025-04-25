@@ -6,18 +6,18 @@ import '../plugin_manager.dart';
 
 /// 悬浮球手势动作类型
 enum FloatingBallGesture {
-  tap,      // 单击
-  swipeUp,  // 上滑
-  swipeDown,// 下滑
-  swipeLeft,// 左滑
-  swipeRight,// 右滑
+  tap, // 单击
+  swipeUp, // 上滑
+  swipeDown, // 下滑
+  swipeLeft, // 左滑
+  swipeRight, // 右滑
 }
 
 /// 动作信息类，包含动作标题和回调函数
 class ActionInfo {
   final String title;
   final Function callback;
-  
+
   ActionInfo(this.title, this.callback);
 }
 
@@ -39,54 +39,63 @@ class FloatingBallManager {
 
   // 预定义的动作映射表
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
-    '打开上次插件': (context) => () {
-      if (context.mounted) {
-        // 获取当前打开的插件ID（如果有）
-        final currentPluginId = ModalRoute.of(context)?.settings.arguments is Map ? 
-            (ModalRoute.of(context)?.settings.arguments as Map)['pluginId'] : null;
-        
-        // 调用getLastOpenedPlugin时传递当前插件ID作为排除项
-        final lastPlugin = PluginManager.instance.getLastOpenedPlugin(
-          excludePluginId: currentPluginId as String?,
-        );
-        if (lastPlugin != null) {
-          PluginManager.instance.openPlugin(context, lastPlugin);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('没有找到最近打开的插件')),
-          );
-        }
-      }
-    },
-    '选择打开插件': (context) => () {
-      if (context.mounted) {
-        showPluginListDialog(context);
-      }
-    },
-    '显示提示消息': (context) => (String message) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
-      }
-    },
-    '返回上一页': (context) => () {
-      if (context.mounted) {
-        Navigator.of(context).maybePop();
-      }
-    },
-    '返回首页': (context) => () {
-      if (context.mounted) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-      }
-    },
-    '刷新页面': (context) => () {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('页面已刷新')),
-        );
-      }
-    },
+    '打开上次插件':
+        (context) => () {
+          if (context.mounted) {
+            // 获取当前打开的插件ID
+            // 使用 Navigator.of(context).context 获取最上层路由的 context
+            final navigatorContext = Navigator.of(context).context;
+            String? currentPluginId =
+                PluginManager.instance.getCurrentPluginId();
+            if (currentPluginId == null) return;
+
+            // 调用getLastOpenedPlugin时传递当前插件ID作为排除项
+            final lastPlugin = PluginManager.instance.getLastOpenedPlugin(
+              excludePluginId: currentPluginId,
+            );
+            if (lastPlugin != null) {
+              PluginManager.instance.openPlugin(context, lastPlugin);
+            } else {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('没有找到最近打开的插件')));
+            }
+          }
+        },
+    '选择打开插件':
+        (context) => () {
+          if (context.mounted) {
+            showPluginListDialog(context);
+          }
+        },
+    '显示提示消息':
+        (context) => (String message) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          }
+        },
+    '返回上一页':
+        (context) => () {
+          if (context.mounted) {
+            Navigator.of(context).maybePop();
+          }
+        },
+    '返回首页':
+        (context) => () {
+          if (context.mounted) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+        },
+    '刷新页面':
+        (context) => () {
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('页面已刷新')));
+          }
+        },
   };
 
   // 加载保存的动作
@@ -95,7 +104,7 @@ class FloatingBallManager {
     for (var gesture in FloatingBallGesture.values) {
       final key = 'floating_ball_action_${gesture.name}';
       final actionTitle = prefs.getString(key);
-      if (actionTitle != null && _predefinedActionCreators.containsKey(actionTitle)) {
+      if (actionTitle != null) {
         // 暂时不设置回调函数，等到需要时再设置
         _actions[gesture] = ActionInfo(actionTitle, () {});
       }
@@ -103,7 +112,10 @@ class FloatingBallManager {
   }
 
   // 保存动作
-  Future<void> _saveAction(FloatingBallGesture gesture, String? actionTitle) async {
+  Future<void> _saveAction(
+    FloatingBallGesture gesture,
+    String? actionTitle,
+  ) async {
     final prefs = await _prefs;
     final key = 'floating_ball_action_${gesture.name}';
     if (actionTitle != null) {
@@ -112,7 +124,7 @@ class FloatingBallManager {
       await prefs.remove(key);
     }
   }
-  
+
   // 获取悬浮球大小比例
   Future<double> getSizeScale() async {
     final prefs = await _prefs;
@@ -124,7 +136,7 @@ class FloatingBallManager {
     _sizeScale = scale;
     final prefs = await _prefs;
     await prefs.setDouble('floating_ball_size_scale', scale);
-    
+
     // 通知悬浮球大小变化
     FloatingBallService()?.notifySizeChange(scale);
   }
@@ -147,7 +159,11 @@ class FloatingBallManager {
   }
 
   // 注册动作
-  Future<void> registerAction(FloatingBallGesture gesture, String title, Function callback) async {
+  Future<void> registerAction(
+    FloatingBallGesture gesture,
+    String title,
+    Function callback,
+  ) async {
     _actions[gesture] = ActionInfo(title, callback);
     await _saveAction(gesture, title);
   }
@@ -156,7 +172,7 @@ class FloatingBallManager {
   Function? getAction(FloatingBallGesture gesture) {
     return _actions[gesture]?.callback;
   }
-  
+
   // 获取动作标题
   String? getActionTitle(FloatingBallGesture gesture) {
     return _actions[gesture]?.title;
@@ -166,10 +182,17 @@ class FloatingBallManager {
   Map<FloatingBallGesture, ActionInfo> getAllActions() {
     return Map.from(_actions);
   }
-  
+
   // 获取所有预定义动作标题
   List<String> getAllPredefinedActionTitles() {
-    return _predefinedActionCreators.keys.toList();
+    final List<String> titles = _predefinedActionCreators.keys.toList();
+    // 添加自定义动作标题
+    for (var action in _actions.values) {
+      if (!titles.contains(action.title)) {
+        titles.add(action.title);
+      }
+    }
+    return titles;
   }
 
   // 清除动作
@@ -181,13 +204,11 @@ class FloatingBallManager {
   // 设置动作的上下文
   void setActionContext(BuildContext context) {
     debugPrint('Setting action context with ${_actions.length} actions');
-    
+
     // 更新所有已保存动作的回调函数
     for (var gesture in FloatingBallGesture.values) {
       final actionInfo = _actions[gesture];
       if (actionInfo != null) {
-        debugPrint('Setting context for gesture: ${gesture.name}, action: ${actionInfo.title}');
-        
         if (_predefinedActionCreators.containsKey(actionInfo.title)) {
           final creator = _predefinedActionCreators[actionInfo.title]!;
           if (actionInfo.title == '显示提示消息') {
@@ -197,21 +218,18 @@ class FloatingBallManager {
               () => creator(context)('${gestureName}手势'),
             );
           } else {
-            _actions[gesture] = ActionInfo(
-              actionInfo.title,
-              creator(context),
-            );
+            _actions[gesture] = ActionInfo(actionInfo.title, creator(context));
           }
         } else {
-          debugPrint('Warning: Action title "${actionInfo.title}" not found in predefined actions');
+          // 如果动作不在预定义列表中，设置一个默认的提示动作
+          final gestureName = _getGestureName(gesture);
+          _actions[gesture] = ActionInfo(actionInfo.title, () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${gestureName}手势 - ${actionInfo.title}')),
+            );
+          });
         }
       }
-    }
-    
-    // 打印当前所有动作信息，用于调试
-    for (var gesture in FloatingBallGesture.values) {
-      final action = _actions[gesture];
-      debugPrint('Gesture ${gesture.name}: ${action?.title ?? "No action"}');
     }
   }
 
@@ -234,29 +252,29 @@ class FloatingBallManager {
   // 初始化默认动作
   void initDefaultActions(BuildContext context) {
     registerAction(FloatingBallGesture.swipeUp, '显示上滑提示', () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('上滑')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('上滑')));
     });
     registerAction(FloatingBallGesture.swipeDown, '显示下滑提示', () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('下滑')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('下滑')));
     });
     registerAction(FloatingBallGesture.swipeLeft, '显示左滑提示', () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('左滑')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('左滑')));
     });
     registerAction(FloatingBallGesture.swipeRight, '显示右滑提示', () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('右滑')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('右滑')));
     });
     registerAction(FloatingBallGesture.tap, '显示单击提示', () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('单击')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('单击')));
     });
     // 移除双击默认动作
   }

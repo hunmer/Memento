@@ -45,6 +45,19 @@ class CheckinPlugin extends BasePlugin {
   // 获取打卡项目列表
   List<CheckinItem> get checkinItems => _checkinItems;
 
+  // 获取总打卡数
+  int getTotalCheckins() {
+    return _checkinItems.fold(
+      0,
+      (sum, item) => sum + item.checkInRecords.length,
+    );
+  }
+
+  // 获取今日打卡数
+  int getTodayCheckins() {
+    return _checkinItems.where((item) => item.isCheckedToday()).length;
+  }
+
   // 触发保存的公共方法
   Future<void> triggerSave() async {
     await _saveCheckinItems();
@@ -140,5 +153,92 @@ class CheckinPlugin extends BasePlugin {
     ConfigManager configManager,
   ) async {
     await initialize();
+  }
+
+  @override
+  Widget? buildCardView(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon ?? Icons.check_circle,
+                  size: 24,
+                  color: color ?? theme.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 统计信息卡片
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withAlpha(76),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                // 今日打卡数
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('今日打卡', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '${getTodayCheckins()}/${_checkinItems.length}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            getTodayCheckins() > 0
+                                ? theme.colorScheme.primary
+                                : null,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+
+                // 总打卡数
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('总打卡数', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '${getTotalCheckins()}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

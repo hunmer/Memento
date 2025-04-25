@@ -226,7 +226,6 @@ class StorageManager {
       _cache[filePath] = content;
       return content;
     } catch (e) {
-      debugPrint('读取文件失败: $filePath - $e');
       throw Exception('读取文件失败: $filePath - $e');
     }
   }
@@ -405,9 +404,24 @@ class StorageManager {
     }
   }
 
-  /// 读取文件内容为字符串（别名方法，与 readString 功能相同）
-  Future<String> readFile(String path) async {
-    return await readString(path);
+  /// 读取文件内容为字符串
+  ///
+  /// [path] 文件路径
+  /// [defaultValue] 当文件不存在或读取失败时返回的默认值
+  ///
+  /// 如果提供了默认值，则在文件不存在或读取失败时返回默认值，而不会抛出异常
+  Future<String> readFile(String path, [String? defaultValue]) async {
+    try {
+      return await readString(path);
+    } catch (e) {
+      if (defaultValue != null) {
+        // 如果提供了默认值且读取失败，返回默认值
+        debugPrint('文件读取失败，使用默认值: $path - $e');
+        return defaultValue;
+      }
+      // 如果没有提供默认值，则继续抛出异常
+      rethrow;
+    }
   }
 
   /// 写入字符串到文件（别名方法，与 writeString 功能相同）

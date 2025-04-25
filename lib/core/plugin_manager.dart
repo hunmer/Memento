@@ -9,7 +9,8 @@ import 'storage/storage_manager.dart';
 class PluginManager {
   StorageManager? _storageManager;
   Map<String, int> _pluginAccessTimes = {};
-  static const String _accessTimesStorageKey = 'plugin_access_times';
+  static const String _accessTimesStorageKey = 'configs/plugin_access_times';
+  PluginBase? _currentPlugin; // 当前打开的插件
   // 单例实例
   static final PluginManager _instance = PluginManager._internal();
 
@@ -73,8 +74,9 @@ class PluginManager {
     }
 
     // 按访问时间降序排序，并排除指定的插件ID
-    var sortedEntries = _pluginAccessTimes.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    var sortedEntries =
+        _pluginAccessTimes.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
 
     // 找到第一个不是被排除ID的插件
     for (var entry in sortedEntries) {
@@ -110,7 +112,9 @@ class PluginManager {
     try {
       final data = await _storageManager!.read(_accessTimesStorageKey);
       if (data.isNotEmpty) {
-        _pluginAccessTimes = data.map((key, value) => MapEntry(key, value as int));
+        _pluginAccessTimes = data.map(
+          (key, value) => MapEntry(key, value as int),
+        );
       }
     } catch (e) {
       debugPrint('Warning: Failed to load plugin access times: $e');
@@ -123,7 +127,9 @@ class PluginManager {
     if (_storageManager == null) return;
 
     try {
-      final Map<String, dynamic> data = Map<String, dynamic>.from(_pluginAccessTimes);
+      final Map<String, dynamic> data = Map<String, dynamic>.from(
+        _pluginAccessTimes,
+      );
       await _storageManager!.write(_accessTimesStorageKey, data);
     } catch (e) {
       debugPrint('Warning: Failed to save plugin access times: $e');
@@ -136,8 +142,15 @@ class PluginManager {
     await _saveAccessTimes();
   }
 
+  /// 获取当前打开的插件
+  PluginBase? getCurrentPlugin() => _currentPlugin;
+
+  /// 获取当前打开的插件ID
+  String? getCurrentPluginId() => _currentPlugin?.id;
+
   /// 打开插件界面
   void openPlugin(BuildContext context, PluginBase plugin) {
+    _currentPlugin = plugin; // 记录当前打开的插件
     // 检查当前路由栈中是否已经存在相同的插件
     bool isPluginAlreadyOpen = false;
     Navigator.popUntil(context, (route) {
@@ -160,21 +173,20 @@ class PluginManager {
     _updatePluginAccessTime(plugin.id);
     Navigator.of(context).push(
       MaterialPageRoute(
-        settings: RouteSettings(
-          arguments: {'pluginId': plugin.id}
-        ),
-        builder: (context) => Scaffold(
-          // 不需要appBar，因为插件界面通常有自己的头部布局
-          body: plugin.buildMainView(context),
-        ),
+        settings: RouteSettings(arguments: {'pluginId': plugin.id}),
+        builder:
+            (context) => Scaffold(
+              // 不需要appBar，因为插件界面通常有自己的头部布局
+              body: plugin.buildMainView(context),
+            ),
       ),
     );
   }
 
-  static toHomeScreen(BuildContext context){
+  static toHomeScreen(BuildContext context) {
+    PluginManager.instance._currentPlugin = null; // 清除当前插件记录
     Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
-  
 }

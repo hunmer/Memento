@@ -5,17 +5,18 @@ class FloatingBallSettingsScreen extends StatefulWidget {
   const FloatingBallSettingsScreen({Key? key}) : super(key: key);
 
   @override
-  State<FloatingBallSettingsScreen> createState() => _FloatingBallSettingsScreenState();
+  State<FloatingBallSettingsScreen> createState() =>
+      _FloatingBallSettingsScreenState();
 }
 
-class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen> {
+class _FloatingBallSettingsScreenState
+    extends State<FloatingBallSettingsScreen> {
   final FloatingBallManager _manager = FloatingBallManager();
   double _sizeScale = 1.0;
   final Map<FloatingBallGesture, String?> _selectedActions = {};
-  
+
   // 从FloatingBallManager获取预定义动作列表
-  List<String> get _availableActions => 
-      _manager.getAllPredefinedActionTitles();
+  List<String> get _availableActions => _manager.getAllPredefinedActionTitles();
 
   @override
   void initState() {
@@ -26,17 +27,13 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
   Future<void> _loadSettings() async {
     // 加载悬浮球大小
     final scale = await _manager.getSizeScale();
-    
-    // 获取可用的动作列表
-    final availableActions = _availableActions;
-    
+
     // 加载当前设置的动作
     for (var gesture in FloatingBallGesture.values) {
       final actionTitle = _manager.getActionTitle(gesture);
-      // 只设置存在于可用动作列表中的动作
-      _selectedActions[gesture] = availableActions.contains(actionTitle) ? actionTitle : null;
+      _selectedActions[gesture] = actionTitle;
     }
-    
+
     if (mounted) {
       setState(() {
         _sizeScale = scale;
@@ -47,9 +44,7 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('悬浮球设置'),
-      ),
+      appBar: AppBar(title: const Text('悬浮球设置')),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -90,9 +85,9 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // 悬浮球动作设置
           Card(
             child: Padding(
@@ -105,7 +100,7 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // 为每种手势创建下拉选择框
                   ..._buildGestureActionSelectors(),
                 ],
@@ -120,17 +115,14 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
   // 构建所有手势动作选择器
   List<Widget> _buildGestureActionSelectors() {
     final List<Widget> selectors = [];
-    
+
     for (var gesture in FloatingBallGesture.values) {
       selectors.add(
         Padding(
           padding: const EdgeInsets.only(bottom: 16.0),
           child: Row(
             children: [
-              SizedBox(
-                width: 100,
-                child: Text(_getGestureName(gesture)),
-              ),
+              SizedBox(width: 100, child: Text(_getGestureName(gesture))),
               Expanded(
                 child: DropdownButton<String?>(
                   isExpanded: true,
@@ -152,14 +144,17 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
                     setState(() {
                       _selectedActions[gesture] = value;
                     });
-                    
+
                     if (value != null) {
                       // 注册新动作
                       await _manager.registerAction(
-                        gesture, 
-                        value, 
+                        gesture,
+                        value,
                         () {}, // 空回调，实际回调将在setActionContext中设置
                       );
+
+                      // 立即更新上下文以应用新动作
+                      _manager.setActionContext(context);
                     } else {
                       // 清除动作
                       await _manager.clearAction(gesture);
@@ -172,7 +167,7 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
         ),
       );
     }
-    
+
     return selectors;
   }
 

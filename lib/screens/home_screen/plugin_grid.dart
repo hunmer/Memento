@@ -27,7 +27,10 @@ class PluginGrid extends StatelessWidget {
     return cardSizes[pluginId] ?? const CardSize(width: 1, height: 1);
   }
 
-  List<PluginBase> _optimizePluginOrder(List<PluginBase> plugins, int crossAxisCount) {
+  List<PluginBase> _optimizePluginOrder(
+    List<PluginBase> plugins,
+    int crossAxisCount,
+  ) {
     // 创建网格占用情况的二维数组，增加行数以适应更高的卡片
     final maxRows = (plugins.length * 4) ~/ crossAxisCount + 1;
     final gridOccupancy = List.generate(
@@ -76,7 +79,7 @@ class PluginGrid extends StatelessWidget {
       final size = _getCardSize(plugin.id);
       final width = size.width.clamp(1, crossAxisCount);
       final height = size.height.clamp(1, 4);
-      
+
       bool placed = false;
       int placedRow = 0;
 
@@ -92,7 +95,7 @@ class PluginGrid extends StatelessWidget {
               }
             }
           }
-          
+
           if (canPlace) {
             // 标记区域为已占用
             for (int h = 0; h < height; h++) {
@@ -150,16 +153,20 @@ class PluginGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildReorderableGrid(List<PluginBase> sortedPlugins, int crossAxisCount, BuildContext context) {
+  Widget _buildReorderableGrid(
+    List<PluginBase> sortedPlugins,
+    int crossAxisCount,
+    BuildContext context,
+  ) {
     return ReorderableGridView.builder(
       shrinkWrap: true,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(8.0),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 4,
         crossAxisSpacing: 4,
-        mainAxisExtent: 180, // 基础卡片高度
+        mainAxisExtent: 120, // 进一步减少基础卡片高度
       ),
       itemCount: sortedPlugins.length,
       onReorder: onReorder,
@@ -180,35 +187,48 @@ class PluginGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildStaggeredGrid(List<PluginBase> sortedPlugins, int crossAxisCount, BuildContext context) {
+  Widget _buildStaggeredGrid(
+    List<PluginBase> sortedPlugins,
+    int crossAxisCount,
+    BuildContext context,
+  ) {
     // 对插件进行排序，优先放置自定义大小卡片，然后是标准卡片
-    final optimizedPlugins = _optimizePluginOrder(sortedPlugins, crossAxisCount);
-    
+    final optimizedPlugins = _optimizePluginOrder(
+      sortedPlugins,
+      crossAxisCount,
+    );
+
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Padding(
-        padding: const EdgeInsets.all(2.0),
+        padding: const EdgeInsets.all(1.0),
         child: StaggeredGrid.count(
           crossAxisCount: crossAxisCount,
           mainAxisSpacing: 4,
           crossAxisSpacing: 4,
-          children: optimizedPlugins.map((plugin) {
-            final cardSize = _getCardSize(plugin.id);
-            // 确保宽度不超过可用列数
-            final crossAxisCellCount = cardSize.width.clamp(1, crossAxisCount);
-            // 确保高度在1-4之间
-            final mainAxisCellCount = cardSize.height.clamp(1, 4);
-            
-            return StaggeredGridTile.count(
-              crossAxisCellCount: crossAxisCellCount,
-              mainAxisCellCount: mainAxisCellCount,
-              child: PluginCard(
-                plugin: plugin,
-                isReorderMode: isReorderMode,
-                cardSize: cardSize,
-                onShowSizeMenu: (context) => onShowCardSizeMenu(context, plugin),
-              ),
-            );
-          }).toList(),
+          children:
+              optimizedPlugins.map((plugin) {
+                final cardSize = _getCardSize(plugin.id);
+                // 确保宽度不超过可用列数
+                final crossAxisCellCount = cardSize.width.clamp(
+                  1,
+                  crossAxisCount,
+                );
+                // 确保高度在1-4之间
+                final mainAxisCellCount = cardSize.height.clamp(1, 4);
+
+                return StaggeredGridTile.count(
+                  crossAxisCellCount: crossAxisCellCount,
+                  mainAxisCellCount: mainAxisCellCount,
+                  child: PluginCard(
+                    plugin: plugin,
+                    isReorderMode: isReorderMode,
+                    cardSize: cardSize,
+                    onShowSizeMenu:
+                        (context) => onShowCardSizeMenu(context, plugin),
+                  ),
+                );
+              }).toList(),
         ),
       ),
     );

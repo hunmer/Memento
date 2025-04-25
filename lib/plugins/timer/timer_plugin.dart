@@ -142,6 +142,99 @@ class TimerPlugin extends BasePlugin {
     return TimerMainView(plugin: this);
   }
 
+  @override
+  Widget? buildCardView(BuildContext context) {
+    final theme = Theme.of(context);
+    final runningTasks = _tasks.where((task) => task.isRunning).toList();
+    final runningTaskNames = runningTasks.map((task) => task.name).join('、');
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon ?? Icons.timer,
+                  size: 24,
+                  color: color ?? theme.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 统计信息卡片
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withAlpha(76),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                // 总计时器数
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('总计时器', style: theme.textTheme.bodyMedium),
+                    Text(
+                      '${_tasks.length}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+
+                // 当前运行中的计时器
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('当前运行', style: theme.textTheme.bodyMedium),
+                    Expanded(
+                      child: Text(
+                        runningTasks.isEmpty ? '无' : runningTaskNames,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color:
+                              runningTasks.isNotEmpty
+                                  ? theme.colorScheme.primary
+                                  : null,
+                        ),
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // 获取所有计时器任务
   List<TimerTask> getTasks() => _tasks;
 

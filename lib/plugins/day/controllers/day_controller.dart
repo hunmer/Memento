@@ -27,10 +27,19 @@ class DayController extends ChangeNotifier {
   // 加载视图偏好设置
   Future<void> _loadViewPreference() async {
     try {
-      final config = await _plugin.storage.readFile('${_plugin.pluginDir}/view_preference.json');
-      final data = jsonDecode(config);
-      _isCardView = data['isCardView'] ?? true;
-      _useCustomOrder = data['useCustomOrder'] ?? false;
+      // 确保目录存在
+      await _plugin.storage.createDirectory(_plugin.pluginDir);
+
+      // 设置默认的配置JSON字符串
+      final defaultConfig = jsonEncode({
+        'isCardView': true,
+        'useCustomOrder': false,
+      });
+
+      final config = await _plugin.storage.readFile(
+        '${_plugin.pluginDir}/view_preference.json',
+        defaultConfig,
+      );
     } catch (e) {
       _isCardView = true;
       _useCustomOrder = false;
@@ -54,15 +63,19 @@ class DayController extends ChangeNotifier {
 
   // 加载纪念日数据
   Future<void> _loadMemorialDays() async {
-    try {
-      final content = await _plugin.storage.readFile('${_plugin.pluginDir}/memorial_days.json');
-      final List<dynamic> jsonList = jsonDecode(content);
-      _memorialDays = jsonList.map((json) => MemorialDay.fromJson(json)).toList();
-    } catch (e) {
-      // 如果文件不存在或读取失败，加载测试数据
-      // _memorialDays = MemorialDay.generateTestData();
-      await _saveMemorialDays();
-    }
+    // 确保目录存在
+    await _plugin.storage.createDirectory(_plugin.pluginDir);
+
+    // 设置默认的空数组JSON字符串
+    final defaultContent = '[]';
+
+    final content = await _plugin.storage.readFile(
+      '${_plugin.pluginDir}/memorial_days.json',
+      defaultContent,
+    );
+    // 如果文件不存在或读取失败，加载测试数据
+    // _memorialDays = MemorialDay.generateTestData();
+    await _saveMemorialDays();
     // 如果不使用自定义排序，则按剩余天数排序
     if (!_useCustomOrder) {
       _sortMemorialDays();
