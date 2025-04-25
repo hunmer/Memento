@@ -55,9 +55,13 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
         });
       }
     });
+    
+    // 在下一帧更新上下文
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         FloatingBallService().updateContext(context);
+        // 设置动作上下文
+        _manager.setActionContext(context);
       }
     });
   }
@@ -245,42 +249,45 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
     final absX = velocity.dx.abs();
     final absY = velocity.dy.abs();
     
-    if (absX > absY) {
-      // 水平方向滑动
-      if (velocity.dx > 0) {
-        // 右滑
-        final action = _manager.getAction(FloatingBallGesture.swipeRight);
-        if (action != null) {
-          action();
-        }
-      } else {
-        // 左滑
-        final action = _manager.getAction(FloatingBallGesture.swipeLeft);
-        if (action != null) {
-          action();
-        }
-      }
+    // 设置方向判定的阈值，使判断更准确
+    const directionThreshold = 2.0; // 如果一个方向的分量是另一个方向的2倍以上，才判定为该方向
+    
+    FloatingBallGesture? gesture;
+    
+    if (absX > absY * directionThreshold) {
+      // 明显的水平方向滑动
+      gesture = velocity.dx > 0 ? FloatingBallGesture.swipeRight : FloatingBallGesture.swipeLeft;
+    } else if (absY > absX * directionThreshold) {
+      // 明显的垂直方向滑动
+      gesture = velocity.dy > 0 ? FloatingBallGesture.swipeDown : FloatingBallGesture.swipeUp;
+    } else if (absX > absY) {
+      // 偏水平方向滑动
+      gesture = velocity.dx > 0 ? FloatingBallGesture.swipeRight : FloatingBallGesture.swipeLeft;
     } else {
-      // 垂直方向滑动
-      if (velocity.dy > 0) {
-        // 下滑
-        final action = _manager.getAction(FloatingBallGesture.swipeDown);
-        if (action != null) {
-          action();
-        }
+      // 偏垂直方向滑动
+      gesture = velocity.dy > 0 ? FloatingBallGesture.swipeDown : FloatingBallGesture.swipeUp;
+    }
+    
+    if (gesture != null) {
+      final action = _manager.getAction(gesture);
+      if (action != null) {
+        debugPrint('Executing action for gesture: $gesture');
+        action();
       } else {
-        // 上滑
-        final action = _manager.getAction(FloatingBallGesture.swipeUp);
-        if (action != null) {
-          action();
-        }
+        debugPrint('No action registered for gesture: $gesture');
       }
     }
   }
 
   void _handleTap() {
+    debugPrint('Tap detected');
     final action = _manager.getAction(FloatingBallGesture.tap);
-    if (action != null) action();
+    if (action != null) {
+      debugPrint('Executing tap action');
+      action();
+    } else {
+      debugPrint('No tap action registered');
+    }
   }
 
   // 双击打开设置页面
@@ -294,6 +301,9 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
 
   @override
   Widget build(BuildContext context) {
+    // 确保动作上下文是最新的
+    _manager.setActionContext(context);
+    
     // 如果位置还没加载完成，显示一个加载指示器或返回空容器
     if (_isLoading || _position == null) {
       return const Positioned(

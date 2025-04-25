@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'floating_ball_service.dart';
 import '../../dialogs/plugin_list_dialog.dart';
+import '../plugin_manager.dart';
 
 /// 悬浮球手势动作类型
 enum FloatingBallGesture {
@@ -38,6 +39,18 @@ class FloatingBallManager {
 
   // 预定义的动作映射表
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
+    '打开上次插件': (context) => () {
+      if (context.mounted) {
+        final lastPlugin = PluginManager.instance.getLastOpenedPlugin();
+        if (lastPlugin != null) {
+          PluginManager.instance.openPlugin(context, lastPlugin);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('没有找到最近打开的插件')),
+          );
+        }
+      }
+    },
     '选择打开插件': (context) => () {
       if (context.mounted) {
         showPluginListDialog(context);
@@ -146,6 +159,11 @@ class FloatingBallManager {
   Map<FloatingBallGesture, ActionInfo> getAllActions() {
     return Map.from(_actions);
   }
+  
+  // 获取所有预定义动作标题
+  List<String> getAllPredefinedActionTitles() {
+    return _predefinedActionCreators.keys.toList();
+  }
 
   // 清除动作
   Future<void> clearAction(FloatingBallGesture gesture) async {
@@ -155,24 +173,38 @@ class FloatingBallManager {
 
   // 设置动作的上下文
   void setActionContext(BuildContext context) {
+    debugPrint('Setting action context with ${_actions.length} actions');
+    
     // 更新所有已保存动作的回调函数
     for (var gesture in FloatingBallGesture.values) {
       final actionInfo = _actions[gesture];
-      if (actionInfo != null && _predefinedActionCreators.containsKey(actionInfo.title)) {
-        final creator = _predefinedActionCreators[actionInfo.title]!;
-        if (actionInfo.title == '显示提示消息') {
-          final gestureName = _getGestureName(gesture);
-          _actions[gesture] = ActionInfo(
-            actionInfo.title,
-            () => creator(context)('${gestureName}手势'),
-          );
+      if (actionInfo != null) {
+        debugPrint('Setting context for gesture: ${gesture.name}, action: ${actionInfo.title}');
+        
+        if (_predefinedActionCreators.containsKey(actionInfo.title)) {
+          final creator = _predefinedActionCreators[actionInfo.title]!;
+          if (actionInfo.title == '显示提示消息') {
+            final gestureName = _getGestureName(gesture);
+            _actions[gesture] = ActionInfo(
+              actionInfo.title,
+              () => creator(context)('${gestureName}手势'),
+            );
+          } else {
+            _actions[gesture] = ActionInfo(
+              actionInfo.title,
+              creator(context),
+            );
+          }
         } else {
-          _actions[gesture] = ActionInfo(
-            actionInfo.title,
-            creator(context),
-          );
+          debugPrint('Warning: Action title "${actionInfo.title}" not found in predefined actions');
         }
       }
+    }
+    
+    // 打印当前所有动作信息，用于调试
+    for (var gesture in FloatingBallGesture.values) {
+      final action = _actions[gesture];
+      debugPrint('Gesture ${gesture.name}: ${action?.title ?? "No action"}');
     }
   }
 

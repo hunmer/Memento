@@ -38,13 +38,8 @@ class PluginManagerScreen extends StatelessWidget {
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => plugin.buildMainView(context),
-                              ),
-                            );
+                            // 使用PluginManager的openPlugin方法
+                            PluginManager.instance.openPlugin(context, plugin);
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),

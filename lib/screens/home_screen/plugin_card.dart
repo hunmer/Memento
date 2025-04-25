@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
+import '../../core/plugin_manager.dart';
 import '../../main.dart';
 import 'card_size.dart';
 
@@ -34,16 +35,8 @@ class PluginCard extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () {
-                    globalConfigManager.savePluginConfig(
-                      'last_opened_plugin',
-                      {'pluginId': plugin.id},
-                    );
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => plugin.buildMainView(context),
-                      ),
-                    );
+                    // 使用PluginManager的openPlugin方法
+                    PluginManager.instance.openPlugin(context, plugin);
                   },
                   child: customCardView ?? _buildDefaultCard(context),
                 ),

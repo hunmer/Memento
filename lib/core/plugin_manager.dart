@@ -64,6 +64,20 @@ class PluginManager {
   /// 获取所有已注册的插件（向后兼容的getter）
   List<PluginBase> get allPlugins => getAllPlugins();
 
+  /// 获取最近打开的插件
+  PluginBase? getLastOpenedPlugin() {
+    if (_pluginAccessTimes.isEmpty || _plugins.isEmpty) {
+      return null;
+    }
+
+    // 找到访问时间最新的插件ID
+    String? lastOpenedId = _pluginAccessTimes.entries
+        .reduce((a, b) => a.value > b.value ? a : b)
+        .key;
+
+    return getPlugin(lastOpenedId);
+  }
+
   /// 根据ID获取插件
   PluginBase? getPlugin(String id) {
     try {
@@ -117,6 +131,7 @@ class PluginManager {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
+          // 不需要appBar，因为插件界面通常有自己的头部布局
           body: plugin.buildMainView(context),
         ),
       ),
