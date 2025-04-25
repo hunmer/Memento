@@ -105,6 +105,7 @@ flutter:
     - lib/plugins/chat/plugin.json
     - lib/plugins/diary/plugin.json
     - assets/audio/msg_sended.mp3
+    - assets/icon/icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

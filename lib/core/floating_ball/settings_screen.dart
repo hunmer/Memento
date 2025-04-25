@@ -11,11 +11,22 @@ class FloatingBallSettingsScreen extends StatefulWidget {
 class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen> {
   final FloatingBallManager _manager = FloatingBallManager();
   late Map<FloatingBallGesture, ActionInfo> _actions;
+  double _sizeScale = 1.0;
   
   @override
   void initState() {
     super.initState();
     _actions = _manager.getAllActions();
+    _loadSizeScale();
+  }
+
+  Future<void> _loadSizeScale() async {
+    final scale = await _manager.getSizeScale();
+    if (mounted) {
+      setState(() {
+        _sizeScale = scale;
+      });
+    }
   }
   
   String _getGestureName(FloatingBallGesture gesture) {
@@ -81,6 +92,38 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
       ),
       body: ListView(
         children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+            child: Text(
+              '悬浮球大小',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: [
+                const Text('50%'),
+                Expanded(
+                  child: Slider(
+                    value: _sizeScale,
+                    min: 0.5,
+                    max: 1.5,
+                    divisions: 13,
+                    label: '${(_sizeScale * 100).round()}%',
+                    onChanged: (value) {
+                      setState(() {
+                        _sizeScale = value;
+                      });
+                      _manager.saveSizeScale(value);
+                    },
+                  ),
+                ),
+                const Text('150%'),
+              ],
+            ),
+          ),
+          const Divider(),
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(

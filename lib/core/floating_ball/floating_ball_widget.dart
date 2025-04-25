@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'dart:async';
+import 'floating_ball_service.dart';
 import 'floating_ball_manager.dart';
 import 'floating_ball_service.dart';
 import 'settings_screen.dart';
 
 class FloatingBallWidget extends StatefulWidget {
-  final double size;
+  final double baseSize;
   final Color color;
+  final String iconPath;
   
   const FloatingBallWidget({
     super.key, 
-    this.size = 60, 
+    this.baseSize = 60, 
     this.color = Colors.blue,
+    this.iconPath = 'assets/icon/icon.png',
   });
 
   @override
@@ -30,15 +33,28 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
   Offset? _lastLongPressDragUpdate; // 最后一次长按拖动更新的位置
   Offset? _panStartPosition; // 滑动开始位置
   DateTime? _panStartTime; // 滑动开始时间
+  double _sizeScale = 1.0; // 大小比例
   
   // 添加指针移出检测相关变量
   bool _pointerDown = false;
-  GlobalKey _ballKey = GlobalKey();
+  final GlobalKey _ballKey = GlobalKey();
+  StreamSubscription<double>? _sizeSubscription;
   
   @override
   void initState() {
     super.initState();
-    _loadPosition();
+    _isLoading = true;
+    _initializePosition();
+    _loadSizeScale();
+    
+    // 监听大小变化
+    _sizeSubscription = FloatingBallService().sizeChangeStream.listen((scale) {
+      if (mounted) {
+        setState(() {
+          _sizeScale = scale;
+        });
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         FloatingBallService().updateContext(context);
@@ -46,19 +62,56 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
     });
   }
 
-  Future<void> _loadPosition() async {
-    final position = await _manager.getPosition();
-    if (mounted) { // 检查widget是否还在树中
+  Future<void> _initializePosition() async {
+    try {
+      final position = await _manager.getPosition();
+      if (!mounted) return;
+      
+      // 获取屏幕大小
+      final screenSize = MediaQuery.of(context).size;
+      
+      // 确保位置在屏幕范围内
+      final safePosition = Offset(
+        position.dx.clamp(0, screenSize.width - widget.baseSize),
+        position.dy.clamp(0, screenSize.height - widget.baseSize),
+      );
+      
       setState(() {
-        _position = position;
+        _position = safePosition;
         _isLoading = false;
+      });
+      
+      // 如果位置被调整了，保存新的安全位置
+      if (safePosition != position) {
+        _manager.savePosition(safePosition);
+      }
+    } catch (e) {
+      debugPrint('Error loading position: $e');
+      if (mounted) {
+        // 如果加载失败，使用默认位置
+        setState(() {
+          _position = const Offset(20, 100);
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadSizeScale() async {
+    final scale = await _manager.getSizeScale();
+    if (mounted) {
+      setState(() {
+        _sizeScale = scale;
       });
     }
   }
 
+  double get _currentSize => widget.baseSize * _sizeScale;
+
   @override
   void dispose() {
     _longPressTimer?.cancel();
+    _sizeSubscription?.cancel();
     super.dispose();
   }
 
@@ -99,12 +152,21 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
     final delta = details.globalPosition - (_lastLongPressDragUpdate ?? details.globalPosition);
     _lastLongPressDragUpdate = details.globalPosition;
     
+    // 获取屏幕大小
+    final screenSize = MediaQuery.of(context).size;
+    
+    // 计算新位置，并确保在屏幕范围内
+    final newPosition = Offset(
+      (_position!.dx + delta.dx).clamp(0, screenSize.width - _currentSize),
+      (_position!.dy + delta.dy).clamp(0, screenSize.height - _currentSize),
+    );
+    
     setState(() {
-      _position = Offset(
-        _position!.dx + delta.dx,
-        _position!.dy + delta.dy,
-      );
+      _position = newPosition;
     });
+    
+    // 实时保存位置
+    _manager.savePosition(newPosition);
     
     // 检查指针是否移出悬浮球
     if (_pointerDown && !_isPointerInsideBall(details.globalPosition)) {
@@ -248,8 +310,8 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
     // 确保悬浮球在屏幕范围内
     final screenSize = MediaQuery.of(context).size;
     final safePosition = Offset(
-      _position!.dx.clamp(0, screenSize.width - widget.size),
-      _position!.dy.clamp(0, screenSize.height - widget.size),
+      _position!.dx.clamp(0, screenSize.width - _currentSize),
+      _position!.dy.clamp(0, screenSize.height - _currentSize),
     );
     
     if (safePosition != _position) {
@@ -301,7 +363,7 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
           // 计算滑动时间和距离
           final now = DateTime.now();
           final duration = now.difference(_panStartTime!).inMilliseconds;
-          final endPosition = details.globalPosition ?? _position!;
+          final endPosition = details.globalPosition;
           final distance = (endPosition - _panStartPosition!).distance;
           final velocity = endPosition - _panStartPosition!;
           
@@ -325,26 +387,16 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProv
             _dragStartPosition = null;
           });
         },
-        child: Container(
+        child: SizedBox(
           key: _ballKey,
-          width: widget.size,
-          height: widget.size,
-          decoration: BoxDecoration(
-            color: _canDrag ? widget.color.withAlpha(179) : widget.color,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(77),
-                blurRadius: 5,
-                spreadRadius: 1,
-              ),
-            ],
-            border: _canDrag ? Border.all(color: Colors.white, width: 2) : null,
-          ),
-          child: const Center(
-            child: Icon(
-              Icons.touch_app,
-              color: Colors.white,
+          width: _currentSize,
+          height: _currentSize,
+          child: ClipOval(
+            child: Image.asset(
+              widget.iconPath,
+              width: _currentSize,
+              height: _currentSize,
+              fit: BoxFit.cover,
             ),
           ),
         ),

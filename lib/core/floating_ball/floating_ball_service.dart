@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'floating_ball_widget.dart';
 import 'floating_ball_manager.dart';
 
@@ -11,6 +12,10 @@ class FloatingBallService {
   OverlayEntry? _overlayEntry;
   final FloatingBallManager _manager = FloatingBallManager();
   bool _isInitialized = false;
+  
+  // 添加一个流控制器用于通知悬浮球大小变化
+  final StreamController<double> _sizeChangeController = StreamController<double>.broadcast();
+  Stream<double> get sizeChangeStream => _sizeChangeController.stream;
 
   /// 初始化悬浮球
   void initialize(BuildContext context) {
@@ -33,7 +38,10 @@ class FloatingBallService {
     initialize(context);
     
     _overlayEntry = OverlayEntry(
-      builder: (context) => const FloatingBallWidget(),
+      builder: (context) => const FloatingBallWidget(
+        baseSize: 60,
+        iconPath: 'assets/icon/icon.png',
+      ),
     );
     
     Overlay.of(context).insert(_overlayEntry!);
@@ -52,4 +60,14 @@ class FloatingBallService {
 
   /// 获取悬浮球管理器
   FloatingBallManager get manager => _manager;
+  
+  /// 通知悬浮球大小变化
+  void notifySizeChange(double scale) {
+    _sizeChangeController.add(scale);
+  }
+  
+  /// 释放资源
+  void dispose() {
+    _sizeChangeController.close();
+  }
 }

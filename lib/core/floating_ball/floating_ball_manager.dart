@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'floating_ball_service.dart';
 
 /// 悬浮球手势动作类型
 enum FloatingBallGesture {
@@ -31,6 +32,8 @@ class FloatingBallManager {
 
   // 默认位置
   Offset _position = const Offset(20, 100);
+  // 默认大小比例 (100%)
+  double _sizeScale = 1.0;
 
   // 预定义的动作映射表
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
@@ -84,6 +87,22 @@ class FloatingBallManager {
     }
   }
   
+  // 获取悬浮球大小比例
+  Future<double> getSizeScale() async {
+    final prefs = await _prefs;
+    return prefs.getDouble('floating_ball_size_scale') ?? 1.0;
+  }
+
+  // 保存悬浮球大小比例
+  Future<void> saveSizeScale(double scale) async {
+    _sizeScale = scale;
+    final prefs = await _prefs;
+    await prefs.setDouble('floating_ball_size_scale', scale);
+    
+    // 通知悬浮球大小变化
+    FloatingBallService()?.notifySizeChange(scale);
+  }
+
   // 获取保存的位置
   Future<Offset> getPosition() async {
     final prefs = await _prefs;
