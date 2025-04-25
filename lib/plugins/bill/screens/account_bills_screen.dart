@@ -79,9 +79,13 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
     );
   }
 
+  // 添加一个账户引用来存储最新的账户数据
+  late Account _currentAccount;
+  
   @override
   void initState() {
     super.initState();
+    _currentAccount = widget.account;
     widget.billPlugin.addListener(_handlePluginUpdate);
   }
 
@@ -91,33 +95,44 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
     super.dispose();
   }
 
+  // 刷新账户数据
+  void _refreshAccountData() {
+    if (!mounted) return;
+    
+    // 从插件中获取最新的账户数据
+    final updatedAccount = widget.billPlugin.accounts.firstWhere(
+      (account) => account.id == widget.account.id,
+      orElse: () => widget.account,
+    );
+    
+    setState(() {
+      _currentAccount = updatedAccount;
+    });
+  }
+
   void _handlePluginUpdate() {
     if (mounted) {
-      setState(() {});
+      _refreshAccountData();
     }
   }
 
   Widget _buildBody() {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        final statistics = widget.billPlugin.getStatistics(
-          bills: widget.account.bills,
-          range: _selectedRange,
-          startDate: _customStartDate,
-          endDate: _customEndDate,
-        );
+    final statistics = widget.billPlugin.getStatistics(
+      bills: _currentAccount.bills,
+      range: _selectedRange,
+      startDate: _customStartDate,
+      endDate: _customEndDate,
+    );
 
-        return Column(
-          children: [
-            BillStatisticsCard(
-              totalIncome: statistics.totalIncome,
-              totalExpense: statistics.totalExpense,
-              balance: statistics.balance,
-            ),
-            Expanded(child: _buildBillsList(widget.account.bills)),
-          ],
-        );
-      },
+    return Column(
+      children: [
+        BillStatisticsCard(
+          totalIncome: statistics.totalIncome,
+          totalExpense: statistics.totalExpense,
+          balance: statistics.balance,
+        ),
+        Expanded(child: _buildBillsList(_currentAccount.bills)),
+      ],
     );
   }
 
@@ -202,11 +217,14 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder:
-            (context) => bill_edit.BillEditScreen(
-              billPlugin: widget.billPlugin,
-              account: widget.account,
-            ),
+        builder: (context) => bill_edit.BillEditScreen(
+          billPlugin: widget.billPlugin,
+          account: _currentAccount,
+          onSaved: () {
+            // 强制更新列表
+            _refreshAccountData();
+          },
+        ),
       ),
     );
   }
@@ -215,12 +233,15 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder:
-            (context) => bill_edit.BillEditScreen(
-              billPlugin: widget.billPlugin,
-              account: widget.account,
-              bill: bill,
-            ),
+        builder: (context) => bill_edit.BillEditScreen(
+          billPlugin: widget.billPlugin,
+          account: _currentAccount,
+          bill: bill,
+          onSaved: () {
+            // 强制更新列表
+            _refreshAccountData();
+          },
+        ),
       ),
     );
   }

@@ -23,14 +23,19 @@ class BillListScreen extends StatefulWidget {
   State<BillListScreen> createState() => _BillListScreenState();
 }
 
-class _BillListScreenState extends State<BillListScreen> {
+class _BillListScreenState extends State<BillListScreen> with TickerProviderStateMixin {
   late final void Function() _billPluginListener;
+  late final TabController _tabController;
   List<BillModel> _bills = [];
   bool _isLoading = true;
+  bool _isEditing = false;
+  BillModel? _selectedBill;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_handleTabChange);
     _billPluginListener = () {
       if (mounted) {
         _loadBills();
@@ -40,39 +45,73 @@ class _BillListScreenState extends State<BillListScreen> {
     _loadBills();
   }
 
+  void _handleTabChange() {
+    if (_tabController.indexIsChanging) {
+      // 如果正在编辑账单并切换到统计页面，先关闭编辑界面
+      if (_isEditing && _tabController.index == 1) {
+        setState(() {
+          _isEditing = false;
+          _selectedBill = null;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
-    widget.billPlugin.removeListener(_billPluginListener);
+    if (mounted) {
+      widget.billPlugin.removeListener(_billPluginListener);
+      _tabController.removeListener(_handleTabChange);
+      _tabController.dispose();
+    }
     super.dispose();
   }
 
   Future<void> _loadBills() async {
+    if (!mounted) return;
+    
     setState(() {
       _isLoading = true;
     });
 
-    // 从账户中获取账单并转换为BillModel
-    final bills =
-        widget.account.bills
-            .map(
-              (bill) => BillModel(
-                id: bill.id,
-                title: bill.title,
-                amount: bill.absoluteAmount,
-                date: bill.createdAt,
-                icon: bill.icon,
-                color: bill.iconColor,
-                category: bill.tag ?? '未分类',
-                note: bill.note,
-                isExpense: bill.isExpense,
-              ),
-            )
-            .toList();
+    try {
+      // 确保使用最新的账户数据
+      final currentAccount = widget.billPlugin.selectedAccount?.id == widget.account.id
+          ? widget.billPlugin.selectedAccount!
+          : widget.account;
 
-    setState(() {
-      _bills = bills;
-      _isLoading = false;
-    });
+      // 从账户中获取账单并转换为BillModel
+      final bills = currentAccount.bills
+          .map(
+            (bill) => BillModel(
+              id: bill.id,
+              title: bill.title,
+              amount: bill.absoluteAmount,
+              date: bill.createdAt,
+              icon: bill.icon,
+              color: bill.iconColor,
+              category: bill.tag ?? '未分类',
+              note: bill.note,
+              isExpense: bill.isExpense,
+            ),
+          )
+          .toList();
+
+      // 按日期倒序排序，最新的账单显示在前面
+      bills.sort((a, b) => b.date.compareTo(a.date));
+
+      if (!mounted) return;
+      setState(() {
+        _bills = bills;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      debugPrint('加载账单失败: $e');
+    }
   }
 
   Future<void> _navigateToBillEdit(
@@ -105,7 +144,6 @@ class _BillListScreenState extends State<BillListScreen> {
             ),
       ),
     );
-    // 不需要手动调用 _loadBills()，因为 billPlugin 的监听器会自动处理
   }
 
   @override
@@ -124,10 +162,9 @@ class _BillListScreenState extends State<BillListScreen> {
 
     final balance = totalIncome - totalExpense;
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
+    return Scaffold(
         body: TabBarView(
+          controller: _tabController,
           children: [
             // 账单列表页
             _isLoading
@@ -204,7 +241,6 @@ class _BillListScreenState extends State<BillListScreen> {
           onPressed: () => _navigateToBillEdit(context),
           child: const Icon(Icons.add),
         ),
-      ),
     );
   }
 

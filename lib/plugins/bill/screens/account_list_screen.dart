@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
-import 'account_bills_screen.dart';
 import 'account_edit_screen.dart';
 
 class AccountListScreen extends StatelessWidget {
   final BillPlugin billPlugin;
 
   const AccountListScreen({
-    Key? key,
+    super.key,
     required this.billPlugin,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +19,14 @@ class AccountListScreen extends StatelessWidget {
       ),
       body: _buildAccountList(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _createAccount(context),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AccountEditScreen(
+              billPlugin: billPlugin,
+            ),
+          ),
+        ),
         child: const Icon(Icons.add),
       ),
     );
@@ -93,24 +99,13 @@ class AccountListScreen extends StatelessWidget {
   }
 
   void _openAccountBills(BuildContext context, Account account) {
-    Navigator.push(
+    // 设置选中的账户
+    billPlugin.selectedAccount = account;
+    // 返回到主视图并显示选中账户的账单
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => AccountBillsScreen(
-          billPlugin: billPlugin,
-          account: account,
-        ),
-      ),
-    );
-  }
-
-  void _createAccount(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AccountEditScreen(
-          billPlugin: billPlugin,
-        ),
+        builder: (context) => billPlugin.buildPluginEntryWidget(context),
       ),
     );
   }

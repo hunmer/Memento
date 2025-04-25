@@ -12,6 +12,15 @@ import 'models/bill_statistics.dart';
 import 'models/statistic_range.dart';
 
 class BillPlugin extends PluginBase with ChangeNotifier {
+  Account? _selectedAccount;
+
+  Account? get selectedAccount => _selectedAccount;
+  
+  set selectedAccount(Account? account) {
+    _selectedAccount = account;
+    notifyListeners();
+  }
+
   @override
   String get id => 'bill_plugin';
 
@@ -170,6 +179,11 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   // 保存账户列表到本地存储
   Future<void> _saveAccounts() async {
     try {
+      // 确保所有账户的总金额都是最新的
+      for (var i = 0; i < _accounts.length; i++) {
+        _accounts[i].calculateTotal();
+      }
+      
       final prefs = await SharedPreferences.getInstance();
       final accountsJson =
           _accounts.map((account) => jsonEncode(account.toJson())).toList();
@@ -188,6 +202,8 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     if (_accounts.any((a) => a.title == account.title)) {
       throw '账户名称已存在';
     }
+    // 确保账户总金额是正确的
+    account.calculateTotal();
     _accounts.add(account);
     await _saveAccounts();
     // 确保在数据保存成功后再通知监听器
@@ -203,15 +219,33 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     if (_accounts.any((a) => a.id != account.id && a.title == account.title)) {
       throw '账户名称已存在';
     }
+    
+    // 确保账户总金额与账单总和一致
+    account.calculateTotal();
+    
+    // 更新账户列表
     _accounts[index] = account;
+    
+    // 如果更新的是当前选中的账户，同步更新选中的账户
+    if (_selectedAccount?.id == account.id) {
+      _selectedAccount = account;
+    }
+    
+    // 先保存数据
     await _saveAccounts();
+    
+    // 再通知监听器，确保数据已经持久化
     notifyListeners();
   }
 
   // 删除账户
   Future<void> deleteAccount(String accountId) async {
     _accounts.removeWhere((account) => account.id == accountId);
+    if (_selectedAccount?.id == accountId) {
+      _selectedAccount = _accounts.isNotEmpty ? _accounts.first : null;
+    }
     await _saveAccounts();
+    notifyListeners();
   }
 
   // 获取账单统计信息
@@ -288,8 +322,17 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
     final account = _accounts[accountIndex];
     final updatedBills = account.bills.where((b) => b.id != billId).toList();
-    _accounts[accountIndex] = account.copyWith(bills: updatedBills);
+    final updatedAccount = account.copyWith(bills: updatedBills);
+    updatedAccount.calculateTotal();
+    _accounts[accountIndex] = updatedAccount;
+    
+    // 如果更新的是当前选中的账户，同步更新选中的账户
+    if (_selectedAccount?.id == accountId) {
+      _selectedAccount = updatedAccount;
+    }
+    
     await _saveAccounts();
+    notifyListeners();
   }
 
   // 获取今日财务统计（收入和支出总和）
@@ -406,15 +449,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   Widget buildSettingsView(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          title: const Text('数据存储位置'),
-          subtitle: Text(storage.getPluginStoragePath(id)),
-          trailing: const Icon(Icons.folder),
-          onTap: () async {
-            // TODO: 实现目录选择功能
-          },
-        ),
-        const Divider(),
+      
       ],
     );
   }
@@ -432,14 +467,13 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // 默认选择第一个账户
-    final defaultAccount = _accounts.first;
-
+    // 使用选中的账户，如果没有选中则使用第一个账户
+    final currentAccount = _selectedAccount ?? _accounts.first;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('账单管理'),
+          title: Text('${currentAccount.title}'),
           bottom: const TabBar(tabs: [Tab(text: '账单列表'), Tab(text: '统计分析')]),
           actions: [
             IconButton(
@@ -456,8 +490,8 @@ class BillPlugin extends PluginBase with ChangeNotifier {
         ),
         body: TabBarView(
           children: [
-            BillListScreen(billPlugin: this, account: defaultAccount),
-            BillStatsScreen(billPlugin: this, account: defaultAccount),
+            BillListScreen(billPlugin: this, account: currentAccount),
+            BillStatsScreen(billPlugin: this, account: currentAccount),
           ],
         ),
       ),

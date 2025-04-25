@@ -49,9 +49,10 @@ class Account {
 
   // 添加账单
   void addBill(Bill bill) {
-    // 确保新账单有一个唯一的ID
-    if (bill.id == null) {
-      bill = bill.copyWith(id: const Uuid().v4());
+    // bill.id 永远不会为 null，因为 Bill 构造函数会自动生成 ID
+    // 检查是否已存在相同 ID 的账单
+    if (bills.any((existingBill) => existingBill.id == bill.id)) {
+      throw Exception('Bill with the same ID already exists');
     }
     bills.add(bill);
     calculateTotal();
@@ -64,7 +65,8 @@ class Account {
       bills[index] = updatedBill;
       calculateTotal();
     } else {
-      throw Exception('Bill not found');
+      // 如果找不到账单，添加为新账单
+      addBill(updatedBill);
     }
   }
 

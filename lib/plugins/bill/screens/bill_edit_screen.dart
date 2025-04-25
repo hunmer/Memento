@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
 import '../models/bill.dart';
@@ -9,12 +10,16 @@ class BillEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
   final Account account;
   final Bill? bill;
+  final VoidCallback? onSaved;
+  final VoidCallback? onCancel;
 
   const BillEditScreen({
     super.key,
     required this.billPlugin,
     required this.account,
     this.bill,
+    this.onSaved,
+    this.onCancel,
   });
 
   @override
@@ -74,9 +79,20 @@ class _BillEditScreenState extends State<BillEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.bill == null ? '添加账单' : '编辑账单')),
-      body: SingleChildScrollView(
+    return Material(
+      child: Column(
+        children: [
+        AppBar(
+          title: Text(widget.bill == null ? '添加账单' : '编辑账单'),
+          leading: widget.onCancel != null
+              ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: widget.onCancel,
+                )
+              : null,
+        ),
+        Expanded(
+          child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -99,6 +115,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
             ],
           ),
         ),
+          ),
+        ),
+        ],
       ),
     );
   }
@@ -122,6 +141,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
             ],
             selected: {_isExpense},
             onSelectionChanged: (Set<bool> newSelection) {
+              if (!mounted) return;
               setState(() {
                 _isExpense = newSelection.first;
               });
@@ -184,6 +204,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
             return DropdownMenuItem<String>(value: tag, child: Text(tag));
           }).toList(),
       onChanged: (String? newValue) {
+        if (!mounted) return;
         setState(() {
           _tag = newValue;
         });
@@ -207,11 +228,13 @@ class _BillEditScreenState extends State<BillEditScreen> {
       currentIcon: _selectedIcon,
       backgroundColor: _selectedColor,
       onIconSelected: (IconData icon) {
+        if (!mounted) return;
         setState(() {
           _selectedIcon = icon;
         });
       },
       onColorSelected: (Color color) {
+        if (!mounted) return;
         setState(() {
           _selectedColor = color;
         });
@@ -221,50 +244,85 @@ class _BillEditScreenState extends State<BillEditScreen> {
 
   Widget _buildSubmitButton() {
     return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+        minimumSize: const Size(200, 50),
+      ),
       onPressed: () async {
         if (_formKey.currentState!.validate()) {
-          final amount = double.parse(_amountController.text);
-          final bill = Bill(
-            id: widget.bill?.id,
-            title: _titleController.text,
-            amount: _isExpense ? -amount : amount,
-            accountId: widget.account.id,
-            tag: _tag ?? '未分类',
-            note: _noteController.text.isNotEmpty ? _noteController.text : null,
-            icon: _selectedIcon,
-            iconColor: _selectedColor,
-            createdAt: widget.bill?.createdAt,
-          );
-
           try {
-            // 创建账户的副本
-            Account updatedAccount;
+            // 显示保存中提示
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('正在保存...'), duration: Duration(milliseconds: 500)),
+            );
+            
+            // 解析金额
+            final amount = double.parse(_amountController.text);
+            
+            // 创建账单对象
+            final bill = Bill(
+              // 如果是编辑现有账单，使用原有ID；如果是新建账单，让构造函数生成新ID
+              id: widget.bill?.id,
+              title: _titleController.text,
+              amount: _isExpense ? -amount : amount,
+              accountId: widget.account.id,
+              tag: _tag ?? '未分类',
+              note: _noteController.text.isNotEmpty ? _noteController.text : null,
+              icon: _selectedIcon,
+              iconColor: _selectedColor,
+              // 如果是编辑现有账单，保留原创建时间；如果是新建账单，使用当前时间
+              createdAt: widget.bill?.createdAt,
+            );
+            
+            // 获取当前账户的最新数据
+            final currentAccount = widget.billPlugin.accounts.firstWhere(
+              (a) => a.id == widget.account.id,
+              orElse: () => widget.account,
+            );
 
+            // 准备更新后的账户数据
+            Account updatedAccount;
             if (widget.bill == null) {
               // 创建新账单
-              updatedAccount = widget.account.copyWith(
-                bills: [...widget.account.bills, bill],
+              updatedAccount = currentAccount.copyWith(
+                bills: [...currentAccount.bills, bill],
               );
             } else {
-              // 更新现有账单
-              updatedAccount = widget.account.copyWith(
-                bills:
-                    widget.account.bills
-                        .map(
-                          (existingBill) =>
-                              existingBill.id == bill.id ? bill : existingBill,
-                        )
-                        .toList(),
+              // 更新现有账单 - 替换相同ID的账单
+              final updatedBills = currentAccount.bills.map((existingBill) {
+                if (existingBill.id == bill.id) {
+                  return bill;
+                }
+                return existingBill;
+              }).toList();
+              
+              updatedAccount = currentAccount.copyWith(
+                bills: updatedBills,
               );
             }
+            
+            // 更新账户总金额
+            updatedAccount.calculateTotal();
+            
             // 调用插件的保存账户方法
             await widget.billPlugin.saveAccount(updatedAccount);
-
-            // 确保数据更新后通知监听器
-            widget.billPlugin.notifyListeners();
-
+            
+            // 返回上一页
             if (!mounted) return;
-            Navigator.pop(context);
+            
+            // 显示成功提示
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(widget.bill == null ? '账单添加成功' : '账单更新成功'), 
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+            
+            // 调用保存回调并返回
+            Navigator.of(context).pop();
+            widget.onSaved?.call();
           } catch (e) {
             if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
@@ -276,4 +334,4 @@ class _BillEditScreenState extends State<BillEditScreen> {
       child: Text(widget.bill == null ? '添加' : '保存'),
     );
   }
-}
+  }
