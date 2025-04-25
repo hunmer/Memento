@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../timer_plugin.dart';
 import '../models/timer_task.dart';
@@ -53,6 +54,10 @@ class TimerMainViewState extends State<TimerMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
         title: Text(widget.plugin.name),
         actions: [
           IconButton(

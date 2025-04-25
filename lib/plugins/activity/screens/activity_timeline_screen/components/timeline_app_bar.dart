@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../controllers/activity_controller.dart';
 import '../controllers/tag_controller.dart';
@@ -20,9 +21,9 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       // 添加返回按钮
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
       title: Text(viewModeController.isGridMode && viewModeController.selectedMinutes > 0
           ? '${viewModeController.selectedMinutes}分钟已选中'
           : '活动时间线'),

@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -89,7 +90,16 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('我的日记'), centerTitle: true),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
+        title: const Text('我的日记'),
+        actions: [
+         
+        ],
+      ),
       body: Column(
         children: [
           TableCalendar<DiaryEntry>(

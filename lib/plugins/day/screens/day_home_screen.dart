@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
@@ -86,6 +87,10 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
         builder: (context, controller, child) {
           return Scaffold(
             appBar: AppBar(
+              leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
               title: Text(DayLocalizations.of(context).memorialDays),
               actions: [
                 // 视图切换按钮

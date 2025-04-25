@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -469,6 +470,10 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
           title: Text('${selectedAccount?.title}'),
           bottom: const TabBar(tabs: [Tab(text: '账单列表'), Tab(text: '统计分析')]),
           actions: [

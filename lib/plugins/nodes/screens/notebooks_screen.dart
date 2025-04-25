@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' show lerpDouble;
 import 'package:provider/provider.dart';
@@ -17,6 +18,10 @@ class NotebooksScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
         title: Text(l10n.notebooks),
         actions: [
           IconButton(

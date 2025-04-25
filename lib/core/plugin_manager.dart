@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Memento/screens/home_screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'plugin_base.dart';
@@ -169,4 +170,11 @@ class PluginManager {
       ),
     );
   }
+
+  static toHomeScreen(BuildContext context){
+    Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
+  }
+  
 }

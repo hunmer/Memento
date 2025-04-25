@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../controllers/notes_controller.dart';
 import '../models/folder.dart';
@@ -144,13 +145,10 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading:
-            _currentFolder?.parentId != null
-                ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: _navigateBack,
-                )
-                : null,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>  _currentFolder?.parentId != null ? _navigateBack : PluginManager.toHomeScreen(context),
+        ),
         title:
             _isSearching
                 ? TextField(

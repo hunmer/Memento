@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../controllers/checkin_list_controller.dart';
 import '../models/checkin_item.dart';
@@ -42,6 +43,10 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
         title: const Text('打卡'),
         actions: [
           IconButton(

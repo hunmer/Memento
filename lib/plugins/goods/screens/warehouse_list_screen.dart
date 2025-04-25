@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../goods_plugin.dart';
 import '../models/warehouse.dart';
@@ -52,6 +53,10 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
         title: Row(
           children: [
             const Text('所有仓库'),

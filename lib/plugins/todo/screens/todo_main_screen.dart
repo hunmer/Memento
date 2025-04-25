@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../services/todo_service.dart';
 import '../models/task_item.dart';
@@ -90,6 +91,10 @@ class TodoMainScreenState extends State<TodoMainScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
         title: Text('任务插件', style: TextStyle(fontSize: 20)),
         centerTitle: false, // 标题靠左
         actions: [],

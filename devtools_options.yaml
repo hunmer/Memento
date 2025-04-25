@@ -1,4 +1,5 @@
 description: This file stores settings for Dart & Flutter DevTools.
 documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 extensions:
-  - shared_preferences: true
+  - shared_preferences: false
+  - provider: false
