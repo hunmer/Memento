@@ -75,19 +75,4 @@ class BaseSettingsController extends ChangeNotifier {
       ),
     );
   }
-
-  void showAboutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AboutDialog(
-        applicationName: '插件管理器',
-        applicationVersion: '1.0.0',
-        applicationLegalese: '© 2023 插件管理器',
-        children: [
-          const SizedBox(height: 20),
-          const Text('这是一个用于管理插件的应用程序。'),
-        ],
-      ),
-    );
-  }
 }

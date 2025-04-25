@@ -10,6 +10,9 @@ import 'plugin_order_manager.dart';
 import 'plugin_grid.dart';
 import 'dart:math';
 
+// 全局路由观察者
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -17,11 +20,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with RouteAware {
   late Future<List<PluginBase>> _pluginsFuture;
   final CardSizeManager _cardSizeManager = CardSizeManager();
   final PluginOrderManager _pluginOrderManager = PluginOrderManager();
   bool _isReorderMode = false;
+
+  // 是否是首次加载，使用静态变量确保在热重载时保持状态
+  static bool _hasInitialized = false;
+  // 是否正在打开插件
+  bool _isOpeningPlugin = false;
 
   // 显示卡片大小调整对话框
   void _showCardSizeDialog(BuildContext context, PluginBase plugin) {
@@ -30,7 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final currentSize = _cardSizeManager.getCardSize(plugin.id);
     int currentWidth = currentSize.width;
     int currentHeight = currentSize.height;
-    final int maxColumns = (MediaQuery.of(context).size.width / 150).floor(); // 假设每列最小宽度为150
+    final int maxColumns =
+        (MediaQuery.of(context).size.width / 150).floor(); // 假设每列最小宽度为150
 
     showDialog(
       context: context,
@@ -94,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     // 关闭对话框
                     Navigator.of(context).pop();
-                    
+
                     // 使用外部的setState更新HomeScreen状态
                     this.setState(() {
                       _cardSizeManager.cardSizes[plugin.id] = CardSize(
@@ -117,14 +126,59 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _pluginsFuture = _initializePlugins();
-    
-    // 延迟初始化悬浮球，确保在布局完成后
+
+    // 延迟初始化，确保在布局完成后执行
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 确保上下文可用且包含Overlay
+      // 确保上下文可用
       if (mounted) {
+        // 显示悬浮球
         FloatingBallService().show(context);
+
+        // 首次加载时打开最后使用的插件
+        if (!_hasInitialized) {
+          _openLastUsedPlugin();
+          _hasInitialized = true;
+        }
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 订阅路由事件
+    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+  }
+
+  @override
+  void dispose() {
+    // 取消订阅路由事件
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  // 打开最后使用的插件
+  void _openLastUsedPlugin() async {
+    // 防止重复打开
+    if (_isOpeningPlugin) {
+      return;
+    }
+    _isOpeningPlugin = true;
+    // 检查是否启用了自动打开功能
+    if (!globalPluginManager.autoOpenLastPlugin) {
+      return;
+    }
+
+    // 获取最后一次使用的插件
+    final lastPlugin = globalPluginManager.getLastOpenedPlugin();
+    if (lastPlugin != null) {
+      // 使用延迟确保不会与初始动画冲突
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (mounted) {
+        globalPluginManager.openPlugin(context, lastPlugin);
+      }
+    }
+    _isOpeningPlugin = false;
   }
 
   Future<List<PluginBase>> _initializePlugins() async {
@@ -137,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleReorder(int oldIndex, int newIndex) {
     setState(() {
-          final List<PluginBase> plugins = globalPluginManager.allPlugins;
+      final List<PluginBase> plugins = globalPluginManager.allPlugins;
       if (oldIndex < newIndex) {
         newIndex -= 1;
       }
@@ -149,6 +203,12 @@ class _HomeScreenState extends State<HomeScreen> {
       _pluginOrderManager.pluginOrder = plugins.map((p) => p.id).toList();
       _pluginOrderManager.savePluginOrder();
     });
+  }
+
+  @override
+  void didPopNext() {
+    // 当从其他页面返回到HomeScreen时触发
+    super.didPopNext();
   }
 
   @override
@@ -187,15 +247,11 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text('No plugins available'),
-            );
+            return const Center(child: Text('No plugins available'));
           }
 
           return PluginGrid(

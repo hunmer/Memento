@@ -51,10 +51,11 @@ void main() async {
     await globalConfigManager.initialize();
     debugPrint('配置管理器初始化完成');
 
-    // 获取插件管理器单例实例
+    // 获取插件管理器单例实例并初始化
     globalPluginManager = PluginManager();
-    globalPluginManager.setStorageManager(globalStorage);
     debugPrint('初始化插件管理器...');
+    await globalPluginManager.setStorageManager(globalStorage);
+    debugPrint('插件管理器初始化完成');
 
     // 注册内置插件
     debugPrint('注册内置插件...');
@@ -122,6 +123,7 @@ class _MyAppState extends State<MyApp> {
       locale:
           globalConfigManager.getLocale() ??
           const Locale('en', ''), // 使用保存的语言设置，默认英文
+      navigatorObservers: [routeObserver], // 添加路由观察者
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -133,7 +135,9 @@ class _MyAppState extends State<MyApp> {
       builder: (context, child) {
         // 确保字体大小不受系统设置影响
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(1.0)),
           child: child!,
         );
       },
@@ -149,12 +153,13 @@ class _MyAppState extends State<MyApp> {
 
           if (channel != null) {
             return MaterialPageRoute(
-              builder: (context) => ChatScreen(
-                channel: channel,
-                initialMessage: initialMessage,
-                highlightMessage: highlightMessage,
-                autoScroll: autoScroll,
-              ),
+              builder:
+                  (context) => ChatScreen(
+                    channel: channel,
+                    initialMessage: initialMessage,
+                    highlightMessage: highlightMessage,
+                    autoScroll: autoScroll,
+                  ),
             );
           }
         }

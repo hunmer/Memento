@@ -144,9 +144,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('关于'),
-            onTap: _controller.showAboutDialog,
+            leading: const Icon(Icons.play_circle),
+            title: const Text('自动打开上次使用的插件'),
+            subtitle: const Text('启动时自动打开最后使用的插件'),
+            trailing: Switch(
+              value: _controller.autoOpenLastPlugin,
+              onChanged:
+                  (value) => setState(() {
+                    _controller.autoOpenLastPlugin = value;
+                  }),
+            ),
           ),
         ],
       ),

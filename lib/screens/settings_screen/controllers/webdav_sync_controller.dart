@@ -18,6 +18,10 @@ class WebDAVSyncController {
   bool _isConnected = false;
   bool get isConnected => _isConnected;
 
+  // 重试配置
+  static const int maxRetries = 10; // 最大重试次数
+  static const Duration retryDelay = Duration(seconds: 2); // 重试间隔
+
   // 当前进度
   BackupProgress _currentProgress = BackupProgress.initial();
 
@@ -190,52 +194,81 @@ class WebDAVSyncController {
     return files;
   }
 
-  // 递归创建远程目录
+  // 递归创建远程目录（带重试）
   Future<void> _ensureRemoteDirectoryExistsRecursively(
     String remotePath,
   ) async {
     if (remotePath == '/' || remotePath.isEmpty) return;
 
-    try {
+    int retryCount = 0;
+    Exception? lastError;
+
+    while (retryCount < maxRetries) {
       try {
-        await _webdavClient!.readDir(remotePath);
+        try {
+          await _webdavClient!.readDir(remotePath);
+          return; // 目录存在，直接返回
+        } catch (e) {
+          // 确保父目录存在
+          final parentDir = path.dirname(remotePath);
+          await _ensureRemoteDirectoryExistsRecursively(parentDir);
+
+          // 创建当前目录
+          await _webdavClient!.mkdir(remotePath);
+          return; // 创建成功，返回
+        }
       } catch (e) {
-        // 确保父目录存在
-        final parentDir = path.dirname(remotePath);
-        await _ensureRemoteDirectoryExistsRecursively(parentDir);
-
-        // 创建当前目录
-        await _webdavClient!.mkdir(remotePath);
-      }
-    } catch (e) {
-      debugPrint('创建远程目录失败: $e');
-    }
-  }
-
-  // 递归获取所有远程文件
-  Future<List<String>> _listAllRemoteFiles(String remotePath) async {
-    List<String> files = [];
-
-    try {
-      final items = await _webdavClient!.readDir(remotePath);
-
-      for (final item in items) {
-        final itemPath = item.path;
-        if (itemPath == null) continue;
-
-        if (item.isDir == false) {
-          // 这是一个文件
-          files.add(itemPath);
-        } else {
-          // 这是一个目录，递归获取
-          files.addAll(await _listAllRemoteFiles(itemPath));
+        lastError = e as Exception;
+        retryCount++;
+        if (retryCount < maxRetries) {
+          debugPrint('创建目录失败，正在重试 ($retryCount/$maxRetries): $e');
+          await Future.delayed(retryDelay);
         }
       }
-    } catch (e) {
-      debugPrint('获取远程文件列表失败: $e');
     }
 
-    return files;
+    debugPrint('创建远程目录失败，已重试 $maxRetries 次: $lastError');
+    throw lastError ?? Exception('创建远程目录失败');
+  }
+
+  // 递归获取所有远程文件（带重试）
+  Future<List<String>> _listAllRemoteFiles(String remotePath) async {
+    List<String> files = [];
+    int retryCount = 0;
+    Exception? lastError;
+
+    while (retryCount < maxRetries) {
+      try {
+        final items = await _webdavClient!.readDir(remotePath);
+
+        for (final item in items) {
+          final itemPath = item.path;
+          if (itemPath == null) continue;
+
+          if (item.isDir == false) {
+            // 这是一个文件
+            files.add(itemPath);
+          } else {
+            // 这是一个目录，递归获取
+            files.addAll(await _listAllRemoteFiles(itemPath));
+          }
+        }
+        return files; // 成功获取文件列表，返回结果
+      } catch (e) {
+        lastError = e as Exception;
+        retryCount++;
+        if (retryCount < maxRetries) {
+          debugPrint('获取远程文件列表失败，正在重试 ($retryCount/$maxRetries): $e');
+          _updateProgress(
+            currentOperation: '获取文件列表失败，正在重试 ($retryCount/$maxRetries)...',
+          );
+          await Future.delayed(retryDelay);
+        }
+      }
+    }
+
+    debugPrint('获取远程文件列表失败，已重试 $maxRetries 次: $lastError');
+    throw lastError ?? Exception('获取远程文件列表失败');
   }
 
   // 上传所有文件到WebDAV
@@ -310,8 +343,31 @@ class WebDAVSyncController {
         final remoteDir = path.dirname(remotePath);
         await _ensureRemoteDirectoryExistsRecursively(remoteDir);
 
-        // 上传文件
-        await _webdavClient!.writeFromFile(file.path, remotePath);
+        // 上传文件（带重试）
+        bool uploadSuccess = false;
+        int retryCount = 0;
+        Exception? lastError;
+
+        while (!uploadSuccess && retryCount < maxRetries) {
+          try {
+            await _webdavClient!.writeFromFile(file.path, remotePath);
+            uploadSuccess = true;
+          } catch (e) {
+            lastError = e as Exception;
+            retryCount++;
+            if (retryCount < maxRetries) {
+              _updateProgress(
+                currentOperation: '上传失败，正在重试 ($retryCount/$maxRetries)...',
+                recentFile: relativePath,
+              );
+              await Future.delayed(retryDelay);
+            }
+          }
+        }
+
+        if (!uploadSuccess) {
+          throw lastError ?? Exception('上传失败，已重试 $maxRetries 次');
+        }
 
         // 让出CPU时间片
         await Future.delayed(Duration.zero);
@@ -414,8 +470,31 @@ class WebDAVSyncController {
           await dirFile.create(recursive: true);
         }
 
-        // 下载文件
-        await _webdavClient!.read2File(remoteFile, localPath);
+        // 下载文件（带重试）
+        bool downloadSuccess = false;
+        int retryCount = 0;
+        Exception? lastError;
+
+        while (!downloadSuccess && retryCount < maxRetries) {
+          try {
+            await _webdavClient!.read2File(remoteFile, localPath);
+            downloadSuccess = true;
+          } catch (e) {
+            lastError = e as Exception;
+            retryCount++;
+            if (retryCount < maxRetries) {
+              _updateProgress(
+                currentOperation: '下载失败，正在重试 ($retryCount/$maxRetries)...',
+                recentFile: remoteFile.substring(remotePath.length),
+              );
+              await Future.delayed(retryDelay);
+            }
+          }
+        }
+
+        if (!downloadSuccess) {
+          throw lastError ?? Exception('下载失败，已重试 $maxRetries 次');
+        }
 
         // 让出CPU时间片
         await Future.delayed(Duration.zero);

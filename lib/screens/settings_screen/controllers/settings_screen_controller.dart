@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/main.dart';
 import 'base_settings_controller.dart';
 import 'export_controller.dart';
 import 'import_controller.dart';
@@ -30,9 +31,6 @@ class SettingsScreenController extends ChangeNotifier {
   bool get isChineseLocale => _baseController.isChineseLocale;
   Future<void> toggleLanguage() => _baseController.toggleLanguage();
 
-  // 关于对话框
-  void showAboutDialog() => _baseController.showAboutDialog();
-
   // 数据导出
   Future<void> exportData() => _exportController.exportData();
 
@@ -48,4 +46,11 @@ class SettingsScreenController extends ChangeNotifier {
   Future<bool> uploadAllToWebDAV() => _webdavSyncController.uploadAllToWebDAV();
   Future<bool> downloadAllFromWebDAV() =>
       _webdavSyncController.downloadAllFromWebDAV();
+
+  // 自动打开最后使用的插件设置
+  bool get autoOpenLastPlugin => globalPluginManager.autoOpenLastPlugin;
+  set autoOpenLastPlugin(bool value) {
+    globalPluginManager.autoOpenLastPlugin = value;
+    notifyListeners();
+  }
 }
