@@ -307,6 +307,15 @@ class UIService {
               });
             },
           ),
+          SwitchListTile(
+            title: const Text('在时间线中显示头像'),
+            value: _settingsService.showAvatarInTimeline,
+            onChanged: (bool value) {
+              setState(() {
+                _settingsService.setShowAvatarInTimeline(value);
+              });
+            },
+          ),
         ],
       ),
     );

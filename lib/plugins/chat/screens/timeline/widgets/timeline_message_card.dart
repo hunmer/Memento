@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../models/message.dart';
 import '../../../models/channel.dart';
 import '../../../utils/date_formatter.dart';
+import '../../../services/settings_service.dart';
 import '../utils/text_highlight.dart';
 import '../controllers/timeline_controller.dart';
 import '../../../utils/message_options_handler.dart';
@@ -17,6 +18,7 @@ class TimelineMessageCard extends StatelessWidget {
   final Channel channel;
   final TimelineController controller;
   final bool isGridView;
+  final SettingsService? settingsService;
 
   const TimelineMessageCard({
     super.key,
@@ -24,6 +26,7 @@ class TimelineMessageCard extends StatelessWidget {
     required this.channel,
     required this.controller,
     this.isGridView = false,
+    this.settingsService,
   });
 
   @override
@@ -73,33 +76,36 @@ class TimelineMessageCard extends StatelessWidget {
             // 头像和用户名
             Row(
               children: [
-                Container(
-                  width: isGridView ? 28 : 40,
-                  height: isGridView ? 28 : 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.colorScheme.primary,
+                // 根据设置决定是否显示头像
+                if (settingsService?.showAvatarInTimeline ?? true) ...[
+                  Container(
+                    width: isGridView ? 28 : 40,
+                    height: isGridView ? 28 : 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: theme.colorScheme.primary,
+                    ),
+                    child: message.user.iconPath != null
+                        ? FutureBuilder<String>(
+                            future: _getAbsolutePath(message.user.iconPath!),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData && snapshot.data != null) {
+                                return ClipOval(
+                                  child: Image.file(
+                                    File(snapshot.data!),
+                                    width: isGridView ? 28 : 40,
+                                    height: isGridView ? 28 : 40,
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              }
+                              return _buildDefaultAvatar(theme, isGridView);
+                            },
+                          )
+                        : _buildDefaultAvatar(theme, isGridView),
                   ),
-                  child: message.user.iconPath != null
-                      ? FutureBuilder<String>(
-                          future: _getAbsolutePath(message.user.iconPath!),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData && snapshot.data != null) {
-                              return ClipOval(
-                                child: Image.file(
-                                  File(snapshot.data!),
-                                  width: isGridView ? 28 : 40,
-                                  height: isGridView ? 28 : 40,
-                                  fit: BoxFit.cover,
-                                ),
-                              );
-                            }
-                            return _buildDefaultAvatar(theme, isGridView);
-                          },
-                        )
-                      : _buildDefaultAvatar(theme, isGridView),
-                ),
-                SizedBox(width: isGridView ? 8 : 12),
+                  SizedBox(width: isGridView ? 8 : 12),
+                ],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,6 +234,6 @@ class TimelineMessageCard extends StatelessWidget {
 
   Future<String> _getAbsolutePath(String relativePath) async {
     final appDir = await getApplicationDocumentsDirectory();
-    return path.join(appDir.path, relativePath.replaceFirst('./', ''));
+    return path.join(appDir.path, 'app_data', relativePath.replaceFirst('./', ''));
   }
 }
