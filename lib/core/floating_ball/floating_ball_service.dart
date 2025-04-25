@@ -12,15 +12,17 @@ class FloatingBallService {
   OverlayEntry? _overlayEntry;
   final FloatingBallManager _manager = FloatingBallManager();
   bool _isInitialized = false;
-  
+  BuildContext? lastContext;
+
   // 添加一个流控制器用于通知悬浮球大小变化
-  final StreamController<double> _sizeChangeController = StreamController<double>.broadcast();
+  final StreamController<double> _sizeChangeController =
+      StreamController<double>.broadcast();
   Stream<double> get sizeChangeStream => _sizeChangeController.stream;
 
   /// 初始化悬浮球
   void initialize(BuildContext context) {
     if (_isInitialized) return;
-    
+
     _manager.initDefaultActions(context);
     _manager.setActionContext(context);
     _isInitialized = true;
@@ -32,18 +34,24 @@ class FloatingBallService {
   }
 
   /// 显示悬浮球
-  void show(BuildContext context) {
-    if (_overlayEntry != null) return;
-    
+  Future<void> show(BuildContext? context) async {
+    if (_overlayEntry != null || context == null) return;
+
+    // 检查悬浮球是否启用
+    final isEnabled = await _manager.isEnabled();
+    if (!isEnabled) return;
+
+    lastContext = context;
     initialize(context);
-    
+
     _overlayEntry = OverlayEntry(
-      builder: (context) => const FloatingBallWidget(
-        baseSize: 60,
-        iconPath: 'assets/icon/icon.png',
-      ),
+      builder:
+          (context) => const FloatingBallWidget(
+            baseSize: 60,
+            iconPath: 'assets/icon/icon.png',
+          ),
     );
-    
+
     Overlay.of(context).insert(_overlayEntry!);
   }
 
@@ -54,18 +62,22 @@ class FloatingBallService {
   }
 
   /// 注册悬浮球动作
-  void registerAction(FloatingBallGesture gesture, String title, Function callback) {
+  void registerAction(
+    FloatingBallGesture gesture,
+    String title,
+    Function callback,
+  ) {
     _manager.registerAction(gesture, title, callback);
   }
 
   /// 获取悬浮球管理器
   FloatingBallManager get manager => _manager;
-  
+
   /// 通知悬浮球大小变化
   void notifySizeChange(double scale) {
     _sizeChangeController.add(scale);
   }
-  
+
   /// 释放资源
   void dispose() {
     _sizeChangeController.close();

@@ -36,6 +36,8 @@ class FloatingBallManager {
   Offset _position = const Offset(20, 100);
   // 默认大小比例 (100%)
   double _sizeScale = 1.0;
+  // 默认启用状态
+  bool _isEnabled = true;
 
   // 预定义的动作映射表
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
@@ -139,6 +141,25 @@ class FloatingBallManager {
 
     // 通知悬浮球大小变化
     FloatingBallService()?.notifySizeChange(scale);
+  }
+
+  // 获取悬浮球启用状态
+  Future<bool> isEnabled() async {
+    final prefs = await _prefs;
+    return prefs.getBool('floating_ball_enabled') ?? true;
+  }
+
+  // 保存悬浮球启用状态
+  Future<void> setEnabled(bool enabled) async {
+    _isEnabled = enabled;
+    final prefs = await _prefs;
+    await prefs.setBool('floating_ball_enabled', enabled);
+
+    // 如果禁用，直接隐藏悬浮球
+    if (!enabled) {
+      FloatingBallService().hide();
+    }
+    // 注意：不在这里调用show()，而是让上层调用者决定是否显示
   }
 
   // 获取保存的位置

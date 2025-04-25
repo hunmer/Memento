@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'floating_ball_manager.dart';
+import 'floating_ball_service.dart';
 
 class FloatingBallSettingsScreen extends StatefulWidget {
   const FloatingBallSettingsScreen({Key? key}) : super(key: key);
@@ -13,6 +14,7 @@ class _FloatingBallSettingsScreenState
     extends State<FloatingBallSettingsScreen> {
   final FloatingBallManager _manager = FloatingBallManager();
   double _sizeScale = 1.0;
+  bool _isEnabled = true;
   final Map<FloatingBallGesture, String?> _selectedActions = {};
 
   // 从FloatingBallManager获取预定义动作列表
@@ -28,6 +30,9 @@ class _FloatingBallSettingsScreenState
     // 加载悬浮球大小
     final scale = await _manager.getSizeScale();
 
+    // 加载悬浮球启用状态
+    final enabled = await _manager.isEnabled();
+
     // 加载当前设置的动作
     for (var gesture in FloatingBallGesture.values) {
       final actionTitle = _manager.getActionTitle(gesture);
@@ -37,6 +42,7 @@ class _FloatingBallSettingsScreenState
     if (mounted) {
       setState(() {
         _sizeScale = scale;
+        _isEnabled = enabled;
       });
     }
   }
@@ -48,6 +54,45 @@ class _FloatingBallSettingsScreenState
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          // 悬浮球启用开关
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '悬浮球开关',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('启用悬浮球'),
+                      Switch(
+                        value: _isEnabled,
+                        onChanged: (value) async {
+                          setState(() {
+                            _isEnabled = value;
+                          });
+                          await _manager.setEnabled(value);
+
+                          // 如果启用悬浮球，则显示悬浮球
+                          if (value) {
+                            FloatingBallService().show(context);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
           // 悬浮球大小设置
           Card(
             child: Padding(

@@ -131,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 确保上下文可用
       if (mounted) {
-        // 显示悬浮球
+        // 显示悬浮球（如果启用的话）
         FloatingBallService().show(context);
 
         // 首次加载时打开最后使用的插件

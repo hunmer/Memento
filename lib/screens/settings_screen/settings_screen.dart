@@ -4,6 +4,8 @@ import './widgets/plugin_selection_dialog.dart';
 import './widgets/folder_selection_dialog.dart';
 import './widgets/webdav_settings_dialog.dart';
 import './controllers/webdav_controller.dart';
+import '../../core/floating_ball/settings_screen.dart';
+import '../../core/floating_ball/floating_ball_manager.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -141,6 +143,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ? const Icon(Icons.check_circle, color: Colors.green)
                     : null,
             onTap: _showWebDAVSettings,
+          ),
+          const Divider(),
+          FutureBuilder<bool>(
+            future: FloatingBallManager().isEnabled(),
+            builder: (context, snapshot) {
+              final bool isEnabled = snapshot.data ?? true;
+              return ListTile(
+                leading: const Icon(Icons.touch_app),
+                title: const Text('悬浮球设置'),
+                subtitle: Text(isEnabled ? '已启用' : '已禁用'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FloatingBallSettingsScreen(),
+                    ),
+                  );
+                },
+              );
+            },
           ),
           const Divider(),
           ListTile(
