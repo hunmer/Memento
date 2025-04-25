@@ -3,6 +3,7 @@ import '../../core/plugin_base.dart';
 import '../../widgets/app_drawer.dart';
 import '../../widgets/app_bar_widget.dart';
 import '../../main.dart';
+import '../../core/floating_ball/floating_ball_service.dart';
 import 'card_size.dart';
 import 'card_size_manager.dart';
 import 'plugin_order_manager.dart';
@@ -116,6 +117,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _pluginsFuture = _initializePlugins();
+    
+    // 延迟初始化悬浮球，确保在布局完成后
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 确保上下文可用且包含Overlay
+      if (mounted) {
+        FloatingBallService().show(context);
+      }
+    });
   }
 
   Future<List<PluginBase>> _initializePlugins() async {

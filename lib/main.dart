@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/day/l10n/day_localizations.dart';
+import 'core/floating_ball/floating_ball_service.dart';
 // 移除未使用的导入
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
@@ -87,8 +88,18 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,9 +133,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         // 确保字体大小不受系统设置影响
         return MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: const TextScaler.linear(1.0)),
+          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
           child: child!,
         );
       },
