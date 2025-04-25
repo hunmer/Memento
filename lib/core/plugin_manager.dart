@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'plugin_base.dart';
 import 'storage/storage_manager.dart';
 
@@ -52,5 +53,19 @@ class PluginManager {
   /// 移除插件
   Future<void> removePlugin(String id) async {
     _plugins.removeWhere((p) => p.id == id);
+  }
+
+  /// 打开插件界面
+  void openPlugin(BuildContext context, PluginBase plugin) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(plugin.name),
+          ),
+          body: plugin.buildMainView(context),
+        ),
+      ),
+    );
   }
 }

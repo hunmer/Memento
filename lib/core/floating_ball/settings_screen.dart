@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'floating_ball_manager.dart';
+import '../../dialogs/plugin_list_dialog.dart';
 
 class FloatingBallSettingsScreen extends StatefulWidget {
   const FloatingBallSettingsScreen({super.key});
@@ -53,6 +54,12 @@ class _FloatingBallSettingsScreenState extends State<FloatingBallSettingsScreen>
   
   // 预定义的动作列表
   final List<({String title, Function(BuildContext) creator})> _predefinedActions = [
+    (
+      title: '选择打开插件',
+      creator: (context) => () {
+        showPluginListDialog(context);
+      }
+    ),
     (
       title: '显示提示消息',
       creator: (context) => (String message) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'floating_ball_service.dart';
+import '../../dialogs/plugin_list_dialog.dart';
 
 /// 悬浮球手势动作类型
 enum FloatingBallGesture {
@@ -37,6 +38,11 @@ class FloatingBallManager {
 
   // 预定义的动作映射表
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
+    '选择打开插件': (context) => () {
+      if (context.mounted) {
+        showPluginListDialog(context);
+      }
+    },
     '显示提示消息': (context) => (String message) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
