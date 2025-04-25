@@ -18,7 +18,7 @@ class FloatingBallWidget extends StatefulWidget {
   State<FloatingBallWidget> createState() => _FloatingBallWidgetState();
 }
 
-class _FloatingBallWidgetState extends State<FloatingBallWidget> {
+class _FloatingBallWidgetState extends State<FloatingBallWidget> with TickerProviderStateMixin {
   final FloatingBallManager _manager = FloatingBallManager();
   Offset? _position; // 改为可空类型
   bool _isDragging = false;
@@ -27,6 +27,12 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
   bool _isLoading = true; // 添加加载状态标志
   bool _canDrag = false; // 是否可以拖动
   Offset? _lastLongPressDragUpdate; // 最后一次长按拖动更新的位置
+  Offset? _panStartPosition; // 滑动开始位置
+  DateTime? _panStartTime; // 滑动开始时间
+  
+  // 添加指针移出检测相关变量
+  bool _pointerDown = false;
+  GlobalKey _ballKey = GlobalKey();
   
   @override
   void initState() {
@@ -55,11 +61,28 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
     if (_position == null) return;
     
     setState(() {
+      _pointerDown = true;
       _canDrag = true;
       _isDragging = true;
       _dragStartPosition = details.globalPosition;
       _lastLongPressDragUpdate = details.globalPosition;
     });
+  }
+  
+  // 检查指针是否在悬浮球内
+  bool _isPointerInsideBall(Offset globalPosition) {
+    if (_ballKey.currentContext == null) return false;
+    
+    final RenderBox renderBox = _ballKey.currentContext!.findRenderObject() as RenderBox;
+    final Size size = renderBox.size;
+    final Offset localPosition = renderBox.globalToLocal(globalPosition);
+    
+    // 检查点是否在圆形内
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    final distance = (localPosition - center).distance;
+    
+    return distance <= radius;
   }
 
   // 长按拖动更新
@@ -76,6 +99,40 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
         _position!.dy + delta.dy,
       );
     });
+    
+    // 检查指针是否移出悬浮球
+    if (_pointerDown && !_isPointerInsideBall(details.globalPosition)) {
+      _handlePointerExit(details.globalPosition);
+    }
+  }
+  
+  // 处理指针移出悬浮球
+  void _handlePointerExit(Offset exitPosition) {
+    if (!_pointerDown || !_canDrag) return;
+    
+    // 计算滑动方向
+    if (_dragStartPosition != null) {
+      final dragVector = exitPosition - _dragStartPosition!;
+      final dragDistance = dragVector.distance;
+      
+      // 如果移动距离足够大，触发滑动动作
+      if (dragDistance > 10) {
+        _handleSwipe(dragVector);
+      }
+    }
+    
+    // 重置状态
+    setState(() {
+      _pointerDown = false;
+      _canDrag = false;
+      _isDragging = false;
+      _lastLongPressDragUpdate = null;
+    });
+    
+    // 保存当前位置
+    if (_position != null) {
+      _manager.savePosition(_position!);
+    }
   }
 
   // 长按拖动结束
@@ -101,6 +158,7 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
     }
     
     setState(() {
+      _pointerDown = false;
       _isDragging = false;
       _canDrag = false;
       _lastLongPressDragUpdate = null;
@@ -111,6 +169,9 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
   void _handleSwipe(Offset velocity) {
     // 如果滑动距离太小，不触发任何动作
     if (velocity.distance < 5) return;
+    
+    // 打印滑动信息，便于调试
+    debugPrint('Swipe detected: $velocity, distance: ${velocity.distance}');
     
     // 判断滑动方向
     final absX = velocity.dx.abs();
@@ -159,7 +220,7 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const FloatingBallSettingsScreen(),
-      ),
+        ),
     );
   }
 
@@ -193,15 +254,65 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
     return Positioned(
       left: _position!.dx,
       top: _position!.dy,
-      child: GestureDetector(
+      child: Listener(
+        onPointerUp: (event) {
+          if (_pointerDown) {
+            setState(() {
+              _pointerDown = false;
+              if (_canDrag) {
+                _canDrag = false;
+                _isDragging = false;
+              }
+            });
+          }
+        },
+        onPointerMove: (event) {
+          if (_pointerDown && _canDrag && !_isPointerInsideBall(event.position)) {
+            _handlePointerExit(event.position);
+          }
+        },
+        child: GestureDetector(
         onTap: _handleTap,
         onDoubleTap: _handleDoubleTap,
         onLongPressDown: _handleLongPressDown,
         onLongPressMoveUpdate: _handleLongPressMoveUpdate,
         onLongPressEnd: _handleLongPressEnd,
+        onPanStart: (details) {
+          if (_isDragging) return; // 如果正在长按拖动，不处理滑动
+          setState(() {
+            _panStartPosition = details.globalPosition;
+            _panStartTime = DateTime.now();
+          });
+        },
+        onPanUpdate: (details) {
+          if (_isDragging || _panStartPosition == null) return; // 如果正在长按拖动，不处理滑动
+          
+          // 在桌面端，我们不立即处理滑动，而是在onPanEnd中处理
+        },
+        onPanEnd: (details) {
+          if (_isDragging || _panStartPosition == null) return; // 如果正在长按拖动，不处理滑动
+          
+          // 计算滑动时间和距离
+          final now = DateTime.now();
+          final duration = now.difference(_panStartTime!).inMilliseconds;
+          final endPosition = details.globalPosition ?? _position!;
+          final distance = (endPosition - _panStartPosition!).distance;
+          final velocity = endPosition - _panStartPosition!;
+          
+          // 如果滑动时间小于500毫秒且距离大于10，触发滑动手势
+          if (duration < 500 && distance > 10) {
+            _handleSwipe(velocity);
+          }
+          
+          setState(() {
+            _panStartPosition = null;
+            _panStartTime = null;
+          });
+        },
         onLongPressCancel: () {
           _longPressTimer?.cancel();
           setState(() {
+            _pointerDown = false;
             _canDrag = false;
             _isDragging = false;
             _lastLongPressDragUpdate = null;
@@ -209,6 +320,7 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
           });
         },
         child: Container(
+          key: _ballKey,
           width: widget.size,
           height: widget.size,
           decoration: BoxDecoration(
@@ -231,6 +343,7 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
           ),
         ),
       ),
+    ),
     );
   }
 }
