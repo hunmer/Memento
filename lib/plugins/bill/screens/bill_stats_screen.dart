@@ -9,11 +9,15 @@ import '../models/bill_model.dart';
 class BillStatsScreen extends StatefulWidget {
   final BillPlugin billPlugin;
   final String accountId;
+  final DateTime startDate;
+  final DateTime endDate;
 
   const BillStatsScreen({
     super.key,
     required this.billPlugin,
     required this.accountId,
+    required this.startDate,
+    required this.endDate,
   });
 
   @override
@@ -23,42 +27,11 @@ class BillStatsScreen extends StatefulWidget {
 class _BillStatsScreenState extends State<BillStatsScreen> {
   List<BillModel> _bills = [];
   bool _isLoading = true;
-  String _selectedPeriod = '月';
-  DateTime _startDate = DateTime.now();
-  late DateTime _endDate;
 
   @override
   void initState() {
     super.initState();
-    _updateDateRange();
     _loadBills();
-  }
-
-  void _updateDateRange() {
-    final now = DateTime.now();
-    switch (_selectedPeriod) {
-      case '周':
-        // 本周的开始（周一）到结束（周日）
-        final weekday = now.weekday;
-        _startDate = now.subtract(Duration(days: weekday - 1));
-        _endDate = _startDate.add(const Duration(days: 6));
-        break;
-      case '月':
-        // 本月的第一天到最后一天
-        _startDate = DateTime(now.year, now.month, 1);
-        _endDate = DateTime(now.year, now.month + 1, 0);
-        break;
-      case '年':
-        // 本年的第一天到最后一天
-        _startDate = DateTime(now.year, 1, 1);
-        _endDate = DateTime(now.year, 12, 31);
-        break;
-    }
-
-    // 将时间设置为当天的开始
-    _startDate = DateTime(_startDate.year, _startDate.month, _startDate.day);
-    // 将时间设置为当天的结束
-    _endDate = DateTime(_endDate.year, _endDate.month, _endDate.day, 23, 59, 59);
   }
 
   Future<void> _loadBills() async {
@@ -70,14 +43,8 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
     final currentAccount = widget.billPlugin.accounts
         .firstWhere((account) => account.id == widget.accountId);
         
-    // 从账户中获取指定时间范围内的账单
-    final filteredBills = currentAccount.bills.where((bill) =>
-      bill.createdAt.isAfter(_startDate) &&
-      bill.createdAt.isBefore(_endDate.add(const Duration(seconds: 1)))
-    );
-
     // 转换为 BillModel
-    final bills = filteredBills.map((bill) => BillModel(
+    final bills = currentAccount.bills.map((bill) => BillModel(
       id: bill.id,
       title: bill.title,
       amount: bill.absoluteAmount,
@@ -93,14 +60,6 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
       _bills = bills;
       _isLoading = false;
     });
-  }
-
-  void _changePeriod(String period) {
-    setState(() {
-      _selectedPeriod = period;
-    });
-    _updateDateRange();
-    _loadBills();
   }
 
   @override
@@ -137,38 +96,6 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 时间段选择
-                    Row(
-                      children: [
-                        const Text('时间范围：'),
-                        const SizedBox(width: 8),
-                        SegmentedButton<String>(
-                          segments: const [
-                            ButtonSegment<String>(
-                              value: '周',
-                              label: Text('本周'),
-                            ),
-                            ButtonSegment<String>(
-                              value: '月',
-                              label: Text('本月'),
-                            ),
-                            ButtonSegment<String>(
-                              value: '年',
-                              label: Text('本年'),
-                            ),
-                          ],
-                          selected: {_selectedPeriod},
-                          onSelectionChanged: (Set<String> newSelection) {
-                            _changePeriod(newSelection.first);
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${DateFormat('yyyy-MM-dd').format(_startDate)} 至 ${DateFormat('yyyy-MM-dd').format(_endDate)}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
                     const SizedBox(height: 24),
                     
                     // 收支概览卡片

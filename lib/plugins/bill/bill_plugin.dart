@@ -394,7 +394,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
   // 移除静态常量，因为已经在接口实现中定义
 
-  @override
   Map<String, dynamic> _settings = {};
 
   @override
@@ -492,7 +491,12 @@ class BillPlugin extends PluginBase with ChangeNotifier {
         body: TabBarView(
           children: [
             BillListScreen(billPlugin: this, accountId: selectedAccount!.id),
-            BillStatsScreen(billPlugin: this, accountId: selectedAccount!.id),
+            BillStatsScreen(
+              billPlugin: this, 
+              accountId: selectedAccount!.id,
+              startDate: DateTime.now().subtract(const Duration(days: 30)), // 默认显示最近30天
+              endDate: DateTime.now(),
+            ),
           ],
         ),
       ),
