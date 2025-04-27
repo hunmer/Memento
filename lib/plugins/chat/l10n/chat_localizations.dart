@@ -57,6 +57,7 @@ abstract class ChatLocalizations {
   String get channelsTab;
   String get timelineTab;
   String get timelineComingSoon;
+  String get editProfile;
   
   // Advanced filter related strings
   String get advancedFilter;

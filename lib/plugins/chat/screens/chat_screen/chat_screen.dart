@@ -1,9 +1,9 @@
+import 'package:Memento/plugins/chat/screens/profile_edit_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../models/channel.dart';
 import '../../models/message.dart';
 import '../../chat_plugin.dart';
-import '../../../../services/image_service.dart';
 import '../channel_info_screen.dart';
 import '../user_profile_screen.dart';
 import '../../utils/message_operations.dart'; // 添加消息操作工具类
@@ -12,7 +12,6 @@ import 'controllers/chat_screen_controller.dart';
 import 'widgets/chat_app_bar.dart';
 import 'widgets/message_list.dart';
 import 'widgets/message_input.dart';
-import 'dialogs/edit_message_dialog.dart';
 import 'dialogs/clear_messages_dialog.dart';
 import 'dialogs/calendar_date_picker_dialog.dart';
 import 'utils/message_list_builder.dart';

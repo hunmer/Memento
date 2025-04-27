@@ -92,6 +92,9 @@ class ChatLocalizationsZh extends ChatLocalizations {
   String get timelineComingSoon => '时间线功能 - 即将推出';
 
   @override
+  String get editProfile => '编辑个人资料';
+
+  @override
   String get today => '今天';
 
   @override

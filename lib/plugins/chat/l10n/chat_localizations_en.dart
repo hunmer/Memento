@@ -92,6 +92,9 @@ class ChatLocalizationsEn extends ChatLocalizations {
   String get timelineComingSoon => 'Timeline - Coming Soon';
 
   @override
+  String get editProfile => 'Edit Profile';
+
+  @override
   String get today => 'Today';
 
   @override

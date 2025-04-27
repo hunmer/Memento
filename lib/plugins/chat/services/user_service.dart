@@ -130,6 +130,26 @@ class UserService {
       _plugin.notifyListeners();
     }
   }
+  
+  /// 更新任意用户信息
+  Future<void> updateUser(User user) async {
+    // 如果是当前用户，则使用updateCurrentUser方法
+    if (user.id == _currentUser?.id) {
+      await updateCurrentUser(
+        username: user.username,
+        avatarPath: user.iconPath,
+      );
+      return;
+    }
+    
+    // 如果更新了头像，同时更新头像映射
+    if (user.iconPath != null) {
+      await setUserAvatar(user.username, user.iconPath!);
+    }
+    
+    // 通知监听器更新
+    _plugin.notifyListeners();
+  }
 
   // 获取头像的绝对路径
   Future<String> getAvatarPath(String relativePath) async {

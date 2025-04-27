@@ -89,6 +89,16 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             PopupMenuItem(
+              value: 'edit',
+              child: Row(
+                children: [
+                  const Icon(Icons.edit, size: 20),
+                  const SizedBox(width: 8),
+                  Text(_getLocalizedText(context, 'Edit Profile', (l) => l.editProfile ?? 'Edit Profile')),
+                ],
+              ),
+            ),
+            PopupMenuItem(
               value: 'clear',
               child: Row(
                 children: [
