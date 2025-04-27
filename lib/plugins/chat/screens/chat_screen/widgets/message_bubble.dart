@@ -53,52 +53,13 @@ class MessageBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          if (message.replyTo != null)
-            GestureDetector(
-              onTap: () => onReplyTap?.call(message.replyTo!.id),
-              child: Container(
-                margin: EdgeInsets.only(
-                  bottom: 4.0,
-                  left: isCurrentUser ? 48.0 : (showAvatar ? 48.0 : 8.0),
-                  right: isCurrentUser ? 8.0 : 48.0,
-                ),
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 50),
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 20),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      message.replyTo!.user.username,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      message.replyTo!.content,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          // 回复引用将在气泡内部显示
           Container(
             margin: EdgeInsets.only(
               left: isCurrentUser ? 48.0 : (showAvatar ? 0 : 8.0),
               right: isCurrentUser ? 8.0 : 48.0,
+              top: 8.0,     // 添加顶部间距
+              bottom: 8.0,  // 添加底部间距
             ),
             decoration: BoxDecoration(
           color: isHighlighted 
@@ -343,6 +304,41 @@ class MessageBubble extends StatelessWidget {
   Widget _buildMessageContent(BuildContext context) {
     final isCurrentUser = message.user.id == currentUserId;
 
+    // 构建回复引用组件
+    Widget? replyWidget;
+    if (message.replyTo != null) {
+      replyWidget = GestureDetector(
+        onTap: () => onReplyTap?.call(message.replyTo!.id),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "${message.replyTo!.user.username}: ${message.replyTo!.content}",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
+    }
+
     // 根据消息类型选择不同的渲染方式
     Widget content;
     switch (message.type) {
@@ -444,10 +440,25 @@ class MessageBubble extends StatelessWidget {
         );
     }
 
-    return DefaultTextStyle(
-      style: const TextStyle(fontSize: 14, height: 1.4),
-      child: content,
-    );
+    // 如果有回复引用，将其添加到消息内容上方
+    if (message.replyTo != null) {
+      return DefaultTextStyle(
+        style: const TextStyle(fontSize: 14, height: 1.4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            replyWidget!,
+            content,
+          ],
+        ),
+      );
+    } else {
+      return DefaultTextStyle(
+        style: const TextStyle(fontSize: 14, height: 1.4),
+        child: content,
+      );
+    }
   }
 
   Widget _buildDefaultAvatar() {

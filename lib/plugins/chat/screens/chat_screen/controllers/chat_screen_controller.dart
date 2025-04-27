@@ -384,6 +384,7 @@ class ChatScreenController extends ChangeNotifier {
         date: DateTime.now(),
         type: type ?? MessageType.sent,
         metadata: metadata,
+        replyTo: replyTo,
       );
 
       // 获取ChatPlugin中的频道索引
