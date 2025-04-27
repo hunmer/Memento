@@ -35,6 +35,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
   bool _isExpense = true;
   IconData _selectedIcon = Icons.shopping_cart;
   Color _selectedColor = Colors.blue;
+  DateTime _selectedDate = DateTime.now();
 
   final List<String> _availableTags = [
     '未分类',
@@ -66,6 +67,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
       _isExpense = widget.bill!.isExpense;
       _selectedIcon = widget.bill!.icon;
       _selectedColor = widget.bill!.iconColor;
+      _selectedDate = widget.bill!.createdAt;
     }
   }
 
@@ -108,6 +110,8 @@ class _BillEditScreenState extends State<BillEditScreen> {
               _buildAmountField(),
               const SizedBox(height: 16),
               _buildTagSelector(),
+              const SizedBox(height: 16),
+              _buildDateSelector(),
               const SizedBox(height: 16),
               _buildNoteField(),
               const SizedBox(height: 24),
@@ -212,6 +216,69 @@ class _BillEditScreenState extends State<BillEditScreen> {
     );
   }
 
+  Widget _buildDateSelector() {
+    return InkWell(
+      onTap: () async {
+        final DateTime? picked = await showDateTimePicker(
+          context: context,
+          initialDate: _selectedDate,
+        );
+        if (picked != null && picked != _selectedDate && mounted) {
+          setState(() {
+            _selectedDate = picked;
+          });
+        }
+      },
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          labelText: '时间',
+          border: OutlineInputBorder(),
+          prefixIcon: Icon(Icons.calendar_today),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')} '
+              '${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}',
+            ),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<DateTime?> showDateTimePicker({
+    required BuildContext context,
+    required DateTime initialDate,
+  }) async {
+    DateTime? date = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (date != null && mounted) {
+      TimeOfDay? time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(initialDate),
+      );
+
+      if (time != null) {
+        return DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
+      }
+    }
+    return null;
+  }
+
   Widget _buildNoteField() {
     return TextFormField(
       controller: _noteController,
@@ -268,7 +335,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
               icon: _selectedIcon,
               iconColor: _selectedColor,
               // 如果是编辑现有账单，保留原创建时间；如果是新建账单，使用当前时间
-              createdAt: widget.bill?.createdAt,
+              createdAt: _selectedDate,
             );
             
             // 获取当前账户的最新数据
