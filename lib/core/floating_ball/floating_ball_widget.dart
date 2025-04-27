@@ -58,7 +58,7 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
     });
 
     // 在下一帧更新上下文
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         FloatingBallService().updateContext(context);
         // 设置动作上下文

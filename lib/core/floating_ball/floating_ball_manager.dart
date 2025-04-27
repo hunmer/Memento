@@ -111,6 +111,7 @@ class FloatingBallManager {
         _actions[gesture] = ActionInfo(actionTitle, () {});
       }
     }
+    debugPrint('Loaded ${_actions.length} saved actions');
   }
 
   // 保存动作
@@ -270,33 +271,54 @@ class FloatingBallManager {
     }
   }
 
-  // 初始化默认动作
-  void initDefaultActions(BuildContext context) {
-    registerAction(FloatingBallGesture.swipeUp, '显示上滑提示', () {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('上滑')));
-    });
-    registerAction(FloatingBallGesture.swipeDown, '显示下滑提示', () {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('下滑')));
-    });
-    registerAction(FloatingBallGesture.swipeLeft, '显示左滑提示', () {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('左滑')));
-    });
-    registerAction(FloatingBallGesture.swipeRight, '显示右滑提示', () {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('右滑')));
-    });
-    registerAction(FloatingBallGesture.tap, '显示单击提示', () {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('单击')));
-    });
-    // 移除双击默认动作
+  // 初始化默认动作 - 只有在没有保存的动作时才设置默认动作
+  Future<void> initDefaultActions(BuildContext context) async {
+    // 等待加载保存的动作完成
+    await _prefs;
+    
+    // 检查每个手势是否已有保存的动作，如果没有才设置默认动作
+    for (var gesture in FloatingBallGesture.values) {
+      if (!_actions.containsKey(gesture)) {
+        switch (gesture) {
+          case FloatingBallGesture.swipeUp:
+            registerAction(gesture, '显示上滑提示', () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('上滑')),
+              );
+            });
+            break;
+          case FloatingBallGesture.swipeDown:
+            registerAction(gesture, '显示下滑提示', () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('下滑')),
+              );
+            });
+            break;
+          case FloatingBallGesture.swipeLeft:
+            registerAction(gesture, '显示左滑提示', () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('左滑')),
+              );
+            });
+            break;
+          case FloatingBallGesture.swipeRight:
+            registerAction(gesture, '显示右滑提示', () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('右滑')),
+              );
+            });
+            break;
+          case FloatingBallGesture.tap:
+            registerAction(gesture, '显示单击提示', () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('单击')),
+              );
+            });
+            break;
+        }
+      }
+    }
+    
+    debugPrint('Initialized default actions for gestures without saved actions');
   }
 }

@@ -20,10 +20,10 @@ class FloatingBallService {
   Stream<double> get sizeChangeStream => _sizeChangeController.stream;
 
   /// 初始化悬浮球
-  void initialize(BuildContext context) {
+  Future<void> initialize(BuildContext context) async {
     if (_isInitialized) return;
 
-    _manager.initDefaultActions(context);
+    await _manager.initDefaultActions(context);
     _manager.setActionContext(context);
     _isInitialized = true;
   }
