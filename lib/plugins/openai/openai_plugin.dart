@@ -6,6 +6,7 @@ import '../../core/config_manager.dart';
 import 'screens/agent_list_screen.dart';
 import 'models/service_provider.dart';
 import 'controllers/agent_controller.dart';
+import 'screens/provider_settings_screen.dart';
 
 class OpenAIPlugin extends BasePlugin {
   @override
@@ -32,41 +33,6 @@ class OpenAIPlugin extends BasePlugin {
 
   @override
   Future<void> initializeDefaultData() async {
-    final defaultProviders = [
-      ServiceProvider(
-        name: 'OpenAI',
-        apiKey: '',
-        baseUrl: 'https://api.openai.com/v1',
-        headers: {'Authorization': 'Bearer '},
-      ),
-      ServiceProvider(
-        name: 'Ollama',
-        apiKey: '',
-        baseUrl: 'http://localhost:11434',
-        headers: {},
-      ),
-      ServiceProvider(
-        name: 'DeepSeek',
-        apiKey: '',
-        baseUrl: 'https://api.deepseek.com/v1',
-        headers: {'api-key': ''},
-      ),
-    ];
-
-    final storage = storageManager;
-    // 确保目录存在
-    await storage.createDirectory(storageDir);
-
-    final providersData = await storage.read('$storageDir/providers.json');
-    if (providersData.isEmpty) {
-      // 将提供商列表转换为 Map 列表
-      final providersMap = defaultProviders.map((p) => p.toJson()).toList();
-      // 写入文件
-      await storage.write('$storageDir/providers.json', {
-        'providers': providersMap,
-      });
-    }
-
     // 确保 agents.json 文件存在并初始化默认智能体
     try {
       final agentData = await storage.read('$storageDir/agents.json');
@@ -167,6 +133,11 @@ class OpenAIPlugin extends BasePlugin {
   @override
   Widget buildMainView(BuildContext context) {
     return const AgentListScreen();
+  }
+
+  @override
+  Widget buildSettingsView(BuildContext context) {
+    return const ProviderSettingsScreen();
   }
 
   @override

@@ -1,35 +1,43 @@
 class ServiceProvider {
-  final String name;
-  final String apiKey;
-  final String baseUrl;
-  final Map<String, String> headers;
-  final Map<String, dynamic> config;
+  String id;
+  String label;
+  String baseUrl;
+  Map<String, String> headers;
 
-  const ServiceProvider({
-    required this.name,
-    required this.apiKey,
-    this.baseUrl = 'https://api.openai.com/v1',
-    this.headers = const {},
-    this.config = const {},
-  });
+  ServiceProvider({
+    required this.id,
+    required this.label,
+    required this.baseUrl,
+    Map<String, String>? headers,
+  }) : headers = headers ?? {};
 
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'apiKey': apiKey,
-    'baseUrl': baseUrl,
-    'headers': headers,
-    'config': config,
-  };
+  // 从JSON构造
+  factory ServiceProvider.fromJson(Map<String, dynamic> json) {
+    return ServiceProvider(
+      id: json['id'] as String,
+      label: json['label'] as String,
+      baseUrl: json['baseUrl'] as String,
+      headers: Map<String, String>.from(json['headers'] as Map),
+    );
+  }
 
-  factory ServiceProvider.fromJson(Map<String, dynamic> json) =>
-      ServiceProvider(
-        name: json['name'] as String,
-        apiKey: json['apiKey'] as String,
-        baseUrl: json['baseUrl'] as String? ?? 'https://api.openai.com/v1',
-        headers:
-            (json['headers'] as Map<String, dynamic>?)
-                ?.cast<String, String>() ??
-            {},
-        config: json['config'] as Map<String, dynamic>? ?? {},
-      );
+  // 转换为JSON
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'label': label, 'baseUrl': baseUrl, 'headers': headers};
+  }
+
+  // 复制对象并修改指定字段
+  ServiceProvider copyWith({
+    String? id,
+    String? label,
+    String? baseUrl,
+    Map<String, String>? headers,
+  }) {
+    return ServiceProvider(
+      id: id ?? this.id,
+      label: label ?? this.label,
+      baseUrl: baseUrl ?? this.baseUrl,
+      headers: headers ?? Map<String, String>.from(this.headers),
+    );
+  }
 }

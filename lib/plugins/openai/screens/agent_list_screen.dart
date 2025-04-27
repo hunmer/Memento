@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../controllers/agent_controller.dart';
 import '../widgets/agent_list_view.dart';
@@ -67,7 +68,7 @@ class _AgentListScreenState extends State<AgentListScreen>
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => PluginManager.toHomeScreen(context),
         ),
         title: const Text('AI Assistant'),
         actions: [

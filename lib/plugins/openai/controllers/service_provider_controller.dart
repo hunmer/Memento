@@ -32,7 +32,7 @@ class ServiceProviderController {
     await loadProviders();
 
     // Update or add the provider
-    final index = providers.indexWhere((p) => p.name == provider.name);
+    final index = providers.indexWhere((p) => p.label == provider.label);
     if (index >= 0) {
       providers[index] = provider;
     } else {
@@ -51,7 +51,7 @@ class ServiceProviderController {
     final plugin = PluginManager.instance.getPlugin('openai');
     if (plugin == null) return;
 
-    providers.removeWhere((provider) => provider.name == providerName);
+    providers.removeWhere((provider) => provider.label == providerName);
     final List<Map<String, dynamic>> providersJson =
         providers.map((p) => p.toJson()).toList();
     await plugin.storage.write('${plugin.storageDir}/providers.json', {
