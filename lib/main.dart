@@ -21,6 +21,7 @@ import 'plugins/nodes/nodes_plugin.dart'; // 笔记插件
 import 'plugins/notes/notes_plugin.dart'; // Notes插件
 import 'plugins/goods/goods_plugin.dart'; // 物品插件
 import 'plugins/bill/bill_plugin.dart'; // 账单插件
+import 'plugins/openai/openai_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 
 // 全局单例实例
@@ -64,6 +65,7 @@ void main() async {
       NotesPlugin(), // 添加Notes插件
       GoodsPlugin.instance, // 添加物品插件
       BillPlugin(), // 添加账单插件
+      OpenAIPlugin(), // 添加OpenAI插件
     ];
 
     // 遍历并注册插件

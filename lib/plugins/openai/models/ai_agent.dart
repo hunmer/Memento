@@ -1,0 +1,55 @@
+class Prompt {
+  String type;
+  String content;
+
+  Prompt({required this.type, required this.content});
+
+  Map<String, dynamic> toJson() => {'type': type, 'content': content};
+
+  factory Prompt.fromJson(Map<String, dynamic> json) =>
+      Prompt(type: json['type'] as String, content: json['content'] as String);
+}
+
+class AIAgent {
+  final String id;
+  final String name;
+  final String description;
+  final String systemPrompt;
+  final List<String> tags;
+  final String type;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const AIAgent({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.systemPrompt,
+    required this.tags,
+    required this.type,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'description': description,
+    'systemPrompt': systemPrompt,
+    'tags': tags,
+    'type': type,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
+
+  factory AIAgent.fromJson(Map<String, dynamic> json) => AIAgent(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    description: json['description'] as String,
+    systemPrompt: json['systemPrompt'] as String,
+    tags: (json['tags'] as List).cast<String>(),
+    type: json['type'] as String,
+    createdAt: DateTime.parse(json['createdAt'] as String),
+    updatedAt: DateTime.parse(json['updatedAt'] as String),
+  );
+}
