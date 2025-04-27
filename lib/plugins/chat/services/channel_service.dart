@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import '../models/channel.dart';
 import '../models/message.dart';
 import '../models/user.dart';
@@ -126,6 +127,20 @@ class ChannelService {
     final channel = _channels.firstWhere((c) => c.id == channelId);
     final updatedChannel = channel.copyWith(backgroundColor: color);
     await saveChannel(updatedChannel);
+  }
+
+  // 更新频道背景
+  Future<Channel> updateChannelBackground(String channelId, String backgroundPath) async {
+    String normalizedPath = backgroundPath;
+    if (normalizedPath.startsWith('./')) {
+      String pathWithoutPrefix = normalizedPath.substring(2);
+      List<String> components = pathWithoutPrefix.split(RegExp(r'[/\\]'));
+      normalizedPath = './' + components.join('/');
+    }
+    final channel = _channels.firstWhere((c) => c.id == channelId);
+    final updatedChannel = channel.copyWith(backgroundPath: normalizedPath);
+    await saveChannel(updatedChannel);
+    return updatedChannel;
   }
 
   // 更新频道固定符号

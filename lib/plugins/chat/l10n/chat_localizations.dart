@@ -76,6 +76,7 @@ abstract class ChatLocalizations {
   String get cancel;
   String get reset;
   String get apply;
+  String get setBackground;
   
   String minutesAgo(int minutes);
   String hoursAgo(int hours);

@@ -15,6 +15,7 @@ class Channel {
   List<String> groups; // 频道所属的组，可以属于多个组
   String? fixedSymbol; // 频道的固定符号
   String? draft; // 频道的草稿内容
+  String? backgroundPath; // 频道背景图片路径
   Message? _lastMessage; // 最后一条消息的缓存
 
   Channel({
@@ -28,6 +29,7 @@ class Channel {
     this.groups = const [], // 默认为空列表，表示不属于任何组
     this.fixedSymbol,
     this.draft,
+    this.backgroundPath,
     Message? lastMessage,
   }) : lastMessageTime =
            messages.isNotEmpty ? messages.last.date : DateTime.now() {
@@ -62,6 +64,7 @@ class Channel {
     List<String>? groups,
     String? fixedSymbol,
     String? draft,
+    String? backgroundPath,
     Message? lastMessage,
   }) {
     return Channel(
@@ -75,6 +78,7 @@ class Channel {
       groups: groups ?? this.groups,
       fixedSymbol: fixedSymbol ?? this.fixedSymbol,
       draft: draft ?? this.draft,
+      backgroundPath: backgroundPath ?? this.backgroundPath,
       lastMessage: lastMessage ?? _lastMessage,
     );
   }
@@ -92,6 +96,7 @@ class Channel {
       'priority': priority,
       'groups': groups,
       'fixedSymbol': fixedSymbol,
+      'backgroundPath': backgroundPath,
       'lastMessageTime': lastMessageTime.toIso8601String(),
     };
   }
@@ -134,7 +139,7 @@ class Channel {
               ? List<String>.from(json['groups'] as List<dynamic>)
               : const [],
       fixedSymbol: json['fixedSymbol'] as String?,
-      lastMessage: messages.isNotEmpty ? messages.last : null,
+      backgroundPath: json['backgroundPath'] as String?,
     );
   }
 }

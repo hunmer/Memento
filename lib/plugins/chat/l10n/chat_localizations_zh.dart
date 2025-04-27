@@ -148,4 +148,7 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String get apply => '应用';
+  
+  @override
+  String get setBackground => '设置背景';
 }

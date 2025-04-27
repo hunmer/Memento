@@ -1,5 +1,7 @@
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io'; // 添加File类支持
 import '../../models/channel.dart';
 import '../../models/message.dart';
 import '../../chat_plugin.dart';
@@ -37,6 +39,8 @@ class _ChatScreenState extends State<ChatScreen> {
   late ChatScreenController _controller;
   late MessageOperations _messageOperations;
   Message? _replyToMessage; // 添加回复消息引用
+  String? _backgroundPath; // 存储背景图片的绝对路径
+  bool _isLoadingBackground = true; // 标记背景图片是否正在加载
 
   @override
   void initState() {
@@ -48,8 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
       highlightMessage: widget.highlightMessage,
       autoScroll: widget.autoScroll,
     );
-
-    // 加载频道草稿
+    _loadBackgroundPath(); 
     _loadChannelDraft();
   }
 
@@ -146,17 +149,18 @@ class _ChatScreenState extends State<ChatScreen> {
   void _showClearConfirmationDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => ClearMessagesDialog(
-            onConfirm: () async {
-              await _controller.clearMessages();
-              _updateMessages(); // 更新消息列表
-              Navigator.of(context).pop();
-            },
-            onCancel: () {
-              Navigator.of(context).pop();
-            },
-          ),
+      builder: (context) => ClearMessagesDialog(
+        onConfirm: () async {
+          await _controller.clearMessages();
+          if (mounted) {
+            _updateMessages(); // 更新消息列表
+            Navigator.of(context).pop();
+          }
+        },
+        onCancel: () {
+          Navigator.of(context).pop();
+        },
+      ),
     );
   }
 
@@ -270,146 +274,212 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  // 加载背景图片路径
+  Future<void> _loadBackgroundPath() async {
+    if (widget.channel.backgroundPath == null) {
+      setState(() {
+        _backgroundPath = null;
+        _isLoadingBackground = false;
+      });
+      return;
+    }
+
+    try {
+      final absolutePath = await PathUtils.toAbsolutePath(widget.channel.backgroundPath!);
+      if (mounted) {
+        setState(() {
+          _backgroundPath = absolutePath;
+          _isLoadingBackground = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading background path: $e');
+      if (mounted) {
+        setState(() {
+          _backgroundPath = null;
+          _isLoadingBackground = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return FutureBuilder<List<dynamic>>(
-          future: MessageListBuilder.buildMessageListWithDateSeparators(
-            _controller.messages,
-            _controller.selectedDate,
-          ),
-          builder: (context, snapshot) {
-            final messageItems = snapshot.data ?? [];
-
-            return Scaffold(
-              appBar: ChatAppBar(
-                channel: widget.channel,
-                isMultiSelectMode: _controller.isMultiSelectMode,
-                selectedCount: _controller.selectedMessageIds.length,
-                onShowDatePicker: _showDatePickerDialog,
-                onShowChannelInfo: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) =>
-                              ChannelInfoScreen(channel: widget.channel),
-                    ),
-                  );
-                },
-                onCopySelected: _copySelectedMessages,
-                onDeleteSelected: _deleteSelectedMessages,
-                onShowClearConfirmation: _showClearConfirmationDialog,
-                onExitMultiSelect: _controller.toggleMultiSelectMode,
-                onEnterMultiSelect: _controller.toggleMultiSelectMode,
-              ),
-              body: Column(
-                children: [
-                  if (_replyToMessage != null)
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                border: Border(
-                  top: BorderSide(
-                    color: Theme.of(context).colorScheme.outline.withAlpha(51), // 0.2 * 255 = 51
-                  ),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '回复 ${_replyToMessage!.user.username}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _replyToMessage!.content,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: _clearReply,
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
-                    ),
-                  ),
-                ],
-              ),
+    // 使用已加载的背景路径构建UI
+    return _buildMainUI(_backgroundPath);
+  }
+  
+  // 构建主UI，接收可选的背景路径参数
+  Widget _buildMainUI(String? backgroundPath) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // 背景层
+          if (backgroundPath != null && !_isLoadingBackground)
+            Builder(
+              builder: (context) {
+                final file = File(backgroundPath);
+                if (!file.existsSync()) {
+                  debugPrint('Background image file does not exist: $backgroundPath');
+                  return const SizedBox.shrink();
+                }
+                return Image.file(
+                  file,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  errorBuilder: (context, error, stackTrace) {
+                    debugPrint('Error loading background image: $error');
+                    return const SizedBox.shrink();
+                  },
+                );
+              },
             ),
-          Expanded(
-            child: MessageList(
-                      items: messageItems,
-                      isMultiSelectMode: _controller.isMultiSelectMode,
-                      selectedMessageIds: _controller.selectedMessageIds,
-                      onMessageEdit: _showEditDialog,
-                      onMessageDelete: _deleteMessage,
-                      onMessageCopy: _copyMessageToClipboard,
-                      onSetFixedSymbol: _setFixedSymbol,
-                      onSetBubbleColor: _setBubbleColor,
-                      onToggleMessageSelection:
-                          _controller.toggleMessageSelection,
-                      scrollController: _controller.scrollController,
-                      onAvatarTap: _navigateToUserProfile,
-                      showAvatar: ChatPlugin.instance.settingsService.showAvatarInChat,
-                      currentUserId:
-                          ChatPlugin.instance.isInitialized
-                              ? ChatPlugin.instance.userService.currentUser.id
-                              : '',
-                      highlightedMessage: _controller.highlightMessage,
-                      shouldHighlight: _controller.highlightMessage != null,
-                      onReply: _handleReply,
-                      onReplyTap: _handleReplyTap,
+          // 半透明遮罩层
+          if (backgroundPath != null && !_isLoadingBackground)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+            ),
+          // 加载指示器
+          if (_isLoadingBackground)
+            const Center(child: CircularProgressIndicator()),
+          // 内容层
+          FutureBuilder<List<dynamic>>(
+            future: MessageListBuilder.buildMessageListWithDateSeparators(
+              _controller.messages,
+              _controller.selectedDate,
+            ),
+            builder: (context, snapshot) {
+              final messageItems = snapshot.data ?? [];
+
+              return Scaffold(
+                appBar: ChatAppBar(
+                  channel: widget.channel,
+                  isMultiSelectMode: _controller.isMultiSelectMode,
+                  selectedCount: _controller.selectedMessageIds.length,
+                  onShowDatePicker: _showDatePickerDialog,
+                  onShowChannelInfo: () {
+                    if (mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChannelInfoScreen(channel: widget.channel),
+                        ),
+                      );
+                    }
+                  },
+                  onCopySelected: _copySelectedMessages,
+                  onDeleteSelected: _deleteSelectedMessages,
+                  onShowClearConfirmation: _showClearConfirmationDialog,
+                  onExitMultiSelect: _controller.toggleMultiSelectMode,
+                  onEnterMultiSelect: _controller.toggleMultiSelectMode,
+                ),
+                body: Column(
+                  children: [
+                    if (_replyToMessage != null)
+                      Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          border: Border(
+                            top: BorderSide(
+                              color: Theme.of(context).colorScheme.outline.withAlpha(51),
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '回复 ${_replyToMessage!.user.username}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _replyToMessage!.content,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: _clearReply,
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    Expanded(
+                      child: MessageList(
+                        items: messageItems,
+                        isMultiSelectMode: _controller.isMultiSelectMode,
+                        selectedMessageIds: _controller.selectedMessageIds,
+                        onMessageEdit: _showEditDialog,
+                        onMessageDelete: _deleteMessage,
+                        onMessageCopy: _copyMessageToClipboard,
+                        onSetFixedSymbol: _setFixedSymbol,
+                        onSetBubbleColor: _setBubbleColor,
+                        onToggleMessageSelection: _controller.toggleMessageSelection,
+                        scrollController: _controller.scrollController,
+                        onAvatarTap: _navigateToUserProfile,
+                        showAvatar: ChatPlugin.instance.settingsService.showAvatarInChat,
+                        currentUserId: ChatPlugin.instance.isInitialized
+                            ? ChatPlugin.instance.userService.currentUser.id
+                            : '',
+                        highlightedMessage: _controller.highlightMessage,
+                        shouldHighlight: _controller.highlightMessage != null,
+                        onReply: _handleReply,
+                        onReplyTap: _handleReplyTap,
+                      ),
                     ),
-                  ),
-                  MessageInput(
-            controller: _controller.draftController,
-            onSendMessage: (content, {metadata, type, replyTo}) {
-              _controller.sendMessage(
-                content,
-                metadata: metadata,
-                type: type,
-                replyTo: _replyToMessage,
+                    MessageInput(
+                      controller: _controller.draftController,
+                      onSendMessage: (content, {metadata, type, replyTo}) {
+                        _controller.sendMessage(
+                          content,
+                          metadata: metadata,
+                          type: type,
+                          replyTo: _replyToMessage,
+                        );
+                        // 发送后清除回复状态
+                        if (_replyToMessage != null) {
+                          setState(() {
+                            _replyToMessage = null;
+                          });
+                        }
+                      },
+                      onSaveDraft: _controller.saveDraft,
+                      replyTo: _replyToMessage,
+                      focusNode: _controller.focusNode,
+                    ),
+                  ],
+                ),
               );
-              // 发送后清除回复状态
-              if (_replyToMessage != null) {
-                setState(() {
-                  _replyToMessage = null;
-                });
-              }
-            },
-            onSaveDraft: _controller.saveDraft,
-            replyTo: _replyToMessage,
-            focusNode: _controller.focusNode,
+            }
           ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+        ]
+      ),
     );
   }
 }

@@ -148,4 +148,7 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String get apply => 'Apply';
+  
+  @override
+  String get setBackground => 'Set Background';
 }

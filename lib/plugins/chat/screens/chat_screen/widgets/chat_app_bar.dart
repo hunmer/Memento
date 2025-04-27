@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
 import '../../../models/channel.dart';
 import '../../../l10n/chat_localizations.dart';
+import '../../../chat_plugin.dart';
+import '../../../../../widgets/image_picker_dialog.dart';
+import '../../../../../utils/image_utils.dart';
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Channel channel;
@@ -89,16 +94,6 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  const Icon(Icons.edit, size: 20),
-                  const SizedBox(width: 8),
-                  Text(_getLocalizedText(context, 'Edit Profile', (l) => l.editProfile ?? 'Edit Profile')),
-                ],
-              ),
-            ),
-            PopupMenuItem(
               value: 'clear',
               child: Row(
                 children: [
@@ -108,8 +103,18 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ],
               ),
             ),
+            PopupMenuItem(
+              value: 'background',
+              child: Row(
+                children: [
+                  const Icon(Icons.wallpaper, size: 20),
+                  const SizedBox(width: 8),
+                  Text(_getLocalizedText(context, 'Set Background', (l) => l.setBackground)),
+                ],
+              ),
+            ),
           ],
-          onSelected: (value) {
+          onSelected: (value) async {
             switch (value) {
               case 'multiselect':
                 onEnterMultiSelect();
@@ -119,6 +124,29 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 break;
               case 'clear':
                 onShowClearConfirmation();
+                break;
+              case 'background':
+                final result = await showDialog(
+                  context: context,
+                  builder: (context) => ImagePickerDialog(
+                    saveDirectory: path.join('chat', 'backgrounds'),
+                    enableCrop: true,
+                    cropAspectRatio: 9 / 16, // 竖屏比例
+                  ),
+                );
+                if (result != null && result is Map<String, dynamic>) {
+                  // 直接使用result中返回的url路径
+                  if (result.containsKey('url') && result['url'] != null) {
+                    // 更新频道背景
+                    final updatedChannel = await ChatPlugin.instance.channelService.updateChannelBackground(
+                      channel.id,
+                      result['url'], // 直接使用返回的url
+                    );
+                    
+                    // 打印日志以便调试
+                    debugPrint('背景图片已更新: ${result['url']}');
+                  }
+                }
                 break;
             }
           },
