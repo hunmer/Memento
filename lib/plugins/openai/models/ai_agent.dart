@@ -16,7 +16,9 @@ class AIAgent {
   final String description;
   final String systemPrompt;
   final List<String> tags;
-  final String type;
+  final String serviceProviderId;
+  final String baseUrl;
+  final Map<String, String> headers;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -26,7 +28,9 @@ class AIAgent {
     required this.description,
     required this.systemPrompt,
     required this.tags,
-    required this.type,
+    required this.serviceProviderId,
+    required this.baseUrl,
+    required this.headers,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -37,7 +41,9 @@ class AIAgent {
     'description': description,
     'systemPrompt': systemPrompt,
     'tags': tags,
-    'type': type,
+    'serviceProviderId': serviceProviderId,
+    'baseUrl': baseUrl,
+    'headers': headers,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };
@@ -48,7 +54,9 @@ class AIAgent {
     description: json['description'] as String,
     systemPrompt: json['systemPrompt'] as String,
     tags: (json['tags'] as List).cast<String>(),
-    type: json['type'] as String,
+    serviceProviderId: json['serviceProviderId'] as String,
+    baseUrl: json['baseUrl'] as String,
+    headers: Map<String, String>.from(json['headers'] as Map),
     createdAt: DateTime.parse(json['createdAt'] as String),
     updatedAt: DateTime.parse(json['updatedAt'] as String),
   );

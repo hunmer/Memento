@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/ai_agent.dart';
+import '../models/service_provider.dart';
 import '../controllers/agent_controller.dart';
+import '../controllers/provider_controller.dart';
 import '../services/test_service.dart';
 
 class AgentEditScreen extends StatefulWidget {
@@ -17,29 +19,104 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _promptController = TextEditingController();
-  String _selectedType = 'Assistant';
+  final _baseUrlController = TextEditingController();
+  final _headersController = TextEditingController();
+  String _selectedProviderId = '';
   final List<String> _tags = [];
   final _tagController = TextEditingController();
 
-  final List<String> _agentTypes = [
-    'Assistant',
-    'Translator',
-    'Writer',
-    'Analyst',
-    'Developer',
-    'Custom',
-  ];
+  List<ServiceProvider> _providers = [];
+  bool _isLoadingProviders = true;
 
   @override
   void initState() {
     super.initState();
+    _loadProviders();
     if (widget.agent != null) {
       _nameController.text = widget.agent!.name;
       _descriptionController.text = widget.agent!.description;
       _promptController.text = widget.agent!.systemPrompt;
-      _selectedType = widget.agent!.type;
+      _selectedProviderId = widget.agent!.serviceProviderId;
+      _baseUrlController.text = widget.agent!.baseUrl;
+      _headersController.text = _formatHeaders(widget.agent!.headers);
       _tags.addAll(widget.agent!.tags);
     }
+  }
+
+  Future<void> _loadProviders() async {
+    setState(() {
+      _isLoadingProviders = true;
+    });
+
+    try {
+      final providerController = ProviderController();
+      _providers = await providerController.getProviders();
+
+      if (_providers.isNotEmpty && _selectedProviderId.isEmpty) {
+        _selectedProviderId = _providers.first.id;
+        _updateProviderFields(_providers.first);
+      } else if (_selectedProviderId.isNotEmpty) {
+        final provider = _providers.firstWhere(
+          (p) => p.id == _selectedProviderId,
+          orElse:
+              () =>
+                  _providers.isNotEmpty
+                      ? _providers.first
+                      : ServiceProvider(
+                        id: 'default',
+                        label: 'Default',
+                        baseUrl: '',
+                        headers: {},
+                      ),
+        );
+        _selectedProviderId = provider.id;
+        if (widget.agent == null) {
+          _updateProviderFields(provider);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('加载服务商失败: $e')));
+      }
+    } finally {
+      setState(() {
+        _isLoadingProviders = false;
+      });
+    }
+  }
+
+  void _updateProviderFields(ServiceProvider provider) {
+    setState(() {
+      _baseUrlController.text = provider.baseUrl;
+      _headersController.text = _formatHeaders(provider.headers);
+    });
+  }
+
+  String _formatHeaders(Map<String, String> headers) {
+    return headers.entries.map((e) => '${e.key}: ${e.value}').join('\n');
+  }
+
+  Map<String, String> _parseHeaders(String headersText) {
+    final Map<String, String> result = {};
+    final lines = headersText.split('\n');
+
+    for (var line in lines) {
+      line = line.trim();
+      if (line.isEmpty) continue;
+
+      final colonIndex = line.indexOf(':');
+      if (colonIndex > 0) {
+        final key = line.substring(0, colonIndex).trim();
+        final value = line.substring(colonIndex + 1).trim();
+        if (key.isNotEmpty) {
+          result[key] = value;
+        }
+      }
+    }
+
+    return result;
   }
 
   void _addTag() {
@@ -67,7 +144,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       id: widget.agent?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       name: _nameController.text,
       description: _descriptionController.text,
-      type: _selectedType,
+      serviceProviderId: _selectedProviderId,
+      baseUrl: _baseUrlController.text,
+      headers: _parseHeaders(_headersController.text),
       systemPrompt: _promptController.text,
       tags: _tags,
       createdAt: widget.agent?.createdAt ?? DateTime.now(),
@@ -121,24 +200,39 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedType,
-              decoration: const InputDecoration(labelText: 'Type'),
-              items:
-                  _agentTypes
-                      .map(
-                        (type) =>
-                            DropdownMenuItem(value: type, child: Text(type)),
-                      )
-                      .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedType = value;
-                  });
-                }
-              },
-            ),
+            _isLoadingProviders
+                ? const Center(child: CircularProgressIndicator())
+                : DropdownButtonFormField<String>(
+                  value:
+                      _selectedProviderId.isEmpty && _providers.isNotEmpty
+                          ? _providers.first.id
+                          : _selectedProviderId,
+                  decoration: const InputDecoration(labelText: '服务商'),
+                  items:
+                      _providers.map((provider) {
+                        return DropdownMenuItem(
+                          value: provider.id,
+                          child: Text(provider.label),
+                        );
+                      }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedProviderId = value;
+                        final provider = _providers.firstWhere(
+                          (p) => p.id == value,
+                        );
+                        _updateProviderFields(provider);
+                      });
+                    }
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请选择服务商';
+                    }
+                    return null;
+                  },
+                ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _descriptionController,
@@ -168,6 +262,29 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                 }
                 return null;
               },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _baseUrlController,
+              decoration: const InputDecoration(
+                labelText: 'Base URL',
+                hintText: 'Enter base URL for API calls',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a base URL';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _headersController,
+              decoration: const InputDecoration(
+                labelText: 'Headers',
+                hintText: 'Enter headers (one per line, format: key: value)',
+              ),
+              maxLines: 3,
             ),
             const SizedBox(height: 16),
             Row(
@@ -222,7 +339,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       id: 'test',
       name: _nameController.text,
       description: _descriptionController.text,
-      type: _selectedType,
+      serviceProviderId: _selectedProviderId,
+      baseUrl: _baseUrlController.text,
+      headers: _parseHeaders(_headersController.text),
       systemPrompt: _promptController.text,
       tags: _tags,
       createdAt: DateTime.now(),
@@ -260,6 +379,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     _nameController.dispose();
     _descriptionController.dispose();
     _promptController.dispose();
+    _baseUrlController.dispose();
+    _headersController.dispose();
     _tagController.dispose();
     super.dispose();
   }

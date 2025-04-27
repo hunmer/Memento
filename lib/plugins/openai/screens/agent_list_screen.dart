@@ -19,7 +19,7 @@ class _AgentListScreenState extends State<AgentListScreen>
   late TabController _tabController;
   final AgentController _controller = AgentController();
   bool _isGridView = true;
-  Set<String> _selectedTypes = {};
+  Set<String> _selectedProviders = {};
   Set<String> _selectedTags = {};
 
   @override
@@ -39,11 +39,11 @@ class _AgentListScreenState extends State<AgentListScreen>
       context: context,
       builder:
           (context) => FilterDialog(
-            selectedTypes: _selectedTypes,
+            selectedProviders: _selectedProviders,
             selectedTags: _selectedTags,
-            onApply: (types, tags) {
+            onApply: (providers, tags) {
               setState(() {
-                _selectedTypes = types;
+                _selectedProviders = providers;
                 _selectedTags = tags;
               });
             },
@@ -53,12 +53,13 @@ class _AgentListScreenState extends State<AgentListScreen>
 
   List<AIAgent> _getFilteredAgents() {
     return _controller.agents.where((agent) {
-      bool typeMatch =
-          _selectedTypes.isEmpty || _selectedTypes.contains(agent.type);
+      bool providerMatch =
+          _selectedProviders.isEmpty ||
+          _selectedProviders.contains(agent.serviceProviderId);
       bool tagMatch =
           _selectedTags.isEmpty ||
           agent.tags.any((tag) => _selectedTags.contains(tag));
-      return typeMatch && tagMatch;
+      return providerMatch && tagMatch;
     }).toList();
   }
 

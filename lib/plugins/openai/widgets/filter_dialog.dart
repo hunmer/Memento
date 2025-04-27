@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import '../controllers/agent_controller.dart';
+import '../controllers/provider_controller.dart';
 
 class FilterDialog extends StatefulWidget {
-  final Set<String> selectedTypes;
+  final Set<String> selectedProviders;
   final Set<String> selectedTags;
-  final Function(Set<String> types, Set<String> tags) onApply;
+  final Function(Set<String> providers, Set<String> tags) onApply;
 
   const FilterDialog({
     super.key,
-    required this.selectedTypes,
+    required this.selectedProviders,
     required this.selectedTags,
     required this.onApply,
   });
@@ -18,23 +19,25 @@ class FilterDialog extends StatefulWidget {
 }
 
 class _FilterDialogState extends State<FilterDialog> {
-  late Set<String> _selectedTypes;
+  late Set<String> _selectedProviders;
   late Set<String> _selectedTags;
   final AgentController _controller = AgentController();
+  final ProviderController _providerController = ProviderController();
   List<String> _allTags = [];
-  List<String> _allTypes = [];
+  List<String> _allProviders = [];
 
   @override
   void initState() {
     super.initState();
-    _selectedTypes = Set.from(widget.selectedTypes);
+    _selectedProviders = Set.from(widget.selectedProviders);
     _selectedTags = Set.from(widget.selectedTags);
     _loadData();
   }
 
   Future<void> _loadData() async {
     _allTags = await _controller.getAllTags();
-    _allTypes = _controller.getTypes();
+    final providers = await _providerController.getProviders();
+    _allProviders = providers.map((p) => p.id).toList();
     setState(() {});
   }
 
@@ -48,25 +51,22 @@ class _FilterDialogState extends State<FilterDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Agent Types',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const Text('服务商', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children:
-                  _allTypes.map((type) {
+                  _allProviders.map((provider) {
                     return FilterChip(
-                      label: Text(type),
-                      selected: _selectedTypes.contains(type),
+                      label: Text(provider),
+                      selected: _selectedProviders.contains(provider),
                       onSelected: (selected) {
                         setState(() {
                           if (selected) {
-                            _selectedTypes.add(type);
+                            _selectedProviders.add(provider);
                           } else {
-                            _selectedTypes.remove(type);
+                            _selectedProviders.remove(provider);
                           }
                         });
                       },
@@ -106,7 +106,7 @@ class _FilterDialogState extends State<FilterDialog> {
         ),
         TextButton(
           onPressed: () {
-            widget.onApply(_selectedTypes, _selectedTags);
+            widget.onApply(_selectedProviders, _selectedTags);
             Navigator.pop(context);
           },
           child: const Text('Apply'),

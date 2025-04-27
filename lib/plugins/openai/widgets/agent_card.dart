@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/ai_agent.dart';
+import '../models/service_provider.dart';
+import '../controllers/provider_controller.dart';
 import '../screens/agent_edit_screen.dart';
 
 class AgentCard extends StatelessWidget {
@@ -44,7 +46,7 @@ class AgentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Type: ${agent.type}',
+                    '服务商: ${agent.serviceProviderId}',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -64,22 +66,20 @@ class AgentCard extends StatelessWidget {
     return Icon(
       Icons.smart_toy, // Default icon
       size: 64,
-      color: _getColorForAgentType(agent.type),
+      color: _getColorForServiceProvider(agent.serviceProviderId),
     );
   }
 
-  Color _getColorForAgentType(String type) {
-    switch (type) {
-      case 'Assistant':
-        return Colors.blue;
-      case 'Translator':
+  Color _getColorForServiceProvider(String providerId) {
+    switch (providerId) {
+      case 'openai':
         return Colors.green;
-      case 'Writer':
-        return Colors.purple;
-      case 'Analyst':
+      case 'azure':
+        return Colors.blue;
+      case 'ollama':
         return Colors.orange;
-      case 'Developer':
-        return Colors.teal;
+      case 'deepseek':
+        return Colors.purple;
       default:
         return Colors.grey;
     }
