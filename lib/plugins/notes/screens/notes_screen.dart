@@ -147,7 +147,11 @@ class _NotesScreenState extends State<NotesScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () =>  _currentFolder?.parentId != null ? _navigateBack : PluginManager.toHomeScreen(context),
+          onPressed:
+              () =>
+                  _currentFolder?.parentId != null
+                      ? _navigateBack()
+                      : PluginManager.toHomeScreen(context),
         ),
         title:
             _isSearching
