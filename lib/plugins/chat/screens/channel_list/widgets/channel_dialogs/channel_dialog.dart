@@ -12,6 +12,8 @@ class ChannelDialog extends StatefulWidget {
   final Future<void> Function(Channel)? onAddChannel;
   // 更新频道的回调
   final Function(Channel)? onUpdateChannel;
+  // 默认的频道分组
+  final String? defaultGroup;
 
   const ChannelDialog({
     super.key,
@@ -19,6 +21,7 @@ class ChannelDialog extends StatefulWidget {
     this.channel,
     this.onAddChannel,
     this.onUpdateChannel,
+    this.defaultGroup,
   }) : assert(
           (isEditMode && channel != null && onUpdateChannel != null) ||
               (!isEditMode && onAddChannel != null),
@@ -51,7 +54,9 @@ class _ChannelDialogState extends State<ChannelDialog> {
     } else {
       // 添加模式，使用默认值
       _titleController = TextEditingController();
-      _groupController = TextEditingController();
+      _groupController = TextEditingController(
+        text: widget.defaultGroup ?? '',
+      );
       _selectedIcon = Icons.chat;
       _selectedColor = Colors.blue;
     }

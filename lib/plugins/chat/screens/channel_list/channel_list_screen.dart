@@ -104,12 +104,19 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   }
 
   void _showAddChannelDialog() {
+    // 获取当前激活的频道分类，排除"全部"和"未分组"
+    String? defaultGroup = _controller.selectedGroup;
+    if (defaultGroup == "全部" || defaultGroup == "未分组") {
+      defaultGroup = null;
+    }
+    
     showDialog(
       context: context,
       builder: (context) => ChannelDialog(
         onAddChannel: (channel) async {
           await _controller.addChannel(channel);
         },
+        defaultGroup: defaultGroup,
       ),
     );
   }
