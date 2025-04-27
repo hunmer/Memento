@@ -235,10 +235,12 @@ class _ActivityGridViewState extends State<ActivityGridView> {
         ),
         // 网格主体
         Expanded(
-          child: ListView.builder(
-            itemCount: 24,
-            itemBuilder: (context, hourIndex) {
-              return Row(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final hourHeight = (constraints.maxHeight - 30) / 24; // 减去分钟标尺的高度
+              return Column(
+                children: List.generate(24, (hourIndex) {
+                  return Row(
                 children: [
                   // 小时标签
                   SizedBox(
@@ -270,8 +272,8 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                               onLongPressMoveUpdate: (_) => _onGridDragUpdate(time),
                               onLongPressEnd: (_) => _onGridDragEnd(),
                               child: Container(
-                              height: 28, // 略微减小高度，创造垂直间隙
-                              margin: const EdgeInsets.all(1.0), // 添加外边距，创造网格间隙
+                              height: hourHeight - 2, // 减去margin的高度
+                              margin: const EdgeInsets.all(1.0), // 保持网格间隙
                               decoration: BoxDecoration(
                                 color: _getGridColor(time),
                                 borderRadius: BorderRadius.circular(4.0), // 添加圆角
@@ -289,10 +291,13 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                   ),
                 ],
               );
-            },
+            }),
+          );
+        }
           ),
         ),
-      ],
-    ));
-    }
+          ]
+        )
+    );
   }
+}
