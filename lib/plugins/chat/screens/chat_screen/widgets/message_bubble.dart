@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
@@ -9,7 +10,7 @@ import '../../../../../plugins/chat/widgets/image_message_widget.dart';
 import '../../../../../widgets/file_preview/index.dart';
 import 'audio_message_bubble.dart';
 
-class MessageBubble extends StatelessWidget {
+class MessageBubble extends StatefulWidget {
   final Message message;
   final bool isSelected;
   final bool isMultiSelectMode;
@@ -44,39 +45,102 @@ class MessageBubble extends StatelessWidget {
   });
 
   @override
+  State<MessageBubble> createState() => _MessageBubbleState();
+}
+
+class _MessageBubbleState extends State<MessageBubble> {
+  Message? replyMessage;
+
+  Future<String> _getAbsolutePath(String relativePath) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    
+    // 规范化路径，确保使用正确的路径分隔符
+    String normalizedPath = relativePath.replaceFirst('./', '');
+    normalizedPath = normalizedPath.replaceAll('/', path.separator);
+    
+    // 检查是否需要添加app_data前缀
+    if (!normalizedPath.startsWith('app_data${path.separator}')) {
+      return path.join(appDir.path, 'app_data', normalizedPath);
+    }
+    
+    return path.join(appDir.path, normalizedPath);
+  }
+
+  Widget _buildDefaultAvatar() {
+    return Builder(
+      builder: (context) => Center(
+        child: Text(
+          widget.message.user.username.isNotEmpty ? widget.message.user.username[0].toUpperCase() : '?',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReplyMessage();
+  }
+
+  @override
+  void didUpdateWidget(MessageBubble oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.message.replyToId != oldWidget.message.replyToId) {
+      _loadReplyMessage();
+    }
+  }
+
+  Future<void> _loadReplyMessage() async {
+    if (widget.message.replyToId != null) {
+      final reply = ChatPlugin.instance.channelService.getMessageById(widget.message.replyToId!);
+      if (mounted && reply != null) {
+        setState(() {
+          replyMessage = reply;
+          widget.message.replyTo = reply;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isCurrentUser = message.user.id == currentUserId;
+    final isCurrentUser = widget.message.user.id == widget.currentUserId;
 
     return GestureDetector(
-      onLongPress: onLongPress,
-      onTap: onTap,
+      onLongPress: widget.onLongPress,
+      onTap: widget.onTap,
       child: Column(
         crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           // 回复引用将在气泡内部显示
           Container(
             margin: EdgeInsets.only(
-              left: isCurrentUser ? 48.0 : (showAvatar ? 0 : 8.0),
+              left: isCurrentUser ? 48.0 : (widget.showAvatar ? 0 : 8.0),
               right: isCurrentUser ? 8.0 : 48.0,
               top: 8.0,     // 添加顶部间距
               bottom: 8.0,  // 添加底部间距
             ),
             decoration: BoxDecoration(
-          color: isHighlighted 
+          color: widget.isHighlighted 
               ? Colors.yellow.withAlpha(50)
-              : (isSelected ? Colors.blue.withAlpha(25) : Colors.transparent),
-          border: isSelected 
+              : (widget.isSelected ? Colors.blue.withAlpha(25) : Colors.transparent),
+          border: widget.isSelected 
               ? Border.all(color: Colors.blue, width: 1) 
-              : (isHighlighted ? Border.all(color: Colors.yellow.shade700, width: 1) : null),
+              : (widget.isHighlighted ? Border.all(color: Colors.yellow.shade700, width: 1) : null),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (!isCurrentUser && showAvatar) ...[
+            if (!isCurrentUser && widget.showAvatar) ...[
               GestureDetector(
-                onTap: onAvatarTap,
+                onTap: widget.onAvatarTap,
                 child: Container(
                   width: 40,
                   height: 40,
@@ -84,9 +148,9 @@ class MessageBubble extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: Theme.of(context).colorScheme.primaryContainer,
                   ),
-                  child: message.user.iconPath != null
+                  child: widget.message.user.iconPath != null
                       ? FutureBuilder<String>(
-                          future: _getAbsolutePath(message.user.iconPath!),
+                          future: _getAbsolutePath(widget.message.user.iconPath!),
                           builder: (context, snapshot) {
                             if (snapshot.hasData && snapshot.data != null) {
                               return ClipOval(
@@ -106,7 +170,7 @@ class MessageBubble extends StatelessWidget {
               ),
               const SizedBox(width: 8),
             ],
-            if (isCurrentUser && showAvatar) const SizedBox(width: 8),
+            if (isCurrentUser && widget.showAvatar) const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment:
@@ -116,7 +180,7 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   if (!isCurrentUser) // 只有非当前用户的消息才显示用户名
                     Text(
-                      message.user.username,
+                      widget.message.user.username,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -136,7 +200,7 @@ class MessageBubble extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                if (message.fixedSymbol != null)
+                                if (widget.message.fixedSymbol != null)
                                   Container(
                                     margin: const EdgeInsets.only(top: 2),
                                     padding: const EdgeInsets.symmetric(
@@ -151,7 +215,7 @@ class MessageBubble extends StatelessWidget {
                                       ),
                                     ),
                                     child: Text(
-                                      message.fixedSymbol!,
+                                      widget.message.fixedSymbol!,
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.amber.shade800,
@@ -159,7 +223,7 @@ class MessageBubble extends StatelessWidget {
                                     ),
                                   ),
                                 Text(
-                                  _formatTime(message.date),
+                                  _formatTime(widget.message.date),
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: Colors.grey[600],
@@ -180,7 +244,7 @@ class MessageBubble extends StatelessWidget {
                                       padding: const EdgeInsets.all(10.0),
                                       decoration: BoxDecoration(
                                         color:
-                                            message.bubbleColor ??
+                                            widget.message.bubbleColor ??
                                             (isCurrentUser
                                                 ? const Color(
                                                   0xFFD6E4FF,
@@ -201,7 +265,7 @@ class MessageBubble extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                if (message.fixedSymbol != null)
+                                if (widget.message.fixedSymbol != null)
                                   Container(
                                     margin: const EdgeInsets.only(top: 2),
                                     padding: const EdgeInsets.symmetric(
@@ -216,7 +280,7 @@ class MessageBubble extends StatelessWidget {
                                       ),
                                     ),
                                     child: Text(
-                                      message.fixedSymbol!,
+                                      widget.message.fixedSymbol!,
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.amber.shade800,
@@ -224,13 +288,13 @@ class MessageBubble extends StatelessWidget {
                                     ),
                                   ),
                                 Text(
-                                  _formatTime(message.date),
+                                  _formatTime(widget.message.date),
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: Colors.grey[600],
                                   ),
                                 ),
-                                if (message.isEdited)
+                                if (widget.message.isEdited)
                                   Text(
                                     '(已编辑)',
                                     style: TextStyle(
@@ -248,10 +312,10 @@ class MessageBubble extends StatelessWidget {
                 ],
               ),
             ),
-            if (isCurrentUser && showAvatar) ...[
+            if (isCurrentUser && widget.showAvatar) ...[
               const SizedBox(width: 8),
               GestureDetector(
-                onTap: onAvatarTap,
+                onTap: widget.onAvatarTap,
                 child: Container(
                   width: 40,
                   height: 40,
@@ -259,9 +323,9 @@ class MessageBubble extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: Theme.of(context).colorScheme.primaryContainer,
                   ),
-                  child: message.user.iconPath != null
+                  child: widget.message.user.iconPath != null
                       ? FutureBuilder<String>(
-                          future: _getAbsolutePath(message.user.iconPath!),
+                          future: _getAbsolutePath(widget.message.user.iconPath!),
                           builder: (context, snapshot) {
                             if (snapshot.hasData && snapshot.data != null) {
                               return ClipOval(
@@ -279,7 +343,7 @@ class MessageBubble extends StatelessWidget {
                       : _buildDefaultAvatar(),
                 ),
               ),
-            ] else if (!isCurrentUser && !showAvatar) ...[
+            ] else if (!isCurrentUser && !widget.showAvatar) ...[
               const SizedBox(width: 8),
             ],
           ],
@@ -297,69 +361,63 @@ class MessageBubble extends StatelessWidget {
   // 判断是否应该显示背景
   bool _shouldShowBackground() {
     // 音频和图片消息不显示背景
-    return message.type != MessageType.audio &&
-        message.type != MessageType.image;
+    return widget.message.type != MessageType.audio &&
+        widget.message.type != MessageType.image;
   }
 
   Widget _buildMessageContent(BuildContext context) {
-    final isCurrentUser = message.user.id == currentUserId;
+    final isCurrentUser = widget.message.user.id == widget.currentUserId;
 
     // 构建回复引用组件
     Widget? replyWidget;
-    if (message.replyTo != null) {
+    if (widget.message.replyTo != null) {
       replyWidget = GestureDetector(
-        onTap: () => onReplyTap?.call(message.replyTo!.id),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    "${message.replyTo!.user.username}: ${message.replyTo!.content}",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+              onTap: () => widget.onReplyTap?.call(replyMessage!.id),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "${widget.message.replyTo!.user.username}: ${widget.message.replyTo!.content}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      );
+                  const SizedBox(height: 4),
+                ],
+              ),
+            );
     }
 
     // 根据消息类型选择不同的渲染方式
-    Widget content;
-    switch (message.type) {
+    Widget content = Container(); // 初始化一个空的Widget
+    switch (widget.message.type) {
       case MessageType.audio:
         content = AudioMessageBubble(
-          message: message,
+          message: widget.message,
           isCurrentUser: isCurrentUser,
         );
         break;
       case MessageType.image:
         content = ImageMessageWidget(
-          message: message,
+          message: widget.message,
           isOutgoing: isCurrentUser,
         );
         break;
       case MessageType.video:
       case MessageType.file:
-        if (message.metadata?[Message.metadataKeyFileInfo] != null) {
+        if (widget.message.metadata?[Message.metadataKeyFileInfo] != null) {
           final fileInfo = FileMessage.fromJson(
             Map<String, dynamic>.from(
-              message.metadata![Message.metadataKeyFileInfo],
+              widget.message.metadata![Message.metadataKeyFileInfo],
             ),
           );
           content = GestureDetector(
@@ -419,7 +477,7 @@ class MessageBubble extends StatelessWidget {
           );
         } else {
           content = MarkdownBody(
-            data: message.content,
+            data: widget.message.content,
             styleSheet: MarkdownStyleSheet(
               p: const TextStyle(fontSize: 14),
               blockSpacing: 0,
@@ -428,10 +486,11 @@ class MessageBubble extends StatelessWidget {
           );
         }
         break;
-      case MessageType.sent:
-      case MessageType.received:
+      default:
+      // case MessageType.sent:
+      // case MessageType.received:
         content = MarkdownBody(
-          data: message.content,
+          data: widget.message.content,
           styleSheet: MarkdownStyleSheet(
             p: const TextStyle(fontSize: 14),
             blockSpacing: 0,
@@ -441,7 +500,7 @@ class MessageBubble extends StatelessWidget {
     }
 
     // 如果有回复引用，将其添加到消息内容上方
-    if (message.replyTo != null) {
+    if (widget.message.replyTo != null) {
       return DefaultTextStyle(
         style: const TextStyle(fontSize: 14, height: 1.4),
         child: Column(
@@ -459,35 +518,5 @@ class MessageBubble extends StatelessWidget {
         child: content,
       );
     }
-  }
-
-  Widget _buildDefaultAvatar() {
-    return Builder(
-      builder: (context) => Center(
-        child: Text(
-          message.user.username.isNotEmpty ? message.user.username[0].toUpperCase() : '?',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<String> _getAbsolutePath(String relativePath) async {
-    final appDir = await getApplicationDocumentsDirectory();
-    
-    // 规范化路径，确保使用正确的路径分隔符
-    String normalizedPath = relativePath.replaceFirst('./', '');
-    normalizedPath = normalizedPath.replaceAll('/', path.separator);
-    
-    // 检查是否需要添加app_data前缀
-    if (!normalizedPath.startsWith('app_data${path.separator}')) {
-      return path.join(appDir.path, 'app_data', normalizedPath);
-    }
-    
-    return path.join(appDir.path, normalizedPath);
   }
 }

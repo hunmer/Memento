@@ -410,4 +410,24 @@ class ChannelService {
     }
     return count;
   }
+
+  // 根据消息ID获取完整消息
+  Message? getMessageById(String messageId) {
+    for (var channel in _channels) {
+      final message = channel.messages.firstWhere(
+        (msg) => msg.id == messageId,
+        orElse: () => null as Message,
+      );
+      if (message != null) {
+        return message;
+      }
+    }
+    return null;
+  }
+
+  // 加载回复消息
+  Future<Message?> loadReplyMessage(String? replyToId) async {
+    if (replyToId == null) return null;
+    return getMessageById(replyToId);
+  }
 }

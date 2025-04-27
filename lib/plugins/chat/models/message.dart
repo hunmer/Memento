@@ -18,6 +18,7 @@ class Message {
   Color? bubbleColor; // 添加气泡颜色字段
   Map<String, dynamic>? metadata; // 添加元数据字段，用于存储额外信息
   Message? replyTo; // 添加回复消息引用
+  String? replyToId; // 添加回复消息ID
 
   Message({
     required this.id,
@@ -29,8 +30,14 @@ class Message {
     this.fixedSymbol,
     this.bubbleColor,
     this.metadata,
-    this.replyTo,
-  }) : date = date ?? DateTime.now();
+    Message? replyTo,
+    this.replyToId,
+  }) : date = date ?? DateTime.now() {
+    // 如果提供了replyTo，确保设置replyToId
+    if (replyTo != null) {
+      replyToId = replyTo.id;
+    }
+  }
 
   /// 初始化消息，处理文件路径转换
   static Future<Message> create({
@@ -44,6 +51,7 @@ class Message {
     Color? bubbleColor,
     Map<String, dynamic>? metadata,
     Message? replyTo,
+    String? replyToId,
   }) async {
     // 创建基本消息实例
     final message = Message(
@@ -57,6 +65,7 @@ class Message {
       bubbleColor: bubbleColor,
       metadata: metadata,
       replyTo: replyTo,
+      replyToId: replyToId ?? replyTo?.id,
     );
 
     // 处理 metadata 中的文件路径，转换为绝对路径
@@ -93,6 +102,7 @@ class Message {
     Color? bubbleColor,
     Map<String, dynamic>? metadata,
     Message? replyTo,
+    String? replyToId,
   }) async {
     return create(
       id: id ?? this.id,
@@ -177,7 +187,7 @@ class Message {
       'fixedSymbol': fixedSymbol,
       'bubbleColor': bubbleColor?.toHex(),
       'metadata': messageMetadata,
-      'replyTo': await replyTo?.toJson(),
+      'replyToId': replyToId ?? replyTo?.id,
     };
   }
 
@@ -197,14 +207,8 @@ class Message {
             )
             : null;
     
-    // 解析回复消息
-    Message? replyToMessage;
-    if (json['replyTo'] != null) {
-      replyToMessage = await Message.fromJson(
-        json['replyTo'] as Map<String, dynamic>,
-        users,
-      );
-    }
+    // 获取回复消息ID
+    final replyToId = json['replyToId'] as String?;
 
     return create(
       id: json['id'] as String,
@@ -225,7 +229,7 @@ class Message {
               ? HexColor.fromHex(json['bubbleColor'] as String)
               : null,
       metadata: messageMetadata,
-      replyTo: replyToMessage,
+      replyToId: replyToId,
     );
   }
 
