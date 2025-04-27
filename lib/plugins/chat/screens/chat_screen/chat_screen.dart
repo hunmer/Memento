@@ -52,7 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
       highlightMessage: widget.highlightMessage,
       autoScroll: widget.autoScroll,
     );
-    _loadBackgroundPath(); 
+    _loadBackgroundPath();
     _loadChannelDraft();
   }
 
@@ -71,7 +71,9 @@ class _ChatScreenState extends State<ChatScreen> {
     // 检查插件是否已初始化
     if (chatPlugin.isInitialized) {
       try {
-        final draft = await chatPlugin.channelService.loadDraft(widget.channel.id);
+        final draft = await chatPlugin.channelService.loadDraft(
+          widget.channel.id,
+        );
         if (draft != null && draft.isNotEmpty && mounted) {
           setState(() {
             // 检查控制器是否可用
@@ -120,7 +122,6 @@ class _ChatScreenState extends State<ChatScreen> {
     // 聚焦输入框
     _controller.focusNode.requestFocus();
   }
-  
 
   // 清除回复
   void _clearReply() {
@@ -149,18 +150,19 @@ class _ChatScreenState extends State<ChatScreen> {
   void _showClearConfirmationDialog() {
     showDialog(
       context: context,
-      builder: (context) => ClearMessagesDialog(
-        onConfirm: () async {
-          await _controller.clearMessages();
-          if (mounted) {
-            _updateMessages(); // 更新消息列表
-            Navigator.of(context).pop();
-          }
-        },
-        onCancel: () {
-          Navigator.of(context).pop();
-        },
-      ),
+      builder:
+          (context) => ClearMessagesDialog(
+            onConfirm: () async {
+              await _controller.clearMessages();
+              if (mounted) {
+                _updateMessages(); // 更新消息列表
+                Navigator.of(context).pop();
+              }
+            },
+            onCancel: () {
+              Navigator.of(context).pop();
+            },
+          ),
     );
   }
 
@@ -285,15 +287,19 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
-      final absolutePath = await PathUtils.toAbsolutePath(widget.channel.backgroundPath!);
+      final absolutePath = await PathUtils.toAbsolutePath(
+        widget.channel.backgroundPath!,
+      );
+
       if (mounted) {
+        final file = File(absolutePath);
+        final exists = await file.exists();
         setState(() {
           _backgroundPath = absolutePath;
           _isLoadingBackground = false;
         });
       }
     } catch (e) {
-      debugPrint('Error loading background path: $e');
       if (mounted) {
         setState(() {
           _backgroundPath = null;
@@ -308,40 +314,63 @@ class _ChatScreenState extends State<ChatScreen> {
     // 使用已加载的背景路径构建UI
     return _buildMainUI(_backgroundPath);
   }
-  
+
   // 构建主UI，接收可选的背景路径参数
   Widget _buildMainUI(String? backgroundPath) {
+    // 调试输出当前UI构建状态
+    debugPrint(
+      'Building UI with background: $backgroundPath, isLoading: $_isLoadingBackground',
+    );
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      // 根据是否有背景图片决定背景颜色
+      backgroundColor:
+          backgroundPath != null ? Colors.transparent : Colors.white,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 背景层
+          // 默认白色背景 - 当没有背景图片时显示
+          if (backgroundPath == null && !_isLoadingBackground)
+            Container(
+              color: Colors.white,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          // 背景层 - 确保这是Stack中的底层元素
           if (backgroundPath != null && !_isLoadingBackground)
             Builder(
               builder: (context) {
                 final file = File(backgroundPath);
                 if (!file.existsSync()) {
-                  debugPrint('Background image file does not exist: $backgroundPath');
+                  debugPrint(
+                    'Background image file does not exist: $backgroundPath',
+                  );
                   return const SizedBox.shrink();
                 }
-                return Image.file(
-                  file,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                  errorBuilder: (context, error, stackTrace) {
-                    debugPrint('Error loading background image: $error');
-                    return const SizedBox.shrink();
-                  },
+                // 使用Container包装图片，确保它占满整个屏幕
+                return Container(
+                  color: Colors.transparent, // 确保容器背景透明
+                  child: Image.file(
+                    file,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    // 添加key以强制重建
+                    key: ValueKey(backgroundPath),
+                    errorBuilder: (context, error, stackTrace) {
+                      debugPrint('Error loading background image: $error');
+                      debugPrint('Stack trace: $stackTrace');
+                      return Container(
+                        color: Colors.red.withOpacity(0.3),
+                      ); // 错误时显示红色背景以便调试
+                    },
+                  ),
                 );
               },
             ),
           // 半透明遮罩层
           if (backgroundPath != null && !_isLoadingBackground)
-            Container(
-              color: Colors.black.withOpacity(0.5),
-            ),
+            Container(color: Colors.black.withOpacity(0.5)),
           // 加载指示器
           if (_isLoadingBackground)
             const Center(child: CircularProgressIndicator()),
@@ -354,7 +383,12 @@ class _ChatScreenState extends State<ChatScreen> {
             builder: (context, snapshot) {
               final messageItems = snapshot.data ?? [];
 
+              // 根据是否有背景图片决定内容层Scaffold的背景颜色
               return Scaffold(
+                backgroundColor:
+                    backgroundPath != null
+                        ? Colors.transparent
+                        : null, // 有背景时透明，无背景时使用默认颜色
                 appBar: ChatAppBar(
                   channel: widget.channel,
                   isMultiSelectMode: _controller.isMultiSelectMode,
@@ -365,7 +399,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ChannelInfoScreen(channel: widget.channel),
+                          builder:
+                              (context) =>
+                                  ChannelInfoScreen(channel: widget.channel),
                         ),
                       );
                     }
@@ -382,10 +418,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       Container(
                         padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color:
+                              Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
                           border: Border(
                             top: BorderSide(
-                              color: Theme.of(context).colorScheme.outline.withAlpha(51),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outline.withAlpha(51),
                             ),
                           ),
                         ),
@@ -401,7 +442,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -409,7 +451,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                     _replyToMessage!.content,
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -440,13 +485,19 @@ class _ChatScreenState extends State<ChatScreen> {
                         onMessageCopy: _copyMessageToClipboard,
                         onSetFixedSymbol: _setFixedSymbol,
                         onSetBubbleColor: _setBubbleColor,
-                        onToggleMessageSelection: _controller.toggleMessageSelection,
+                        onToggleMessageSelection:
+                            _controller.toggleMessageSelection,
                         scrollController: _controller.scrollController,
                         onAvatarTap: _navigateToUserProfile,
-                        showAvatar: ChatPlugin.instance.settingsService.showAvatarInChat,
-                        currentUserId: ChatPlugin.instance.isInitialized
-                            ? ChatPlugin.instance.userService.currentUser.id
-                            : '',
+                        showAvatar:
+                            ChatPlugin
+                                .instance
+                                .settingsService
+                                .showAvatarInChat,
+                        currentUserId:
+                            ChatPlugin.instance.isInitialized
+                                ? ChatPlugin.instance.userService.currentUser.id
+                                : '',
                         highlightedMessage: _controller.highlightMessage,
                         shouldHighlight: _controller.highlightMessage != null,
                         onReply: _handleReply,
@@ -476,9 +527,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   ],
                 ),
               );
-            }
+            },
           ),
-        ]
+        ],
       ),
     );
   }
