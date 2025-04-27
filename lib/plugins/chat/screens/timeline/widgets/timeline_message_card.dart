@@ -4,7 +4,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../../../models/message.dart';
 import '../../../models/channel.dart';
+import '../../../models/file_message.dart';
 import '../../../utils/date_formatter.dart';
+import '../../../../../widgets/file_preview/file_preview_screen.dart';
+import '../../../widgets/image_message_widget.dart';
+import '../../../widgets/audio_player_widget.dart';
 import '../../../services/settings_service.dart';
 import '../utils/text_highlight.dart';
 import '../controllers/timeline_controller.dart';
@@ -171,6 +175,183 @@ class TimelineMessageCard extends StatelessWidget {
                   Expanded(
                     child: LayoutBuilder(
                       builder: (context, constraints) {
+                        // 检查消息类型
+                        if (message.metadata?[Message.metadataKeyFileInfo] !=
+                            null) {
+                          final fileInfo = FileMessage.fromJson(
+                            Map<String, dynamic>.from(
+                              message.metadata![Message.metadataKeyFileInfo],
+                            ),
+                          );
+
+                          // 根据文件类型显示不同的预览
+                          switch (fileInfo.type) {
+                            case FileMessageType.image:
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder:
+                                          (BuildContext ctx) =>
+                                              FilePreviewScreen(
+                                                filePath: fileInfo.filePath,
+                                                fileName: fileInfo.fileName,
+                                                mimeType:
+                                                    fileInfo.mimeType ??
+                                                    'image/jpeg',
+                                                fileSize: fileInfo.fileSize,
+                                              ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  constraints: BoxConstraints(
+                                    maxWidth: isGridView ? 120 : 200,
+                                    maxHeight: isGridView ? 120 : 200,
+                                  ),
+                                  child: ImageMessageWidget(
+                                    message: message,
+                                    isOutgoing: false,
+                                  ),
+                                ),
+                              );
+
+                            case FileMessageType.document:
+                            case FileMessageType.audio:
+                              return Container(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      isGridView
+                                          ? constraints.maxWidth * 0.8
+                                          : constraints.maxWidth,
+                                ),
+                                child: AudioPlayerWidget(
+                                  audioPath: fileInfo.filePath,
+                                  durationInSeconds: message.audioDuration ?? 0,
+                                  isLocalFile: true,
+                                  primaryColor: theme.colorScheme.primary,
+                                  backgroundColor: theme.colorScheme.surface,
+                                  progressColor: theme.colorScheme.primary,
+                                ),
+                              );
+
+                            case FileMessageType.video:
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder:
+                                          (BuildContext ctx) =>
+                                              FilePreviewScreen(
+                                                filePath: fileInfo.filePath,
+                                                fileName: fileInfo.fileName,
+                                                mimeType:
+                                                    fileInfo.mimeType ??
+                                                    'video/mp4',
+                                                fileSize: fileInfo.fileSize,
+                                              ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  constraints: BoxConstraints(
+                                    maxWidth: isGridView ? 120 : 200,
+                                    maxHeight: isGridView ? 120 : 200,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.video_library,
+                                        size: isGridView ? 32 : 48,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                      Positioned(
+                                        bottom: 8,
+                                        left: 8,
+                                        right: 8,
+                                        child: Text(
+                                          fileInfo.originalFileName,
+                                          style: TextStyle(
+                                            fontSize: isGridView ? 10 : 12,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+
+                            default: // 文档和其他类型文件
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder:
+                                          (BuildContext ctx) =>
+                                              FilePreviewScreen(
+                                                filePath: fileInfo.filePath,
+                                                fileName: fileInfo.fileName,
+                                                mimeType:
+                                                    fileInfo.mimeType ??
+                                                    'application/octet-stream',
+                                                fileSize: fileInfo.fileSize,
+                                              ),
+                                    ),
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      fileInfo.getIcon(),
+                                      size: isGridView ? 16 : 24,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                    SizedBox(width: isGridView ? 4 : 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            fileInfo.originalFileName,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: isGridView ? 12 : 14,
+                                              color:
+                                                  theme.colorScheme.onSurface,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            fileInfo.formattedSize,
+                                            style: TextStyle(
+                                              fontSize: isGridView ? 10 : 12,
+                                              color:
+                                                  theme
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                          }
+                        }
                         return RichText(
                           maxLines:
                               isGridView ? 12 : null, // 增加最大行数，但仍保持一定限制以避免过长

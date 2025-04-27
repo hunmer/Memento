@@ -53,31 +53,34 @@ class _MessageBubbleState extends State<MessageBubble> {
 
   Future<String> _getAbsolutePath(String relativePath) async {
     final appDir = await getApplicationDocumentsDirectory();
-    
+
     // 规范化路径，确保使用正确的路径分隔符
     String normalizedPath = relativePath.replaceFirst('./', '');
     normalizedPath = normalizedPath.replaceAll('/', path.separator);
-    
+
     // 检查是否需要添加app_data前缀
     if (!normalizedPath.startsWith('app_data${path.separator}')) {
       return path.join(appDir.path, 'app_data', normalizedPath);
     }
-    
+
     return path.join(appDir.path, normalizedPath);
   }
 
   Widget _buildDefaultAvatar() {
     return Builder(
-      builder: (context) => Center(
-        child: Text(
-          widget.message.user.username.isNotEmpty ? widget.message.user.username[0].toUpperCase() : '?',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
+      builder:
+          (context) => Center(
+            child: Text(
+              widget.message.user.username.isNotEmpty
+                  ? widget.message.user.username[0].toUpperCase()
+                  : '?',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -97,7 +100,9 @@ class _MessageBubbleState extends State<MessageBubble> {
 
   Future<void> _loadReplyMessage() async {
     if (widget.message.replyToId != null) {
-      final reply = ChatPlugin.instance.channelService.getMessageById(widget.message.replyToId!);
+      final reply = ChatPlugin.instance.channelService.getMessageById(
+        widget.message.replyToId!,
+      );
       if (mounted && reply != null) {
         setState(() {
           replyMessage = reply;
@@ -115,240 +120,260 @@ class _MessageBubbleState extends State<MessageBubble> {
       onLongPress: widget.onLongPress,
       onTap: widget.onTap,
       child: Column(
-        crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment:
+            isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           // 回复引用将在气泡内部显示
           Container(
             margin: EdgeInsets.only(
               left: isCurrentUser ? 48.0 : (widget.showAvatar ? 0 : 8.0),
               right: isCurrentUser ? 8.0 : 48.0,
-              top: 8.0,     // 添加顶部间距
-              bottom: 8.0,  // 添加底部间距
+              top: 8.0, // 添加顶部间距
+              bottom: 8.0, // 添加底部间距
             ),
             decoration: BoxDecoration(
-          color: widget.isHighlighted 
-              ? Colors.yellow.withAlpha(50)
-              : (widget.isSelected ? Colors.blue.withAlpha(25) : Colors.transparent),
-          border: widget.isSelected 
-              ? Border.all(color: Colors.blue, width: 1) 
-              : (widget.isHighlighted ? Border.all(color: Colors.yellow.shade700, width: 1) : null),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (!isCurrentUser && widget.showAvatar) ...[
-              GestureDetector(
-                onTap: widget.onAvatarTap,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                  ),
-                  child: widget.message.user.iconPath != null
-                      ? FutureBuilder<String>(
-                          future: _getAbsolutePath(widget.message.user.iconPath!),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData && snapshot.data != null) {
-                              return ClipOval(
-                                child: Image.file(
-                                  File(snapshot.data!),
-                                  width: 40,
-                                  height: 40,
-                                  fit: BoxFit.cover,
-                                ),
-                              );
-                            }
-                            return _buildDefaultAvatar();
-                          },
-                        )
-                      : _buildDefaultAvatar(),
-                ),
-              ),
-              const SizedBox(width: 8),
-            ],
-            if (isCurrentUser && widget.showAvatar) const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment:
-                    isCurrentUser
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start,
-                children: [
-                  if (!isCurrentUser) // 只有非当前用户的消息才显示用户名
-                    Text(
-                      widget.message.user.username,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: Colors.grey[600],
+              color:
+                  widget.isHighlighted
+                      ? Colors.yellow.withAlpha(50)
+                      : (widget.isSelected
+                          ? Colors.blue.withAlpha(25)
+                          : Colors.transparent),
+              border:
+                  widget.isSelected
+                      ? Border.all(color: Colors.blue, width: 1)
+                      : (widget.isHighlighted
+                          ? Border.all(color: Colors.yellow.shade700, width: 1)
+                          : null),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (!isCurrentUser && widget.showAvatar) ...[
+                  GestureDetector(
+                    onTap: widget.onAvatarTap,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.primaryContainer,
                       ),
-                    ),
-                  if (!isCurrentUser) const SizedBox(height: 2),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          if (isCurrentUser) ...[
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (widget.message.fixedSymbol != null)
-                                  Container(
-                                    margin: const EdgeInsets.only(top: 2),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                      vertical: 1,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber.shade100,
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(
-                                        color: Colors.amber.shade200,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      widget.message.fixedSymbol!,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.amber.shade800,
-                                      ),
-                                    ),
-                                  ),
-                                Text(
-                                  _formatTime(widget.message.date),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[600],
-                                  ),
+                      child:
+                          widget.message.user.iconPath != null
+                              ? FutureBuilder<String>(
+                                future: _getAbsolutePath(
+                                  widget.message.user.iconPath!,
                                 ),
-                              ],
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          Container(
-                            constraints: BoxConstraints(
-                              maxWidth: constraints.maxWidth * 0.7,
-                              minWidth: 0,
-                            ),
-                            child:
-                                _shouldShowBackground()
-                                    ? Container(
-                                      padding: const EdgeInsets.all(10.0),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            widget.message.bubbleColor ??
-                                            (isCurrentUser
-                                                ? const Color(
-                                                  0xFFD6E4FF,
-                                                ) // 更深的蓝色背景，提高对比度
-                                                : Colors.grey[200]),
-                                        borderRadius: BorderRadius.circular(
-                                          12.0,
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data != null) {
+                                    return ClipOval(
+                                      child: Image.file(
+                                        File(snapshot.data!),
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    );
+                                  }
+                                  return _buildDefaultAvatar();
+                                },
+                              )
+                              : _buildDefaultAvatar(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                if (isCurrentUser && widget.showAvatar)
+                  const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        isCurrentUser
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                    children: [
+                      if (!isCurrentUser) // 只有非当前用户的消息才显示用户名
+                        Text(
+                          widget.message.user.username,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      if (!isCurrentUser) const SizedBox(height: 2),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (isCurrentUser) ...[
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (widget.message.fixedSymbol != null)
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 2),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                          vertical: 1,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.shade100,
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.amber.shade200,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          widget.message.fixedSymbol!,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.amber.shade800,
+                                          ),
                                         ),
                                       ),
-                                      child: _buildMessageContent(context),
-                                    )
-                                    : _buildMessageContent(context),
-                          ),
-                          if (!isCurrentUser) ...[
-                            const SizedBox(width: 4),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (widget.message.fixedSymbol != null)
-                                  Container(
-                                    margin: const EdgeInsets.only(top: 2),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                      vertical: 1,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber.shade100,
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(
-                                        color: Colors.amber.shade200,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      widget.message.fixedSymbol!,
+                                    Text(
+                                      _formatTime(widget.message.date),
                                       style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.amber.shade800,
+                                        fontSize: 10,
+                                        color: Colors.grey[600],
                                       ),
                                     ),
-                                  ),
-                                Text(
-                                  _formatTime(widget.message.date),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[600],
-                                  ),
+                                  ],
                                 ),
-                                if (widget.message.isEdited)
-                                  Text(
-                                    '(已编辑)',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
+                                const SizedBox(width: 4),
                               ],
-                            ),
-                          ],
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            if (isCurrentUser && widget.showAvatar) ...[
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: widget.onAvatarTap,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                  ),
-                  child: widget.message.user.iconPath != null
-                      ? FutureBuilder<String>(
-                          future: _getAbsolutePath(widget.message.user.iconPath!),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData && snapshot.data != null) {
-                              return ClipOval(
-                                child: Image.file(
-                                  File(snapshot.data!),
-                                  width: 40,
-                                  height: 40,
-                                  fit: BoxFit.cover,
+                              Container(
+                                constraints: BoxConstraints(
+                                  maxWidth: constraints.maxWidth * 0.7,
+                                  minWidth: 0,
                                 ),
-                              );
-                            }
-                            return _buildDefaultAvatar();
-                          },
-                        )
-                      : _buildDefaultAvatar(),
+                                child:
+                                    _shouldShowBackground()
+                                        ? Container(
+                                          padding: const EdgeInsets.all(10.0),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                widget.message.bubbleColor ??
+                                                (isCurrentUser
+                                                    ? const Color(
+                                                      0xFFD6E4FF,
+                                                    ) // 更深的蓝色背景，提高对比度
+                                                    : Colors.grey[200]),
+                                            borderRadius: BorderRadius.circular(
+                                              12.0,
+                                            ),
+                                          ),
+                                          child: _buildMessageContent(context),
+                                        )
+                                        : _buildMessageContent(context),
+                              ),
+                              if (!isCurrentUser) ...[
+                                const SizedBox(width: 4),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (widget.message.fixedSymbol != null)
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 2),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                          vertical: 1,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.shade100,
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.amber.shade200,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          widget.message.fixedSymbol!,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.amber.shade800,
+                                          ),
+                                        ),
+                                      ),
+                                    Text(
+                                      _formatTime(widget.message.date),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    if (widget.message.isEdited)
+                                      Text(
+                                        '(已编辑)',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ] else if (!isCurrentUser && !widget.showAvatar) ...[
-              const SizedBox(width: 8),
-            ],
-          ],
-        ),
-      ),
+                if (isCurrentUser && widget.showAvatar) ...[
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: widget.onAvatarTap,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                      ),
+                      child:
+                          widget.message.user.iconPath != null
+                              ? FutureBuilder<String>(
+                                future: _getAbsolutePath(
+                                  widget.message.user.iconPath!,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data != null) {
+                                    return ClipOval(
+                                      child: Image.file(
+                                        File(snapshot.data!),
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    );
+                                  }
+                                  return _buildDefaultAvatar();
+                                },
+                              )
+                              : _buildDefaultAvatar(),
+                    ),
+                  ),
+                ] else if (!isCurrentUser && !widget.showAvatar) ...[
+                  const SizedBox(width: 8),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -372,29 +397,29 @@ class _MessageBubbleState extends State<MessageBubble> {
     Widget? replyWidget;
     if (widget.message.replyTo != null) {
       replyWidget = GestureDetector(
-              onTap: () => widget.onReplyTap?.call(replyMessage!.id),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "${widget.message.replyTo!.user.username}: ${widget.message.replyTo!.content}",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+        onTap: () => widget.onReplyTap?.call(replyMessage!.id),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "${widget.message.replyTo!.user.username}: ${widget.message.replyTo!.content}",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                ],
-              ),
-            );
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+          ],
+        ),
+      );
     }
 
     // 根据消息类型选择不同的渲染方式
@@ -487,8 +512,8 @@ class _MessageBubbleState extends State<MessageBubble> {
         }
         break;
       default:
-      // case MessageType.sent:
-      // case MessageType.received:
+        // case MessageType.sent:
+        // case MessageType.received:
         content = MarkdownBody(
           data: widget.message.content,
           styleSheet: MarkdownStyleSheet(
@@ -506,10 +531,7 @@ class _MessageBubbleState extends State<MessageBubble> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: [
-            replyWidget!,
-            content,
-          ],
+          children: [replyWidget!, content],
         ),
       );
     } else {

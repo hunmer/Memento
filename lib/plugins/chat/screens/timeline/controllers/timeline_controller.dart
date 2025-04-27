@@ -106,11 +106,16 @@ class TimelineController extends ChangeNotifier {
           channel.messages.map((message) async {
             // 创建一个带有频道信息的消息副本
             return await message.copyWith(
-              // 我们可以在元数据中存储频道信息
+              // 使用channelInfo字段而不是覆盖原始metadata
               metadata: {
-                'channelId': channel.id,
-                'channelName': channel.title,
-                'channelColor': channel.backgroundColor.value.toRadixString(16),
+                ...message.metadata ?? {}, // 保留原始metadata
+                'channelInfo': {
+                  'channelId': channel.id,
+                  'channelName': channel.title,
+                  'channelColor': channel.backgroundColor.value.toRadixString(
+                    16,
+                  ),
+                },
               },
             );
           }),
@@ -179,12 +184,11 @@ class TimelineController extends ChangeNotifier {
             }
 
             if (filter.includeChannels) {
+              final channelInfo =
+                  message.metadata?['channelInfo'] as Map<String, dynamic>?;
+              final channelName = channelInfo?['channelName'] as String?;
               matches =
-                  matches ||
-                  (message.metadata?['channelName'] as String?)
-                          ?.toLowerCase()
-                          .contains(query) ==
-                      true;
+                  matches || channelName?.toLowerCase().contains(query) == true;
             }
 
             return matches;
@@ -197,7 +201,9 @@ class TimelineController extends ChangeNotifier {
       if (filter.selectedChannelIds.isNotEmpty) {
         result =
             result.where((message) {
-              final channelId = message.metadata?['channelId'] as String?;
+              final channelInfo =
+                  message.metadata?['channelInfo'] as Map<String, dynamic>?;
+              final channelId = channelInfo?['channelId'] as String?;
               return channelId != null &&
                   filter.selectedChannelIds.contains(channelId);
             }).toList();
@@ -359,11 +365,15 @@ class TimelineController extends ChangeNotifier {
 
   /// 获取消息所属的频道
   Channel? getMessageChannel(Message message) {
-    final channelId = message.metadata?['channelId'] as String?;
+    final channelInfo =
+        message.metadata?['channelInfo'] as Map<String, dynamic>?;
+    final channelId = channelInfo?['channelId'] as String?;
     if (channelId == null) return null;
 
     try {
-      return _chatPlugin.channelService.channels.firstWhere((c) => c.id == channelId);
+      return _chatPlugin.channelService.channels.firstWhere(
+        (c) => c.id == channelId,
+      );
     } catch (e) {
       return null;
     }
