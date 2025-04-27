@@ -178,6 +178,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   }),
             ),
           ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.system_update),
+            title: const Text('自动检查更新'),
+            subtitle: const Text('定期检查应用新版本'),
+            trailing: Switch(
+              value: _controller.autoCheckUpdate,
+              onChanged:
+                  (value) => setState(() {
+                    _controller.autoCheckUpdate = value;
+                  }),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.update),
+            title: const Text('检查更新'),
+            subtitle: const Text('立即检查应用新版本'),
+            onTap: _controller.checkForUpdates,
+          ),
         ],
       ),
     );

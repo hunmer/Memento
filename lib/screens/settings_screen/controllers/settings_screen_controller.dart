@@ -5,6 +5,7 @@ import 'export_controller.dart';
 import 'import_controller.dart';
 import 'full_backup_controller.dart';
 import 'webdav_sync_controller.dart';
+import 'auto_update_controller.dart';
 
 class SettingsScreenController extends ChangeNotifier {
   final BuildContext context;
@@ -13,13 +14,15 @@ class SettingsScreenController extends ChangeNotifier {
   final ImportController _importController;
   final FullBackupController _fullBackupController;
   final WebDAVSyncController _webdavSyncController;
+  final AutoUpdateController _autoUpdateController;
 
   SettingsScreenController(this.context)
     : _baseController = BaseSettingsController(context),
       _exportController = ExportController(context),
       _importController = ImportController(context),
       _fullBackupController = FullBackupController(context),
-      _webdavSyncController = WebDAVSyncController(context);
+      _webdavSyncController = WebDAVSyncController(context),
+      _autoUpdateController = AutoUpdateController(context);
 
   // 主题相关
   bool get isDarkMode => _baseController.isDarkMode;
@@ -53,4 +56,12 @@ class SettingsScreenController extends ChangeNotifier {
     globalPluginManager.autoOpenLastPlugin = value;
     notifyListeners();
   }
+
+  // 自动更新相关
+  bool get autoCheckUpdate => _autoUpdateController.autoCheckUpdate;
+  set autoCheckUpdate(bool value) {
+    _autoUpdateController.autoCheckUpdate = value;
+  }
+  
+  Future<void> checkForUpdates() => _autoUpdateController.showUpdateDialog();
 }

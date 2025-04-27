@@ -22,6 +22,7 @@ import 'plugins/nodes/nodes_plugin.dart'; // 笔记插件
 import 'plugins/notes/notes_plugin.dart'; // Notes插件
 import 'plugins/goods/goods_plugin.dart'; // 物品插件
 import 'plugins/bill/bill_plugin.dart'; // 账单插件
+import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 
 // 全局单例实例
 late final StorageManager globalStorage;
@@ -82,6 +83,20 @@ void main() async {
         debugPrint('插件注册失败: ${plugin.name} - $e');
       }
     }
+
+    // 初始化自动更新检查器
+    debugPrint('初始化自动更新检查...');
+    try {
+      final updateController = AutoUpdateController.instance;
+      // 在后台初始化更新检查器
+      updateController.initialize().then((_) {
+        debugPrint('自动更新检查初始化完成');
+      }).catchError((e) {
+        debugPrint('自动更新检查初始化失败: $e');
+      });
+    } catch (e) {
+      debugPrint('初始化自动更新检查失败: $e');
+    }
   } catch (e) {
     debugPrint('初始化失败: $e');
   }
@@ -100,6 +115,39 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    
+    // 延迟执行以确保context可用
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setupAutoUpdate();
+    });
+  }
+  
+  void _setupAutoUpdate() {
+    if (!mounted) return;
+    final updateController = AutoUpdateController.instance;
+    
+    // 设置context，这样更新控制器就可以显示UI了
+    updateController.context = context;
+  }
+  
+  // 手动检查更新的方法，可以在需要时调用
+  Future<void> checkForUpdates() async {
+    if (!mounted) return;
+    
+    debugPrint('MyApp: 手动检查更新');
+    final updateController = AutoUpdateController.instance;
+    updateController.context = context;
+    
+    try {
+      final hasUpdate = await updateController.checkForUpdates();
+      if (!mounted) return;
+      
+      if (hasUpdate) {
+        updateController.showUpdateDialog(skipCheck: true);
+      }
+    } catch (e) {
+      debugPrint('MyApp: 检查更新失败: $e');
+    }
   }
 
   @override
