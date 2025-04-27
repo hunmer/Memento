@@ -92,6 +92,24 @@ fi
 echo -e "${YELLOW}Creating GitHub Release...${NC}"
 RELEASE_NOTES="release_notes.md"
 
+# 创建文件哈希值表格头部
+echo "## File Checksums" > "$RELEASE_NOTES"
+echo "" >> "$RELEASE_NOTES"
+echo "| Filename | MD5 | SHA256 |" >> "$RELEASE_NOTES"
+echo "|----------|-----|---------|" >> "$RELEASE_NOTES"
+
+# 计算并写入每个文件的哈希值
+for file in $OUTPUT_DIR/*; do
+    if [ -f "$file" ]; then
+        filename=$(basename "$file")
+        md5=$(md5sum "$file" | cut -d' ' -f1)
+        sha256=$(shasum -a 256 "$file" | cut -d' ' -f1)
+        echo "| $filename | \`$md5\` | \`$sha256\` |" >> "$RELEASE_NOTES"
+    fi
+done
+
+echo "" >> "$RELEASE_NOTES"
+
 # 创建 GitHub Release
 echo -e "${YELLOW}Creating GitHub Release for $GITHUB_USER/$GITHUB_REPO...${NC}"
 if ! gh release create "v$VERSION" --repo "$GITHUB_USER/$GITHUB_REPO" --title "Memento v$VERSION" --notes-file $RELEASE_NOTES; then

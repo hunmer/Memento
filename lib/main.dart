@@ -42,24 +42,17 @@ void main() async {
   try {
     // 创建并初始化存储管理器（内部会处理Web平台的情况）
     globalStorage = StorageManager();
-    debugPrint('初始化存储管理器...');
     await globalStorage.initialize();
-    debugPrint('存储管理器初始化完成');
 
     // 初始化配置管理器
     globalConfigManager = ConfigManager(globalStorage);
-    debugPrint('初始化配置管理器...');
     await globalConfigManager.initialize();
-    debugPrint('配置管理器初始化完成');
 
     // 获取插件管理器单例实例并初始化
     globalPluginManager = PluginManager();
-    debugPrint('初始化插件管理器...');
     await globalPluginManager.setStorageManager(globalStorage);
-    debugPrint('插件管理器初始化完成');
 
     // 注册内置插件
-    debugPrint('注册内置插件...');
     final plugins = [
       ChatPlugin.instance,
       DiaryPlugin.instance,
@@ -84,19 +77,8 @@ void main() async {
       }
     }
 
-    // 初始化自动更新检查器
-    debugPrint('初始化自动更新检查...');
-    try {
-      final updateController = AutoUpdateController.instance;
-      // 在后台初始化更新检查器
-      updateController.initialize().then((_) {
-        debugPrint('自动更新检查初始化完成');
-      }).catchError((e) {
-        debugPrint('自动更新检查初始化失败: $e');
-      });
-    } catch (e) {
-      debugPrint('初始化自动更新检查失败: $e');
-    }
+    final updateController = AutoUpdateController.instance;
+    updateController.initialize();
   } catch (e) {
     debugPrint('初始化失败: $e');
   }
@@ -115,33 +97,33 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    
+
     // 延迟执行以确保context可用
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupAutoUpdate();
     });
   }
-  
+
   void _setupAutoUpdate() {
     if (!mounted) return;
     final updateController = AutoUpdateController.instance;
-    
+
     // 设置context，这样更新控制器就可以显示UI了
     updateController.context = context;
   }
-  
+
   // 手动检查更新的方法，可以在需要时调用
   Future<void> checkForUpdates() async {
     if (!mounted) return;
-    
+
     debugPrint('MyApp: 手动检查更新');
     final updateController = AutoUpdateController.instance;
     updateController.context = context;
-    
+
     try {
       final hasUpdate = await updateController.checkForUpdates();
       if (!mounted) return;
-      
+
       if (hasUpdate) {
         updateController.showUpdateDialog(skipCheck: true);
       }

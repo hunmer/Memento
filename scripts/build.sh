@@ -133,7 +133,6 @@ if is_platform_enabled "android"; then
     # 检查密钥库是否存在
     if [ ! -f "$KEYSTORE_PATH" ]; then
         echo -e "${YELLOW}Creating new keystore...${NC}"
-        x86
         # 创建目录（如果不存在）
         mkdir -p android/app
         
@@ -158,43 +157,27 @@ keyAlias=$KEY_ALIAS
 storeFile=upload-keystore.jks
 EOF
     
-    # 为每个架构构建单独的APK
-    for arch in "${ANDROID_ARCHS[@]}"; do
-        echo -e "${YELLOW}Building Android APK for $arch...${NC}"
-        
-        # 根据架构设置正确的目标平台
-        case $arch in
-            "arm64-v8a")
-                TARGET_PLATFORM="android-arm64"
-                ;;
-            "armeabi-v7a")
-                TARGET_PLATFORM="android-arm"
-                ;;
-            "x86_64")
-                TARGET_PLATFORM="android-x64"
-                ;;
-        esac
-        
-        flutter build apk --release --no-tree-shake-icons --target-platform=$TARGET_PLATFORM --split-per-abi
-    done
+    # 为所有架构一次性构建APK
+    echo -e "${YELLOW}Building Android APKs for all architectures...${NC}"
+    flutter build apk --release --no-tree-shake-icons --split-per-abi
 
     # 移动并重命名生成的APK文件
     mkdir -p "$OUTPUT_DIR"
     
     # 检查并移动每个架构的APK
     if [ -f "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" ]; then
-        cp "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" "$OUTPUT_DIR/memento-$VERSION-android-arm64-v8a.apk"
-        echo -e "${GREEN}Successfully built Android APK (arm64-v8a): $OUTPUT_DIR/memento-$VERSION-android-arm64-v8a.apk${NC}"
+        cp "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" "$OUTPUT_DIR/memento-v${VERSION}-android-arm64-v8a.apk"
+        echo -e "${GREEN}Successfully built Android APK (arm64-v8a): $OUTPUT_DIR/memento-v${VERSION}-android-arm64-v8a.apk${NC}"
     fi
     
     if [ -f "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk" ]; then
-        cp "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk" "$OUTPUT_DIR/memento-$VERSION-android-armeabi-v7a.apk"
-        echo -e "${GREEN}Successfully built Android APK (armeabi-v7a): $OUTPUT_DIR/memento-$VERSION-android-armeabi-v7a.apk${NC}"
+        cp "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk" "$OUTPUT_DIR/memento-v${VERSION}-android-armeabi-v7a.apk"
+        echo -e "${GREEN}Successfully built Android APK (armeabi-v7a): $OUTPUT_DIR/memento-v${VERSION}-android-armeabi-v7a.apk${NC}"
     fi
     
     if [ -f "build/app/outputs/flutter-apk/app-x86_64-release.apk" ]; then
-        cp "build/app/outputs/flutter-apk/app-x86_64-release.apk" "$OUTPUT_DIR/memento-$VERSION-android-x86_64.apk"
-        echo -e "${GREEN}Successfully built Android APK (x86_64): $OUTPUT_DIR/memento-$VERSION-android-x86_64.apk${NC}"
+        cp "build/app/outputs/flutter-apk/app-x86_64-release.apk" "$OUTPUT_DIR/memento-v${VERSION}-android-x86_64.apk"
+        echo -e "${GREEN}Successfully built Android APK (x86_64): $OUTPUT_DIR/memento-v${VERSION}-android-x86_64.apk${NC}"
     fi
 
     # 构建通用APK（包含所有架构）
@@ -215,8 +198,8 @@ if is_platform_enabled "web"; then
     echo -e "${YELLOW}Building Web...${NC}"
     flutter build web --release --no-tree-shake-icons
     if [ -d "build/web" ]; then
-        (cd build/web && zip -r "../../$OUTPUT_DIR/memento-$VERSION-web.zip" .)
-        echo -e "${GREEN}Successfully built Web: $OUTPUT_DIR/app-$VERSION-web.zip${NC}"
+        (cd build/web && zip -r "../../$OUTPUT_DIR/memento-v${VERSION}-web.zip" .)
+        echo -e "${GREEN}Successfully built Web: $OUTPUT_DIR/memento-v${VERSION}-web.zip${NC}"
     else
         echo -e "${RED}Error: Web build failed or directory not found${NC}"
         exit 1
@@ -252,7 +235,7 @@ if is_platform_enabled "macos"; then
         fi
         
         # 创建 DMG 文件
-        DMG_NAME="memento-$VERSION.dmg"
+        DMG_NAME="memento-v${VERSION}-macos.dmg"
         if create-dmg \
             --volname "Memento" \
             --volicon "assets/icon/app_icon.icns" \
@@ -286,8 +269,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         flutter build linux --release --no-tree-shake-icons
         if [ -d "build/linux/x64/release/bundle" ]; then
             mkdir -p "$OUTPUT_DIR"
-            (cd build/linux/x64/release/bundle && tar czf "../../../../$OUTPUT_DIR/apmementop-$VERSION-linux.tar.gz" .)
-            echo -e "${GREEN}Successfully built Linux package: $OUTPUT_DIR/memento-$VERSION-linux.tar.gz${NC}"
+            (cd build/linux/x64/release/bundle && tar czf "../../../../$OUTPUT_DIR/memento-v${VERSION}-linux.tar.gz" .)
+            echo -e "${GREEN}Successfully built Linux package: $OUTPUT_DIR/memento-v${VERSION}-linux.tar.gz${NC}"
         else
             echo -e "${RED}Error: Linux build failed or directory not found${NC}"
             exit 1
@@ -304,8 +287,8 @@ if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
         flutter build windows --release --no-tree-shake-icons
         if [ -d "build/windows/x64/runner/Release" ]; then
             mkdir -p "$OUTPUT_DIR"
-            (cd build/windows/x64/runner/Release && zip -r "../../../../$OUTPUT_DIR/memento-$VERSION-windows.zip" .)
-            echo -e "${GREEN}Successfully built Windows package: $OUTPUT_DIR/memento-$VERSION-windows.zip${NC}"
+            (cd build/windows/x64/runner/Release && zip -r "../../../../$OUTPUT_DIR/memento-v${VERSION}-windows.zip" .)
+            echo -e "${GREEN}Successfully built Windows package: $OUTPUT_DIR/memento-v${VERSION}-windows.zip${NC}"
         else
             echo -e "${RED}Error: Windows build failed or directory not found${NC}"
             exit 1
