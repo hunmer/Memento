@@ -266,20 +266,46 @@ class _ActivityFormState extends State<ActivityForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: Padding(
+    final theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.activity == null ? '新建活动' : '编辑活动'),
+        centerTitle: true,
+        leadingWidth: 80, // 为左侧按钮预留足够空间
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 4.0),
+          child: TextButton.icon(
+            icon: const Icon(Icons.close),
+            label: const Text('取消'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              textStyle: const TextStyle(fontSize: 14),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: TextButton.icon(
+              icon: const Icon(Icons.check),
+              label: const Text('保存'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                textStyle: const TextStyle(fontSize: 14),
+              ),
+              onPressed: _handleSave,
+            ),
+          ),
+        ],
+      ),
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                widget.activity == null ? '新建活动' : '编辑活动',
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
               TextField(
                 controller: _titleController,
                 decoration: const InputDecoration(
@@ -631,20 +657,7 @@ class _ActivityFormState extends State<ActivityForm> {
               ),
 
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: _handleSave,
-                    child: const Text('保存'),
-                  ),
-                ],
-              ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
