@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/bill_model.dart';
 import '../models/bill.dart';
-import '../models/account.dart';
 import '../bill_plugin.dart';
-import '../services/bill_service.dart';
 import 'bill_edit_screen.dart';
-import 'account_list_screen.dart';
 import 'bill_stats_screen.dart';
 
 class BillListScreen extends StatefulWidget {
@@ -23,7 +20,8 @@ class BillListScreen extends StatefulWidget {
   State<BillListScreen> createState() => _BillListScreenState();
 }
 
-class _BillListScreenState extends State<BillListScreen> with TickerProviderStateMixin {
+class _BillListScreenState extends State<BillListScreen>
+    with TickerProviderStateMixin {
   late final void Function() _billPluginListener;
   late final TabController _tabController;
   List<BillModel> _bills = [];
@@ -73,7 +71,14 @@ class _BillListScreenState extends State<BillListScreen> with TickerProviderStat
     // 将时间设置为当天的开始
     _startDate = DateTime(_startDate.year, _startDate.month, _startDate.day);
     // 将时间设置为当天的结束
-    _endDate = DateTime(_endDate.year, _endDate.month, _endDate.day, 23, 59, 59);
+    _endDate = DateTime(
+      _endDate.year,
+      _endDate.month,
+      _endDate.day,
+      23,
+      59,
+      59,
+    );
   }
 
   void _changePeriod(String period) {
@@ -108,37 +113,41 @@ class _BillListScreenState extends State<BillListScreen> with TickerProviderStat
 
   Future<void> _loadBills() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoading = true;
     });
 
     try {
       // 获取当前账户
-      final currentAccount = widget.billPlugin.accounts
-          .firstWhere((account) => account.id == widget.accountId);
+      final currentAccount = widget.billPlugin.accounts.firstWhere(
+        (account) => account.id == widget.accountId,
+      );
 
       // 从账户中获取指定时间范围内的账单
-      final filteredBills = currentAccount.bills.where((bill) =>
-        bill.createdAt.isAfter(_startDate) &&
-        bill.createdAt.isBefore(_endDate.add(const Duration(seconds: 1)))
+      final filteredBills = currentAccount.bills.where(
+        (bill) =>
+            bill.createdAt.isAfter(_startDate) &&
+            bill.createdAt.isBefore(_endDate.add(const Duration(seconds: 1))),
       );
 
       // 转换为BillModel
-      final bills = filteredBills.map(
-            (bill) => BillModel(
-              id: bill.id,
-              title: bill.title,
-              amount: bill.absoluteAmount,
-              date: bill.createdAt,
-              icon: bill.icon,
-              color: bill.iconColor,
-              category: bill.tag ?? '未分类',
-              note: bill.note,
-              isExpense: bill.isExpense,
-            ),
-          )
-          .toList();
+      final bills =
+          filteredBills
+              .map(
+                (bill) => BillModel(
+                  id: bill.id,
+                  title: bill.title,
+                  amount: bill.absoluteAmount,
+                  date: bill.createdAt,
+                  icon: bill.icon,
+                  color: bill.iconColor,
+                  category: bill.tag ?? '未分类',
+                  note: bill.note,
+                  isExpense: bill.isExpense,
+                ),
+              )
+              .toList();
 
       // 按日期倒序排序，最新的账单显示在前面
       bills.sort((a, b) => b.date.compareTo(a.date));
@@ -195,8 +204,9 @@ class _BillListScreenState extends State<BillListScreen> with TickerProviderStat
     double totalIncome = 0;
     double totalExpense = 0;
 
-    final currentAccount = widget.billPlugin.accounts
-        .firstWhere((account) => account.id == widget.accountId);
+    final currentAccount = widget.billPlugin.accounts.firstWhere(
+      (account) => account.id == widget.accountId,
+    );
     for (var bill in currentAccount.bills) {
       if (bill.amount > 0) {
         totalIncome += bill.amount;
@@ -208,127 +218,127 @@ class _BillListScreenState extends State<BillListScreen> with TickerProviderStat
     final balance = totalIncome - totalExpense;
 
     return Scaffold(
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            // 账单列表页
-            _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : Column(
-                  children: [
-                    // 时间段选择
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // 账单列表页
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                children: [
+                  // 时间段选择
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text('时间范围：'),
+                            const SizedBox(width: 8),
+                            SegmentedButton<String>(
+                              segments: const [
+                                ButtonSegment<String>(
+                                  value: '周',
+                                  label: Text('本周'),
+                                ),
+                                ButtonSegment<String>(
+                                  value: '月',
+                                  label: Text('本月'),
+                                ),
+                                ButtonSegment<String>(
+                                  value: '年',
+                                  label: Text('本年'),
+                                ),
+                              ],
+                              selected: {_selectedPeriod},
+                              onSelectionChanged: (Set<String> newSelection) {
+                                _changePeriod(newSelection.first);
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${DateFormat('yyyy-MM-dd').format(_startDate)} 至 ${DateFormat('yyyy-MM-dd').format(_endDate)}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 账单统计卡片
+                  Card(
+                    margin: const EdgeInsets.all(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          const Text(
+                            '账单概览',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              const Text('时间范围：'),
-                              const SizedBox(width: 8),
-                              SegmentedButton<String>(
-                                segments: const [
-                                  ButtonSegment<String>(
-                                    value: '周',
-                                    label: Text('本周'),
-                                  ),
-                                  ButtonSegment<String>(
-                                    value: '月',
-                                    label: Text('本月'),
-                                  ),
-                                  ButtonSegment<String>(
-                                    value: '年',
-                                    label: Text('本年'),
-                                  ),
-                                ],
-                                selected: {_selectedPeriod},
-                                onSelectionChanged: (Set<String> newSelection) {
-                                  _changePeriod(newSelection.first);
-                                },
+                              _buildStatItem(
+                                '收入',
+                                totalIncome,
+                                Colors.green,
+                                Icons.arrow_downward,
+                              ),
+                              _buildStatItem(
+                                '支出',
+                                totalExpense,
+                                Colors.red,
+                                Icons.arrow_upward,
+                              ),
+                              _buildStatItem(
+                                '结余',
+                                balance,
+                                balance >= 0 ? Colors.blue : Colors.orange,
+                                Icons.account_balance_wallet,
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${DateFormat('yyyy-MM-dd').format(_startDate)} 至 ${DateFormat('yyyy-MM-dd').format(_endDate)}',
-                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                       ),
                     ),
+                  ),
 
-                    // 账单统计卡片
-                    Card(
-                      margin: const EdgeInsets.all(16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            const Text(
-                              '账单概览',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                  // 账单列表
+                  Expanded(
+                    child:
+                        _bills.isEmpty
+                            ? const Center(child: Text('暂无账单记录，点击右下角添加'))
+                            : ListView.builder(
+                              itemCount: _bills.length,
+                              itemBuilder: (context, index) {
+                                final bill = _bills[index];
+                                return _buildBillItem(context, bill);
+                              },
                             ),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                _buildStatItem(
-                                  '收入',
-                                  totalIncome,
-                                  Colors.green,
-                                  Icons.arrow_downward,
-                                ),
-                                _buildStatItem(
-                                  '支出',
-                                  totalExpense,
-                                  Colors.red,
-                                  Icons.arrow_upward,
-                                ),
-                                _buildStatItem(
-                                  '结余',
-                                  balance,
-                                  balance >= 0 ? Colors.blue : Colors.orange,
-                                  Icons.account_balance_wallet,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  ),
+                ],
+              ),
 
-                    // 账单列表
-                    Expanded(
-                      child:
-                          _bills.isEmpty
-                              ? const Center(child: Text('暂无账单记录，点击右下角添加'))
-                              : ListView.builder(
-                                itemCount: _bills.length,
-                                itemBuilder: (context, index) {
-                                  final bill = _bills[index];
-                                  return _buildBillItem(context, bill);
-                                },
-                              ),
-                    ),
-                  ],
-                ),
-
-            // 统计分析页
-            BillStatsScreen(
-              billPlugin: widget.billPlugin,
-              accountId: widget.accountId,
-              startDate: _startDate,
-              endDate: _endDate,
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _navigateToBillEdit(context),
-          child: const Icon(Icons.add),
-        ),
+          // 统计分析页
+          BillStatsScreen(
+            billPlugin: widget.billPlugin,
+            accountId: widget.accountId,
+            startDate: _startDate,
+            endDate: _endDate,
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToBillEdit(context),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 

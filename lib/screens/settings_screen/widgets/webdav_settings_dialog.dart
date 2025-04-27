@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/webdav_controller.dart';
 import '../../../core/storage/storage_manager.dart';
-import '../widgets/backup_progress_dialog.dart';
 
 class WebDAVSettingsDialog extends StatefulWidget {
   final WebDAVController controller;

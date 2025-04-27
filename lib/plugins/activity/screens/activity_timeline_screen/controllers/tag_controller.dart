@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../../models/activity_record.dart';
 import '../../../services/activity_service.dart';
 import '../../../widgets/tag_manager_dialog.dart';
 
 class TagController {
   final ActivityService activityService;
   final VoidCallback onTagsChanged;
-  
+
   List<TagGroup> tagGroups = [];
   List<String> selectedTags = [];
   List<String> recentTags = [];
 
-  TagController({
-    required this.activityService,
-    required this.onTagsChanged,
-  });
+  TagController({required this.activityService, required this.onTagsChanged});
 
   Future<void> initialize() async {
     // 初始化标签组
@@ -24,7 +20,7 @@ class TagController {
       TagGroup(name: '生活', tags: ['运动', '购物', '休息', '娱乐', '社交']),
       TagGroup(name: '健康', tags: ['锻炼', '冥想', '饮食', '睡眠']),
     ];
-    
+
     await _loadTagGroups();
   }
 
@@ -48,7 +44,7 @@ class TagController {
         // 更新最近使用标签组
         _updateRecentTagGroup();
       }
-      
+
       onTagsChanged();
     } catch (e) {
       // 处理错误
@@ -98,23 +94,24 @@ class TagController {
 
     // 保存标签组
     await _saveTagGroups();
-    
+
     onTagsChanged();
   }
 
   Future<void> showTagManagerDialog(BuildContext context) async {
     final result = await showDialog<List<String>>(
       context: context,
-      builder: (context) => TagManagerDialog(
-        groups: tagGroups,
-        selectedTags: selectedTags,
-        onGroupsChanged: (updatedGroups) {
-          // 保存更新后的标签组
-          tagGroups = updatedGroups;
-          _saveTagGroups();
-          onTagsChanged();
-        },
-      ),
+      builder:
+          (context) => TagManagerDialog(
+            groups: tagGroups,
+            selectedTags: selectedTags,
+            onGroupsChanged: (updatedGroups) {
+              // 保存更新后的标签组
+              tagGroups = updatedGroups;
+              _saveTagGroups();
+              onTagsChanged();
+            },
+          ),
     );
 
     if (result != null) {

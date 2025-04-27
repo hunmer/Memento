@@ -10,13 +10,13 @@ class AppearanceTab extends StatelessWidget {
   final List<String> predefinedBackgroundImages;
 
   const AppearanceTab({
-    Key? key,
+    super.key,
     required this.selectedColor,
     required this.onColorSelected,
     required this.backgroundImageUrl,
     required this.onBackgroundImageSelected,
     required this.predefinedBackgroundImages,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -60,39 +60,41 @@ class AppearanceTab extends StatelessWidget {
                       margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: backgroundImageUrl == null
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey,
+                          color:
+                              backgroundImageUrl == null
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey,
                         ),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Center(
-                        child: Icon(Icons.clear),
-                      ),
+                      child: const Center(child: Icon(Icons.clear)),
                     ),
                   ),
-                  ...predefinedBackgroundImages.map((imageUrl) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () => onBackgroundImageSelected(imageUrl),
-                          child: Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: backgroundImageUrl == imageUrl
-                                    ? Theme.of(context).primaryColor
-                                    : Colors.grey,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                              image: DecorationImage(
-                                image: NetworkImage(imageUrl),
-                                fit: BoxFit.cover,
-                              ),
+                  ...predefinedBackgroundImages.map(
+                    (imageUrl) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () => onBackgroundImageSelected(imageUrl),
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color:
+                                  backgroundImageUrl == imageUrl
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                            image: DecorationImage(
+                              image: NetworkImage(imageUrl),
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

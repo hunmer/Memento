@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import './controllers/settings_screen_controller.dart';
-import './widgets/plugin_selection_dialog.dart';
-import './widgets/folder_selection_dialog.dart';
 import './widgets/webdav_settings_dialog.dart';
 import './controllers/webdav_controller.dart';
 import '../../core/floating_ball/settings_screen.dart';

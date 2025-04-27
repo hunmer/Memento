@@ -130,7 +130,7 @@ class PluginManager {
 
     try {
       final data = await _storageManager!.read(_accessTimesStorageKey);
-      if (data != null && data.isNotEmpty) {
+      if (data.isNotEmpty) {
         _pluginAccessTimes = Map<String, int>.from(
           data.map((key, value) => MapEntry(key, value as int)),
         );

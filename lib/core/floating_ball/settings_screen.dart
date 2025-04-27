@@ -3,7 +3,7 @@ import 'floating_ball_manager.dart';
 import 'floating_ball_service.dart';
 
 class FloatingBallSettingsScreen extends StatefulWidget {
-  const FloatingBallSettingsScreen({Key? key}) : super(key: key);
+  const FloatingBallSettingsScreen({super.key});
 
   @override
   State<FloatingBallSettingsScreen> createState() =>
@@ -114,7 +114,7 @@ class _FloatingBallSettingsScreenState
                           min: 0.5,
                           max: 1.5,
                           divisions: 10,
-                          label: (_sizeScale * 100).round().toString() + '%',
+                          label: '${(_sizeScale * 100).round()}%',
                           onChanged: (value) {
                             setState(() {
                               _sizeScale = value;
@@ -183,7 +183,7 @@ class _FloatingBallSettingsScreenState
                         value: action,
                         child: Text(action),
                       );
-                    }).toList(),
+                    }),
                   ],
                   onChanged: (value) async {
                     setState(() {

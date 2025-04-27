@@ -5,10 +5,10 @@ class ColorPicker extends StatelessWidget {
   final Function(Color) onColorSelected;
 
   const ColorPicker({
-    Key? key,
+    super.key,
     required this.selectedColor,
     required this.onColorSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,36 +31,40 @@ class ColorPicker extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: colors.map((color) {
-        return GestureDetector(
-          onTap: () => onColorSelected(color),
-          child: Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: selectedColor == color ? Colors.white : Colors.transparent,
-                width: 2,
-              ),
-              boxShadow: [
-                if (selectedColor == color)
-                  BoxShadow(
-                    color: Color.fromRGBO(
-                      color.r.round(),
-                      color.g.round(),
-                      color.b.round(),
-                      0.5,
-                    ),
-                    blurRadius: 8,
-                    spreadRadius: 1,
+      children:
+          colors.map((color) {
+            return GestureDetector(
+              onTap: () => onColorSelected(color),
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color:
+                        selectedColor == color
+                            ? Colors.white
+                            : Colors.transparent,
+                    width: 2,
                   ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+                  boxShadow: [
+                    if (selectedColor == color)
+                      BoxShadow(
+                        color: Color.fromRGBO(
+                          color.r.round(),
+                          color.g.round(),
+                          color.b.round(),
+                          0.5,
+                        ),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
     );
   }
 }

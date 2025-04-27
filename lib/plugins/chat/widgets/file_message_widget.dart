@@ -9,10 +9,10 @@ class FileMessageWidget extends StatelessWidget {
   final bool isOutgoing;
 
   const FileMessageWidget({
-    Key? key,
+    super.key,
     required this.fileMessage,
     this.isOutgoing = false,
-  }) : super(key: key);
+  });
 
   IconData _getFileIcon() {
     final ext = fileMessage.extension;

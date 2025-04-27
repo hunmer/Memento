@@ -8,12 +8,12 @@ class DateSection extends StatelessWidget {
   final Function(DateTime?) onEndDateChanged;
 
   const DateSection({
-    Key? key,
+    super.key,
     required this.startDate,
     required this.endDate,
     required this.onStartDateChanged,
     required this.onEndDateChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +24,11 @@ class DateSection extends StatelessWidget {
         Expanded(
           child: TextButton.icon(
             icon: const Icon(Icons.calendar_today),
-            label: Text(startDate != null
-                ? startDate!.toString().split(' ')[0]
-                : l10n.startDate),
+            label: Text(
+              startDate != null
+                  ? startDate!.toString().split(' ')[0]
+                  : l10n.startDate,
+            ),
             onPressed: () => _selectDate(context, true),
           ),
         ),
@@ -34,9 +36,11 @@ class DateSection extends StatelessWidget {
         Expanded(
           child: TextButton.icon(
             icon: const Icon(Icons.calendar_today),
-            label: Text(endDate != null
-                ? endDate!.toString().split(' ')[0]
-                : l10n.endDate),
+            label: Text(
+              endDate != null
+                  ? endDate!.toString().split(' ')[0]
+                  : l10n.endDate,
+            ),
             onPressed: () => _selectDate(context, false),
           ),
         ),
@@ -47,7 +51,8 @@ class DateSection extends StatelessWidget {
   Future<void> _selectDate(BuildContext context, bool isStart) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: isStart ? startDate ?? DateTime.now() : endDate ?? DateTime.now(),
+      initialDate:
+          isStart ? startDate ?? DateTime.now() : endDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );

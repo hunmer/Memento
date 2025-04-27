@@ -7,11 +7,11 @@ class BillStatisticsCard extends StatelessWidget {
   final double balance;
 
   const BillStatisticsCard({
-    Key? key,
+    super.key,
     required this.totalIncome,
     required this.totalExpense,
     required this.balance,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +23,7 @@ class BillStatisticsCard extends StatelessWidget {
           children: [
             const Text(
               '账单概览',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Row(
@@ -58,27 +55,26 @@ class BillStatisticsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String title, double amount, Color color, IconData icon) {
+  Widget _buildStatItem(
+    String title,
+    double amount,
+    Color color,
+    IconData icon,
+  ) {
     final formatter = NumberFormat.currency(symbol: '¥', decimalDigits: 2);
-    
+
     return Column(
       children: [
         Icon(icon, color: color),
         const SizedBox(height: 4),
         Text(
           title,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         Text(
           formatter.format(amount),
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
         ),
       ],
     );

@@ -5,7 +5,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/day/l10n/day_localizations.dart';
-import 'core/floating_ball/floating_ball_service.dart';
 // 移除未使用的导入
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';

@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:share_plus/share_plus.dart';
 import '../../../models/message.dart';
 import '../../../models/channel.dart';
 import '../../../utils/date_formatter.dart';
@@ -10,7 +9,6 @@ import '../../../services/settings_service.dart';
 import '../utils/text_highlight.dart';
 import '../controllers/timeline_controller.dart';
 import '../../../utils/message_options_handler.dart';
-import '../../../models/file_message.dart';
 
 /// Timeline 中显示的消息卡片组件
 class TimelineMessageCard extends StatelessWidget {
@@ -34,7 +32,7 @@ class TimelineMessageCard extends StatelessWidget {
     final theme = Theme.of(context);
     final timeFormatter = DateFormatter();
     final cardColor = message.bubbleColor;
-    
+
     // 根据视图模式调整卡片样式
     return Card(
       elevation: isGridView ? 2 : 1,
@@ -51,8 +49,11 @@ class TimelineMessageCard extends StatelessWidget {
             onMessageEdit: (_) => controller.handleMessageEdit(message),
             onMessageDelete: (_) => controller.handleMessageDelete(message),
             onMessageCopy: (_) => controller.handleMessageCopy(message),
-            onSetFixedSymbol: (msg, symbol) => controller.handleSetFixedSymbol(message, symbol),
-            onSetBubbleColor: (msg, color) => controller.handleSetBubbleColor(message, color),
+            onSetFixedSymbol:
+                (msg, symbol) =>
+                    controller.handleSetFixedSymbol(message, symbol),
+            onSetBubbleColor:
+                (msg, color) => controller.handleSetBubbleColor(message, color),
           );
         },
         onTap: () async {
@@ -73,148 +74,165 @@ class TimelineMessageCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            // 头像和用户名
-            Row(
-              children: [
-                // 根据设置决定是否显示头像
-                if (settingsService?.showAvatarInTimeline ?? true) ...[
-                  Container(
-                    width: isGridView ? 28 : 40,
-                    height: isGridView ? 28 : 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: theme.colorScheme.primary,
-                    ),
-                    child: message.user.iconPath != null
-                        ? FutureBuilder<String>(
-                            future: _getAbsolutePath(message.user.iconPath!),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData && snapshot.data != null) {
-                                return ClipOval(
-                                  child: Image.file(
-                                    File(snapshot.data!),
-                                    width: isGridView ? 28 : 40,
-                                    height: isGridView ? 28 : 40,
-                                    fit: BoxFit.cover,
-                                  ),
-                                );
-                              }
-                              return _buildDefaultAvatar(theme, isGridView);
-                            },
-                          )
-                        : _buildDefaultAvatar(theme, isGridView),
-                  ),
-                  SizedBox(width: isGridView ? 8 : 12),
-                ],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        message.user.username,
-                        style: isGridView 
-                            ? theme.textTheme.titleSmall 
-                            : theme.textTheme.titleMedium,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        DateFormatter.formatDateTime(message.date, context),
-                        style: isGridView 
-                            ? theme.textTheme.bodySmall?.copyWith(fontSize: 10) 
-                            : theme.textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: isGridView ? 8 : 12),
-            
-            // 消息内容（带高亮）和固定字符
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 显示固定字符（如果有）
-                if (message.fixedSymbol != null) ...[
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isGridView ? 4 : 6, 
-                      vertical: isGridView ? 1 : 2
-                    ),
-                    margin: EdgeInsets.only(right: isGridView ? 4 : 8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      message.fixedSymbol!,
-                      style: TextStyle(
+              // 头像和用户名
+              Row(
+                children: [
+                  // 根据设置决定是否显示头像
+                  if (settingsService?.showAvatarInTimeline ?? true) ...[
+                    Container(
+                      width: isGridView ? 28 : 40,
+                      height: isGridView ? 28 : 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
                         color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: isGridView ? 10 : 12,
+                      ),
+                      child:
+                          message.user.iconPath != null
+                              ? FutureBuilder<String>(
+                                future: _getAbsolutePath(
+                                  message.user.iconPath!,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data != null) {
+                                    return ClipOval(
+                                      child: Image.file(
+                                        File(snapshot.data!),
+                                        width: isGridView ? 28 : 40,
+                                        height: isGridView ? 28 : 40,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    );
+                                  }
+                                  return _buildDefaultAvatar(theme, isGridView);
+                                },
+                              )
+                              : _buildDefaultAvatar(theme, isGridView),
+                    ),
+                    SizedBox(width: isGridView ? 8 : 12),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message.user.username,
+                          style:
+                              isGridView
+                                  ? theme.textTheme.titleSmall
+                                  : theme.textTheme.titleMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          DateFormatter.formatDateTime(message.date, context),
+                          style:
+                              isGridView
+                                  ? theme.textTheme.bodySmall?.copyWith(
+                                    fontSize: 10,
+                                  )
+                                  : theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: isGridView ? 8 : 12),
+
+              // 消息内容（带高亮）和固定字符
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 显示固定字符（如果有）
+                  if (message.fixedSymbol != null) ...[
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isGridView ? 4 : 6,
+                        vertical: isGridView ? 1 : 2,
+                      ),
+                      margin: EdgeInsets.only(right: isGridView ? 4 : 8),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        message.fixedSymbol!,
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isGridView ? 10 : 12,
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  // 消息内容
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return RichText(
+                          maxLines:
+                              isGridView ? 12 : null, // 增加最大行数，但仍保持一定限制以避免过长
+                          overflow: TextOverflow.ellipsis,
+                          text: TextSpan(
+                            children: TextHighlight.highlightText(
+                              text: message.content,
+                              query: controller.searchQuery,
+                              style:
+                                  isGridView
+                                      ? theme.textTheme.bodyMedium?.copyWith(
+                                            fontSize: 13,
+                                            height: 1.3, // 调整行高使文本更紧凑
+                                          ) ??
+                                          const TextStyle(
+                                            fontSize: 13,
+                                            height: 1.3,
+                                          )
+                                      : theme.textTheme.bodyLarge ??
+                                          const TextStyle(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: isGridView ? 8 : 12),
+
+              // 频道信息
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.chat_bubble_outline,
+                    size: isGridView ? 12 : 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  SizedBox(width: isGridView ? 2 : 4),
+                  RichText(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      children: TextHighlight.highlightText(
+                        text: channel.title,
+                        query: controller.searchQuery,
+                        style:
+                            theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontSize: isGridView ? 10 : null,
+                            ) ??
+                            const TextStyle(),
                       ),
                     ),
                   ),
                 ],
-                
-                // 消息内容
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return RichText(
-                        maxLines: isGridView ? 12 : null, // 增加最大行数，但仍保持一定限制以避免过长
-                        overflow: TextOverflow.ellipsis,
-                        text: TextSpan(
-                          children: TextHighlight.highlightText(
-                            text: message.content,
-                            query: controller.searchQuery,
-                            style: isGridView
-                                ? theme.textTheme.bodyMedium?.copyWith(
-                                    fontSize: 13,
-                                    height: 1.3, // 调整行高使文本更紧凑
-                                  ) ?? const TextStyle(fontSize: 13, height: 1.3)
-                                : theme.textTheme.bodyLarge ?? const TextStyle(),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: isGridView ? 8 : 12),
-            
-            // 频道信息
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Icon(
-                  Icons.chat_bubble_outline,
-                  size: isGridView ? 12 : 16,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                SizedBox(width: isGridView ? 2 : 4),
-                RichText(
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(
-                    children: TextHighlight.highlightText(
-                      text: channel.title,
-                      query: controller.searchQuery,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: isGridView ? 10 : null,
-                      ) ?? const TextStyle(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -222,7 +240,9 @@ class TimelineMessageCard extends StatelessWidget {
   Widget _buildDefaultAvatar(ThemeData theme, bool isGridView) {
     return Center(
       child: Text(
-        message.user.username.isNotEmpty ? message.user.username[0].toUpperCase() : '?',
+        message.user.username.isNotEmpty
+            ? message.user.username[0].toUpperCase()
+            : '?',
         style: TextStyle(
           color: theme.colorScheme.onPrimary,
           fontSize: isGridView ? 12 : 16,
@@ -234,6 +254,10 @@ class TimelineMessageCard extends StatelessWidget {
 
   Future<String> _getAbsolutePath(String relativePath) async {
     final appDir = await getApplicationDocumentsDirectory();
-    return path.join(appDir.path, 'app_data', relativePath.replaceFirst('./', ''));
+    return path.join(
+      appDir.path,
+      'app_data',
+      relativePath.replaceFirst('./', ''),
+    );
   }
 }

@@ -13,14 +13,14 @@ class AudioPlayerWidget extends StatefulWidget {
   final Color progressColor;
 
   const AudioPlayerWidget({
-    Key? key,
+    super.key,
     required this.audioPath,
     this.durationInSeconds = 0,
     this.isLocalFile = true,
     this.primaryColor = Colors.blue,
     this.backgroundColor = Colors.grey,
     this.progressColor = Colors.blue,
-  }) : super(key: key);
+  });
 
   @override
   State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
@@ -54,13 +54,13 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       // 设置音频文件
       if (widget.isLocalFile) {
         String filePath = widget.audioPath;
-        
+
         // 如果是相对路径，转换为绝对路径
         if (widget.audioPath.startsWith('./')) {
           final appDir = await getApplicationDocumentsDirectory();
           filePath = path.join(appDir.path, widget.audioPath.substring(2));
         }
-        
+
         await _audioPlayer.setSource(DeviceFileSource(filePath));
       } else {
         await _audioPlayer.setSource(UrlSource(widget.audioPath));
@@ -164,24 +164,28 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           // 播放/暂停按钮
           _isLoading
               ? SizedBox(
-                  width: 36,
-                  height: 36,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(widget.primaryColor),
+                width: 36,
+                height: 36,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    widget.primaryColor,
                   ),
-                )
-              : IconButton(
-                  icon: Icon(
-                    _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
-                    color: widget.primaryColor,
-                    size: 36,
-                  ),
-                  onPressed: _isInitialized ? _playPause : null,
                 ),
-          
+              )
+              : IconButton(
+                icon: Icon(
+                  _isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_filled,
+                  color: widget.primaryColor,
+                  size: 36,
+                ),
+                onPressed: _isInitialized ? _playPause : null,
+              ),
+
           const SizedBox(width: 8),
-          
+
           // 进度条
           Expanded(
             child: Column(
@@ -207,13 +211,17 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     ),
                   ],
                 ),
-                
+
                 // 进度滑块
                 SliderTheme(
                   data: SliderThemeData(
                     trackHeight: 4,
-                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 6,
+                    ),
+                    overlayShape: const RoundSliderOverlayShape(
+                      overlayRadius: 14,
+                    ),
                     activeTrackColor: widget.progressColor,
                     inactiveTrackColor: widget.backgroundColor.withOpacity(0.3),
                     thumbColor: widget.primaryColor,
@@ -223,16 +231,16 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     min: 0,
                     max: _duration.inSeconds.toDouble(),
                     value: _position.inSeconds.toDouble().clamp(
-                          0,
-                          _duration.inSeconds.toDouble(),
-                        ),
+                      0,
+                      _duration.inSeconds.toDouble(),
+                    ),
                     onChanged: _isInitialized ? _seek : null,
                   ),
                 ),
               ],
             ),
           ),
-          
+
           // 播放速度按钮
           TextButton(
             onPressed: _isInitialized ? _changeSpeed : null,

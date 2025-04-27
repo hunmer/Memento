@@ -8,12 +8,12 @@ class NotesTab extends StatelessWidget {
   final Function(int) onNoteRemoved;
 
   const NotesTab({
-    Key? key,
+    super.key,
     required this.notes,
     required this.onAddNote,
     required this.onNoteChanged,
     required this.onNoteRemoved,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +22,7 @@ class NotesTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: ListView(
-            children: [
-              ..._buildNotesList(context),
-            ],
-          ),
-        ),
+        Expanded(child: ListView(children: [..._buildNotesList(context)])),
         TextButton.icon(
           onPressed: onAddNote,
           icon: const Icon(Icons.add),

@@ -16,7 +16,7 @@ class MarkdownEditor extends StatefulWidget {
   final List<Widget>? extraActions;
 
   const MarkdownEditor({
-    Key? key,
+    super.key,
     this.initialTitle,
     this.initialContent,
     this.showTitle = true,
@@ -29,7 +29,7 @@ class MarkdownEditor extends StatefulWidget {
     this.autofocus = true,
     this.actions,
     this.extraActions,
-  }) : super(key: key);
+  });
 
   @override
   State<MarkdownEditor> createState() => _MarkdownEditorState();
@@ -46,7 +46,9 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.initialTitle ?? '');
-    _contentController = TextEditingController(text: widget.initialContent ?? '');
+    _contentController = TextEditingController(
+      text: widget.initialContent ?? '',
+    );
     _contentController.addListener(() {
       _currentCursorPosition = _contentController.selection.baseOffset;
     });
@@ -66,30 +68,36 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   void _insertMarkdownSyntax(String syntax, {String? closingSyntax}) {
     final text = _contentController.text;
     final selection = _contentController.selection;
-    
+
     if (selection.isValid) {
       final selectedText = text.substring(selection.start, selection.end);
       final beforeText = text.substring(0, selection.start);
       final afterText = text.substring(selection.end);
-      
-      final newText = closingSyntax != null
-          ? '$beforeText$syntax$selectedText$closingSyntax$afterText'
-          : '$beforeText$syntax$selectedText$afterText';
-      
+
+      final newText =
+          closingSyntax != null
+              ? '$beforeText$syntax$selectedText$closingSyntax$afterText'
+              : '$beforeText$syntax$selectedText$afterText';
+
       _contentController.value = TextEditingValue(
         text: newText,
         selection: TextSelection.collapsed(
-          offset: selection.start + syntax.length + selectedText.length + (closingSyntax?.length ?? 0),
+          offset:
+              selection.start +
+              syntax.length +
+              selectedText.length +
+              (closingSyntax?.length ?? 0),
         ),
       );
     } else {
       final beforeText = text.substring(0, _currentCursorPosition);
       final afterText = text.substring(_currentCursorPosition);
-      
-      final newText = closingSyntax != null
-          ? '$beforeText$syntax$closingSyntax$afterText'
-          : '$beforeText$syntax$afterText';
-      
+
+      final newText =
+          closingSyntax != null
+              ? '$beforeText$syntax$closingSyntax$afterText'
+              : '$beforeText$syntax$afterText';
+
       _contentController.value = TextEditingValue(
         text: newText,
         selection: TextSelection.collapsed(
@@ -97,7 +105,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
         ),
       );
     }
-    
+
     _contentFocusNode.requestFocus();
   }
 
@@ -139,17 +147,20 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
           IconButton(
             icon: const Icon(Icons.code),
             tooltip: '代码块',
-            onPressed: () => _insertMarkdownSyntax('```\\n', closingSyntax: '\\n```'),
+            onPressed:
+                () => _insertMarkdownSyntax('```\\n', closingSyntax: '\\n```'),
           ),
           IconButton(
             icon: const Icon(Icons.link),
             tooltip: '链接',
-            onPressed: () => _insertMarkdownSyntax('[链接文字](', closingSyntax: ')'),
+            onPressed:
+                () => _insertMarkdownSyntax('[链接文字](', closingSyntax: ')'),
           ),
           IconButton(
             icon: const Icon(Icons.image),
             tooltip: '图片',
-            onPressed: () => _insertMarkdownSyntax('![图片描述](', closingSyntax: ')'),
+            onPressed:
+                () => _insertMarkdownSyntax('![图片描述](', closingSyntax: ')'),
           ),
           IconButton(
             icon: const Icon(Icons.title),
@@ -164,7 +175,8 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
           IconButton(
             icon: const Icon(Icons.table_chart),
             tooltip: '表格',
-            onPressed: () => _insertMarkdownSyntax('''
+            onPressed:
+                () => _insertMarkdownSyntax('''
 | 列1 | 列2 | 列3 |
 |-----|-----|-----|
 | 内容 | 内容 | 内容 |
@@ -192,7 +204,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     if (widget.actions != null && widget.actions!.isNotEmpty) {
       return widget.actions!;
     }
-    
+
     // 否则使用默认actions
     final defaultActions = <Widget>[
       if (widget.showPreviewButton)
@@ -212,26 +224,23 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
             final title = _titleController.text.trim();
             final content = _contentController.text.trim();
             if (widget.showTitle && title.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('请输入标题')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('请输入标题')));
               return;
             }
             widget.onSave(title, content);
           },
         ),
       if (widget.onCancel != null)
-        IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: widget.onCancel,
-        ),
+        IconButton(icon: const Icon(Icons.close), onPressed: widget.onCancel),
     ];
-    
+
     // 如果有额外的actions，添加到默认actions后面
     if (widget.extraActions != null && widget.extraActions!.isNotEmpty) {
       defaultActions.addAll(widget.extraActions!);
     }
-    
+
     return defaultActions;
   }
 
@@ -245,26 +254,27 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
         ),
         if (!_isPreviewMode) _buildMarkdownToolbar(),
         Expanded(
-          child: _isPreviewMode
-              ? Markdown(
-                  data: _contentController.text,
-                  selectable: true,
-                  styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                    tableColumnWidth: const IntrinsicColumnWidth(),
+          child:
+              _isPreviewMode
+                  ? Markdown(
+                    data: _contentController.text,
+                    selectable: true,
+                    styleSheet: MarkdownStyleSheet.fromTheme(
+                      Theme.of(context),
+                    ).copyWith(tableColumnWidth: const IntrinsicColumnWidth()),
+                  )
+                  : TextField(
+                    controller: _contentController,
+                    focusNode: _contentFocusNode,
+                    maxLines: null,
+                    expands: true,
+                    textAlignVertical: TextAlignVertical.top,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(16),
+                      hintText: widget.contentHint,
+                      border: InputBorder.none,
+                    ),
                   ),
-                )
-              : TextField(
-                  controller: _contentController,
-                  focusNode: _contentFocusNode,
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.all(16),
-                    hintText: widget.contentHint,
-                    border: InputBorder.none,
-                  ),
-                ),
         ),
       ],
     );

@@ -6,10 +6,10 @@ class CustomFieldsList extends StatefulWidget {
   final Function(List<CustomField>) onFieldsChanged;
 
   const CustomFieldsList({
-    Key? key,
+    super.key,
     required this.fields,
     required this.onFieldsChanged,
-  }) : super(key: key);
+  });
 
   @override
   _CustomFieldsListState createState() => _CustomFieldsListState();
@@ -79,7 +79,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
   void _addNewField() async {
     final TextEditingController keyController = TextEditingController();
     final TextEditingController valueController = TextEditingController();
-    
+
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -113,12 +113,13 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
             ),
             TextButton(
               onPressed: () {
-                if (keyController.text.isNotEmpty && valueController.text.isNotEmpty) {
+                if (keyController.text.isNotEmpty &&
+                    valueController.text.isNotEmpty) {
                   Navigator.of(context).pop(true);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('字段名和字段值不能为空')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('字段名和字段值不能为空')));
                 }
               },
               child: const Text('确认'),
@@ -130,10 +131,9 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
 
     if (confirmed == true) {
       setState(() {
-        _fields.add(CustomField(
-          key: keyController.text,
-          value: valueController.text,
-        ));
+        _fields.add(
+          CustomField(key: keyController.text, value: valueController.text),
+        );
         widget.onFieldsChanged(_fields);
       });
     }
@@ -141,9 +141,13 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
 
   void _editField(int index) async {
     final field = _fields[index];
-    final TextEditingController keyController = TextEditingController(text: field.key);
-    final TextEditingController valueController = TextEditingController(text: field.value);
-    
+    final TextEditingController keyController = TextEditingController(
+      text: field.key,
+    );
+    final TextEditingController valueController = TextEditingController(
+      text: field.value,
+    );
+
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -177,12 +181,13 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
             ),
             TextButton(
               onPressed: () {
-                if (keyController.text.isNotEmpty && valueController.text.isNotEmpty) {
+                if (keyController.text.isNotEmpty &&
+                    valueController.text.isNotEmpty) {
                   Navigator.of(context).pop(true);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('字段名和字段值不能为空')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('字段名和字段值不能为空')));
                 }
               },
               child: const Text('确认'),

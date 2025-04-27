@@ -130,12 +130,15 @@ class ChannelService {
   }
 
   // 更新频道背景
-  Future<Channel> updateChannelBackground(String channelId, String backgroundPath) async {
+  Future<Channel> updateChannelBackground(
+    String channelId,
+    String backgroundPath,
+  ) async {
     String normalizedPath = backgroundPath;
     if (normalizedPath.startsWith('./')) {
       String pathWithoutPrefix = normalizedPath.substring(2);
       List<String> components = pathWithoutPrefix.split(RegExp(r'[/\\]'));
-      normalizedPath = './' + components.join('/');
+      normalizedPath = './${components.join('/')}';
     }
     final channel = _channels.firstWhere((c) => c.id == channelId);
     final updatedChannel = channel.copyWith(backgroundPath: normalizedPath);
@@ -433,9 +436,7 @@ class ChannelService {
         (msg) => msg.id == messageId,
         orElse: () => null as Message,
       );
-      if (message != null) {
-        return message;
-      }
+      return message;
     }
     return null;
   }

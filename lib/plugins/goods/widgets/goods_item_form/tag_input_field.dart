@@ -6,10 +6,10 @@ class TagInputField extends StatelessWidget {
   final Function(List<String>) onTagsChanged;
 
   const TagInputField({
-    Key? key,
+    super.key,
     required this.tags,
     required this.onTagsChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

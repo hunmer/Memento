@@ -5,10 +5,10 @@ class ColorPickerSection extends StatelessWidget {
   final ValueChanged<Color> onColorChanged;
 
   const ColorPickerSection({
-    Key? key,
+    super.key,
     required this.selectedColor,
     required this.onColorChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +32,9 @@ class ColorPickerSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Node Color',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text('Node Color', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        Container(
+        SizedBox(
           height: 50,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -45,7 +42,7 @@ class ColorPickerSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final color = commonColors[index];
               final isSelected = selectedColor.value == color.value;
-              
+
               return GestureDetector(
                 onTap: () => onColorChanged(color),
                 child: Container(
@@ -55,13 +52,19 @@ class ColorPickerSection extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
-                    border: isSelected 
-                        ? Border.all(color: Colors.black, width: 2) 
-                        : null,
+                    border:
+                        isSelected
+                            ? Border.all(color: Colors.black, width: 2)
+                            : null,
                   ),
-                  child: isSelected 
-                      ? const Icon(Icons.check, color: Colors.white, size: 20) 
-                      : null,
+                  child:
+                      isSelected
+                          ? const Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 20,
+                          )
+                          : null,
                 ),
               );
             },

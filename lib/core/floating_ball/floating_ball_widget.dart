@@ -285,14 +285,12 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
               : FloatingBallGesture.swipeUp;
     }
 
-    if (gesture != null) {
-      final action = _manager.getAction(gesture);
-      if (action != null) {
-        debugPrint('Executing action for gesture: $gesture');
-        action();
-      } else {
-        debugPrint('No action registered for gesture: $gesture');
-      }
+    final action = _manager.getAction(gesture);
+    if (action != null) {
+      debugPrint('Executing action for gesture: $gesture');
+      action();
+    } else {
+      debugPrint('No action registered for gesture: $gesture');
     }
   }
 
@@ -382,14 +380,16 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
             });
           },
           onPanUpdate: (details) {
-            if (_isDragging || _panStartPosition == null)
+            if (_isDragging || _panStartPosition == null) {
               return; // 如果正在长按拖动，不处理滑动
+            }
 
             // 在桌面端，我们不立即处理滑动，而是在onPanEnd中处理
           },
           onPanEnd: (details) {
-            if (_isDragging || _panStartPosition == null)
+            if (_isDragging || _panStartPosition == null) {
               return; // 如果正在长按拖动，不处理滑动
+            }
 
             // 计算滑动时间和距离
             final now = DateTime.now();

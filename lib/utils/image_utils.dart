@@ -19,7 +19,7 @@ class PathUtils {
         return '.${relativePath.substring('/app_data'.length)}';
       } else if (relativePath.startsWith('/')) {
         // 处理其他可能的情况
-        return '.${relativePath}';
+        return '.$relativePath';
       }
     }
 

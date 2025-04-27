@@ -5,15 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../models/user.dart';
-import '../../chat/screens/chat_screen/chat_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final User user;
 
-  const UserProfileScreen({
-    super.key,
-    required this.user,
-  });
+  const UserProfileScreen({super.key, required this.user});
 
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();
@@ -25,9 +21,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     if (path.isAbsolute(relativePath)) {
       return relativePath;
     }
-    
+
     final appDir = await getApplicationDocumentsDirectory();
-    
+
     // 规范化路径，确保使用正确的路径分隔符
     String normalizedPath = relativePath.replaceFirst('./', '');
     normalizedPath = normalizedPath.replaceAll('/', path.separator);
@@ -50,12 +46,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             onPressed: () async {
               final result = await showDialog<bool>(
                 context: context,
-                builder: (context) => ProfileEditDialog(
-                  user: widget.user,
-                  chatPlugin: ChatPlugin.instance,
-                ),
+                builder:
+                    (context) => ProfileEditDialog(
+                      user: widget.user,
+                      chatPlugin: ChatPlugin.instance,
+                    ),
               );
-              
+
               if (result == true && mounted) {
                 setState(() {
                   // 刷新界面以显示更新后的用户信息
@@ -82,7 +79,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   // 显示默认头像
                   return CircleAvatar(
                     radius: 60,
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
                     child: Text(
                       widget.user.username[0].toUpperCase(),
                       style: TextStyle(

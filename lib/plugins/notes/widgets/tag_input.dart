@@ -5,10 +5,10 @@ class TagInput extends StatefulWidget {
   final void Function(List<String>) onTagsChanged;
 
   const TagInput({
-    Key? key,
+    super.key,
     this.initialTags = const [],
     required this.onTagsChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<TagInput> createState() => _TagInputState();
@@ -51,12 +51,13 @@ class _TagInputState extends State<TagInput> {
           Wrap(
             spacing: 8,
             runSpacing: 4,
-            children: _tags.map((tag) {
-              return Chip(
-                label: Text(tag),
-                onDeleted: () => _removeTag(tag),
-              );
-            }).toList(),
+            children:
+                _tags.map((tag) {
+                  return Chip(
+                    label: Text(tag),
+                    onDeleted: () => _removeTag(tag),
+                  );
+                }).toList(),
           ),
         TextField(
           controller: _controller,

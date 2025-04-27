@@ -3,9 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/plugin_base.dart';
 import 'controllers/nodes_controller.dart';
 import 'screens/notebooks_screen.dart';
-import 'screens/nodes_screen.dart';
 import 'l10n/nodes_localizations.dart';
-import '../../core/storage/storage_manager.dart';
 import 'models/node.dart';
 
 class NodesPlugin extends PluginBase {

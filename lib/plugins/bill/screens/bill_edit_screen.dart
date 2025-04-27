@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
 import '../models/bill.dart';
@@ -84,43 +83,44 @@ class _BillEditScreenState extends State<BillEditScreen> {
     return Material(
       child: Column(
         children: [
-        AppBar(
-          title: Text(widget.bill == null ? '添加账单' : '编辑账单'),
-          leading: widget.onCancel != null
-              ? IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: widget.onCancel,
-                )
-              : null,
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildIconSelector(),
-              const SizedBox(height: 16),
-              _buildTypeSelector(),
-              const SizedBox(height: 16),
-              _buildTitleField(),
-              const SizedBox(height: 16),
-              _buildAmountField(),
-              const SizedBox(height: 16),
-              _buildTagSelector(),
-              const SizedBox(height: 16),
-              _buildDateSelector(),
-              const SizedBox(height: 16),
-              _buildNoteField(),
-              const SizedBox(height: 24),
-              _buildSubmitButton(),
-            ],
+          AppBar(
+            title: Text(widget.bill == null ? '添加账单' : '编辑账单'),
+            leading:
+                widget.onCancel != null
+                    ? IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: widget.onCancel,
+                    )
+                    : null,
           ),
-        ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildIconSelector(),
+                    const SizedBox(height: 16),
+                    _buildTypeSelector(),
+                    const SizedBox(height: 16),
+                    _buildTitleField(),
+                    const SizedBox(height: 16),
+                    _buildAmountField(),
+                    const SizedBox(height: 16),
+                    _buildTagSelector(),
+                    const SizedBox(height: 16),
+                    _buildDateSelector(),
+                    const SizedBox(height: 16),
+                    _buildNoteField(),
+                    const SizedBox(height: 24),
+                    _buildSubmitButton(),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
         ],
       ),
     );
@@ -322,7 +322,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
             if (!mounted) return;
             // 解析金额
             final amount = double.parse(_amountController.text);
-            
+
             // 创建账单对象
             final bill = Bill(
               // 如果是编辑现有账单，使用原有ID；如果是新建账单，让构造函数生成新ID
@@ -331,13 +331,14 @@ class _BillEditScreenState extends State<BillEditScreen> {
               amount: _isExpense ? -amount : amount,
               accountId: widget.accountId,
               tag: _tag ?? '未分类',
-              note: _noteController.text.isNotEmpty ? _noteController.text : null,
+              note:
+                  _noteController.text.isNotEmpty ? _noteController.text : null,
               icon: _selectedIcon,
               iconColor: _selectedColor,
               // 如果是编辑现有账单，保留原创建时间；如果是新建账单，使用当前时间
               createdAt: _selectedDate,
             );
-            
+
             // 获取当前账户的最新数据
             final currentAccount = widget.billPlugin.accounts.firstWhere(
               (a) => a.id == widget.accountId,
@@ -352,27 +353,26 @@ class _BillEditScreenState extends State<BillEditScreen> {
               );
             } else {
               // 更新现有账单 - 替换相同ID的账单
-              final updatedBills = currentAccount.bills.map((existingBill) {
-                if (existingBill.id == bill.id) {
-                  return bill;
-                }
-                return existingBill;
-              }).toList();
-              
-              updatedAccount = currentAccount.copyWith(
-                bills: updatedBills,
-              );
+              final updatedBills =
+                  currentAccount.bills.map((existingBill) {
+                    if (existingBill.id == bill.id) {
+                      return bill;
+                    }
+                    return existingBill;
+                  }).toList();
+
+              updatedAccount = currentAccount.copyWith(bills: updatedBills);
             }
-            
+
             // 更新账户总金额
             updatedAccount.calculateTotal();
-            
+
             // 调用插件的保存账户方法
             await widget.billPlugin.saveAccount(updatedAccount);
-            
+
             // 返回上一页
             if (!mounted) return;
-            
+
             // 调用保存回调并返回
             Navigator.of(context).pop();
             widget.onSaved?.call();
@@ -387,4 +387,4 @@ class _BillEditScreenState extends State<BillEditScreen> {
       child: Text(widget.bill == null ? '添加' : '保存'),
     );
   }
-  }
+}

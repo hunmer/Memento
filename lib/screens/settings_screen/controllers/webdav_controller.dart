@@ -683,9 +683,7 @@ class WebDAVController {
           // 检查远程文件是否存在
           try {
             final response = await _client!.read(remoteFilePath);
-            if (response != null) {
-              debugPrint('远程文件已存在，将覆盖: $remoteFilePath');
-            }
+            debugPrint('远程文件已存在，将覆盖: $remoteFilePath');
           } catch (e) {
             // 文件不存在或其他错误，继续上传
             debugPrint('检查远程文件时出错（可能是文件不存在）: $e');

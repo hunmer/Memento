@@ -28,10 +28,7 @@ class BackupProgressDialog extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
+                  Text(title, style: Theme.of(context).textTheme.titleLarge),
                   if (onCancel != null)
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -45,7 +42,7 @@ class BackupProgressDialog extends StatelessWidget {
                 stream: progressStream,
                 builder: (context, snapshot) {
                   final progress = snapshot.data ?? BackupProgress.initial();
-                  
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -53,7 +50,10 @@ class BackupProgressDialog extends StatelessWidget {
                       // 总进度条
                       LinearProgressIndicator(
                         value: progress.totalProgress,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                        backgroundColor:
+                            Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
                       ),
                       const SizedBox(height: 8),
                       // 总进度百分比
@@ -74,7 +74,10 @@ class BackupProgressDialog extends StatelessWidget {
                       Flexible(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withOpacity(0.3),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           padding: const EdgeInsets.all(8),
@@ -85,7 +88,9 @@ class BackupProgressDialog extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final file = progress.recentFiles[index];
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 2,
+                                ),
                                 child: Text(
                                   file,
                                   style: Theme.of(context).textTheme.bodySmall,

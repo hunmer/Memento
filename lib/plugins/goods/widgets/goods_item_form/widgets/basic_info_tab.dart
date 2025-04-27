@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:crop_your_image/crop_your_image.dart';
 import 'dart:io';
-import 'dart:typed_data';
 import '../../../../../widgets/circle_icon_picker.dart';
 import '../../../../../widgets/image_picker_dialog.dart';
 import '../tag_input_field.dart';
 import '../custom_fields_list.dart';
 import '../controllers/form_controller.dart';
 import '../../../../../utils/image_utils.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 
 class BasicInfoTab extends StatelessWidget {
   final GoodsItemFormController controller;

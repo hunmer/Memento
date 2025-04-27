@@ -6,7 +6,7 @@ import 'package:video_player/video_player.dart';
 class VideoPreview extends StatefulWidget {
   final String filePath;
 
-  const VideoPreview({Key? key, required this.filePath}) : super(key: key);
+  const VideoPreview({super.key, required this.filePath});
 
   @override
   State<VideoPreview> createState() => _VideoPreviewState();
@@ -93,8 +93,7 @@ class _VideoPreviewState extends State<VideoPreview> {
 class _PlayPauseOverlay extends StatelessWidget {
   final VideoPlayerController controller;
 
-  const _PlayPauseOverlay({Key? key, required this.controller})
-    : super(key: key);
+  const _PlayPauseOverlay({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -121,8 +120,7 @@ class _PlayPauseOverlay extends StatelessWidget {
 class _VideoProgressIndicator extends StatelessWidget {
   final VideoPlayerController controller;
 
-  const _VideoProgressIndicator({Key? key, required this.controller})
-    : super(key: key);
+  const _VideoProgressIndicator({super.key, required this.controller});
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');

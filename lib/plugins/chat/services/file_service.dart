@@ -5,7 +5,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 import '../models/file_message.dart';
-import '../../../utils/image_utils.dart';
 
 // 用于返回保存文件的结果
 class SaveFileResult {

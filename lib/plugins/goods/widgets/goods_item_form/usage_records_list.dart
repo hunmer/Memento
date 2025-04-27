@@ -7,10 +7,10 @@ class UsageRecordsList extends StatefulWidget {
   final Function(List<UsageRecord>) onRecordsChanged;
 
   const UsageRecordsList({
-    Key? key,
+    super.key,
     required this.records,
     required this.onRecordsChanged,
-  }) : super(key: key);
+  });
 
   @override
   _UsageRecordsListState createState() => _UsageRecordsListState();
@@ -64,9 +64,10 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 child: ListTile(
                   title: Text(_dateFormat.format(record.date)),
-                  subtitle: record.note != null && record.note!.isNotEmpty
-                      ? Text(record.note!)
-                      : null,
+                  subtitle:
+                      record.note != null && record.note!.isNotEmpty
+                          ? Text(record.note!)
+                          : null,
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () => _removeRecord(index),
@@ -90,7 +91,7 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
 
     if (pickedDate != null) {
       final TextEditingController noteController = TextEditingController();
-      
+
       // ignore: use_build_context_synchronously
       final bool? confirmed = await showDialog<bool>(
         context: context,
@@ -121,10 +122,12 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
 
       if (confirmed == true) {
         setState(() {
-          _records.add(UsageRecord(
-            date: pickedDate,
-            note: noteController.text.isEmpty ? null : noteController.text,
-          ));
+          _records.add(
+            UsageRecord(
+              date: pickedDate,
+              note: noteController.text.isEmpty ? null : noteController.text,
+            ),
+          );
           _records.sort((a, b) => b.date.compareTo(a.date)); // 按日期降序排序
           widget.onRecordsChanged(_records);
         });
@@ -134,8 +137,10 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
 
   void _editRecord(int index) async {
     final record = _records[index];
-    final TextEditingController noteController = TextEditingController(text: record.note);
-    
+    final TextEditingController noteController = TextEditingController(
+      text: record.note,
+    );
+
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: record.date,

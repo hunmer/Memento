@@ -94,7 +94,7 @@ class Account {
     List<Bill>? bills,
   }) {
     return Account(
-      id: this.id,
+      id: id,
       title: title ?? this.title,
       icon: icon ?? this.icon,
       backgroundColor: backgroundColor ?? this.backgroundColor,

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/bill_model.dart';
@@ -9,11 +8,11 @@ class BillService {
 
   // 单例模式
   static final BillService _instance = BillService._internal();
-  
+
   factory BillService() {
     return _instance;
   }
-  
+
   BillService._internal();
 
   Future<void> init() async {
@@ -23,18 +22,15 @@ class BillService {
   Future<void> loadBills() async {
     final prefs = await SharedPreferences.getInstance();
     final billsJson = prefs.getStringList(_billKey) ?? [];
-    
-    _bills = billsJson
-        .map((json) => BillModel.fromMap(jsonDecode(json)))
-        .toList();
+
+    _bills =
+        billsJson.map((json) => BillModel.fromMap(jsonDecode(json))).toList();
   }
 
   Future<void> saveBills() async {
     final prefs = await SharedPreferences.getInstance();
-    final billsJson = _bills
-        .map((bill) => jsonEncode(bill.toMap()))
-        .toList();
-    
+    final billsJson = _bills.map((bill) => jsonEncode(bill.toMap())).toList();
+
     await prefs.setStringList(_billKey, billsJson);
   }
 
@@ -77,7 +73,7 @@ class BillService {
   // 按类别获取支出统计
   Map<String, double> getExpenseByCategory() {
     final result = <String, double>{};
-    
+
     for (final bill in _bills.where((bill) => bill.isExpense)) {
       if (result.containsKey(bill.category)) {
         result[bill.category] = result[bill.category]! + bill.amount;
@@ -85,16 +81,18 @@ class BillService {
         result[bill.category] = bill.amount;
       }
     }
-    
+
     return result;
   }
 
   // 获取一段时间内的账单
   List<BillModel> getBillsInRange(DateTime start, DateTime end) {
     return _bills
-        .where((bill) => 
-            bill.date.isAfter(start) && 
-            bill.date.isBefore(end.add(const Duration(days: 1))))
+        .where(
+          (bill) =>
+              bill.date.isAfter(start) &&
+              bill.date.isBefore(end.add(const Duration(days: 1))),
+        )
         .toList();
   }
 }

@@ -6,8 +6,7 @@ class NoteEditScreen extends StatelessWidget {
   final Note? note;
   final Function(String title, String content) onSave;
 
-  const NoteEditScreen({Key? key, this.note, required this.onSave})
-    : super(key: key);
+  const NoteEditScreen({super.key, this.note, required this.onSave});
 
   @override
   Widget build(BuildContext context) {

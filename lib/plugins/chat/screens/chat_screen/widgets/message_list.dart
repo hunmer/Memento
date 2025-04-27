@@ -115,8 +115,7 @@ class MessageList extends StatelessWidget {
                       isMultiSelectMode
                           ? () => onToggleMessageSelection(item.id)
                           : () {
-                            if (item is Message &&
-                                (item.type == MessageType.file ||
+                            if ((item.type == MessageType.file ||
                                     item.type == MessageType.video ||
                                     item.type == MessageType.image) &&
                                 item.metadata != null &&
@@ -153,9 +152,9 @@ class MessageList extends StatelessWidget {
                       onAvatarTap != null ? () => onAvatarTap!(item) : null,
                   showAvatar: showAvatar,
                   currentUserId: currentUserId ?? '',
-                  isHighlighted: shouldHighlight && 
-                      highlightedMessage != null && 
-                      item is Message && 
+                  isHighlighted:
+                      shouldHighlight &&
+                      highlightedMessage != null &&
                       item.id == highlightedMessage?.id,
                 ),
               ),
@@ -170,5 +169,4 @@ class MessageList extends StatelessWidget {
   bool _shouldShowDateSeparator(Message currentMessage, Message nextMessage) {
     return !DateFormatter.isSameDay(currentMessage.date, nextMessage.date);
   }
-
 }

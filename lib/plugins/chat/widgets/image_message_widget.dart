@@ -7,10 +7,10 @@ class ImageMessageWidget extends StatelessWidget {
   final bool isOutgoing;
 
   const ImageMessageWidget({
-    Key? key,
+    super.key,
     required this.message,
     this.isOutgoing = false,
-  }) : super(key: key);
+  });
 
   Map<String, dynamic>? get fileInfo =>
       message.metadata?[Message.metadataKeyFileInfo] as Map<String, dynamic>?;

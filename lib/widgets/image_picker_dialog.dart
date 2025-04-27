@@ -5,7 +5,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:uuid/uuid.dart';
 import '../utils/image_utils.dart';
 
 class ImagePickerDialog extends StatefulWidget {

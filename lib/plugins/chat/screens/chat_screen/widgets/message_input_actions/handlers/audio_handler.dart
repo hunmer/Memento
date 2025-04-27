@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'package:path/path.dart' as path;
-import '../../../../../../../utils/image_utils.dart';
 import '../../../../../models/file_message.dart';
 import '../../../../../models/message.dart';
 import '../../../../../services/file_service.dart';

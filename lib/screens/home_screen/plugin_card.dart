@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
-import '../../main.dart';
 import 'card_size.dart';
 
 class PluginCard extends StatelessWidget {

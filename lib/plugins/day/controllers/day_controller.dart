@@ -5,7 +5,7 @@ import '../day_plugin.dart';
 
 class DayController extends ChangeNotifier {
   final _plugin = DayPlugin.instance;
-  List<MemorialDay> _memorialDays = [];
+  final List<MemorialDay> _memorialDays = [];
   bool _isCardView = true;
 
   List<MemorialDay> get memorialDays => _memorialDays;

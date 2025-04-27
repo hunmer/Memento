@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AddTagDialog extends StatefulWidget {
+  const AddTagDialog({super.key});
+
   @override
   _AddTagDialogState createState() => _AddTagDialogState();
 }

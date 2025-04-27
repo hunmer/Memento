@@ -275,7 +275,7 @@ class GoodsPlugin extends BasePlugin {
           // 统计信息卡片
           Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),

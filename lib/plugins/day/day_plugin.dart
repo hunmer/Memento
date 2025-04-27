@@ -4,7 +4,6 @@ import '../../core/config_manager.dart';
 import '../base_plugin.dart';
 import 'screens/day_home_screen.dart';
 import 'controllers/day_controller.dart';
-import 'models/memorial_day.dart';
 
 class DayPlugin extends BasePlugin {
   static final DayPlugin instance = DayPlugin._internal();

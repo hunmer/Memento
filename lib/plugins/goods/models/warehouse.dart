@@ -76,7 +76,7 @@ class Warehouse {
       title: title ?? this.title,
       icon: icon ?? this.icon,
       iconColor: iconColor ?? this.iconColor,
-      imageUrl: imageUrl ?? this._imageUrl, // 使用已存储的相对路径
+      imageUrl: imageUrl ?? _imageUrl, // 使用已存储的相对路径
       items: items ?? List.from(this.items),
     );
   }

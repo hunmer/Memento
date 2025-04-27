@@ -10,12 +10,12 @@ class CustomFieldsSection extends StatelessWidget {
   final Function(int) onCustomFieldRemoved;
 
   const CustomFieldsSection({
-    Key? key,
+    super.key,
     required this.customFields,
     required this.onCustomFieldValueChanged,
     required this.onCustomFieldAdded,
     required this.onCustomFieldRemoved,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,46 +24,39 @@ class CustomFieldsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.customFields,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text(l10n.customFields, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        ...customFields.asMap().entries.map(
-          (entry) {
-            final index = entry.key;
-            final field = entry.value;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(field.key),
-                  ),
-                  Expanded(
-                    flex: 5,
-                    child: TextField(
-                      controller: TextEditingController(text: field.value),
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
+        ...customFields.asMap().entries.map((entry) {
+          final index = entry.key;
+          final field = entry.value;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(flex: 2, child: Text(field.key)),
+                Expanded(
+                  flex: 5,
+                  child: TextField(
+                    controller: TextEditingController(text: field.value),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
                       ),
-                      onChanged: (value) => onCustomFieldValueChanged(index, value),
                     ),
+                    onChanged:
+                        (value) => onCustomFieldValueChanged(index, value),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => onCustomFieldRemoved(index),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => onCustomFieldRemoved(index),
+                ),
+              ],
+            ),
+          );
+        }),
         TextButton.icon(
           icon: const Icon(Icons.add),
           label: Text(l10n.addCustomField),
@@ -76,9 +69,9 @@ class CustomFieldsSection extends StatelessWidget {
   void _showAddCustomFieldDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AddCustomFieldDialog(
-        onCustomFieldAdded: onCustomFieldAdded,
-      ),
+      builder:
+          (context) =>
+              AddCustomFieldDialog(onCustomFieldAdded: onCustomFieldAdded),
     );
   }
 }

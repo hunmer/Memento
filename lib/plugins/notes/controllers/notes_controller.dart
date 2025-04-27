@@ -21,8 +21,10 @@ class NotesController {
   Future<void> _loadFolders() async {
     try {
       // 读取文件内容为字符串
-      final data = await _storage.readPluginFile('notes', 'folders.json').catchError((_) => '');
-      
+      final data = await _storage
+          .readPluginFile('notes', 'folders.json')
+          .catchError((_) => '');
+
       if (data.isNotEmpty) {
         final List<dynamic> jsonList = json.decode(data);
         for (var item in jsonList) {
@@ -50,8 +52,10 @@ class NotesController {
   Future<void> _loadNotes() async {
     try {
       // 读取文件内容为字符串
-      final data = await _storage.readPluginFile('notes', 'notes.json').catchError((_) => '');
-      
+      final data = await _storage
+          .readPluginFile('notes', 'notes.json')
+          .catchError((_) => '');
+
       if (data.isNotEmpty) {
         final List<dynamic> jsonList = json.decode(data);
         for (var item in jsonList) {
@@ -92,12 +96,12 @@ class NotesController {
   Folder? getFolder(String id) {
     return _folders[id];
   }
-  
+
   // 获取所有文件夹
   List<Folder> getAllFolders() {
     return _folders.values.toList();
   }
-  
+
   // 获取指定文件夹的子文件夹
   List<Folder> getFolderChildren(String parentId) {
     return _folders.values
@@ -170,12 +174,12 @@ class NotesController {
   Future<void> deleteNoteObject(Note note) async {
     await deleteNote(note.id);
   }
-  
+
   // 移动笔记到其他文件夹
   Future<void> moveNote(String noteId, String targetFolderId) async {
     Note? noteToMove;
     String? sourceFolderId;
-    
+
     // 查找笔记
     for (var entry in _notes.entries) {
       final notes = entry.value;
@@ -187,7 +191,7 @@ class NotesController {
         break;
       }
     }
-    
+
     // 如果找到笔记，将其添加到目标文件夹
     if (noteToMove != null && sourceFolderId != null) {
       // 创建一个新的笔记对象，更新文件夹ID
@@ -200,10 +204,10 @@ class NotesController {
         updatedAt: DateTime.now(), // 更新时间戳
         tags: noteToMove.tags,
       );
-      
+
       // 添加到新文件夹
       _notes.putIfAbsent(targetFolderId, () => []).add(movedNote);
-      
+
       // 保存更改
       await _saveNotes();
     }
@@ -237,7 +241,7 @@ class NotesController {
 
       // 标签匹配
       if (tags != null && tags.isNotEmpty) {
-        if (note.tags == null || !tags.any((tag) => note.tags!.contains(tag))) {
+        if (!tags.any((tag) => note.tags.contains(tag))) {
           return false;
         }
       }
@@ -247,7 +251,14 @@ class NotesController {
         return false;
       }
       if (endDate != null) {
-        final endOfDay = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+        final endOfDay = DateTime(
+          endDate.year,
+          endDate.month,
+          endDate.day,
+          23,
+          59,
+          59,
+        );
         if (note.createdAt.isAfter(endOfDay)) {
           return false;
         }
@@ -267,7 +278,7 @@ class NotesController {
     // 删除文件夹中的笔记
     _notes.remove(folderId);
     _folders.remove(folderId);
-    
+
     await _saveFolders();
     await _saveNotes();
   }

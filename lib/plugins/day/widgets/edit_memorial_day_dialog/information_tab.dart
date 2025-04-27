@@ -8,12 +8,12 @@ class InformationTab extends StatelessWidget {
   final String Function(DateTime) formatDate;
 
   const InformationTab({
-    Key? key,
+    super.key,
     required this.titleController,
     required this.selectedDate,
     required this.onSelectDate,
     required this.formatDate,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

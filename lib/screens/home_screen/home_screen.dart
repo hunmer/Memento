@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
 import '../../widgets/app_drawer.dart';
-import '../../widgets/app_bar_widget.dart';
 import '../../main.dart';
 import '../../core/floating_ball/floating_ball_service.dart';
 import 'card_size.dart';
 import 'card_size_manager.dart';
 import 'plugin_order_manager.dart';
 import 'plugin_grid.dart';
-import 'dart:math';
 
 // 全局路由观察者
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();

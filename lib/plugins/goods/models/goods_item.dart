@@ -126,7 +126,7 @@ class GoodsItem {
     return GoodsItem(
       id: id,
       title: title ?? this.title,
-      imageUrl: imageUrl ?? this._imageUrl, // 使用已存储的相对路径
+      imageUrl: imageUrl ?? _imageUrl, // 使用已存储的相对路径
       icon: icon ?? this.icon,
       iconColor: iconColor ?? this.iconColor,
       tags: tags ?? List.from(this.tags),

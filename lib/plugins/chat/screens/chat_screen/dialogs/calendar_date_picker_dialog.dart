@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../utils/date_formatter.dart';
 
 class CalendarDatePickerDialog extends StatefulWidget {
   final List<DateTime> availableDates;
@@ -17,7 +16,8 @@ class CalendarDatePickerDialog extends StatefulWidget {
   });
 
   @override
-  State<CalendarDatePickerDialog> createState() => _CalendarDatePickerDialogState();
+  State<CalendarDatePickerDialog> createState() =>
+      _CalendarDatePickerDialogState();
 }
 
 class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
@@ -31,12 +31,13 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
     super.initState();
     _selectedDay = widget.selectedDate;
     _focusedDay = widget.selectedDate ?? widget.availableDates.first;
-    
+
     // 将可用日期转换为Set以便快速查找
-    _availableDatesSet = widget.availableDates
-        .map((date) => DateTime(date.year, date.month, date.day))
-        .toSet();
-        
+    _availableDatesSet =
+        widget.availableDates
+            .map((date) => DateTime(date.year, date.month, date.day))
+            .toSet();
+
     // 初始化日期计数映射
     _dateCountMap = {};
     if (widget.dateCountMap != null) {
@@ -59,16 +60,16 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 10.0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
                   '选择日期',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 TextButton(
                   onPressed: () {
@@ -84,8 +85,8 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
             firstDay: widget.availableDates.last,
             lastDay: widget.availableDates.first,
             focusedDay: _focusedDay,
-            selectedDayPredicate: (day) => _selectedDay != null &&
-                isSameDay(_selectedDay!, day),
+            selectedDayPredicate:
+                (day) => _selectedDay != null && isSameDay(_selectedDay!, day),
             enabledDayPredicate: _isDateAvailable,
             calendarFormat: CalendarFormat.month,
             startingDayOfWeek: StartingDayOfWeek.monday,
@@ -116,8 +117,13 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
             ),
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, date, events) {
-                final normalizedDate = DateTime(date.year, date.month, date.day);
-                if (_dateCountMap.containsKey(normalizedDate) && _dateCountMap[normalizedDate]! > 0) {
+                final normalizedDate = DateTime(
+                  date.year,
+                  date.month,
+                  date.day,
+                );
+                if (_dateCountMap.containsKey(normalizedDate) &&
+                    _dateCountMap[normalizedDate]! > 0) {
                   return Positioned(
                     right: 1,
                     top: 1,
@@ -163,7 +169,10 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
             },
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

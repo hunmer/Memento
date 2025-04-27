@@ -24,12 +24,12 @@ class NodeItem extends StatelessWidget {
   final int depth;
 
   const NodeItem({
-    Key? key,
+    super.key,
     required this.node,
     required this.notebookId,
     required this.depth,
-  }) : super(key: key);
-  
+  });
+
   Widget _buildStatusButton(
     BuildContext context,
     NodesController controller,
@@ -39,7 +39,7 @@ class NodeItem extends StatelessWidget {
     Color textColor,
   ) {
     final isSelected = node.status == status;
-    
+
     return InkWell(
       onTap: () {
         // 更新节点状态并保存
@@ -65,9 +65,7 @@ class NodeItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(20),
-          border: isSelected 
-              ? Border.all(color: textColor, width: 2) 
-              : null,
+          border: isSelected ? Border.all(color: textColor, width: 2) : null,
         ),
         child: Text(
           label,
@@ -100,7 +98,7 @@ class NodeItem extends StatelessWidget {
     };
 
     final info = statusInfo[status]!;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       margin: const EdgeInsets.only(left: 8),
@@ -142,13 +140,15 @@ class NodeItem extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChangeNotifierProvider<NodesController>.value(
-                      value: controller,
-                      child: NodeEditScreen(
-                        notebookId: notebookId,
-                        node: node,
-                      ),
-                    ),
+                    builder:
+                        (context) =>
+                            ChangeNotifierProvider<NodesController>.value(
+                              value: controller,
+                              child: NodeEditScreen(
+                                notebookId: notebookId,
+                                node: node,
+                              ),
+                            ),
                   ),
                 );
               }
@@ -195,25 +195,28 @@ class NodeItem extends StatelessWidget {
                           if (node.tags.isNotEmpty)
                             Wrap(
                               spacing: 4,
-                              children: node.tags.map((tag) {
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    tag,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
+                              children:
+                                  node.tags.map((tag) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(
+                                          context,
+                                        ).primaryColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        tag,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
                             ),
                         ],
                       ),
@@ -225,11 +228,10 @@ class NodeItem extends StatelessWidget {
           ),
         ),
         if (node.isExpanded && node.children.isNotEmpty)
-          ...node.children.map((child) => NodeItem(
-                node: child,
-                notebookId: notebookId,
-                depth: depth + 1,
-              )),
+          ...node.children.map(
+            (child) =>
+                NodeItem(node: child, notebookId: notebookId, depth: depth + 1),
+          ),
       ],
     );
   }
@@ -255,153 +257,162 @@ class NodeItem extends StatelessWidget {
       Colors.purple,
       Colors.pink,
     ];
-    
+
     showModalBottomSheet(
       context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Node Color',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Container(
-            height: 50,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: commonColors.length,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemBuilder: (context, index) {
-                final color = commonColors[index];
-                final isSelected = node.color.value == color.value;
-                
-                return GestureDetector(
-                  onTap: () {
-                    // 更新节点颜色并保存
-                    final updatedNode = Node(
-                      id: node.id,
-                      title: node.title,
-                      createdAt: node.createdAt,
-                      tags: node.tags,
-                      status: node.status,
-                      startDate: node.startDate,
-                      endDate: node.endDate,
-                      customFields: node.customFields,
-                      notes: node.notes,
-                      parentId: node.parentId,
-                      children: node.children,
-                      isExpanded: node.isExpanded,
-                      pathValue: node.pathValue,
-                      color: color,
-                    );
-                    controller.updateNode(notebookId, updatedNode);
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: isSelected 
-                          ? Border.all(color: Colors.black, width: 2) 
-                          : null,
-                    ),
-                    child: isSelected 
-                        ? const Icon(Icons.check, color: Colors.white, size: 20) 
-                        : null,
-                  ),
-                );
-              },
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Node Status',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      builder:
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _buildStatusButton(
-                context, 
-                controller, 
-                NodeStatus.todo, 
-                'TODO',
-                Colors.grey.shade200,
-                Colors.grey.shade700,
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Node Color',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-              _buildStatusButton(
-                context, 
-                controller, 
-                NodeStatus.doing, 
-                'DOING',
-                Colors.blue.shade100,
-                Colors.blue.shade700,
+              SizedBox(
+                height: 50,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: commonColors.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemBuilder: (context, index) {
+                    final color = commonColors[index];
+                    final isSelected = node.color.value == color.value;
+
+                    return GestureDetector(
+                      onTap: () {
+                        // 更新节点颜色并保存
+                        final updatedNode = Node(
+                          id: node.id,
+                          title: node.title,
+                          createdAt: node.createdAt,
+                          tags: node.tags,
+                          status: node.status,
+                          startDate: node.startDate,
+                          endDate: node.endDate,
+                          customFields: node.customFields,
+                          notes: node.notes,
+                          parentId: node.parentId,
+                          children: node.children,
+                          isExpanded: node.isExpanded,
+                          pathValue: node.pathValue,
+                          color: color,
+                        );
+                        controller.updateNode(notebookId, updatedNode);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          border:
+                              isSelected
+                                  ? Border.all(color: Colors.black, width: 2)
+                                  : null,
+                        ),
+                        child:
+                            isSelected
+                                ? const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 20,
+                                )
+                                : null,
+                      ),
+                    );
+                  },
+                ),
               ),
-              _buildStatusButton(
-                context, 
-                controller, 
-                NodeStatus.done, 
-                'DONE',
-                Colors.green.shade100,
-                Colors.green.shade700,
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Node Status',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildStatusButton(
+                    context,
+                    controller,
+                    NodeStatus.todo,
+                    'TODO',
+                    Colors.grey.shade200,
+                    Colors.grey.shade700,
+                  ),
+                  _buildStatusButton(
+                    context,
+                    controller,
+                    NodeStatus.doing,
+                    'DOING',
+                    Colors.blue.shade100,
+                    Colors.blue.shade700,
+                  ),
+                  _buildStatusButton(
+                    context,
+                    controller,
+                    NodeStatus.done,
+                    'DONE',
+                    Colors.green.shade100,
+                    Colors.green.shade700,
+                  ),
+                ],
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: Text(l10n.editNode),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) =>
+                              ChangeNotifierProvider<NodesController>.value(
+                                value: controller,
+                                child: NodeEditScreen(
+                                  notebookId: notebookId,
+                                  node: node,
+                                ),
+                              ),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.add_circle_outline),
+                title: Text(l10n.addChildNode),
+                onTap: () {
+                  Navigator.pop(context);
+                  _addChildNode(context, controller);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.add),
+                title: Text(l10n.addSiblingNode),
+                onTap: () {
+                  Navigator.pop(context);
+                  _addSiblingNode(context, controller);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: Text(l10n.deleteNode),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteConfirmation(context, controller, l10n);
+                },
               ),
             ],
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: Text(l10n.editNode),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChangeNotifierProvider<NodesController>.value(
-                    value: controller,
-                    child: NodeEditScreen(
-                      notebookId: notebookId,
-                      node: node,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.add_circle_outline),
-            title: Text(l10n.addChildNode),
-            onTap: () {
-              Navigator.pop(context);
-              _addChildNode(context, controller);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.add),
-            title: Text(l10n.addSiblingNode),
-            onTap: () {
-              Navigator.pop(context);
-              _addSiblingNode(context, controller);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.delete),
-            title: Text(l10n.deleteNode),
-            onTap: () {
-              Navigator.pop(context);
-              _showDeleteConfirmation(context, controller, l10n);
-            },
-          ),
-        ],
-      ),
     );
   }
 
@@ -416,14 +427,15 @@ class NodeItem extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChangeNotifierProvider<NodesController>.value(
-          value: controller,
-          child: NodeEditScreen(
-            notebookId: notebookId,
-            node: newNode,
-            isNew: true,
-          ),
-        ),
+        builder:
+            (context) => ChangeNotifierProvider<NodesController>.value(
+              value: controller,
+              child: NodeEditScreen(
+                notebookId: notebookId,
+                node: newNode,
+                isNew: true,
+              ),
+            ),
       ),
     );
   }
@@ -439,14 +451,15 @@ class NodeItem extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChangeNotifierProvider<NodesController>.value(
-          value: controller,
-          child: NodeEditScreen(
-            notebookId: notebookId,
-            node: newNode,
-            isNew: true,
-          ),
-        ),
+        builder:
+            (context) => ChangeNotifierProvider<NodesController>.value(
+              value: controller,
+              child: NodeEditScreen(
+                notebookId: notebookId,
+                node: newNode,
+                isNew: true,
+              ),
+            ),
       ),
     );
   }
@@ -458,23 +471,24 @@ class NodeItem extends StatelessWidget {
   ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deleteNode),
-        content: Text('Are you sure you want to delete "${node.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
+      builder:
+          (context) => AlertDialog(
+            title: Text(l10n.deleteNode),
+            content: Text('Are you sure you want to delete "${node.title}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.cancel),
+              ),
+              TextButton(
+                onPressed: () {
+                  controller.deleteNode(notebookId, node.id);
+                  Navigator.pop(context);
+                },
+                child: Text(l10n.deleteNode),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              controller.deleteNode(notebookId, node.id);
-              Navigator.pop(context);
-            },
-            child: Text(l10n.deleteNode),
-          ),
-        ],
-      ),
     );
   }
 }

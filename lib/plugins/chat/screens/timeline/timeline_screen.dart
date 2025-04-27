@@ -1,9 +1,7 @@
-import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../l10n/chat_localizations.dart';
 import '../../chat_plugin.dart';
-import '../../services/settings_service.dart';
 import '../../utils/message_operations.dart';
 import 'controllers/timeline_controller.dart';
 import 'widgets/timeline_message_card.dart';
@@ -47,7 +45,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
               'startEditing': true, // 指示应该开始编辑这条消息
             },
           );
-          
+
           // 如果消息被编辑，刷新时间线
           if (result == true) {
             await _controller.refreshTimeline();
@@ -138,9 +136,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
                 return RefreshIndicator(
                   onRefresh: _controller.refreshTimeline,
-                  child: _isGridView 
-                      ? _buildGridView() 
-                      : _buildListView(),
+                  child: _isGridView ? _buildGridView() : _buildListView(),
                 );
               },
             ),
@@ -149,14 +145,14 @@ class _TimelineScreenState extends State<TimelineScreen> {
       ),
     );
   }
-  
+
   // 构建列表视图（默认卡片视图）
   Widget _buildListView() {
     return ListView.builder(
       controller: _controller.scrollController,
       padding: const EdgeInsets.all(8),
-      itemCount: _controller.messages.length +
-          (_controller.hasMoreMessages ? 1 : 0),
+      itemCount:
+          _controller.messages.length + (_controller.hasMoreMessages ? 1 : 0),
       itemBuilder: (context, index) {
         // 显示加载更多指示器
         if (_controller.hasMoreMessages &&
@@ -191,7 +187,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
   Widget _buildGridView() {
     final padding = 8.0;
     final spacing = 8.0;
-    
+
     return CustomScrollView(
       controller: _controller.scrollController,
       slivers: [
@@ -214,11 +210,13 @@ class _TimelineScreenState extends State<TimelineScreen> {
                   // 返回空容器而不是null
                   return const SizedBox.shrink();
                 }
-                
+
                 // 构建自适应高度的卡片
                 return _buildGridCard(index);
               },
-              childCount: _controller.messages.length + (_controller.hasMoreMessages ? 1 : 0),
+              childCount:
+                  _controller.messages.length +
+                  (_controller.hasMoreMessages ? 1 : 0),
             ),
             gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -235,16 +233,14 @@ class _TimelineScreenState extends State<TimelineScreen> {
   Widget _buildGridCard(int index) {
     // 检查是否是加载更多指示器
     if (index >= _controller.messages.length) {
-      return const Card(
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const Card(child: Center(child: CircularProgressIndicator()));
     }
-    
+
     final message = _controller.messages[index];
     final channel = _controller.getMessageChannel(message);
-    
+
     if (channel == null) return const SizedBox.shrink();
-    
+
     return TimelineMessageCard(
       message: message,
       channel: channel,

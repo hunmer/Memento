@@ -135,11 +135,11 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                               onPressed: () => Navigator.pop(context, false),
                             ),
                             TextButton(
-                              child: const Text('删除'),
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.red,
                               ),
                               onPressed: () => Navigator.pop(context, true),
+                              child: const Text('删除'),
                             ),
                           ],
                         ),

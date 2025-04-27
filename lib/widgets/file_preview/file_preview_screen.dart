@@ -14,12 +14,12 @@ class FilePreviewScreen extends StatefulWidget {
   final int fileSize;
 
   const FilePreviewScreen({
-    Key? key,
+    super.key,
     required this.filePath,
     required this.fileName,
     required this.mimeType,
     required this.fileSize,
-  }) : super(key: key);
+  });
 
   @override
   State<FilePreviewScreen> createState() => _FilePreviewScreenState();
@@ -150,7 +150,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('文件名：${widget.fileName}'),
-                      Text('路径：${_absoluteFilePath}'),
+                      Text('路径：$_absoluteFilePath'),
                       Text('大小：${_formatFileSize(widget.fileSize)}'),
                       Text('类型：${widget.mimeType}'),
                     ],
