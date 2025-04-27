@@ -14,6 +14,13 @@ class ChannelsView extends StatelessWidget {
   final Function(Message) onMessageCopy;
   final Function(Message, String?) onSetFixedSymbol;
   final Function(Message, Color?) onSetBubbleColor;
+  final Function(Message) onReply;
+  final Function(String) onReplyTap;
+  final Function(Message)? onAvatarTap;
+  final bool showAvatar;
+  final String? currentUserId;
+  final Message? highlightedMessage;
+  final bool shouldHighlight;
 
   const ChannelsView({
     super.key,
@@ -24,6 +31,13 @@ class ChannelsView extends StatelessWidget {
     required this.onMessageCopy,
     required this.onSetFixedSymbol,
     required this.onSetBubbleColor,
+    required this.onReply,
+    required this.onReplyTap,
+    this.onAvatarTap,
+    this.showAvatar = true,
+    this.currentUserId,
+    this.highlightedMessage,
+    this.shouldHighlight = false,
   });
 
   @override
@@ -50,6 +64,13 @@ class ChannelsView extends StatelessWidget {
                 onSetBubbleColor: onSetBubbleColor,
                 onToggleMessageSelection: controller.toggleMessageSelection,
                 scrollController: controller.scrollController,
+                onReply: onReply,
+                onReplyTap: onReplyTap,
+                onAvatarTap: onAvatarTap,
+                showAvatar: showAvatar,
+                currentUserId: currentUserId,
+                highlightedMessage: highlightedMessage,
+                shouldHighlight: shouldHighlight,
               ),
             ),
             MessageInput(

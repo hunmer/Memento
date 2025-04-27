@@ -7,15 +7,19 @@ import '../../../models/message.dart';
 
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
-  final Function(String, {Map<String, dynamic>? metadata, MessageType? type})
+  final Function(String, {Map<String, dynamic>? metadata, MessageType? type, Message? replyTo})
   onSendMessage;
   final Function(String) onSaveDraft;
+  final Message? replyTo; // 添加回复消息引用
+  final FocusNode? focusNode; // 添加焦点节点
 
   const MessageInput({
     super.key,
     required this.controller,
     required this.onSendMessage,
     required this.onSaveDraft,
+    this.replyTo,
+    this.focusNode,
   });
 
   @override
@@ -29,13 +33,15 @@ class _MessageInputState extends State<MessageInput> {
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
+    _focusNode = widget.focusNode ?? FocusNode();
     _keyboardListenerFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     _keyboardListenerFocusNode.dispose();
     super.dispose();
   }
@@ -62,6 +68,7 @@ class _MessageInputState extends State<MessageInput> {
             widget.onSendMessage(
               widget.controller.text.trim(),
               type: MessageType.sent,
+              replyTo: widget.replyTo,
             );
             widget.controller.clear();
             // 保持焦点但阻止换行
@@ -187,6 +194,7 @@ class _MessageInputState extends State<MessageInput> {
                   widget.onSendMessage(
                     widget.controller.text.trim(),
                     type: MessageType.sent,
+                    replyTo: widget.replyTo,
                   );
                   widget.controller.clear();
                   _focusNode.requestFocus(); // 保持焦点

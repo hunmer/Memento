@@ -11,6 +11,7 @@ class MessageOptionsDialog extends StatelessWidget {
   final void Function(Message) onMessageCopy;
   final void Function(Message, String?) onSetFixedSymbol;
   final void Function(Message, Color?) onSetBubbleColor;
+  final void Function(Message)? onReply; // 添加回复回调函数
   final bool useRecentSymbols;
   final bool initiallyShowFixedSymbolDialog;
 
@@ -22,6 +23,7 @@ class MessageOptionsDialog extends StatelessWidget {
     required this.onMessageCopy,
     required this.onSetFixedSymbol,
     required this.onSetBubbleColor,
+    this.onReply,
     this.useRecentSymbols = true,
     this.initiallyShowFixedSymbolDialog = false,
   });
@@ -35,6 +37,7 @@ class MessageOptionsDialog extends StatelessWidget {
     required void Function(Message) onMessageCopy,
     required void Function(Message, String?) onSetFixedSymbol,
     required void Function(Message, Color?) onSetBubbleColor,
+    void Function(Message)? onReply,
     bool useRecentSymbols = true,
     bool initiallyShowFixedSymbolDialog = false,
   }) {
@@ -47,6 +50,7 @@ class MessageOptionsDialog extends StatelessWidget {
         onMessageCopy: onMessageCopy,
         onSetFixedSymbol: onSetFixedSymbol,
         onSetBubbleColor: onSetBubbleColor,
+        onReply: onReply,
         useRecentSymbols: useRecentSymbols,
         initiallyShowFixedSymbolDialog: initiallyShowFixedSymbolDialog,
       ),
@@ -200,6 +204,17 @@ class MessageOptionsDialog extends StatelessWidget {
                     MessageOptionsHandler.shareMessage(context, message);
                   },
                 ),
+                // 回复
+                if (onReply != null)
+                  _buildIconButton(
+                    context,
+                    Icons.reply,
+                    Colors.indigo,
+                    () {
+                      Navigator.pop(context);
+                      onReply!(message);
+                    },
+                  ),
               ],
             ),
           ),

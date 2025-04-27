@@ -17,7 +17,9 @@ class MessageList extends StatelessWidget {
   final void Function(Message) onMessageCopy;
   final void Function(Message, String?) onSetFixedSymbol;
   final void Function(Message, Color?) onSetBubbleColor;
+  final void Function(Message) onReply; // 添加回复消息回调
   final void Function(String) onToggleMessageSelection;
+  final void Function(String) onReplyTap; // 添加回复消息点击回调
   final ScrollController scrollController;
   final void Function(Message)? onAvatarTap;
   final bool showAvatar;
@@ -37,7 +39,9 @@ class MessageList extends StatelessWidget {
     required this.onMessageCopy,
     required this.onSetFixedSymbol,
     required this.onSetBubbleColor,
+    required this.onReply,
     required this.onToggleMessageSelection,
+    required this.onReplyTap,
     required this.scrollController,
     this.currentUserId,
     this.highlightedMessage,
@@ -81,6 +85,7 @@ class MessageList extends StatelessWidget {
                     onMessageCopy: onMessageCopy,
                     onSetFixedSymbol: onSetFixedSymbol,
                     onSetBubbleColor: onSetBubbleColor,
+                    onReply: onReply,
                   );
                 },
                 onDoubleTap: () {
@@ -93,6 +98,7 @@ class MessageList extends StatelessWidget {
                     onMessageCopy: onMessageCopy,
                     onSetFixedSymbol: onSetFixedSymbol,
                     onSetBubbleColor: onSetBubbleColor,
+                    onReply: onReply,
                     initiallyShowFixedSymbolDialog: true, // 直接显示固态符号编辑对话框
                   );
                 },

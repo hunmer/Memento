@@ -1,4 +1,3 @@
-import 'package:Memento/plugins/chat/screens/profile_edit_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../models/channel.dart';
@@ -37,7 +36,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   late ChatScreenController _controller;
   late MessageOperations _messageOperations;
-  // 移除未使用的字段
+  Message? _replyToMessage; // 添加回复消息引用
 
   @override
   void initState() {
@@ -50,11 +49,15 @@ class _ChatScreenState extends State<ChatScreen> {
       autoScroll: widget.autoScroll,
     );
 
-    // 初始化消息操作工具类
-    _messageOperations = MessageOperations(context);
-
     // 加载频道草稿
     _loadChannelDraft();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 初始化消息操作工具类，在didChangeDependencies中初始化以安全地使用context
+    _messageOperations = MessageOperations(context);
   }
 
   Future<void> _loadChannelDraft() async {
@@ -106,9 +109,38 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  // 处理回复消息
+  void _handleReply(Message message) {
+    setState(() {
+      _replyToMessage = message;
+    });
+    // 聚焦输入框
+    _controller.focusNode.requestFocus();
+  }
+  
+
+  // 清除回复
+  void _clearReply() {
+    setState(() {
+      _replyToMessage = null;
+    });
+  }
+
+  // 处理回复消息点击
+  void _handleReplyTap(String messageId) {
+    final message = widget.channel.messages.firstWhere(
+      (m) => m.id == messageId,
+      orElse: () => widget.channel.messages.first,
+    );
+    _controller.scrollToMessage(message);
+  }
+
   void _showEditDialog(Message message) async {
+    if (!mounted) return;
     await _messageOperations.editMessage(message);
-    _updateMessages(); // 更新消息列表
+    if (mounted) {
+      _updateMessages(); // 更新消息列表
+    }
   }
 
   void _showClearConfirmationDialog() {
@@ -187,11 +219,13 @@ class _ChatScreenState extends State<ChatScreen> {
   /// 删除单条消息并更新状态
   Future<void> _deleteMessage(Message message) async {
     await _messageOperations.deleteMessage(message);
-    _updateMessages(); // 更新消息列表
+    if (mounted) {
+      _updateMessages(); // 更新消息列表
+    }
   }
 
   /// 删除多条选中的消息
-  void _deleteSelectedMessages() async {
+  Future<void> _deleteSelectedMessages() async {
     final selectedMessages =
         _controller.messages
             .where((msg) => _controller.selectedMessageIds.contains(msg.id))
@@ -201,7 +235,9 @@ class _ChatScreenState extends State<ChatScreen> {
       await _deleteMessage(message);
     }
 
-    _controller.toggleMultiSelectMode();
+    if (mounted) {
+      _controller.toggleMultiSelectMode();
+    }
   }
 
   void _copyMessageToClipboard(Message message) {
@@ -209,16 +245,20 @@ class _ChatScreenState extends State<ChatScreen> {
     _messageOperations.copyMessage(message);
   }
 
-  void _setFixedSymbol(Message message, String? symbol) async {
+  Future<void> _setFixedSymbol(Message message, String? symbol) async {
     // 使用MessageOperations设置固定符号
     await _messageOperations.setFixedSymbol(message, symbol);
-    _updateMessages(); // 更新消息列表
+    if (mounted) {
+      _updateMessages(); // 更新消息列表
+    }
   }
 
-  void _setBubbleColor(Message message, Color? color) async {
+  Future<void> _setBubbleColor(Message message, Color? color) async {
     // 使用MessageOperations设置气泡颜色
     await _messageOperations.setBubbleColor(message, color);
-    _updateMessages(); // 更新消息列表
+    if (mounted) {
+      _updateMessages(); // 更新消息列表
+    }
   }
 
   void _navigateToUserProfile(Message message) {
@@ -267,8 +307,60 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               body: Column(
                 children: [
+                  if (_replyToMessage != null)
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).colorScheme.outline.withAlpha(51), // 0.2 * 255 = 51
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
                   Expanded(
-                    child: MessageList(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '回复 ${_replyToMessage!.user.username}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _replyToMessage!.content,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: _clearReply,
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: MessageList(
                       items: messageItems,
                       isMultiSelectMode: _controller.isMultiSelectMode,
                       selectedMessageIds: _controller.selectedMessageIds,
@@ -288,13 +380,30 @@ class _ChatScreenState extends State<ChatScreen> {
                               : '',
                       highlightedMessage: _controller.highlightMessage,
                       shouldHighlight: _controller.highlightMessage != null,
+                      onReply: _handleReply,
+                      onReplyTap: _handleReplyTap,
                     ),
                   ),
                   MessageInput(
-                    controller: _controller.draftController,
-                    onSendMessage: _controller.sendMessage,
-                    onSaveDraft: _controller.saveDraft,
-                  ),
+            controller: _controller.draftController,
+            onSendMessage: (content, {metadata, type, replyTo}) {
+              _controller.sendMessage(
+                content,
+                metadata: metadata,
+                type: type,
+                replyTo: _replyToMessage,
+              );
+              // 发送后清除回复状态
+              if (_replyToMessage != null) {
+                setState(() {
+                  _replyToMessage = null;
+                });
+              }
+            },
+            onSaveDraft: _controller.saveDraft,
+            replyTo: _replyToMessage,
+            focusNode: _controller.focusNode,
+          ),
                 ],
               ),
             );

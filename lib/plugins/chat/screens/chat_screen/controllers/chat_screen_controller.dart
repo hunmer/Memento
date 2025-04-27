@@ -22,6 +22,7 @@ class ChatScreenController extends ChangeNotifier {
 
   Message? messageBeingEdited;
   final TextEditingController editingController = TextEditingController();
+  final FocusNode focusNode = FocusNode();
   final TextEditingController draftController = TextEditingController();
   Message? initialMessage;
   Message? highlightMessage;
@@ -250,6 +251,30 @@ class ChatScreenController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // 滚动到指定消息
+  void scrollToMessage(Message message) {
+    final index = messages.indexOf(message);
+    if (index != -1) {
+      // 计算目标位置，考虑日期分隔符
+      int targetIndex = index;
+      for (int i = 0; i < index; i++) {
+        if (messages[i] is DateTime) {
+          targetIndex++;
+        }
+      }
+
+      // 反转列表中的索引
+      final reversedIndex = messages.length - 1 - targetIndex;
+
+      // 滚动到目标位置
+      scrollController.animateTo(
+        reversedIndex * 60.0, // 估计每个消息的高度为60
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   void editMessage(Message message) {
     messageBeingEdited = message;
     editingController.text = message.content;
@@ -347,6 +372,7 @@ class ChatScreenController extends ChangeNotifier {
     String content, {
     Map<String, dynamic>? metadata,
     MessageType? type,
+    Message? replyTo,
   }) async {
     if (content.trim().isEmpty) return;
 
@@ -513,10 +539,9 @@ class ChatScreenController extends ChangeNotifier {
 
   @override
   void dispose() {
-    scrollController.dispose();
-    editingController.dispose();
     draftController.dispose();
-    _audioService.dispose();
+    scrollController.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 }

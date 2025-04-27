@@ -23,6 +23,7 @@ class MessageBubble extends StatelessWidget {
   final bool showAvatar;
   final String currentUserId;
   final bool isHighlighted;
+  final Function(String)? onReplyTap; // 添加回复消息点击回调
 
   const MessageBubble({
     super.key,
@@ -39,6 +40,7 @@ class MessageBubble extends StatelessWidget {
     this.onAvatarTap,
     this.showAvatar = true,
     this.isHighlighted = false,
+    this.onReplyTap,
   });
 
   @override
@@ -48,9 +50,57 @@ class MessageBubble extends StatelessWidget {
     return GestureDetector(
       onLongPress: onLongPress,
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-        decoration: BoxDecoration(
+      child: Column(
+        crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          if (message.replyTo != null)
+            GestureDetector(
+              onTap: () => onReplyTap?.call(message.replyTo!.id),
+              child: Container(
+                margin: EdgeInsets.only(
+                  bottom: 4.0,
+                  left: isCurrentUser ? 48.0 : (showAvatar ? 48.0 : 8.0),
+                  right: isCurrentUser ? 8.0 : 48.0,
+                ),
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 50),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 20),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message.replyTo!.user.username,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      message.replyTo!.content,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          Container(
+            margin: EdgeInsets.only(
+              left: isCurrentUser ? 48.0 : (showAvatar ? 0 : 8.0),
+              right: isCurrentUser ? 8.0 : 48.0,
+            ),
+            decoration: BoxDecoration(
           color: isHighlighted 
               ? Colors.yellow.withAlpha(50)
               : (isSelected ? Colors.blue.withAlpha(25) : Colors.transparent),
@@ -154,14 +204,6 @@ class MessageBubble extends StatelessWidget {
                                     color: Colors.grey[600],
                                   ),
                                 ),
-                                if (message.isEdited)
-                                  Text(
-                                    '(已编辑)',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
                               ],
                             ),
                             const SizedBox(width: 4),
@@ -282,6 +324,8 @@ class MessageBubble extends StatelessWidget {
           ],
         ),
       ),
+        ],
+      ),
     );
   }
 
@@ -390,7 +434,6 @@ class MessageBubble extends StatelessWidget {
         break;
       case MessageType.sent:
       case MessageType.received:
-      default:
         content = MarkdownBody(
           data: message.content,
           styleSheet: MarkdownStyleSheet(

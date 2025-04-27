@@ -17,6 +17,7 @@ class MessageOptionsHandler {
     required void Function(Message) onMessageCopy,
     required void Function(Message, String?) onSetFixedSymbol,
     required void Function(Message, Color?) onSetBubbleColor,
+    void Function(Message)? onReply,
     bool useRecentSymbols = true,
     bool initiallyShowFixedSymbolDialog = false,
   }) {
@@ -28,6 +29,7 @@ class MessageOptionsHandler {
       onMessageCopy: onMessageCopy,
       onSetFixedSymbol: onSetFixedSymbol,
       onSetBubbleColor: onSetBubbleColor,
+      onReply: onReply,
       useRecentSymbols: useRecentSymbols,
       initiallyShowFixedSymbolDialog: initiallyShowFixedSymbolDialog,
     );
