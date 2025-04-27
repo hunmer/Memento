@@ -99,10 +99,6 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                     selectedDate: _selectedDate,
                     onActivityTap: (activity) => _activityController.editActivity(context, activity),
                     onUnrecordedTimeTap: (start, end) {
-                      // 计算选择的分钟数
-                      final minutes = end.difference(start).inMinutes;
-                      _viewModeController.updateSelectedMinutes(minutes);
-                      
                       _activityController.addActivity(
                         context,
                         _selectedDate,
@@ -112,6 +108,14 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                       ).then((_) {
                         _viewModeController.clearSelectedMinutes();
                       });
+                    },
+                    onSelectionChanged: (start, end) {
+                      if (start != null && end != null) {
+                        final minutes = end.difference(start).inMinutes;
+                        _viewModeController.updateSelectedMinutes(minutes);
+                      } else {
+                        _viewModeController.clearSelectedMinutes();
+                      }
                     },
                   )
                 : ActivityTimeline(

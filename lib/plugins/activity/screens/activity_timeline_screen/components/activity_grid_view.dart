@@ -6,6 +6,7 @@ class ActivityGridView extends StatefulWidget {
   final List<ActivityRecord> activities;
   final Function(ActivityRecord) onActivityTap;
   final Function(DateTime, DateTime) onUnrecordedTimeTap;
+  final Function(DateTime?, DateTime?)? onSelectionChanged;
   final DateTime selectedDate;
 
   const ActivityGridView({
@@ -13,6 +14,7 @@ class ActivityGridView extends StatefulWidget {
     required this.activities,
     required this.onActivityTap,
     required this.onUnrecordedTimeTap,
+    this.onSelectionChanged,
     required this.selectedDate,
   });
 
@@ -114,6 +116,11 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       _selectionEnd = time;
       _isDragging = true;
     });
+    
+    // 通知选择范围变化
+    if (widget.onSelectionChanged != null) {
+      widget.onSelectionChanged!(_selectionStart, _selectionEnd);
+    }
   }
 
   void _onGridDragUpdate(DateTime time) {
@@ -124,6 +131,11 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       setState(() {
         _selectionEnd = endTime;
       });
+      
+      // 通知选择范围变化
+      if (widget.onSelectionChanged != null && _selectionStart != null) {
+        widget.onSelectionChanged!(_selectionStart, _selectionEnd);
+      }
     }
   }
 
@@ -142,6 +154,11 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       _selectionStart = null;
       _selectionEnd = null;
     });
+    
+    // 通知选择范围清空
+    if (widget.onSelectionChanged != null) {
+      widget.onSelectionChanged!(null, null);
+    }
   }
 
   // 根据鼠标位置找到对应的时间
