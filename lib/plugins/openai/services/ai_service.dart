@@ -73,7 +73,6 @@ class AIService {
 
       // 处理真实的流式响应
       await for (var chunk in response.stream.transform(utf8.decoder)) {
-        print(chunk);
         // 根据不同的服务提供商解析响应
         switch (agent.serviceProviderId) {
          default:

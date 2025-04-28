@@ -128,26 +128,46 @@ class ChatEventHandler {
             _messageControllers.remove(messageId);
             _messageBuffers.remove(messageId);
           },
-          onComplete: () {
+          onComplete: () async {
             developer.log(
               '完成消息生成，最终长度: ${contentBuffer.length}，Token数: $tokenCount',
               name: 'ChatEventHandler'
             );
             
-            // 发送最终的消息更新
-            Message.create(
-              id: typingMessage?.id ?? '',
-              content: contentBuffer.toString(),
-              user: aiUser,
-              type: MessageType.received,
-              date: typingMessage?.date,
-              metadata: {'isAI': true},
-            ).then((finalMessage) {
+            try {
+              // 创建最终消息
+              final finalMessage = await Message.create(
+                id: typingMessage?.id ?? '',
+                content: contentBuffer.toString(),
+                user: aiUser,
+                type: MessageType.received,
+                date: typingMessage?.date,
+                metadata: {'isAI': true},
+              );
+
+              // 先广播一个消息更新事件
               eventManager.broadcast(
                 'onMessageUpdated',
                 Value<Message>(finalMessage),
               );
-            });
+
+              // 再广播一个新消息接收事件，确保界面能收到新消息
+              eventManager.broadcast(
+                'onMessageReceived',
+                Value<Message>(finalMessage),
+              );
+
+              developer.log(
+                '已发送最终消息：${finalMessage.content}',
+                name: 'ChatEventHandler'
+              );
+            } catch (e) {
+              developer.log(
+                '发送最终消息时出错：$e',
+                name: 'ChatEventHandler',
+                error: e,
+              );
+            }
 
             // 清理资源
             streamController.close();

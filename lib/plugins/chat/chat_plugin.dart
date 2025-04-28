@@ -6,6 +6,7 @@ import 'services/channel_service.dart';
 import 'services/settings_service.dart';
 import 'services/ui_service.dart';
 import 'services/user_service.dart';
+import 'handlers/message_event_handler.dart';
 import 'l10n/chat_localizations.dart';
 
 class ChatPlugin extends BasePlugin with ChangeNotifier {
@@ -20,6 +21,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
   late final SettingsService settingsService;
   late final UIService uiService;
   late final UserService userService;
+  late final MessageEventHandler messageEventHandler;
 
   // 检查插件是否已完全初始化
   bool get isInitialized {
@@ -63,6 +65,9 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
     await userService.initialize();
     await channelService.initialize();
     await uiService.initialize();
+    
+    // 初始化消息事件处理器
+    messageEventHandler = MessageEventHandler(this);
   }
 
   @override

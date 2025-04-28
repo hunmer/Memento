@@ -9,9 +9,21 @@ import '../chat_plugin.dart';
 class ChannelService {
   final ChatPlugin _plugin;
   final List<Channel> _channels = [];
-
+  
+  // 当前活跃频道
+  Channel? _currentChannel;
+  
   // 获取频道列表的getter
   List<Channel> get channels => _channels;
+  
+  // 获取当前活跃频道的getter
+  Channel? get currentChannel => _currentChannel;
+  
+  // 设置当前活跃频道
+  void setCurrentChannel(Channel? channel) {
+    _currentChannel = channel;
+    _plugin.notifyListeners();
+  }
 
   ChannelService(this._plugin);
 
@@ -398,6 +410,35 @@ class ChannelService {
       // 重新抛出异常
       rethrow;
     }
+  }
+
+  // 更新消息
+  Future<void> updateMessage(Message message) async {
+    // 遍历所有频道查找消息
+    for (int i = 0; i < _channels.length; i++) {
+      final channel = _channels[i];
+      final messageIndex = channel.messages.indexWhere((m) => m.id == message.id);
+      
+      if (messageIndex != -1) {
+        // 找到消息，更新它
+        channel.messages[messageIndex] = message;
+        
+        // 如果这是最后一条消息，也更新频道的最后一条消息
+        if (channel.lastMessage?.id == message.id) {
+          channel.lastMessage = message;
+        }
+        
+        // 保存到存储
+        await saveMessages(channel.id, channel.messages);
+        
+        // 通知监听器数据已更新
+        _plugin.notifyListeners();
+        return;
+      }
+    }
+    
+    // 如果没有找到消息，记录警告
+    debugPrint('无法更新消息：未找到ID为 ${message.id} 的消息');
   }
 
   // 获取今日消息数量
