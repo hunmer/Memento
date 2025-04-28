@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import '../chat_plugin.dart';
 import '../models/message.dart';
 import '../models/channel.dart';
+import '../../../core/event/event_args.dart';
+import '../../../core/event/event_manager.dart';
 
 /// 统一管理消息操作的处理器
 class MessageOperations {
@@ -70,7 +72,10 @@ class MessageOperations {
     );
 
     if (result == true && controller.text.isNotEmpty) {
-      final updatedMessage = await message.copyWith(content: controller.text);
+      final updatedMessage = await message.copyWith(
+        content: controller.text,
+        editedAt: DateTime.now(),
+      );
       final index = channel.messages.indexWhere((m) => m.id == message.id);
       if (index != -1) {
         // 更新消息
@@ -79,6 +84,11 @@ class MessageOperations {
         await _chatPlugin.channelService.saveMessages(
           channel.id,
           channel.messages,
+        );
+        // 发布消息更新事件
+        EventManager.instance.broadcast(
+          'onMessageUpdated',
+          Value<Message>(updatedMessage),
         );
       }
     }
@@ -165,6 +175,11 @@ class MessageOperations {
         channel.id,
         channel.messages,
       );
+      // 发布消息更新事件
+      EventManager.instance.broadcast(
+        'onMessageUpdated',
+        Value<Message>(updatedMessage),
+      );
     }
   }
 
@@ -182,6 +197,11 @@ class MessageOperations {
       await _chatPlugin.channelService.saveMessages(
         channel.id,
         channel.messages,
+      );
+      // 发布消息更新事件
+      EventManager.instance.broadcast(
+        'onMessageUpdated',
+        Value<Message>(updatedMessage),
       );
     }
   }

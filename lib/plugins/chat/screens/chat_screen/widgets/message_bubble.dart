@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:Memento/core/event/event.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -50,6 +52,38 @@ class MessageBubble extends StatefulWidget {
 
 class _MessageBubbleState extends State<MessageBubble> {
   Message? replyMessage;
+  late String _messageUpdateSubscriptionId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReplyMessage();
+    // 订阅消息更新事件
+    _messageUpdateSubscriptionId = eventManager
+        .subscribe('onMessageUpdated', _handleMessageUpdated);
+  }
+
+  @override
+  void dispose() {
+    eventManager.unsubscribeById(_messageUpdateSubscriptionId);
+    super.dispose();
+  }
+
+  void _handleMessageUpdated(EventArgs args) {
+    if (args is! Value<Message>) return;
+    
+    final updatedMessage = args.value;
+    // 如果当前消息或回复消息被更新，刷新UI
+    if (updatedMessage.id == widget.message.id || 
+        (widget.message.replyToId != null && 
+         updatedMessage.id == widget.message.replyToId)) {
+      if (mounted) {
+        setState(() {
+          // 强制刷新UI
+        });
+      }
+    }
+  }
 
   Future<String> _getAbsolutePath(String relativePath) async {
     final appDir = await getApplicationDocumentsDirectory();
@@ -84,11 +118,6 @@ class _MessageBubbleState extends State<MessageBubble> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadReplyMessage();
-  }
 
   @override
   void didUpdateWidget(MessageBubble oldWidget) {

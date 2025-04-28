@@ -46,14 +46,24 @@ class ChatEventHandler {
           username: agentData['name'] ?? 'AI',
         );
 
-        // 创建单个消息，初始状态为"正在思考..."
-        final messageId = DateTime.now().millisecondsSinceEpoch.toString();
+        // 确保原消息已保存后再创建AI回复
+        eventManager.broadcast(
+          'onMessageUpdated',
+          Value<Message>(message),
+        );
+
+        // 创建AI回复消息，初始状态为"正在思考..."
+        final messageId = 'ai_${message.id}_${DateTime.now().millisecondsSinceEpoch}';
         typingMessage = await Message.create(
           id: messageId,
           content: '正在思考...',
           user: aiUser,
           type: MessageType.received,
-          metadata: {'isAI': true, 'isStreaming': true},
+          metadata: {
+            'isAI': true,
+            'isStreaming': true,
+            'replyTo': message.id, // 标记为对原消息的回复
+          },
         );
 
         // 创建消息流控制器和内容缓冲区
@@ -68,7 +78,7 @@ class ChatEventHandler {
           name: 'ChatEventHandler'
         );
 
-        // 发布消息创建事件 - 只发送一条消息
+        // 发布AI回复消息创建事件
         eventManager.broadcast(
           'onMessageCreate',
           Value<Message>(typingMessage),

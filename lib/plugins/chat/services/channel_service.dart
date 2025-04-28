@@ -414,65 +414,42 @@ class ChannelService {
   // 更新消息
   /// 更新指定消息的内容
   /// 
-  /// 此方法会更新频道中指定ID的消息内容，并触发UI更新
-  Future<void> updateMessage(Message message) async {
-    // 首先在当前频道中查找并更新消息
-    final currentChannel = _currentChannel;
-    if (currentChannel == null) {
-      debugPrint('无法更新消息：当前没有活跃的频道');
-      return;
-    }
-
-    final messageIndex = currentChannel.messages.indexWhere((m) => m.id == message.id);
-    if (messageIndex == -1) {
-      debugPrint('无法更新消息：找不到指定ID的消息');
-      return;
-    }
-
-    // 更新消息
-    currentChannel.messages[messageIndex] = message;
-
-    // 如果是最后一条消息，同时更新频道的lastMessage
-    if (messageIndex == currentChannel.messages.length - 1) {
-      currentChannel.lastMessage = message;
-    }
-
-    // 通知UI更新
-    _plugin.notifyListeners();
-
-    // 异步保存更新后的消息列表
-    await saveMessages(currentChannel.id, currentChannel.messages);
+  /// 此方法会更新频道中指定ID的消息内容，并触发UI刷新
+  Future<void> updateMessage(Message message, {bool persist = true}) async {
+    bool messageFound = false;
+    
     // 遍历所有频道查找消息
-    for (int i = 0; i < _channels.length; i++) {
-      final channel = _channels[i];
+    for (final channel in _channels) {
       final messageIndex = channel.messages.indexWhere((m) => m.id == message.id);
       
       if (messageIndex != -1) {
         // 找到消息，更新它
         channel.messages[messageIndex] = message;
         
-        // 如果这是最后一条消息，也更新频道的最后一条消息
+        // 如果这是最后一条消息，也更新频道的lastMessage
         if (channel.lastMessage?.id == message.id) {
           channel.lastMessage = message;
         }
         
-        // 立即通知监听器数据已更新，确保UI能及时刷新
-        _plugin.notifyListeners();
+        messageFound = true;
         
-        // 异步保存到存储，不阻塞UI更新
-        saveMessages(channel.id, channel.messages).then((_) {
-          // 保存完成后再次通知，确保数据一致性
-          _plugin.notifyListeners();
-        }).catchError((error) {
-          debugPrint('保存消息失败: $error');
-        });
-        
-        return;
+        // 根据persist参数决定是否保存到存储
+        if (persist) {
+          try {
+            await saveMessages(channel.id, channel.messages);
+          } catch (error) {
+            debugPrint('保存消息失败: $error');
+          }
+        }
       }
     }
     
-    // 如果没有找到消息，记录警告
-    debugPrint('无法更新消息：未找到ID为 ${message.id} 的消息');
+    if (messageFound) {
+      // 统一通知UI更新，避免多次触发
+      _plugin.notifyListeners();
+    } else {
+      debugPrint('无法更新消息：未找到ID为 ${message.id} 的消息');
+    }
   }
 
   // 获取今日消息数量

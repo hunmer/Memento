@@ -358,10 +358,9 @@ class _MessageInputState extends State<MessageInput> {
                     'onMessageSent',
                     Value<Message>(message),
                   );
-                  // 发送后清除选中的智能体
-                  setState(() {
-                    selectedAgents.clear();
-                  });
+                  // setState(() {
+                  //   selectedAgents.clear();
+                  // });
                   widget.controller.clear();
                   _focusNode.requestFocus(); // 保持焦点
                 }

@@ -48,8 +48,8 @@ class MessageEventHandler {
         await _channelService.getOrCreateDefaultChannel();
       }
       
-      // 更新当前频道中的消息
-      await _channelService.updateMessage(message);
+      // 更新当前频道中的消息，但不写入本地文件以提高性能
+      await _channelService.updateMessage(message, persist: false);
       
       // 强制通知监听器更新UI
       _plugin.notifyListeners();
