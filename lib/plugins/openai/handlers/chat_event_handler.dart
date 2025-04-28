@@ -46,32 +46,19 @@ class ChatEventHandler {
           username: agentData['name'] ?? 'AI',
         );
 
-        // 创建"正在输入"的临时消息
+        // 创建单个消息，初始状态为"正在思考..."
+        final messageId = DateTime.now().millisecondsSinceEpoch.toString();
         typingMessage = await Message.create(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: messageId,
           content: '正在思考...',
           user: aiUser,
           type: MessageType.received,
-          metadata: {'isAI': true},
+          metadata: {'isAI': true, 'isStreaming': true},
         );
-
-        // 广播临时消息
-        eventManager.broadcast(
-          'onMessageReceived',
-          Value<Message>(typingMessage),
-        );
-
-        // 获取agent配置
-        final agent = await _agentController.getAgent(agentData['id']);
-        if (agent == null) {
-          _updateTypingMessage(typingMessage?.id ?? '', '抱歉，找不到指定的AI助手配置', aiUser);
-          continue;
-        }
 
         // 创建消息流控制器和内容缓冲区
         final streamController = StreamController<String>();
         final contentBuffer = StringBuffer();
-        final messageId = typingMessage?.id ?? '';
         _messageControllers[messageId] = streamController;
         _messageBuffers[messageId] = contentBuffer;
         int tokenCount = 0;
@@ -80,38 +67,50 @@ class ChatEventHandler {
           '开始处理来自用户的消息: ${message.content}',
           name: 'ChatEventHandler'
         );
-        
+
+        // 发布消息创建事件 - 只发送一条消息
+        eventManager.broadcast(
+          'onMessageCreate',
+          Value<Message>(typingMessage),
+        );
+
+        // 获取agent配置
+        final agent = await _agentController.getAgent(agentData['id']);
+        if (agent == null) {
+          _updateTypingMessage(messageId, '抱歉，找不到指定的AI助手配置', aiUser);
+          continue;
+        }
+
         // 启动流式响应
         _aiService.streamResponse(
           agent: agent,
           prompt: message.content,
           onToken: (token) async {
             if (!streamController.isClosed) {
-              streamController.add(token);
+              // 如果是第一个token，清除"正在思考..."
+              if (tokenCount == 0) {
+                contentBuffer.clear();
+              }
               contentBuffer.write(token);
               tokenCount++;
-              
-              // 更新消息内容
-              final updatedMessage = await Message.create(
-                id: typingMessage?.id ?? '',
-                content: contentBuffer.toString(),
-                user: aiUser,
-                type: MessageType.received,
-                date: typingMessage?.date,
-                metadata: {'isAI': true},
-              );
 
-              if (tokenCount % 5 == 0) {
-                developer.log(
-                  '更新消息内容: 已接收 $tokenCount 个token，当前长度: ${contentBuffer.length}',
-                  name: 'ChatEventHandler'
+              // 更新 typingMessage 的内容
+              if (typingMessage != null) {
+                typingMessage.content = contentBuffer.toString();
+
+                if (tokenCount % 5 == 0) {
+                  developer.log(
+                    '更新消息内容: 已接收 $tokenCount 个token，当前长度: ${contentBuffer.length}',
+                    name: 'ChatEventHandler'
+                  );
+                }
+
+                // 广播消息更新事件
+                eventManager.broadcast(
+                  'onMessageUpdated',
+                  Value<Message>(typingMessage),
                 );
               }
-
-              eventManager.broadcast(
-                'onMessageUpdated',
-                Value<Message>(updatedMessage),
-              );
             }
           },
           onError: (error) {
@@ -120,7 +119,9 @@ class ChatEventHandler {
               name: 'ChatEventHandler',
               error: error
             );
-            _updateTypingMessage(typingMessage!.id, '抱歉，生成回复时出现错误：$error', aiUser);
+            if (typingMessage != null) {
+            _updateTypingMessage(typingMessage.id, '抱歉，生成回复时出现错误：$error', aiUser);
+            }
             
             // 清理资源
             final messageId = typingMessage?.id ?? '';
@@ -134,46 +135,25 @@ class ChatEventHandler {
               name: 'ChatEventHandler'
             );
             
-            try {
-              // 创建最终消息
-              final finalMessage = await Message.create(
-                id: typingMessage?.id ?? '',
-                content: contentBuffer.toString(),
-                user: aiUser,
-                type: MessageType.received,
-                date: typingMessage?.date,
-                metadata: {'isAI': true},
-              );
+              // 直接更新 typingMessage 的内容和元数据
+              if (typingMessage != null) {
+                typingMessage.content = contentBuffer.toString();
+                typingMessage.metadata = {'isAI': true}; // 移除 isStreaming 标记
 
-              // 先广播一个消息更新事件
-              eventManager.broadcast(
-                'onMessageUpdated',
-                Value<Message>(finalMessage),
-              );
-
-              // 再广播一个新消息接收事件，确保界面能收到新消息
-              eventManager.broadcast(
-                'onMessageReceived',
-                Value<Message>(finalMessage),
-              );
-
-              developer.log(
-                '已发送最终消息：${finalMessage.content}',
-                name: 'ChatEventHandler'
-              );
-            } catch (e) {
-              developer.log(
-                '发送最终消息时出错：$e',
-                name: 'ChatEventHandler',
-                error: e,
-              );
-            }
+                // 广播最终的消息更新事件
+                eventManager.broadcast(
+                  'onMessageUpdated',
+                  Value<Message>(typingMessage),
+                );
+              }
 
             // 清理资源
             streamController.close();
-            _messageControllers.remove(typingMessage?.id);
-            _messageBuffers.remove(typingMessage?.id);
-          },
+            if (typingMessage != null) {
+              _messageControllers.remove(typingMessage.id);
+              _messageBuffers.remove(typingMessage.id);
+            }
+          }
         );
       } catch (e) {
         developer.log(

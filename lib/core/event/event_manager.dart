@@ -63,10 +63,48 @@ class EventManager {
     return id;
   }
 
-  /// 通过订阅ID取消订阅
+  /// 通过事件名称和处理函数取消订阅
+  /// [eventName] 事件名称
+  /// [handler] 事件处理函数（可选）
+  /// 如果不提供handler，则取消该事件的所有订阅
+  /// 返回是否成功取消订阅
+  bool unsubscribe(String eventName, [Function(EventArgs)? handler]) {
+    bool removed = false;
+    
+    // 获取指定事件的订阅列表
+    final subscriptions = _eventSubscriptions[eventName];
+    if (subscriptions == null) return false;
+    
+    if (handler == null) {
+      // 如果没有提供handler，取消该事件的所有订阅
+      removed = subscriptions.isNotEmpty;
+      subscriptions.forEach((subscription) => subscription.cancel());
+      subscriptions.clear();
+    } else {
+      // 如果提供了handler，只取消匹配的订阅
+      subscriptions.removeWhere((subscription) {
+        if (subscription.handler == handler && subscription.isActive) {
+          subscription.cancel();
+          removed = true;
+          return true;
+        }
+        return false;
+      });
+    }
+    
+    // 清理空的事件列表
+    if (subscriptions.isEmpty) {
+      _eventSubscriptions.remove(eventName);
+    }
+    
+    return removed;
+  }
+
+  /// 通过订阅ID取消订阅（已弃用）
   /// [subscriptionId] 订阅句柄的唯一ID
   /// 返回是否成功取消订阅
-  bool unsubscribe(String subscriptionId) {
+  @Deprecated('请使用 unsubscribe(eventName, [handler]) 方法代替')
+  bool unsubscribeById(String subscriptionId) {
     bool removed = false;
     
     for (var subs in _eventSubscriptions.values) {
@@ -120,17 +158,19 @@ class EventManager {
     final controller = StreamController<EventArgs>();
     late final String subscriptionId;
     
-    subscriptionId = subscribe(eventName, (args) {
+    final handler = (EventArgs args) {
       if (controller.isClosed) {
-        unsubscribe(subscriptionId);
+        unsubscribeById(subscriptionId);
         return;
       }
       controller.add(args);
-    });
+    };
+    
+    subscriptionId = subscribe(eventName, handler);
     
     // 当Stream被取消时，自动取消事件订阅
     controller.onCancel = () {
-      unsubscribe(subscriptionId);
+      unsubscribeById(subscriptionId);
       controller.close();
     };
     

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
 import '../models/channel.dart';
 import '../models/message.dart';
 import '../models/user.dart';
@@ -413,7 +412,36 @@ class ChannelService {
   }
 
   // 更新消息
+  /// 更新指定消息的内容
+  /// 
+  /// 此方法会更新频道中指定ID的消息内容，并触发UI更新
   Future<void> updateMessage(Message message) async {
+    // 首先在当前频道中查找并更新消息
+    final currentChannel = _currentChannel;
+    if (currentChannel == null) {
+      debugPrint('无法更新消息：当前没有活跃的频道');
+      return;
+    }
+
+    final messageIndex = currentChannel.messages.indexWhere((m) => m.id == message.id);
+    if (messageIndex == -1) {
+      debugPrint('无法更新消息：找不到指定ID的消息');
+      return;
+    }
+
+    // 更新消息
+    currentChannel.messages[messageIndex] = message;
+
+    // 如果是最后一条消息，同时更新频道的lastMessage
+    if (messageIndex == currentChannel.messages.length - 1) {
+      currentChannel.lastMessage = message;
+    }
+
+    // 通知UI更新
+    _plugin.notifyListeners();
+
+    // 异步保存更新后的消息列表
+    await saveMessages(currentChannel.id, currentChannel.messages);
     // 遍历所有频道查找消息
     for (int i = 0; i < _channels.length; i++) {
       final channel = _channels[i];
@@ -428,11 +456,17 @@ class ChannelService {
           channel.lastMessage = message;
         }
         
-        // 保存到存储
-        await saveMessages(channel.id, channel.messages);
-        
-        // 通知监听器数据已更新
+        // 立即通知监听器数据已更新，确保UI能及时刷新
         _plugin.notifyListeners();
+        
+        // 异步保存到存储，不阻塞UI更新
+        saveMessages(channel.id, channel.messages).then((_) {
+          // 保存完成后再次通知，确保数据一致性
+          _plugin.notifyListeners();
+        }).catchError((error) {
+          debugPrint('保存消息失败: $error');
+        });
+        
         return;
       }
     }
@@ -473,10 +507,11 @@ class ChannelService {
   // 根据消息ID获取完整消息
   Message? getMessageById(String messageId) {
     for (var channel in _channels) {
-      final message = channel.messages.firstWhere(
-        (msg) => msg.id == messageId,
-        orElse: () => null as Message,
-      );
+      // 使用 try-catch 来处理没有找到消息的情况
+      Message? message;
+        message = channel.messages.firstWhere(
+          (msg) => msg.id == messageId,
+        );
       return message;
     }
     return null;
@@ -486,5 +521,51 @@ class ChannelService {
   Future<Message?> loadReplyMessage(String? replyToId) async {
     if (replyToId == null) return null;
     return getMessageById(replyToId);
+  }
+
+  /// 获取或创建默认频道
+  /// 如果没有频道或当前没有活跃频道，则创建一个默认频道
+  Future<Channel?> getOrCreateDefaultChannel() async {
+    try {
+      // 如果已有活跃频道，直接返回
+      if (_currentChannel != null) {
+        return _currentChannel;
+      }
+      
+      // 如果有频道但没有活跃频道，设置第一个为活跃频道
+      if (_channels.isNotEmpty) {
+        _currentChannel = _channels.first;
+        _plugin.notifyListeners();
+        return _currentChannel;
+      }
+      
+      // 如果没有任何频道，创建默认频道
+      final defaultUser = User(
+        id: 'user',
+        username: '用户',
+      );
+      
+      final defaultChannel = Channel(
+        id: 'default_${DateTime.now().millisecondsSinceEpoch}',
+        title: '默认对话',
+        icon: Icons.chat_bubble_outline,
+        members: [defaultUser],
+        messages: [],
+        priority: 0,
+      );
+      
+      // 创建频道
+      await createChannel(defaultChannel);
+      
+      // 设置为当前活跃频道
+      _currentChannel = defaultChannel;
+      _plugin.notifyListeners();
+      
+      debugPrint('已创建默认频道: ${defaultChannel.id}');
+      return defaultChannel;
+    } catch (e) {
+      debugPrint('创建默认频道失败: $e');
+      return null;
+    }
   }
 }
