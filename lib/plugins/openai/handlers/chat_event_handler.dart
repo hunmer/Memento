@@ -2,15 +2,15 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import '../../../core/event/event.dart';
 import '../controllers/agent_controller.dart';
-import '../services/ai_service.dart';
+import '../services/request_service.dart';
 import '../../chat/models/message.dart';
 import '../../chat/models/user.dart';
+import '../../../utils/image_utils.dart';
 
 class ChatEventHandler {
   final AgentController _agentController = AgentController();
-  final AIService _aiService = AIService();
   final eventManager = EventManager.instance;
-  
+
   // 存储每个消息ID对应的controller，用于更新消息内容
   final Map<String, StreamController<String>> _messageControllers = {};
   final Map<String, StringBuffer> _messageBuffers = {};
@@ -22,16 +22,36 @@ class ChatEventHandler {
 
   Future<void> _handleChatMessage(EventArgs args) async {
     if (args is! Value<Message>) return;
-    
+
     final message = args.value;
     final metadata = message.metadata;
-    
+
     developer.log('收到新消息: ${message.content}', name: 'ChatEventHandler');
-    
+
     // 检查消息是否包含agent信息
     if (metadata == null || !metadata.containsKey('agents')) return;
-    
-    final List<Map<String, dynamic>> agents = List<Map<String, dynamic>>.from(metadata['agents']);
+
+    // 处理文件路径，如果存在的话
+    String? absoluteFilePath;
+    bool hasImage = false;
+    if (metadata.containsKey('file') && metadata['file'] != null) {
+      final fileMetadata = metadata['file'] as Map<String, dynamic>;
+      if (fileMetadata.containsKey('path')) {
+        absoluteFilePath = await PathUtils.toAbsolutePath(fileMetadata['path']);
+        // 检查是否为图片文件
+        final extension = absoluteFilePath.toLowerCase();
+        hasImage =
+            extension.endsWith('.jpg') ||
+            extension.endsWith('.jpeg') ||
+            extension.endsWith('.png') ||
+            extension.endsWith('.gif') ||
+            extension.endsWith('.webp');
+      }
+    }
+
+    final List<Map<String, dynamic>> agents = List<Map<String, dynamic>>.from(
+      metadata['agents'],
+    );
     if (agents.isEmpty) return;
 
     // 为每个被@的AI agent创建回复
@@ -47,13 +67,11 @@ class ChatEventHandler {
         );
 
         // 确保原消息已保存后再创建AI回复
-        eventManager.broadcast(
-          'onMessageUpdated',
-          Value<Message>(message),
-        );
+        eventManager.broadcast('onMessageUpdated', Value<Message>(message));
 
         // 创建AI回复消息，初始状态为"正在思考..."
-        final messageId = 'ai_${message.id}_${DateTime.now().millisecondsSinceEpoch}';
+        final messageId =
+            'ai_${message.id}_${DateTime.now().millisecondsSinceEpoch}';
         typingMessage = await Message.create(
           id: messageId,
           content: '正在思考...',
@@ -75,12 +93,12 @@ class ChatEventHandler {
 
         developer.log(
           '开始处理来自用户的消息: ${message.content}',
-          name: 'ChatEventHandler'
+          name: 'ChatEventHandler',
         );
 
         // 发布AI回复消息创建事件
         eventManager.broadcast(
-          'onMessageCreate',  
+          'onMessageCreate',
           Value<Message>(typingMessage),
         );
 
@@ -92,9 +110,11 @@ class ChatEventHandler {
         }
 
         // 启动流式响应
-        _aiService.streamResponse(
+        await RequestService.streamResponse(
           agent: agent,
           prompt: message.content,
+          vision: hasImage, // 如果有图片，启用vision模式
+          filePath: absoluteFilePath, // 传递文件路径
           onToken: (token) async {
             if (!streamController.isClosed) {
               if (tokenCount == 0) {
@@ -122,12 +142,16 @@ class ChatEventHandler {
             developer.log(
               '生成回复时出现错误: $error',
               name: 'ChatEventHandler',
-              error: error
+              error: error,
             );
             if (typingMessage != null) {
-            _updateTypingMessage(typingMessage.id, '抱歉，生成回复时出现错误：$error', aiUser);
+              _updateTypingMessage(
+                typingMessage.id,
+                '抱歉，生成回复时出现错误：$error',
+                aiUser,
+              );
             }
-            
+
             // 清理资源
             final messageId = typingMessage?.id ?? '';
             streamController.close();
@@ -137,22 +161,24 @@ class ChatEventHandler {
           onComplete: () async {
             developer.log(
               '完成消息生成，最终长度: ${contentBuffer.length}，Token数: $tokenCount',
-              name: 'ChatEventHandler'
+              name: 'ChatEventHandler',
             );
-            
-              // 直接更新 typingMessage 的内容和元数据
-              if (typingMessage != null) {
-                // 在完成时也处理一次思考过程的标记
-                String finalContent = _processThinkingContent(contentBuffer.toString());
-                typingMessage.content = finalContent;
-                typingMessage.metadata = {'isAI': true}; // 移除 isStreaming 标记
 
-                // 广播最终的消息更新事件
-                eventManager.broadcast(
-                  'onMessageUpdated',
-                  Value<Message>(typingMessage),
-                );
-              }
+            // 直接更新 typingMessage 的内容和元数据
+            if (typingMessage != null) {
+              // 在完成时也处理一次思考过程的标记
+              String finalContent = _processThinkingContent(
+                contentBuffer.toString(),
+              );
+              typingMessage.content = finalContent;
+              typingMessage.metadata = {'isAI': true}; // 移除 isStreaming 标记
+
+              // 广播最终的消息更新事件
+              eventManager.broadcast(
+                'onMessageUpdated',
+                Value<Message>(typingMessage),
+              );
+            }
 
             // 清理资源
             streamController.close();
@@ -160,28 +186,17 @@ class ChatEventHandler {
               _messageControllers.remove(typingMessage.id);
               _messageBuffers.remove(typingMessage.id);
             }
-          }
+          },
         );
       } catch (e) {
-        developer.log(
-          '处理AI回复时出错',
-          name: 'ChatEventHandler',
-          error: e,
-        );
+        developer.log('处理AI回复时出错', name: 'ChatEventHandler', error: e);
         if (typingMessage != null) {
-          _updateTypingMessage(
-            typingMessage.id,
-            '处理AI回复时出错：$e',
-            aiUser,
-          );
+          _updateTypingMessage(typingMessage.id, '处理AI回复时出错：$e', aiUser);
         } else {
           // 如果typingMessage未创建，则创建一个新的错误消息
-          final errorMessageId = DateTime.now().millisecondsSinceEpoch.toString();
-          _updateTypingMessage(
-            errorMessageId,
-            '处理AI回复时出错：$e',
-            aiUser,
-          );
+          final errorMessageId =
+              DateTime.now().millisecondsSinceEpoch.toString();
+          _updateTypingMessage(errorMessageId, '处理AI回复时出错：$e', aiUser);
         }
         continue;
       }
@@ -197,10 +212,7 @@ class ChatEventHandler {
       metadata: {'isAI': true, 'isError': true},
     );
 
-    eventManager.broadcast(
-      'onMessageUpdated',
-      Value<Message>(updatedMessage),
-    );
+    eventManager.broadcast('onMessageUpdated', Value<Message>(updatedMessage));
   }
 
   String _processThinkingContent(String content) {
@@ -213,7 +225,7 @@ class ChatEventHandler {
         String thinkingContent = match.group(1) ?? '';
         return '<details><summary>思考过程</summary>\n\n<sub>${thinkingContent.trim()}</sub>\n\n</details>';
       });
-    } 
+    }
     // 处理未结束的思考过程
     else if (content.contains('<think>')) {
       // 将未结束的思考过程转换为小字体

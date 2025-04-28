@@ -69,30 +69,29 @@ Future<void> handleVideoSelection({
           debugPrint('文件消息已创建: ${fileMessage.id}');
 
           // 标准化文件信息结构，确保包含FileMessage.fromJson所需的所有字段
-        final Map<String, dynamic> metadata = {
-          'fileInfo': {
-            'id': fileMessage.id,
-            'fileName': fileMessage.fileName, // FileMessage.fromJson必需字段
-            'filePath': fileMessage.filePath, // FileMessage.fromJson必需字段
-            'originalFileName': fileMessage.originalFileName,
-            'size': fileMessage.fileSize,
-            'extension': fileMessage.extension,
-            'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
-            'type': 'video',
-            'isImage': false,
-            'createdAt': DateTime.now().toIso8601String(),
-          },
-          'senderInfo': {
-            'userId': 'current_user_id',
-            'timestamp': DateTime.now().millisecondsSinceEpoch,
-          }
-        };
+          final Map<String, dynamic> metadata = {
+            'fileInfo': {
+              'id': fileMessage.id,
+              'fileName': fileMessage.fileName, // FileMessage.fromJson必需字段
+              'filePath': fileMessage.filePath, // FileMessage.fromJson必需字段
+              'originalFileName': fileMessage.originalFileName,
+              'size': fileMessage.fileSize,
+              'extension': fileMessage.extension,
+              'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
+              'type': 'video',
+              'isImage': false,
+              'createdAt': DateTime.now().toIso8601String(),
+            },
+            'senderInfo': {
+              'userId': 'current_user',
+              'timestamp': DateTime.now().millisecondsSinceEpoch,
+            },
+          };
 
-        // 调用回调函数
-        debugPrint('调用onFileSelected回调...');
-        onFileSelected?.call(metadata);
-        debugPrint('onFileSelected回调已调用');
-   
+          // 调用回调函数
+          debugPrint('调用onFileSelected回调...');
+          onFileSelected?.call(metadata);
+          debugPrint('onFileSelected回调已调用');
         } catch (processingError) {
           debugPrint('错误：处理视频时出错: $processingError');
           scaffoldMessenger.showSnackBar(
@@ -165,10 +164,10 @@ Future<void> handleVideoSelection({
         final Map<String, dynamic> metadata = {
           'fileInfo': {
             'id': fileMessage.id,
-            'fileName': fileMessage.fileName,  // 修正字段名
+            'fileName': fileMessage.fileName, // 修正字段名
             'originalFileName': fileMessage.originalFileName,
-            'filePath': fileMessage.filePath,  // 修正字段名
-            'fileSize': fileMessage.fileSize,  // 修正字段名
+            'filePath': fileMessage.filePath, // 修正字段名
+            'fileSize': fileMessage.fileSize, // 修正字段名
             'extension': fileMessage.extension,
             'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
             'type': 'video',
@@ -176,9 +175,9 @@ Future<void> handleVideoSelection({
             'createdAt': DateTime.now().toIso8601String(),
           },
           'senderInfo': {
-            'userId': 'current_user_id',
+            'userId': 'current_user',
             'timestamp': DateTime.now().millisecondsSinceEpoch,
-          }
+          },
         };
 
         // 调用回调函数

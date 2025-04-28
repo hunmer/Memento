@@ -59,8 +59,10 @@ class _MessageBubbleState extends State<MessageBubble> {
     super.initState();
     _loadReplyMessage();
     // 订阅消息更新事件
-    _messageUpdateSubscriptionId = eventManager
-        .subscribe('onMessageUpdated', _handleMessageUpdated);
+    _messageUpdateSubscriptionId = eventManager.subscribe(
+      'onMessageUpdated',
+      _handleMessageUpdated,
+    );
   }
 
   @override
@@ -71,12 +73,12 @@ class _MessageBubbleState extends State<MessageBubble> {
 
   void _handleMessageUpdated(EventArgs args) {
     if (args is! Value<Message>) return;
-    
+
     final updatedMessage = args.value;
     // 如果当前消息或回复消息被更新，刷新UI
-    if (updatedMessage.id == widget.message.id || 
-        (widget.message.replyToId != null && 
-         updatedMessage.id == widget.message.replyToId)) {
+    if (updatedMessage.id == widget.message.id ||
+        (widget.message.replyToId != null &&
+            updatedMessage.id == widget.message.replyToId)) {
       if (mounted) {
         setState(() {
           // 强制刷新UI
@@ -117,7 +119,6 @@ class _MessageBubbleState extends State<MessageBubble> {
           ),
     );
   }
-
 
   @override
   void didUpdateWidget(MessageBubble oldWidget) {
@@ -477,13 +478,14 @@ class _MessageBubbleState extends State<MessageBubble> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (BuildContext ctx) => FilePreviewScreen(
-                    filePath: fileInfo.filePath,
-                    fileName: fileInfo.fileName,
-                    mimeType: fileInfo.mimeType ?? 'video/mp4',
-                    fileSize: fileInfo.fileSize,
-                    isVideo: true,
-                  ),
+                  builder:
+                      (BuildContext ctx) => FilePreviewScreen(
+                        filePath: fileInfo.filePath,
+                        fileName: fileInfo.fileName,
+                        mimeType: fileInfo.mimeType ?? 'video/mp4',
+                        fileSize: fileInfo.fileSize,
+                        isVideo: true,
+                      ),
                 ),
               );
             },
@@ -505,7 +507,8 @@ class _MessageBubbleState extends State<MessageBubble> {
                         fileInfo.originalFileName,
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
-                          color: isCurrentUser ? Colors.blue[900] : Colors.black87,
+                          color:
+                              isCurrentUser ? Colors.blue[900] : Colors.black87,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -514,7 +517,10 @@ class _MessageBubbleState extends State<MessageBubble> {
                         fileInfo.formattedSize,
                         style: TextStyle(
                           fontSize: 12,
-                          color: isCurrentUser ? Colors.blue[700] : Colors.grey[700],
+                          color:
+                              isCurrentUser
+                                  ? Colors.blue[700]
+                                  : Colors.grey[700],
                         ),
                       ),
                     ],

@@ -12,7 +12,7 @@ import '../../utils/message_operations.dart'; // 添加消息操作工具类
 import 'controllers/chat_screen_controller.dart';
 import 'widgets/chat_app_bar.dart';
 import 'widgets/message_list.dart';
-import 'widgets/message_input.dart';
+import 'widgets/message_input/index.dart';
 import 'dialogs/clear_messages_dialog.dart';
 import 'dialogs/calendar_date_picker_dialog.dart';
 import 'utils/message_list_builder.dart';
@@ -145,19 +145,20 @@ class _ChatScreenState extends State<ChatScreen> {
     final BuildContext currentContext = context;
     showDialog(
       context: currentContext,
-      builder: (BuildContext dialogContext) => ClearMessagesDialog(
-        onConfirm: () async {
-          await _controller.clearMessages();
-          if (!mounted) return;
-          _updateMessages(); // 更新消息列表
-          if (currentContext.mounted) {
-            Navigator.of(dialogContext).pop();
-          }
-        },
-        onCancel: () {
-          Navigator.of(dialogContext).pop();
-        },
-      ),
+      builder:
+          (BuildContext dialogContext) => ClearMessagesDialog(
+            onConfirm: () async {
+              await _controller.clearMessages();
+              if (!mounted) return;
+              _updateMessages(); // 更新消息列表
+              if (currentContext.mounted) {
+                Navigator.of(dialogContext).pop();
+              }
+            },
+            onCancel: () {
+              Navigator.of(dialogContext).pop();
+            },
+          ),
     );
   }
 
@@ -287,8 +288,8 @@ class _ChatScreenState extends State<ChatScreen> {
       );
 
       if (mounted) {
-              final file = File(absolutePath);
-              await file.exists(); // 检查文件是否存在
+        final file = File(absolutePath);
+        await file.exists(); // 检查文件是否存在
         setState(() {
           _backgroundPath = absolutePath;
           _isLoadingBackground = false;
@@ -372,160 +373,176 @@ class _ChatScreenState extends State<ChatScreen> {
           // 内容层
           ListenableBuilder(
             listenable: _controller,
-            builder: (context, _) => FutureBuilder<List<dynamic>>(
-              future: MessageListBuilder.buildMessageListWithDateSeparators(
-                _controller.messages,
-                _controller.selectedDate,
-              ),
-              builder: (context, snapshot) {
-              final messageItems = snapshot.data ?? [];
+            builder:
+                (context, _) => FutureBuilder<List<dynamic>>(
+                  future: MessageListBuilder.buildMessageListWithDateSeparators(
+                    _controller.messages,
+                    _controller.selectedDate,
+                  ),
+                  builder: (context, snapshot) {
+                    final messageItems = snapshot.data ?? [];
 
-              // 根据是否有背景图片决定内容层Scaffold的背景颜色
-              return Scaffold(
-                backgroundColor:
-                    backgroundPath != null
-                        ? Colors.transparent
-                        : null, // 有背景时透明，无背景时使用默认颜色
-                appBar: ChatAppBar(
-                  channel: widget.channel,
-                  isMultiSelectMode: _controller.isMultiSelectMode,
-                  selectedCount: _controller.selectedMessageIds.length,
-                  onShowDatePicker: _showDatePickerDialog,
-                  onShowChannelInfo: () {
-                    if (mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  ChannelInfoScreen(channel: widget.channel),
-                        ),
-                      );
-                    }
-                  },
-                  onCopySelected: _copySelectedMessages,
-                  onDeleteSelected: _deleteSelectedMessages,
-                  onShowClearConfirmation: _showClearConfirmationDialog,
-                  onExitMultiSelect: _controller.toggleMultiSelectMode,
-                  onEnterMultiSelect: _controller.toggleMultiSelectMode,
-                ),
-                body: Column(
-                  children: [
-                    if (_replyToMessage != null)
-                      Container(
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color:
-                              Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
-                          border: Border(
-                            top: BorderSide(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.outline.withAlpha(51),
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                    // 根据是否有背景图片决定内容层Scaffold的背景颜色
+                    return Scaffold(
+                      backgroundColor:
+                          backgroundPath != null
+                              ? Colors.transparent
+                              : null, // 有背景时透明，无背景时使用默认颜色
+                      appBar: ChatAppBar(
+                        channel: widget.channel,
+                        isMultiSelectMode: _controller.isMultiSelectMode,
+                        selectedCount: _controller.selectedMessageIds.length,
+                        onShowDatePicker: _showDatePickerDialog,
+                        onShowChannelInfo: () {
+                          if (mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => ChannelInfoScreen(
+                                      channel: widget.channel,
+                                    ),
+                              ),
+                            );
+                          }
+                        },
+                        onCopySelected: _copySelectedMessages,
+                        onDeleteSelected: _deleteSelectedMessages,
+                        onShowClearConfirmation: _showClearConfirmationDialog,
+                        onExitMultiSelect: _controller.toggleMultiSelectMode,
+                        onEnterMultiSelect: _controller.toggleMultiSelectMode,
+                      ),
+                      body: Column(
+                        children: [
+                          if (_replyToMessage != null)
+                            Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceContainerHighest,
+                                border: Border(
+                                  top: BorderSide(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.outline.withAlpha(51),
+                                  ),
+                                ),
+                              ),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    '回复 ${_replyToMessage!.user.username}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '回复 ${_replyToMessage!.user.username}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _replyToMessage!.content,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurfaceVariant,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    _replyToMessage!.content,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color:
-                                          Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
+                                  IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: _clearReply,
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 32,
+                                      minHeight: 32,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: _clearReply,
-                              visualDensity: VisualDensity.compact,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 32,
-                                minHeight: 32,
-                              ),
+                          Expanded(
+                            child: MessageList(
+                              items: messageItems,
+                              isMultiSelectMode: _controller.isMultiSelectMode,
+                              selectedMessageIds:
+                                  _controller.selectedMessageIds,
+                              onMessageEdit: _showEditDialog,
+                              onMessageDelete: _deleteMessage,
+                              onMessageCopy: _copyMessageToClipboard,
+                              onSetFixedSymbol: _setFixedSymbol,
+                              onSetBubbleColor: _setBubbleColor,
+                              onToggleMessageSelection:
+                                  _controller.toggleMessageSelection,
+                              scrollController: _controller.scrollController,
+                              onAvatarTap: _navigateToUserProfile,
+                              showAvatar:
+                                  ChatPlugin
+                                      .instance
+                                      .settingsService
+                                      .showAvatarInChat,
+                              currentUserId:
+                                  ChatPlugin.instance.isInitialized
+                                      ? ChatPlugin
+                                          .instance
+                                          .userService
+                                          .currentUser
+                                          .id
+                                      : '',
+                              highlightedMessage: _controller.highlightMessage,
+                              shouldHighlight:
+                                  _controller.highlightMessage != null,
+                              onReply: _handleReply,
+                              onReplyTap: _handleReplyTap,
                             ),
-                          ],
-                        ),
+                          ),
+                          MessageInput(
+                            controller: _controller.draftController,
+                            onSendMessage: (
+                              content, {
+                              metadata,
+                              String type = 'text',
+                              replyTo,
+                            }) {
+                              _controller.sendMessage(
+                                content,
+                                metadata: metadata,
+                                type: type,
+                                replyTo: _replyToMessage,
+                              );
+                              // 发送后清除回复状态
+                              if (_replyToMessage != null) {
+                                setState(() {
+                                  _replyToMessage = null;
+                                });
+                              }
+                            },
+                            onSaveDraft: _controller.saveDraft,
+                            replyTo: _replyToMessage,
+                            focusNode: _controller.focusNode,
+                          ),
+                        ],
                       ),
-                    Expanded(
-                      child: MessageList(
-                        items: messageItems,
-                        isMultiSelectMode: _controller.isMultiSelectMode,
-                        selectedMessageIds: _controller.selectedMessageIds,
-                        onMessageEdit: _showEditDialog,
-                        onMessageDelete: _deleteMessage,
-                        onMessageCopy: _copyMessageToClipboard,
-                        onSetFixedSymbol: _setFixedSymbol,
-                        onSetBubbleColor: _setBubbleColor,
-                        onToggleMessageSelection:
-                            _controller.toggleMessageSelection,
-                        scrollController: _controller.scrollController,
-                        onAvatarTap: _navigateToUserProfile,
-                        showAvatar:
-                            ChatPlugin
-                                .instance
-                                .settingsService
-                                .showAvatarInChat,
-                        currentUserId:
-                            ChatPlugin.instance.isInitialized
-                                ? ChatPlugin.instance.userService.currentUser.id
-                                : '',
-                        highlightedMessage: _controller.highlightMessage,
-                        shouldHighlight: _controller.highlightMessage != null,
-                        onReply: _handleReply,
-                        onReplyTap: _handleReplyTap,
-                      ),
-                    ),
-                    MessageInput(
-                      controller: _controller.draftController,
-                      onSendMessage: (content, {metadata, String type = 'text', replyTo}) {
-                        _controller.sendMessage(
-                          content,
-                          metadata: metadata,
-                          type: type,
-                          replyTo: _replyToMessage,
-                        );
-                        // 发送后清除回复状态
-                        if (_replyToMessage != null) {
-                          setState(() {
-                            _replyToMessage = null;
-                          });
-                        }
-                      },
-                      onSaveDraft: _controller.saveDraft,
-                      replyTo: _replyToMessage,
-                      focusNode: _controller.focusNode,
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
-          ),
           ),
         ],
       ),

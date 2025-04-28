@@ -3,7 +3,7 @@ import '../../../models/channel.dart';
 import '../../../models/message.dart';
 import '../controllers/chat_screen_controller.dart';
 import './message_list.dart';
-import './message_input.dart';
+import './message_input/message_input.dart';
 import '../utils/message_list_builder.dart';
 
 class ChannelsView extends StatelessWidget {

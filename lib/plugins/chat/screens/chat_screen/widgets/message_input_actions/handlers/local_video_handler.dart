@@ -68,9 +68,9 @@ Future<void> handleLocalVideoSelection({
             'createdAt': DateTime.now().toIso8601String(),
           },
           'senderInfo': {
-            'userId': 'current_user_id',
+            'userId': 'current_user',
             'timestamp': DateTime.now().millisecondsSinceEpoch,
-          }
+          },
         };
 
         // 调用回调函数

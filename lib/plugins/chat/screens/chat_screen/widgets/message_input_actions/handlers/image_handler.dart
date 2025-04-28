@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -28,10 +27,7 @@ Future<void> handleImageSelection({
         final File imageFile = File(image.path);
         if (!await imageFile.exists()) {
           scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text('图片文件不存在'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text('图片文件不存在'), backgroundColor: Colors.red),
           );
           return;
         }
@@ -58,25 +54,17 @@ Future<void> handleImageSelection({
             'createdAt': DateTime.now().toIso8601String(),
           },
           'senderInfo': {
-            'userId': 'current_user_id', // 需要替换为实际用户ID
+            'userId': 'current_user', // 需要替换为实际用户ID
             'timestamp': DateTime.now().millisecondsSinceEpoch,
-          }
+          },
         };
 
         onFileSelected?.call(metadata);
-
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('图片已选择')),
-        );
       } catch (e) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('处理图片失败: $e')),
-        );
+        scaffoldMessenger.showSnackBar(SnackBar(content: Text('处理图片失败: $e')));
       }
     }
   } catch (e) {
-    scaffoldMessenger.showSnackBar(
-      SnackBar(content: Text('选择图片失败: $e')),
-    );
+    scaffoldMessenger.showSnackBar(SnackBar(content: Text('选择图片失败: $e')));
   }
 }
