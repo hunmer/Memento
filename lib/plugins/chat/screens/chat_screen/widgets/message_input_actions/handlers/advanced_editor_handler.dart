@@ -20,7 +20,7 @@ Future<void> handleAdvancedEditor({
           onSave: (_, content) {
             if (content.isNotEmpty) {
               // 发送消息
-              onSendMessage?.call(content, type: MessageType.sent);
+              onSendMessage?.call(content, type: 'sent');
             }
             Navigator.of(context).pop();
           },

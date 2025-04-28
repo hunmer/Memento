@@ -103,7 +103,7 @@ Future<void> handleVideoSelection({
               onSendMessage.call(
                 fileContent,
                 metadata: fileMetadata,
-                type: MessageType.video,
+                type: 'video',
               );
               debugPrint('消息已发送');
             } catch (sendError) {
@@ -229,7 +229,7 @@ Future<void> handleVideoSelection({
           onSendMessage.call(
             fileContent,
             metadata: fileMetadata,
-            type: MessageType.video,
+            type: 'video',
           );
           debugPrint('消息已发送');
         }

@@ -5,10 +5,12 @@ import 'message_input_actions/message_input_actions_drawer.dart';
 import 'message_input_actions/message_input_actions_builder.dart';
 import '../../../models/message.dart';
 
+// 定义发送消息的回调函数类型
+typedef OnSendMessage = void Function(String content, {Map<String, dynamic>? metadata, String type, Message? replyTo});
+
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
-  final Function(String, {Map<String, dynamic>? metadata, MessageType? type, Message? replyTo})
-  onSendMessage;
+  final OnSendMessage onSendMessage;
   final Function(String) onSaveDraft;
   final Message? replyTo; // 添加回复消息引用
   final FocusNode? focusNode; // 添加焦点节点
@@ -67,7 +69,7 @@ class _MessageInputState extends State<MessageInput> {
           if (widget.controller.text.trim().isNotEmpty) {
             widget.onSendMessage(
               widget.controller.text.trim(),
-              type: MessageType.sent,
+              type: 'sent',
               replyTo: widget.replyTo,
             );
             widget.controller.clear();
@@ -193,7 +195,7 @@ class _MessageInputState extends State<MessageInput> {
                 if (widget.controller.text.trim().isNotEmpty) {
                   widget.onSendMessage(
                     widget.controller.text.trim(),
-                    type: MessageType.sent,
+                    type: 'sent',
                     replyTo: widget.replyTo,
                   );
                   widget.controller.clear();

@@ -85,7 +85,7 @@ Future<void> handleAudioRecording({
                     onSendMessage.call(
                       fileContent,
                       metadata: fileMetadata,
-                      type: MessageType.audio,
+                      type: 'audio',
                     );
                   }
 

@@ -72,7 +72,7 @@ Future<void> handleFileSelection({
           onSendMessage.call(
             fileContent,
             metadata: fileMetadata,
-            type: MessageType.file,
+            type: 'file',
           );
         }
 

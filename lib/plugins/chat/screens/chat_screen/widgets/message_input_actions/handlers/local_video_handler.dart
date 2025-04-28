@@ -88,7 +88,7 @@ Future<void> handleLocalVideoSelection({
             onSendMessage.call(
               fileContent,
               metadata: fileMetadata,
-              type: MessageType.video,
+              type: 'video',
             );
             debugPrint('消息已发送');
           } catch (sendError) {

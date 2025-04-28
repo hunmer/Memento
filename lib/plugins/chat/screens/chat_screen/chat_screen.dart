@@ -105,13 +105,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // 更新消息列表
   void _updateMessages() {
-    setState(() {
-      // 重新加载消息
-      _controller.messages =
-          ChatPlugin.instance.channelService.channels
-              .firstWhere((c) => c.id == widget.channel.id)
-              .messages;
-    });
+    _controller.reloadMessages();
   }
 
   // 处理回复消息
@@ -148,21 +142,22 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _showClearConfirmationDialog() {
+    final BuildContext currentContext = context;
     showDialog(
-      context: context,
-      builder:
-          (context) => ClearMessagesDialog(
-            onConfirm: () async {
-              await _controller.clearMessages();
-              if (mounted) {
-                _updateMessages(); // 更新消息列表
-                Navigator.of(context).pop();
-              }
-            },
-            onCancel: () {
-              Navigator.of(context).pop();
-            },
-          ),
+      context: currentContext,
+      builder: (BuildContext dialogContext) => ClearMessagesDialog(
+        onConfirm: () async {
+          await _controller.clearMessages();
+          if (!mounted) return;
+          _updateMessages(); // 更新消息列表
+          if (currentContext.mounted) {
+            Navigator.of(dialogContext).pop();
+          }
+        },
+        onCancel: () {
+          Navigator.of(dialogContext).pop();
+        },
+      ),
     );
   }
 
@@ -292,8 +287,8 @@ class _ChatScreenState extends State<ChatScreen> {
       );
 
       if (mounted) {
-        final file = File(absolutePath);
-        final exists = await file.exists();
+              final file = File(absolutePath);
+              await file.exists(); // 检查文件是否存在
         setState(() {
           _backgroundPath = absolutePath;
           _isLoadingBackground = false;
@@ -361,7 +356,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       debugPrint('Error loading background image: $error');
                       debugPrint('Stack trace: $stackTrace');
                       return Container(
-                        color: Colors.red.withOpacity(0.3),
+                        color: Colors.red.withAlpha(77),
                       ); // 错误时显示红色背景以便调试
                     },
                   ),
@@ -370,17 +365,19 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           // 半透明遮罩层
           if (backgroundPath != null && !_isLoadingBackground)
-            Container(color: Colors.black.withOpacity(0.5)),
+            Container(color: Colors.black.withAlpha(128)),
           // 加载指示器
           if (_isLoadingBackground)
             const Center(child: CircularProgressIndicator()),
           // 内容层
-          FutureBuilder<List<dynamic>>(
-            future: MessageListBuilder.buildMessageListWithDateSeparators(
-              _controller.messages,
-              _controller.selectedDate,
-            ),
-            builder: (context, snapshot) {
+          ListenableBuilder(
+            listenable: _controller,
+            builder: (context, _) => FutureBuilder<List<dynamic>>(
+              future: MessageListBuilder.buildMessageListWithDateSeparators(
+                _controller.messages,
+                _controller.selectedDate,
+              ),
+              builder: (context, snapshot) {
               final messageItems = snapshot.data ?? [];
 
               // 根据是否有背景图片决定内容层Scaffold的背景颜色
@@ -506,7 +503,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                     MessageInput(
                       controller: _controller.draftController,
-                      onSendMessage: (content, {metadata, type, replyTo}) {
+                      onSendMessage: (content, {metadata, String type = 'text', replyTo}) {
                         _controller.sendMessage(
                           content,
                           metadata: metadata,
@@ -528,6 +525,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               );
             },
+          ),
           ),
         ],
       ),

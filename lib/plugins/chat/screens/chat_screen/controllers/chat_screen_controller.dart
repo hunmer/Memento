@@ -6,6 +6,21 @@ import '../../../chat_plugin.dart';
 import '../../../../../../utils/audio_service.dart';
 
 class ChatScreenController extends ChangeNotifier {
+  // 重新加载消息列表
+  void reloadMessages() {
+    final channelIndex = chatPlugin.channelService.channels.indexWhere(
+      (c) => c.id == channel.id,
+    );
+    
+    if (channelIndex != -1) {
+      messages = List<Message>.from(
+        chatPlugin.channelService.channels[channelIndex].messages,
+      )..sort((a, b) => b.date.compareTo(a.date));
+      
+      notifyListeners();
+    }
+  }
+
   final Channel channel;
   final ChatPlugin chatPlugin;
   final ScrollController scrollController = ScrollController();
@@ -49,56 +64,42 @@ class ChatScreenController extends ChangeNotifier {
     debugPrint(
       'Available channels: ${chatPlugin.channelService.channels.map((c) => c.id).join(', ')}',
     );
-    final channelIndex = chatPlugin.channelService.channels.indexWhere(
-      (c) => c.id == channel.id,
-    );
-    print('Found channel at index: $channelIndex');
-    if (channelIndex != -1) {
-      final totalMessages =
-          chatPlugin.channelService.channels[channelIndex].messages.length;
+    // 查找当前频道
+    if (!chatPlugin.channelService.channels.any((c) => c.id == channel.id)) {
+      debugPrint('Channel not found: ${channel.id}');
+      return;
+    }
+    
+    // 加载第一页消息
+    await _loadMessages();
 
-      // 计算总页数（向上取整）
-      final totalPages = (totalMessages / pageSize).ceil();
-
-      // 设置当前页为第一页，显示最新消息
-      currentPage = 1;
-
-      debugPrint('Initializing chat screen:');
-      debugPrint('- Total messages: $totalMessages');
-      debugPrint('- Total pages: $totalPages');
-      debugPrint('- Starting at page: $currentPage');
-
-      // 加载第一页消息
-      await _loadMessages();
-
-      // 如果需要定位到特定消息
-      if (initialMessage != null && autoScroll) {
-        // 查找消息在列表中的位置
-        final messageIndex = messages.indexWhere(
-          (m) => m.id == initialMessage!.id,
-        );
-        if (messageIndex != -1) {
-          // 使用延迟以确保布局完成
-          Future.delayed(const Duration(milliseconds: 100), () {
-            if (scrollController.hasClients) {
-              // 计算消息的位置并滚动
-              final itemHeight = 80.0; // 估计每个消息项的高度
-              final offset = messageIndex * itemHeight;
-              scrollController.jumpTo(offset);
-            }
-          });
-        } else {
-          // 如果消息不在当前页，加载更多页直到找到目标消息
-          _loadUntilMessageFound();
-        }
-      }
-      // 如果不需要定位到特定消息，则滚动到最新消息
-      else if (messages.isNotEmpty) {
+    // 如果需要定位到特定消息
+    if (initialMessage != null && autoScroll) {
+      // 查找消息在列表中的位置
+      final messageIndex = messages.indexWhere(
+        (m) => m.id == initialMessage!.id,
+      );
+      if (messageIndex != -1) {
         // 使用延迟以确保布局完成
         Future.delayed(const Duration(milliseconds: 100), () {
-          requestScrollToLatest();
+          if (scrollController.hasClients) {
+            // 计算消息的位置并滚动
+            final itemHeight = 80.0; // 估计每个消息项的高度
+            final offset = messageIndex * itemHeight;
+            scrollController.jumpTo(offset);
+          }
         });
+      } else {
+        // 如果消息不在当前页，加载更多页直到找到目标消息
+        _loadUntilMessageFound();
       }
+    }
+    // 如果不需要定位到特定消息，则滚动到最新消息
+    else if (messages.isNotEmpty) {
+      // 使用延迟以确保布局完成
+      Future.delayed(const Duration(milliseconds: 100), () {
+        requestScrollToLatest();
+      });
     }
   }
 
@@ -377,9 +378,32 @@ class ChatScreenController extends ChangeNotifier {
   Future<void> sendMessage(
     String content, {
     Map<String, dynamic>? metadata,
-    MessageType? type,
+    String type = 'text',
     Message? replyTo,
   }) async {
+    MessageType messageType;
+    switch (type) {
+      case 'sent':
+        messageType = MessageType.sent;
+        break;
+      case 'received':
+        messageType = MessageType.received;
+        break;
+      case 'file':
+        messageType = MessageType.file;
+        break;
+      case 'image':
+        messageType = MessageType.image;
+        break;
+      case 'video':
+        messageType = MessageType.video;
+        break;
+      case 'audio':
+        messageType = MessageType.audio;
+        break;
+      default:
+        messageType = MessageType.sent;
+    }
     if (content.trim().isEmpty) return;
 
     try {
@@ -388,7 +412,7 @@ class ChatScreenController extends ChangeNotifier {
         content: content,
         user: currentUser,
         date: DateTime.now(),
-        type: type ?? MessageType.sent,
+        type: messageType,
         metadata: metadata,
         replyTo: replyTo,
       );
@@ -405,16 +429,20 @@ class ChatScreenController extends ChangeNotifier {
       );
       debugPrint('Found channel at index: $channelIndex');
       if (channelIndex != -1) {
-        // 直接使用ChatPlugin的addMessage方法，它会同时更新内存和存储
-        await chatPlugin.channelService.addMessage(
-          channel.id,
-          Future.value(newMessage),
-        );
-
-        // 更新本地消息列表，与服务中的保持一致
-        messages = List<Message>.from(
-          chatPlugin.channelService.channels[channelIndex].messages,
-        )..sort((a, b) => b.date.compareTo(a.date));
+        // 先将消息添加到本地列表
+        messages.insert(0, newMessage);
+        
+        // 更新 channelService 中的消息
+        final channelMessages = chatPlugin.channelService.channels[channelIndex].messages;
+        channelMessages.add(newMessage);
+        // 在原始数据上进行排序
+        channelMessages.sort((a, b) => b.date.compareTo(a.date));
+        
+        // 保存更新后的消息
+        await chatPlugin.channelService.saveMessages(channel.id, channelMessages);
+        
+        // 确保本地消息列表与服务中的保持一致
+        messages = List<Message>.from(channelMessages);
       } else {
         // 如果找不到频道，则先添加到本地列表，再使用旧方法保存
         messages.insert(0, newMessage);
@@ -428,8 +456,10 @@ class ChatScreenController extends ChangeNotifier {
       // 请求滚动到最新消息
       requestScrollToLatest();
 
-      // 通知UI更新
-      notifyListeners();
+      // 确保在主线程中更新UI
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
 
       // 根据设置决定是否播放提示音
       if (chatPlugin.settingsService.shouldPlayMessageSound()) {
@@ -462,8 +492,10 @@ class ChatScreenController extends ChangeNotifier {
       // 保存空消息列表到存储
       await chatPlugin.channelService.saveMessages(channel.id, messages);
 
-      // 通知UI更新
-      notifyListeners();
+          // 消息发送完成后，确保在主线程中更新UI
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
 
       debugPrint('Messages cleared successfully');
     } catch (e) {

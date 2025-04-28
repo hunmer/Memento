@@ -22,5 +22,6 @@ typedef OnFileSelected = void Function(FileMessage fileMessage);
 typedef OnSendMessage = void Function(
   String content, {
   Map<String, dynamic>? metadata,
-  MessageType? type,
+  String type,
+  Message? replyTo,
 });

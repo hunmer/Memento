@@ -88,7 +88,7 @@ Future<void> handleImageSelection({
           onSendMessage.call(
             fileContent,
             metadata: fileMetadata,
-            type: MessageType.image,
+            type: 'image',
           );
           debugPrint('消息已发送');
         }
