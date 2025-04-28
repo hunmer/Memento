@@ -309,7 +309,7 @@ class _MessageInputState extends State<MessageInput> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // metadata展示区域，展示选中的文件和智能体
-                          if (selectedFile != null)
+                          if (selectedFile != null || selectedAgents.isNotEmpty)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -317,132 +317,153 @@ class _MessageInputState extends State<MessageInput> {
                               ),
                               child: Row(
                                 children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () async {
-                                        // 预览文件
-                                        if (selectedFile != null) {
-                                          final fileInfo =
-                                              selectedFile!['fileInfo']
-                                                  as Map<String, dynamic>?;
-                                          if (fileInfo != null &&
-                                              fileInfo['path'] != null) {
-                                            final filePath =
-                                                fileInfo['path'] as String;
-                                            if (Platform.isWindows) {
-                                              Process.run('explorer', [
-                                                filePath,
-                                              ]);
-                                            } else if (Platform.isMacOS) {
-                                              Process.run('open', [filePath]);
-                                            } else if (Platform.isLinux) {
-                                              Process.run('xdg-open', [
-                                                filePath,
-                                              ]);
+                                  // 文件状态展示
+                                  if (selectedFile != null)
+                                    Expanded(
+                                      flex: 1,
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          // 预览文件
+                                          if (selectedFile != null) {
+                                            final fileInfo =
+                                                selectedFile!['fileInfo']
+                                                    as Map<String, dynamic>?;
+                                            if (fileInfo != null &&
+                                                fileInfo['path'] != null) {
+                                              final filePath =
+                                                  fileInfo['path'] as String;
+                                              if (Platform.isWindows) {
+                                                Process.run('explorer', [
+                                                  filePath,
+                                                ]);
+                                              } else if (Platform.isMacOS) {
+                                                Process.run('open', [filePath]);
+                                              } else if (Platform.isLinux) {
+                                                Process.run('xdg-open', [
+                                                  filePath,
+                                                ]);
+                                              }
                                             }
                                           }
-                                        }
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.surface,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
                                           ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              (selectedFile!['fileInfo']?['type']
-                                                          as String?) ==
-                                                      'image'
-                                                  ? Icons.image
-                                                  : Icons.insert_drive_file,
-                                              size: 20,
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).colorScheme.onSurface,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.surface,
+                                            borderRadius: BorderRadius.circular(
+                                              8,
                                             ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              '1个文件',
-                                              style: TextStyle(
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                (selectedFile!['fileInfo']?['type']
+                                                            as String?) ==
+                                                        'image'
+                                                    ? Icons.image
+                                                    : Icons.insert_drive_file,
+                                                size: 20,
                                                 color:
                                                     Theme.of(
                                                       context,
                                                     ).colorScheme.onSurface,
-                                                fontWeight: FontWeight.w500,
                                               ),
-                                            ),
-                                          ],
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                '1个文件',
+                                                style: TextStyle(
+                                                  color:
+                                                      Theme.of(
+                                                        context,
+                                                      ).colorScheme.onSurface,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () {
-                                      setState(() {
-                                        selectedFile = null;
-                                      });
-                                    },
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 32,
-                                      minHeight: 32,
+
+                                  // 文件关闭按钮
+                                  if (selectedFile != null)
+                                    IconButton(
+                                      icon: const Icon(Icons.close),
+                                      onPressed: () {
+                                        setState(() {
+                                          selectedFile = null;
+                                        });
+                                      },
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(
+                                        minWidth: 32,
+                                        minHeight: 32,
+                                      ),
+                                      visualDensity: VisualDensity.compact,
                                     ),
-                                    visualDensity: VisualDensity.compact,
-                                  ),
+
+                                  // 如果两者都存在，添加一个间隔
+                                  if (selectedFile != null &&
+                                      selectedAgents.isNotEmpty)
+                                    const SizedBox(width: 8),
+
+                                  // 智能体状态展示
+                                  if (selectedAgents.isNotEmpty)
+                                    Expanded(
+                                      flex: 2,
+                                      child: GestureDetector(
+                                        onTap: showAgentListDrawer,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          child: Wrap(
+                                            spacing: 8,
+                                            children:
+                                                selectedAgents.map((agent) {
+                                                  return Chip(
+                                                    avatar: const Icon(
+                                                      Icons.smart_toy,
+                                                      size: 18,
+                                                    ),
+                                                    label: Text(
+                                                      agent['name'] ?? '',
+                                                    ),
+                                                    onDeleted: () {
+                                                      setState(() {
+                                                        selectedAgents
+                                                            .removeWhere(
+                                                              (a) =>
+                                                                  a['id'] ==
+                                                                  agent['id'],
+                                                            );
+                                                      });
+                                                    },
+                                                    backgroundColor:
+                                                        Theme.of(context)
+                                                            .colorScheme
+                                                            .primaryContainer,
+                                                    labelStyle: TextStyle(
+                                                      color:
+                                                          Theme.of(context)
+                                                              .colorScheme
+                                                              .onPrimaryContainer,
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                 ],
-                              ),
-                            ),
-                          if (selectedAgents.isNotEmpty)
-                            GestureDetector(
-                              onTap: showAgentListDrawer,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                child: Wrap(
-                                  spacing: 8,
-                                  children:
-                                      selectedAgents.map((agent) {
-                                        return Chip(
-                                          avatar: const Icon(
-                                            Icons.smart_toy,
-                                            size: 18,
-                                          ),
-                                          label: Text(agent['name'] ?? ''),
-                                          onDeleted: () {
-                                            setState(() {
-                                              selectedAgents.removeWhere(
-                                                (a) => a['id'] == agent['id'],
-                                              );
-                                            });
-                                          },
-                                          backgroundColor:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primaryContainer,
-                                          labelStyle: TextStyle(
-                                            color:
-                                                Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimaryContainer,
-                                          ),
-                                        );
-                                      }).toList(),
-                                ),
                               ),
                             ),
                           TextField(
