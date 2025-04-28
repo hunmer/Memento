@@ -63,7 +63,6 @@ class MessageInputActionsBuilder {
               context: context,
               fileService: fileService,
               onFileSelected: onFileSelected,
-              onSendMessage: onSendMessage,
               fromCamera: false,
             ),
       ),
@@ -79,7 +78,6 @@ class MessageInputActionsBuilder {
               context: context,
               fileService: fileService,
               onFileSelected: onFileSelected,
-              onSendMessage: onSendMessage,
               fromCamera: true,
             ),
       ),
@@ -96,7 +94,6 @@ class MessageInputActionsBuilder {
               context: context,
               fileService: fileService,
               onFileSelected: onFileSelected,
-              onSendMessage: onSendMessage,
             ),
       ),
     );
@@ -111,7 +108,6 @@ class MessageInputActionsBuilder {
               context: context,
               fileService: fileService,
               onFileSelected: onFileSelected,
-              onSendMessage: onSendMessage,
             ),
       ),
     );
@@ -126,7 +122,6 @@ class MessageInputActionsBuilder {
               context: context,
               fileService: fileService,
               onFileSelected: onFileSelected,
-              onSendMessage: onSendMessage,
             ),
       ),
     );
@@ -143,7 +138,6 @@ class MessageInputActionsBuilder {
                 context: context,
                 fileService: fileService,
                 onFileSelected: onFileSelected,
-                onSendMessage: onSendMessage,
               ),
         ),
       );

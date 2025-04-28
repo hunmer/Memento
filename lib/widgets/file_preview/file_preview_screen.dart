@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:video_player/video_player.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -12,6 +11,7 @@ class FilePreviewScreen extends StatefulWidget {
   final String fileName;
   final String mimeType;
   final int fileSize;
+  final bool isVideo;
 
   const FilePreviewScreen({
     super.key,
@@ -19,6 +19,7 @@ class FilePreviewScreen extends StatefulWidget {
     required this.fileName,
     required this.mimeType,
     required this.fileSize,
+    this.isVideo = false,
   });
 
   @override
@@ -35,7 +36,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
   void initState() {
     super.initState();
     _isImage = widget.mimeType.startsWith('image/');
-    _isVideo = widget.mimeType.startsWith('video/');
+    _isVideo = widget.isVideo || widget.mimeType.startsWith('video/');
     _resolveFilePath();
   }
 
@@ -47,17 +48,27 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
     try {
       // 解码 URI 编码的路径
       String resolvedPath = Uri.decodeFull(widget.filePath);
+      
+      // 统一路径分隔符为系统分隔符
+      resolvedPath = resolvedPath.replaceAll('/', path.separator).replaceAll(r'\\', path.separator);
 
-      // 如果是相对路径（不是以 / 开头），则转换为绝对路径
+      // 如果是相对路径（不是以系统分隔符开头），则转换为绝对路径
       if (!path.isAbsolute(resolvedPath)) {
         // 移除可能的 './' 前缀
-        if (resolvedPath.startsWith('./')) {
+        if (resolvedPath.startsWith('./') || resolvedPath.startsWith('.' + path.separator)) {
           resolvedPath = resolvedPath.substring(2);
         }
 
         // 获取应用文档目录作为基础路径
         final appDocDir = await getApplicationDocumentsDirectory();
-        resolvedPath = path.join(appDocDir.path, resolvedPath);
+        String appDirPath = appDocDir.path;
+        
+        // 如果路径包含 app_data，确保正确处理
+        if (!resolvedPath.contains('app_data')) {
+          appDirPath = path.join(appDirPath, 'app_data');
+        }
+        
+        resolvedPath = path.join(appDirPath, resolvedPath);
       }
 
       // 规范化路径（处理 .. 和 . 等特殊路径）
@@ -66,7 +77,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
       // 验证文件是否存在
       final file = File(_absoluteFilePath);
       final fileExists = await file.exists();
-      print('文件路径: $resolvedPath');
+      debugPrint('文件路径: $_absoluteFilePath');
       if (!fileExists) {
         if (mounted) {
           ScaffoldMessenger.of(
@@ -115,8 +126,9 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
     try {
       final file = File(_absoluteFilePath);
       if (await file.exists()) {
+        // 使用绝对路径而不是相对路径来分享文件
         await Share.shareXFiles([
-          XFile(widget.filePath),
+          XFile(_absoluteFilePath),
         ], text: '分享文件：${widget.fileName}');
       } else {
         if (mounted) {

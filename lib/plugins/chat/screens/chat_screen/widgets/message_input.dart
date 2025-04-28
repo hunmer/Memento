@@ -63,15 +63,14 @@ class _MessageInputState extends State<MessageInput> {
 
     if (hasFile || hasMessage) {
       // 如果有文件，先发送文件
-      if (hasFile && selectedFile != null) {
-        final filePath = selectedFile!['path'] as String?;
-        final fileType = selectedFile!['type'] as String?;
-        if (filePath != null && fileType != null) {
-          widget.onSendMessage(
-            filePath,
-            type: fileType,
-            metadata: {'fileName': selectedFile!['name']},
-          );
+        if (hasFile && selectedFile != null) {
+          final fileInfo = selectedFile!['fileInfo'] as Map<String, dynamic>?;
+          if (fileInfo != null) {
+            widget.onSendMessage(
+              fileInfo['path'] as String,
+              type: fileInfo['type'] as String,
+              metadata: selectedFile,
+            );
           setState(() {
             selectedFile = null;
           });
@@ -277,7 +276,6 @@ class _MessageInputState extends State<MessageInput> {
                               actions:
                                   MessageInputActionsBuilder.getDefaultActions(
                                     context,
-                                    // onSendMessage: widget.onSendMessage,
                                     onFileSelected: (fileMessage) {
                                       setState(() {
                                         selectedFile = fileMessage;
@@ -315,8 +313,9 @@ class _MessageInputState extends State<MessageInput> {
                                       onTap: () async {
                                         // 预览文件
                                       if (selectedFile != null) {
-                                        final filePath = selectedFile!['path'] as String?;
-                                        if (filePath != null) {
+                                        final fileInfo = selectedFile!['fileInfo'] as Map<String, dynamic>?;
+                                        if (fileInfo != null && fileInfo['path'] != null) {
+                                          final filePath = fileInfo['path'] as String;
                                           if (Platform.isWindows) {
                                             Process.run('explorer', [filePath]);
                                           } else if (Platform.isMacOS) {
@@ -340,7 +339,7 @@ class _MessageInputState extends State<MessageInput> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(
-                                              (selectedFile!['type'] as String?) == 'image'
+                                              (selectedFile!['fileInfo']?['type'] as String?) == 'image'
                                                   ? Icons.image
                                                   : Icons.insert_drive_file,
                                               size: 20,
@@ -349,7 +348,7 @@ class _MessageInputState extends State<MessageInput> {
                                             const SizedBox(width: 8),
                                             Flexible(
                                               child: Text(
-                                                selectedFile!['name']?.toString() ?? '',
+                                                selectedFile!['fileInfo']?['name']?.toString() ?? '',
                                                 style: TextStyle(
                                                   color: Theme.of(context).colorScheme.onSurface,
                                                 ),

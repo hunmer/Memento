@@ -467,6 +467,66 @@ class _MessageBubbleState extends State<MessageBubble> {
         );
         break;
       case MessageType.video:
+        if (widget.message.metadata?[Message.metadataKeyFileInfo] != null) {
+          final fileInfo = FileMessage.fromJson(
+            Map<String, dynamic>.from(
+              widget.message.metadata![Message.metadataKeyFileInfo],
+            ),
+          );
+          content = GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext ctx) => FilePreviewScreen(
+                    filePath: fileInfo.filePath,
+                    fileName: fileInfo.fileName,
+                    mimeType: fileInfo.mimeType ?? 'video/mp4',
+                    fileSize: fileInfo.fileSize,
+                    isVideo: true,
+                  ),
+                ),
+              );
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.video_file,
+                  size: 24,
+                  color: isCurrentUser ? Colors.blue[900] : Colors.grey[800],
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        fileInfo.originalFileName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: isCurrentUser ? Colors.blue[900] : Colors.black87,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        fileInfo.formattedSize,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isCurrentUser ? Colors.blue[700] : Colors.grey[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          content = const Text('Invalid video message format');
+        }
+        break;
       case MessageType.file:
         if (widget.message.metadata?[Message.metadataKeyFileInfo] != null) {
           final fileInfo = FileMessage.fromJson(

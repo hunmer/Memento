@@ -11,7 +11,6 @@ Future<void> handleLocalVideoSelection({
   required BuildContext context,
   required FileService fileService,
   required OnFileSelected? onFileSelected,
-  required OnSendMessage? onSendMessage,
 }) async {
   final scaffoldMessenger = ScaffoldMessenger.of(context);
 
@@ -54,69 +53,28 @@ Future<void> handleLocalVideoSelection({
         );
         debugPrint('文件消息已创建: ${fileMessage.id}');
 
-        // 创建视频元数据用于回调
-        final Map<String, dynamic> fileInfoForCallback = {
-          'id': fileMessage.id,
-          'name': fileMessage.fileName,
-          'originalName': fileMessage.originalFileName,
-          'path': fileMessage.filePath,
-          'size': fileMessage.fileSize,
-          'extension': fileMessage.extension,
-          'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
-          'isVideo': true,
-          'type': 'video',
-        };
-
-        // 调用回调函数发送视频消息
-        debugPrint('调用onFileSelected回调...');
-        onFileSelected?.call(fileInfoForCallback);
-        debugPrint('onFileSelected回调已调用');
-
-        // 如果提供了onSendMessage回调，创建视频类型的消息
-        if (onSendMessage != null) {
-          debugPrint('准备发送消息...');
-          // 创建纯文本格式的视频消息内容
-          final fileContent =
-              '🎥 ${fileMessage.fileName} (${fileMessage.formattedSize})';
-          debugPrint('消息内容: $fileContent');
-
-          // 创建视频元数据
-          final Map<String, dynamic> fileInfo = {
+        // 标准化文件信息结构
+        final Map<String, dynamic> metadata = {
+          'fileInfo': {
             'id': fileMessage.id,
-            'fileName': fileMessage.fileName,
-            'originalFileName': fileMessage.originalFileName,
-            'filePath': fileMessage.filePath,
-            'fileSize': fileMessage.fileSize,
+            'name': fileMessage.fileName,
+            'originalName': fileMessage.originalFileName,
+            'path': fileMessage.filePath,
+            'size': fileMessage.fileSize,
             'extension': fileMessage.extension,
             'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
-            'isVideo': true,
-          };
-
-          final fileMetadata = {Message.metadataKeyFileInfo: fileInfo};
-          debugPrint('元数据已创建');
-
-          // 发送视频消息
-          debugPrint('调用onSendMessage回调...');
-          try {
-            onSendMessage.call(
-              fileContent,
-              metadata: fileMetadata,
-              type: 'video',
-            );
-            debugPrint('消息已发送');
-          } catch (sendError) {
-            debugPrint('错误：发送消息时出错: $sendError');
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: Text('发送消息失败: $sendError'),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            'type': 'video',
+            'isImage': false,
+            'createdAt': DateTime.now().toIso8601String(),
+          },
+          'senderInfo': {
+            'userId': 'current_user_id',
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
           }
-        } else {
-          debugPrint('警告：onSendMessage回调为null');
-        }
+        };
+
+        // 调用回调函数
+        onFileSelected?.call(metadata);
 
         // 显示视频选择成功的提示
         scaffoldMessenger.showSnackBar(

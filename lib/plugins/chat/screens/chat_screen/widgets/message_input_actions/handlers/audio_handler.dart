@@ -13,7 +13,6 @@ Future<void> handleAudioRecording({
   required BuildContext context,
   required FileService fileService,
   required OnFileSelected? onFileSelected,
-  required OnSendMessage? onSendMessage,
 }) async {
   // 保存 context 的引用
   final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -54,54 +53,29 @@ Future<void> handleAudioRecording({
                     originalFileName: originalFileName,
                   );
 
-                  // 创建音频元数据
-                  final Map<String, dynamic> fileInfo = {
-                    'id': fileMessage.id,
-                    'name': fileMessage.fileName,
-                    'originalName': fileMessage.originalFileName,
-                    'path': fileMessage.filePath,
-                    'size': fileMessage.fileSize,
-                    'extension': fileMessage.extension,
-                    'mimeType': 'audio/${fileMessage.extension.replaceAll('.', '')}',
-                    'type': 'audio', // 添加type字段
-                    'isAudio': true,
-                    'duration': duration.inSeconds, // 添加音频时长信息
+                  // 标准化文件信息结构
+                  final Map<String, dynamic> metadata = {
+                    'fileInfo': {
+                      'id': fileMessage.id,
+                      'name': fileMessage.fileName,
+                      'originalName': fileMessage.originalFileName,
+                      'path': fileMessage.filePath,
+                      'size': fileMessage.fileSize,
+                      'extension': fileMessage.extension,
+                      'mimeType': 'audio/${fileMessage.extension.replaceAll('.', '')}',
+                      'type': 'audio',
+                      'isAudio': true,
+                      'duration': duration.inSeconds,
+                      'createdAt': DateTime.now().toIso8601String(),
+                    },
+                    'senderInfo': {
+                      'userId': 'current_user_id',
+                      'timestamp': DateTime.now().millisecondsSinceEpoch,
+                    }
                   };
 
-                  // 调用回调函数发送音频消息
-                  onFileSelected?.call(fileInfo);
-
-                  // 如果提供了onSendMessage回调，创建音频类型的消息
-                  if (onSendMessage != null) {
-                    // 创建音频消息内容
-                    final durationText = formatDuration(duration);
-                    final fileContent = '🎵 语音消息 ($durationText)';
-
-                    // 创建音频元数据
-                    final Map<String, dynamic> fileInfo = {
-                      'id': fileMessage.id,
-                      'fileName': fileMessage.fileName,
-                      'originalFileName': fileMessage.originalFileName,
-                      'filePath': fileMessage.filePath,
-                      'fileSize': fileMessage.fileSize,
-                      'extension': fileMessage.extension,
-                      'mimeType':
-                          'audio/${fileMessage.extension.replaceAll('.', '')}',
-                      'isAudio': true,
-                      'duration': duration.inSeconds, // 添加音频时长信息
-                    };
-
-                    final fileMetadata = {
-                      Message.metadataKeyFileInfo: fileInfo,
-                    };
-
-                    // 发送音频消息
-                    onSendMessage.call(
-                      fileContent,
-                      metadata: fileMetadata,
-                      type: 'audio',
-                    );
-                  }
+                  // 调用回调函数
+                  onFileSelected?.call(metadata);
 
                   // 显示音频发送成功的提示
                   if (scaffoldMessenger.mounted) {

@@ -140,10 +140,15 @@ class FileMessage {
 
   // 从Map创建FileMessage
   factory FileMessage.fromJson(Map<String, dynamic> json) {
+    // 兼容不同的字段命名格式
+    final String? fileName = json['fileName'] ?? json['name'];
+    String? filePath = json['filePath'] ?? json['path'];
+    final int fileSize = json['fileSize'] ?? json['size'] ?? 0;
+    
     // 确保必要的字段存在
-    if (!json.containsKey('fileName') || !json.containsKey('filePath')) {
+    if (fileName == null || filePath == null) {
       throw FormatException(
-        'Invalid file message format: missing required fields',
+        'Invalid file message format: missing required fields (fileName/name or filePath/path)',
       );
     }
 
@@ -171,10 +176,6 @@ class FileMessage {
       fileType = _determineFileType(json['filePath'] ?? '');
     }
 
-    // 处理文件名和路径
-    String fileName = json['fileName'];
-    String filePath = json['filePath'];
-
     // 如果是URI编码的路径，进行解码
     if (filePath.contains('%')) {
       filePath = Uri.decodeFull(filePath);
@@ -183,9 +184,9 @@ class FileMessage {
     return FileMessage(
       id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
       fileName: fileName,
-      originalFileName: json['originalFileName'] ?? fileName,
+      originalFileName: json['originalFileName'] ?? json['originalName'] ?? fileName,
       filePath: filePath,
-      fileSize: json['fileSize'] ?? 0,
+      fileSize: fileSize,
       timestamp:
           json.containsKey('timestamp') && json['timestamp'] != null
               ? DateTime.parse(json['timestamp'])

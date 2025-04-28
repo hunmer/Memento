@@ -9,7 +9,6 @@ Future<void> handleFileSelection({
   required BuildContext context,
   required FileService fileService,
   required OnFileSelected? onFileSelected,
-  required OnSendMessage? onSendMessage,
 }) async {
   final scaffoldMessenger = ScaffoldMessenger.of(context);
 
@@ -40,19 +39,25 @@ Future<void> handleFileSelection({
 
         debugPrint('文件已选择并验证: ${fileMessage.fileName}, 路径: $absolutePath');
 
-        // 创建文件元数据
-        final Map<String, dynamic> fileInfo = {
-          'id': fileMessage.id,
-          'name': fileMessage.fileName,
-          'originalName': fileMessage.originalFileName,
-          'path': absolutePath, // 使用绝对路径
-          'size': fileMessage.fileSize,
-          'extension': fileMessage.extension,
-          'type': 'file',
+        // 标准化文件信息结构
+        final Map<String, dynamic> metadata = {
+          'fileInfo': {
+            'id': fileMessage.id,
+            'name': fileMessage.fileName,
+            'originalName': fileMessage.originalFileName,
+            'path': absolutePath,
+            'size': fileMessage.fileSize,
+            'extension': fileMessage.extension,
+            'type': 'file',
+          },
+          'senderInfo': {
+            'id': 'current_user',
+            'name': '我',
+          }
         };
 
-        // 调用回调函数传递文件信息，但不发送消息
-        onFileSelected?.call(fileInfo);
+        // 调用回调函数传递文件信息
+        onFileSelected?.call(metadata);
 
         // 显示文件选择成功的提示
         scaffoldMessenger.showSnackBar(

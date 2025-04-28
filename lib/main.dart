@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:media_kit/media_kit.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/day/l10n/day_localizations.dart';
 // 移除未使用的导入
@@ -32,6 +33,9 @@ late final PluginManager globalPluginManager;
 void main() async {
   // 确保Flutter绑定初始化
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // 初始化 MediaKit
+  MediaKit.ensureInitialized();
 
   // 设置首选方向为竖屏
   await SystemChrome.setPreferredOrientations([
