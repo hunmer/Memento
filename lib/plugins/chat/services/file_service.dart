@@ -17,9 +17,9 @@ class SaveFileResult {
 class FileService {
   Future<Directory> get _appFilesDir async {
     final appDir = await getApplicationDocumentsDirectory();
-    // 确保使用相对路径
-    final filesDir = Directory('app_data/chat/chat_files');
-    final absoluteFilesDir = Directory('${appDir.path}/${filesDir.path}');
+    // 确保使用正确的路径分隔符
+    final filesDir = Directory(path.join('app_data', 'chat', 'chat_files'));
+    final absoluteFilesDir = Directory(path.join(appDir.path, filesDir.path));
     if (!await absoluteFilesDir.exists()) {
       await absoluteFilesDir.create(recursive: true);
     }
@@ -70,7 +70,7 @@ class FileService {
 
     // 如果指定了子目录，创建它
     if (subdirectory != null) {
-      targetDir = '${filesDir.path}/$subdirectory';
+      targetDir = path.join(filesDir.path, subdirectory);
       final subDir = Directory(targetDir);
       if (!await subDir.exists()) {
         await subDir.create(recursive: true);
@@ -81,7 +81,7 @@ class FileService {
     final extension = path.extension(sourceFile.path);
     final uuid = const Uuid().v4();
     final uniqueFileName = '$uuid$extension';
-    final targetFile = File('$targetDir/$uniqueFileName');
+    final targetFile = File(path.join(targetDir, uniqueFileName));
 
     // 复制文件到目标目录
     final savedFile = await sourceFile.copy(targetFile.path);
@@ -233,7 +233,7 @@ class FileService {
       }
 
       final filesDir = await _appFilesDir;
-      final thumbnailsDir = Directory('${filesDir.path}/thumbnails');
+      final thumbnailsDir = Directory(path.join(filesDir.path, 'thumbnails'));
 
       // 确保缩略图目录存在
       if (!await thumbnailsDir.exists()) {
@@ -242,7 +242,7 @@ class FileService {
 
       // 生成唯一的缩略图文件名
       final uuid = const Uuid().v4();
-      final thumbnailPath = '${thumbnailsDir.path}/$uuid.jpg';
+      final thumbnailPath = path.join(thumbnailsDir.path, '$uuid.jpg');
 
       try {
         // TODO: 实现视频缩略图生成逻辑

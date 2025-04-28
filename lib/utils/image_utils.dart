@@ -14,24 +14,27 @@ class PathUtils {
     final appDataPath = path.join(appDir.path, 'app_data');
 
     if (absolutePath.startsWith(appDataPath)) {
-      final relativePath = absolutePath.substring(appDir.path.length);
-      if (relativePath.startsWith('/app_data/')) {
-        return '.${relativePath.substring('/app_data'.length)}';
-      } else if (relativePath.startsWith('/')) {
-        // 处理其他可能的情况
-        return '.$relativePath';
+      String relativePath = absolutePath.substring(appDir.path.length);
+      // 统一使用正斜杠
+      relativePath = relativePath.replaceAll(r'\', '/');
+      
+      if (relativePath.startsWith('/app_data/') || relativePath.startsWith('\\app_data\\')) {
+        return '.${relativePath.substring('/app_data'.length).replaceAll(r'\', '/')}';
+      } else if (relativePath.startsWith('/') || relativePath.startsWith('\\')) {
+        // 处理其他可能的情况，确保使用正斜杠
+        return '.${relativePath.replaceAll(r'\', '/')}';
       }
     }
 
-    // 如果已经是相对路径格式，直接返回
+    // 如果已经是相对路径格式，直接返回（确保使用正斜杠）
     if (absolutePath.startsWith('./')) {
-      return absolutePath;
+      return absolutePath.replaceAll(r'\', '/');
     }
 
     // 如果不是应用数据目录下的文件，尝试构造相对路径
     final fileName = path.basename(absolutePath);
     if (fileName.contains('.')) {
-      return './chat/chat_files/$fileName';
+      return './chat/chat_files/${fileName.replaceAll(r'\', '/')}';
     }
 
     // 最后的回退方案，返回原路径
@@ -115,8 +118,8 @@ class ImageUtils {
       // 复制图片到目标目录
       await imageFile.copy(savedImage.path);
 
-      // 返回相对路径
-      return './$saveDirectory/$fileName';
+      // 返回相对路径（统一使用正斜杠，因为这是API的约定格式）
+      return './${saveDirectory.replaceAll(r'\', '/')}/${fileName.replaceAll(r'\', '/')}';
     } catch (e) {
       rethrow;
     }
@@ -151,8 +154,8 @@ class ImageUtils {
       // 写入图片数据
       await savedImage.writeAsBytes(imageBytes);
 
-      // 返回相对路径
-      return './$saveDirectory/$fileName';
+      // 返回相对路径（统一使用正斜杠，因为这是API的约定格式）
+      return './${saveDirectory.replaceAll(r'\', '/')}/${fileName.replaceAll(r'\', '/')}';
     } catch (e) {
       rethrow;
     }
@@ -173,14 +176,18 @@ class ImageUtils {
     if (!relativePath.startsWith('./')) {
       // 不是相对路径格式，可能是旧数据，尝试处理
       final appDir = await getApplicationDocumentsDirectory();
-      return path.join(appDir.path, relativePath);
+      // 确保使用正确的路径分隔符
+      final normalizedPath = relativePath.replaceAll('/', path.separator);
+      return path.join(appDir.path, normalizedPath);
     }
 
     final appDir = await getApplicationDocumentsDirectory();
-    final pathWithoutPrefix = relativePath.substring(2); // 移除 './' 前缀
+    // 移除 './' 前缀并规范化路径分隔符
+    final pathWithoutPrefix = relativePath.substring(2).replaceAll('/', path.separator);
 
-    // 检查路径是否已经包含 app_data
-    if (pathWithoutPrefix.startsWith('app_data/')) {
+    // 检查路径是否已经包含 app_data（处理不同的路径分隔符）
+    if (pathWithoutPrefix.startsWith('app_data${path.separator}') || 
+        pathWithoutPrefix.startsWith('app_data/')) {
       return path.join(appDir.path, pathWithoutPrefix);
     } else {
       // 添加 app_data 前缀
