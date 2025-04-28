@@ -152,7 +152,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       baseUrl: _baseUrlController.text,
       headers: _parseHeaders(_headersController.text),
       systemPrompt: _promptController.text,
-      model: _modelController.text.isEmpty ? 'gpt-3.5-turbo' : _modelController.text,
+      model:
+          _modelController.text.isEmpty
+              ? 'gpt-3.5-turbo'
+              : _modelController.text,
       tags: _tags,
       createdAt: widget.agent?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
@@ -166,6 +169,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
         await controller.updateAgent(agent);
       }
       if (mounted) {
+        // 返回true表示保存成功
         Navigator.of(context).pop(true);
       }
     } catch (e) {
@@ -357,7 +361,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     final testAgent = AIAgent(
       id: 'test',
       // 如果模型为空，使用 gpt-4-vision-preview 作为默认模型
-      model: _modelController.text.isEmpty ? 'gpt-4-vision-preview' : _modelController.text,
+      model:
+          _modelController.text.isEmpty
+              ? 'gpt-4-vision-preview'
+              : _modelController.text,
       name: _nameController.text,
       description: _descriptionController.text,
       serviceProviderId: selectedProvider.id,
@@ -389,7 +396,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
         try {
           // 处理请求并获取响应
           final response = await TestService.processTestRequest(
-            input, 
+            input,
             testAgent,
             imageFile: imageFile,
           );
@@ -409,7 +416,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     }
   }
 
-@override
+  @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
@@ -426,10 +433,7 @@ class _TestInputDialog extends StatefulWidget {
   final String title;
   final String hintText;
 
-  const _TestInputDialog({
-    required this.title,
-    required this.hintText,
-  });
+  const _TestInputDialog({required this.title, required this.hintText});
 
   @override
   State<_TestInputDialog> createState() => _TestInputDialogState();
@@ -445,7 +449,9 @@ class _TestInputDialogState extends State<_TestInputDialog> {
       allowMultiple: false,
     );
 
-    if (result != null && result.files.isNotEmpty && result.files.first.path != null) {
+    if (result != null &&
+        result.files.isNotEmpty &&
+        result.files.first.path != null) {
       setState(() {
         _selectedImage = File(result.files.first.path!);
       });
@@ -478,12 +484,13 @@ class _TestInputDialogState extends State<_TestInputDialog> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: _selectedImage != null
-                      ? Text(
-                          '已选择: ${_selectedImage!.path.split('/').last}',
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : const Text('未选择图片'),
+                  child:
+                      _selectedImage != null
+                          ? Text(
+                            '已选择: ${_selectedImage!.path.split('/').last}',
+                            overflow: TextOverflow.ellipsis,
+                          )
+                          : const Text('未选择图片'),
                 ),
               ],
             ),
@@ -508,10 +515,9 @@ class _TestInputDialogState extends State<_TestInputDialog> {
         ),
         TextButton(
           onPressed: () {
-            Navigator.of(context).pop({
-              'text': _textController.text,
-              'image': _selectedImage,
-            });
+            Navigator.of(
+              context,
+            ).pop({'text': _textController.text, 'image': _selectedImage});
           },
           child: const Text('发送'),
         ),

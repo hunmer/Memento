@@ -1,9 +1,15 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import '../models/ai_agent.dart';
 import '../../../core/plugin_manager.dart';
 
-class AgentController {
-  List<AIAgent> agents = [];
+class AgentController extends ChangeNotifier {
+  static final AgentController _instance = AgentController._internal();
+  factory AgentController() => _instance;
+  AgentController._internal();
+
+  List<AIAgent> _agents = [];
+  List<AIAgent> get agents => List.unmodifiable(_agents);
 
   Future<List<AIAgent>> loadAgents() async {
     final plugin = PluginManager.instance.getPlugin('openai');
@@ -14,18 +20,20 @@ class AgentController {
       final data = await storage.read('${plugin.storageDir}/agents.json');
       if (data.isNotEmpty) {
         final List<dynamic> jsonList = (data['agents'] ?? []) as List<dynamic>;
-        agents =
+        _agents =
             jsonList
                 .map((item) => AIAgent.fromJson(item as Map<String, dynamic>))
                 .toList();
       } else {
         // 如果文件为空，确保返回空列表
-        agents = [];
+        _agents = [];
       }
+      notifyListeners();
     } catch (e) {
-      agents = [];
+      _agents = [];
+      notifyListeners();
     }
-    return agents;
+    return _agents;
   }
 
   Future<void> saveAgent(AIAgent agent) async {
@@ -36,36 +44,42 @@ class AgentController {
     await loadAgents();
 
     // Update or add the agent
-    final index = agents.indexWhere((a) => a.id == agent.id);
+    final index = _agents.indexWhere((a) => a.id == agent.id);
     if (index >= 0) {
-      agents[index] = agent;
+      _agents[index] = agent;
     } else {
-      agents.add(agent);
+      _agents.add(agent);
     }
 
     // Save all agents
     final List<Map<String, dynamic>> agentsJson =
-        agents.map((a) => a.toJson()).toList();
+        _agents.map((a) => a.toJson()).toList();
     await plugin.storage.write('${plugin.storageDir}/agents.json', {
       'agents': agentsJson,
     });
+
+    // 通知监听器数据已更新
+    notifyListeners();
   }
 
   Future<void> deleteAgent(String agentId) async {
     final plugin = PluginManager.instance.getPlugin('openai');
     if (plugin == null) return;
 
-    agents.removeWhere((agent) => agent.id == agentId);
+    _agents.removeWhere((agent) => agent.id == agentId);
     final List<Map<String, dynamic>> agentsJson =
-        agents.map((a) => a.toJson()).toList();
+        _agents.map((a) => a.toJson()).toList();
     await plugin.storage.write('${plugin.storageDir}/agents.json', {
       'agents': agentsJson,
     });
+
+    // 通知监听器数据已更新
+    notifyListeners();
   }
 
   Future<AIAgent?> getAgent(String agentId) async {
     await loadAgents();
-    return agents.firstWhere(
+    return _agents.firstWhere(
       (agent) => agent.id == agentId,
       orElse: () => throw Exception('Agent not found'),
     );
@@ -75,7 +89,7 @@ class AgentController {
     await loadAgents();
     final Set<String> uniqueTags = {};
 
-    for (final agent in agents) {
+    for (final agent in _agents) {
       uniqueTags.addAll(agent.tags);
     }
 

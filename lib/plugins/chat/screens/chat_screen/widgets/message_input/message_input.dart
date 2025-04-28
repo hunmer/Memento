@@ -82,11 +82,9 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
-  void _handleAgentSelected(Map<String, String> agent) {
+  void _handleAgentSelected(List<Map<String, String>> agents) {
     setState(() {
-      if (!selectedAgents.any((a) => a['id'] == agent['id'])) {
-        selectedAgents.add(agent);
-      }
+      selectedAgents = agents;
       showAgentList = false;
       _updateMessageInputState();
     });

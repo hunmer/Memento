@@ -178,40 +178,45 @@ class _MessageBubbleState extends State<MessageBubble> {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (!isCurrentUser && widget.showAvatar) ...[
-                  GestureDetector(
-                    onTap: widget.onAvatarTap,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).colorScheme.primaryContainer,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 8.0,
+                    ), // 添加顶部间距，使头像不会完全贴在顶部
+                    child: GestureDetector(
+                      onTap: widget.onAvatarTap,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                        ),
+                        child:
+                            widget.message.user.iconPath != null
+                                ? FutureBuilder<String>(
+                                  future: _getAbsolutePath(
+                                    widget.message.user.iconPath!,
+                                  ),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData &&
+                                        snapshot.data != null) {
+                                      return ClipOval(
+                                        child: Image.file(
+                                          File(snapshot.data!),
+                                          width: 40,
+                                          height: 40,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      );
+                                    }
+                                    return _buildDefaultAvatar();
+                                  },
+                                )
+                                : _buildDefaultAvatar(),
                       ),
-                      child:
-                          widget.message.user.iconPath != null
-                              ? FutureBuilder<String>(
-                                future: _getAbsolutePath(
-                                  widget.message.user.iconPath!,
-                                ),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData &&
-                                      snapshot.data != null) {
-                                    return ClipOval(
-                                      child: Image.file(
-                                        File(snapshot.data!),
-                                        width: 40,
-                                        height: 40,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    );
-                                  }
-                                  return _buildDefaultAvatar();
-                                },
-                              )
-                              : _buildDefaultAvatar(),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -225,16 +230,15 @@ class _MessageBubbleState extends State<MessageBubble> {
                             ? CrossAxisAlignment.end
                             : CrossAxisAlignment.start,
                     children: [
-                      if (!isCurrentUser) // 只有非当前用户的消息才显示用户名
-                        Text(
-                          widget.message.user.username,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
+                      Text(
+                        widget.message.user.username,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.grey[600],
                         ),
-                      if (!isCurrentUser) const SizedBox(height: 2),
+                      ),
+                      const SizedBox(height: 2),
                       LayoutBuilder(
                         builder: (context, constraints) {
                           return Row(
@@ -365,37 +369,42 @@ class _MessageBubbleState extends State<MessageBubble> {
                 ),
                 if (isCurrentUser && widget.showAvatar) ...[
                   const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: widget.onAvatarTap,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).colorScheme.primaryContainer,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 8.0,
+                    ), // 添加顶部间距，使头像不会完全贴在顶部
+                    child: GestureDetector(
+                      onTap: widget.onAvatarTap,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                        ),
+                        child:
+                            widget.message.user.iconPath != null
+                                ? FutureBuilder<String>(
+                                  future: _getAbsolutePath(
+                                    widget.message.user.iconPath!,
+                                  ),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData &&
+                                        snapshot.data != null) {
+                                      return ClipOval(
+                                        child: Image.file(
+                                          File(snapshot.data!),
+                                          width: 40,
+                                          height: 40,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      );
+                                    }
+                                    return _buildDefaultAvatar();
+                                  },
+                                )
+                                : _buildDefaultAvatar(),
                       ),
-                      child:
-                          widget.message.user.iconPath != null
-                              ? FutureBuilder<String>(
-                                future: _getAbsolutePath(
-                                  widget.message.user.iconPath!,
-                                ),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData &&
-                                      snapshot.data != null) {
-                                    return ClipOval(
-                                      child: Image.file(
-                                        File(snapshot.data!),
-                                        width: 40,
-                                        height: 40,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    );
-                                  }
-                                  return _buildDefaultAvatar();
-                                },
-                              )
-                              : _buildDefaultAvatar(),
                     ),
                   ),
                 ] else if (!isCurrentUser && !widget.showAvatar) ...[

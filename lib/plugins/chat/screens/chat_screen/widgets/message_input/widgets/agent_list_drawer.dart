@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 
-class AgentListDrawer extends StatelessWidget {
+class AgentListDrawer extends StatefulWidget {
   final List<Map<String, String>> selectedAgents;
-  final Function(Map<String, String>) onAgentSelected;
+  final Function(List<Map<String, String>>) onAgentSelected;
   final TextEditingController textController;
 
   const AgentListDrawer({
@@ -13,6 +13,36 @@ class AgentListDrawer extends StatelessWidget {
     required this.onAgentSelected,
     required this.textController,
   }) : super(key: key);
+
+  @override
+  State<AgentListDrawer> createState() => _AgentListDrawerState();
+}
+
+class _AgentListDrawerState extends State<AgentListDrawer> {
+  late List<Map<String, String>> _selectedAgents;
+
+  @override
+  void initState() {
+    super.initState();
+    // 复制已选择的智能体列表，避免直接修改原始列表
+    _selectedAgents = List.from(widget.selectedAgents);
+  }
+
+  // 检查智能体是否已被选中
+  bool _isAgentSelected(String agentId) {
+    return _selectedAgents.any((agent) => agent['id'] == agentId);
+  }
+
+  // 切换智能体选择状态
+  void _toggleAgentSelection(Map<String, String> agentData) {
+    setState(() {
+      if (_isAgentSelected(agentData['id']!)) {
+        _selectedAgents.removeWhere((agent) => agent['id'] == agentData['id']);
+      } else {
+        _selectedAgents.add(agentData);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,23 +75,22 @@ class AgentListDrawer extends StatelessWidget {
                   itemCount: agents.length,
                   itemBuilder: (context, index) {
                     final agent = agents[index];
+                    final agentData = {'id': agent.id, 'name': agent.name};
+                    final isSelected = _isAgentSelected(agent.id);
+
                     return ListTile(
                       leading: const Icon(Icons.smart_toy),
                       title: Text(agent.name),
                       subtitle: Text(agent.description),
+                      trailing:
+                          isSelected
+                              ? const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              )
+                              : const Icon(Icons.circle_outlined),
                       onTap: () {
-                        final agentData = {'id': agent.id, 'name': agent.name};
-
-                        onAgentSelected(agentData);
-                        Navigator.pop(context);
-
-                        // 删除输入框中的@符号
-                        if (textController.text.endsWith('@')) {
-                          textController.text = textController.text.substring(
-                            0,
-                            textController.text.length - 1,
-                          );
-                        }
+                        _toggleAgentSelection(agentData);
                       },
                     );
                   },
@@ -79,6 +108,45 @@ class AgentListDrawer extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('取消'),
+                ),
+                ElevatedButton(
+                  onPressed:
+                      _selectedAgents.isEmpty
+                          ? null
+                          : () {
+                            widget.onAgentSelected(_selectedAgents);
+                            Navigator.pop(context);
+
+                            // 删除输入框中的@符号
+                            if (widget.textController.text.endsWith('@')) {
+                              widget.textController.text = widget
+                                  .textController
+                                  .text
+                                  .substring(
+                                    0,
+                                    widget.textController.text.length - 1,
+                                  );
+                            }
+                          },
+                  child: Text('确认选择 (${_selectedAgents.length})'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
         ],
       ),
     );

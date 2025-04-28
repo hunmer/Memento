@@ -15,6 +15,16 @@ class ChatEventHandler {
   final Map<String, StreamController<String>> _messageControllers = {};
   final Map<String, StringBuffer> _messageBuffers = {};
 
+  // 清理特定消息的资源
+  void _cleanupMessageResources(String messageId) {
+    final controller = _messageControllers[messageId];
+    if (controller != null && !controller.isClosed) {
+      controller.close();
+    }
+    _messageControllers.remove(messageId);
+    _messageBuffers.remove(messageId);
+  }
+
   void initialize() {
     // 订阅聊天消息事件
     eventManager.subscribe('onMessageSent', _handleChatMessage);
@@ -54,152 +64,172 @@ class ChatEventHandler {
     );
     if (agents.isEmpty) return;
 
-    // 为每个被@的AI agent创建回复
+    // eventManager.broadcast('onMessageUpdated', Value<Message>(message));
+
+    // 为每个被@的AI agent创建独立的异步任务处理回复
+    final List<Future<void>> agentTasks = [];
     for (final agentData in agents) {
-      // 预先定义变量，以便在catch块中访问
-      late User aiUser;
-      Message? typingMessage;
-      try {
-        // 创建AI用户
-        aiUser = User(
-          id: agentData['id'] ?? 'ai',
-          username: agentData['name'] ?? 'AI',
-        );
+      // 创建独立的异步任务
+      final task = _processAgentResponse(
+        agentData,
+        message,
+        absoluteFilePath,
+        hasImage,
+      );
+      agentTasks.add(task);
+    }
+    // 并行执行所有agent的任务
+    await Future.wait(agentTasks);
+  }
 
-        // 确保原消息已保存后再创建AI回复
-        eventManager.broadcast('onMessageUpdated', Value<Message>(message));
+  // 将单个agent的响应处理逻辑抽取为独立方法
+  Future<void> _processAgentResponse(
+    Map<String, dynamic> agentData,
+    Message originalMessage,
+    String? absoluteFilePath,
+    bool hasImage,
+  ) async {
+    // 预先定义变量，以便在catch块中访问
+    late User aiUser;
+    Message? typingMessage;
+    try {
+      // 创建AI用户
+      aiUser = User(
+        id: agentData['id'] ?? 'ai',
+        username: agentData['name'] ?? 'AI',
+      );
 
-        // 创建AI回复消息，初始状态为"正在思考..."
-        final messageId =
-            'ai_${message.id}_${DateTime.now().millisecondsSinceEpoch}';
-        typingMessage = await Message.create(
-          id: messageId,
-          content: '正在思考...',
-          user: aiUser,
-          type: MessageType.received,
-          metadata: {
-            'isAI': true,
-            'isStreaming': true,
-            'replyTo': message.id, // 标记为对原消息的回复
-          },
-        );
+      // 创建AI回复消息，使用agent的ID确保唯一性
+      final messageId =
+          'ai_${originalMessage.id}_${agentData['id']}_${DateTime.now().millisecondsSinceEpoch}';
+      typingMessage = await Message.create(
+        id: messageId,
+        content: '正在思考...',
+        user: aiUser,
+        type: MessageType.received,
+        metadata: {
+          'isAI': true,
+          'isStreaming': true,
+          'replyTo': originalMessage.id, // 标记为对原消息的回复
+        },
+      );
 
-        // 创建消息流控制器和内容缓冲区
-        final streamController = StreamController<String>();
-        final contentBuffer = StringBuffer();
-        _messageControllers[messageId] = streamController;
-        _messageBuffers[messageId] = contentBuffer;
-        int tokenCount = 0;
+      // 创建消息流控制器和内容缓冲区
+      final streamController = StreamController<String>();
+      final contentBuffer = StringBuffer();
+      _messageControllers[messageId] = streamController;
+      _messageBuffers[messageId] = contentBuffer;
+      int tokenCount = 0;
 
-        developer.log(
-          '开始处理来自用户的消息: ${message.content}',
-          name: 'ChatEventHandler',
-        );
+      developer.log(
+        '开始处理来自用户的消息: ${originalMessage.content}',
+        name: 'ChatEventHandler',
+      );
 
-        // 发布AI回复消息创建事件
-        eventManager.broadcast(
-          'onMessageCreate',
-          Value<Message>(typingMessage),
-        );
+      // 发布AI回复消息创建事件，添加agent标识
+      typingMessage.metadata?['agentId'] = agentData['id'];
+      eventManager.broadcast('onMessageCreate', Value<Message>(typingMessage));
 
-        // 获取agent配置
-        final agent = await _agentController.getAgent(agentData['id']);
-        if (agent == null) {
-          _updateTypingMessage(messageId, '抱歉，找不到指定的AI助手配置', aiUser);
-          continue;
-        }
+      // 获取agent配置
+      final agent = await _agentController.getAgent(agentData['id']);
+      if (agent == null) {
+        _updateTypingMessage(messageId, '抱歉，找不到指定的AI助手配置', aiUser);
+        return; // 使用return替代continue，因为我们现在在一个独立的异步方法中
+      }
 
-        // 启动流式响应
-        await RequestService.streamResponse(
-          agent: agent,
-          prompt: message.content,
-          vision: hasImage, // 如果有图片，启用vision模式
-          filePath: absoluteFilePath, // 传递文件路径
-          onToken: (token) async {
-            if (!streamController.isClosed) {
-              if (tokenCount == 0) {
-                contentBuffer.clear();
-              }
-              // 处理token并添加到缓冲区
-              contentBuffer.write(token);
-              tokenCount++;
-
-              // 检查并处理思考过程的标记
-              String currentContent = contentBuffer.toString();
-              String processedContent = _processThinkingContent(currentContent);
-
-              // 更新 typingMessage 的内容
-              if (typingMessage != null) {
-                typingMessage.content = processedContent;
-                eventManager.broadcast(
-                  'onMessageUpdated',
-                  Value<Message>(typingMessage),
-                );
-              }
+      // 启动流式响应
+      await RequestService.streamResponse(
+        agent: agent,
+        prompt: originalMessage.content,
+        vision: hasImage, // 如果有图片，启用vision模式
+        filePath: absoluteFilePath, // 传递文件路径
+        onToken: (token) async {
+          if (!streamController.isClosed) {
+            if (tokenCount == 0) {
+              contentBuffer.clear();
             }
-          },
-          onError: (error) {
-            developer.log(
-              '生成回复时出现错误: $error',
-              name: 'ChatEventHandler',
-              error: error,
-            );
+            // 处理token并添加到缓冲区
+            contentBuffer.write(token);
+            tokenCount++;
+
+            // 检查并处理思考过程的标记
+            String currentContent = contentBuffer.toString();
+            String processedContent = _processThinkingContent(currentContent);
+
+            // 更新 typingMessage 的内容
             if (typingMessage != null) {
-              _updateTypingMessage(
-                typingMessage.id,
-                '抱歉，生成回复时出现错误：$error',
-                aiUser,
-              );
-            }
-
-            // 清理资源
-            final messageId = typingMessage?.id ?? '';
-            streamController.close();
-            _messageControllers.remove(messageId);
-            _messageBuffers.remove(messageId);
-          },
-          onComplete: () async {
-            developer.log(
-              '完成消息生成，最终长度: ${contentBuffer.length}，Token数: $tokenCount',
-              name: 'ChatEventHandler',
-            );
-
-            // 直接更新 typingMessage 的内容和元数据
-            if (typingMessage != null) {
-              // 在完成时也处理一次思考过程的标记
-              String finalContent = _processThinkingContent(
-                contentBuffer.toString(),
-              );
-              typingMessage.content = finalContent;
-              typingMessage.metadata = {'isAI': true}; // 移除 isStreaming 标记
-
-              // 广播最终的消息更新事件
+              typingMessage.content = processedContent;
+              // 保持agent标识
+              typingMessage.metadata?['agentId'] = agentData['id'];
               eventManager.broadcast(
                 'onMessageUpdated',
                 Value<Message>(typingMessage),
               );
             }
+          }
+        },
+        onError: (error) {
+          developer.log(
+            '生成回复时出现错误: $error',
+            name: 'ChatEventHandler',
+            error: error,
+          );
+          if (typingMessage != null) {
+            _updateTypingMessage(
+              typingMessage.id,
+              '抱歉，生成回复时出现错误：$error',
+              aiUser,
+            );
+          }
 
-            // 清理资源
-            streamController.close();
-            if (typingMessage != null) {
-              _messageControllers.remove(typingMessage.id);
-              _messageBuffers.remove(typingMessage.id);
-            }
-          },
-        );
-      } catch (e) {
-        developer.log('处理AI回复时出错', name: 'ChatEventHandler', error: e);
-        if (typingMessage != null) {
-          _updateTypingMessage(typingMessage.id, '处理AI回复时出错：$e', aiUser);
-        } else {
-          // 如果typingMessage未创建，则创建一个新的错误消息
-          final errorMessageId =
-              DateTime.now().millisecondsSinceEpoch.toString();
-          _updateTypingMessage(errorMessageId, '处理AI回复时出错：$e', aiUser);
-        }
-        continue;
+          // 清理资源
+          final messageId = typingMessage?.id ?? '';
+          streamController.close();
+          _cleanupMessageResources(messageId);
+        },
+        onComplete: () async {
+          developer.log(
+            '完成消息生成，最终长度: ${contentBuffer.length}，Token数: $tokenCount',
+            name: 'ChatEventHandler',
+          );
+
+          // 直接更新 typingMessage 的内容和元数据
+          if (typingMessage != null) {
+            // 在完成时也处理一次思考过程的标记
+            String finalContent = _processThinkingContent(
+              contentBuffer.toString(),
+            );
+            typingMessage.content = finalContent;
+            // 保持agent标识
+            typingMessage.metadata = {
+              'isAI': true,
+              'agentId': agentData['id'],
+            }; // 移除 isStreaming 标记
+
+            // 广播最终的消息更新事件
+            eventManager.broadcast(
+              'onMessageUpdated',
+              Value<Message>(typingMessage),
+            );
+          }
+
+          // 清理资源
+          streamController.close();
+          if (typingMessage != null) {
+            _cleanupMessageResources(typingMessage.id);
+          }
+        },
+      );
+    } catch (e) {
+      developer.log('处理AI回复时出错', name: 'ChatEventHandler', error: e);
+      if (typingMessage != null) {
+        _updateTypingMessage(typingMessage.id, '处理AI回复时出错：$e', aiUser);
+      } else {
+        // 如果typingMessage未创建，则创建一个新的错误消息
+        final errorMessageId = DateTime.now().millisecondsSinceEpoch.toString();
+        _updateTypingMessage(errorMessageId, '处理AI回复时出错：$e', aiUser);
       }
+      return; // 使用return替代continue，因为我们现在在一个独立的异步方法中
     }
   }
 
@@ -209,7 +239,7 @@ class ChatEventHandler {
       content: content,
       user: user,
       type: MessageType.received,
-      metadata: {'isAI': true, 'isError': true},
+      metadata: {'isAI': true, 'isError': true, 'agentId': user.id},
     );
 
     eventManager.broadcast('onMessageUpdated', Value<Message>(updatedMessage));
@@ -221,30 +251,41 @@ class ChatEventHandler {
       // 使用正则表达式匹配所有思考过程
       final pattern = RegExp(r'<think>(.*?)</think>', dotAll: true);
       return content.replaceAllMapped(pattern, (match) {
-        // 将思考过程转换为可折叠的markdown格式
+        // 将思考过程转换为 Markdown blockquote 格式
         String thinkingContent = match.group(1) ?? '';
-        return '<details><summary>思考过程</summary>\n\n<sub>${thinkingContent.trim()}</sub>\n\n</details>';
+        // 在每一行前面添加 > 符号，实现 blockquote 效果
+        String formattedContent = thinkingContent
+            .trim()
+            .split('\n')
+            .map((line) => '> $line')
+            .join('\n');
+        return '\n\n**思考过程：**\n$formattedContent\n\n';
       });
     }
     // 处理未结束的思考过程
     else if (content.contains('<think>')) {
-      // 将未结束的思考过程转换为小字体
+      // 将未结束的思考过程转换为 blockquote 格式
       final pattern = RegExp(r'<think>(.*)$', dotAll: true);
       return content.replaceAllMapped(pattern, (match) {
         String thinkingContent = match.group(1) ?? '';
-        return '<sub>${thinkingContent.trim()}</sub>';
+        String formattedContent = thinkingContent
+            .trim()
+            .split('\n')
+            .map((line) => '> $line')
+            .join('\n');
+        return '\n\n**思考中...**\n$formattedContent';
       });
     }
     return content;
   }
 
   void dispose() {
-    // 清理所有活跃的消息流
-    for (final controller in _messageControllers.values) {
-      if (!controller.isClosed) {
-        controller.close();
-      }
+    // 获取所有消息ID的副本，因为我们会在循环中修改集合
+    final messageIds = _messageControllers.keys.toList();
+
+    // 使用_cleanupMessageResources清理每个消息的资源
+    for (final messageId in messageIds) {
+      _cleanupMessageResources(messageId);
     }
-    _messageControllers.clear();
   }
 }

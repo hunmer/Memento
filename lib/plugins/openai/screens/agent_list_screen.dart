@@ -1,5 +1,6 @@
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../controllers/agent_controller.dart';
 import '../widgets/agent_list_view.dart';
 import '../widgets/agent_grid_view.dart';
@@ -17,7 +18,7 @@ class AgentListScreen extends StatefulWidget {
 class _AgentListScreenState extends State<AgentListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final AgentController _controller = AgentController();
+  late AgentController _controller;
   bool _isGridView = true;
   Set<String> _selectedProviders = {};
   Set<String> _selectedTags = {};
@@ -26,12 +27,28 @@ class _AgentListScreenState extends State<AgentListScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _controller = AgentController();
+    _controller.addListener(_onAgentsChanged);
     _loadAgents();
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onAgentsChanged);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _onAgentsChanged() {
+    if (mounted) {
+      setState(() {
+        // 智能体列表已更新，UI需要刷新
+      });
+    }
   }
 
   Future<void> _loadAgents() async {
     await _controller.loadAgents();
-    setState(() {});
   }
 
   void _showFilterDialog() {
@@ -88,14 +105,12 @@ class _AgentListScreenState extends State<AgentListScreen>
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () async {
-              final result = await Navigator.of(context).push<bool>(
+              await Navigator.of(context).push<bool>(
                 MaterialPageRoute(
                   builder: (context) => const AgentEditScreen(),
                 ),
               );
-              if (result == true) {
-                await _loadAgents();
-              }
+              // 不需要手动刷新，因为AgentController会通知变化
             },
           ),
         ],
@@ -114,11 +129,5 @@ class _AgentListScreenState extends State<AgentListScreen>
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 }
