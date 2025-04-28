@@ -7,8 +7,10 @@ import 'screens/agent_list_screen.dart';
 import 'models/service_provider.dart';
 import 'controllers/agent_controller.dart';
 import 'screens/plugin_settings_screen.dart';
+import 'handlers/chat_event_handler.dart';
 
 class OpenAIPlugin extends BasePlugin {
+  final ChatEventHandler _chatEventHandler = ChatEventHandler();
   @override
   String get id => 'openai';
 
@@ -29,6 +31,9 @@ class OpenAIPlugin extends BasePlugin {
   Future<void> initialize() async {
     // Initialize default service providers
     await initializeDefaultData();
+    
+    // 初始化聊天事件处理器
+    _chatEventHandler.initialize();
   }
 
   @override
@@ -171,5 +176,8 @@ class OpenAIPlugin extends BasePlugin {
   Future<void> uninstall() async {
     // Clean up plugin data
     await storage.delete(storageDir);
+    
+    // 清理事件处理器
+    _chatEventHandler.dispose();
   }
 }
