@@ -5,8 +5,6 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
   file_selector_windows
-  media_kit_libs_windows_audio
-  media_kit_libs_windows_video
   media_kit_video
   permission_handler_windows
   record_windows
