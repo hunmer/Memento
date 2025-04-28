@@ -169,6 +169,18 @@ class OpenAIPlugin extends BasePlugin {
     await configManager.savePluginConfig(id, {'providers': []});
   }
 
+  Future<Map<String, dynamic>> _getAgentsData() async {
+    try {
+      final agentData = await storage.read('$storageDir/agents.json');
+      if (agentData.isNotEmpty) {
+        return Map<String, dynamic>.from(agentData);
+      }
+    } catch (e) {
+      debugPrint('Error reading agents data: $e');
+    }
+    return {'agents': []};
+  }
+
   @override
   Future<void> uninstall() async {
     // Clean up plugin data
@@ -176,5 +188,82 @@ class OpenAIPlugin extends BasePlugin {
 
     // 清理事件处理器
     _chatEventHandler.dispose();
+  }
+
+  @override
+  IconData get icon => Icons.smart_toy;
+
+  @override
+  Widget buildCardView(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _getAgentsData(),
+      builder: (context, snapshot) {
+        final agentsCount = (snapshot.data?['agents'] as List?)?.length ?? 0;
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 顶部图标和标题
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: theme.primaryColor.withAlpha(30),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, size: 24, color: theme.primaryColor),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 统计信息卡片
+              Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(
+                    76,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    // 智能体总数
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('智能体总数', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '$agentsCount',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color:
+                                agentsCount > 0
+                                    ? theme.colorScheme.primary
+                                    : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
