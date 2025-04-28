@@ -54,6 +54,55 @@ class _MessageInputState extends State<MessageInput> {
     super.dispose();
   }
 
+  // 统一的发送消息方法
+  void _sendMessage() {
+    if (widget.controller.text.trim().isNotEmpty) {
+      // 准备消息元数据，包含选中的智能体信息
+      Map<String, dynamic>? metadata;
+      if (selectedAgents.isNotEmpty) {
+        metadata = {
+          'agents': selectedAgents.map((agent) => {
+            'id': agent['id'],
+            'name': agent['name'],
+          }).toList(),
+        };
+      }
+      
+      // 创建用户对象
+      final user = User(
+        id: 'user',
+        username: 'User',
+      );
+      
+      // 创建消息对象
+      final message = Message(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        content: widget.controller.text.trim(),
+        user: user,
+        type: MessageType.sent,
+        replyTo: widget.replyTo,
+        metadata: metadata,
+      );
+
+      // 发送消息
+      widget.onSendMessage(
+        message.content,
+        type: 'sent',
+        replyTo: message.replyTo,
+        metadata: message.metadata,
+      );
+
+      // 广播消息事件
+      EventManager.instance.broadcast(
+        'onMessageSent',
+        Value<Message>(message),
+      );
+
+      widget.controller.clear();
+      _focusNode.requestFocus(); // 保持焦点
+    }
+  }
+
   KeyEventResult _handleKeyPress(KeyEvent event) {
     if (event is KeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.enter) {
@@ -72,16 +121,7 @@ class _MessageInputState extends State<MessageInput> {
           );
         } else if (!HardwareKeyboard.instance.isShiftPressed) {
           // Enter (不按Shift): 发送消息
-          if (widget.controller.text.trim().isNotEmpty) {
-            widget.onSendMessage(
-              widget.controller.text.trim(),
-              type: 'sent',
-              replyTo: widget.replyTo,
-            );
-            widget.controller.clear();
-            // 保持焦点但阻止换行
-            _focusNode.requestFocus();
-          }
+          _sendMessage();
         }
         return KeyEventResult.handled;
       }
@@ -238,25 +278,28 @@ class _MessageInputState extends State<MessageInput> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (selectedAgents.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              child: Wrap(
-                                spacing: 8,
-                                children: selectedAgents.map((agent) {
-                                  return Chip(
-                                    avatar: const Icon(Icons.smart_toy, size: 18),
-                                    label: Text(agent['name'] ?? ''),
-                                    onDeleted: () {
-                                      setState(() {
-                                        selectedAgents.removeWhere((a) => a['id'] == agent['id']);
-                                      });
-                                    },
-                                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                                    labelStyle: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                    ),
-                                  );
-                                }).toList(),
+                            GestureDetector(
+                              onTap: _showAgentListDrawer,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                child: Wrap(
+                                  spacing: 8,
+                                  children: selectedAgents.map((agent) {
+                                    return Chip(
+                                      avatar: const Icon(Icons.smart_toy, size: 18),
+                                      label: Text(agent['name'] ?? ''),
+                                      onDeleted: () {
+                                        setState(() {
+                                          selectedAgents.removeWhere((a) => a['id'] == agent['id']);
+                                        });
+                                      },
+                                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                                      labelStyle: TextStyle(
+                                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
                               ),
                             ),
                           TextField(
@@ -316,55 +359,7 @@ class _MessageInputState extends State<MessageInput> {
                   size: 20, // 适当调整图标大小
                 ),
               ),
-              onPressed: () {
-                if (widget.controller.text.trim().isNotEmpty) {
-                  // 准备消息元数据，包含选中的智能体信息
-                  Map<String, dynamic>? metadata;
-                  if (selectedAgents.isNotEmpty) {
-                    metadata = {
-                      'agents': selectedAgents.map((agent) => {
-                        'id': agent['id'],
-                        'name': agent['name'],
-                      }).toList(),
-                    };
-                  }
-                  
-                  // 创建用户对象
-                  final user = User(
-                    id: 'user',
-                    username: 'User',
-                  );
-                  
-                  // 创建消息对象
-                  final message = Message(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    content: widget.controller.text.trim(),
-                    user: user,
-                    type: MessageType.sent,
-                    replyTo: widget.replyTo,
-                    metadata: metadata,
-                  );
-
-                  // 发送消息
-                  widget.onSendMessage(
-                    message.content,
-                    type: 'sent',
-                    replyTo: message.replyTo,
-                    metadata: message.metadata,
-                  );
-
-                  // 广播消息事件
-                  EventManager.instance.broadcast(
-                    'onMessageSent',
-                    Value<Message>(message),
-                  );
-                  // setState(() {
-                  //   selectedAgents.clear();
-                  // });
-                  widget.controller.clear();
-                  _focusNode.requestFocus(); // 保持焦点
-                }
-              },
+              onPressed: _sendMessage,
               padding: EdgeInsets.zero,
             ),
           ),

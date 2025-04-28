@@ -49,7 +49,7 @@ class MessageEventHandler {
       }
       
       // 更新当前频道中的消息，但不写入本地文件以提高性能
-      await _channelService.updateMessage(message, persist: false);
+      await _channelService.updateMessage(message, persist: true);
       
       // 强制通知监听器更新UI
       _plugin.notifyListeners();

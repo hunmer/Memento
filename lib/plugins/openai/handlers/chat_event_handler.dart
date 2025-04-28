@@ -80,7 +80,7 @@ class ChatEventHandler {
 
         // 发布AI回复消息创建事件
         eventManager.broadcast(
-          'onMessageCreate',
+          'onMessageCreate',  
           Value<Message>(typingMessage),
         );
 
@@ -97,25 +97,20 @@ class ChatEventHandler {
           prompt: message.content,
           onToken: (token) async {
             if (!streamController.isClosed) {
-              // 如果是第一个token，清除"正在思考..."
               if (tokenCount == 0) {
                 contentBuffer.clear();
               }
+              // 处理token并添加到缓冲区
               contentBuffer.write(token);
               tokenCount++;
 
+              // 检查并处理思考过程的标记
+              String currentContent = contentBuffer.toString();
+              String processedContent = _processThinkingContent(currentContent);
+
               // 更新 typingMessage 的内容
               if (typingMessage != null) {
-                typingMessage.content = contentBuffer.toString();
-
-                if (tokenCount % 5 == 0) {
-                  developer.log(
-                    '更新消息内容: 已接收 $tokenCount 个token，当前长度: ${contentBuffer.length}',
-                    name: 'ChatEventHandler'
-                  );
-                }
-
-                // 广播消息更新事件
+                typingMessage.content = processedContent;
                 eventManager.broadcast(
                   'onMessageUpdated',
                   Value<Message>(typingMessage),
@@ -147,7 +142,9 @@ class ChatEventHandler {
             
               // 直接更新 typingMessage 的内容和元数据
               if (typingMessage != null) {
-                typingMessage.content = contentBuffer.toString();
+                // 在完成时也处理一次思考过程的标记
+                String finalContent = _processThinkingContent(contentBuffer.toString());
+                typingMessage.content = finalContent;
                 typingMessage.metadata = {'isAI': true}; // 移除 isStreaming 标记
 
                 // 广播最终的消息更新事件
@@ -204,6 +201,29 @@ class ChatEventHandler {
       'onMessageUpdated',
       Value<Message>(updatedMessage),
     );
+  }
+
+  String _processThinkingContent(String content) {
+    // 检查是否存在完整的思考过程（已结束的思考）
+    if (content.contains('<think>') && content.contains('</think>')) {
+      // 使用正则表达式匹配所有思考过程
+      final pattern = RegExp(r'<think>(.*?)</think>', dotAll: true);
+      return content.replaceAllMapped(pattern, (match) {
+        // 将思考过程转换为可折叠的markdown格式
+        String thinkingContent = match.group(1) ?? '';
+        return '<details><summary>思考过程</summary>\n\n<sub>${thinkingContent.trim()}</sub>\n\n</details>';
+      });
+    } 
+    // 处理未结束的思考过程
+    else if (content.contains('<think>')) {
+      // 将未结束的思考过程转换为小字体
+      final pattern = RegExp(r'<think>(.*)$', dotAll: true);
+      return content.replaceAllMapped(pattern, (match) {
+        String thinkingContent = match.group(1) ?? '';
+        return '<sub>${thinkingContent.trim()}</sub>';
+      });
+    }
+    return content;
   }
 
   void dispose() {
