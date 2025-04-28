@@ -46,8 +46,10 @@ class OpenAIPlugin extends BasePlugin {
             'serviceProviderId': 'ollama',
             'baseUrl': 'http://localhost:11434',
             'headers': {'api-key': 'ollama'},
+            'model': 'llama3',
             'systemPrompt': '你是一个乐于助人的AI助手，擅长回答问题并提供有用的建议。请用友好的语气与用户交流。',
             'tags': ['通用', '问答', '建议'],
+            'model': 'llama3',
             'createdAt': DateTime.now().toIso8601String(),
             'updatedAt': DateTime.now().toIso8601String(),
           },
@@ -61,6 +63,7 @@ class OpenAIPlugin extends BasePlugin {
             'systemPrompt':
                 '你是一个专业的翻译助手。请准确理解原文的含义，并以地道的方式翻译成目标语言。注意保持文体风格的一致性。',
             'tags': ['翻译', '多语言', '本地化'],
+            'model': 'deepseek-chat',
             'createdAt': DateTime.now().toIso8601String(),
             'updatedAt': DateTime.now().toIso8601String(),
           },
@@ -74,6 +77,7 @@ class OpenAIPlugin extends BasePlugin {
             'systemPrompt':
                 '你是一个富有创造力的写作助手。请根据用户的需求，创作出生动有趣、引人入胜的内容。注意文章的结构和情节发展。',
             'tags': ['写作', '创意', '文学'],
+            'model': 'gpt-4',
             'createdAt': DateTime.now().toIso8601String(),
             'updatedAt': DateTime.now().toIso8601String(),
           },

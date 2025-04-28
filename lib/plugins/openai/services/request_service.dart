@@ -32,7 +32,7 @@ class RequestService {
       final client = _getClient(agent);
 
       final request = CreateChatCompletionRequest(
-        model: ChatCompletionModel.modelId('deepseek-r1:14b'),
+        model: ChatCompletionModel.modelId(agent.model),
         messages: [
           ChatCompletionMessage.system(content: agent.systemPrompt),
           ChatCompletionMessage.user(
@@ -56,7 +56,7 @@ class RequestService {
       final client = _getClient(agent);
 
       final request = CreateChatCompletionRequest(
-        model: ChatCompletionModel.modelId('gpt-3.5-turbo'),
+        model: ChatCompletionModel.modelId(agent.model),
         messages: [
           ChatCompletionMessage.system(content: agent.systemPrompt),
           ChatCompletionMessage.user(

@@ -21,6 +21,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   final _promptController = TextEditingController();
   final _baseUrlController = TextEditingController();
   final _headersController = TextEditingController();
+  final _modelController = TextEditingController();
   String _selectedProviderId = '';
   final List<String> _tags = [];
   final _tagController = TextEditingController();
@@ -38,6 +39,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       _promptController.text = widget.agent!.systemPrompt;
       _selectedProviderId = widget.agent!.serviceProviderId;
       _baseUrlController.text = widget.agent!.baseUrl;
+      _modelController.text = widget.agent!.model;
       _headersController.text = _formatHeaders(widget.agent!.headers);
       _tags.addAll(widget.agent!.tags);
     }
@@ -148,6 +150,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       baseUrl: _baseUrlController.text,
       headers: _parseHeaders(_headersController.text),
       systemPrompt: _promptController.text,
+      model: _modelController.text.isEmpty ? 'gpt-3.5-turbo' : _modelController.text,
       tags: _tags,
       createdAt: widget.agent?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
@@ -279,6 +282,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: _modelController,
+              decoration: const InputDecoration(
+                labelText: 'Model',
+                hintText: 'Enter model name (e.g. gpt-3.5-turbo)',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
               controller: _headersController,
               decoration: const InputDecoration(
                 labelText: 'Headers',
@@ -334,14 +345,21 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       return;
     }
 
-    // 创建临时agent用于测试
+    // 获取当前选中的服务商
+    final selectedProvider = _providers.firstWhere(
+      (p) => p.id == _selectedProviderId,
+      orElse: () => throw Exception('未找到选定的服务商'),
+    );
+
+    // 创建临时agent用于测试，使用服务商的最新配置
     final testAgent = AIAgent(
       id: 'test',
+      model: _modelController.text,
       name: _nameController.text,
       description: _descriptionController.text,
-      serviceProviderId: _selectedProviderId,
-      baseUrl: _baseUrlController.text,
-      headers: _parseHeaders(_headersController.text),
+      serviceProviderId: selectedProvider.id,
+      baseUrl: selectedProvider.baseUrl,
+      headers: Map<String, String>.from(selectedProvider.headers),
       systemPrompt: _promptController.text,
       tags: _tags,
       createdAt: DateTime.now(),
@@ -381,6 +399,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     _promptController.dispose();
     _baseUrlController.dispose();
     _headersController.dispose();
+    _modelController.dispose();
     _tagController.dispose();
     super.dispose();
   }
