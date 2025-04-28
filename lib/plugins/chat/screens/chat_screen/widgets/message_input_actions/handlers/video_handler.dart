@@ -69,9 +69,22 @@ Future<void> handleVideoSelection({
           );
           debugPrint('文件消息已创建: ${fileMessage.id}');
 
+          // 创建视频元数据用于回调
+          final Map<String, dynamic> fileInfoForCallback = {
+            'id': fileMessage.id,
+            'name': fileMessage.fileName,
+            'originalName': fileMessage.originalFileName,
+            'path': fileMessage.filePath,
+            'size': fileMessage.fileSize,
+            'extension': fileMessage.extension,
+            'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
+            'isVideo': true,
+            'type': 'video',
+          };
+
           // 调用回调函数发送视频消息
           debugPrint('调用onFileSelected回调...');
-          onFileSelected?.call(fileMessage);
+          onFileSelected?.call(fileInfoForCallback);
           debugPrint('onFileSelected回调已调用');
 
           // 如果提供了onSendMessage回调，创建视频类型的消息
@@ -196,9 +209,22 @@ Future<void> handleVideoSelection({
         );
         debugPrint('文件消息已创建: ${fileMessage.id}');
 
+        // 创建视频元数据用于回调
+        final Map<String, dynamic> fileInfoForCallback = {
+          'id': fileMessage.id,
+          'name': fileMessage.fileName,
+          'originalName': fileMessage.originalFileName,
+          'path': fileMessage.filePath,
+          'size': fileMessage.fileSize,
+          'extension': fileMessage.extension,
+          'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
+          'isVideo': true,
+          'type': 'video',
+        };
+
         // 调用回调函数发送视频消息
         debugPrint('调用onFileSelected回调...');
-        onFileSelected?.call(fileMessage);
+        onFileSelected?.call(fileInfoForCallback);
         debugPrint('onFileSelected回调已调用');
 
         // 如果提供了onSendMessage回调，创建视频类型的消息

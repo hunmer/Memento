@@ -16,7 +16,7 @@ class MessageInputAction {
 }
 
 /// 文件选择回调
-typedef OnFileSelected = void Function(FileMessage fileMessage);
+typedef OnFileSelected = void Function(Map<String, dynamic> fileInfo);
 
 /// 发送消息回调
 typedef OnSendMessage = void Function(

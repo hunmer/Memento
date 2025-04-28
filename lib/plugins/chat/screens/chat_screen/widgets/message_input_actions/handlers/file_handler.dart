@@ -40,46 +40,24 @@ Future<void> handleFileSelection({
 
         debugPrint('文件已选择并验证: ${fileMessage.fileName}, 路径: $absolutePath');
 
-        // 调用回调函数发送文件消息
-        onFileSelected?.call(fileMessage);
+        // 创建文件元数据
+        final Map<String, dynamic> fileInfo = {
+          'id': fileMessage.id,
+          'name': fileMessage.fileName,
+          'originalName': fileMessage.originalFileName,
+          'path': absolutePath, // 使用绝对路径
+          'size': fileMessage.fileSize,
+          'extension': fileMessage.extension,
+          'type': 'file',
+        };
 
-        // 如果提供了onSendMessage回调，创建文件类型的消息
-        if (onSendMessage != null) {
-          // 创建纯文本格式的文件消息内容
-          final fileContent =
-              '📎 ${fileMessage.fileName} (${fileMessage.formattedSize})';
-
-          // 获取文件的绝对路径以验证
-          final absolutePath = await fileMessage.getAbsolutePath();
-          debugPrint('发送消息时的文件路径: $absolutePath');
-
-          // 创建文件元数据
-          final Map<String, dynamic> fileInfo = {
-            'id': fileMessage.id,
-            'fileName': fileMessage.fileName,
-            'originalFileName': fileMessage.originalFileName,
-            'filePath': fileMessage.filePath, // 使用相对路径存储
-            'absolutePath': absolutePath, // 额外存储绝对路径用于调试
-            'fileSize': fileMessage.fileSize,
-            'extension': fileMessage.extension,
-            'mimeType': 'application/octet-stream',
-            'isFile': true,
-          };
-
-          final fileMetadata = {Message.metadataKeyFileInfo: fileInfo};
-
-          // 发送文件消息
-          onSendMessage.call(
-            fileContent,
-            metadata: fileMetadata,
-            type: 'file',
-          );
-        }
+        // 调用回调函数传递文件信息，但不发送消息
+        onFileSelected?.call(fileInfo);
 
         // 显示文件选择成功的提示
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text('已发送文件: ${fileMessage.originalFileName}'),
+            content: Text('已选择文件: ${fileMessage.originalFileName}'),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, Process;
 import '../../../../../core/event/event.dart';
 import 'message_input_actions/message_input_actions_drawer.dart';
 import 'message_input_actions/message_input_actions_builder.dart';
@@ -37,6 +37,7 @@ class _MessageInputState extends State<MessageInput> {
   late FocusNode _keyboardListenerFocusNode;
   List<Map<String, String>> selectedAgents = [];
   bool showAgentList = false;
+  Map<String, dynamic>? selectedFile; // 存储选中的文件信息
 
   @override
   void initState() {
@@ -55,55 +56,80 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   // 统一的发送消息方法
-  void _sendMessage() {
-    if (widget.controller.text.trim().isNotEmpty) {
-      // 准备消息元数据，包含选中的智能体信息
-      Map<String, dynamic>? metadata;
-      if (selectedAgents.isNotEmpty) {
-        metadata = {
-          'agents': selectedAgents.map((agent) => {
-            'id': agent['id'],
-            'name': agent['name'],
-          }).toList(),
-        };
+  void _sendMessage() async {
+    final messageText = widget.controller.text.trim();
+    final hasFile = selectedFile != null;
+    final hasMessage = messageText.isNotEmpty;
+
+    if (hasFile || hasMessage) {
+      // 如果有文件，先发送文件
+      if (hasFile && selectedFile != null) {
+        final filePath = selectedFile!['path'] as String?;
+        final fileType = selectedFile!['type'] as String?;
+        if (filePath != null && fileType != null) {
+          widget.onSendMessage(
+            filePath,
+            type: fileType,
+            metadata: {'fileName': selectedFile!['name']},
+          );
+          setState(() {
+            selectedFile = null;
+          });
+        } else {
+          debugPrint('文件路径或类型为空，无法发送文件');
+        }
       }
-      
-      // 创建用户对象
-      final user = User(
-        id: 'user',
-        username: 'User',
-      );
-      
-      // 创建消息对象
-      final message = Message(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        content: widget.controller.text.trim(),
-        user: user,
-        type: MessageType.sent,
-        replyTo: widget.replyTo,
-        metadata: metadata,
-      );
 
-      // 发送消息
-      widget.onSendMessage(
-        message.content,
-        type: 'sent',
-        replyTo: message.replyTo,
-        metadata: message.metadata,
-      );
+      // 如果有消息文本，再发送消息
+      if (hasMessage) {
+        // 准备消息元数据，包含选中的智能体信息
+        Map<String, dynamic>? metadata;
+        if (selectedAgents.isNotEmpty) {
+          metadata = {
+            'agents': selectedAgents.map((agent) => {
+              'id': agent['id'],
+              'name': agent['name'],
+            }).toList(),
+          };
+        }
+        
+        // 创建用户对象
+        final user = User(
+          id: 'user',
+          username: 'User',
+        );
+        
+        // 创建消息对象
+        final message = Message(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          content: widget.controller.text.trim(),
+          user: user,
+          type: MessageType.sent,
+          replyTo: widget.replyTo,
+          metadata: metadata,
+        );
 
-      // 广播消息事件
-      EventManager.instance.broadcast(
-        'onMessageSent',
-        Value<Message>(message),
-      );
+        // 发送消息
+        widget.onSendMessage(
+          message.content,
+          type: 'sent',
+          replyTo: message.replyTo,
+          metadata: message.metadata,
+        );
 
-      widget.controller.clear();
-      _focusNode.requestFocus(); // 保持焦点
+        // 广播消息事件
+        EventManager.instance.broadcast(
+          'onMessageSent',
+          Value<Message>(message),
+        );
+
+        widget.controller.clear();
+        _focusNode.requestFocus(); // 保持焦点
+      }
     }
   }
 
-  KeyEventResult _handleKeyPress(KeyEvent event) {
+  KeyEventResult handleKeyPress(KeyEvent event) {
     if (event is KeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.enter) {
         if (HardwareKeyboard.instance.isControlPressed) {
@@ -120,7 +146,6 @@ class _MessageInputState extends State<MessageInput> {
             selection: TextSelection.collapsed(offset: selection.start + 1),
           );
         } else if (!HardwareKeyboard.instance.isShiftPressed) {
-          // Enter (不按Shift): 发送消息
           _sendMessage();
         }
         return KeyEventResult.handled;
@@ -129,7 +154,7 @@ class _MessageInputState extends State<MessageInput> {
     return KeyEventResult.ignored;
   }
 
-  void _showAgentListDrawer() {
+  void showAgentListDrawer() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -252,9 +277,11 @@ class _MessageInputState extends State<MessageInput> {
                               actions:
                                   MessageInputActionsBuilder.getDefaultActions(
                                     context,
-                                    onSendMessage: widget.onSendMessage,
+                                    // onSendMessage: widget.onSendMessage,
                                     onFileSelected: (fileMessage) {
-                                      // 文件选择后的回调已经在 getDefaultActions 中处理
+                                      setState(() {
+                                        selectedFile = fileMessage;
+                                      });
                                     },
                                   ),
                             ),
@@ -272,14 +299,88 @@ class _MessageInputState extends State<MessageInput> {
                           Platform.isMacOS ||
                                   Platform.isWindows ||
                                   Platform.isLinux
-                              ? _handleKeyPress
+                              ? handleKeyPress
                               : null,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // metadata展示区域，展示选中的文件和智能体
+                          if (selectedFile != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        // 预览文件
+                                      if (selectedFile != null) {
+                                        final filePath = selectedFile!['path'] as String?;
+                                        if (filePath != null) {
+                                          if (Platform.isWindows) {
+                                            Process.run('explorer', [filePath]);
+                                          } else if (Platform.isMacOS) {
+                                            Process.run('open', [filePath]);
+                                          } else if (Platform.isLinux) {
+                                            Process.run('xdg-open', [filePath]);
+                                          }
+                                        }
+                                      }
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.surface,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              (selectedFile!['type'] as String?) == 'image'
+                                                  ? Icons.image
+                                                  : Icons.insert_drive_file,
+                                              size: 20,
+                                              color: Theme.of(context).colorScheme.onSurface,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Flexible(
+                                              child: Text(
+                                                selectedFile!['name']?.toString() ?? '',
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.onSurface,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () {
+                                      setState(() {
+                                        selectedFile = null;
+                                      });
+                                    },
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 32,
+                                      minHeight: 32,
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ],
+                              ),
+                            ),
                           if (selectedAgents.isNotEmpty)
                             GestureDetector(
-                              onTap: _showAgentListDrawer,
+                              onTap: showAgentListDrawer,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 child: Wrap(
@@ -310,7 +411,7 @@ class _MessageInputState extends State<MessageInput> {
                                 setState(() {
                                   showAgentList = true;
                                 });
-                                _showAgentListDrawer();
+                                showAgentListDrawer();
                               }
                             },
                         style: TextStyle(

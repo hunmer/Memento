@@ -55,9 +55,22 @@ Future<void> handleImageSelection({
         );
         debugPrint('文件消息已创建: ${fileMessage.id}');
 
+        // 创建图片元数据用于回调
+        final Map<String, dynamic> fileInfoForCallback = {
+          'id': fileMessage.id,
+          'name': fileMessage.fileName,
+          'originalName': fileMessage.originalFileName,
+          'path': fileMessage.filePath,
+          'size': fileMessage.fileSize,
+          'extension': fileMessage.extension,
+          'mimeType': 'image/${fileMessage.extension.replaceAll('.', '')}',
+          'type': 'image', // 添加type字段
+          'isImage': true,
+        };
+
         // 调用回调函数发送图片消息
         debugPrint('调用onFileSelected回调...');
-        onFileSelected?.call(fileMessage);
+        onFileSelected?.call(fileInfoForCallback);
         debugPrint('onFileSelected回调已调用');
 
         // 如果提供了onSendMessage回调，创建图片类型的消息
@@ -92,15 +105,6 @@ Future<void> handleImageSelection({
           );
           debugPrint('消息已发送');
         }
-
-        // 显示图片选择成功的提示
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text('已发送图片: ${path.basename(image.path)}'),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
       } catch (processingError) {
         debugPrint('错误：处理图片时出错: $processingError');
         scaffoldMessenger.showSnackBar(

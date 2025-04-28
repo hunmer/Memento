@@ -54,8 +54,22 @@ Future<void> handleAudioRecording({
                     originalFileName: originalFileName,
                   );
 
+                  // 创建音频元数据
+                  final Map<String, dynamic> fileInfo = {
+                    'id': fileMessage.id,
+                    'name': fileMessage.fileName,
+                    'originalName': fileMessage.originalFileName,
+                    'path': fileMessage.filePath,
+                    'size': fileMessage.fileSize,
+                    'extension': fileMessage.extension,
+                    'mimeType': 'audio/${fileMessage.extension.replaceAll('.', '')}',
+                    'type': 'audio', // 添加type字段
+                    'isAudio': true,
+                    'duration': duration.inSeconds, // 添加音频时长信息
+                  };
+
                   // 调用回调函数发送音频消息
-                  onFileSelected?.call(fileMessage);
+                  onFileSelected?.call(fileInfo);
 
                   // 如果提供了onSendMessage回调，创建音频类型的消息
                   if (onSendMessage != null) {
