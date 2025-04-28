@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/ai_agent.dart';
 import 'request_service.dart';
@@ -24,14 +25,25 @@ class TestService {
   }
 
   /// 发送请求并获取响应
-  static Future<String> processTestRequest(String input, AIAgent agent) async {
+  static Future<String> processTestRequest(
+    String input,
+    AIAgent agent, {
+    File? imageFile,
+  }) async {
     try {
       if (input.trim().isEmpty) {
         return "请提供输入内容。";
       }
 
       String response;
-      if (input.toLowerCase().startsWith("/image")) {
+      // 如果提供了图片文件，使用vision模型处理
+      if (imageFile != null) {
+        response = await RequestService.chat(
+          input,
+          agent,
+          imageFile: imageFile,
+        );
+      } else if (input.toLowerCase().startsWith("/image")) {
         // 处理图片生成请求
         final prompt = input.substring(6).trim(); // 移除 "/image "
         if (prompt.isEmpty) {

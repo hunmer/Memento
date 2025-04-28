@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../models/ai_agent.dart';
 import '../models/service_provider.dart';
@@ -354,7 +356,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     // 创建临时agent用于测试，使用服务商的最新配置
     final testAgent = AIAgent(
       id: 'test',
-      model: _modelController.text,
+      // 如果模型为空，使用 gpt-4-vision-preview 作为默认模型
+      model: _modelController.text.isEmpty ? 'gpt-4-vision-preview' : _modelController.text,
       name: _nameController.text,
       description: _descriptionController.text,
       serviceProviderId: selectedProvider.id,
@@ -366,33 +369,47 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       updatedAt: DateTime.now(),
     );
 
-    // 显示长文本输入对话框
-    final input = await TestService.showLongTextInputDialog(
-      context,
-      title: '测试${testAgent.name}',
-      hintText: '请输入测试文本...',
+    // 显示带有图片选择的测试对话框
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return _TestInputDialog(
+          title: '测试${testAgent.name}',
+          hintText: '请输入测试文本...',
+        );
+      },
     );
 
-    if (input != null && input.isNotEmpty && mounted) {
-      try {
-        // 处理请求并获取响应
-        final response = await TestService.processTestRequest(input, testAgent);
+    if (result != null && mounted) {
+      final input = result['text'] as String;
+      final File? imageFile = result['image'] as File?;
 
-        // 显示响应结果
-        if (mounted) {
-          TestService.showResponseDialog(context, response);
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('测试过程中出错: $e')));
+      if (input.isNotEmpty) {
+        try {
+          // 处理请求并获取响应
+          final response = await TestService.processTestRequest(
+            input, 
+            testAgent,
+            imageFile: imageFile,
+          );
+
+          // 显示响应结果
+          if (mounted) {
+            TestService.showResponseDialog(context, response);
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('测试过程中出错: $e')));
+          }
         }
       }
     }
   }
 
-  @override
+@override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
@@ -401,6 +418,110 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     _headersController.dispose();
     _modelController.dispose();
     _tagController.dispose();
+    super.dispose();
+  }
+}
+
+class _TestInputDialog extends StatefulWidget {
+  final String title;
+  final String hintText;
+
+  const _TestInputDialog({
+    required this.title,
+    required this.hintText,
+  });
+
+  @override
+  State<_TestInputDialog> createState() => _TestInputDialogState();
+}
+
+class _TestInputDialogState extends State<_TestInputDialog> {
+  final TextEditingController _textController = TextEditingController();
+  File? _selectedImage;
+
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
+
+    if (result != null && result.files.isNotEmpty && result.files.first.path != null) {
+      setState(() {
+        _selectedImage = File(result.files.first.path!);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _textController,
+              decoration: InputDecoration(
+                hintText: widget.hintText,
+                border: const OutlineInputBorder(),
+              ),
+              maxLines: 5,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.image),
+                  label: const Text('选择图片'),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _selectedImage != null
+                      ? Text(
+                          '已选择: ${_selectedImage!.path.split('/').last}',
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      : const Text('未选择图片'),
+                ),
+              ],
+            ),
+            if (_selectedImage != null) ...[
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.file(
+                  _selectedImage!,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('取消'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop({
+              'text': _textController.text,
+              'image': _selectedImage,
+            });
+          },
+          child: const Text('发送'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
     super.dispose();
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:openai_dart/openai_dart.dart';
 import '../models/ai_agent.dart';
 import 'dart:developer' as developer;
@@ -37,24 +39,57 @@ class RequestService {
   }
 
   /// 发送聊天请求
-  static Future<String> chat(String input, AIAgent agent) async {
+  static Future<String> chat(
+    String input,
+    AIAgent agent, {
+    File? imageFile,
+  }) async {
     try {
       developer.log('开始聊天请求: ${agent.id}', name: 'RequestService');
       developer.log('用户输入: $input', name: 'RequestService');
       
       final client = _getClient(agent);
 
-      final request = CreateChatCompletionRequest(
-        model: ChatCompletionModel.modelId(agent.model),
-        messages: [
-          ChatCompletionMessage.system(content: agent.systemPrompt),
-          ChatCompletionMessage.user(
-            content: ChatCompletionUserMessageContent.string(input),
-          ),
-        ],
-        temperature: 0.7,
-        maxTokens: 1000,
-      );
+      late final CreateChatCompletionRequest request;
+
+      if (imageFile != null) {
+        // 读取图片文件并转换为base64
+        final bytes = await imageFile.readAsBytes();
+        final base64Image = base64Encode(bytes);
+        
+        request = CreateChatCompletionRequest(
+          model: ChatCompletionModel.modelId(agent.model),
+          messages: [
+            ChatCompletionMessage.system(content: agent.systemPrompt),
+            ChatCompletionMessage.user(
+              content: ChatCompletionUserMessageContent.parts([
+                ChatCompletionMessageContentPart.text(
+                  text: input,
+                ),
+                ChatCompletionMessageContentPart.image(
+                  imageUrl: ChatCompletionMessageImageUrl(
+                    url: 'data:image/jpeg;base64,$base64Image',
+                  ),
+                ),
+              ]),
+            ),
+          ],
+          temperature: 0.7,
+          maxTokens: 4096,
+        );
+      } else {
+        request = CreateChatCompletionRequest(
+          model: ChatCompletionModel.modelId(agent.model),
+          messages: [
+            ChatCompletionMessage.system(content: agent.systemPrompt),
+            ChatCompletionMessage.user(
+              content: ChatCompletionUserMessageContent.string(input),
+            ),
+          ],
+          temperature: 0.7,
+          maxTokens: 1000,
+        );
+      }
 
       developer.log('发送请求: ${request.model}', name: 'RequestService');
       developer.log('系统提示词长度: ${agent.systemPrompt.length}字符', name: 'RequestService');
