@@ -370,6 +370,12 @@ class _BillEditScreenState extends State<BillEditScreen> {
 
             // 调用插件的保存账户方法
             await widget.billPlugin.saveAccount(updatedAccount);
+            
+            // 显示成功提示
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('保存成功'), backgroundColor: Colors.green),
+            );
 
             // 返回上一页
             if (!mounted) return;

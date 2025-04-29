@@ -7,9 +7,18 @@ import '../models/bill_statistics.dart';
 import '../models/statistic_range.dart';
 
 class BillController with ChangeNotifier {
+  static final BillController _instance = BillController._internal();
+  factory BillController() => _instance;
+  
+  BillController._internal() {
+    _loadAccounts();
+  }
+
   static const String _accountsKey = 'accounts';
   final List<Account> _accounts = [];
   String? _selectedAccountId;
+  bool _initialized = false;
+  bool _isLoading = false;
 
   List<Account> get accounts => List.unmodifiable(_accounts);
   
@@ -31,8 +40,24 @@ class BillController with ChangeNotifier {
     notifyListeners();
   }
 
-  BillController() {
-    _loadAccounts();
+  // 确保控制器已初始化
+  Future<void> _ensureInitialized() async {
+    if (!_initialized && !_isLoading) {
+      await _loadAccounts();
+    }
+  }
+
+  // 从本地存储加载账户列表
+  Future<void> initialize() async {
+    if (_initialized || _isLoading) return;
+    
+    _isLoading = true;
+    try {
+      await _loadAccounts();
+      _initialized = true;
+    } finally {
+      _isLoading = false;
+    }
   }
 
   // 从本地存储加载账户列表
@@ -111,6 +136,96 @@ class BillController with ChangeNotifier {
     _accounts.removeWhere((account) => account.id == accountId);
     await _saveAccounts();
     notifyListeners();
+  }
+
+  // 根据日期范围获取账单
+  Future<List<Bill>> getBills({DateTime? startDate, DateTime? endDate}) async {
+    await _ensureInitialized();
+    List<Bill> allBills = [];
+    
+    // 从所有账户收集账单
+    for (var account in _accounts) {
+      allBills.addAll(account.bills);
+    }
+    
+    if (startDate == null && endDate == null) {
+      return List.unmodifiable(allBills);
+    }
+    
+    return allBills.where((bill) {
+      bool match = true;
+      if (startDate != null) {
+        match = match && bill.createdAt.isAfter(startDate.subtract(const Duration(days: 1)));
+      }
+      if (endDate != null) {
+        match = match && bill.createdAt.isBefore(endDate.add(const Duration(days: 1)));
+      }
+      return match;
+    }).toList();
+  }
+
+  // 获取账单类别统计
+  Future<Map<String, double>> getCategoryStatistics({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final bills = await getBills(startDate: startDate, endDate: endDate);
+    final Map<String, double> result = {};
+    
+    for (final bill in bills) {
+      if (!result.containsKey(bill.category)) {
+        result[bill.category] = 0;
+      }
+      result[bill.category] = (result[bill.category] ?? 0) + bill.amount;
+    }
+    
+    return result;
+  }
+
+  // 获取日期范围内的总收入
+  Future<double> getTotalIncome({DateTime? startDate, DateTime? endDate}) async {
+    final bills = await getBills(startDate: startDate, endDate: endDate);
+    return bills
+        .where((bill) => bill.amount > 0)
+        .fold<double>(0, (sum, bill) => sum + bill.amount);
+  }
+
+  // 获取日期范围内的总支出
+  Future<double> getTotalExpense({DateTime? startDate, DateTime? endDate}) async {
+    final bills = await getBills(startDate: startDate, endDate: endDate);
+    return bills
+        .where((bill) => bill.amount < 0)
+        .fold<double>(0, (sum, bill) => sum + bill.amount.abs());
+  }
+
+  // 检查账单数据存储状态
+  Future<Map<String, dynamic>> checkBillsStorage() async {
+    try {
+      await _ensureInitialized();
+      final prefs = await SharedPreferences.getInstance();
+      
+      return {
+        'success': true,
+        'accountsCount': _accounts.length,
+        'billsCount': _accounts.fold<int>(0, (sum, account) => sum + account.bills.length),
+        'initialized': _initialized,
+        'storageKeys': prefs.getKeys().toList(),
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+        'accountsCount': _accounts.length,
+        'initialized': _initialized,
+      };
+    }
+  }
+
+  // 强制重新加载账单数据
+  Future<int> forceReloadBills() async {
+    _initialized = false;
+    await initialize();
+    return _accounts.fold<int>(0, (sum, account) => sum + account.bills.length);
   }
 
   // 获取账单统计信息

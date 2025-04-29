@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../openai/controllers/prompt_replacement_controller.dart';
 import '../models/bill.dart';
-import '../services/bill_service.dart';
+import '../controls/bill_controller.dart';
 
 /// Bill插件的Prompt替换服务
 class BillPromptReplacements {
-  final BillService _billService = BillService();
+  final BillController _billController = BillController();
   
   /// 初始化并注册所有prompt替换方法
   void initialize() {
     debugPrint('初始化Bill插件的Prompt替换服务');
-    // 确保BillService已初始化
-    _billService.initialize().catchError((e) {
-      debugPrint('初始化BillService失败: $e');
+    // 确保BillController已初始化
+    _billController.initialize().catchError((e) {
+      debugPrint('初始化BillController失败: $e');
     });
   }
 
@@ -45,7 +45,7 @@ class BillPromptReplacements {
       }
       
       // 查询账单数据
-      final bills = await _billService.getBills(
+      final bills = await _billController.getBills(
         startDate: startDate,
         endDate: endDate,
       );

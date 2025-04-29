@@ -39,6 +39,7 @@ class _BillListScreenState extends State<BillListScreen>
     _tabController.addListener(_handleTabChange);
     _billPluginListener = () {
       if (mounted) {
+        debugPrint("BillPlugin 通知更新 - 重新加载账单");
         _loadBills();
       }
     };
@@ -372,25 +373,76 @@ class _BillListScreenState extends State<BillListScreen>
     final formatter = NumberFormat.currency(symbol: '¥', decimalDigits: 2);
     final dateFormatter = DateFormat('yyyy-MM-dd');
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: bill.color,
-          child: Icon(bill.icon, color: Colors.white),
+    return Dismissible(
+      key: Key(bill.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20.0),
+        color: Colors.red,
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
         ),
-        title: Text(bill.title),
-        subtitle: Text(
-          '${bill.category} · ${dateFormatter.format(bill.date)}${(bill.note?.isNotEmpty ?? false) ? ' · ${bill.note}' : ''}',
-        ),
-        trailing: Text(
-          formatter.format(bill.amount),
-          style: TextStyle(
-            color: bill.isExpense ? Colors.red : Colors.green,
-            fontWeight: FontWeight.bold,
+      ),
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('确认删除'),
+              content: const Text('确定要删除这条账单记录吗？'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('取消'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text(
+                    '删除',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onDismissed: (direction) {
+        // 删除账单
+        widget.billPlugin.deleteBill(widget.accountId, bill.id);
+
+        // 更新UI
+        setState(() {
+          _bills.removeWhere((b) => b.id == bill.id);
+        });
+
+        // 显示删除成功提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('账单已删除'),
+            duration: Duration(seconds: 3),
           ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: ListTile(
+          leading: Icon(bill.icon, color: bill.color),
+          title: Text(bill.title),
+          subtitle: Text(
+            '${bill.category} · ${dateFormatter.format(bill.date)}${(bill.note?.isNotEmpty ?? false) ? ' · ${bill.note}' : ''}',
+          ),
+          trailing: Text(
+            formatter.format(bill.amount),
+            style: TextStyle(
+              color: bill.isExpense ? Colors.red : Colors.green,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onTap: () => _navigateToBillEdit(context, bill),
         ),
-        onTap: () => _navigateToBillEdit(context, bill),
       ),
     );
   }

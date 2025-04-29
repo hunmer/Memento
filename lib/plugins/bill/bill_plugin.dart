@@ -273,7 +273,13 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   
   // 委托方法到BillController
   Future<void> createAccount(Account account) => _billController.createAccount(account);
-  Future<void> saveAccount(Account account) => _billController.saveAccount(account);
+  
+  // 修改saveAccount方法，在保存账户后通知监听器
+  Future<void> saveAccount(Account account) async {
+    await _billController.saveAccount(account);
+    notifyListeners(); // 添加通知，确保UI更新
+  }
+  
   Future<void> deleteAccount(String accountId) => _billController.deleteAccount(accountId);
   Future<void> deleteBill(String accountId, String billId) => _billController.deleteBill(accountId, billId);
   BillStatistics getStatistics({
