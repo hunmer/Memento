@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../../widgets/circle_icon_picker.dart';
+import '../../../widgets/image_picker_dialog.dart';
 import '../models/ai_agent.dart';
 import '../models/service_provider.dart';
 import '../models/llm_models.dart';
@@ -23,6 +25,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _promptController = TextEditingController();
+  IconData _selectedIcon = Icons.smart_toy;
+  Color _selectedIconColor = Colors.blue;
+  String? _avatarUrl;
   final _baseUrlController = TextEditingController();
   final _headersController = TextEditingController();
   final _modelController = TextEditingController();
@@ -41,6 +46,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       _nameController.text = widget.agent!.name;
       _descriptionController.text = widget.agent!.description;
       _promptController.text = widget.agent!.systemPrompt;
+      _selectedIcon = widget.agent!.icon ?? Icons.smart_toy;
+      _selectedIconColor = widget.agent!.iconColor ?? Colors.blue;
+      _avatarUrl = widget.agent!.avatarUrl;
       _selectedProviderId = widget.agent!.serviceProviderId;
       _baseUrlController.text = widget.agent!.baseUrl;
       _modelController.text = widget.agent!.model;
@@ -178,6 +186,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       tags: _tags,
       createdAt: widget.agent?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
+      icon: _selectedIcon,
+      iconColor: _selectedIconColor,
+      avatarUrl: _avatarUrl,
     );
 
     try {
@@ -214,6 +225,81 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            Row(
+              children: [
+                CircleIconPicker(
+                  currentIcon: _selectedIcon,
+                  backgroundColor: _selectedIconColor,
+                  onIconSelected: (icon) {
+                    setState(() {
+                      _selectedIcon = icon;
+                    });
+                  },
+                  onColorSelected: (color) {
+                    setState(() {
+                      _selectedIconColor = color;
+                    });
+                  },
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final result = await showDialog<Map<String, dynamic>>(
+                        context: context,
+                        builder: (context) => ImagePickerDialog(
+                          initialUrl: _avatarUrl,
+                          saveDirectory: 'agent_avatars',
+                          enableCrop: true,
+                          cropAspectRatio: 1.0,
+                        ),
+                      );
+                      if (result != null) {
+                        setState(() {
+                          _avatarUrl = result['url'] as String;
+                        });
+                      }
+                    },
+                    child: Container(
+                      height: 64,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                        ),
+                      ),
+                      child: _avatarUrl != null && _avatarUrl!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(7),
+                              child: _avatarUrl!.startsWith('http')
+                                  ? Image.network(
+                                      _avatarUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          const Icon(Icons.broken_image),
+                                    )
+                                  : Image.file(
+                                      File(_avatarUrl!),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          const Icon(Icons.broken_image),
+                                    ),
+                            )
+                          : const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add_photo_alternate_outlined),
+                                  Text('添加头像'),
+                                ],
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(

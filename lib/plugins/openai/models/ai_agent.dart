@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Prompt {
   String type;
   String content;
@@ -22,6 +24,9 @@ class AIAgent {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String model;
+  final IconData? icon;
+  final Color? iconColor;
+  final String? avatarUrl;
 
   const AIAgent({
     required this.id,
@@ -35,6 +40,9 @@ class AIAgent {
     required this.createdAt,
     required this.updatedAt,
     required this.model,
+    this.icon,
+    this.iconColor,
+    this.avatarUrl,
   });
 
   Map<String, dynamic> toJson() => {
@@ -49,6 +57,9 @@ class AIAgent {
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
     'model': model,
+    'icon': icon?.codePoint,
+    'iconColor': iconColor?.value,
+    'avatarUrl': avatarUrl,
   };
 
   factory AIAgent.fromJson(Map<String, dynamic> json) => AIAgent(
@@ -63,5 +74,8 @@ class AIAgent {
     createdAt: DateTime.parse(json['createdAt'] as String),
     updatedAt: DateTime.parse(json['updatedAt'] as String),
     model: json['model'] as String? ?? 'gpt-3.5-turbo',
+    icon: json['icon'] != null ? IconData(json['icon'] as int, fontFamily: 'MaterialIcons') : null,
+    iconColor: json['iconColor'] != null ? Color(json['iconColor'] as int) : null,
+    avatarUrl: json['avatarUrl'] as String?,
   );
 }

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/ai_agent.dart';
 import '../models/service_provider.dart';
@@ -43,11 +44,70 @@ class AgentListItem extends StatelessWidget {
   }
 
   Widget _buildAgentIcon() {
-    // 使用固定图标，因为我们的新模型没有icon字段
-    return Icon(
-      Icons.smart_toy,
-      size: 40,
-      color: _getColorForServiceProvider(agent.serviceProviderId),
+    // 如果有头像，优先显示头像
+    if (agent.avatarUrl != null && agent.avatarUrl!.isNotEmpty) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: _getColorForServiceProvider(agent.serviceProviderId).withOpacity(0.5),
+            width: 2,
+          ),
+        ),
+        child: ClipOval(
+          child: agent.avatarUrl!.startsWith('http')
+              ? Image.network(
+                  agent.avatarUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _buildDefaultIcon(),
+                )
+              : Image.file(
+                  File(agent.avatarUrl!),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _buildDefaultIcon(),
+                ),
+        ),
+      );
+    }
+    
+    // 如果有自定义图标，使用自定义图标
+    if (agent.icon != null) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: agent.iconColor ?? _getColorForServiceProvider(agent.serviceProviderId),
+        ),
+        child: Icon(
+          agent.icon,
+          size: 24,
+          color: Colors.white,
+        ),
+      );
+    }
+    
+    // 默认图标
+    return _buildDefaultIcon();
+  }
+
+  Widget _buildDefaultIcon() {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: _getColorForServiceProvider(agent.serviceProviderId),
+      ),
+      child: const Icon(
+        Icons.smart_toy,
+        size: 24,
+        color: Colors.white,
+      ),
     );
   }
 
