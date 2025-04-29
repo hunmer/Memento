@@ -220,37 +220,4 @@ class BillService {
     await initialize();
     return _bills.length;
   }
-  
-  /// 添加测试账单数据（仅用于开发和测试）
-  Future<List<Bill>> addTestBills(int count) async {
-    await _ensureInitialized();
-    
-    final List<Bill> newBills = [];
-    final List<String> categories = ['餐饮', '交通', '购物', '娱乐', '住宿', '工资', '奖金'];
-    final List<String> titles = ['早餐', '午餐', '晚餐', '打车', '地铁', '公交', '购物', '电影', '游戏', '房租', '月薪', '奖金'];
-    final Random random = Random();
-    
-    for (int i = 0; i < count; i++) {
-      final bool isExpense = random.nextBool();
-      final double amount = isExpense 
-          ? -random.nextDouble() * 1000 
-          : random.nextDouble() * 5000;
-      
-      final Bill bill = Bill(
-        id: 'test_${DateTime.now().millisecondsSinceEpoch}_$i',
-        title: titles[random.nextInt(titles.length)],
-        amount: double.parse(amount.toStringAsFixed(2)),
-        category: categories[random.nextInt(categories.length)],
-        date: DateTime.now().subtract(Duration(days: random.nextInt(30))),
-        accountId: 'default',
-        note: '测试数据 #$i',
-      );
-      
-      _bills.add(bill);
-      newBills.add(bill);
-    }
-    
-    await _saveBills();
-    return newBills;
-  }
 }

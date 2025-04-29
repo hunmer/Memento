@@ -1,11 +1,8 @@
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/plugin_base.dart';
-import '../openai/openai_plugin.dart';
-import 'services/prompt_replacements.dart';
-// import '../../core/storage/storage_manager.dart';
+import '../../core/plugin_manager.dart';
+import 'controls/bill_controller.dart';
+import 'controls/prompt_controller.dart';
 import 'screens/bill_list_screen.dart';
 import 'screens/bill_stats_screen.dart';
 import 'screens/account_list_screen.dart';
@@ -15,44 +12,17 @@ import 'models/bill_statistics.dart';
 import 'models/statistic_range.dart';
 
 class BillPlugin extends PluginBase with ChangeNotifier {
+  late final BillController _billController;
+  late final PromptController _promptController;
+
+  BillPlugin() {
+    _billController = BillController();
+    _promptController = PromptController();
+  }
+
   @override
   String get id => 'bill';
   
-  String? _selectedAccountId;
-  final BillPromptReplacements _promptReplacements = BillPromptReplacements();
-
-  Account? get selectedAccount {
-    if (_selectedAccountId == null) return null;
-    try {
-      return _accounts.firstWhere(
-        (account) => account.id == _selectedAccountId,
-      );
-    } catch (e) {
-      return _accounts.isNotEmpty ? _accounts.first : null;
-    }
-  }
-  
-  set selectedAccount(Account? account) {
-    _selectedAccountId = account?.id;
-    notifyListeners();
-  }
-
-  String? get selectedAccountId => _selectedAccountId;
-  Future<void> uninstall() async {
-    // 注销prompt替换方法
-    final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
-    if (openaiPlugin != null) {
-      openaiPlugin.unregisterPromptReplacementMethod('bill_getBills');
-      debugPrint('成功注销bill_getBills方法');
-    }
-    
-    // 清理prompt替换服务
-    _promptReplacements.dispose();
-    
-    // Clean up plugin data
-    await storage.delete(storageDir);
-  }
-
   @override
   String get name => '账单';
 
@@ -71,39 +41,20 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   @override
   Color get color => Colors.green;
 
+  Account? get selectedAccount => _billController.selectedAccount;
+  set selectedAccount(Account? account) => _billController.selectedAccount = account;
+  String? get selectedAccountId => _billController.selectedAccountId;
+  List<Account> get accounts => _billController.accounts;
+
   @override
   Future<void> initialize() async {
-    await _loadAccounts();
-    
-    // 初始化prompt替换服务
-    _promptReplacements.initialize();
-    
-    // 延迟注册prompt替换方法，等待OpenAI插件初始化完成
-    Future.delayed(const Duration(seconds: 1), () {
-      _registerPromptMethods();
-    });
+    _promptController.initialize();
   }
 
-  /// 注册prompt替换方法
-  void _registerPromptMethods() {
-    try {
-      final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
-      if (openaiPlugin != null) {
-        openaiPlugin.registerPromptReplacementMethod(
-          'bill_getBills',
-          _promptReplacements.getBills,
-        );
-        debugPrint('成功注册bill_getBills方法到OpenAI插件');
-      } else {
-        debugPrint('注册bill_getBills方法失败：未找到OpenAI插件，将在5秒后重试');
-        // 如果OpenAI插件还未准备好，5秒后重试
-        Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
-      }
-    } catch (e) {
-      debugPrint('注册prompt替换方法时出错: $e，将在5秒后重试');
-      // 发生错误时，5秒后重试
-      Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
-    }
+  @override
+  Future<void> uninstall() async {
+    _promptController.unregisterPromptMethods();
+    await storage.delete(storageDir);
   }
 
   @override
@@ -158,11 +109,11 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                   children: [
                     Text('今日财务', style: theme.textTheme.bodyMedium),
                     Text(
-                      '¥${getTodayFinance().toStringAsFixed(2)}',
+                      '¥${_billController.getTodayFinance().toStringAsFixed(2)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color:
-                            getTodayFinance() >= 0 ? Colors.green : Colors.red,
+                            _billController.getTodayFinance() >= 0 ? Colors.green : Colors.red,
                       ),
                     ),
                   ],
@@ -177,11 +128,11 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                   children: [
                     Text('本月财务', style: theme.textTheme.bodyMedium),
                     Text(
-                      '¥${getMonthFinance().toStringAsFixed(2)}',
+                      '¥${_billController.getMonthFinance().toStringAsFixed(2)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color:
-                            getMonthFinance() >= 0 ? Colors.green : Colors.red,
+                            _billController.getMonthFinance() >= 0 ? Colors.green : Colors.red,
                       ),
                     ),
                   ],
@@ -196,7 +147,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                   children: [
                     Text('本月记账', style: theme.textTheme.bodyMedium),
                     Text(
-                      '${getMonthBillCount()} 笔',
+                      '${_billController.getMonthBillCount()} 笔',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -210,236 +161,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       ),
     );
   }
-
-  static const String _accountsKey = 'accounts';
-  final List<Account> _accounts = [];
-
-  List<Account> get accounts => List.unmodifiable(_accounts);
-
-  BillPlugin() {
-    _loadAccounts();
-  }
-
-  // 从本地存储加载账户列表
-  Future<void> _loadAccounts() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final accountsJson = prefs.getStringList(_accountsKey) ?? [];
-      _accounts.clear();
-      _accounts.addAll(
-        accountsJson.map((json) => Account.fromJson(jsonDecode(json))),
-      );
-      notifyListeners();
-    } catch (e) {
-      debugPrint('加载账户失败: $e');
-    }
-  }
-
-  // 保存账户列表到本地存储
-  Future<void> _saveAccounts() async {
-    try {
-      // 确保所有账户的总金额都是最新的
-      for (var i = 0; i < _accounts.length; i++) {
-        _accounts[i].calculateTotal();
-      }
-      
-      final prefs = await SharedPreferences.getInstance();
-      final accountsJson =
-          _accounts.map((account) => jsonEncode(account.toJson())).toList();
-      final success = await prefs.setStringList(_accountsKey, accountsJson);
-      if (!success) {
-        throw '保存账户数据失败';
-      }
-    } catch (e) {
-      debugPrint('保存账户失败: $e');
-      throw '保存账户失败: $e';
-    }
-  }
-
-  // 创建新账户
-  Future<void> createAccount(Account account) async {
-    if (_accounts.any((a) => a.title == account.title)) {
-      throw '账户名称已存在';
-    }
-    // 确保账户总金额是正确的
-    account.calculateTotal();
-    _accounts.add(account);
-    await _saveAccounts();
-    // 确保在数据保存成功后再通知监听器
-    notifyListeners();
-  }
-
-  // 更新账户信息
-  Future<void> saveAccount(Account account) async {
-    final index = _accounts.indexWhere((a) => a.id == account.id);
-    if (index == -1) {
-      throw '账户不存在';
-    }
-    if (_accounts.any((a) => a.id != account.id && a.title == account.title)) {
-      throw '账户名称已存在';
-    }
-    
-    // 确保账户总金额与账单总和一致
-    account.calculateTotal();
-    
-    // 更新账户列表
-    _accounts[index] = account;
-    // 先保存数据
-    await _saveAccounts();
-    
-    // 再通知监听器，确保数据已经持久化
-    notifyListeners();
-  }
-
-  // 删除账户
-  Future<void> deleteAccount(String accountId) async {
-    _accounts.removeWhere((account) => account.id == accountId);
-    await _saveAccounts();
-    notifyListeners();
-  }
-
-  // 获取账单统计信息
-  BillStatistics getStatistics({
-    required List<Bill> bills,
-    required StatisticRange range,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) {
-    List<Bill> filteredBills = bills;
-    final now = DateTime.now();
-
-    // 根据统计范围筛选账单
-    switch (range) {
-      case StatisticRange.week:
-        final weekStart = now.subtract(Duration(days: now.weekday - 1));
-        filteredBills =
-            bills.where((bill) => bill.createdAt.isAfter(weekStart)).toList();
-        break;
-      case StatisticRange.month:
-        final monthStart = DateTime(now.year, now.month, 1);
-        filteredBills =
-            bills.where((bill) => bill.createdAt.isAfter(monthStart)).toList();
-        break;
-      case StatisticRange.year:
-        final yearStart = DateTime(now.year, 1, 1);
-        filteredBills =
-            bills.where((bill) => bill.createdAt.isAfter(yearStart)).toList();
-        break;
-      case StatisticRange.custom:
-        if (startDate != null && endDate != null) {
-          filteredBills =
-              bills
-                  .where(
-                    (bill) =>
-                        bill.createdAt.isAfter(startDate) &&
-                        bill.createdAt.isBefore(
-                          endDate.add(const Duration(days: 1)),
-                        ),
-                  )
-                  .toList();
-        }
-        break;
-      case StatisticRange.all:
-        // 使用所有账单，无需筛选
-        break;
-    }
-
-    // 计算收入和支出
-    double totalIncome = 0;
-    double totalExpense = 0;
-
-    for (final bill in filteredBills) {
-      if (bill.amount > 0) {
-        totalIncome += bill.amount;
-      } else {
-        totalExpense += bill.amount.abs();
-      }
-    }
-
-    return BillStatistics(
-      totalIncome: totalIncome,
-      totalExpense: totalExpense,
-      balance: totalIncome - totalExpense,
-    );
-  }
-
-  // 删除账单
-  Future<void> deleteBill(String accountId, String billId) async {
-    final accountIndex = _accounts.indexWhere((a) => a.id == accountId);
-    if (accountIndex == -1) {
-      throw '账户不存在';
-    }
-
-    final account = _accounts[accountIndex];
-    final updatedBills = account.bills.where((b) => b.id != billId).toList();
-    final updatedAccount = account.copyWith(bills: updatedBills);
-    updatedAccount.calculateTotal();
-    _accounts[accountIndex] = updatedAccount;
-    await _saveAccounts();
-    notifyListeners();
-  }
-
-  // 获取今日财务统计（收入和支出总和）
-  double getTodayFinance() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    double total = 0;
-
-    for (var account in _accounts) {
-      for (var bill in account.bills) {
-        if (bill.createdAt.year == today.year &&
-            bill.createdAt.month == today.month &&
-            bill.createdAt.day == today.day) {
-          total += bill.amount;
-        }
-      }
-    }
-    return total;
-  }
-
-  // 获取本月财务统计（收入和支出总和）
-  double getMonthFinance() {
-    final now = DateTime.now();
-    final monthStart = DateTime(now.year, now.month, 1);
-    double total = 0;
-
-    for (var account in _accounts) {
-      for (var bill in account.bills) {
-        if (bill.createdAt.isAfter(
-              monthStart.subtract(const Duration(days: 1)),
-            ) &&
-            bill.createdAt.isBefore(DateTime(now.year, now.month + 1, 1))) {
-          total += bill.amount;
-        }
-      }
-    }
-    return total;
-  }
-
-  // 获取本月记账次数
-  int getMonthBillCount() {
-    final now = DateTime.now();
-    final monthStart = DateTime(now.year, now.month, 1);
-    int count = 0;
-
-    for (var account in _accounts) {
-      count +=
-          account.bills
-              .where(
-                (bill) =>
-                    bill.createdAt.isAfter(
-                      monthStart.subtract(const Duration(days: 1)),
-                    ) &&
-                    bill.createdAt.isBefore(
-                      DateTime(now.year, now.month + 1, 1),
-                    ),
-              )
-              .length;
-    }
-    return count;
-  }
-
-  // 移除静态常量，因为已经在接口实现中定义
 
   Map<String, dynamic> _settings = {};
 
@@ -499,7 +220,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
   Widget buildPluginEntryWidget(BuildContext context) {
     // 如果没有账户，跳转到账户列表页面
-    if (_accounts.isEmpty) {
+    if (accounts.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -509,8 +230,8 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       });
       return const Center(child: CircularProgressIndicator());
     }
-    if(_selectedAccountId == null && _accounts.isNotEmpty) {
-      _selectedAccountId = _accounts.first.id;
+    if(selectedAccountId == null && accounts.isNotEmpty) {
+      selectedAccount = accounts.first;
     }
     return DefaultTabController(
       length: 2,
@@ -549,4 +270,21 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       ),
     );
   }
+  
+  // 委托方法到BillController
+  Future<void> createAccount(Account account) => _billController.createAccount(account);
+  Future<void> saveAccount(Account account) => _billController.saveAccount(account);
+  Future<void> deleteAccount(String accountId) => _billController.deleteAccount(accountId);
+  Future<void> deleteBill(String accountId, String billId) => _billController.deleteBill(accountId, billId);
+  BillStatistics getStatistics({
+    required List<Bill> bills,
+    required StatisticRange range,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) => _billController.getStatistics(
+    bills: bills,
+    range: range,
+    startDate: startDate,
+    endDate: endDate,
+  );
 }
