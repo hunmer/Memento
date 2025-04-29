@@ -93,10 +93,10 @@ class BillPromptReplacements {
     throw FormatException('无法解析日期: $dateStr');
   }
   
-  /// 格式化账单数据为文本
+  /// 格式化账单数据为JSON文本
   String _formatBillsToText(List<Bill> bills) {
     if (bills.isEmpty) {
-      return '在指定时间段内没有找到账单记录。';
+      return '{"status": "empty", "msg": "在指定时间段内没有找到账单记录。"}';
     }
     
     // 计算总收入和总支出
@@ -121,30 +121,58 @@ class BillPromptReplacements {
       categoryStats[category] = (categoryStats[category] ?? 0) + bill.amount;
     }
     
-    // 生成文本报告
-    final buffer = StringBuffer();
-    buffer.writeln('账单摘要报告:');
-    buffer.writeln('- 总收入: ¥${totalIncome.toStringAsFixed(2)}');
-    buffer.writeln('- 总支出: ¥${totalExpense.toStringAsFixed(2)}');
-    buffer.writeln('- 净收支: ¥${(totalIncome - totalExpense).toStringAsFixed(2)}');
-    buffer.writeln('\n按类别统计:');
+    // 生成JSON报告
+    final Map<String, dynamic> report = {
+      'sum': { // summary缩写
+        'tInc': totalIncome, // totalIncome缩写
+        'tExp': totalExpense, // totalExpense缩写
+        'net': totalIncome - totalExpense, // netBalance缩写
+      },
+      'catStat': {}, // categoryStatistics缩写
+      'records': [] // detailedRecords缩写
+    };
     
+    // 添加类别统计
     categoryStats.forEach((category, amount) {
-      buffer.writeln('- $category: ¥${amount.toStringAsFixed(2)}');
+      report['catStat'][category] = amount;
     });
     
-    buffer.writeln('\n详细账单记录:');
-    for (int i = 0; i < bills.length; i++) {
-      final bill = bills[i];
+    // 添加详细账单记录
+    for (final bill in bills) {
       final date = bill.date.toString().substring(0, 10);
-      final amount = bill.amount > 0 ? '+${bill.amount}' : '${bill.amount}';
-      buffer.writeln('${i+1}. [$date] ${bill.title} (${bill.category}): ¥$amount');
-      if (bill.note.isNotEmpty) {
-        buffer.writeln('   备注: ${bill.note}');
-      }
+      report['records'].add({
+        'date': date,
+        'title': bill.title,
+        'cat': bill.category, // category缩写
+        'amt': bill.amount, // amount缩写
+        'note': bill.note.isNotEmpty ? bill.note : null
+      });
     }
     
-    return buffer.toString();
+    return _formatJsonString(report);
+  }
+  
+  /// 格式化JSON字符串，确保数字正确显示
+  String _formatJsonString(Map<String, dynamic> jsonMap) {
+    // 将Map转换为JSON字符串
+    String jsonString = jsonMap.toString();
+    
+    // 替换Map表示为JSON格式
+    jsonString = jsonString.replaceAll('{', '{\n  ')
+                           .replaceAll('}', '\n}')
+                           .replaceAll(', ', ',\n  ')
+                           .replaceAll(':[', ': [')
+                           .replaceAll('],', '],\n  ');
+    
+    // 确保数字格式正确（保留两位小数）
+    final RegExp numPattern = RegExp(r'(tInc|tExp|net|amt): ([0-9.-]+)');
+    jsonString = jsonString.replaceAllMapped(numPattern, (match) {
+      final key = match.group(1);
+      final value = double.parse(match.group(2)!);
+      return '$key: ${value.toStringAsFixed(2)}';
+    });
+    
+    return jsonString;
   }
   
   /// 释放资源

@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
-import '../models/ai_agent.dart';
+// 移除不需要的导入
 import 'request_service.dart';
 
 class TestService {
@@ -67,7 +68,23 @@ class TestService {
     String input,
     AIAgent agent, {
     File? imageFile,
+    Map<String, dynamic>? formValues,
   }) async {
+    // 如果有表单值，创建一个新的agent并合并表单值
+    if (formValues != null && formValues.isNotEmpty) {
+      agent = agent.copyWith(
+        name: formValues['name'] ?? agent.name,
+        baseUrl: formValues['baseUrl'] ?? agent.baseUrl,
+        model: formValues['model'] ?? agent.model,
+        temperature: formValues['temperature']?.toDouble() ?? agent.temperature,
+        maxLength: formValues['maxLength'] ?? agent.maxLength,
+        topP: formValues['topP']?.toDouble() ?? agent.topP,
+        frequencyPenalty: formValues['frequencyPenalty']?.toDouble() ?? agent.frequencyPenalty,
+        presencePenalty: formValues['presencePenalty']?.toDouble() ?? agent.presencePenalty,
+        stop: formValues['stop'] ?? agent.stop,
+        serviceProviderId: formValues['serviceProviderId'] ?? agent.serviceProviderId,
+      );
+    }
     // 保存这次输入
     await saveLastInput(input);
     try {

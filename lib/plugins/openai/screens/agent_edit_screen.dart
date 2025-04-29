@@ -66,26 +66,37 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       final providerController = ProviderController();
       _providers = await providerController.getProviders();
 
-      if (_providers.isNotEmpty && _selectedProviderId.isEmpty) {
-        _selectedProviderId = _providers.first.id;
-        _updateProviderFields(_providers.first);
-      } else if (_selectedProviderId.isNotEmpty) {
-        final provider = _providers.firstWhere(
-          (p) => p.id == _selectedProviderId,
-          orElse:
-              () =>
-                  _providers.isNotEmpty
-                      ? _providers.first
-                      : ServiceProvider(
-                        id: 'default',
-                        label: 'Default',
-                        baseUrl: '',
-                        headers: {},
-                      ),
+      if (_providers.isNotEmpty) {
+        if (_selectedProviderId.isEmpty) {
+          // 如果没有选择服务商，使用第一个
+          _selectedProviderId = _providers.first.id;
+          _updateProviderFields(_providers.first);
+        } else {
+          // 如果已经选择了服务商，找到对应的服务商
+          final provider = _providers.firstWhere(
+            (p) => p.id == _selectedProviderId,
+            orElse: () => _providers.first,
+          );
+          _selectedProviderId = provider.id;
+          
+          // 如果是新建智能体，或者是编辑但字段为空，则使用服务商的默认配置
+          if (widget.agent == null || 
+              _baseUrlController.text.isEmpty || 
+              _headersController.text.isEmpty) {
+            _updateProviderFields(provider);
+          }
+        }
+      } else {
+        // 如果没有可用的服务商，创建一个默认的
+        _selectedProviderId = 'default';
+        final defaultProvider = ServiceProvider(
+          id: 'default',
+          label: 'Default',
+          baseUrl: '',
+          headers: {},
         );
-        _selectedProviderId = provider.id;
-        if (widget.agent == null) {
-          _updateProviderFields(provider);
+        if (_baseUrlController.text.isEmpty || _headersController.text.isEmpty) {
+          _updateProviderFields(defaultProvider);
         }
       }
     } catch (e) {
@@ -102,9 +113,31 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   }
 
   void _updateProviderFields(ServiceProvider provider) {
-    if (widget.agent == null) {
+    // 如果是新建智能体，或者用户明确要更新配置，则使用服务商的默认配置
+    setState(() {
       _baseUrlController.text = provider.baseUrl;
       _headersController.text = _formatHeaders(provider.headers);
+    });
+
+    // 显示确认更新的 Snackbar
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('已更新为服务商默认配置'),
+          action: SnackBarAction(
+            label: '撤销',
+            onPressed: () {
+              // 如果用户选择撤销，则恢复之前的值
+              setState(() {
+                if (widget.agent != null) {
+                  _baseUrlController.text = widget.agent!.baseUrl;
+                  _headersController.text = _formatHeaders(widget.agent!.headers);
+                }
+              });
+            },
+          ),
+        ),
+      );
     }
   }
 
@@ -363,13 +396,47 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                       }).toList(),
                   onChanged: (value) {
                     if (value != null) {
-                      setState(() {
-                        _selectedProviderId = value;
-                        final provider = _providers.firstWhere(
-                          (p) => p.id == value,
+                      final provider = _providers.firstWhere(
+                        (p) => p.id == value,
+                      );
+                      
+                      // 如果是编辑现有智能体，先询问用户是否要更新配置
+                      if (widget.agent != null) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('更新配置'),
+                            content: const Text('是否要使用该服务商的默认配置更新当前设置？'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  setState(() {
+                                    _selectedProviderId = value;
+                                  });
+                                },
+                                child: const Text('保持当前配置'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  setState(() {
+                                    _selectedProviderId = value;
+                                    _updateProviderFields(provider);
+                                  });
+                                },
+                                child: const Text('使用默认配置'),
+                              ),
+                            ],
+                          ),
                         );
-                        _updateProviderFields(provider);
-                      });
+                      } else {
+                        // 如果是新建智能体，直接更新配置
+                        setState(() {
+                          _selectedProviderId = value;
+                          _updateProviderFields(provider);
+                        });
+                      }
                     }
                   },
                   validator: (value) {
@@ -504,7 +571,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       orElse: () => throw Exception('未找到选定的服务商'),
     );
 
-    // 创建临时agent用于测试，使用服务商的最新配置
+    // 创建临时agent用于测试，使用表单中的最新配置
+    final headers = _parseHeaders(_headersController.text);
+    final apiKey = headers['Authorization']?.replaceFirst('Bearer ', '') ?? '';
+    
     final testAgent = AIAgent(
       id: 'test',
       // 如果模型为空，使用 gpt-4-vision-preview 作为默认模型
@@ -514,13 +584,19 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               : _modelController.text,
       name: _nameController.text,
       description: _descriptionController.text,
-      serviceProviderId: selectedProvider.id,
-      baseUrl: selectedProvider.baseUrl,
-      headers: Map<String, String>.from(selectedProvider.headers),
+      serviceProviderId: _selectedProviderId,
+      baseUrl: _baseUrlController.text,
+      headers: headers,
       systemPrompt: _promptController.text,
       tags: _tags,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      // 默认参数值
+      temperature: 0.7,
+      maxLength: 2000,
+      topP: 1.0,
+      frequencyPenalty: 0.0,
+      presencePenalty: 0.0,
     );
 
     // 使用 TestService 的对话框
@@ -537,11 +613,28 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
 
       if (input.isNotEmpty) {
         try {
-          // 处理请求并获取响应
+          // 获取当前表单的值
+          final formValues = {
+            'name': _nameController.text,
+            'baseUrl': _baseUrlController.text,
+            'model': _modelController.text,
+            'systemPrompt': _promptController.text,
+            'serviceProviderId': _selectedProviderId,
+            'apiKey': apiKey,
+            // 可以在这里添加更多参数，如果界面上有相应的输入控件
+            'temperature': 0.7, // 默认值，如果界面上有输入控件，可以从控件获取
+            'maxLength': 2000, // 默认值
+            'topP': 1.0, // 默认值
+            'frequencyPenalty': 0.0, // 默认值
+            'presencePenalty': 0.0, // 默认值
+          };
+
+          // 处理请求并获取响应，传入表单值
           final response = await TestService.processTestRequest(
             input,
             testAgent,
             imageFile: imageFile,
+            formValues: formValues,
           );
 
           // 显示响应结果

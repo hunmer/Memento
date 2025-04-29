@@ -12,7 +12,6 @@ class RequestService {
 
   /// 获取或创建OpenAI客户端
   static OpenAIClient _getClient(AIAgent agent) {
-    if (!_clients.containsKey(agent.id)) {
       // 从headers中提取API密钥
       final apiKey =
           agent.headers['Authorization']?.replaceAll('Bearer ', '') ??
@@ -32,15 +31,13 @@ class RequestService {
       );
       mergedHeaders['api-key'] = apiKey;
       mergedHeaders['Authorization'] = 'Bearer $apiKey';
-
-      _clients[agent.id] = OpenAIClient(
+      print(mergedHeaders);
+      return OpenAIClient(
         apiKey: apiKey,
         organization: organization,
         baseUrl: agent.baseUrl,
         headers: mergedHeaders,
       );
-    }
-    return _clients[agent.id]!;
   }
 
   /// 发送聊天请求
