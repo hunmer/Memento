@@ -121,14 +121,17 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                             await avatarDir.create(recursive: true);
                           }
                           
-                          // 构建最终文件路径
-                          final finalFileName = '${widget.user.username}.jpg';
-                          final finalAbsPath = path.join(avatarDir.path, finalFileName);
-                          final finalFile = File(finalAbsPath);
+                          // 保持原文件名，只改变路径
+                          final tempFileName = path.basename(tempAbsPath);
+                          final finalAbsPath = path.join(avatarDir.path, tempFileName);
                           
-                          // 如果目标文件已存在，先删除
-                          if (await finalFile.exists()) {
-                            await finalFile.delete();
+                          // 如果用户已有头像，先删除旧头像
+                          if (widget.user.iconPath != null) {
+                            final oldAvatarPath = path.join(appDir.path, 'app_data', widget.user.iconPath!);
+                            final oldAvatarFile = File(oldAvatarPath);
+                            if (await oldAvatarFile.exists()) {
+                              await oldAvatarFile.delete();
+                            }
                           }
                           
                           // 移动文件到最终位置
@@ -136,7 +139,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                           await tempFile.delete(); // 删除临时文件
                           
                           // 更新最终路径
-                          finalAvatarPath = './chat/avatars/$finalFileName';
+                          finalAvatarPath = './chat/avatars/$tempFileName';
                         }
                       } catch (e) {
                         debugPrint('Error moving avatar file: $e');

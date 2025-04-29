@@ -22,8 +22,6 @@ class UserService {
     return _currentUser!;
   }
 
-  // 用于存储用户头像信息的Map
-  final Map<String, String> _userAvatars = {};
 
   UserService(this._plugin);
 
@@ -47,63 +45,13 @@ class UserService {
       }
     }
 
-    // 加载用户头像信息
-    await _loadAvatars();
+    // 确保头像目录存在
+    await _plugin.storage.createDirectory('chat/avatars');
   }
 
   // 设置当前用户
   void setCurrentUser(User user) {
     _currentUser = user;
-    _plugin.notifyListeners();
-  }
-
-  // 加载所有用户头像
-  Future<void> _loadAvatars() async {
-    try {
-      if (kIsWeb) {
-        // Web平台暂不支持列出目录文件
-        debugPrint('Avatar loading not fully supported on Web platform');
-        return;
-      }
-
-      // 获取应用文档目录
-      final appDir = await getApplicationDocumentsDirectory();
-      final avatarsDir = Directory(
-        path.join(appDir.path, 'app_data/chat/avatars'),
-      );
-
-      // 检查目录是否存在
-      if (!await avatarsDir.exists()) {
-        await _plugin.storage.createDirectory('chat/avatars');
-        debugPrint('Created avatars directory');
-        return; // 目录刚创建，还没有文件
-      }
-
-      // 列出目录中的所有文件
-      final avatarFiles = avatarsDir.listSync();
-      for (var entity in avatarFiles) {
-        if (entity is File) {
-          final fileName = path.basename(entity.path);
-          if (fileName.endsWith('.jpg')) {
-            final username = fileName.substring(0, fileName.length - 4);
-            _userAvatars[username] = './chat/avatars/$fileName';
-          }
-        }
-      }
-      debugPrint('Loaded ${_userAvatars.length} user avatars');
-    } catch (e) {
-      debugPrint('Error loading avatars: $e');
-    }
-  }
-
-  // 获取用户头像路径
-  String? getUserAvatar(String username) {
-    return _userAvatars[username];
-  }
-
-  // 设置用户头像
-  Future<void> setUserAvatar(String username, String avatarPath) async {
-    _userAvatars[username] = avatarPath;
     _plugin.notifyListeners();
   }
 
@@ -122,11 +70,6 @@ class UserService {
         'user': _currentUser!.toJson(),
       });
 
-      // 如果更新了头像，同时更新头像映射
-      if (avatarPath != null) {
-        await setUserAvatar(_currentUser!.username, avatarPath);
-      }
-
       _plugin.notifyListeners();
     }
   }
@@ -140,11 +83,6 @@ class UserService {
         avatarPath: user.iconPath,
       );
       return;
-    }
-    
-    // 如果更新了头像，同时更新头像映射
-    if (user.iconPath != null) {
-      await setUserAvatar(user.username, user.iconPath!);
     }
     
     // 通知监听器更新
