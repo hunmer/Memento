@@ -3,14 +3,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../models/ai_agent.dart';
 import '../models/service_provider.dart';
+import '../models/llm_models.dart';
 import '../controllers/agent_controller.dart';
 import '../controllers/provider_controller.dart';
 import '../services/test_service.dart';
+import 'model_search_screen.dart';
 
 class AgentEditScreen extends StatefulWidget {
   final AIAgent? agent;
 
-  const AgentEditScreen({Key? key, this.agent}) : super(key: key);
+  const AgentEditScreen({super.key, this.agent});
 
   @override
   State<AgentEditScreen> createState() => _AgentEditScreenState();
@@ -92,10 +94,27 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   }
 
   void _updateProviderFields(ServiceProvider provider) {
-    setState(() {
+    if (widget.agent == null) {
       _baseUrlController.text = provider.baseUrl;
       _headersController.text = _formatHeaders(provider.headers);
-    });
+    }
+  }
+
+  Future<void> _selectModel() async {
+    final selectedModel = await Navigator.push<LLMModel>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ModelSearchScreen(
+          initialModelId: _modelController.text,
+        ),
+      ),
+    );
+
+    if (selectedModel != null) {
+      setState(() {
+        _modelController.text = selectedModel.id;
+      });
+    }
   }
 
   String _formatHeaders(Map<String, String> headers) {
@@ -287,12 +306,23 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _modelController,
-              decoration: const InputDecoration(
-                labelText: 'Model',
-                hintText: 'Enter model name (e.g. gpt-3.5-turbo)',
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _modelController,
+                    decoration: const InputDecoration(
+                      labelText: 'Model',
+                      hintText: 'Enter model name (e.g. gpt-3.5-turbo)',
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _selectModel,
+                  tooltip: '搜索模型',
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -345,7 +375,6 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     );
   }
 
-  @override
   Future<void> _testAgent() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -470,9 +499,8 @@ class _TestInputDialogState extends State<_TestInputDialog> {
               controller: _textController,
               decoration: InputDecoration(
                 hintText: widget.hintText,
-                border: const OutlineInputBorder(),
               ),
-              maxLines: 5,
+              maxLines: 3,
             ),
             const SizedBox(height: 16),
             Row(
