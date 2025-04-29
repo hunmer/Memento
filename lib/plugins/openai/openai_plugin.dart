@@ -5,9 +5,11 @@ import '../../core/config_manager.dart';
 import 'screens/agent_list_screen.dart';
 import 'screens/plugin_settings_screen.dart';
 import 'handlers/chat_event_handler.dart';
+import 'controllers/prompt_replacement_controller.dart';
 
 class OpenAIPlugin extends BasePlugin {
   final ChatEventHandler _chatEventHandler = ChatEventHandler();
+  final PromptReplacementController _promptReplacementController = PromptReplacementController();
   @override
   String get id => 'openai';
 
@@ -31,6 +33,8 @@ class OpenAIPlugin extends BasePlugin {
 
     // 初始化聊天事件处理器
     _chatEventHandler.initialize();
+    
+    // 初始化prompt替换控制器已在构造函数中完成
   }
 
   @override
@@ -188,6 +192,24 @@ class OpenAIPlugin extends BasePlugin {
 
     // 清理事件处理器
     _chatEventHandler.dispose();
+    
+    // 清理prompt替换控制器
+    _promptReplacementController.dispose();
+  }
+
+  /// 注册prompt替换方法
+  void registerPromptReplacementMethod(String methodName, PromptReplacementCallback callback) {
+    _promptReplacementController.registerMethod(methodName, callback);
+  }
+
+  /// 注销prompt替换方法
+  void unregisterPromptReplacementMethod(String methodName) {
+    _promptReplacementController.unregisterMethod(methodName);
+  }
+
+  /// 获取prompt替换控制器实例
+  PromptReplacementController getPromptReplacementController() {
+    return _promptReplacementController;
   }
 
   @override

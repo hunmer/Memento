@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/plugin_base.dart';
+import '../openai/openai_plugin.dart';
+import 'services/prompt_replacements.dart';
 // import '../../core/storage/storage_manager.dart';
 import 'screens/bill_list_screen.dart';
 import 'screens/bill_stats_screen.dart';
@@ -13,7 +15,11 @@ import 'models/bill_statistics.dart';
 import 'models/statistic_range.dart';
 
 class BillPlugin extends PluginBase with ChangeNotifier {
+  @override
+  String get id => 'bill';
+  
   String? _selectedAccountId;
+  final BillPromptReplacements _promptReplacements = BillPromptReplacements();
 
   Account? get selectedAccount {
     if (_selectedAccountId == null) return null;
@@ -32,9 +38,20 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   }
 
   String? get selectedAccountId => _selectedAccountId;
-
-  @override
-  String get id => 'bill_plugin';
+  Future<void> uninstall() async {
+    // 注销prompt替换方法
+    final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+    if (openaiPlugin != null) {
+      openaiPlugin.unregisterPromptReplacementMethod('bill_getBills');
+      debugPrint('成功注销bill_getBills方法');
+    }
+    
+    // 清理prompt替换服务
+    _promptReplacements.dispose();
+    
+    // Clean up plugin data
+    await storage.delete(storageDir);
+  }
 
   @override
   String get name => '账单';
@@ -57,6 +74,36 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   @override
   Future<void> initialize() async {
     await _loadAccounts();
+    
+    // 初始化prompt替换服务
+    _promptReplacements.initialize();
+    
+    // 延迟注册prompt替换方法，等待OpenAI插件初始化完成
+    Future.delayed(const Duration(seconds: 1), () {
+      _registerPromptMethods();
+    });
+  }
+
+  /// 注册prompt替换方法
+  void _registerPromptMethods() {
+    try {
+      final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      if (openaiPlugin != null) {
+        openaiPlugin.registerPromptReplacementMethod(
+          'bill_getBills',
+          _promptReplacements.getBills,
+        );
+        debugPrint('成功注册bill_getBills方法到OpenAI插件');
+      } else {
+        debugPrint('注册bill_getBills方法失败：未找到OpenAI插件，将在5秒后重试');
+        // 如果OpenAI插件还未准备好，5秒后重试
+        Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
+      }
+    } catch (e) {
+      debugPrint('注册prompt替换方法时出错: $e，将在5秒后重试');
+      // 发生错误时，5秒后重试
+      Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
+    }
   }
 
   @override

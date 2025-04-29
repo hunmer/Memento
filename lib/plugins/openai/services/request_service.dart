@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:openai_dart/openai_dart.dart';
 import 'package:http/http.dart' as http;
 import '../models/ai_agent.dart';
+import '../controllers/prompt_replacement_controller.dart';
 import 'dart:developer' as developer;
 
 class RequestService {
@@ -47,10 +48,29 @@ class RequestService {
     String input,
     AIAgent agent, {
     File? imageFile,
+    bool replacePrompt = true,
   }) async {
     try {
       developer.log('开始聊天请求: ${agent.id}', name: 'RequestService');
       developer.log('用户输入: $input', name: 'RequestService');
+
+      // 处理prompt替换
+      String processedInput = input;
+      if (replacePrompt) {
+        try {
+          processedInput = await PromptReplacementController().processPrompt(input);
+          developer.log(
+            'Prompt替换结果: $processedInput',
+            name: 'RequestService',
+          );
+        } catch (e) {
+          developer.log(
+            'Prompt替换失败: $e',
+            name: 'RequestService',
+            error: e,
+          );
+        }
+      }
 
       final client = _getClient(agent);
 
@@ -67,7 +87,7 @@ class RequestService {
             ChatCompletionMessage.system(content: agent.systemPrompt),
             ChatCompletionMessage.user(
               content: ChatCompletionUserMessageContent.parts([
-                ChatCompletionMessageContentPart.text(text: input),
+                ChatCompletionMessageContentPart.text(text: processedInput),
                 ChatCompletionMessageContentPart.image(
                   imageUrl: ChatCompletionMessageImageUrl(
                     url: 'data:image/jpeg;base64,$base64Image',
@@ -85,7 +105,7 @@ class RequestService {
           messages: [
             ChatCompletionMessage.system(content: agent.systemPrompt),
             ChatCompletionMessage.user(
-              content: ChatCompletionUserMessageContent.string(input),
+              content: ChatCompletionUserMessageContent.string(processedInput),
             ),
           ],
           temperature: 0.7,
@@ -130,6 +150,7 @@ class RequestService {
   /// [onComplete] - 完成时的回调
   /// [vision] - 是否启用vision模式
   /// [filePath] - 图片文件路径（vision模式下使用）
+  /// [replacePrompt] - 是否启用prompt替换
   static Future<void> streamResponse({
     required AIAgent agent,
     required String prompt,
@@ -138,6 +159,7 @@ class RequestService {
     required Function() onComplete,
     bool vision = false,
     String? filePath,
+    bool replacePrompt = true,
   }) async {
     try {
       if (vision && filePath != null) {
@@ -154,6 +176,24 @@ class RequestService {
         }
       }
 
+      // 处理prompt替换
+      String processedPrompt = prompt;
+      if (replacePrompt) {
+        try {
+          processedPrompt = await PromptReplacementController().processPrompt(prompt);
+          developer.log(
+            'Prompt替换结果: $processedPrompt',
+            name: 'RequestService',
+          );
+        } catch (e) {
+          developer.log(
+            'Prompt替换失败: $e',
+            name: 'RequestService',
+            error: e,
+          );
+        }
+      }
+
       // 普通流式对话模式
       final client = _getClient(agent);
 
@@ -162,7 +202,7 @@ class RequestService {
         messages: [
           ChatCompletionMessage.system(content: agent.systemPrompt),
           ChatCompletionMessage.user(
-            content: ChatCompletionUserMessageContent.string(prompt),
+            content: ChatCompletionUserMessageContent.string(processedPrompt),
           ),
         ],
         temperature: 0.7,

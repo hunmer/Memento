@@ -1,27 +1,65 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 import '../models/ai_agent.dart';
 import 'request_service.dart';
 
 class TestService {
-  /// 显示长文本输入对话框
-  static Future<String?> showLongTextInputDialog(
+  // 用于存储最后一次输入的文本的键
+  static const String _lastInputKey = 'last_test_input';
+  
+  /// 保存最后一次输入的文本
+  static Future<void> saveLastInput(String input) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_lastInputKey, input);
+      debugPrint('已保存最后一次输入的文本');
+    } catch (e) {
+      debugPrint('保存最后一次输入的文本失败: $e');
+    }
+  }
+  
+  /// 读取最后一次输入的文本
+  static Future<String> getLastInput() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_lastInputKey) ?? '';
+    } catch (e) {
+      debugPrint('读取最后一次输入的文本失败: $e');
+      return '';
+    }
+  }
+  /// 显示长文本输入对话框，支持图片选择，自动加载上次输入的文本
+  static Future<Map<String, dynamic>?> showLongTextInputDialog(
     BuildContext context, {
     String title = '测试输入',
     String hintText = '请输入测试文本',
-    String initialValue = '',
+    String? initialValue,
+    bool enableImagePicker = false,
   }) async {
-    return showDialog<String>(
+    // 如果没有提供初始值，则尝试加载上次输入的文本
+    String loadedInitialValue = initialValue ?? await getLastInput();
+    
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       barrierDismissible: false, // 防止点击外部关闭对话框导致控制器过早处置
       builder: (BuildContext dialogContext) {
         return _TextInputDialog(
           title: title,
           hintText: hintText,
-          initialValue: initialValue,
+          initialValue: loadedInitialValue,
+          enableImagePicker: enableImagePicker,
         );
       },
     );
+    
+    // 如果用户输入了文本并点击了确定，保存这次输入
+    if (result != null && result['text'] != null && result['text'].isNotEmpty) {
+      await saveLastInput(result['text']);
+    }
+    
+    return result;
   }
 
   /// 发送请求并获取响应
@@ -30,11 +68,9 @@ class TestService {
     AIAgent agent, {
     File? imageFile,
   }) async {
+    // 保存这次输入
+    await saveLastInput(input);
     try {
-      if (input.trim().isEmpty) {
-        return "请提供输入内容。";
-      }
-
       String response;
       // 如果提供了图片文件，使用vision模型处理
       if (imageFile != null) {
@@ -216,20 +252,24 @@ class _TextInputDialog extends StatefulWidget {
   final String title;
   final String hintText;
   final String initialValue;
+  final bool enableImagePicker;
 
   const _TextInputDialog({
     required this.title,
     required this.hintText,
     required this.initialValue,
+    this.enableImagePicker = false,
   });
 
   @override
-  _TextInputDialogState createState() => _TextInputDialogState();
+  State<_TextInputDialog> createState() => _TextInputDialogState();
 }
 
 class _TextInputDialogState extends State<_TextInputDialog> {
   late final TextEditingController _controller;
   bool _isDisposed = false;
+  bool _isLoading = false;
+  File? _selectedImage;
 
   @override
   void initState() {
@@ -243,11 +283,91 @@ class _TextInputDialogState extends State<_TextInputDialog> {
     _controller.dispose();
     super.dispose();
   }
+  
+  /// 加载上次输入的文本
+  Future<void> _loadLastInput() async {
+    if (_isDisposed) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final lastInput = await TestService.getLastInput();
+      if (!_isDisposed && lastInput.isNotEmpty) {
+        _controller.text = lastInput;
+      }
+    } catch (e) {
+      debugPrint('加载上次输入失败: $e');
+      if (!_isDisposed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('加载上次输入失败')),
+        );
+      }
+    } finally {
+      if (!_isDisposed) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+  
+  /// 清空输入框
+  void _clearInput() {
+    if (!_isDisposed) {
+      _controller.clear();
+    }
+  }
+
+  /// 选择图片
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
+
+    if (result != null && 
+        result.files.isNotEmpty && 
+        result.files.first.path != null) {
+      setState(() {
+        _selectedImage = File(result.files.first.path!);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.title),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(widget.title),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 加载上次输入的按钮
+              IconButton(
+                icon: _isLoading 
+                    ? const SizedBox(
+                        width: 20, 
+                        height: 20, 
+                        child: CircularProgressIndicator(strokeWidth: 2)
+                      )
+                    : const Icon(Icons.refresh, size: 20),
+                tooltip: '加载上次输入',
+                onPressed: _isLoading ? null : _loadLastInput,
+              ),
+              // 清空输入的按钮
+              IconButton(
+                icon: const Icon(Icons.clear, size: 20),
+                tooltip: '清空输入',
+                onPressed: _clearInput,
+              ),
+            ],
+          ),
+        ],
+      ),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
@@ -262,6 +382,38 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                   border: const OutlineInputBorder(),
                 ),
               ),
+              if (widget.enableImagePicker) ...[
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _pickImage,
+                      icon: const Icon(Icons.image),
+                      label: const Text('选择图片'),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _selectedImage != null
+                          ? Text(
+                              '已选择: ${_selectedImage!.path.split('/').last}',
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          : const Text('未选择图片'),
+                    ),
+                  ],
+                ),
+                if (_selectedImage != null) ...[
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      _selectedImage!,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ],
+              ],
             ],
           ),
         ),
@@ -280,7 +432,10 @@ class _TextInputDialogState extends State<_TextInputDialog> {
           onPressed: () {
             if (!_isDisposed) {
               final text = _controller.text;
-              Navigator.of(context).pop(text);
+              Navigator.of(context).pop({
+                'text': text,
+                'image': _selectedImage,
+              });
             }
           },
         ),

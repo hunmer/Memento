@@ -61,12 +61,12 @@ class _BillEditScreenState extends State<BillEditScreen> {
     if (widget.bill != null) {
       _titleController.text = widget.bill!.title;
       _amountController.text = widget.bill!.absoluteAmount.toString();
-      _noteController.text = widget.bill!.note ?? '';
-      _tag = widget.bill!.tag;
+      _noteController.text = widget.bill!.note;
+      _tag = widget.bill!.tag ?? widget.bill!.category;
       _isExpense = widget.bill!.isExpense;
       _selectedIcon = widget.bill!.icon;
       _selectedColor = widget.bill!.iconColor;
-      _selectedDate = widget.bill!.createdAt;
+      _selectedDate = widget.bill!.date;
     }
   }
 
@@ -320,23 +320,24 @@ class _BillEditScreenState extends State<BillEditScreen> {
           try {
             // 显示保存中提示
             if (!mounted) return;
-            // 解析金额
-            final amount = double.parse(_amountController.text);
+    
+    // 解析金额
+    final amount = double.parse(_amountController.text);
 
             // 创建账单对象
             final bill = Bill(
-              // 如果是编辑现有账单，使用原有ID；如果是新建账单，让构造函数生成新ID
-              id: widget.bill?.id,
+              // 如果是编辑现有账单，使用原有ID；如果是新建账单，生成新ID
+              id: widget.bill?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
               title: _titleController.text,
               amount: _isExpense ? -amount : amount,
               accountId: widget.accountId,
-              tag: _tag ?? '未分类',
-              note:
-                  _noteController.text.isNotEmpty ? _noteController.text : null,
+              category: _tag ?? '未分类', // 使用tag作为category
+              date: _selectedDate,
+              tag: _tag,
+              note: _noteController.text,
               icon: _selectedIcon,
               iconColor: _selectedColor,
-              // 如果是编辑现有账单，保留原创建时间；如果是新建账单，使用当前时间
-              createdAt: _selectedDate,
+              createdAt: widget.bill?.createdAt ?? _selectedDate,
             );
 
             // 获取当前账户的最新数据

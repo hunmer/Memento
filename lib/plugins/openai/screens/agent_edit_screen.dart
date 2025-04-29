@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../../utils/image_utils.dart';
 import '../../../widgets/circle_icon_picker.dart';
@@ -524,16 +523,12 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       updatedAt: DateTime.now(),
     );
 
-    // 显示带有图片选择的测试对话框
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return _TestInputDialog(
-          title: '测试${testAgent.name}',
-          hintText: '请输入测试文本...',
-        );
-      },
+    // 使用 TestService 的对话框
+    final result = await TestService.showLongTextInputDialog(
+      context,
+      title: '测试${testAgent.name}',
+      hintText: '请输入测试文本...',
+      enableImagePicker: true,
     );
 
     if (result != null && mounted) {
@@ -577,104 +572,4 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   }
 }
 
-class _TestInputDialog extends StatefulWidget {
-  final String title;
-  final String hintText;
-
-  const _TestInputDialog({required this.title, required this.hintText});
-
-  @override
-  State<_TestInputDialog> createState() => _TestInputDialogState();
-}
-
-class _TestInputDialogState extends State<_TestInputDialog> {
-  final TextEditingController _textController = TextEditingController();
-  File? _selectedImage;
-
-  Future<void> _pickImage() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
-    );
-
-    if (result != null &&
-        result.files.isNotEmpty &&
-        result.files.first.path != null) {
-      setState(() {
-        _selectedImage = File(result.files.first.path!);
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.title),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _textController,
-              decoration: InputDecoration(
-                hintText: widget.hintText,
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.image),
-                  label: const Text('选择图片'),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child:
-                      _selectedImage != null
-                          ? Text(
-                            '已选择: ${_selectedImage!.path.split('/').last}',
-                            overflow: TextOverflow.ellipsis,
-                          )
-                          : const Text('未选择图片'),
-                ),
-              ],
-            ),
-            if (_selectedImage != null) ...[
-              const SizedBox(height: 16),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  _selectedImage!,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(
-              context,
-            ).pop({'text': _textController.text, 'image': _selectedImage});
-          },
-          child: const Text('发送'),
-        ),
-      ],
-    );
-  }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
-}
+// 删除自定义对话框，因为现在使用 TestService 中的对话框

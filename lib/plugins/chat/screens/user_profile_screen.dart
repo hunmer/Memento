@@ -37,7 +37,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ),
               );
               if (result == true && mounted) {
-
+                // 强制更新UI
+                setState(() {});
+                // 通知插件监听器更新
+                ChatPlugin.instance.notifyListeners();
               }
             },
           ),

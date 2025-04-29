@@ -27,7 +27,7 @@ class _BillListScreenState extends State<BillListScreen>
   List<BillModel> _bills = [];
   bool _isLoading = true;
   bool _isEditing = false;
-  BillModel? _selectedBill;
+  // 移除未使用的字段
   String _selectedPeriod = '月';
   DateTime _startDate = DateTime.now();
   late DateTime _endDate;
@@ -95,7 +95,6 @@ class _BillListScreenState extends State<BillListScreen>
       if (_isEditing && _tabController.index == 1) {
         setState(() {
           _isEditing = false;
-          _selectedBill = null;
         });
       }
     }
@@ -177,8 +176,10 @@ class _BillListScreenState extends State<BillListScreen>
         title: billModel.title,
         amount: billModel.isExpense ? -billModel.amount : billModel.amount,
         accountId: widget.accountId,
+        category: billModel.category,
+        date: billModel.date,
         tag: billModel.category,
-        note: billModel.note,
+        note: billModel.note ?? '',
         createdAt: billModel.date,
         icon: billModel.icon,
         iconColor: billModel.color,
@@ -380,7 +381,7 @@ class _BillListScreenState extends State<BillListScreen>
         ),
         title: Text(bill.title),
         subtitle: Text(
-          '${bill.category} · ${dateFormatter.format(bill.date)}${bill.note != null ? ' · ${bill.note}' : ''}',
+          '${bill.category} · ${dateFormatter.format(bill.date)}${(bill.note?.isNotEmpty ?? false) ? ' · ${bill.note}' : ''}',
         ),
         trailing: Text(
           formatter.format(bill.amount),

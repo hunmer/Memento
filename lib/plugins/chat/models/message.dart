@@ -180,7 +180,7 @@ class Message {
     return {
       'id': id,
       'content': content,
-      'user': user.toJson(),
+      'user': {'id': user.id}, // 保存用户ID作为对象
       'type': type.toString().split('.').last,
       'date': date.toIso8601String(),
       'editedAt': editedAt?.toIso8601String(),
@@ -196,16 +196,30 @@ class Message {
     Map<String, dynamic> json,
     List<User> users,
   ) async {
-    // 从消息中直接获取完整的用户信息
-    final user = User.fromJson(json['user'] as Map<String, dynamic>);
+    // 从JSON中获取用户信息
+    Map<String, dynamic>? userMap;
+    String userId;
+    
+    if (json.containsKey('user') && json['user'] is Map) {
+      userMap = Map<String, dynamic>.from(json['user'] as Map<String, dynamic>);
+      userId = userMap['id'] as String;
+    } else {
+      userId = 'unknown_user';
+    }
 
-    // 获取元数据，但路径转换将在create方法中处理
-    final messageMetadata =
-        json['metadata'] != null
-            ? Map<String, dynamic>.from(
-              json['metadata'] as Map<String, dynamic>,
-            )
-            : null;
+    // 从用户列表中查找基础用户信息
+    var user = users.firstWhere(
+      (u) => u.id == userId,
+      orElse: () => User(id: userId, username: 'Unknown User'),
+    );
+
+    // 如果消息中包含用户信息，使用它覆盖全局用户信息
+    if (userMap != null) {
+      user = user.copyWith(
+        username: userMap['username'] as String?,
+        iconPath: userMap['iconPath'] as String?,
+      );
+    }
     
     // 获取回复消息ID
     final replyToId = json['replyToId'] as String?;
@@ -228,7 +242,7 @@ class Message {
           json['bubbleColor'] != null
               ? HexColor.fromHex(json['bubbleColor'] as String)
               : null,
-      metadata: messageMetadata,
+      metadata: json['metadata'] as Map<String, dynamic>?,
       replyToId: replyToId,
     );
   }
