@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/screens/profile_edit_dialog.dart';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
@@ -16,23 +17,6 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
-  Future<String> _getAbsolutePath(String relativePath) async {
-    // 如果已经是绝对路径，直接返回
-    if (path.isAbsolute(relativePath)) {
-      return relativePath;
-    }
-
-    final appDir = await getApplicationDocumentsDirectory();
-
-    // 规范化路径，确保使用正确的路径分隔符
-    String normalizedPath = relativePath.replaceFirst('./', '');
-    normalizedPath = normalizedPath.replaceAll('/', path.separator);
-    // 检查是否需要添加app_data前缀
-    if (!normalizedPath.startsWith('app_data${path.separator}')) {
-      return path.join(appDir.path, 'app_data', normalizedPath);
-    }
-    return path.join(appDir.path, normalizedPath);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,23 +36,25 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       chatPlugin: ChatPlugin.instance,
                     ),
               );
-
               if (result == true && mounted) {
-                setState(() {
-                  // 刷新界面以显示更新后的用户信息
-                });
+
               }
             },
           ),
         ],
       ),
       body: Center(
-        child: Column(
+        child: ListenableBuilder(
+          listenable: ChatPlugin.instance,
+          builder: (context, _) {
+            // 获取最新的用户信息
+            final currentUser = ChatPlugin.instance.userService.currentUser;
+            return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (widget.user.iconPath != null)
+            if (currentUser.iconPath != null)
               FutureBuilder<String>(
-                future: _getAbsolutePath(widget.user.iconPath!),
+                future: ImageUtils.getAbsolutePath(currentUser.iconPath!),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data != null) {
                     return CircleAvatar(
@@ -82,7 +68,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     backgroundColor:
                         Theme.of(context).colorScheme.primaryContainer,
                     child: Text(
-                      widget.user.username[0].toUpperCase(),
+                      currentUser.username[0].toUpperCase(),
                       style: TextStyle(
                         fontSize: 48,
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -96,7 +82,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 radius: 60,
                 backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                 child: Text(
-                  widget.user.username[0].toUpperCase(),
+                  currentUser.username[0].toUpperCase(),
                   style: TextStyle(
                     fontSize: 48,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -114,8 +100,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],
-        ),
+        );
+        }
       ),
+    )
     );
   }
 }

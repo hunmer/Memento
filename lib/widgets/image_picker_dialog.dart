@@ -303,10 +303,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                             onPressed: () async {
                               Navigator.of(context).pop();
                               // 获取原始图片的相对路径
-                              final appDir =
-                                  await getApplicationDocumentsDirectory();
-                              final relativePath =
-                                  './${widget.saveDirectory}/${path.basename(originalImagePath)}';
+                              final relativePath = await PathUtils.toRelativePath(originalImagePath);
 
                               Navigator.of(
                                 context,

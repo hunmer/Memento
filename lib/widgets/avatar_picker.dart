@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'image_picker_dialog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import '../utils/image_utils.dart';
 
 class AvatarPicker extends StatefulWidget {
   final double size;
@@ -33,6 +35,16 @@ class _AvatarPickerState extends State<AvatarPicker> {
     _avatarPath = widget.currentAvatarPath;
   }
 
+  @override
+  void didUpdateWidget(AvatarPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentAvatarPath != widget.currentAvatarPath) {
+      setState(() {
+        _avatarPath = widget.currentAvatarPath;
+      });
+    }
+  }
+
   Future<void> _pickImage(BuildContext context) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -45,31 +57,33 @@ class _AvatarPickerState extends State<AvatarPicker> {
     );
 
     if (result != null) {
+      final sourcePath = result['url'] as String;
       setState(() {
-        _avatarPath = result['url'] as String;
+        _avatarPath = sourcePath;
       });
 
-      // 重命名文件为用户名.jpg
+      // 重命名文件为随机文件名
       if (_avatarPath != null) {
         try {
-          // 确保目录存在
-          final appDir = await getApplicationDocumentsDirectory();
-          final avatarDir = Directory(path.join(appDir.path, 'app_data', widget.saveDirectory));
-          if (!await avatarDir.exists()) {
-            await avatarDir.create(recursive: true);
-          }
-          
-          // 获取当前文件的绝对路径
-          final currentFilePath = await _getAbsolutePath(_avatarPath!);
-          final currentFile = File(currentFilePath);
+          // 获取源文件的绝对路径
+          final sourceAbsolutePath = await PathUtils.toAbsolutePath(_avatarPath!);
+          final sourceFile = File(sourceAbsolutePath);
           
           // 确保文件存在
-          if (await currentFile.exists()) {
-            final newFileName = '${widget.username}.jpg';
-            final newPath = path.join(
-              avatarDir.path,
-              newFileName,
-            );
+          if (await sourceFile.exists()) {
+            // 获取应用文档目录
+            final appDir = await getApplicationDocumentsDirectory();
+            final avatarDir = Directory(path.join(appDir.path, 'app_data', widget.saveDirectory));
+            if (!await avatarDir.exists()) {
+              await avatarDir.create(recursive: true);
+            }
+            
+            // 生成随机文件名
+            final random = Random();
+            final timestamp = DateTime.now().millisecondsSinceEpoch;
+            final randomString = List.generate(8, (_) => random.nextInt(16).toRadixString(16)).join();
+            final newFileName = '$timestamp-$randomString.jpg';
+            final newPath = path.join(avatarDir.path, newFileName);
             
             // 如果目标文件已存在，先删除
             final newFile = File(newPath);
@@ -77,11 +91,11 @@ class _AvatarPickerState extends State<AvatarPicker> {
               await newFile.delete();
             }
             
-            // 复制而不是重命名，确保文件存在
-            await currentFile.copy(newPath);
+            // 复制文件到新位置
+            await sourceFile.copy(newPath);
             
-            // 更新头像路径
-            final relativePath = './${widget.saveDirectory}/$newFileName';
+            // 转换为相对路径并更新状态
+            final relativePath = await PathUtils.toRelativePath(newPath);
             setState(() {
               _avatarPath = relativePath;
             });
@@ -91,7 +105,7 @@ class _AvatarPickerState extends State<AvatarPicker> {
             
             debugPrint('Avatar saved successfully to: $newPath');
           } else {
-            debugPrint('Source avatar file does not exist: $currentFilePath');
+            debugPrint('Source avatar file does not exist: $sourceAbsolutePath');
           }
         } catch (e) {
           debugPrint('Error processing avatar file: $e');
@@ -113,20 +127,25 @@ class _AvatarPickerState extends State<AvatarPicker> {
         ),
         child: _avatarPath != null
             ? FutureBuilder<String>(
-                future: _getAbsolutePath(_avatarPath!),
+                key: ValueKey(_avatarPath), // 添加key以确保更新
+                future: PathUtils.toAbsolutePath(_avatarPath!),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data != null) {
                     final file = File(snapshot.data!);
                     return FutureBuilder<bool>(
+                      key: ValueKey(snapshot.data), // 添加key以确保更新
                       future: file.exists(),
                       builder: (context, existsSnapshot) {
                         if (existsSnapshot.hasData && existsSnapshot.data == true) {
                           return ClipOval(
                             child: Image.file(
                               file,
+                              key: ValueKey(file.path), // 添加key以确保更新
                               width: widget.size,
                               height: widget.size,
                               fit: BoxFit.cover,
+                              cacheWidth: (widget.size * 2).toInt(), // 添加缓存控制
+                              cacheHeight: (widget.size * 2).toInt(), // 添加缓存控制
                               errorBuilder: (context, error, stackTrace) {
                                 debugPrint('Error loading avatar: $error');
                                 return _buildDefaultAvatar();
@@ -159,18 +178,5 @@ class _AvatarPickerState extends State<AvatarPicker> {
     );
   }
 
-  Future<String> _getAbsolutePath(String relativePath) async {
-    final appDir = await getApplicationDocumentsDirectory();
-    
-    // 规范化路径，确保使用正确的路径分隔符
-    String normalizedPath = relativePath.replaceFirst('./', '');
-    normalizedPath = normalizedPath.replaceAll('/', path.separator);
-    
-    // 检查是否需要添加app_data前缀
-    if (!normalizedPath.startsWith('app_data${path.separator}')) {
-      return path.join(appDir.path, 'app_data', normalizedPath);
-    }
-    
-    return path.join(appDir.path, normalizedPath);
-  }
+  // 移除旧的 _getAbsolutePath 方法，因为现在使用 PathUtils 类
 }
