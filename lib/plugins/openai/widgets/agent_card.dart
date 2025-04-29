@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../utils/image_utils.dart';
 import '../models/ai_agent.dart';
-import '../models/service_provider.dart';
-import '../controllers/provider_controller.dart';
 import '../screens/agent_edit_screen.dart';
 
 class AgentCard extends StatelessWidget {
@@ -66,31 +65,49 @@ class AgentCard extends StatelessWidget {
   Widget _buildAgentIcon() {
     // 如果有头像，优先显示头像
     if (agent.avatarUrl != null && agent.avatarUrl!.isNotEmpty) {
-      return Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: _getColorForServiceProvider(agent.serviceProviderId).withOpacity(0.5),
-            width: 2,
-          ),
-        ),
-        child: ClipOval(
-          child: agent.avatarUrl!.startsWith('http')
-              ? Image.network(
-                  agent.avatarUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      _buildDefaultIcon(),
-                )
-              : Image.file(
-                  File(agent.avatarUrl!),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      _buildDefaultIcon(),
+      return FutureBuilder<String>(
+        future: PathUtils.toAbsolutePath(agent.avatarUrl),
+        builder: (context, snapshot) {
+          return SizedBox(
+            width: 80,
+            height: 80,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: _getColorForServiceProvider(agent.serviceProviderId).withOpacity(0.5),
+                  width: 2,
                 ),
-        ),
+              ),
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: 1.0,
+                  child: ClipOval(
+                    child: agent.avatarUrl!.startsWith('http')
+                        ? Image.network(
+                            agent.avatarUrl!,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                _buildDefaultIcon(),
+                          )
+                        : snapshot.hasData
+                            ? Image.file(
+                                File(snapshot.data!),
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildDefaultIcon(),
+                              )
+                            : _buildDefaultIcon(),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       );
     }
     

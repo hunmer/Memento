@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../../utils/image_utils.dart';
 import '../../../widgets/circle_icon_picker.dart';
 import '../../../widgets/image_picker_dialog.dart';
 import '../models/ai_agent.dart';
@@ -226,20 +227,23 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                CircleIconPicker(
-                  currentIcon: _selectedIcon,
-                  backgroundColor: _selectedIconColor,
-                  onIconSelected: (icon) {
-                    setState(() {
-                      _selectedIcon = icon;
-                    });
-                  },
-                  onColorSelected: (color) {
-                    setState(() {
-                      _selectedIconColor = color;
-                    });
-                  },
+                Expanded(
+                  child: CircleIconPicker(
+                    currentIcon: _selectedIcon,
+                    backgroundColor: _selectedIconColor,
+                    onIconSelected: (icon) {
+                      setState(() {
+                        _selectedIcon = icon;
+                      });
+                    },
+                    onColorSelected: (color) {
+                      setState(() {
+                        _selectedIconColor = color;
+                      });
+                    },
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -254,49 +258,78 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                           cropAspectRatio: 1.0,
                         ),
                       );
-                      if (result != null) {
+                      if (result != null && result['url'] != null) {
                         setState(() {
                           _avatarUrl = result['url'] as String;
                         });
                       }
                     },
-                    child: Container(
+                    child: SizedBox(
+                      width: 64,
                       height: 64,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                            width: 2,
+                          ),
                         ),
-                      ),
                       child: _avatarUrl != null && _avatarUrl!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(7),
-                              child: _avatarUrl!.startsWith('http')
-                                  ? Image.network(
-                                      _avatarUrl!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.broken_image),
-                                    )
-                                  : Image.file(
-                                      File(_avatarUrl!),
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.broken_image),
+                          ? FutureBuilder<String>(
+                              future: _avatarUrl!.startsWith('http')
+                                  ? Future.value(_avatarUrl!)
+                                  : ImageUtils.getAbsolutePath(_avatarUrl),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Center(
+                                    child: AspectRatio(
+                                      aspectRatio: 1.0,
+                                      child: ClipOval(
+                                        child: _avatarUrl!.startsWith('http')
+                                            ? Image.network(
+                                                snapshot.data!,
+                                                width: 64,
+                                                height: 64,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) =>
+                                                    const Icon(Icons.broken_image),
+                                              )
+                                            : Image.file(
+                                                File(snapshot.data!),
+                                                width: 64,
+                                                height: 64,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) =>
+                                                    const Icon(Icons.broken_image),
+                                              ),
+                                      ),
                                     ),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return const Icon(Icons.broken_image);
+                                } else {
+                                  return const CircularProgressIndicator();
+                                }
+                              },
                             )
                           : const Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.add_photo_alternate_outlined),
-                                  Text('添加头像'),
+                                  Icon(Icons.add_photo_alternate_outlined, size: 24),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    '头像',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
                                 ],
                               ),
                             ),
                     ),
                   ),
                 ),
+                )
               ],
             ),
             const SizedBox(height: 16),
