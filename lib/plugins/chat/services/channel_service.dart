@@ -131,6 +131,9 @@ class ChannelService {
 
     // 重新排序频道列表
     _channels.sort(Channel.compare);
+    
+    // 通知监听器数据已更新，确保UI刷新
+    _plugin.notifyListeners();
   }
 
   // 更新频道颜色
@@ -148,12 +151,25 @@ class ChannelService {
     String normalizedPath = backgroundPath;
     if (normalizedPath.startsWith('./')) {
       String pathWithoutPrefix = normalizedPath.substring(2);
-      List<String> components = pathWithoutPrefix.split(RegExp(r'[/\\]'));
+      List<String> components = pathWithoutPrefix.split(RegExp(r'[/\\\\]'));
       normalizedPath = './${components.join('/')}';
     }
+    
+    // 找到并更新频道
     final channel = _channels.firstWhere((c) => c.id == channelId);
     final updatedChannel = channel.copyWith(backgroundPath: normalizedPath);
+    
+    // 如果是当前活跃频道，更新 _currentChannel
+    if (_currentChannel?.id == channelId) {
+      _currentChannel = updatedChannel;
+    }
+    
+    // 保存更新后的频道
     await saveChannel(updatedChannel);
+    
+    // 确保 UI 得到更新
+    _plugin.notifyListeners();
+    
     return updatedChannel;
   }
 

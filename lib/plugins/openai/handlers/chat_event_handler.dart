@@ -36,6 +36,11 @@ class ChatEventHandler {
     final message = args.value;
     final metadata = message.metadata;
 
+    // 在AI发消息前更新消息内容
+    eventManager.broadcast(
+      'onMessageUpdated',
+      Value<Message>(message),
+    );
     developer.log('收到新消息: ${message.content}', name: 'ChatEventHandler');
 
     // 检查消息是否包含agent信息

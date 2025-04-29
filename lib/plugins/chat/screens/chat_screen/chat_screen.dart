@@ -52,6 +52,8 @@ class _ChatScreenState extends State<ChatScreen> {
       highlightMessage: widget.highlightMessage,
       autoScroll: widget.autoScroll,
     );
+    // 添加监听器，当 ChatPlugin 发生变化时重新加载背景
+    ChatPlugin.instance.addListener(_handleChatPluginUpdate);
     _loadBackgroundPath();
     _loadChannelDraft();
   }
@@ -98,9 +100,35 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    // 移除监听器
+    ChatPlugin.instance.removeListener(_handleChatPluginUpdate);
     _controller.dispose();
     // MessageOperations不需要dispose
     super.dispose();
+  }
+
+  // 处理 ChatPlugin 更新
+  void _handleChatPluginUpdate() {
+    // 检查当前频道是否更新
+    final updatedChannel = ChatPlugin.instance.channelService.channels
+        .firstWhere((c) => c.id == widget.channel.id, orElse: () => widget.channel);
+    
+    // 如果背景路径发生变化，重新加载背景
+    if (updatedChannel.backgroundPath != widget.channel.backgroundPath) {
+      debugPrint('背景图片已更新，重新加载: ${updatedChannel.backgroundPath}');
+      setState(() {
+        _isLoadingBackground = true;
+      });
+      _loadBackgroundPath();
+      
+      // 强制重建背景图片
+      if (_backgroundPath != null) {
+        setState(() {
+          // 添加一个随机参数，确保Image.file重新加载
+          _backgroundPath = "$_backgroundPath?t=${DateTime.now().millisecondsSinceEpoch}";
+        });
+      }
+    }
   }
 
   // 更新消息列表
@@ -274,7 +302,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // 加载背景图片路径
   Future<void> _loadBackgroundPath() async {
-    if (widget.channel.backgroundPath == null) {
+    // 获取最新的频道数据
+    final currentChannel = ChatPlugin.instance.channelService.channels
+        .firstWhere((c) => c.id == widget.channel.id, orElse: () => widget.channel);
+    
+    if (currentChannel.backgroundPath == null) {
       setState(() {
         _backgroundPath = null;
         _isLoadingBackground = false;
@@ -284,18 +316,29 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       final absolutePath = await PathUtils.toAbsolutePath(
-        widget.channel.backgroundPath!,
+        currentChannel.backgroundPath!,
       );
 
       if (mounted) {
         final file = File(absolutePath);
-        await file.exists(); // 检查文件是否存在
-        setState(() {
-          _backgroundPath = absolutePath;
-          _isLoadingBackground = false;
-        });
+        final exists = await file.exists(); // 检查文件是否存在
+        
+        if (exists) {
+          setState(() {
+            _backgroundPath = absolutePath;
+            _isLoadingBackground = false;
+          });
+          debugPrint('背景图片加载成功: $_backgroundPath');
+        } else {
+          debugPrint('背景图片文件不存在: $absolutePath');
+          setState(() {
+            _backgroundPath = null;
+            _isLoadingBackground = false;
+          });
+        }
       }
     } catch (e) {
+      debugPrint('加载背景图片路径出错: $e');
       if (mounted) {
         setState(() {
           _backgroundPath = null;

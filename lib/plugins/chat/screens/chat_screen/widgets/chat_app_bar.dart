@@ -168,21 +168,18 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // 直接使用result中返回的url路径
                   if (result.containsKey('url') && result['url'] != null) {
                     // 更新频道背景
-                    final updatedChannel = await ChatPlugin
+                    await ChatPlugin
                         .instance
                         .channelService
                         .updateChannelBackground(
                           channel.id,
                           result['url'], // 直接使用返回的url
                         );
-
-                    // 打印日志以便调试
-                    debugPrint('背景图片已更新: ${result['url']}');
                   }
                 }
-                break;
-            }
-          },
+            break;
+          }
+          }
         ),
       ],
     );
