@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
 import 'package:flutter/material.dart';
 import '../controllers/activity_controller.dart';
 import '../controllers/tag_controller.dart';
@@ -25,58 +26,60 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
       title: Text(viewModeController.isGridMode && viewModeController.selectedMinutes > 0
-          ? '${viewModeController.selectedMinutes}分钟已选中'
-          : '活动时间线'),
+          ? DiaryLocalizations.of(context)!.minutesSelected.replaceAll('{minutes}', viewModeController.selectedMinutes.toString())
+          : DiaryLocalizations.of(context)!.activityTimeline),
       actions: [
         // 视图切换按钮
         IconButton(
           icon: Icon(viewModeController.isGridMode ? Icons.timeline : Icons.grid_on),
           onPressed: viewModeController.toggleViewMode,
-          tooltip: viewModeController.isGridMode ? '切换到时间线视图' : '切换到网格视图',
+          tooltip: viewModeController.isGridMode 
+              ? DiaryLocalizations.of(context)!.switchToTimelineView 
+              : DiaryLocalizations.of(context)!.switchToGridView,
         ),
         // 标签管理按钮
         IconButton(
           icon: const Icon(Icons.label),
           onPressed: () => tagController.showTagManagerDialog(context),
-          tooltip: '标签管理',
+          tooltip: DiaryLocalizations.of(context)!.tagManagement,
         ),
         // 排序下拉菜单
         PopupMenuButton<int>(
           icon: const Icon(Icons.sort),
-          tooltip: '排序方式',
+          tooltip: DiaryLocalizations.of(context)!.sortBy,
           initialValue: activityController.sortMode,
           onSelected: (int index) {
             activityController.setSortMode(index);
           },
           itemBuilder:
               (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 0,
                   child: Row(
                     children: [
-                      Icon(Icons.arrow_upward, size: 16),
-                      SizedBox(width: 8),
-                      Text('按开始时间升序'),
+                      const Icon(Icons.arrow_upward, size: 16),
+                      const SizedBox(width: 8),
+                      Text(DiaryLocalizations.of(context)!.sortByStartTimeAsc),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 1,
                   child: Row(
                     children: [
-                      Icon(Icons.timer, size: 16),
-                      SizedBox(width: 8),
-                      Text('按活动时长排序'),
+                      const Icon(Icons.timer, size: 16),
+                      const SizedBox(width: 8),
+                      Text(DiaryLocalizations.of(context)!.sortByDuration),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 2,
                   child: Row(
                     children: [
-                      Icon(Icons.arrow_downward, size: 16),
-                      SizedBox(width: 8),
-                      Text('按开始时间降序'),
+                      const Icon(Icons.arrow_downward, size: 16),
+                      const SizedBox(width: 8),
+                      Text(DiaryLocalizations.of(context)!.sortByStartTimeDesc),
                     ],
                   ),
                 ),

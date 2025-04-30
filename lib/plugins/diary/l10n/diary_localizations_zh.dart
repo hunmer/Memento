@@ -34,4 +34,92 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
   @override
   String get monthWordCount => '本月文字数';
 
+  // Activity form translations
+  @override
+  String get addActivity => '添加活动';
+  
+  @override
+  String get editActivity => '编辑活动';
+  
+  @override
+  String get cancel => '取消';
+  
+  @override
+  String get save => '保存';
+  
+  @override
+  String get activityName => '活动名称';
+  
+  @override
+  String get unnamedActivity => '未命名活动';
+  
+  @override
+  String get activityDescription => '活动描述';
+  
+  @override
+  String get startTime => '开始时间';
+  
+  @override
+  String get endTime => '结束时间';
+  
+  @override
+  String get interval => '间隔';
+  
+  @override
+  String get minutes => '分钟';
+  
+  @override
+  String get tags => '标签';
+  
+  @override
+  String get tagsHint => '例如: 工作, 学习, 运动';
+  
+  @override
+  String get tagsHelperText => '可以直接输入新标签，将自动保存到未分组';
+  
+  @override
+  String get editInterval => '修改时间间隔';
+  
+  @override
+  String get confirmButton => '确定';
+  
+  @override
+  String get cancelButton => '取消';
+  
+  @override
+  String get endTimeError => '结束时间必须晚于开始时间';
+  
+  @override
+  String get minDurationError => '活动时间必须至少为1分钟';
+  
+  @override
+  String get dayEndError => '活动结束时间不能超过当天23:59';
+
+  // Timeline app bar translations
+  @override
+  String get activityTimeline => '活动时间线';
+  
+  @override
+  String get minutesSelected => '{minutes}分钟已选中';
+  
+  @override
+  String get switchToTimelineView => '切换到时间线视图';
+  
+  @override
+  String get switchToGridView => '切换到网格视图';
+  
+  @override
+  String get tagManagement => '标签管理';
+  
+  @override
+  String get sortBy => '排序方式';
+  
+  @override
+  String get sortByStartTimeAsc => '按开始时间升序';
+  
+  @override
+  String get sortByDuration => '按活动时长排序';
+  
+  @override
+  String get sortByStartTimeDesc => '按开始时间降序';
 }

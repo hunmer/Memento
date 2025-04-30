@@ -3,7 +3,7 @@ import '../models/activity_record.dart';
 import 'tag_manager_dialog.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../services/activity_service.dart';
-import '../l10n/activity_localizations.dart';
+import '../../../plugins/diary/l10n/diary_localizations.dart';
 
 class ActivityForm extends StatefulWidget {
   final ActivityRecord? activity;
@@ -28,6 +28,7 @@ class ActivityForm extends StatefulWidget {
 }
 
 class _ActivityFormState extends State<ActivityForm> {
+  late DiaryLocalizations l10n;
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _tagsController;
@@ -252,7 +253,7 @@ class _ActivityFormState extends State<ActivityForm> {
       endTime: endDateTime,
       title:
           _titleController.text.trim().isEmpty
-              ? '未命名活动'
+              ? l10n.unnamedActivity
               : _titleController.text.trim(),
       description:
           _descriptionController.text.isEmpty
@@ -268,18 +269,17 @@ class _ActivityFormState extends State<ActivityForm> {
 
   @override
   Widget build(BuildContext context) {
+    l10n = DiaryLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text((widget.activity == null 
-          ? ActivityLocalizations.of(context)?.addActivity
-          : ActivityLocalizations.of(context)?.editActivity)!),
+        title: Text(widget.activity == null ? l10n.addActivity : l10n.editActivity),
         centerTitle: true,
         leadingWidth: 80, // 为左侧按钮预留足够空间
         leading: Padding(
           padding: const EdgeInsets.only(left: 4.0),
           child: TextButton.icon(
             icon: const Icon(Icons.close),
-            label: Text(ActivityLocalizations.of(context)!.cancel ),
+            label: Text(l10n.cancel),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               textStyle: const TextStyle(fontSize: 14),
@@ -292,7 +292,7 @@ class _ActivityFormState extends State<ActivityForm> {
             padding: const EdgeInsets.only(right: 4.0),
             child: TextButton.icon(
               icon: const Icon(Icons.check),
-              label: Text(ActivityLocalizations.of(context)!.save),
+              label: Text(l10n.save),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 textStyle: const TextStyle(fontSize: 14),
@@ -312,11 +312,10 @@ class _ActivityFormState extends State<ActivityForm> {
               TextField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                labelText: ActivityLocalizations.of(context)?.activityName ?? '活动名称',
-                border: const OutlineInputBorder(),
-                helperText: '不填写则显示为\"未命名活动\"',
-              ),
-                autofocus: true,
+                  labelText: l10n.activityName,
+                  border: const OutlineInputBorder(),
+                  helperText: l10n.unnamedActivity,
+               ),
               ),
               const SizedBox(height: 16),
               // 时间范围和间隔控制
@@ -340,7 +339,7 @@ class _ActivityFormState extends State<ActivityForm> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              ActivityLocalizations.of(context)!.startTime,
+                              l10n.startTime,
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
@@ -371,30 +370,17 @@ class _ActivityFormState extends State<ActivityForm> {
                             context: context,
                             builder:
                                 (BuildContext context) => AlertDialog(
-                                  title: const Text('修改时间间隔'),
-                                  content: TextField(
-                                    controller: _durationController,
-                                    keyboardType: TextInputType.number,
-                                    textAlign: TextAlign.center,
-                                    decoration: const InputDecoration(
-                                      labelText: '间隔（分钟）',
-                                      border: OutlineInputBorder(),
-                                      alignLabelWithHint: true,
-                                    ),
-                                  ),
+                                  title: Text(l10n.editInterval),
                                   actions: [
                                     TextButton(
-                                      onPressed:
-                                          () => Navigator.of(context).pop(),
-                                      child: const Text('取消'),
+                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: Text(l10n.cancelButton),
                                     ),
-                                    ElevatedButton(
+                                    TextButton(
                                       onPressed: () {
-                                        Navigator.of(
-                                          context,
-                                        ).pop(_durationController.text);
+                                        Navigator.of(context).pop(int.parse(_durationController.text));
                                       },
-                                      child: const Text('确定'),
+                                      child: Text(l10n.confirmButton),
                                     ),
                                   ],
                                 ),
@@ -435,8 +421,8 @@ class _ActivityFormState extends State<ActivityForm> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
-                              '间隔',
+                            Text(
+                              l10n.interval,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
@@ -445,7 +431,7 @@ class _ActivityFormState extends State<ActivityForm> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${_calculateDuration()}分钟',
+                              '${_calculateDuration()}${l10n.minutes}',
                               style: TextStyle(
                                 color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.bold,
@@ -474,7 +460,7 @@ class _ActivityFormState extends State<ActivityForm> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              ActivityLocalizations.of(context)!.endTime,
+                              l10n.endTime,
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
@@ -500,7 +486,7 @@ class _ActivityFormState extends State<ActivityForm> {
               TextField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
-                labelText: ActivityLocalizations.of(context)?.activityDescription ?? '活动描述',
+                labelText: l10n.activityDescription,
                 border: const OutlineInputBorder(),
               ),
                 maxLines: 3,
@@ -512,10 +498,10 @@ class _ActivityFormState extends State<ActivityForm> {
                     child: TextField(
                       controller: _tagsController,
                       decoration: InputDecoration(
-                labelText: ActivityLocalizations.of(context)?.tags ?? '标签',
+                labelText: l10n.tags,
                 border: const OutlineInputBorder(),
-                hintText: '例如: 工作, 学习, 运动',
-                helperText: '可以直接输入新标签，将自动保存到未分组',
+                hintText: l10n.tagsHint,
+                helperText: l10n.tagsHelperText,
               ),
                     ),
                   ),
@@ -588,7 +574,7 @@ class _ActivityFormState extends State<ActivityForm> {
                         });
                       }
                     },
-                    tooltip: ActivityLocalizations.of(context)?.addTag,
+                    tooltip: l10n.tags,
                   ),
                 ],
               ),
@@ -598,9 +584,9 @@ class _ActivityFormState extends State<ActivityForm> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '选择心情',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.selectMood,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Wrap(

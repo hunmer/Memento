@@ -47,6 +47,39 @@ abstract class DiaryLocalizations {
   String get clearSelection;
   String get close;
   String get moodSelectorTooltip;
+
+  // Activity form translations
+  String get addActivity;
+  String get editActivity;
+  String get cancel;
+  String get save;
+  String get activityName;
+  String get unnamedActivity;
+  String get activityDescription;
+  String get startTime;
+  String get endTime;
+  String get interval;
+  String get minutes;
+  String get tags;
+  String get tagsHint;
+  String get tagsHelperText;
+  String get editInterval;
+  String get confirmButton;
+  String get cancelButton;
+  String get endTimeError;
+  String get minDurationError;
+  String get dayEndError;
+
+  // Timeline app bar translations
+  String get activityTimeline;
+  String get minutesSelected;
+  String get switchToTimelineView;
+  String get switchToGridView;
+  String get tagManagement;
+  String get sortBy;
+  String get sortByStartTimeAsc;
+  String get sortByDuration;
+  String get sortByStartTimeDesc;
 }
 
 class _DiaryLocalizationsDelegate extends LocalizationsDelegate<DiaryLocalizations> {
