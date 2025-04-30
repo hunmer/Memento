@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/tool_app.dart';
 import 'tool_app_card.dart';
+import '../controllers/tool_app_controller.dart';
 
 class ToolAppGridView extends StatelessWidget {
   final List<ToolApp> apps;
-  final Function(ToolApp)? onAppSelected;
-
+  final ToolAppController? controller;
+  
   const ToolAppGridView({
     Key? key,
     required this.apps,
-    this.onAppSelected,
+    this.controller,
   }) : super(key: key);
 
   @override
@@ -33,7 +34,15 @@ class ToolAppGridView extends StatelessWidget {
         final app = apps[index];
         return ToolAppCard(
           app: app,
-          onTap: () => onAppSelected?.call(app),
+          onTap: () {
+            if (controller != null) {
+              controller!.handleAppClick(context, app.id);
+            } else {
+              // 如果没有提供控制器，创建一个临时的来处理点击
+              final tempController = ToolAppController();
+              tempController.handleAppClick(context, app.id);
+            }
+          },
         );
       },
     );

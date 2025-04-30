@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:convert';
 import '../models/plugin_analysis_method.dart';
 import '../services/plugin_analysis_service.dart';
 import 'agent_list_drawer.dart';
@@ -23,13 +24,35 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
   final PluginAnalysisService _service = PluginAnalysisService();
   String? _responseMessage;
   bool _isLoading = false;
+  late Map<String, dynamic> _currentTemplate;
 
   @override
   void initState() {
     super.initState();
-    // 为每个字段创建控制器
-    widget.method.template.forEach((key, value) {
-      _controllers[key] = TextEditingController(text: value.toString());
+    // 创建模板的副本
+    _currentTemplate = Map<String, dynamic>.from(widget.method.template);
+    
+    // 为每个字段创建控制器并添加监听器
+    _currentTemplate.forEach((key, value) {
+      final controller = TextEditingController(text: value.toString());
+      controller.addListener(() {
+        _updateTemplateValue(key, controller.text);
+      });
+      _controllers[key] = controller;
+    });
+  }
+  
+  // 更新模板值
+  void _updateTemplateValue(String key, String value) {
+    setState(() {
+      // 尝试转换为数字，如果失败则保持为字符串
+      if (int.tryParse(value) != null) {
+        _currentTemplate[key] = int.parse(value);
+      } else if (double.tryParse(value) != null) {
+        _currentTemplate[key] = double.parse(value);
+      } else {
+        _currentTemplate[key] = value;
+      }
     });
   }
 
@@ -42,7 +65,8 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
 
   // 复制JSON到剪贴板
   Future<void> _copyToClipboard() async {
-    final json = widget.method.formattedJson;
+    // 使用 dart:convert 将 Map 转换为 JSON 字符串
+    final json = _getJsonString();
     final success = await _service.copyToClipboard(json);
     
     if (success) {
@@ -76,6 +100,11 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
     );
   }
 
+  // 获取当前模板的JSON字符串
+  String _getJsonString() {
+    return jsonEncode(_currentTemplate);
+  }
+
   // 发送到智能体
   Future<void> _sendToAgent(Map<String, String> agentData) async {
     setState(() {
@@ -95,7 +124,7 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
       // 发送消息
       final response = await _service.sendToAgent(
         agent, 
-        widget.method.formattedJson,
+        _getJsonString(),
       );
 
       setState(() {
@@ -155,23 +184,6 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
                       );
                     }).toList(),
                     
-                    // 显示JSON预览
-                    const Text(
-                      'JSON预览:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        widget.method.formattedJson,
-                        style: const TextStyle(fontFamily: 'monospace'),
-                      ),
-                    ),
                     
                     // 智能体响应
                     if (_responseMessage != null || _isLoading) ...[

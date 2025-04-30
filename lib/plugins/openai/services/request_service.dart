@@ -249,67 +249,6 @@ class RequestService {
     }
   }
 
-  /// 流式聊天请求（旧版本，保持兼容）
-  @Deprecated('使用 streamResponse 替代')
-  static Stream<String> chatStream(String input, AIAgent agent) async* {
-    try {
-      developer.log('开始流式聊天请求: ${agent.id}', name: 'RequestService');
-      developer.log('用户输入: $input', name: 'RequestService');
-
-      final client = _getClient(agent);
-
-      final request = CreateChatCompletionRequest(
-        model: ChatCompletionModel.modelId(agent.model),
-        messages: [
-          ChatCompletionMessage.system(content: agent.systemPrompt),
-          ChatCompletionMessage.user(
-            content: ChatCompletionUserMessageContent.string(input),
-          ),
-        ],
-        temperature: 0.7,
-      );
-
-      developer.log('发送流式请求: ${request.model}', name: 'RequestService');
-
-      final stopwatch = Stopwatch()..start();
-      final stream = client.createChatCompletionStream(request: request);
-
-      int totalChars = 0;
-      int chunkCount = 0;
-
-      await for (final res in stream) {
-        final content = res.choices.first.delta.content;
-        if (content != null) {
-          totalChars += content.length;
-          chunkCount++;
-
-          // 每10个块记录一次进度
-          if (chunkCount % 10 == 0) {
-            developer.log(
-              '流式响应进度: $totalChars字符, $chunkCount个块, 已耗时: ${stopwatch.elapsedMilliseconds}ms',
-              name: 'RequestService',
-            );
-          }
-
-          yield content;
-        }
-      }
-
-      stopwatch.stop();
-      developer.log(
-        '流式响应完成: 总计$totalChars字符, $chunkCount个块, 总耗时: ${stopwatch.elapsedMilliseconds}ms',
-        name: 'RequestService',
-      );
-    } catch (e) {
-      developer.log(
-        '流式聊天请求错误: ${e.toString()}',
-        name: 'RequestService',
-        error: e,
-      );
-      yield 'Error: ${e.toString()}';
-    }
-  }
-
   /// 生成图片
   static Future<List<String>> generateImages(
     String prompt,

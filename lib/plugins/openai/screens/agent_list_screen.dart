@@ -185,12 +185,6 @@ class _AgentListScreenState extends State<AgentListScreen>
         
         return ToolAppGridView(
           apps: _toolAppController.apps,
-          onAppSelected: (app) {
-            // TODO: Handle tool app selection
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Selected: ${app.title}')),
-            );
-          },
         );
       },
     );

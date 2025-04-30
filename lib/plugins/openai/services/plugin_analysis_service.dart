@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
+import 'dart:async';
 import '../models/plugin_analysis_method.dart';
 import '../models/ai_agent.dart';
+import 'request_service.dart';
 
 class PluginAnalysisService {
   // 单例模式
@@ -28,15 +30,28 @@ class PluginAnalysisService {
 
   // 向智能体发送消息并获取响应
   Future<String> sendToAgent(AIAgent agent, String message) async {
-    // 这里应该实现与智能体通信的逻辑
-    // 目前返回模拟响应
-    await Future.delayed(const Duration(seconds: 1)); // 模拟网络延迟
+    final completer = Completer<String>();
+    final responseBuffer = StringBuffer();
     
-    return '已分析完成：\n\n该插件API调用了${message.contains('activity') ? '活动' : '账单'}相关功能，'
-           '时间范围是从2025-04-01到2025-05-01。\n\n'
-           '建议优化：\n'
-           '1. 添加分页参数\n'
-           '2. 增加错误处理机制\n'
-           '3. 考虑添加缓存策略';
+    await RequestService.streamResponse(
+      agent: agent,
+      prompt: "$message",
+      onToken: (token) {
+        responseBuffer.write(token);
+      },
+      onError: (error) {
+        if (!completer.isCompleted) {
+          completer.completeError(error);
+        }
+      },
+      onComplete: () {
+        if (!completer.isCompleted) {
+          completer.complete(responseBuffer.toString());
+        }
+      },
+      replacePrompt: true,
+    );
+    
+    return completer.future;
   }
 }
