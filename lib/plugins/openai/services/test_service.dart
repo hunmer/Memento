@@ -3,7 +3,8 @@ import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
-// 移除不需要的导入
+// 添加本地化导入
+import '../l10n/openai_localizations.dart';
 import 'request_service.dart';
 
 class TestService {
@@ -34,11 +35,13 @@ class TestService {
   /// 显示长文本输入对话框，支持图片选择，自动加载上次输入的文本
   static Future<Map<String, dynamic>?> showLongTextInputDialog(
     BuildContext context, {
-    String title = '测试输入',
-    String hintText = '请输入测试文本',
+    String? title,
+    String? hintText,
     String? initialValue,
     bool enableImagePicker = false,
   }) async {
+    // 获取本地化实例
+    final l10n = OpenAILocalizations.of(context);
     // 如果没有提供初始值，则尝试加载上次输入的文本
     String loadedInitialValue = initialValue ?? await getLastInput();
     
@@ -47,8 +50,8 @@ class TestService {
       barrierDismissible: false, // 防止点击外部关闭对话框导致控制器过早处置
       builder: (BuildContext dialogContext) {
         return _TextInputDialog(
-          title: title,
-          hintText: hintText,
+          title: title ?? l10n.testInput,
+          hintText: hintText ?? l10n.enterTestText,
           initialValue: loadedInitialValue,
           enableImagePicker: enableImagePicker,
         );
@@ -126,14 +129,15 @@ $response
 API端点: ${agent.baseUrl}
 ''';
     } catch (e) {
+      final l10n = OpenAILocalizations.defaultLocalizations;
       return '''
 错误: 请求处理失败
-详细信息: ${e.toString()}
+${l10n.errorDetails}: ${e.toString()}
 
-请检查:
-1. API密钥是否正确配置
-2. 网络连接是否正常
-3. 服务端点是否可访问
+${l10n.checkItems}:
+1. ${l10n.apiKeyConfig}
+2. ${l10n.networkConnection}
+3. ${l10n.serviceEndpoint}
 ''';
     }
   }
@@ -146,13 +150,16 @@ API端点: ${agent.baseUrl}
         (response.contains('http://') || response.contains('https://'));
 
     // 使用独立的context避免MediaQuery依赖问题
+    // 获取本地化实例
+    final l10n = OpenAILocalizations.of(context);
+    
     showDialog(
       context: context,
       barrierDismissible: true,
       useRootNavigator: true,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('测试响应'),
+          title: Text(l10n.testResponse),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,9 +168,9 @@ API端点: ${agent.baseUrl}
                 SelectableText(response),
                 if (containsImageUrl) ...[
                   const SizedBox(height: 16),
-                  const Text(
-                    '预览图片:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    '${l10n.previewImages}:',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   _buildImagePreview(response, dialogContext),
@@ -173,7 +180,7 @@ API端点: ${agent.baseUrl}
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('关闭'),
+              child: Text(l10n.close),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
@@ -190,8 +197,11 @@ API端点: ${agent.baseUrl}
     final RegExp urlRegex = RegExp(r'https?://\S+');
     final matches = urlRegex.allMatches(response);
 
+    // 获取本地化实例
+    final l10n = OpenAILocalizations.of(context);
+    
     if (matches.isEmpty) {
-      return const Text('无法加载图片预览');
+      return Text(l10n.imageLoadFailed);
     }
 
     // 使用ValueKey生成唯一键以避免重复键问题
@@ -246,7 +256,7 @@ API端点: ${agent.baseUrl}
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text('图片加载失败'),
+                          child: Text(l10n.imageLoadFailed),
                         );
                       },
                     ),
@@ -317,8 +327,9 @@ class _TextInputDialogState extends State<_TextInputDialog> {
     } catch (e) {
       debugPrint('加载上次输入失败: $e');
       if (!_isDisposed) {
+        final l10n = OpenAILocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('加载上次输入失败')),
+          SnackBar(content: Text(l10n.lastInputLoadFailed)),
         );
       }
     } finally {
@@ -356,34 +367,39 @@ class _TextInputDialogState extends State<_TextInputDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(widget.title),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+      title: Builder(
+        builder: (context) {
+          final l10n = OpenAILocalizations.of(context);
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 加载上次输入的按钮
-              IconButton(
-                icon: _isLoading 
-                    ? const SizedBox(
-                        width: 20, 
-                        height: 20, 
-                        child: CircularProgressIndicator(strokeWidth: 2)
-                      )
-                    : const Icon(Icons.refresh, size: 20),
-                tooltip: '加载上次输入',
-                onPressed: _isLoading ? null : _loadLastInput,
-              ),
-              // 清空输入的按钮
-              IconButton(
-                icon: const Icon(Icons.clear, size: 20),
-                tooltip: '清空输入',
-                onPressed: _clearInput,
+              Text(widget.title),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 加载上次输入的按钮
+                  IconButton(
+                    icon: _isLoading 
+                        ? const SizedBox(
+                            width: 20, 
+                            height: 20, 
+                            child: CircularProgressIndicator(strokeWidth: 2)
+                          )
+                        : const Icon(Icons.refresh, size: 20),
+                    tooltip: l10n.loadLastInput,
+                    onPressed: _isLoading ? null : _loadLastInput,
+                  ),
+                  // 清空输入的按钮
+                  IconButton(
+                    icon: const Icon(Icons.clear, size: 20),
+                    tooltip: l10n.clearInput,
+                    onPressed: _clearInput,
+                  ),
+                ],
               ),
             ],
-          ),
-        ],
+          );
+        }
       ),
       content: SizedBox(
         width: double.maxFinite,
@@ -403,19 +419,29 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    ElevatedButton.icon(
-                      onPressed: _pickImage,
-                      icon: const Icon(Icons.image),
-                      label: const Text('选择图片'),
+                    Builder(
+                      builder: (context) {
+                        final l10n = OpenAILocalizations.of(context);
+                        return ElevatedButton.icon(
+                          onPressed: _pickImage,
+                          icon: const Icon(Icons.image),
+                          label: Text(l10n.selectImage),
+                        );
+                      }
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: _selectedImage != null
-                          ? Text(
-                              '已选择: ${_selectedImage!.path.split('/').last}',
-                              overflow: TextOverflow.ellipsis,
-                            )
-                          : const Text('未选择图片'),
+                      child: Builder(
+                        builder: (context) {
+                          final l10n = OpenAILocalizations.of(context);
+                          return _selectedImage != null
+                              ? Text(
+                                  '${l10n.selectedImage}: ${_selectedImage!.path.split('/').last}',
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              : Text(l10n.noImageSelected);
+                        }
+                      ),
                     ),
                   ],
                 ),
@@ -436,25 +462,35 @@ class _TextInputDialogState extends State<_TextInputDialog> {
         ),
       ),
       actions: <Widget>[
-        TextButton(
-          child: const Text('取消'),
-          onPressed: () {
-            if (!_isDisposed) {
-              Navigator.of(context).pop();
-            }
-          },
+        Builder(
+          builder: (context) {
+            final l10n = OpenAILocalizations.of(context);
+            return TextButton(
+              child: Text(l10n.cancel),
+              onPressed: () {
+                if (!_isDisposed) {
+                  Navigator.of(context).pop();
+                }
+              },
+            );
+          }
         ),
-        TextButton(
-          child: const Text('确定'),
-          onPressed: () {
-            if (!_isDisposed) {
-              final text = _controller.text;
-              Navigator.of(context).pop({
-                'text': text,
-                'image': _selectedImage,
-              });
-            }
-          },
+        Builder(
+          builder: (context) {
+            final l10n = OpenAILocalizations.of(context);
+            return TextButton(
+              child: Text(l10n.save),
+              onPressed: () {
+                if (!_isDisposed) {
+                  final text = _controller.text;
+                  Navigator.of(context).pop({
+                    'text': text,
+                    'image': _selectedImage,
+                  });
+                }
+              },
+            );
+          }
         ),
       ],
     );

@@ -1,6 +1,6 @@
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../l10n/openai_localizations.dart';
 import '../controllers/agent_controller.dart';
 import '../controllers/tool_app_controller.dart';
 import '../widgets/agent_list_view.dart';
@@ -8,11 +8,10 @@ import '../widgets/agent_grid_view.dart';
 import '../widgets/tool_app_grid_view.dart';
 import '../widgets/filter_dialog.dart';
 import '../models/ai_agent.dart';
-import '../models/tool_app.dart';
 import 'agent_edit_screen.dart';
 
 class AgentListScreen extends StatefulWidget {
-  const AgentListScreen({Key? key}) : super(key: key);
+  const AgentListScreen({super.key});
 
   @override
   State<AgentListScreen> createState() => _AgentListScreenState();
@@ -98,7 +97,7 @@ class _AgentListScreenState extends State<AgentListScreen>
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => PluginManager.toHomeScreen(context),
               ),
-              title: const Text('AI Assistant'),
+              title: Text(OpenAILocalizations.of(context).agentListTitle),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.filter_list),
@@ -136,7 +135,7 @@ class _AgentListScreenState extends State<AgentListScreen>
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => PluginManager.toHomeScreen(context),
               ),
-              title: const Text('Tools'),
+              title: Text(OpenAILocalizations.of(context).toolsTitle),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.search),
@@ -157,12 +156,12 @@ class _AgentListScreenState extends State<AgentListScreen>
         ],
       ),
       bottomNavigationBar: Material(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withAlpha(25),
         child: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.people), text: 'Agents'),
-            Tab(icon: Icon(Icons.build), text: 'Tools'),
+          tabs: [
+            Tab(icon: const Icon(Icons.people), text: OpenAILocalizations.of(context).agentsTab),
+            Tab(icon: const Icon(Icons.build), text: OpenAILocalizations.of(context).toolsTab),
           ],
           labelColor: Theme.of(context).primaryColor,
           unselectedLabelColor: Colors.grey,

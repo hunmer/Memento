@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:media_kit/media_kit.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/day/l10n/day_localizations.dart';
+import 'plugins/openai/l10n/openai_localizations.dart';
 // 移除未使用的导入
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
@@ -146,6 +147,7 @@ class _MyAppState extends State<MyApp> {
         AppLocalizations.delegate,
         ChatLocalizations.delegate, // 添加聊天插件的本地化代理
         DayLocalizationsDelegate.delegate, // 添加纪念日插件的本地化代理
+        OpenAILocalizationsDelegate.delegate, // 添加OpenAI插件的本地化代理
         NodesPlugin().localizationsDelegate, // 添加笔记插件的本地化代理
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

@@ -6,6 +6,7 @@ import '../services/plugin_analysis_service.dart';
 import 'agent_list_drawer.dart';
 import '../models/ai_agent.dart';
 import '../controllers/agent_controller.dart';
+import '../l10n/openai_localizations.dart';
 
 class PluginAnalysisForm extends StatefulWidget {
   final PluginAnalysisMethod method;
@@ -84,7 +85,7 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
                 const Icon(Icons.analytics),
                 const SizedBox(width: 8),
                 Text(
-                  '插件分析: ${widget.method.name}',
+                  '${OpenAILocalizations.of(context).pluginAnalysis}: ${widget.method.name}',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
@@ -119,14 +120,14 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('取消'),
+                  child: Text(OpenAILocalizations.of(context).cancel),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: () {
                     widget.onConfirm(_getJsonString());
                   },
-                  child: const Text('确定'),
+                  child: Text(OpenAILocalizations.of(context).confirm),
                 ),
               ],
             ),

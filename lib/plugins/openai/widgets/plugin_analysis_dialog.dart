@@ -5,10 +5,10 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/ai_agent.dart';
 import '../widgets/agent_list_drawer.dart';
 import '../services/plugin_analysis_service.dart';
-import '../models/plugin_analysis_method.dart';
-import '../widgets/plugin_analysis_form.dart';
+// 移除未使用的导入
 import '../widgets/plugin_method_selection_dialog.dart';
 import '../../../utils/image_utils.dart';
+import '../l10n/openai_localizations.dart';
 
 class PluginAnalysisDialog extends StatefulWidget {
   const PluginAnalysisDialog({super.key});
@@ -31,7 +31,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: _getColorForServiceProvider(agent.serviceProviderId).withOpacity(0.5),
+                color: _getColorForServiceProvider(agent.serviceProviderId).withAlpha(128),
                 width: 2,
               ),
             ),
@@ -129,6 +129,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
 
   // 打开智能体选择抽屉
   void _openAgentSelector() {
+    final localizations = OpenAILocalizations.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -146,17 +147,21 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
                 });
               }
             } catch (e) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('加载智能体失败: $e')),
-                );
-              }
+              // 在异步操作后使用 BuildContext 前先检查 mounted
+              if (!mounted) return;
+              
+              // 获取当前上下文，而不是使用闭包中的上下文
+              final currentContext = context;
+              final currentLocalizations = OpenAILocalizations.of(currentContext);
+              ScaffoldMessenger.of(currentContext).showSnackBar(
+                SnackBar(content: Text('${currentLocalizations.loadingProviders} $e')),
+              );
             }
           }
         },
         allowMultipleSelection: false,
-        title: '选择智能体',
-        confirmButtonText: '选择',
+        title: localizations.selectAgent,
+        confirmButtonText: localizations.confirm,
       ),
     );
   }
@@ -165,16 +170,18 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
 
   // 发送到智能体
   Future<void> _sendToAgent() async {
+    final localizations = OpenAILocalizations.of(context);
+    
     if (_selectedAgent == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先选择智能体')),
+        SnackBar(content: Text(localizations.pleaseSelectAgentFirst)),
       );
       return;
     }
 
     if (_promptController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入提示词')),
+        SnackBar(content: Text(localizations.pleaseEnterPrompt)),
       );
       return;
     }
@@ -195,7 +202,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
       });
     } catch (e) {
       setState(() {
-        _responseMessage = '发送失败: $e';
+        _responseMessage = '${localizations.sendingFailed}$e';
       });
     } finally {
       setState(() {
@@ -206,6 +213,8 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = OpenAILocalizations.of(context);
+    
     return Dialog(
       child: Container(
         width: 600,
@@ -220,7 +229,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
                 const Icon(Icons.analytics),
                 const SizedBox(width: 8),
                 Text(
-                  '插件分析',
+                  localizations.pluginAnalysis,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
@@ -260,10 +269,10 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
                       ),
                     ),
                   ] else
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        '未选择智能体',
-                        style: TextStyle(
+                        localizations.noAgentSelected,
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.grey,
                         ),
@@ -272,7 +281,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
                   IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: _openAgentSelector,
-                    tooltip: '选择智能体',
+                    tooltip: localizations.selectAgentTooltip,
                   ),
                 ],
               ),
@@ -282,9 +291,9 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
             const SizedBox(height: 16),
             TextField(
               controller: _promptController,
-              decoration: const InputDecoration(
-                labelText: '提示词',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: localizations.prompt,
+                border: const OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
               maxLines: 8,
@@ -314,16 +323,16 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
                   }
                 },
                 icon: const Icon(Icons.add),
-                label: const Text('添加分析方法'),
+                label: Text(localizations.addAnalysisMethod),
               ),
             ),
             
             // 智能体响应
             if (_responseMessage != null || _isLoading) ...[
               const SizedBox(height: 16),
-              const Text(
-                '智能体响应:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                localizations.agentResponse,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               if (_isLoading)
@@ -352,13 +361,13 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('取消'),
+                  child: Text(localizations.cancel),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: _isLoading ? null : _sendToAgent,
                   icon: const Icon(Icons.send),
-                  label: const Text('发送请求'),
+                  label: Text(localizations.sendRequest),
                 ),
               ],
             ),

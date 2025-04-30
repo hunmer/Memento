@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../l10n/openai_localizations.dart';
 import '../../../utils/image_utils.dart';
 import '../../../widgets/circle_icon_picker.dart';
 import '../../../widgets/image_picker_dialog.dart';
@@ -18,6 +19,17 @@ class AgentEditScreen extends StatefulWidget {
 
   @override
   State<AgentEditScreen> createState() => _AgentEditScreenState();
+
+  static Route<T> route<T>({AIAgent? agent}) {
+    return MaterialPageRoute<T>(
+      builder: (BuildContext context) {
+        return Localizations.override(
+          context: context,
+          child: AgentEditScreen(agent: agent),
+        );
+      },
+    );
+  }
 }
 
 class _AgentEditScreenState extends State<AgentEditScreen> {
@@ -123,9 +135,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('已更新为服务商默认配置'),
+          content: Text(OpenAILocalizations.of(context).configUpdated),
           action: SnackBarAction(
-            label: '撤销',
+            label: OpenAILocalizations.of(context).undoAction,
             onPressed: () {
               // 如果用户选择撤销，则恢复之前的值
               setState(() {
@@ -249,16 +261,16 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除智能体'),
-        content: const Text('确定要删除这个智能体吗？此操作不可撤销。'),
+        title: Text(OpenAILocalizations.of(context).deleteAgentConfirm),
+        content: Text(OpenAILocalizations.of(context).deleteAgentMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(OpenAILocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('删除', style: TextStyle(color: Colors.red)),
+            child: Text(OpenAILocalizations.of(context).delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -271,7 +283,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       await controller.deleteAgent(widget.agent!.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('智能体已删除')),
+          SnackBar(content: Text(OpenAILocalizations.of(context).agentDeleted)),
         );
         // 返回true表示删除成功
         Navigator.of(context).pop(true);
@@ -279,7 +291,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('删除失败: $e')),
+          SnackBar(content: Text('${OpenAILocalizations.of(context).deleteFailed}: $e')),
         );
       }
     }
@@ -311,7 +323,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       await controller.addAgent(clonedAgent);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('智能体已复制')),
+          SnackBar(content: Text(OpenAILocalizations.of(context).agentCloned)),
         );
         // 返回克隆的智能体，以便可能的进一步操作
         Navigator.of(context).pop(clonedAgent);
@@ -319,7 +331,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('复制失败: $e')),
+          SnackBar(content: Text('${OpenAILocalizations.of(context).cloneFailed}: $e')),
         );
       }
     }
@@ -329,19 +341,19 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.agent == null ? 'Create Agent' : 'Edit Agent'),
+        title: Text(widget.agent == null ? OpenAILocalizations.of(context).createAgent : OpenAILocalizations.of(context).editAgent),
         actions: [
           // 只有在编辑现有智能体时才显示删除和克隆按钮
           if (widget.agent != null) ...[
             IconButton(
               icon: const Icon(Icons.copy),
               onPressed: _cloneAgent,
-              tooltip: '克隆智能体',
+              tooltip: OpenAILocalizations.of(context).cloneAgent,
             ),
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteAgent,
-              tooltip: '删除智能体',
+              tooltip: OpenAILocalizations.of(context).deleteAgent,
             ),
           ],
           IconButton(icon: const Icon(Icons.save), onPressed: _saveAgent),
@@ -439,15 +451,15 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                                 }
                               },
                             )
-                          : const Center(
+                          : Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.add_photo_alternate_outlined, size: 24),
-                                  SizedBox(height: 2),
+                                  const Icon(Icons.add_photo_alternate_outlined, size: 24),
+                                  const SizedBox(height: 2),
                                   Text(
-                                    '头像',
-                                    style: TextStyle(fontSize: 12),
+                                    OpenAILocalizations.of(context).avatar,
+                                    style: const TextStyle(fontSize: 12),
                                   ),
                                 ],
                               ),
@@ -461,26 +473,26 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                hintText: 'Enter agent name',
+              decoration: InputDecoration(
+                labelText: OpenAILocalizations.of(context).agentName,
+                hintText: OpenAILocalizations.of(context).enterAgentName,
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a name';
+                  return OpenAILocalizations.of(context).pleaseEnterName;
                 }
                 return null;
               },
             ),
             const SizedBox(height: 16),
             _isLoadingProviders
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: Text(OpenAILocalizations.of(context).loadingProviders))
                 : DropdownButtonFormField<String>(
                   value:
                       _selectedProviderId.isEmpty && _providers.isNotEmpty
                           ? _providers.first.id
                           : _selectedProviderId,
-                  decoration: const InputDecoration(labelText: '服务商'),
+                  decoration: InputDecoration(labelText: OpenAILocalizations.of(context).serviceProvider),
                   items:
                       _providers.map((provider) {
                         return DropdownMenuItem(
@@ -499,8 +511,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('更新配置'),
-                            content: const Text('是否要使用该服务商的默认配置更新当前设置？'),
+                            title: Text(OpenAILocalizations.of(context).updateConfig),
+                            content: Text(OpenAILocalizations.of(context).updateConfigConfirm),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -509,7 +521,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                                     _selectedProviderId = value;
                                   });
                                 },
-                                child: const Text('保持当前配置'),
+                                child: Text(OpenAILocalizations.of(context).keepCurrentConfig),
                               ),
                               TextButton(
                                 onPressed: () {
@@ -519,7 +531,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                                     _updateProviderFields(provider);
                                   });
                                 },
-                                child: const Text('使用默认配置'),
+                                child: Text(OpenAILocalizations.of(context).useDefaultConfig),
                               ),
                             ],
                           ),
@@ -535,7 +547,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return '请选择服务商';
+                      return OpenAILocalizations.of(context).pleaseSelectProvider;
                     }
                     return null;
                   },
@@ -543,14 +555,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'Enter agent description',
+              decoration: InputDecoration(
+                labelText: OpenAILocalizations.of(context).description,
+                hintText: OpenAILocalizations.of(context).enterDescription,
               ),
               maxLines: 3,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a description';
+                  return OpenAILocalizations.of(context).pleaseEnterDescription;
                 }
                 return null;
               },
@@ -558,14 +570,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _promptController,
-              decoration: const InputDecoration(
-                labelText: 'System Prompt',
-                hintText: 'Enter system prompt',
+              decoration: InputDecoration(
+                labelText: OpenAILocalizations.of(context).systemPrompt,
+                hintText: OpenAILocalizations.of(context).enterSystemPrompt,
               ),
               maxLines: 5,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a system prompt';
+                  return OpenAILocalizations.of(context).pleaseEnterSystemPrompt;
                 }
                 return null;
               },
@@ -573,13 +585,13 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _baseUrlController,
-              decoration: const InputDecoration(
-                labelText: 'Base URL',
-                hintText: 'Enter base URL for API calls',
+              decoration: InputDecoration(
+                labelText: OpenAILocalizations.of(context).baseUrl,
+                hintText: OpenAILocalizations.of(context).enterBaseUrl,
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a base URL';
+                  return OpenAILocalizations.of(context).pleaseEnterBaseUrl;
                 }
                 return null;
               },
@@ -590,25 +602,25 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _modelController,
-                    decoration: const InputDecoration(
-                      labelText: 'Model',
-                      hintText: 'Enter model name (e.g. gpt-3.5-turbo)',
+                    decoration: InputDecoration(
+                      labelText: OpenAILocalizations.of(context).model,
+                      hintText: OpenAILocalizations.of(context).enterModel,
                     ),
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: _selectModel,
-                  tooltip: '搜索模型',
+                  tooltip: OpenAILocalizations.of(context).searchModel,
                 ),
               ],
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _headersController,
-              decoration: const InputDecoration(
-                labelText: 'Headers',
-                hintText: 'Enter headers (one per line, format: key: value)',
+              decoration: InputDecoration(
+                labelText: OpenAILocalizations.of(context).headers,
+                hintText: OpenAILocalizations.of(context).enterHeaders,
               ),
               maxLines: 3,
             ),
@@ -618,9 +630,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _tagController,
-                    decoration: const InputDecoration(
-                      labelText: 'Tags',
-                      hintText: 'Enter a tag',
+                    decoration: InputDecoration(
+                      labelText: OpenAILocalizations.of(context).tags,
+                      hintText: OpenAILocalizations.of(context).enterTag,
                     ),
                   ),
                 ),
@@ -646,7 +658,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
               ),
-              child: const Text('测试智能体'),
+              child: Text(OpenAILocalizations.of(context).testAgent),
             ),
           ],
         ),
@@ -696,8 +708,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     // 使用 TestService 的对话框
     final result = await TestService.showLongTextInputDialog(
       context,
-      title: '测试${testAgent.name}',
-      hintText: '请输入测试文本...',
+      title: '${OpenAILocalizations.of(context).testAgentTitle}${testAgent.name}',
+      hintText: OpenAILocalizations.of(context).enterTestText,
       enableImagePicker: true,
     );
 

@@ -18,9 +18,7 @@ class AgentCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => AgentEditScreen(agent: agent),
-            ),
+            AgentEditScreen.route(agent: agent),
           );
         },
         child: Column(

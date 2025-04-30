@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/llm_models.dart';
 import '../controllers/model_controller.dart';
+import '../l10n/openai_localizations.dart';
 
 class ModelListScreen extends StatefulWidget {
   const ModelListScreen({Key? key}) : super(key: key);
@@ -41,7 +42,7 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载模型失败: $e')),
+          SnackBar(content: Text('${OpenAILocalizations.of(context).loadModelsFailed}: $e')),
         );
         setState(() {
           _modelGroups = [];
@@ -66,7 +67,7 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('模型管理'),
+        title: Text(OpenAILocalizations.of(context).modelManagement),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -82,8 +83,8 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: '搜索模型...',
+                      decoration: InputDecoration(
+                        hintText: OpenAILocalizations.of(context).searchModel,
                         prefixIcon: Icon(Icons.search),
                         border: OutlineInputBorder(), // 添加边框使搜索框更明显
                         contentPadding: EdgeInsets.symmetric(vertical: 8.0),
@@ -107,13 +108,13 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : _tabController == null 
-          ? const Center(child: Text('无法加载模型列表'))
+          ? Center(child: Text(OpenAILocalizations.of(context).cannotLoadModels))
           : TabBarView(
             controller: _tabController,
             children: _modelGroups.map((group) {
               final filteredModels = _getFilteredModels(group.models);
               return filteredModels.isEmpty
-                ? const Center(child: Text('没有找到匹配的模型'))
+                ? Center(child: Text(OpenAILocalizations.of(context).noModelsFound))
                 : ListView.builder(
                     itemCount: filteredModels.length,
                     itemBuilder: (context, index) {
@@ -154,7 +155,7 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('添加模型失败: $e')),
+            SnackBar(content: Text('${OpenAILocalizations.of(context).addModelFailed}: $e')),
           );
         }
       }
@@ -183,7 +184,7 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('更新模型失败: $e')),
+            SnackBar(content: Text('${OpenAILocalizations.of(context).updateModelFailed}: $e')),
           );
         }
       }
@@ -194,16 +195,16 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除模型 ${model.name} 吗？'),
+        title: Text(OpenAILocalizations.of(context).confirmDelete),
+        content: Text(OpenAILocalizations.of(context).confirmDeleteModel.replaceAll('{modelName}', model.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(OpenAILocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('删除'),
+            child: Text(OpenAILocalizations.of(context).delete),
           ),
         ],
       ),
@@ -216,7 +217,7 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('删除模型失败: $e')),
+            SnackBar(content: Text('${OpenAILocalizations.of(context).deleteModelFailed}: $e')),
           );
         }
       }
@@ -264,7 +265,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.model == null ? '添加模型' : '编辑模型'),
+      title: Text(widget.model == null ? OpenAILocalizations.of(context).addModel : OpenAILocalizations.of(context).editModel),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -274,26 +275,26 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               if (widget.model == null)
                 TextFormField(
                   controller: _idController,
-                  decoration: const InputDecoration(
-                    labelText: '模型ID',
-                    hintText: '例如: gpt-4',
+                  decoration: InputDecoration(
+                    labelText: OpenAILocalizations.of(context).modelId,
+                    hintText: OpenAILocalizations.of(context).modelIdExample,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return '请输入模型ID';
+                      return OpenAILocalizations.of(context).pleaseEnterModelId;
                     }
                     return null;
                   },
                 ),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: '模型名称',
-                  hintText: '例如: GPT-4',
+                decoration: InputDecoration(
+                  labelText: OpenAILocalizations.of(context).modelName,
+                  hintText: OpenAILocalizations.of(context).modelNameExample,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入模型名称';
+                    return OpenAILocalizations.of(context).pleaseEnterModelName;
                   }
                   return null;
                 },
@@ -301,8 +302,8 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedGroup,
-                decoration: const InputDecoration(
-                  labelText: '模型组',
+                decoration: InputDecoration(
+                  labelText: OpenAILocalizations.of(context).modelGroup,
                 ),
                 items: widget.groups.map((group) {
                   return DropdownMenuItem(
@@ -319,7 +320,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请选择模型组';
+                    return OpenAILocalizations.of(context).pleaseSelectModelGroup;
                   }
                   return null;
                 },
@@ -331,7 +332,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(OpenAILocalizations.of(context).cancel),
         ),
         TextButton(
           onPressed: () {
@@ -343,7 +344,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               });
             }
           },
-          child: const Text('保存'),
+          child: Text(OpenAILocalizations.of(context).save),
         ),
       ],
     );
