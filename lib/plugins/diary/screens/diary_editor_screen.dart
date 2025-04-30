@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../../../widgets/markdown_editor/markdown_editor.dart';
 import '../utils/diary_utils.dart';
+import '../l10n/diary_localizations.dart';
 
 class DiaryEditorScreen extends StatefulWidget {
   final DateTime date;
@@ -49,7 +50,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('选择今天的心情'),
+        title: Text(DiaryLocalizations.of(context)!.selectMood),
         content: Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -81,11 +82,11 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
                 setState(() => _selectedMood = null);
                 Navigator.pop(context);
               },
-              child: const Text('清除选择'),
+              child: Text(DiaryLocalizations.of(context)!.clearSelection),
             ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
+            child: Text(DiaryLocalizations.of(context)!.close),
           ),
         ],
       ),
@@ -98,10 +99,13 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
       body: MarkdownEditor(
         initialTitle: widget.initialTitle,
         initialContent: widget.initialContent,
-        titleHint: '给今天的日记起个标题...',
-        contentHint: '写下今天的故事...',
+        titleHint: DiaryLocalizations.of(context)!.titleHint,
+        contentHint: DiaryLocalizations.of(context)!.contentHint,
         showTitle: true,
         onSave: (title, content) async {
+          // 保存前捕获当前上下文
+          final currentContext = context;
+          
           await DiaryUtils.saveDiaryEntry(
             widget.storage,
             widget.date,
@@ -109,8 +113,9 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
             title: title,
             mood: _selectedMood,
           );
+          
           if (mounted) {
-            Navigator.of(context).pop();
+            Navigator.of(currentContext).pop();
           }
         },
         extraActions: [
@@ -119,7 +124,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
                 ? Text(_selectedMood!, style: const TextStyle(fontSize: 24))
                 : const Icon(Icons.mood),
             onPressed: _showMoodSelector,
-            tooltip: '选择心情',
+            tooltip: DiaryLocalizations.of(context)?.moodSelectorTooltip,
           ),
         ],
       ),

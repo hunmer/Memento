@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import 'l10n/diary_localizations.dart';
 import 'screens/diary_calendar_screen.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
@@ -84,7 +85,7 @@ class DiaryPlugin extends BasePlugin {
   final String id = 'diary_plugin';
 
   @override
-  final String name = 'Diary';
+  String get name =>  'Diary';
 
   @override
   final String version = '1.0.0';
@@ -92,7 +93,7 @@ class DiaryPlugin extends BasePlugin {
   final String pluginDir = 'diary';
 
   @override
-  String get description => '日记管理插件';
+  String get description => 'Diary management plugin';
 
   @override
   String get author => 'Zhuanz';
@@ -191,7 +192,10 @@ class DiaryPlugin extends BasePlugin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('今日文字数', style: theme.textTheme.bodyMedium),
+                        Text(
+                          DiaryLocalizations.of(context)?.todayWordCount ?? 'Today\'s word count',
+                          style: theme.textTheme.bodyMedium
+                        ),
                         Text(
                           '$todayCount',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -212,7 +216,10 @@ class DiaryPlugin extends BasePlugin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('本月文字数', style: theme.textTheme.bodyMedium),
+                        Text(
+                          DiaryLocalizations.of(context)?.monthWordCount ?? 'Month\'s word count',
+                          style: theme.textTheme.bodyMedium
+                        ),
                         Text(
                           '$monthCount',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -229,7 +236,10 @@ class DiaryPlugin extends BasePlugin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('本月完成进度', style: theme.textTheme.bodyMedium),
+                        Text(
+                          DiaryLocalizations.of(context)?.monthProgress ?? 'Month progress',
+                          style: theme.textTheme.bodyMedium
+                        ),
                         Text(
                           '$completedDays/$totalDays',
                           style: theme.textTheme.bodyMedium?.copyWith(

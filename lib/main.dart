@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:media_kit/media_kit.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
+import 'plugins/diary/l10n/diary_localizations.dart';
 import 'plugins/day/l10n/day_localizations.dart';
 import 'plugins/openai/l10n/openai_localizations.dart';
 // 移除未使用的导入
@@ -145,6 +146,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false, // 关闭调试横幅
       localizationsDelegates: [
         AppLocalizations.delegate,
+        DiaryLocalizations.delegate,
         ChatLocalizations.delegate, // 添加聊天插件的本地化代理
         DayLocalizationsDelegate.delegate, // 添加纪念日插件的本地化代理
         OpenAILocalizationsDelegate.delegate, // 添加OpenAI插件的本地化代理
