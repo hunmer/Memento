@@ -1,9 +1,11 @@
 class PluginAnalysisMethod {
   final String name;
+  final String title;
   final Map<String, dynamic> template;
 
   const PluginAnalysisMethod({
     required this.name,
+    required this.title,
     required this.template,
   });
 
@@ -40,6 +42,7 @@ class PluginAnalysisMethod {
   static List<PluginAnalysisMethod> get predefinedMethods => [
     PluginAnalysisMethod(
       name: 'activity_getActivitys',
+      title: '获取活动列表',
       template: {
         'method': 'activity_getActivitys',
         'startDate': '2025-04-01',
@@ -48,6 +51,7 @@ class PluginAnalysisMethod {
     ),
     PluginAnalysisMethod(
       name: 'bill_getBills',
+      title: '获取账单列表',
       template: {
         'method': 'bill_getBills',
         'startDate': '2025-04-01',

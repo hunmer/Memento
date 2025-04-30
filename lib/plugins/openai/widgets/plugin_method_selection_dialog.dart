@@ -38,7 +38,7 @@ class PluginMethodSelectionDialog extends StatelessWidget {
                   ListTile(
                     leading: const Icon(Icons.analytics_outlined),
                     title: Text(method.name),
-                    subtitle: Text('点击查看模板'),
+                    subtitle: Text(method.title),
                     onTap: () {
                       showDialog(
                         context: context,

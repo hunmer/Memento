@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/ai_agent.dart';
 import '../widgets/agent_list_drawer.dart';
 import '../services/plugin_analysis_service.dart';
 import '../models/plugin_analysis_method.dart';
 import '../widgets/plugin_analysis_form.dart';
 import '../widgets/plugin_method_selection_dialog.dart';
+import '../../../utils/image_utils.dart';
 
 class PluginAnalysisDialog extends StatefulWidget {
   const PluginAnalysisDialog({super.key});
@@ -15,6 +18,103 @@ class PluginAnalysisDialog extends StatefulWidget {
 }
 
 class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
+  // 构建智能体图标
+  Widget _buildAgentIcon(AIAgent agent) {
+    // 如果有头像，优先显示头像
+    if (agent.avatarUrl != null && agent.avatarUrl!.isNotEmpty) {
+      return FutureBuilder<String>(
+        future: PathUtils.toAbsolutePath(agent.avatarUrl),
+        builder: (context, snapshot) {
+          return Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: _getColorForServiceProvider(agent.serviceProviderId).withOpacity(0.5),
+                width: 2,
+              ),
+            ),
+            child: ClipOval(
+              child: agent.avatarUrl!.startsWith('http')
+                ? Image.network(
+                    agent.avatarUrl!,
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildDefaultIcon(agent),
+                  )
+                : snapshot.hasData
+                    ? Image.file(
+                        File(snapshot.data!),
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildDefaultIcon(agent),
+                      )
+                    : _buildDefaultIcon(agent),
+            ),
+          );
+        },
+      );
+    }
+    
+    // 如果有自定义图标，使用自定义图标
+    if (agent.icon != null) {
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: agent.iconColor ?? _getColorForServiceProvider(agent.serviceProviderId),
+        ),
+        child: Icon(
+          agent.icon,
+          size: 24,
+          color: Colors.white,
+        ),
+      );
+    }
+    
+    // 默认图标
+    return _buildDefaultIcon(agent);
+  }
+
+  // 构建默认图标
+  Widget _buildDefaultIcon(AIAgent agent) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: _getColorForServiceProvider(agent.serviceProviderId),
+      ),
+      child: const Icon(
+        Icons.smart_toy,
+        size: 24,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  // 根据服务提供商获取颜色
+  Color _getColorForServiceProvider(String providerId) {
+    switch (providerId) {
+      case 'openai':
+        return Colors.green;
+      case 'azure':
+        return Colors.blue;
+      case 'ollama':
+        return Colors.orange;
+      case 'deepseek':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
   final TextEditingController _promptController = TextEditingController();
   final PluginAnalysisService _service = PluginAnalysisService();
   AIAgent? _selectedAgent;
@@ -128,13 +228,53 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
             const Divider(),
             
             // 智能体选择器
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('选中的智能体'),
-              subtitle: Text(_selectedAgent?.name ?? '未选择'),
-              trailing: IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: _openAgentSelector,
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  if (_selectedAgent != null) ...[
+                    _buildAgentIcon(_selectedAgent!),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedAgent!.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _selectedAgent!.description,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else
+                    const Expanded(
+                      child: Text(
+                        '未选择智能体',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: _openAgentSelector,
+                    tooltip: '选择智能体',
+                  ),
+                ],
               ),
             ),
             
@@ -191,12 +331,17 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
               else
                 Container(
                   width: double.infinity,
+                  height: 300, // 固定高度使其可滚动
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.blue.shade50,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Text(_responseMessage!),
+                  child: Markdown(
+                    data: _responseMessage!,
+                    selectable: true, // 允许选择文本
+                    padding: EdgeInsets.zero,
+                  ),
                 ),
             ],
             
