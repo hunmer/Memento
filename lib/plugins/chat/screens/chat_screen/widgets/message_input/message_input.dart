@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'message_input_types.dart';
 import 'message_input_state.dart';
-import 'widgets/agent_list_drawer.dart';
+import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
 import 'widgets/metadata_display.dart';
 import 'widgets/input_field.dart';
 import 'widgets/send_button.dart';

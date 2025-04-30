@@ -83,50 +83,81 @@ class _AgentListScreenState extends State<AgentListScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
-        title: const Text('AI Assistant'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: _showFilterDialog,
-          ),
-          IconButton(
-            icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
-            onPressed: () {
-              setState(() {
-                _isGridView = !_isGridView;
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () async {
-              await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (context) => const AgentEditScreen(),
-                ),
-              );
-              // 不需要手动刷新，因为AgentController会通知变化
-            },
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [Tab(text: 'Agents'), Tab(text: 'Statistics')],
-        ),
-      ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _isGridView
-              ? AgentGridView(agents: _getFilteredAgents())
-              : AgentListView(agents: _getFilteredAgents()),
-          const Center(child: Text('Statistics - Coming Soon')),
+          // Agents Tab
+          Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
+              title: const Text('AI Assistant'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: _showFilterDialog,
+                ),
+                IconButton(
+                  icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
+                  onPressed: () {
+                    setState(() {
+                      _isGridView = !_isGridView;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () async {
+                    await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(
+                        builder: (context) => const AgentEditScreen(),
+                      ),
+                    );
+                    // 不需要手动刷新，因为AgentController会通知变化
+                  },
+                ),
+              ],
+            ),
+            body: _isGridView
+                ? AgentGridView(agents: _getFilteredAgents())
+                : AgentListView(agents: _getFilteredAgents()),
+          ),
+          // Tools Tab
+          Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
+              title: const Text('Tools'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    // TODO: Implement tools search
+                  },
+                ),
+              ],
+            ),
+            body: const Center(child: Text('Tools - Coming Soon')),
+          ),
         ],
+      ),
+      bottomNavigationBar: Material(
+        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        child: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(icon: Icon(Icons.people), text: 'Agents'),
+            Tab(icon: Icon(Icons.build), text: 'Tools'),
+          ],
+          labelColor: Theme.of(context).primaryColor,
+          unselectedLabelColor: Colors.grey,
+          indicatorSize: TabBarIndicatorSize.tab,
+          labelStyle: const TextStyle(fontSize: 12),
+        ),
       ),
     );
   }

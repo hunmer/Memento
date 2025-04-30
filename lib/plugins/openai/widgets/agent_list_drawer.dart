@@ -3,15 +3,40 @@ import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 
 class AgentListDrawer extends StatefulWidget {
+  /// 当前已选择的智能体列表
   final List<Map<String, String>> selectedAgents;
+
+  /// 当智能体选择发生变化时的回调
   final Function(List<Map<String, String>>) onAgentSelected;
-  final TextEditingController textController;
+
+  /// 可选的文本控制器，用于处理@符号等特殊情况
+  final TextEditingController? textController;
+
+  /// 自定义标题
+  final String? title;
+
+  /// 自定义确认按钮文本
+  final String? confirmButtonText;
+
+  /// 自定义取消按钮文本
+  final String? cancelButtonText;
+
+  /// 是否允许多选
+  final bool allowMultipleSelection;
+
+  /// 自定义智能体过滤器
+  final bool Function(AIAgent)? agentFilter;
 
   const AgentListDrawer({
     Key? key,
     required this.selectedAgents,
     required this.onAgentSelected,
-    required this.textController,
+    this.textController,
+    this.title = '选择智能体',
+    this.confirmButtonText,
+    this.cancelButtonText = '取消',
+    this.allowMultipleSelection = true,
+    this.agentFilter,
   }) : super(key: key);
 
   @override
@@ -39,9 +64,25 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
       if (_isAgentSelected(agentData['id']!)) {
         _selectedAgents.removeWhere((agent) => agent['id'] == agentData['id']);
       } else {
+        if (!widget.allowMultipleSelection) {
+          // 单选模式下，清除之前的选择
+          _selectedAgents.clear();
+        }
         _selectedAgents.add(agentData);
       }
     });
+  }
+
+  // 处理智能体选择完成
+  void _handleSelectionComplete() {
+    widget.onAgentSelected(_selectedAgents);
+    Navigator.pop(context);
+
+    // 如果提供了文本控制器，处理@符号
+    if (widget.textController?.text.endsWith('@') ?? false) {
+      final text = widget.textController!.text;
+      widget.textController!.text = text.substring(0, text.length - 1);
+    }
   }
 
   @override
@@ -60,7 +101,8 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
               children: [
                 const Icon(Icons.smart_toy),
                 const SizedBox(width: 8),
-                Text('选择智能体', style: Theme.of(context).textTheme.titleLarge),
+                Text(widget.title ?? '选择智能体',
+                    style: Theme.of(context).textTheme.titleLarge),
               ],
             ),
           ),
@@ -69,7 +111,13 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
             future: AgentController().loadAgents(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                final agents = snapshot.data!;
+                var agents = snapshot.data!;
+                
+                // 应用过滤器（如果有）
+                if (widget.agentFilter != null) {
+                  agents = agents.where(widget.agentFilter!).toList();
+                }
+
                 return ListView.builder(
                   shrinkWrap: true,
                   itemCount: agents.length,
@@ -82,16 +130,13 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
                       leading: const Icon(Icons.smart_toy),
                       title: Text(agent.name),
                       subtitle: Text(agent.description),
-                      trailing:
-                          isSelected
-                              ? const Icon(
-                                Icons.check_circle,
-                                color: Colors.green,
-                              )
-                              : const Icon(Icons.circle_outlined),
-                      onTap: () {
-                        _toggleAgentSelection(agentData);
-                      },
+                      trailing: isSelected
+                          ? const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                            )
+                          : const Icon(Icons.circle_outlined),
+                      onTap: () => _toggleAgentSelection(agentData),
                     );
                   },
                 );
@@ -117,31 +162,13 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('取消'),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(widget.cancelButtonText ?? '取消'),
                 ),
                 ElevatedButton(
-                  onPressed:
-                      _selectedAgents.isEmpty
-                          ? null
-                          : () {
-                            widget.onAgentSelected(_selectedAgents);
-                            Navigator.pop(context);
-
-                            // 删除输入框中的@符号
-                            if (widget.textController.text.endsWith('@')) {
-                              widget.textController.text = widget
-                                  .textController
-                                  .text
-                                  .substring(
-                                    0,
-                                    widget.textController.text.length - 1,
-                                  );
-                            }
-                          },
-                  child: Text('确认选择 (${_selectedAgents.length})'),
+                  onPressed: _selectedAgents.isEmpty ? null : _handleSelectionComplete,
+                  child: Text(widget.confirmButtonText ??
+                      '确认选择 (${_selectedAgents.length})'),
                 ),
               ],
             ),

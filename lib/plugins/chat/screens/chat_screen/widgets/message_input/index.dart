@@ -2,7 +2,7 @@
 export 'message_input.dart';
 export 'message_input_types.dart';
 export 'message_input_state.dart';
-export 'widgets/agent_list_drawer.dart';
+export 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
 export 'widgets/metadata_display.dart';
 export 'widgets/input_field.dart';
 export 'widgets/send_button.dart';

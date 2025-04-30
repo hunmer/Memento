@@ -6,12 +6,14 @@ import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_statistics_screen.dart';
 import 'services/activity_service.dart';
 import 'models/activity_record.dart';
+import 'controls/prompt_controller.dart';
 
 class ActivityPlugin extends BasePlugin {
   static final ActivityPlugin instance = ActivityPlugin._internal();
   ActivityPlugin._internal();
 
   late ActivityService _activityService;
+  late ActivityPromptController _promptController;
   bool _isInitialized = false;
 
   @override
@@ -56,6 +58,11 @@ class ActivityPlugin extends BasePlugin {
     // 确保活动记录数据目录存在
     await storage.createDirectory(pluginDir);
     _activityService = ActivityService(storage, pluginDir);
+    
+    // 初始化Prompt控制器
+    _promptController = ActivityPromptController(storage, pluginDir);
+    _promptController.initialize();
+    
     _isInitialized = true;
   }
 

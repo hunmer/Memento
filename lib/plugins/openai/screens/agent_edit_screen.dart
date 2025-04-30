@@ -244,12 +244,106 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     }
   }
 
+  Future<void> _deleteAgent() async {
+    // 确认删除对话框
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('删除智能体'),
+        content: const Text('确定要删除这个智能体吗？此操作不可撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('删除', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || widget.agent == null) return;
+
+    try {
+      final controller = AgentController();
+      await controller.deleteAgent(widget.agent!.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('智能体已删除')),
+        );
+        // 返回true表示删除成功
+        Navigator.of(context).pop(true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('删除失败: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _cloneAgent() async {
+    if (widget.agent == null) return;
+    
+    // 创建一个新的智能体，复制当前智能体的所有属性，但生成新ID并更新名称
+    final clonedAgent = AIAgent(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: '${_nameController.text} (复制)',
+      description: _descriptionController.text,
+      serviceProviderId: _selectedProviderId,
+      baseUrl: _baseUrlController.text,
+      headers: _parseHeaders(_headersController.text),
+      systemPrompt: _promptController.text,
+      model: _modelController.text.isEmpty ? 'gpt-3.5-turbo' : _modelController.text,
+      tags: List.from(_tags),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      icon: _selectedIcon,
+      iconColor: _selectedIconColor,
+      avatarUrl: _avatarUrl,
+    );
+
+    try {
+      final controller = AgentController();
+      await controller.addAgent(clonedAgent);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('智能体已复制')),
+        );
+        // 返回克隆的智能体，以便可能的进一步操作
+        Navigator.of(context).pop(clonedAgent);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('复制失败: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.agent == null ? 'Create Agent' : 'Edit Agent'),
         actions: [
+          // 只有在编辑现有智能体时才显示删除和克隆按钮
+          if (widget.agent != null) ...[
+            IconButton(
+              icon: const Icon(Icons.copy),
+              onPressed: _cloneAgent,
+              tooltip: '克隆智能体',
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _deleteAgent,
+              tooltip: '删除智能体',
+            ),
+          ],
           IconButton(icon: const Icon(Icons.save), onPressed: _saveAgent),
         ],
       ),

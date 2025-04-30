@@ -96,12 +96,15 @@ class BillPromptReplacements {
   /// 格式化账单数据为JSON文本
   String _formatBillsToText(List<Bill> bills) {
     if (bills.isEmpty) {
-      return '{"status": "empty", "msg": "在指定时间段内没有找到账单记录。"}';
+      return '{\"status\": \"empty\", \"msg\": \"在指定时间段内没有找到账单记录。\"}';
     }
     
     // 计算总收入和总支出
     double totalIncome = 0;
     double totalExpense = 0;
+    
+    // 按类别统计
+    final Map<String, double> categoryStats = {};
     
     for (final bill in bills) {
       if (bill.amount > 0) {
@@ -109,62 +112,73 @@ class BillPromptReplacements {
       } else {
         totalExpense += bill.amount.abs();
       }
-    }
-    
-    // 按类别统计
-    final Map<String, double> categoryStats = {};
-    for (final bill in bills) {
-      final category = bill.category;
-      if (!categoryStats.containsKey(category)) {
-        categoryStats[category] = 0;
+      
+      // 只统计非零金额的类别
+      if (bill.amount != 0) {
+        categoryStats[bill.category] = (categoryStats[bill.category] ?? 0) + bill.amount;
       }
-      categoryStats[category] = (categoryStats[category] ?? 0) + bill.amount;
     }
     
     // 生成JSON报告
-    final Map<String, dynamic> report = {
-      'sum': { // summary缩写
-        'tInc': totalIncome, // totalIncome缩写
-        'tExp': totalExpense, // totalExpense缩写
-        'net': totalIncome - totalExpense, // netBalance缩写
-      },
-      'catStat': {}, // categoryStatistics缩写
-      'records': [] // detailedRecords缩写
-    };
+    final Map<String, dynamic> report = {};
     
-    // 添加类别统计
-    categoryStats.forEach((category, amount) {
-      report['catStat'][category] = amount;
-    });
+    // 只有当有收支数据时才添加sum字段
+    if (totalIncome > 0 || totalExpense > 0) {
+      final Map<String, double> summary = {};
+      
+      if (totalIncome > 0) {
+        summary['tInc'] = totalIncome; // totalIncome缩写
+      }
+      if (totalExpense > 0) {
+        summary['tExp'] = totalExpense; // totalExpense缩写
+      }
+      
+      final double netBalance = totalIncome - totalExpense;
+      if (netBalance != 0) {
+        summary['net'] = netBalance; // netBalance缩写
+      }
+      
+      report['sum'] = summary;
+    }
     
-    // 添加详细账单记录
-    for (final bill in bills) {
-      final date = bill.date.toString().substring(0, 10);
-      report['records'].add({
-        'date': date,
-        'title': bill.title,
-        'cat': bill.category, // category缩写
-        'amt': bill.amount, // amount缩写
-        'note': bill.note.isNotEmpty ? bill.note : null
-      });
+    // 只有当有类别统计数据时才添加catStat字段
+    if (categoryStats.isNotEmpty) {
+      // 移除金额为0的类别
+      categoryStats.removeWhere((_, amount) => amount == 0);
+      if (categoryStats.isNotEmpty) {
+        report['catStat'] = categoryStats;
+      }
+    }
+    
+    // 添加非空的详细账单记录
+    if (bills.isNotEmpty) {
+      final List<Map<String, dynamic>> records = [];
+      for (final bill in bills) {
+        final Map<String, dynamic> record = {
+          'date': bill.date.toString().substring(0, 10),
+          'title': bill.title,
+          'cat': bill.category, // category缩写
+          'amt': bill.amount // amount缩写
+        };
+        
+        // 只有当备注非空时才添加note字段
+        if (bill.note.isNotEmpty) {
+          record['note'] = bill.note;
+        }
+        
+        records.add(record);
+      }
+      report['records'] = records;
     }
     
     return _formatJsonString(report);
   }
   
-  /// 格式化JSON字符串，确保数字正确显示
+  /// 格式化JSON字符串，移除多余空格和换行符，保留金额的两位小数
   String _formatJsonString(Map<String, dynamic> jsonMap) {
-    // 将Map转换为JSON字符串
     String jsonString = jsonMap.toString();
     
-    // 替换Map表示为JSON格式
-    jsonString = jsonString.replaceAll('{', '{\n  ')
-                           .replaceAll('}', '\n}')
-                           .replaceAll(', ', ',\n  ')
-                           .replaceAll(':[', ': [')
-                           .replaceAll('],', '],\n  ');
-    
-    // 确保数字格式正确（保留两位小数）
+    // 确保金额显示两位小数
     final RegExp numPattern = RegExp(r'(tInc|tExp|net|amt): ([0-9.-]+)');
     jsonString = jsonString.replaceAllMapped(numPattern, (match) {
       final key = match.group(1);
