@@ -3,6 +3,7 @@ import '../models/activity_record.dart';
 import 'tag_manager_dialog.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../services/activity_service.dart';
+import '../l10n/activity_localizations.dart';
 
 class ActivityForm extends StatefulWidget {
   final ActivityRecord? activity;
@@ -145,6 +146,7 @@ class _ActivityFormState extends State<ActivityForm> {
   }
 
   Future<void> _handleSave() async {
+    if (!mounted) return;
     // 创建DateTime对象
     final now = widget.selectedDate;
     final startDateTime = DateTime(
@@ -266,17 +268,18 @@ class _ActivityFormState extends State<ActivityForm> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.activity == null ? '新建活动' : '编辑活动'),
+        title: Text((widget.activity == null 
+          ? ActivityLocalizations.of(context)?.addActivity
+          : ActivityLocalizations.of(context)?.editActivity)!),
         centerTitle: true,
         leadingWidth: 80, // 为左侧按钮预留足够空间
         leading: Padding(
           padding: const EdgeInsets.only(left: 4.0),
           child: TextButton.icon(
             icon: const Icon(Icons.close),
-            label: const Text('取消'),
+            label: Text(ActivityLocalizations.of(context)!.cancel ),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               textStyle: const TextStyle(fontSize: 14),
@@ -289,7 +292,7 @@ class _ActivityFormState extends State<ActivityForm> {
             padding: const EdgeInsets.only(right: 4.0),
             child: TextButton.icon(
               icon: const Icon(Icons.check),
-              label: const Text('保存'),
+              label: Text(ActivityLocalizations.of(context)!.save),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 textStyle: const TextStyle(fontSize: 14),
@@ -308,11 +311,11 @@ class _ActivityFormState extends State<ActivityForm> {
             children: [
               TextField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: '活动标题',
-                  border: OutlineInputBorder(),
-                  helperText: '不填写则显示为"未命名活动"',
-                ),
+                decoration: InputDecoration(
+                labelText: ActivityLocalizations.of(context)?.activityName ?? '活动名称',
+                border: const OutlineInputBorder(),
+                helperText: '不填写则显示为\"未命名活动\"',
+              ),
                 autofocus: true,
               ),
               const SizedBox(height: 16),
@@ -336,9 +339,9 @@ class _ActivityFormState extends State<ActivityForm> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
-                              '开始',
-                              style: TextStyle(
+                            Text(
+                              ActivityLocalizations.of(context)!.startTime,
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
                               ),
@@ -363,6 +366,7 @@ class _ActivityFormState extends State<ActivityForm> {
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: TextButton(
                         onPressed: () async {
+                        if (!mounted) return;
                           final result = await showDialog<String>(
                             context: context,
                             builder:
@@ -469,9 +473,9 @@ class _ActivityFormState extends State<ActivityForm> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
-                              '结束',
-                              style: TextStyle(
+                            Text(
+                              ActivityLocalizations.of(context)!.endTime,
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
                               ),
@@ -495,10 +499,10 @@ class _ActivityFormState extends State<ActivityForm> {
               const SizedBox(height: 16),
               TextField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: '描述（可选）',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: InputDecoration(
+                labelText: ActivityLocalizations.of(context)?.activityDescription ?? '活动描述',
+                border: const OutlineInputBorder(),
+              ),
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
@@ -507,12 +511,12 @@ class _ActivityFormState extends State<ActivityForm> {
                   Expanded(
                     child: TextField(
                       controller: _tagsController,
-                      decoration: const InputDecoration(
-                        labelText: '标签（用逗号分隔）',
-                        border: OutlineInputBorder(),
-                        hintText: '例如: 工作, 学习, 运动',
-                        helperText: '可以直接输入新标签，将自动保存到未分组',
-                      ),
+                      decoration: InputDecoration(
+                labelText: ActivityLocalizations.of(context)?.tags ?? '标签',
+                border: const OutlineInputBorder(),
+                hintText: '例如: 工作, 学习, 运动',
+                helperText: '可以直接输入新标签，将自动保存到未分组',
+              ),
                     ),
                   ),
                   IconButton(
@@ -529,24 +533,6 @@ class _ActivityFormState extends State<ActivityForm> {
                       // 加载保存的标签组
                       List<TagGroup> tagGroups =
                           await activityService.getTagGroups();
-
-                      // 如果没有保存的标签组，使用默认标签组
-                      if (tagGroups.isEmpty) {
-                        tagGroups = [
-                          TagGroup(name: '所有', tags: []),
-                          TagGroup(name: '最近使用', tags: []),
-                          TagGroup(name: '未分组', tags: []),
-                          TagGroup(
-                            name: '工作',
-                            tags: ['会议', '编程', '写作', '阅读', '学习'],
-                          ),
-                          TagGroup(
-                            name: '生活',
-                            tags: ['运动', '购物', '休息', '娱乐', '社交'],
-                          ),
-                          TagGroup(name: '健康', tags: ['锻炼', '冥想', '饮食', '睡眠']),
-                        ];
-                      }
 
                       // 确保存在所有和未分组标签组
                       if (!tagGroups.any((group) => group.name == '所有')) {
@@ -602,7 +588,7 @@ class _ActivityFormState extends State<ActivityForm> {
                         });
                       }
                     },
-                    tooltip: '选择标签',
+                    tooltip: ActivityLocalizations.of(context)?.addTag,
                   ),
                 ],
               ),
@@ -635,7 +621,7 @@ class _ActivityFormState extends State<ActivityForm> {
                                     isSelected
                                         ? Theme.of(
                                           context,
-                                        ).primaryColor.withOpacity(0.2)
+                                        ).primaryColor.withAlpha(51)
                                         : null,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(

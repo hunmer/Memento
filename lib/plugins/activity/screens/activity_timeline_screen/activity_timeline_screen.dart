@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/storage/storage_manager.dart';
 import '../../services/activity_service.dart';
 import '../../widgets/activity_timeline.dart';
+import '../../l10n/activity_localizations.dart';
 import 'components/activity_grid_view.dart';
 import 'components/date_selector.dart';
 import 'components/timeline_app_bar.dart';
@@ -143,6 +144,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
           null,
           _tagController.updateRecentTags,
         ),
+        tooltip: ActivityLocalizations.of(context)?.addActivity ?? 'Add Activity',
         child: const Icon(Icons.add),
       ),
     );

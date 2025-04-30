@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import 'l10n/activity_localizations.dart';
 import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_statistics_screen.dart';
 import 'services/activity_service.dart';
-import 'models/activity_record.dart';
 import 'controls/prompt_controller.dart';
 
 class ActivityPlugin extends BasePlugin {
@@ -20,7 +20,7 @@ class ActivityPlugin extends BasePlugin {
   final String id = 'activity_plugin';
 
   @override
-  final String name = 'Activity';
+  String get name => 'Activity';
 
   @override
   final String version = '1.0.0';
@@ -133,7 +133,7 @@ class ActivityPlugin extends BasePlugin {
           // 统计信息卡片
           Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withAlpha(77),
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(12),
@@ -155,7 +155,10 @@ class ActivityPlugin extends BasePlugin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('今日活动', style: theme.textTheme.bodyMedium),
+                        Text(
+                          ActivityLocalizations.of(context)?.todayActivities ?? '今日活动',
+                          style: theme.textTheme.bodyMedium
+                        ),
                         Text(
                           '$activityCount',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -176,7 +179,10 @@ class ActivityPlugin extends BasePlugin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('今日时长', style: theme.textTheme.bodyMedium),
+                        Text(
+                          ActivityLocalizations.of(context)?.todayDuration ?? '今日时长',
+                          style: theme.textTheme.bodyMedium
+                        ),
                         Text(
                           '${(activityDuration / 60).toStringAsFixed(1)}H',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -193,7 +199,10 @@ class ActivityPlugin extends BasePlugin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('剩余时间', style: theme.textTheme.bodyMedium),
+                        Text(
+                          ActivityLocalizations.of(context)?.remainingTime ?? '剩余时间',
+                          style: theme.textTheme.bodyMedium
+                        ),
                         Text(
                           '${(remainingTime / 60).toStringAsFixed(1)}H',
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -216,7 +225,7 @@ class ActivityPlugin extends BasePlugin {
     );
   }
 
-  @override
+    @override
   Widget buildMainView(BuildContext context) {
     return const ActivityMainView();
   }
@@ -250,16 +259,19 @@ class _ActivityMainViewState extends State<ActivityMainView> {
             _selectedIndex = index;
           });
         },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.timeline), label: '时间线'),
-          NavigationDestination(icon: Icon(Icons.bar_chart), label: '统计'),
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.timeline),
+            label: ActivityLocalizations.of(context)?.timeline ?? '时间线'
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.bar_chart),
+            label: ActivityLocalizations.of(context)?.statistics ?? '统计'
+          ),
         ],
       ),
     );
   }
 
-  @override
-  Widget buildMainView(BuildContext context) {
-    return const ActivityMainView();
-  }
+
 }
