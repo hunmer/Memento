@@ -72,9 +72,6 @@ class OpenAIPlugin extends BasePlugin {
   Widget buildMainView(BuildContext context) {
     return Localizations.override(
       context: context,
-      delegates: const [
-        OpenAILocalizationsDelegate.delegate,
-      ],
       child: const AgentListScreen(),
     );
   }
@@ -139,9 +136,6 @@ class OpenAIPlugin extends BasePlugin {
   Widget buildCardView(BuildContext context) {
     return Localizations.override(
       context: context,
-      delegates: const [
-        OpenAILocalizationsDelegate.delegate,
-      ],
       child: _buildCardViewContent(context),
     );
   }

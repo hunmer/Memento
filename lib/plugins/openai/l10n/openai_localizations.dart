@@ -142,43 +142,13 @@ abstract class OpenAILocalizations {
 /// 中文实现
 class OpenAILocalizationsZh implements OpenAILocalizations {
   @override
+  String get pluginName => 'AI 助手';
+  
+  @override
+  String get pluginDescription => 'AI 助手插件，支持多种大语言模型服务商';
+  
+  @override
   String get pluginAnalysis => '插件分析';
-
-  @override
-  String get confirm => '确认';
-  
-  @override
-  String get selectAgent => '选择智能体';
-  
-  @override
-  String get pleaseSelectAgentFirst => '请先选择一个智能体';
-  
-  @override
-  String get pleaseEnterPrompt => '请输入提示词';
-  
-  @override
-  String get sendingFailed => '发送失败：';
-  
-  @override
-  String get noAgentSelected => '未选择智能体';
-  
-  @override
-  String get selectAgentTooltip => '选择智能体';
-  
-  @override
-  String get prompt => '提示词';
-  
-  @override
-  String get addAnalysisMethod => '添加分析方法';
-  
-  @override
-  String get agentResponse => '智能体响应';
-  
-  @override
-  String get sendRequest => '发送请求';
-
-  @override
-  String get pluginName => 'AI助手';
   
   @override
   String get confirm => '确认';
@@ -845,11 +815,14 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   
   @override
   String get serviceEndpoint => 'If the service endpoint is accessible';
-  
+}
 
 /// 本地化代理
 class OpenAILocalizationsDelegate extends LocalizationsDelegate<OpenAILocalizations> {
   const OpenAILocalizationsDelegate();
+  
+  /// 提供静态访问的代理实例
+  static const OpenAILocalizationsDelegate delegate = OpenAILocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) {
@@ -869,6 +842,7 @@ class OpenAILocalizationsDelegate extends LocalizationsDelegate<OpenAILocalizati
 
   @override
   bool shouldReload(OpenAILocalizationsDelegate old) => false;
-
-  static const OpenAILocalizationsDelegate delegate = OpenAILocalizationsDelegate();
 }
+
+/// 提供全局访问的代理实例（兼容性保留，推荐使用 OpenAILocalizationsDelegate.delegate）
+const openAILocalizationsDelegate = OpenAILocalizationsDelegate.delegate;
