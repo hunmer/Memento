@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:Memento/utils/image_utils.dart';
 
 class AgentListDrawer extends StatefulWidget {
   /// 当前已选择的智能体列表
@@ -85,6 +87,103 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
     }
   }
 
+  // 构建智能体图标
+  Widget _buildAgentIcon(AIAgent agent) {
+    // 如果有头像，优先显示头像
+    if (agent.avatarUrl != null && agent.avatarUrl!.isNotEmpty) {
+      return FutureBuilder<String>(
+        future: PathUtils.toAbsolutePath(agent.avatarUrl),
+        builder: (context, snapshot) {
+          return Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: _getColorForServiceProvider(agent.serviceProviderId).withOpacity(0.5),
+                width: 2,
+              ),
+            ),
+            child: ClipOval(
+              child: agent.avatarUrl!.startsWith('http')
+                ? Image.network(
+                    agent.avatarUrl!,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildDefaultIcon(agent),
+                  )
+                : snapshot.hasData
+                    ? Image.file(
+                        File(snapshot.data!),
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildDefaultIcon(agent),
+                      )
+                    : _buildDefaultIcon(agent),
+            ),
+          );
+        },
+      );
+    }
+    
+    // 如果有自定义图标，使用自定义图标
+    if (agent.icon != null) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: agent.iconColor ?? _getColorForServiceProvider(agent.serviceProviderId),
+        ),
+        child: Icon(
+          agent.icon,
+          size: 20,
+          color: Colors.white,
+        ),
+      );
+    }
+    
+    // 默认图标
+    return _buildDefaultIcon(agent);
+  }
+
+  // 构建默认图标
+  Widget _buildDefaultIcon(AIAgent agent) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: _getColorForServiceProvider(agent.serviceProviderId),
+      ),
+      child: const Icon(
+        Icons.smart_toy,
+        size: 20,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  // 根据服务提供商获取颜色
+  Color _getColorForServiceProvider(String providerId) {
+    switch (providerId) {
+      case 'openai':
+        return Colors.green;
+      case 'azure':
+        return Colors.blue;
+      case 'ollama':
+        return Colors.orange;
+      case 'deepseek':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -127,7 +226,7 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
                     final isSelected = _isAgentSelected(agent.id);
 
                     return ListTile(
-                      leading: const Icon(Icons.smart_toy),
+                      leading: _buildAgentIcon(agent),
                       title: Text(agent.name),
                       subtitle: Text(agent.description),
                       trailing: isSelected

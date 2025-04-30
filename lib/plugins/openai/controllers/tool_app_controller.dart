@@ -42,7 +42,7 @@ class ToolAppController extends ChangeNotifier {
     switch (appId) {
       case 'plugin-analysis':
         // 打开插件分析应用
-        PluginAnalysisController().showMethodSelectionDialog(context);
+        PluginAnalysisController().showPluginAnalysisDialog(context);
         break;
       // 可以添加更多应用的处理逻辑
       default:

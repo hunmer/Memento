@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/openai/widgets/plugin_analysis_dialog.dart';
 import 'package:flutter/material.dart';
 import '../models/plugin_analysis_method.dart';
 import '../widgets/method_selection_dialog.dart';
@@ -11,23 +12,11 @@ class PluginAnalysisController {
   
   PluginAnalysisController._internal();
 
-  // 显示方法选择对话框
-  void showMethodSelectionDialog(BuildContext context) {
+  // 显示插件分析对话框
+  void showPluginAnalysisDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => MethodSelectionDialog(
-        onMethodSelected: (method) {
-          _showPluginAnalysisForm(context, method);
-        },
-      ),
-    );
-  }
-
-  // 显示插件分析表单
-  void _showPluginAnalysisForm(BuildContext context, PluginAnalysisMethod method) {
-    showDialog(
-      context: context,
-      builder: (context) => PluginAnalysisForm(method: method),
+      builder: (context) => const PluginAnalysisDialog(),
     );
   }
 }

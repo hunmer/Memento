@@ -9,10 +9,12 @@ import '../controllers/agent_controller.dart';
 
 class PluginAnalysisForm extends StatefulWidget {
   final PluginAnalysisMethod method;
+  final Function(String) onConfirm;
 
   const PluginAnalysisForm({
     Key? key,
     required this.method,
+    required this.onConfirm,
   }) : super(key: key);
 
   @override
@@ -22,8 +24,6 @@ class PluginAnalysisForm extends StatefulWidget {
 class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
   final Map<String, TextEditingController> _controllers = {};
   final PluginAnalysisService _service = PluginAnalysisService();
-  String? _responseMessage;
-  bool _isLoading = false;
   late Map<String, dynamic> _currentTemplate;
 
   @override
@@ -63,82 +63,9 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
     super.dispose();
   }
 
-  // 复制JSON到剪贴板
-  Future<void> _copyToClipboard() async {
-    // 使用 dart:convert 将 Map 转换为 JSON 字符串
-    final json = _getJsonString();
-    final success = await _service.copyToClipboard(json);
-    
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已复制到剪贴板')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('复制失败')),
-      );
-    }
-  }
-
-  // 打开智能体选择抽屉
-  void _openAgentSelector() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => AgentListDrawer(
-        selectedAgents: const [],
-        onAgentSelected: (selectedAgents) {
-          if (selectedAgents.isNotEmpty) {
-            _sendToAgent(selectedAgents.first);
-          }
-        },
-        allowMultipleSelection: false,
-        title: '选择智能体',
-        confirmButtonText: '选择',
-      ),
-    );
-  }
-
   // 获取当前模板的JSON字符串
   String _getJsonString() {
     return jsonEncode(_currentTemplate);
-  }
-
-  // 发送到智能体
-  Future<void> _sendToAgent(Map<String, String> agentData) async {
-    setState(() {
-      _isLoading = true;
-      _responseMessage = null;
-    });
-
-    try {
-      // 从 AgentController 获取智能体
-      final agentController = AgentController();
-      final agent = await agentController.getAgent(agentData['id'] ?? '');
-      
-      if (agent == null) {
-        throw Exception('未找到智能体');
-      }
-
-      // 发送消息
-      final response = await _service.sendToAgent(
-        agent, 
-        _getJsonString(),
-      );
-
-      setState(() {
-        _responseMessage = response;
-      });
-    } catch (e) {
-      setState(() {
-        _responseMessage = '发送失败: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 
   @override
@@ -185,58 +112,31 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
                     }).toList(),
                     
                     
-                    // 智能体响应
-                    if (_responseMessage != null || _isLoading) ...[
-                      const SizedBox(height: 16),
-                      const Text(
-                        '智能体响应:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      if (_isLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(_responseMessage!),
-                        ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            
-            // 底部按钮
+                    // 底部按钮
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('关闭'),
+                  child: const Text('取消'),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: _copyToClipboard,
-                  icon: const Icon(Icons.copy),
-                  label: const Text('复制'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: _openAgentSelector,
-                  icon: const Icon(Icons.smart_toy),
-                  label: const Text('选择智能体'),
+                ElevatedButton(
+                  onPressed: () {
+                    widget.onConfirm(_getJsonString());
+                  },
+                  child: const Text('确定'),
                 ),
               ],
             ),
           ],
         ),
-      ),
+      )
+            ),
+          ]
+        ),
+      )
     );
   }
 }
