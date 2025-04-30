@@ -2,10 +2,13 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/agent_controller.dart';
+import '../controllers/tool_app_controller.dart';
 import '../widgets/agent_list_view.dart';
 import '../widgets/agent_grid_view.dart';
+import '../widgets/tool_app_grid_view.dart';
 import '../widgets/filter_dialog.dart';
 import '../models/ai_agent.dart';
+import '../models/tool_app.dart';
 import 'agent_edit_screen.dart';
 
 class AgentListScreen extends StatefulWidget {
@@ -18,7 +21,8 @@ class AgentListScreen extends StatefulWidget {
 class _AgentListScreenState extends State<AgentListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late AgentController _controller;
+  late AgentController _agentController;
+  late ToolAppController _toolAppController;
   bool _isGridView = true;
   Set<String> _selectedProviders = {};
   Set<String> _selectedTags = {};
@@ -27,14 +31,15 @@ class _AgentListScreenState extends State<AgentListScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _controller = AgentController();
-    _controller.addListener(_onAgentsChanged);
+    _agentController = AgentController();
+    _toolAppController = ToolAppController();
+    _agentController.addListener(_onAgentsChanged);
     _loadAgents();
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onAgentsChanged);
+    _agentController.removeListener(_onAgentsChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -48,7 +53,7 @@ class _AgentListScreenState extends State<AgentListScreen>
   }
 
   Future<void> _loadAgents() async {
-    await _controller.loadAgents();
+    await _agentController.loadAgents();
   }
 
   void _showFilterDialog() {
@@ -69,7 +74,7 @@ class _AgentListScreenState extends State<AgentListScreen>
   }
 
   List<AIAgent> _getFilteredAgents() {
-    return _controller.agents.where((agent) {
+    return _agentController.agents.where((agent) {
       bool providerMatch =
           _selectedProviders.isEmpty ||
           _selectedProviders.contains(agent.serviceProviderId);
@@ -139,9 +144,15 @@ class _AgentListScreenState extends State<AgentListScreen>
                     // TODO: Implement tools search
                   },
                 ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () {
+                    // TODO: Implement add new tool app
+                  },
+                ),
               ],
             ),
-            body: const Center(child: Text('Tools - Coming Soon')),
+            body: _buildToolsBody(),
           ),
         ],
       ),
@@ -159,6 +170,29 @@ class _AgentListScreenState extends State<AgentListScreen>
           labelStyle: const TextStyle(fontSize: 12),
         ),
       ),
+    );
+  }
+  
+  Widget _buildToolsBody() {
+    return AnimatedBuilder(
+      animation: _toolAppController,
+      builder: (context, child) {
+        if (_toolAppController.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        
+        return ToolAppGridView(
+          apps: _toolAppController.apps,
+          onAppSelected: (app) {
+            // TODO: Handle tool app selection
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Selected: ${app.title}')),
+            );
+          },
+        );
+      },
     );
   }
 }
