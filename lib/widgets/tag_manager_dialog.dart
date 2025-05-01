@@ -4,14 +4,20 @@ import 'package:flutter/material.dart';
 class TagGroup {
   final String name;
   final List<String> tags;
+  final List<String>? tagIds;  // 新增 tagIds 字段，用于存储每个标签对应的 id
 
-  TagGroup({required this.name, required this.tags});
+  TagGroup({
+    required this.name,
+    required this.tags,
+    this.tagIds,  // 可选参数，因为并非所有场景都需要 id
+  });
 
   /// 从Map创建TagGroup实例
   factory TagGroup.fromMap(Map<String, dynamic> map) {
     return TagGroup(
       name: map['name'] as String,
       tags: List<String>.from(map['tags'] as List),
+      tagIds: map['tagIds'] != null ? List<String>.from(map['tagIds'] as List) : null,
     );
   }
 
@@ -20,6 +26,7 @@ class TagGroup {
     return {
       'name': name,
       'tags': tags,
+      'tagIds': tagIds,
     };
   }
 
@@ -27,10 +34,12 @@ class TagGroup {
   TagGroup copyWith({
     String? name,
     List<String>? tags,
+    List<String>? tagIds,
   }) {
     return TagGroup(
       name: name ?? this.name,
       tags: tags ?? List.from(this.tags),
+      tagIds: tagIds ?? (this.tagIds != null ? List.from(this.tagIds!) : null),
     );
   }
 }
@@ -77,6 +86,11 @@ class TagManagerDialog extends StatefulWidget {
   
   /// 是否允许编辑（新增、修改、删除）
   final bool enableEditing;
+  
+  /// 添加标签回调，返回新标签的名称
+  /// [groupName] 当前选中的分组名称
+  /// [tag] 长按的标签名称（可选）
+  final Future<String?> Function(String groupName, {String? tag})? onAddTag;
 
   const TagManagerDialog({
     super.key,
@@ -86,6 +100,7 @@ class TagManagerDialog extends StatefulWidget {
     this.onTagsSelected,
     this.config,
     this.enableEditing = true,
+    this.onAddTag,
   });
 
   @override
@@ -148,29 +163,37 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
   Future<void> _addNewTag() async {
     if (!widget.enableEditing || _selectedGroup == _config.newGroupLabel) return;
 
-    final TextEditingController textController = TextEditingController();
-    final name = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('新建标签'),
-        content: TextField(
-          autofocus: true,
-          controller: textController,
-          decoration: InputDecoration(hintText: _config.addTagHint),
-          onSubmitted: (value) => Navigator.of(context).pop(value),
+    String? name;
+    
+    // 使用自定义的添加标签回调，如果提供了的话
+    if (widget.onAddTag != null) {
+      name = await widget.onAddTag!(_selectedGroup);
+    } else {
+      // 默认的添加标签对话框
+      final TextEditingController textController = TextEditingController();
+      name = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('新建标签'),
+          content: TextField(
+            autofocus: true,
+            controller: textController,
+            decoration: InputDecoration(hintText: _config.addTagHint),
+            onSubmitted: (value) => Navigator.of(context).pop(value),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(textController.text),
+              child: const Text('确定'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(textController.text),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
-    );
+      );
+    }
 
     if (name != null && name.isNotEmpty) {
       setState(() {
@@ -178,7 +201,7 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
         if (groupIndex != -1) {
           if (!_groups[groupIndex].tags.contains(name)) {
             final currentTags = List<String>.from(_groups[groupIndex].tags);
-            currentTags.add(name);
+            currentTags.add(name!);
             _groups[groupIndex] = TagGroup(
               name: _selectedGroup,
               tags: currentTags,
@@ -326,31 +349,24 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
                       value: _config.allTagsLabel,
                       child: Text(_config.allTagsLabel),
                     ),
-                    if (widget.enableEditing)
-                      DropdownMenuItem(
-                        value: _config.newGroupLabel,
-                        child: Text(_config.newGroupLabel),
+                    ..._groups
+                      .where((group) => group.name != _config.allTagsLabel)
+                      .map(
+                        (group) => DropdownMenuItem(
+                          value: group.name,
+                          child: Text(group.name),
+                        ),
                       ),
-                    ..._groups.map(
-                      (group) => DropdownMenuItem(
-                        value: group.name,
-                        child: Text(group.name),
-                      ),
-                    ),
                   ],
                   onChanged: (String? value) {
                     if (value != null) {
-                      if (value == _config.newGroupLabel) {
-                        _createNewGroup();
-                      } else {
-                        setState(() {
-                          _selectedGroup = value;
-                          if (value != _config.allTagsLabel) {
-                            _selectedTags.clear();
-                            widget.onTagsSelected?.call(_selectedTags);
-                          }
-                        });
-                      }
+                      setState(() {
+                        _selectedGroup = value;
+                        if (value != _config.allTagsLabel) {
+                          _selectedTags.clear();
+                          widget.onTagsSelected?.call(_selectedTags);
+                        }
+                      });
                     }
                   },
                 ),
@@ -359,29 +375,31 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: _selectedGroup == _config.newGroupLabel ||
-                                _selectedGroup == _config.allTagsLabel
-                            ? null
-                            : _addNewTag,
-                        tooltip: '添加新标签',
-                      ),
-                      IconButton(
                         icon: const Icon(Icons.edit),
-                        onPressed: _selectedGroup == _config.newGroupLabel ||
-                                _selectedGroup == _config.allTagsLabel
+                        onPressed: _selectedGroup == _config.allTagsLabel
                             ? null
                             : _editCurrentGroup,
                         tooltip: '编辑分组',
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete),
-                        onPressed: _selectedGroup == _config.newGroupLabel ||
-                                _selectedGroup == _config.allTagsLabel ||
+                        onPressed: _selectedGroup == _config.allTagsLabel ||
                                 _selectedTags.isEmpty
                             ? null
                             : _deleteSelectedTags,
                         tooltip: '删除选中的标签',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: _selectedGroup == _config.allTagsLabel
+                            ? null
+                            : _addNewTag,
+                        tooltip: '添加新标签',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.create_new_folder),
+                        onPressed: _createNewGroup,
+                        tooltip: '新建分组',
                       ),
                     ],
                   ),
@@ -393,14 +411,27 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
               runSpacing: 8,
               children: _getCurrentGroupTags().map((tag) {
                 final isSelected = _selectedTags.contains(tag);
-                return FilterChip(
-                  label: Text(tag),
-                  selected: isSelected,
-                  onSelected: (_) => _onTagToggle(tag),
-                  selectedColor: widget.config?.selectedTagColor ??
-                      theme.primaryColor.withOpacity(0.2),
-                  checkmarkColor:
-                      widget.config?.checkmarkColor ?? theme.primaryColor,
+                // 使用InkWell代替GestureDetector，它能更好地与Material组件协同工作
+                return InkWell(
+                  onLongPress: widget.onAddTag != null ? () async {
+                    print("长按标签: $tag, 分组: $_selectedGroup"); // 调试信息
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('正在添加新标签到 $_selectedGroup 分组')),
+                    );
+                    await widget.onAddTag!(_selectedGroup, tag: tag);
+                  } : null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0), // 增加点击区域
+                    child: FilterChip(
+                      label: Text(tag),
+                      selected: isSelected,
+                      onSelected: (_) => _onTagToggle(tag),
+                      selectedColor: widget.config?.selectedTagColor ??
+                          theme.primaryColor.withOpacity(0.2),
+                      checkmarkColor:
+                          widget.config?.checkmarkColor ?? theme.primaryColor,
+                    ),
+                  ),
                 );
               }).toList(),
             ),

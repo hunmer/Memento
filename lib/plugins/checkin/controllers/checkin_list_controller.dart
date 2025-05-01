@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
 import '../widgets/checkin_form_dialog.dart';
 import 'package:intl/intl.dart';
-import '../../../widgets/circle_icon_picker.dart';
 import '../checkin_plugin.dart';
 
 class CheckinListController {
@@ -289,6 +289,7 @@ class CheckinListController {
       return TagGroup(
         name: group,
         tags: items.map((item) => item.name).toList(),
+        tagIds: items.map((item) => item.id).toList(), // 添加 id 信息
       );
     }).toList();
 
@@ -298,11 +299,41 @@ class CheckinListController {
         .map((item) => item.name)
         .toList();
 
+    // 创建一个 Completer 用于处理添加标签的异步操作
+    Completer<String?>? addTagCompleter;
+
     showDialog(
       context: context,
-      builder: (context) => TagManagerDialog(
+      builder: (dialogContext) => TagManagerDialog(
         groups: tagGroups,
         selectedTags: selectedTags,
+        onAddTag: (String group, {String? tag}) async {
+          // 获取标签对应的id（如果存在）
+          String? itemId;
+          if (tag != null) {
+            for (var tagGroup in tagGroups) {
+              if (tagGroup.name == group) {
+                final tagIndex = tagGroup.tags.indexOf(tag);
+                if (tagIndex != -1 && tagGroup.tagIds != null && tagGroup.tagIds!.length > tagIndex) {
+                  itemId = tagGroup.tagIds![tagIndex];
+                  break;
+                }
+              }
+            }
+          }
+          
+          // 直接使用checkin的对话框，不关闭TagManager
+          final newTagName = await showAddCheckinItemDialog(
+            group: group,
+            copyFromTag: tag,
+            id: itemId, // 传递id参数用于编辑
+          );
+          
+          if (newTagName != null) {
+            return newTagName;
+          }
+          return null;
+        },
         onGroupsChanged: (List<TagGroup> updatedGroups) async {
           // 处理分组变更
           for (var tagGroup in updatedGroups) {
@@ -316,22 +347,11 @@ class CheckinListController {
             for (var tag in tagGroup.tags) {
               // 如果标签不在现有项目中，创建新项目
               if (!existingItemNames.contains(tag)) {
-                final newItem = CheckinItem(
-                  name: tag,
-                  icon: Icons.check_box_outline_blank,
-                  group: tagGroup.name,
-                );
-                checkinItems.add(newItem);
-              } else {
-                // 更新现有项目的分组
-                for (var item in checkinItems) {
-                  if (item.name == tag && item.group != tagGroup.name) {
-                    item.group = tagGroup.name;
-                  }
-                }
+                // 这里不需要显示对话框，因为已经通过onAddTag回调处理了
+                // 只需确保标签已经被正确添加到项目中
               }
             }
-
+            
             // 处理被移除的项目
             for (var item in List.from(checkinItems)) {
               if (item.group == tagGroup.name && !tagGroup.tags.contains(item.name)) {
@@ -348,9 +368,6 @@ class CheckinListController {
           await CheckinPlugin.shared.triggerSave();
           onStateChanged();
         },
-        onTagsSelected: (List<String> tags) {
-          // 处理标签选择变更（如果需要）
-        },
         config: const TagManagerConfig(
           title: '管理分组',
           addGroupHint: '请输入分组名称',
@@ -366,20 +383,79 @@ class CheckinListController {
     });
   }
 
-  // 显示添加打卡项目对话框
-  void showAddCheckinItemDialog() {
+  // 显示添加或编辑打卡项目对话框
+  Future<String?> showAddCheckinItemDialog({String? group, String? copyFromTag, String? id}) async {
+    final completer = Completer<String?>();
+    
+    // 如果提供了id，尝试找到现有项目进行编辑
+    CheckinItem? existingItem;
+    if (id != null) {
+      try {
+        existingItem = checkinItems.firstWhere(
+          (item) => item.id == id,
+        );
+      } catch (e) {
+        // 如果找不到匹配的项目，existingItem 保持为 null
+        existingItem = null;
+      }
+    }
+    
+    // 如果提供了copyFromTag且不是编辑模式，尝试找到该标签对应的CheckinItem作为模板
+    CheckinItem? templateItem;
+    if (copyFromTag != null && id == null) {
+      templateItem = checkinItems.firstWhere(
+        (item) => item.name == copyFromTag,
+        orElse: () => CheckinItem(
+          name: '',
+          group: group ?? '',
+          icon: Icons.check_circle,
+          color: Colors.blue,
+        ),
+      );
+      
+      // 创建一个新的CheckinItem，复制模板的属性但使用新的名称
+      templateItem = CheckinItem(
+        name: '', // 名称留空，由用户填写
+        group: group ?? templateItem.group,
+        icon: templateItem.icon,
+        color: templateItem.color,
+        // 复制其他需要的属性，但不复制记录
+      );
+    }
+    
     showDialog<CheckinItem>(
       context: context,
-      builder: (context) => const CheckinFormDialog(),
+      builder: (context) => CheckinFormDialog(
+        initialItem: existingItem ?? templateItem ?? (group != null ? CheckinItem(
+          name: '',
+          group: group,
+          icon: Icons.check_circle,
+          color: Colors.blue,
+        ) : null),
+      ),
     ).then((checkinItem) async {
       if (checkinItem != null) {
-        checkinItems.add(checkinItem);
+        if (existingItem != null) {
+          // 更新现有项目
+          final index = checkinItems.indexWhere((item) => item.id == existingItem!.id);
+          if (index != -1) {
+            checkinItems[index] = checkinItem;
+          }
+        } else {
+          // 添加新项目
+          checkinItems.add(checkinItem);
+        }
         // 确保新添加的项目所在的分组是展开的
         expandedGroups[checkinItem.group] = true;
         await CheckinPlugin.shared.triggerSave();
         onStateChanged();
+        completer.complete(checkinItem.name);
+      } else {
+        completer.complete(null);
       }
     });
+    
+    return completer.future;
   }
 
   // 更新指定分组中项目的顺序

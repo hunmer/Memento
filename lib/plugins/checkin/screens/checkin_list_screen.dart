@@ -235,14 +235,6 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          controller.showAddCheckinItemDialog();
-          _handleStateChanged();
-        },
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
