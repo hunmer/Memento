@@ -47,6 +47,14 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
         ),
         title: Text(CheckinLocalizations.of(context)?.checkinPluginName ?? '打卡'),
         actions: [
+          // 排序按钮
+          IconButton(
+            icon: const Icon(Icons.sort),
+            onPressed: () {
+              controller.showGroupSortDialog();
+            },
+            tooltip: '排序',
+          ),
           IconButton(
             icon: Icon(controller.isEditMode ? Icons.done : Icons.edit),
             onPressed: () {

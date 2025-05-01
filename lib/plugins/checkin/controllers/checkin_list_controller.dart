@@ -5,6 +5,8 @@ import '../models/checkin_item.dart';
 import '../screens/checkin_form_screen.dart';
 import 'package:intl/intl.dart';
 import '../checkin_plugin.dart';
+import '../services/group_sort_service.dart';
+import '../widgets/group_sort_dialog.dart';
 
 class CheckinListController {
   final BuildContext context;
@@ -12,6 +14,8 @@ class CheckinListController {
   final Function() onStateChanged;
   final Map<String, bool> expandedGroups;
   bool isEditMode = false;
+  GroupSortType currentSortType = GroupSortType.upcoming;
+  bool isReversed = false;
 
   CheckinListController({
     required this.context,
@@ -38,7 +42,9 @@ class CheckinListController {
         'total': groupItems.length,
       });
     }
-    return items;
+    
+    // 应用排序
+    return GroupSortService.sortGroups(items, currentSortType, isReversed);
   }
 
   // 按分组获取打卡项目
@@ -98,6 +104,22 @@ class CheckinListController {
     final items = groupedItems[group] ?? [];
     final completed = items.where((item) => item.isCheckedToday()).length;
     return {'total': items.length, 'completed': completed};
+  }
+
+  // 显示分组排序对话框
+  void showGroupSortDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => GroupSortDialog(
+        currentSortType: currentSortType,
+        isReversed: isReversed,
+        onSortChanged: (sortType, reversed) {
+          currentSortType = sortType;
+          isReversed = reversed;
+          onStateChanged();
+        },
+      ),
+    );
   }
 
   // 切换编辑模式
