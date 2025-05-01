@@ -48,6 +48,9 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
   
   @override
   String get save => 'Save';
+
+  @override
+  String get mood => 'Mood';
   
   @override
   String get cancel => 'Cancel';

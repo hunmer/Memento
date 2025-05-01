@@ -1,3 +1,4 @@
+import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
 import '../widgets/checkin_form_dialog.dart';
@@ -282,218 +283,87 @@ class CheckinListController {
 
   // 显示分组管理对话框
   void showGroupManagementDialog() {
-    BuildContext dialogContext;
+    // 将现有的分组转换为 TagGroup 格式
+    List<TagGroup> tagGroups = groups.map((group) {
+      final items = groupedItems[group] ?? [];
+      return TagGroup(
+        name: group,
+        tags: items.map((item) => item.name).toList(),
+      );
+    }).toList();
+
+    // 获取当前选中的标签（打卡项目）
+    List<String> selectedTags = checkinItems
+        .where((item) => item.isCheckedToday())
+        .map((item) => item.name)
+        .toList();
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        dialogContext = context;
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              title: const Text('管理分组'),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (groups.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(
-                          child: Text(
-                            '暂无分组',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
-                        ),
-                      )
-                    else
-                      Flexible(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: groups.length,
-                          itemBuilder: (context, index) {
-                            final group = groups[index];
-                            final items = groupedItems[group] ?? [];
-                            final completedCount =
-                                items
-                                    .where((item) => item.isCheckedToday())
-                                    .length;
+      builder: (context) => TagManagerDialog(
+        groups: tagGroups,
+        selectedTags: selectedTags,
+        onGroupsChanged: (List<TagGroup> updatedGroups) async {
+          // 处理分组变更
+          for (var tagGroup in updatedGroups) {
+            final existingItems = groupedItems[tagGroup.name] ?? [];
+            final existingItemNames = existingItems.map((e) => e.name).toSet();
+            
+            // 确保新分组是展开的
+            expandedGroups[tagGroup.name] = true;
 
-                            return ListTile(
-                              leading: const Icon(Icons.folder_outlined),
-                              title: Text(group),
-                              subtitle: Text(
-                                '${items.length}个项目，$completedCount个已打卡',
-                                style: TextStyle(
-                                  color:
-                                      completedCount > 0
-                                          ? Colors.green
-                                          : Colors.grey,
-                                ),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (items.isEmpty)
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline),
-                                      tooltip: '删除空分组',
-                                      onPressed: () {
-                                        // 空分组不需要特别处理，因为分组是根据打卡项目动态生成的
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit_outlined),
-                                    tooltip: '编辑分组',
-                                    onPressed: () {
-                                      _showEditOrCreateGroupDialog(
-                                        group: group,
-                                        items: items,
-                                        parentContext: dialogContext,
-                                        onGroupUpdated: () => setState(() {}),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('关闭'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    _showEditOrCreateGroupDialog(
-                      parentContext: dialogContext,
-                      onGroupUpdated: () => setState(() {}),
-                    );
-                  },
-                  child: const Text('新建'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+            // 更新现有项目的分组
+            for (var tag in tagGroup.tags) {
+              // 如果标签不在现有项目中，创建新项目
+              if (!existingItemNames.contains(tag)) {
+                final newItem = CheckinItem(
+                  name: tag,
+                  icon: Icons.check_box_outline_blank,
+                  group: tagGroup.name,
+                );
+                checkinItems.add(newItem);
+              } else {
+                // 更新现有项目的分组
+                for (var item in checkinItems) {
+                  if (item.name == tag && item.group != tagGroup.name) {
+                    item.group = tagGroup.name;
+                  }
+                }
+              }
+            }
+
+            // 处理被移除的项目
+            for (var item in List.from(checkinItems)) {
+              if (item.group == tagGroup.name && !tagGroup.tags.contains(item.name)) {
+                checkinItems.remove(item);
+              }
+            }
+          }
+
+          // 删除不在更新后分组列表中的项目
+          final updatedGroupNames = updatedGroups.map((g) => g.name).toSet();
+          checkinItems.removeWhere((item) => !updatedGroupNames.contains(item.group));
+
+          // 保存更改
+          await CheckinPlugin.shared.triggerSave();
+          onStateChanged();
+        },
+        onTagsSelected: (List<String> tags) {
+          // 处理标签选择变更（如果需要）
+        },
+        config: const TagManagerConfig(
+          title: '管理分组',
+          addGroupHint: '请输入分组名称',
+          addTagHint: '请输入打卡项目名称',
+          editGroupHint: '请输入新的分组名称',
+          allTagsLabel: '所有打卡项目',
+          newGroupLabel: '新建分组',
+        ),
+      ),
     ).then((_) {
       // 关闭对话框后刷新界面
       onStateChanged();
     });
-  }
-
-  // 显示编辑或创建分组对话框
-  void _showEditOrCreateGroupDialog({
-    String? group,
-    List<CheckinItem>? items,
-    required BuildContext parentContext,
-    required VoidCallback onGroupUpdated,
-  }) {
-    final bool isEditing = group != null;
-    final TextEditingController groupController = TextEditingController(
-      text: group,
-    );
-    IconData selectedIcon = Icons.folder; // 默认图标
-    Color selectedColor = Colors.blue; // 默认颜色
-
-    showDialog(
-      context: parentContext,
-      builder:
-          (BuildContext context) => StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return AlertDialog(
-                title: Text(isEditing ? '编辑分组' : '新建分组'),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircleIconPicker(
-                        currentIcon: selectedIcon,
-                        backgroundColor: selectedColor,
-                        onIconSelected: (icon) {
-                          setState(() => selectedIcon = icon);
-                        },
-                        onColorSelected: (color) {
-                          setState(() => selectedColor = color);
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      TextField(
-                        controller: groupController,
-                        decoration: const InputDecoration(
-                          labelText: '分组名称',
-                          hintText: '请输入分组名称',
-                        ),
-                      ),
-                      if (isEditing) ...[
-                        const SizedBox(height: 16),
-                        Text('该分组包含 ${items!.length} 个打卡项目'),
-                      ],
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('取消'),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      final newGroupName = groupController.text.trim();
-                      if (newGroupName.isNotEmpty &&
-                          (!isEditing || newGroupName != group)) {
-                        if (isEditing) {
-                          // 更新所有该分组下的打卡项目
-                          for (var item in items!) {
-                            item.group = newGroupName;
-                          }
-                          // 确保新分组是展开的
-                          expandedGroups.remove(group);
-                          expandedGroups[newGroupName] = true;
-                        } else {
-                          // 创建一个新的打卡项目作为分组标记
-                          final groupMarker = CheckinItem(
-                            name: newGroupName,
-                            icon: selectedIcon,
-                            color: selectedColor,
-                            group: newGroupName,
-                          );
-                          checkinItems.add(groupMarker);
-                          expandedGroups[newGroupName] = true;
-                        }
-
-                        await CheckinPlugin.shared.triggerSave();
-                        Navigator.pop(context);
-                        onGroupUpdated();
-                        onStateChanged();
-                        ScaffoldMessenger.of(parentContext).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              isEditing
-                                  ? '已更新分组"$newGroupName"'
-                                  : '已创建新分组"$newGroupName"',
-                            ),
-                          ),
-                        );
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: const Text('保存'),
-                  ),
-                ],
-              );
-            },
-          ),
-    );
   }
 
   // 显示添加打卡项目对话框

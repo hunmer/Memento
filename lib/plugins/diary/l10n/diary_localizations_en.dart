@@ -122,4 +122,7 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
   
   @override
   String get sortByStartTimeDesc => 'Sort by start time (descending)';
+  
+  @override
+  String get mood => 'Mood';
 }

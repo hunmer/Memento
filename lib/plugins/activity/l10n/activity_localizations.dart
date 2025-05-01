@@ -53,6 +53,7 @@ abstract class ActivityLocalizations {
   String get addTag;
   String get deleteTag;
   String get save;
+  String get mood;
   String get cancel;
   
   // Timeline screen

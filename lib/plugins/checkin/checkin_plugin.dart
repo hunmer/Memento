@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../base_plugin.dart';
+import 'l10n/checkin_localizations.dart';
 import 'models/checkin_item.dart';
 import 'screens/checkin_list_screen.dart';
 import 'controllers/checkin_list_controller.dart';
@@ -84,12 +85,6 @@ class CheckinPlugin extends BasePlugin {
       }
     } catch (e) {
       debugPrint('初始化打卡项目失败: $e');
-      // 使用默认数据
-      _checkinItems = [
-        CheckinItem(name: '早起', icon: Icons.wb_sunny),
-        CheckinItem(name: '早睡', icon: Icons.nightlight_round),
-        CheckinItem(name: '运动', icon: Icons.fitness_center),
-      ];
     }
   }
 
@@ -204,7 +199,10 @@ class CheckinPlugin extends BasePlugin {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('今日打卡', style: theme.textTheme.bodyMedium),
+                    Text(
+                      CheckinLocalizations.of(context)?.todayCheckin ?? '今日打卡',
+                      style: theme.textTheme.bodyMedium
+                    ),
                     Text(
                       '${getTodayCheckins()}/${_checkinItems.length}',
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -225,7 +223,10 @@ class CheckinPlugin extends BasePlugin {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('总打卡数', style: theme.textTheme.bodyMedium),
+                    Text(
+                      CheckinLocalizations.of(context)?.totalCheckinCount ?? '总打卡数',
+                      style: theme.textTheme.bodyMedium
+                    ),
                     Text(
                       '${getTotalCheckins()}',
                       style: theme.textTheme.bodyMedium?.copyWith(

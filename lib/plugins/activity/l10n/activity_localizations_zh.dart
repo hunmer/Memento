@@ -48,6 +48,9 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
   
   @override
   String get save => '保存';
+
+  @override
+  String get mood => '心情';
   
   @override
   String get cancel => '取消';

@@ -80,6 +80,7 @@ abstract class DiaryLocalizations {
   String get sortByStartTimeAsc;
   String get sortByDuration;
   String get sortByStartTimeDesc;
+  String get mood;
 }
 
 class _DiaryLocalizationsDelegate extends LocalizationsDelegate<DiaryLocalizations> {

@@ -4,6 +4,8 @@ import '../controllers/checkin_list_controller.dart';
 import '../models/checkin_item.dart';
 import '../widgets/checkin_record_dialog.dart';
 import '../screens/checkin_record_screen.dart';
+import '../l10n/checkin_localizations.dart';
+import '../../../widgets/tag_manager_dialog.dart';
 import 'package:intl/intl.dart';
 
 class CheckinListScreen extends StatefulWidget {
@@ -26,8 +28,6 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
 
   void _handleStateChanged() {
     if (mounted) {
-      // 使用 SchedulerBinding 确保在下一帧渲染前更新状态
-      // 这样可以避免在布局过程中触发状态更新导致的异常
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {});
@@ -47,7 +47,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
-        title: const Text('打卡'),
+        title: Text(CheckinLocalizations.of(context)?.checkinPluginName ?? '打卡'),
         actions: [
           IconButton(
             icon: Icon(controller.isEditMode ? Icons.done : Icons.edit),
@@ -73,13 +73,13 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
               children: [
                 _buildStatCard(
                   context,
-                  '总项目',
+                  CheckinLocalizations.of(context)?.totalCheckinCount ?? '总项目',
                   '${statistics['totalItems']}',
                   Icons.list_alt,
                 ),
                 _buildStatCard(
                   context,
-                  '今日打卡数',
+                  CheckinLocalizations.of(context)?.todayCheckin ?? '今日打卡数',
                   '${statistics['todayCheckins'] ?? 0}',
                   Icons.today,
                   color: Colors.green,
@@ -457,10 +457,11 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
             color: Theme.of(context).disabledColor,
           ),
           const SizedBox(height: 16),
-          Text('没有打卡项目', style: Theme.of(context).textTheme.titleMedium),
+          Text(CheckinLocalizations.of(context)?.noRecords ?? '没有打卡项目', 
+               style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Text(
-            '点击下方按钮添加新的打卡项目',
+            CheckinLocalizations.of(context)?.createCheckin ?? '点击下方按钮添加新的打卡项目',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).hintColor,
             ),

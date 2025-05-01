@@ -7,6 +7,7 @@ import 'package:media_kit/media_kit.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/diary/l10n/diary_localizations.dart';
 import 'plugins/day/l10n/day_localizations.dart';
+import 'plugins/checkin/l10n/checkin_localizations.dart';
 import 'plugins/activity/l10n/activity_localizations.dart';
 import 'plugins/openai/l10n/openai_localizations.dart';
 // 移除未使用的导入
@@ -148,6 +149,7 @@ class _MyAppState extends State<MyApp> {
       localizationsDelegates: [
         AppLocalizations.delegate,
         DiaryLocalizations.delegate,
+        CheckinLocalizations.delegate,
         ActivityLocalizations.delegate,
         ChatLocalizations.delegate, // 添加聊天插件的本地化代理
         DayLocalizationsDelegate.delegate, // 添加纪念日插件的本地化代理

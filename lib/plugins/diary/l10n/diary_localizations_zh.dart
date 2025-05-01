@@ -122,4 +122,7 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
   
   @override
   String get sortByStartTimeDesc => '按开始时间降序';
+  
+  @override
+  String get mood => '心情';
 }
