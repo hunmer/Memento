@@ -37,7 +37,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       widget.selectedDate.month,
       widget.selectedDate.day,
       hourIndex,
-      minuteIndex * 5,
+      minuteIndex * 5 + 5,  // 实际时间从05开始
     );
   }
 
@@ -148,7 +148,9 @@ class _ActivityGridViewState extends State<ActivityGridView> {
           _selectionStart!.isBefore(_selectionEnd!)
               ? _selectionEnd!
               : _selectionStart!;
-      widget.onUnrecordedTimeTap(start, end);
+      // 调整开始时间，向前偏移5分钟
+      final adjustedStart = start.subtract(const Duration(minutes: 5));
+      widget.onUnrecordedTimeTap(adjustedStart, end);
     }
     setState(() {
       _isDragging = false;
@@ -220,7 +222,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                     return Expanded(
                       child: Center(
                         child: Text(
-                          '${index * 5}'.padLeft(2, '0'),
+                          '${(index * 5 + 5) % 60}'.padLeft(2, '0'),  // 显示从05开始
                           style: const TextStyle(fontSize: 12),
                         ),
                       ),
