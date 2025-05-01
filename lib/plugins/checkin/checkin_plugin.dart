@@ -59,6 +59,7 @@ class CheckinPlugin extends BasePlugin {
     return _checkinItems.where((item) => item.isCheckedToday()).length;
   }
 
+
   // 触发保存的公共方法
   Future<void> triggerSave() async {
     await _saveCheckinItems();

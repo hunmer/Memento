@@ -29,6 +29,9 @@ class TagManagerDialog extends StatefulWidget {
   /// 配置选项
   final TagManagerConfig? config;
 
+  /// 获取最新数据源的回调函数
+  final Future<List<TagGroup>> Function()? onRefreshData;
+
   const TagManagerDialog({
     super.key,
     required this.groups,
@@ -38,6 +41,7 @@ class TagManagerDialog extends StatefulWidget {
     this.enableEditing = true,
     this.onAddTag,
     this.config,
+    this.onRefreshData,
   });
 
   @override

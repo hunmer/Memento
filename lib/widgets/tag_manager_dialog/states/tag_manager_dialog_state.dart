@@ -195,7 +195,20 @@ abstract class TagManagerDialogState extends State<TagManagerDialog> {
   Future<void> handleTagLongPress(String tag, String group) async {
     if (widget.onAddTag != null) {
       final realGroup = group == config.allTagsLabel ? getTagRealGroup(tag) : group;
-      await widget.onAddTag!(realGroup, tag: tag);
+      final result = await widget.onAddTag!(realGroup, tag: tag);
+      
+      // 如果有返回值并且提供了刷新数据的回调，则获取最新数据
+      if (result != null && widget.onRefreshData != null) {
+        final newGroups = await widget.onRefreshData!();
+        setState(() {
+          groups = List.from(newGroups);
+          // 保持当前选中的分组
+          if (!groupNames.contains(selectedGroup) && selectedGroup != config.allTagsLabel) {
+            selectedGroup = config.allTagsLabel;
+          }
+        });
+        widget.onGroupsChanged(groups);
+      }
     }
   }
 }

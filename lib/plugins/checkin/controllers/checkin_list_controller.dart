@@ -284,12 +284,24 @@ class CheckinListController {
   // 显示分组管理对话框
   void showGroupManagementDialog() {
     // 将现有的分组转换为 TagGroup 格式
-    List<TagGroup> tagGroups = groups.map((group) {
+    Future<List<TagGroup>> convertToTagGroups() async {
+      return groups.map((group) {
       final items = groupedItems[group] ?? [];
       return TagGroup(
         name: group,
         tags: items.map((item) => item.name).toList(),
         tagIds: items.map((item) => item.id).toList(), // 添加 id 信息
+      );
+      }).toList();
+    }
+
+    // 初始化标签组
+    List<TagGroup> tagGroups = groups.map((group) {
+      final items = groupedItems[group] ?? [];
+      return TagGroup(
+        name: group,
+        tags: items.map((item) => item.name).toList(),
+        tagIds: items.map((item) => item.id).toList(),
       );
     }).toList();
 
@@ -367,6 +379,9 @@ class CheckinListController {
           // 保存更改
           await CheckinPlugin.shared.triggerSave();
           onStateChanged();
+        },
+        onRefreshData: () async {
+          return convertToTagGroups();
         },
         config: const TagManagerConfig(
           title: '管理分组',
