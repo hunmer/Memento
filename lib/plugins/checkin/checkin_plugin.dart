@@ -4,20 +4,13 @@ import '../../core/config_manager.dart';
 import '../base_plugin.dart';
 import 'l10n/checkin_localizations.dart';
 import 'models/checkin_item.dart';
-import 'screens/checkin_list_screen.dart';
+import 'screens/checkin_list_screen/checkin_list_screen.dart';
 import 'controllers/checkin_list_controller.dart';
 
 class CheckinPlugin extends BasePlugin {
-  // 单例模式
   static final CheckinPlugin _instance = CheckinPlugin._internal();
-
-  // 工厂构造函数
   factory CheckinPlugin() => _instance;
-
-  // 私有构造函数
   CheckinPlugin._internal();
-
-  // 单例实例访问器
   static CheckinPlugin get instance => _instance;
 
   @override

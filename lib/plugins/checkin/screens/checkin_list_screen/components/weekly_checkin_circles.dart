@@ -1,0 +1,77 @@
+import 'package:flutter/material.dart';
+import '../../../models/checkin_item.dart';
+
+class WeeklyCheckinCircles extends StatelessWidget {
+  final CheckinItem item;
+
+  const WeeklyCheckinCircles({
+    super.key,
+    required this.item,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(7, (index) {
+        final date = startOfWeek.add(Duration(days: index));
+        final isToday = date.year == now.year &&
+            date.month == now.month &&
+            date.day == now.day;
+        final hasCheckin = item.checkInRecords.keys.any((checkinDate) =>
+            checkinDate.year == date.year &&
+            checkinDate.month == date.month &&
+            checkinDate.day == date.day);
+        final isEnabled = item.frequency[index];
+
+        return Column(
+          children: [
+            Text(
+              weekdays[index],
+              style: TextStyle(
+                fontSize: 12,
+                color: isToday
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).hintColor,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: hasCheckin
+                    ? Colors.green
+                    : isEnabled
+                        ? Colors.transparent
+                        : Colors.grey.withOpacity(0.2),
+                border: Border.all(
+                  color: isToday
+                      ? Theme.of(context).primaryColor
+                      : hasCheckin
+                          ? Colors.green
+                          : isEnabled
+                              ? Colors.grey
+                              : Colors.transparent,
+                  width: isToday ? 2 : 1,
+                ),
+              ),
+              child: hasCheckin
+                  ? const Icon(
+                      Icons.check,
+                      size: 16,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+          ],
+        );
+      }),
+    );
+  }
+}

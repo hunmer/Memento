@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
+import '../controllers/checkin_list_controller.dart';
 import 'package:intl/intl.dart';
 
 class CheckinRecordScreen extends StatefulWidget {
   final CheckinItem checkinItem;
+  final CheckinListController controller;
 
-  const CheckinRecordScreen({super.key, required this.checkinItem});
+  const CheckinRecordScreen({
+    super.key, 
+    required this.checkinItem,
+    required this.controller,
+  });
 
   @override
   State<CheckinRecordScreen> createState() => _CheckinRecordScreenState();

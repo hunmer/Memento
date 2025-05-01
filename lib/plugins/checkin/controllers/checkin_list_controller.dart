@@ -101,6 +101,85 @@ class CheckinListController {
   }
 
   // 切换编辑模式
+  // 检查日期是否为今天
+  bool isToday(DateTime? date) {
+    if (date == null) return false;
+    final today = DateTime.now();
+    return date.year == today.year && date.month == today.month && date.day == today.day;
+  }
+
+  // 检查打卡项是否已完成
+  bool isCompleted(CheckinItem item) {
+    return item.isCheckedToday();
+  }
+
+  // 切换打卡状态
+  void toggleCheckin(CheckinItem item) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // 检查今天是否已打卡
+    if (item.isCheckedToday()) {
+      // 取消今天的打卡
+      item.checkInRecords.removeWhere((key, _) => 
+        key.year == today.year && key.month == today.month && key.day == today.day);
+    } else {
+      // 添加今天的打卡记录
+      final record = CheckinRecord(
+        startTime: now,
+        endTime: now,
+        checkinTime: now,
+      );
+      item.addCheckinRecord(record);
+    }
+    onStateChanged();
+  }
+
+  // 显示编辑打卡项对话框
+  void showEditItemDialog(CheckinItem item) {
+    showDialog<CheckinItem>(
+      context: context,
+      builder: (context) => CheckinFormDialog(
+        initialItem: item,
+      ),
+    ).then((updatedItem) {
+      if (updatedItem != null) {
+        final index = checkinItems.indexWhere((i) => i.id == updatedItem.id);
+        if (index != -1) {
+          checkinItems[index] = updatedItem;
+          CheckinPlugin.shared.triggerSave();
+          onStateChanged();
+        }
+      }
+    });
+  }
+
+  // 删除打卡项
+  void deleteItem(CheckinItem item) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('删除打卡项'),
+        content: Text('确定要删除"${item.name}"吗？此操作不可恢复。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              checkinItems.removeWhere((i) => i.id == item.id);
+              CheckinPlugin.shared.triggerSave();
+              onStateChanged();
+            },
+            child: const Text('删除', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void toggleEditMode() {
     isEditMode = !isEditMode;
     onStateChanged();

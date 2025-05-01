@@ -1,12 +1,17 @@
+import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
 
 class CheckinRecordDialog extends StatefulWidget {
-  final CheckinItem checkinItem;
+  final CheckinItem item;
+  final CheckinListController controller;
+  final VoidCallback onCheckinCompleted;
 
   const CheckinRecordDialog({
     super.key,
-    required this.checkinItem,
+    required this.item,
+    required this.controller,
+    required this.onCheckinCompleted,
   });
 
   @override
@@ -67,7 +72,6 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
     }
   }
 
-  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('添加打卡记录'),
@@ -140,7 +144,9 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
                     ? _noteController.text.trim() 
                     : null,
               );
-              Navigator.of(context).pop(record);
+              widget.item.addCheckinRecord(record);
+              widget.onCheckinCompleted();
+              Navigator.of(context).pop();
             }
           },
           child: const Text('打卡'),

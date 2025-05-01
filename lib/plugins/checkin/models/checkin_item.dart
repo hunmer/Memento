@@ -7,6 +7,8 @@ class CheckinItem {
   final IconData icon;
   final Color color;
   String group;
+  String description;
+  List<bool> frequency;
   // 打卡记录，包含时间范围和备注
   final Map<DateTime, CheckinRecord> checkInRecords;
 
@@ -16,10 +18,14 @@ class CheckinItem {
     required this.icon,
     Color? color,
     String? group,
+    String? description,
+    List<bool>? frequency,
     Map<DateTime, CheckinRecord>? checkInRecords,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        color = color ?? Colors.blue,
        group = group ?? '默认分组',
+       description = description ?? '',
+       frequency = frequency ?? List.filled(7, true),
        checkInRecords = checkInRecords ?? {};
 
   // 检查今天是否已打卡
@@ -27,6 +33,12 @@ class CheckinItem {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
     return checkInRecords.containsKey(todayDate);
+  }
+
+  // 获取最后一次打卡日期
+  DateTime? get lastCheckinDate {
+    if (checkInRecords.isEmpty) return null;
+    return checkInRecords.keys.reduce((a, b) => a.isAfter(b) ? a : b);
   }
 
   // 获取今天的打卡记录列表
