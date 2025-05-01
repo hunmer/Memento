@@ -56,12 +56,6 @@ class GroupCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (controller.isEditMode) ...[
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () {
-                      controller.showGroupManagementDialog();
-                    },
-                  ),
                   // 分组拖拽手柄
                   ReorderableDragStartListener(
                     index: groupIndex,

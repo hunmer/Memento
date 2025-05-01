@@ -9,6 +9,8 @@ class CheckinItem {
   String group;
   String description;
   List<bool> frequency;
+  // 提醒设置
+  ReminderSettings? reminderSettings;
   // 打卡记录，包含时间范围和备注
   final Map<DateTime, CheckinRecord> checkInRecords;
 
@@ -20,6 +22,7 @@ class CheckinItem {
     String? group,
     String? description,
     List<bool>? frequency,
+    this.reminderSettings,
     Map<DateTime, CheckinRecord>? checkInRecords,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        color = color ?? Colors.blue,
@@ -129,6 +132,7 @@ class CheckinItem {
       'icon': icon.codePoint,
       'color': color.value,
       'group': group,
+      'reminderSettings': reminderSettings?.toJson(),
       'checkInRecords': checkInRecords.map(
         (key, value) => MapEntry(key.toIso8601String(), value.toJson()),
       ),
@@ -155,6 +159,9 @@ class CheckinItem {
       icon: icon,
       color: Color(json['color']),
       group: json['group'] ?? '默认分组',
+      reminderSettings: json['reminderSettings'] != null
+          ? ReminderSettings.fromJson(json['reminderSettings'])
+          : null,
       checkInRecords: (json['checkInRecords'] as Map<String, dynamic>).map(
         (key, value) => MapEntry(
           DateTime.parse(key),
@@ -163,6 +170,58 @@ class CheckinItem {
       ),
     );
   }
+}
+
+// 提醒设置类
+class ReminderSettings {
+  final ReminderType type;
+  final List<int> weekdays; // 用于周提醒，0-6 表示周日到周六
+  final int? dayOfMonth; // 用于月提醒，1-31
+  final DateTime? specificDate; // 用于特定日期提醒
+  final TimeOfDay timeOfDay; // 提醒时间
+
+  ReminderSettings({
+    required this.type,
+    this.weekdays = const [],
+    this.dayOfMonth,
+    this.specificDate,
+    required this.timeOfDay,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.index,
+      'weekdays': weekdays,
+      'dayOfMonth': dayOfMonth,
+      'specificDate': specificDate?.toIso8601String(),
+      'timeOfDay': {
+        'hour': timeOfDay.hour,
+        'minute': timeOfDay.minute,
+      },
+    };
+  }
+
+  factory ReminderSettings.fromJson(Map<String, dynamic> json) {
+    return ReminderSettings(
+      type: ReminderType.values[json['type'] as int],
+      weekdays: (json['weekdays'] as List<dynamic>).cast<int>(),
+      dayOfMonth: json['dayOfMonth'] as int?,
+      specificDate: json['specificDate'] != null
+          ? DateTime.parse(json['specificDate'] as String)
+          : null,
+      timeOfDay: TimeOfDay(
+        hour: (json['timeOfDay'] as Map<String, dynamic>)['hour'] as int,
+        minute: (json['timeOfDay'] as Map<String, dynamic>)['minute'] as int,
+      ),
+    );
+  }
+}
+
+// 提醒类型枚举
+enum ReminderType {
+  weekly, // 每周特定日期提醒
+  monthly, // 每月特定日期提醒
+  specific, // 特定日期提醒
 }
 
 // 打卡记录类

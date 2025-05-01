@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
-import '../widgets/checkin_form_dialog.dart';
+import '../screens/checkin_form_screen.dart';
 import 'package:intl/intl.dart';
 import '../checkin_plugin.dart';
 
@@ -135,12 +135,14 @@ class CheckinListController {
     onStateChanged();
   }
 
-  // 显示编辑打卡项对话框
+  // 显示编辑打卡项页面
   void showEditItemDialog(CheckinItem item) {
-    showDialog<CheckinItem>(
-      context: context,
-      builder: (context) => CheckinFormDialog(
-        initialItem: item,
+    Navigator.push<CheckinItem>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckinFormScreen(
+          initialItem: item,
+        ),
       ),
     ).then((updatedItem) {
       if (updatedItem != null) {
@@ -230,9 +232,11 @@ class CheckinListController {
 
   // 编辑打卡项目
   void _editCheckinItem(CheckinItem item) {
-    showDialog<CheckinItem>(
-      context: context,
-      builder: (context) => CheckinFormDialog(initialItem: item),
+    Navigator.push<CheckinItem>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckinFormScreen(initialItem: item),
+      ),
     ).then((editedItem) async {
       if (editedItem != null) {
         final index = checkinItems.indexOf(item);
@@ -511,15 +515,17 @@ class CheckinListController {
       );
     }
     
-    showDialog<CheckinItem>(
-      context: context,
-      builder: (context) => CheckinFormDialog(
-        initialItem: existingItem ?? templateItem ?? (group != null ? CheckinItem(
-          name: '',
-          group: group,
-          icon: Icons.check_circle,
-          color: Colors.blue,
-        ) : null),
+    Navigator.push<CheckinItem>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckinFormScreen(
+          initialItem: existingItem ?? templateItem ?? (group != null ? CheckinItem(
+            name: '',
+            group: group,
+            icon: Icons.check_circle,
+            color: Colors.blue,
+          ) : null),
+        ),
       ),
     ).then((checkinItem) async {
       if (checkinItem != null) {

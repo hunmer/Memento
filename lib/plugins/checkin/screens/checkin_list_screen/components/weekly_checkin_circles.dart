@@ -40,34 +40,70 @@ class WeeklyCheckinCircles extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: hasCheckin
-                    ? Colors.green
-                    : isEnabled
-                        ? Colors.transparent
-                        : Colors.grey.withOpacity(0.2),
-                border: Border.all(
-                  color: isToday
-                      ? Theme.of(context).primaryColor
-                      : hasCheckin
-                          ? Colors.green
-                          : isEnabled
-                              ? Colors.grey
-                              : Colors.transparent,
-                  width: isToday ? 2 : 1,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: hasCheckin
+                        ? Colors.green
+                        : isEnabled
+                            ? Colors.transparent
+                            : Colors.grey.withOpacity(0.2),
+                    border: Border.all(
+                      color: isToday
+                          ? Theme.of(context).primaryColor
+                          : hasCheckin
+                              ? Colors.green
+                              : isEnabled
+                                  ? Colors.grey
+                                  : Colors.transparent,
+                      width: isToday ? 2 : 1,
+                    ),
+                  ),
+                  child: hasCheckin
+                      ? const Icon(
+                          Icons.check,
+                          size: 16,
+                          color: Colors.white,
+                        )
+                      : null,
                 ),
-              ),
-              child: hasCheckin
-                  ? const Icon(
-                      Icons.check,
-                      size: 16,
-                      color: Colors.white,
-                    )
-                  : null,
+                if (isToday && item.getTodayRecords().length > 1)
+                  Positioned(
+                    top: -8,
+                    right: -8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        '${item.getTodayRecords().length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         );

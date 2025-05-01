@@ -73,6 +73,7 @@ class CheckinItemCard extends StatelessWidget {
                         color: isCompleted ? Colors.green : Colors.grey,
                       ),
                       onPressed: () {
+                          // 如果今天未打卡，则打卡
                           showDialog(
                             context: context,
                             builder: (context) => CheckinRecordDialog(
