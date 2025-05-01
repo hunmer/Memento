@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/activity_record.dart';
-import 'tag_manager_dialog.dart';
+import 'package:Memento/widgets/tag_manager_dialog.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../services/activity_service.dart';
 import '../../../plugins/diary/l10n/diary_localizations.dart';

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../models/activity_record.dart';
-import '../widgets/tag_manager_dialog.dart';
+import 'package:Memento/widgets/tag_manager_dialog.dart';
 
 class ActivityService {
   final StorageManager _storage;
