@@ -283,33 +283,25 @@ class CheckinListController {
 
   // 显示分组管理对话框
   void showGroupManagementDialog() {
-    // 将现有的分组转换为 TagGroup 格式
-    Future<List<TagGroup>> convertToTagGroups() async {
+    // 获取当前的标签组
+    List<TagGroup> getCurrentTagGroups() {
       return groups.map((group) {
-      final items = groupedItems[group] ?? [];
-      return TagGroup(
-        name: group,
-        tags: items.map((item) => item.name).toList(),
-        tagIds: items.map((item) => item.id).toList(), // 添加 id 信息
-      );
+        final items = groupedItems[group] ?? [];
+        return TagGroup(
+          name: group,
+          tags: items.map((item) => item.name).toList(),
+          tagIds: items.map((item) => item.id).toList(),
+        );
       }).toList();
     }
 
-    // 初始化标签组
-    List<TagGroup> tagGroups = groups.map((group) {
-      final items = groupedItems[group] ?? [];
-      return TagGroup(
-        name: group,
-        tags: items.map((item) => item.name).toList(),
-        tagIds: items.map((item) => item.id).toList(),
-      );
-    }).toList();
-
     // 获取当前选中的标签（打卡项目）
-    List<String> selectedTags = checkinItems
-        .where((item) => item.isCheckedToday())
-        .map((item) => item.name)
-        .toList();
+    List<String> getSelectedTags() {
+      return checkinItems
+          .where((item) => item.isCheckedToday())
+          .map((item) => item.name)
+          .toList();
+    }
 
     // 创建一个 Completer 用于处理添加标签的异步操作
     Completer<String?>? addTagCompleter;
@@ -317,13 +309,15 @@ class CheckinListController {
     showDialog(
       context: context,
       builder: (dialogContext) => TagManagerDialog(
-        groups: tagGroups,
-        selectedTags: selectedTags,
+        groups: getCurrentTagGroups(),
+        selectedTags: getSelectedTags(),
         onAddTag: (String group, {String? tag}) async {
+          // 获取最新的标签组数据
+          final currentGroups = getCurrentTagGroups();
           // 获取标签对应的id（如果存在）
           String? itemId;
           if (tag != null) {
-            for (var tagGroup in tagGroups) {
+            for (var tagGroup in currentGroups) {
               if (tagGroup.name == group) {
                 final tagIndex = tagGroup.tags.indexOf(tag);
                 if (tagIndex != -1 && tagGroup.tagIds != null && tagGroup.tagIds!.length > tagIndex) {
@@ -381,7 +375,7 @@ class CheckinListController {
           onStateChanged();
         },
         onRefreshData: () async {
-          return convertToTagGroups();
+          return getCurrentTagGroups();
         },
         config: const TagManagerConfig(
           title: '管理分组',

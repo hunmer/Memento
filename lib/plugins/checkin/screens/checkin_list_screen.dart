@@ -5,7 +5,6 @@ import '../models/checkin_item.dart';
 import '../widgets/checkin_record_dialog.dart';
 import '../screens/checkin_record_screen.dart';
 import '../l10n/checkin_localizations.dart';
-import '../../../widgets/tag_manager_dialog.dart';
 import 'package:intl/intl.dart';
 
 class CheckinListScreen extends StatefulWidget {
