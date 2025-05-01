@@ -67,5 +67,14 @@ class PluginAnalysisMethod {
         'endDate': '2025-05-01',
       },
     ),
+    PluginAnalysisMethod(
+      name: 'diary_getDiaries',
+      title: '获取日记列表',
+      template: {
+        'method': 'diary_getDiaries',
+        'startDate': '2025-04-15',
+        'endDate': '2025-05-03',
+      },
+    ),
   ];
 }

@@ -31,7 +31,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   }
 
   Future<void> _loadDiaryEntries() async {
-    final entries = await DiaryUtils.loadDiaryEntries(widget.storage);
+    final entries = await DiaryUtils.loadDiaryEntries();
     if (mounted) {
       setState(() {
         _diaryEntries = entries;

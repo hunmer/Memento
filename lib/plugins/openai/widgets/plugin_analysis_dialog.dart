@@ -1,11 +1,12 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/ai_agent.dart';
 import '../widgets/agent_list_drawer.dart';
 import '../services/plugin_analysis_service.dart';
-// 移除未使用的导入
 import '../widgets/plugin_method_selection_dialog.dart';
 import '../../../utils/image_utils.dart';
 import '../l10n/openai_localizations.dart';
@@ -121,6 +122,12 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
   String? _responseMessage;
   bool _isLoading = false;
   int _currentTabIndex = 0; // 当前选中的标签页索引
+  final TabController? _tabController = null; // 将在initState中初始化
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -169,6 +176,19 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
 
   // 此方法不再需要，已经在按钮的onPressed中直接处理
 
+  // 在后台线程处理API请求的方法
+  static Future<String> _processInBackground(Map<String, dynamic> params) async {
+    final agent = params['agent'] as AIAgent;
+    final prompt = params['prompt'] as String;
+    final service = PluginAnalysisService();
+    
+    try {
+      return await service.sendToAgent(agent, prompt);
+    } catch (e) {
+      return "ERROR: $e";
+    }
+  }
+
   // 发送到智能体
   Future<void> _sendToAgent() async {
     final localizations = OpenAILocalizations.of(context);
@@ -190,27 +210,37 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
     setState(() {
       _isLoading = true;
       _responseMessage = null;
+      _currentTabIndex = 1; // 立即切换到输出标签页
     });
 
     try {
-      final response = await _service.sendToAgent(
-        _selectedAgent!,
-        _promptController.text,
-      );
+      // 使用compute在后台线程处理请求
+      final response = await compute(_processInBackground, {
+        'agent': _selectedAgent!,
+        'prompt': _promptController.text,
+      });
+
+      if (!mounted) return;
 
       setState(() {
-        _responseMessage = response;
-        _currentTabIndex = 1; // 自动切换到输出标签页
+        if (response.startsWith("ERROR:")) {
+          _responseMessage = '${localizations.sendingFailed} ${response.substring(6)}';
+        } else {
+          _responseMessage = response;
+        }
       });
     } catch (e) {
+      if (!mounted) return;
+      
       setState(() {
-        _responseMessage = '${localizations.sendingFailed}$e';
-        _currentTabIndex = 1; // 即使出错也切换到输出标签页
+        _responseMessage = '${localizations.sendingFailed} $e';
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -323,33 +353,34 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        if (_isLoading)
-          const Center(child: CircularProgressIndicator())
-        else if (_responseMessage != null)
-          Container(
-            width: double.infinity,
-            height: double.infinity, // 充满可用空间
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Markdown(
-              data: _responseMessage!,
-              selectable: true, // 允许选择文本
-              padding: EdgeInsets.zero,
-            ),
-          )
-        else
-          Center(
-            child: Text(
-              localizations.noResponseYet,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
+        Expanded(
+          child: SingleChildScrollView(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(4),
               ),
+              child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _responseMessage != null
+                  ? MarkdownBody(
+                      data: _responseMessage!,
+                      selectable: true, // 允许选择文本
+                    )
+                  : Center(
+                      child: Text(
+                        localizations.noResponseYet,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
             ),
           ),
+        ),
       ],
     );
   }
@@ -385,37 +416,37 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
             const Divider(),
             
             // 添加标签页
-            DefaultTabController(
-              length: 2,
-              initialIndex: _currentTabIndex,
-              child: Expanded(
+            Expanded(
+              child: DefaultTabController(
+                length: 2,
+                initialIndex: _currentTabIndex,
                 child: Column(
                   children: [
-                  TabBar(
-                    onTap: (index) {
-                      setState(() {
-                        _currentTabIndex = index;
-                      });
-                    },
-                    tabs: [
-                      Tab(text: localizations.form),
-                      Tab(text: localizations.output),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: IndexedStack(
-                      index: _currentTabIndex,
-                      children: [
-                      // 表单标签页内容
-                      _buildFormTab(localizations),
-                      
-                      // 输出标签页内容
-                      _buildOutputTab(localizations),
-                    ],
+                    TabBar(
+                      onTap: (index) {
+                        setState(() {
+                          _currentTabIndex = index;
+                        });
+                      },
+                      tabs: [
+                        Tab(text: localizations.form),
+                        Tab(text: localizations.output),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: TabBarView(
+                        physics: const NeverScrollableScrollPhysics(), // 禁用滑动以确保IndexedStack的行为
+                        children: [
+                          // 表单标签页内容
+                          _buildFormTab(localizations),
+                          
+                          // 输出标签页内容
+                          _buildOutputTab(localizations),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

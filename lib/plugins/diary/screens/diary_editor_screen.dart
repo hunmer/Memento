@@ -38,7 +38,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
   }
 
   Future<void> _loadCurrentEntry() async {
-    final entry = await DiaryUtils.loadDiaryEntry(widget.storage, widget.date);
+    final entry = await DiaryUtils.loadDiaryEntry(widget.date);
     if (entry != null && mounted) {
       setState(() {
         _selectedMood = entry.mood;
@@ -107,7 +107,6 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
           final currentContext = context;
           
           await DiaryUtils.saveDiaryEntry(
-            widget.storage,
             widget.date,
             content,
             title: title,

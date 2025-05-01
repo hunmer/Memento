@@ -2,9 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import '../../../core/storage/storage_manager.dart';
 import '../models/diary_entry.dart';
+import '../diary_plugin.dart';
 
 class DiaryUtils {
   static const String _pluginDir = 'diary';
+  
+  // 获取插件的存储管理器
+  static StorageManager get _storage => DiaryPlugin.instance.storage;
 
   static String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -18,9 +22,8 @@ class DiaryUtils {
     return path.join(_pluginDir, '${_formatDate(date)}.json');
   }
 
-  static Future<Map<DateTime, DiaryEntry>> loadDiaryEntries(
-    StorageManager storage,
-  ) async {
+  static Future<Map<DateTime, DiaryEntry>> loadDiaryEntries() async {
+    final storage = _storage;
     try {
       final Map<DateTime, DiaryEntry> entries = {};
 
@@ -64,12 +67,12 @@ class DiaryUtils {
   }
 
   static Future<void> saveDiaryEntry(
-    StorageManager storage,
     DateTime date,
     String content, {
     String title = '',
     String? mood,
   }) async {
+    final storage = _storage;
     try {
       final normalizedDate = _normalizeDate(date);
       final dateStr = _formatDate(normalizedDate);
@@ -109,7 +112,7 @@ class DiaryUtils {
       await storage.writeJson(entryPath, newEntry.toJson());
 
       // 更新索引文件
-      await _updateDiaryIndex(storage, dateStr);
+      await _updateDiaryIndex(dateStr);
 
       debugPrint('Saved diary entry for $dateStr');
     } catch (e) {
@@ -120,9 +123,9 @@ class DiaryUtils {
 
   /// 更新日记索引文件
   static Future<void> _updateDiaryIndex(
-    StorageManager storage,
     String dateStr,
   ) async {
+    final storage = _storage;
     final indexPath = path.join(_pluginDir, 'diary_index.json');
 
     try {
@@ -145,9 +148,9 @@ class DiaryUtils {
 
   /// 加载特定日期的日记条目
   static Future<DiaryEntry?> loadDiaryEntry(
-    StorageManager storage,
     DateTime date,
   ) async {
+    final storage = _storage;
     try {
       final normalizedDate = _normalizeDate(date);
       final entryPath = _getEntryPath(normalizedDate);
@@ -166,9 +169,9 @@ class DiaryUtils {
 
   /// 删除特定日期的日记条目
   static Future<bool> deleteDiaryEntry(
-    StorageManager storage,
     DateTime date,
   ) async {
+    final storage = _storage;
     try {
       final normalizedDate = _normalizeDate(date);
       final dateStr = _formatDate(normalizedDate);
@@ -186,7 +189,7 @@ class DiaryUtils {
       await storage.deleteFile(entryPath);
 
       // 从索引中移除并更新总字数
-      await _removeFromDiaryIndex(storage, dateStr, contentLength);
+      await _removeFromDiaryIndex(dateStr, contentLength);
 
       debugPrint('Deleted diary entry for $dateStr');
       return true;
@@ -198,10 +201,10 @@ class DiaryUtils {
 
   /// 从索引中移除日记条目并更新总字数
   static Future<void> _removeFromDiaryIndex(
-    StorageManager storage,
     String dateStr,
     int contentLength,
   ) async {
+    final storage = _storage;
     final indexPath = path.join(_pluginDir, 'diary_index.json');
 
     try {
@@ -228,16 +231,17 @@ class DiaryUtils {
 
   /// 检查特定日期是否有日记条目
   static Future<bool> hasEntryForDate(
-    StorageManager storage,
     DateTime date,
   ) async {
+    final storage = _storage;
     final normalizedDate = _normalizeDate(date);
     final entryPath = _getEntryPath(normalizedDate);
     return await storage.fileExists(entryPath);
   }
 
   /// 获取所有日记的总字数
-  static Future<int> getTotalCharCount(StorageManager storage) async {
+  static Future<int> getTotalCharCount() async {
+    final storage = _storage;
     final indexPath = path.join(_pluginDir, 'diary_index.json');
 
     try {
@@ -255,9 +259,9 @@ class DiaryUtils {
 
   /// 获取特定日期日记的字数
   static Future<int> getEntryCharCount(
-    StorageManager storage,
     DateTime date,
   ) async {
+    final storage = _storage;
     final dateStr = _formatDate(_normalizeDate(date));
     final indexPath = path.join(_pluginDir, 'diary_index.json');
 
@@ -276,9 +280,8 @@ class DiaryUtils {
   }
 
   /// 获取日记统计信息
-  static Future<Map<String, dynamic>> getDiaryStats(
-    StorageManager storage,
-  ) async {
+  static Future<Map<String, dynamic>> getDiaryStats() async {
+    final storage = _storage;
     final indexPath = path.join(_pluginDir, 'diary_index.json');
 
     try {

@@ -28,3 +28,12 @@
   "startDate": "2025-04-01",
   "endDate": "2025-05-01"
 }
+
+# diary_getDiaries
+
+```
+{
+  "method": "diary_getDiaries",
+  "startDate": "2025-04-15",
+  "endDate": "2025-05-02"
+}

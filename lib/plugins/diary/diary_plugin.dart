@@ -3,11 +3,33 @@ import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import 'l10n/diary_localizations.dart';
+import 'controls/prompt_controller.dart';
 import 'screens/diary_calendar_screen.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
 class DiaryPlugin extends BasePlugin {
+  final DiaryPromptController _promptController = DiaryPromptController();
+  final String pluginDir = 'diary';
+
+  static final DiaryPlugin instance = DiaryPlugin._internal();
+  DiaryPlugin._internal();
+
+  @override
+  String get id => 'diary_plugin';
+
+  @override
+  String get name => 'Diary';
+
+  @override
+  final String version = '1.0.0';
+
+  @override
+  String get description => 'Diary management plugin';
+
+  @override
+  String get author => 'Zhuanz';
+
   // 获取今日文字数
   Future<int> getTodayWordCount() async {
     final today = DateTime.now();
@@ -78,25 +100,21 @@ class DiaryPlugin extends BasePlugin {
     return (completedDays, totalDays);
   }
 
-  static final DiaryPlugin instance = DiaryPlugin._internal();
-  DiaryPlugin._internal();
-
   @override
-  final String id = 'diary_plugin';
+  Future<void> initialize() async {
+    // 确保日记数据目录存在
+    await storage.createDirectory(pluginDir);
+    
+    // 初始化 prompt 控制器
+    _promptController.initialize();
 
-  @override
-  String get name =>  'Diary';
-
-  @override
-  final String version = '1.0.0';
-
-  final String pluginDir = 'diary';
-
-  @override
-  String get description => 'Diary management plugin';
-
-  @override
-  String get author => 'Zhuanz';
+    // 初始化默认配置
+    await loadSettings({
+      'theme': 'light',
+      'version': version,
+      'enabled': true,
+    });
+  }
 
   @override
   Future<void> registerToApp(
@@ -113,14 +131,12 @@ class DiaryPlugin extends BasePlugin {
     await configManager.savePluginConfig(id, {
       'version': version,
       'enabled': true,
-      'settings': {'theme': 'light'},
+      'settings': settings,
     });
   }
 
-  @override
-  Future<void> initialize() async {
-    // 确保日记数据目录存在
-    await storage.createDirectory(pluginDir);
+  Future<void> dispose() async {
+    _promptController.unregisterPromptMethods();
   }
 
   @override
@@ -129,7 +145,7 @@ class DiaryPlugin extends BasePlugin {
   }
 
   @override
-  Widget? buildCardView(BuildContext context) {
+  Widget buildCardView(BuildContext context) {
     final theme = Theme.of(context);
 
     return FutureBuilder<(int, int, int)>(
@@ -259,6 +275,15 @@ class DiaryPlugin extends BasePlugin {
           ),
         );
       },
+    );
+  }
+
+  @override
+  Widget buildSettingsView(BuildContext context) {
+    return Column(
+      children: [
+        // TODO 插件设置项
+      ],
     );
   }
 }
