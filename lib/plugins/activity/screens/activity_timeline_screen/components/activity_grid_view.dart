@@ -27,8 +27,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
   bool _isDragging = false;
   bool _isMouseDown = false;
 
-  // 跟踪鼠标位置
-  Offset? _lastMousePosition;
+  // 不再需要跟踪鼠标位置
   final GlobalKey _gridKey = GlobalKey();
 
   // 计算网格索引对应的时间
@@ -163,44 +162,26 @@ class _ActivityGridViewState extends State<ActivityGridView> {
     }
   }
 
-  // 根据鼠标位置找到对应的时间
-  DateTime? _getTimeFromOffset(Offset localPosition) {
-    if (_gridKey.currentContext == null) return null;
-
-    final RenderBox box =
-        _gridKey.currentContext!.findRenderObject() as RenderBox;
-    final Size size = box.size;
-
-    // 计算鼠标位置对应的行和列
-    final double cellWidth = (size.width - 30) / 12; // 减去小时标签宽度，除以12个5分钟格子
-    final double cellHeight = 33; // 每个格子高度
-
-    // 计算小时和分钟
-    final int hourIndex = (localPosition.dy / cellHeight).floor();
-    if (hourIndex < 0 || hourIndex >= 24) return null;
-
-    // 减去小时标签宽度
-    final double adjustedX = localPosition.dx - 30;
-    if (adjustedX < 0) return null;
-
-    final int minuteIndex = (adjustedX / cellWidth).floor();
-    if (minuteIndex < 0 || minuteIndex >= 12) return null;
-
-    return _getTimeFromIndex(hourIndex, minuteIndex);
-  }
-
-  // 处理鼠标移动事件
-  void _handleMouseMove(PointerMoveEvent event) {
-    if (!_isMouseDown) return;
-
-    final RenderBox box =
-        _gridKey.currentContext!.findRenderObject() as RenderBox;
-    final Offset localPosition = box.globalToLocal(event.position);
-    _lastMousePosition = localPosition;
-
-    final DateTime? time = _getTimeFromOffset(localPosition);
-    if (time != null) {
-      _onGridDragUpdate(time);
+  // 不再需要根据鼠标位置计算时间，直接使用网格的时间
+  
+  // 处理网格的鼠标悬停事件
+  void _handleGridHover(DateTime time) {
+    if (_isMouseDown) {
+      if (!_isDragging) {
+        // 第一次进入拖动状态
+        setState(() {
+          _isDragging = true;
+          _selectionStart = time;
+          _selectionEnd = time;
+        });
+        // 通知选择范围变化
+        if (widget.onSelectionChanged != null) {
+          widget.onSelectionChanged!(_selectionStart, _selectionEnd);
+        }
+      } else {
+        // 更新拖动终点
+        _onGridDragUpdate(time);
+      }
     }
   }
 
@@ -208,20 +189,14 @@ class _ActivityGridViewState extends State<ActivityGridView> {
   Widget build(BuildContext context) {
     return Listener(
       onPointerDown: (PointerDownEvent event) {
-        final RenderBox box =
-            _gridKey.currentContext!.findRenderObject() as RenderBox;
-        final Offset localPosition = box.globalToLocal(event.position);
-        _lastMousePosition = localPosition;
-
-        final DateTime? time = _getTimeFromOffset(localPosition);
-        if (time != null) {
-          setState(() {
-            _isMouseDown = true;
-          });
-          _onGridTapDown(time);
-        }
+        setState(() {
+          _isMouseDown = true;
+        });
       },
-      onPointerMove: _handleMouseMove,
+      onPointerMove: (PointerMoveEvent event) {
+        if (!_isMouseDown) return;
+        // 继续跟踪鼠标移动状态
+      },
       onPointerUp: (PointerUpEvent event) {
         if (_isMouseDown) {
           setState(() {
@@ -289,7 +264,14 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                                       _isDragging
                                           ? SystemMouseCursors.grabbing
                                           : SystemMouseCursors.click,
+                                  // 添加鼠标悬停事件处理
+                                  onEnter: (_) => _handleGridHover(time),
                                   child: GestureDetector(
+                                    onTapDown: (_) {
+                                      if (!_isDragging) {
+                                        _onGridTapDown(time);
+                                      }
+                                    },
                                     // 移动端长按事件
                                     onLongPressStart: (_) {
                                       // 检查是否点击了已有活动
