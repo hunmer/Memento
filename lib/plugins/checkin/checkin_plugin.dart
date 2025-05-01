@@ -7,6 +7,7 @@ import 'models/checkin_item.dart';
 import 'screens/checkin_list_screen/checkin_list_screen.dart';
 import 'screens/checkin_stats_screen/checkin_stats_screen.dart';
 import 'controllers/checkin_list_controller.dart';
+import 'controls/prompt_controller.dart';
 
 class CheckinMainView extends StatefulWidget {
   const CheckinMainView({super.key});
@@ -70,8 +71,12 @@ class _CheckinMainViewState extends State<CheckinMainView> {
 class CheckinPlugin extends BasePlugin {
   static final CheckinPlugin _instance = CheckinPlugin._internal();
   factory CheckinPlugin() => _instance;
-  CheckinPlugin._internal();
+  CheckinPlugin._internal() {
+    _promptController = PromptController();
+  }
   static CheckinPlugin get instance => _instance;
+
+  late final PromptController _promptController;
 
   @override
   String get id => 'checkin';
@@ -120,6 +125,9 @@ class CheckinPlugin extends BasePlugin {
   @override
   Future<void> initialize() async {
     try {
+      // 初始化prompt控制器
+      _promptController.initialize();
+
       // 从存储中加载保存的打卡项目
       final pluginPath = 'checkin/$_storageKey';
       if (await storage.fileExists(pluginPath)) {
@@ -139,6 +147,11 @@ class CheckinPlugin extends BasePlugin {
     } catch (e) {
       debugPrint('初始化打卡项目失败: $e');
     }
+  }
+
+  @override
+  Future<void> uninstall() async {
+    _promptController.unregisterPromptMethods();
   }
 
   @override

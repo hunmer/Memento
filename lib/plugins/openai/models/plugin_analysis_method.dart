@@ -58,5 +58,14 @@ class PluginAnalysisMethod {
         'endDate': '2025-05-01',
       },
     ),
+    PluginAnalysisMethod(
+      name: 'checkin_getCheckinHistory',
+      title: '获取打卡历史记录',
+      template: {
+        'method': 'checkin_getCheckinHistory',
+        'startDate': '2025-04-01',
+        'endDate': '2025-05-01',
+      },
+    ),
   ];
 }

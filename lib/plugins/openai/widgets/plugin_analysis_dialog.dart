@@ -120,6 +120,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
   AIAgent? _selectedAgent;
   String? _responseMessage;
   bool _isLoading = false;
+  int _currentTabIndex = 0; // 当前选中的标签页索引
 
   @override
   void dispose() {
@@ -199,10 +200,12 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
 
       setState(() {
         _responseMessage = response;
+        _currentTabIndex = 1; // 自动切换到输出标签页
       });
     } catch (e) {
       setState(() {
         _responseMessage = '${localizations.sendingFailed}$e';
+        _currentTabIndex = 1; // 即使出错也切换到输出标签页
       });
     } finally {
       setState(() {
@@ -211,16 +214,161 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
     }
   }
 
+  // 构建表单标签页
+  Widget _buildFormTab(OpenAILocalizations localizations) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 智能体选择器
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              if (_selectedAgent != null) ...[
+                _buildAgentIcon(_selectedAgent!),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _selectedAgent!.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedAgent!.description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ] else
+                Expanded(
+                  child: Text(
+                    localizations.noAgentSelected,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: _openAgentSelector,
+                tooltip: localizations.selectAgentTooltip,
+              ),
+            ],
+          ),
+        ),
+        
+        // 提示词输入
+        const SizedBox(height: 16),
+        TextField(
+          controller: _promptController,
+          decoration: InputDecoration(
+            labelText: localizations.prompt,
+            border: const OutlineInputBorder(),
+            alignLabelWithHint: true,
+          ),
+          maxLines: 8,
+          minLines: 4,
+        ),
+        
+        // 添加分析方法按钮
+        const SizedBox(height: 16),
+        Center(
+          child: OutlinedButton.icon(
+            onPressed: () async {
+              final result = await showDialog<Map<String, String>>(
+                context: context,
+                builder: (context) => const PluginMethodSelectionDialog(),
+              );
+              
+              if (result != null && mounted) {
+                setState(() {
+                  // 在当前提示词的末尾添加 JSON 字符串
+                  final currentText = _promptController.text;
+                  final jsonString = result['jsonString'] ?? '';
+                  final newText = currentText.isEmpty
+                      ? jsonString
+                      : '$currentText\n$jsonString';
+                  _promptController.text = newText;
+                });
+              }
+            },
+            icon: const Icon(Icons.add),
+            label: Text(localizations.addAnalysisMethod),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 构建输出标签页
+  Widget _buildOutputTab(OpenAILocalizations localizations) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          localizations.agentResponse,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        if (_isLoading)
+          const Center(child: CircularProgressIndicator())
+        else if (_responseMessage != null)
+          Container(
+            width: double.infinity,
+            height: double.infinity, // 充满可用空间
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Markdown(
+              data: _responseMessage!,
+              selectable: true, // 允许选择文本
+              padding: EdgeInsets.zero,
+            ),
+          )
+        else
+          Center(
+            child: Text(
+              localizations.noResponseYet,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 16,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = OpenAILocalizations.of(context);
     
+    // 获取屏幕尺寸
+    final screenSize = MediaQuery.of(context).size;
+    final dialogHeight = screenSize.height * 0.8; // 设置为屏幕高度的80%
+    
     return Dialog(
       child: Container(
         width: 600,
+        height: dialogHeight,
         padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max, // 改为max以充满容器高度
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 标题
@@ -236,123 +384,41 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
             ),
             const Divider(),
             
-            // 智能体选择器
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                children: [
-                  if (_selectedAgent != null) ...[
-                    _buildAgentIcon(_selectedAgent!),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _selectedAgent!.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _selectedAgent!.description,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+            // 添加标签页
+            DefaultTabController(
+              length: 2,
+              initialIndex: _currentTabIndex,
+              child: Expanded(
+                child: Column(
+                  children: [
+                  TabBar(
+                    onTap: (index) {
+                      setState(() {
+                        _currentTabIndex = index;
+                      });
+                    },
+                    tabs: [
+                      Tab(text: localizations.form),
+                      Tab(text: localizations.output),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: IndexedStack(
+                      index: _currentTabIndex,
+                      children: [
+                      // 表单标签页内容
+                      _buildFormTab(localizations),
+                      
+                      // 输出标签页内容
+                      _buildOutputTab(localizations),
+                    ],
                     ),
-                  ] else
-                    Expanded(
-                      child: Text(
-                        localizations.noAgentSelected,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: _openAgentSelector,
-                    tooltip: localizations.selectAgentTooltip,
                   ),
                 ],
-              ),
-            ),
-            
-            // 提示词输入
-            const SizedBox(height: 16),
-            TextField(
-              controller: _promptController,
-              decoration: InputDecoration(
-                labelText: localizations.prompt,
-                border: const OutlineInputBorder(),
-                alignLabelWithHint: true,
-              ),
-              maxLines: 8,
-              minLines: 4,
-            ),
-            
-            // 添加分析方法按钮
-            const SizedBox(height: 16),
-            Center(
-              child: OutlinedButton.icon(
-                onPressed: () async {
-                  final result = await showDialog<Map<String, String>>(
-                    context: context,
-                    builder: (context) => const PluginMethodSelectionDialog(),
-                  );
-                  
-                  if (result != null && mounted) {
-                    setState(() {
-                      // 在当前提示词的末尾添加 JSON 字符串
-                      final currentText = _promptController.text;
-                      final jsonString = result['jsonString'] ?? '';
-                      final newText = currentText.isEmpty
-                          ? jsonString
-                          : '$currentText\n$jsonString';
-                      _promptController.text = newText;
-                    });
-                  }
-                },
-                icon: const Icon(Icons.add),
-                label: Text(localizations.addAnalysisMethod),
-              ),
-            ),
-            
-            // 智能体响应
-            if (_responseMessage != null || _isLoading) ...[
-              const SizedBox(height: 16),
-              Text(
-                localizations.agentResponse,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              if (_isLoading)
-                const Center(child: CircularProgressIndicator())
-              else
-                Container(
-                  width: double.infinity,
-                  height: 300, // 固定高度使其可滚动
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Markdown(
-                    data: _responseMessage!,
-                    selectable: true, // 允许选择文本
-                    padding: EdgeInsets.zero,
-                  ),
                 ),
-            ],
+              ),
+            ),
             
             // 底部按钮
             const SizedBox(height: 16),

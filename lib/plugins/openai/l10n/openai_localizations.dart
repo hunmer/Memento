@@ -25,6 +25,11 @@ abstract class OpenAILocalizations {
   String get initDefaultAgent;
   String get errorReadingAgents;
   
+  // Tab titles
+  String get form;
+  String get output;
+  String get noResponseYet;
+  
   // Agent Edit Screen
   String get createAgent;
   String get editAgent;
@@ -149,6 +154,15 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
   
   @override
   String get pluginAnalysis => '插件分析';
+  
+  @override
+  String get form => '表单';
+  
+  @override
+  String get output => '输出';
+  
+  @override
+  String get noResponseYet => '暂无响应';
   
   @override
   String get confirm => '确认';
@@ -483,6 +497,15 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   @override
   String get pluginAnalysis => 'Plugin Analysis';
 
+  @override
+  String get form => 'Form';
+  
+  @override
+  String get output => 'Output';
+  
+  @override
+  String get noResponseYet => 'No response yet';
+  
   @override
   String get confirm => 'Confirm';
   

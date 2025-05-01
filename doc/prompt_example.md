@@ -17,4 +17,14 @@
   "startDate": "2025-04-01",
   "endDate": "2025-05-01"
 }
+
 ```
+
+# checkin_getCheckinHistory
+
+```
+{
+  "method": "checkin_getCheckinHistory",
+  "startDate": "2025-04-01",
+  "endDate": "2025-05-01"
+}
