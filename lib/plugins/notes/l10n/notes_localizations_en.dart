@@ -50,6 +50,18 @@ class NotesLocalizationsEn extends NotesLocalizations {
   String get searchHint => 'Search notes...';
 
   @override
+  String get search => 'Search';
+
+  @override
+  String get noSearchResults => 'No search results';
+
+  @override
+  String get folders => 'Folders';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
   String get cancel => 'Cancel';
 
   @override

@@ -53,6 +53,12 @@ abstract class NotesLocalizations {
   
   // 搜索
   String get searchHint;
+  String get search;
+  String get noSearchResults;
+  
+  // 列表标题
+  String get folders;
+  String get notes;
   
   // 按钮文本
   String get cancel;

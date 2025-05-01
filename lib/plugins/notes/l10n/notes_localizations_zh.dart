@@ -50,6 +50,18 @@ class NotesLocalizationsZh extends NotesLocalizations {
   String get searchHint => '搜索笔记...';
 
   @override
+  String get search => '搜索';
+
+  @override
+  String get noSearchResults => '没有搜索结果';
+
+  @override
+  String get folders => '文件夹';
+
+  @override
+  String get notes => '笔记';
+
+  @override
   String get cancel => '取消';
 
   @override
