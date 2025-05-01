@@ -31,7 +31,7 @@ class CheckinItemCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(
         vertical: 4,
-        horizontal: 0,
+        horizontal: 8,
       ),
       child: InkWell(
         onTap: controller.isEditMode
@@ -47,8 +47,13 @@ class CheckinItemCard extends StatelessWidget {
                   ),
                 ).then((_) => onStateChanged());
               },
+        onLongPress: controller.isEditMode
+            ? null
+            : () {
+                controller.showItemOptionsDialog(item);
+              },
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

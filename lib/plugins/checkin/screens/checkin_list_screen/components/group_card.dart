@@ -28,9 +28,11 @@ class GroupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 0,
-        vertical: 0,
+      margin: const EdgeInsets.only(
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 16, // 增加底部间距
       ),
       elevation: 2,
       child: Column(
@@ -81,9 +83,6 @@ class GroupCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(8),
-              ),
-              margin: const EdgeInsets.symmetric(
-                horizontal: 8,
               ),
               child: CheckinItemList(
                 items: items,

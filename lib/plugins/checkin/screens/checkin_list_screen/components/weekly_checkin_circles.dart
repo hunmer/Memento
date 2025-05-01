@@ -9,6 +9,16 @@ class WeeklyCheckinCircles extends StatelessWidget {
     required this.item,
   });
 
+  bool _isReminderDay(int weekday) {
+    if (item.reminderSettings?.type != ReminderType.weekly) {
+      return false;
+    }
+    // 转换weekday为与item.reminderSettings.weekdays匹配的格式
+    // Flutter中周一是1，周日是7，而我们存储的周日是0，周六是6
+    int adjustedWeekday = weekday == 7 ? 0 : weekday;
+    return item.reminderSettings!.weekdays.contains(adjustedWeekday);
+  }
+
   @override
   Widget build(BuildContext context) {
     final weekdays = ['一', '二', '三', '四', '五', '六', '日'];
@@ -30,14 +40,32 @@ class WeeklyCheckinCircles extends StatelessWidget {
 
         return Column(
           children: [
-            Text(
-              weekdays[index],
-              style: TextStyle(
-                fontSize: 12,
-                color: isToday
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).hintColor,
-              ),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Text(
+                  weekdays[index],
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isToday
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).hintColor,
+                  ),
+                ),
+                if (_isReminderDay(index + 1))
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 4),
             Stack(
