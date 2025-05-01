@@ -7,6 +7,70 @@ import 'models/checkin_item.dart';
 import 'screens/checkin_list_screen/checkin_list_screen.dart';
 import 'controllers/checkin_list_controller.dart';
 
+class CheckinMainView extends StatefulWidget {
+  const CheckinMainView({super.key});
+
+  @override
+  State<CheckinMainView> createState() => _CheckinMainViewState();
+}
+
+class _CheckinMainViewState extends State<CheckinMainView> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          // 打卡列表页面
+          StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              final controller = CheckinListController(
+                context: context,
+                checkinItems: CheckinPlugin.instance.checkinItems,
+                onStateChanged: () {
+                  setState(() {});
+                  CheckinPlugin.instance.triggerSave();
+                },
+                expandedGroups: {},
+              );
+              return CheckinListScreen(controller: controller);
+            },
+          ),
+          // 统计页面（待实现）
+          Center(
+            child: Text(
+              '统计功能开发中...',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.check_circle_outline),
+            selectedIcon: Icon(Icons.check_circle),
+            label: '打卡',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: '统计',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class CheckinPlugin extends BasePlugin {
   static final CheckinPlugin _instance = CheckinPlugin._internal();
   factory CheckinPlugin() => _instance;
@@ -52,7 +116,6 @@ class CheckinPlugin extends BasePlugin {
     return _checkinItems.where((item) => item.isCheckedToday()).length;
   }
 
-
   // 触发保存的公共方法
   Future<void> triggerSave() async {
     await _saveCheckinItems();
@@ -84,21 +147,7 @@ class CheckinPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
-        final controller = CheckinListController(
-          context: context,
-          checkinItems: _checkinItems,
-          onStateChanged: () {
-            setState(() {});
-            _saveCheckinItems();
-          },
-          expandedGroups: {},
-        );
-
-        return CheckinListScreen(controller: controller);
-      },
-    );
+    return const CheckinMainView();
   }
 
   // 添加打卡项目
