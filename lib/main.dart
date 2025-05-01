@@ -10,6 +10,7 @@ import 'plugins/day/l10n/day_localizations.dart';
 import 'plugins/checkin/l10n/checkin_localizations.dart';
 import 'plugins/activity/l10n/activity_localizations.dart';
 import 'plugins/openai/l10n/openai_localizations.dart';
+import 'plugins/notes/l10n/notes_localizations.dart';
 // 移除未使用的导入
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
@@ -154,6 +155,7 @@ class _MyAppState extends State<MyApp> {
         ChatLocalizations.delegate, // 添加聊天插件的本地化代理
         DayLocalizationsDelegate.delegate, // 添加纪念日插件的本地化代理
         OpenAILocalizationsDelegate.delegate, // 添加OpenAI插件的本地化代理
+        NotesLocalizations.delegate, // 添加Notes插件的本地化代理
         NodesPlugin().localizationsDelegate, // 添加笔记插件的本地化代理
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

@@ -4,6 +4,7 @@ import '../controllers/notes_controller.dart';
 import '../models/folder.dart';
 import '../models/note.dart';
 import 'note_edit_screen.dart';
+import '../l10n/notes_localizations.dart';
 
 class NotesScreen extends StatefulWidget {
   final NotesController controller;
@@ -102,26 +103,30 @@ class _NotesScreenState extends State<NotesScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('新建文件夹'),
+            title: Text(NotesLocalizations.of(context)?.newFolder ?? 'New Folder'),
             content: TextField(
               controller: folderNameController,
               autofocus: true,
-              decoration: const InputDecoration(hintText: '文件夹名称'),
+              decoration: InputDecoration(
+                hintText: NotesLocalizations.of(context)?.folderNameHint ?? 'Folder name',
+              ),
               onSubmitted: (value) => Navigator.pop(context, value),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context, folderNameController.text);
-                },
-                child: const Text('确定'),
-              ),
-            ],
-          ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(NotesLocalizations.of(context)?.cancel ?? 'Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (folderNameController.text.isNotEmpty) {
+                      Navigator.pop(context, folderNameController.text);
+                    }
+                  },
+                  child: Text(NotesLocalizations.of(context)?.confirm ?? 'Confirm'),
+                ),
+              ],
+          )
     );
     if (result != null && result.isNotEmpty) {
       await widget.controller.createFolder(result, _currentFolderId);
@@ -157,8 +162,8 @@ class _NotesScreenState extends State<NotesScreen> {
             _isSearching
                 ? TextField(
                   controller: _searchController,
-                  decoration: const InputDecoration(
-                    hintText: '搜索笔记...',
+                  decoration: InputDecoration(
+                    hintText: NotesLocalizations.of(context)?.searchHint ?? 'Search notes...',
                     border: InputBorder.none,
                   ),
                   onChanged: _handleSearch,
@@ -267,7 +272,7 @@ class _NotesScreenState extends State<NotesScreen> {
                                           context: context,
                                           builder:
                                               (context) => AlertDialog(
-                                                title: const Text('重命名文件夹'),
+                                                title: Text(NotesLocalizations.of(context)?.renameFolder ?? 'Rename Folder'),
                                                 content: TextField(
                                                   controller: renameController,
                                                   autofocus: true,
@@ -324,10 +329,8 @@ class _NotesScreenState extends State<NotesScreen> {
                                           context: context,
                                           builder:
                                               (context) => AlertDialog(
-                                                title: const Text('删除文件夹'),
-                                                content: const Text(
-                                                  '确定要删除此文件夹吗？此操作将删除文件夹中的所有内容，且不可恢复。',
-                                                ),
+                                                title: Text(NotesLocalizations.of(context)?.deleteFolder ?? 'Delete Folder'),
+                                                content: Text(NotesLocalizations.of(context)?.deleteFolderConfirm ?? 'Are you sure you want to delete this folder? All content in this folder will be deleted and cannot be recovered.'),
                                                 actions: [
                                                   TextButton(
                                                     onPressed:
@@ -442,10 +445,8 @@ class _NotesScreenState extends State<NotesScreen> {
                                               context: context,
                                               builder:
                                                   (context) => AlertDialog(
-                                                    title: const Text('删除笔记'),
-                                                    content: const Text(
-                                                      '确定要删除此笔记吗？此操作不可恢复。',
-                                                    ),
+                                                    title: Text(NotesLocalizations.of(context)?.deleteNote ?? 'Delete Note'),
+                                                    content: Text(NotesLocalizations.of(context)?.deleteNoteConfirm ?? 'Are you sure you want to delete this note? This action cannot be undone.'),
                                                     actions: [
                                                       TextButton(
                                                         onPressed:

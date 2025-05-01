@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
+import 'l10n/notes_localizations.dart';
 
 class NotesPlugin extends BasePlugin {
   late NotesController _controller;
@@ -11,7 +12,7 @@ class NotesPlugin extends BasePlugin {
   String get id => 'notes';
 
   @override
-  String get name => 'Notes';
+  String get name =>  'Notes';
 
   @override
   String get author => 'Memento Team';
@@ -104,7 +105,10 @@ class NotesPlugin extends BasePlugin {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('总笔记数', style: theme.textTheme.bodyMedium),
+                    Text(
+                      NotesLocalizations.of(context)?.totalNotes ?? 'Total Notes',
+                      style: theme.textTheme.bodyMedium
+                    ),
                     Text(
                       '$totalNotes',
                       style: theme.textTheme.bodyMedium?.copyWith(
