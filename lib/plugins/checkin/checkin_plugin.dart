@@ -5,6 +5,7 @@ import '../base_plugin.dart';
 import 'l10n/checkin_localizations.dart';
 import 'models/checkin_item.dart';
 import 'screens/checkin_list_screen/checkin_list_screen.dart';
+import 'screens/checkin_stats_screen/checkin_stats_screen.dart';
 import 'controllers/checkin_list_controller.dart';
 
 class CheckinMainView extends StatefulWidget {
@@ -38,13 +39,8 @@ class _CheckinMainViewState extends State<CheckinMainView> {
               return CheckinListScreen(controller: controller);
             },
           ),
-          // 统计页面（待实现）
-          Center(
-            child: Text(
-              '统计功能开发中...',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
+          // 统计页面
+          const CheckinStatsScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
