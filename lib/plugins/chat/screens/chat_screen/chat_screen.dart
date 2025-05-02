@@ -4,9 +4,10 @@ import 'package:flutter/services.dart';
 import 'dart:io'; // 添加File类支持
 import '../../models/channel.dart';
 import '../../models/message.dart';
+import '../../models/user.dart';
 import '../../chat_plugin.dart';
+import '../profile_edit_dialog.dart';
 import '../channel_info_screen.dart';
-import '../user_profile_screen.dart';
 import '../../utils/message_operations.dart'; // 添加消息操作工具类
 // 移除未使用的导入
 import 'controllers/chat_screen_controller.dart';
@@ -290,16 +291,6 @@ class _ChatScreenState extends State<ChatScreen> {
       _updateMessages(); // 更新消息列表
     }
   }
-
-  void _navigateToUserProfile(Message message) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UserProfileScreen(user: message.user),
-      ),
-    );
-  }
-
   // 加载背景图片路径
   Future<void> _loadBackgroundPath() async {
     // 获取最新的频道数据
@@ -315,7 +306,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
-      final absolutePath = await PathUtils.toAbsolutePath(
+      final absolutePath = await ImageUtils.getAbsolutePath(
         currentChannel.backgroundPath!,
       );
 
@@ -535,7 +526,33 @@ class _ChatScreenState extends State<ChatScreen> {
                               onToggleMessageSelection:
                                   _controller.toggleMessageSelection,
                               scrollController: _controller.scrollController,
-                              onAvatarTap: _navigateToUserProfile,
+                              onAvatarTap: (message) async {
+                                final chatPlugin = ChatPlugin.instance;
+                                final users = chatPlugin.userService.getAllUsers();
+                                final targetUser = users.firstWhere(
+                                  (user) => user.id == message.user.id,
+                                  orElse: () => message.user,
+                                );
+                                
+                                final updatedUser = await showDialog<User>(
+                                  context: context,
+                                  builder: (context) => ProfileEditDialog(
+                                    user: targetUser,
+                                    chatPlugin: chatPlugin,
+                                  ),
+                                );
+                                
+                                if (updatedUser != null && mounted) {
+                                  // 如果是当前用户，则更新当前用户信息
+                                  if (targetUser.id == chatPlugin.userService.currentUser.id) {
+                                    chatPlugin.userService.setCurrentUser(updatedUser);
+                                  }
+                                  // 否则只更新用户列表中的用户信息
+                                  else {
+                                    await chatPlugin.userService.updateUser(updatedUser);
+                                  }
+                                }
+                              },
                               showAvatar:
                                   ChatPlugin
                                       .instance

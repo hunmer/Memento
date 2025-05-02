@@ -2,7 +2,7 @@ import 'package:Memento/models/file_path_converter.dart';
 import 'package:flutter/material.dart';
 import 'user.dart';
 import '../../../utils/color_extension.dart';
-
+import '../chat_plugin.dart';
 enum MessageType { received, sent, file, image, video, audio }
 
 class Message {
@@ -200,7 +200,6 @@ class Message {
   /// 从JSON格式创建Message实例
   static Future<Message> fromJson(
     Map<String, dynamic> json,
-    List<User> users,
   ) async {
     // 从JSON中获取用户信息
     Map<String, dynamic>? userMap;
@@ -214,6 +213,7 @@ class Message {
     }
 
     // 从用户列表中查找基础用户信息
+   final users = ChatPlugin.instance.userService.getAllUsers();
     var user = users.firstWhere(
       (u) => u.id == userId,
       orElse: () => User(id: userId, username: 'Unknown User'),

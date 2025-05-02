@@ -1,8 +1,7 @@
 import 'dart:io';
-
+import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+import '../../../utils/image_utils.dart';
 import '../../../widgets/avatar_picker.dart';
 import '../chat_plugin.dart';
 import '../models/user.dart';
@@ -21,28 +20,48 @@ class ProfileEditDialog extends StatefulWidget {
   State<ProfileEditDialog> createState() => _ProfileEditDialogState();
 }
 
-class _ProfileEditDialogState extends State<ProfileEditDialog> {
+class _ProfileEditDialogState extends State<ProfileEditDialog> with SingleTickerProviderStateMixin {
   late TextEditingController _usernameController;
   String? _avatarPath;
-  String? _tempAvatarPath; // 临时头像路径
-
+  late AnimationController _animationController;
   @override
   void initState() {
     super.initState();
     _usernameController = TextEditingController(text: widget.user.username);
     _avatarPath = widget.user.iconPath;
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void didUpdateWidget(ProfileEditDialog oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 只有当user对象确实发生变化时才更新
+    if (oldWidget.user != widget.user && _avatarPath == oldWidget.user.iconPath) {
+      setState(() {
+        _avatarPath = widget.user.iconPath;
+      });
+    }
   }
 
   @override
   void dispose() {
     _usernameController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
-  void _onAvatarChanged(String path) {
+  Future<void> _onAvatarChanged(String path) async {
+    // 转换为相对路径
+    final relativePath = await ImageUtils.toRelativePath(path);
+    
+    // 如果路径没有变化，不触发更新
+    if (_avatarPath == relativePath) return;
+    
     setState(() {
-      _tempAvatarPath = path; // 保存临时路径
-      _avatarPath = path; // 更新显示
+      _avatarPath = relativePath;
     });
   }
 
@@ -63,14 +82,27 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
             ),
             const SizedBox(height: 16),
             
-            // 头像选择器
-            AvatarPicker(
-              key: ValueKey(_avatarPath ?? 'default'), // 添加key确保更新
-              size: 80,
-              username: widget.user.username,
-              currentAvatarPath: _avatarPath, // 使用状态中的路径
-              saveDirectory: 'chat/temp_avatars', // 使用临时目录
-              onAvatarChanged: _onAvatarChanged,
+            RepaintBoundary(
+              child: AvatarPicker(
+                key: const ValueKey('avatar_picker'),
+                size: 80,
+                username: widget.user.username,
+                currentAvatarPath: _avatarPath,
+                saveDirectory: 'chat/avatars',
+                onAvatarChanged: _onAvatarChanged,
+                showPickerDialog: (BuildContext context, String? initialPath) async {
+                  return showDialog<Map<String, dynamic>>(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (BuildContext dialogContext) => ImagePickerDialog(
+                      initialUrl: initialPath,
+                      saveDirectory: 'chat/avatars',
+                      enableCrop: true,
+                      cropAspectRatio: 1.0,
+                    ),
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 16),
             
@@ -103,59 +135,33 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                       return;
                     }
 
-                    String? finalAvatarPath = _avatarPath;
-                    
-                    // 如果有新的头像，将其从临时目录移动到最终目录
-                    if (_tempAvatarPath != null && _tempAvatarPath != widget.user.iconPath) {
-                      try {
-                        final appDir = await getApplicationDocumentsDirectory();
-                        
-                        // 获取临时文件的绝对路径
-                        final tempAbsPath = path.join(appDir.path, 'app_data', _tempAvatarPath!);
-                        final tempFile = File(tempAbsPath);
-                        
-                        if (await tempFile.exists()) {
-                          // 创建最终目录
-                          final avatarDir = Directory(path.join(appDir.path, 'app_data', 'chat/avatars'));
-                          if (!await avatarDir.exists()) {
-                            await avatarDir.create(recursive: true);
-                          }
-                          
-                          // 保持原文件名，只改变路径
-                          final tempFileName = path.basename(tempAbsPath);
-                          final finalAbsPath = path.join(avatarDir.path, tempFileName);
-                          
-                          // 如果用户已有头像，先删除旧头像
-                          if (widget.user.iconPath != null) {
-                            final oldAvatarPath = path.join(appDir.path, 'app_data', widget.user.iconPath!);
-                            final oldAvatarFile = File(oldAvatarPath);
-                            if (await oldAvatarFile.exists()) {
-                              await oldAvatarFile.delete();
-                            }
-                          }
-                          
-                          // 移动文件到最终位置
-                          await tempFile.copy(finalAbsPath);
-                          await tempFile.delete(); // 删除临时文件
-                          
-                          // 更新最终路径
-                          finalAvatarPath = './chat/avatars/$tempFileName';
-                        }
-                      } catch (e) {
-                        debugPrint('Error moving avatar file: $e');
-                        // 如果移动失败，继续使用临时路径
-                        finalAvatarPath = _tempAvatarPath;
+                    try {
+                      // 创建更新后的用户对象
+                      final updatedUser = widget.user.copyWith(
+                        username: newUsername,
+                        iconPath: _avatarPath,
+                      );
+                      
+                      // 使用 updateUser 方法更新用户信息
+                      await widget.chatPlugin.userService.updateUser(updatedUser);
+
+                      // 强制清除图片缓存
+                      PaintingBinding.instance.imageCache.clear();
+                      PaintingBinding.instance.imageCache.clearLiveImages();
+
+                      // 通知所有监听器（包括聊天消息气泡）更新
+                      widget.chatPlugin.notifyListeners();
+
+                      if (context.mounted) {
+                        // 返回更新后的用户对象
+                        Navigator.of(context).pop(updatedUser);
                       }
-                    }
-
-                    // 更新用户信息
-                    await widget.chatPlugin.userService.updateCurrentUser(
-                      username: newUsername,
-                      avatarPath: finalAvatarPath,
-                    );
-
-                    if (context.mounted) {
-                      Navigator.of(context).pop(true);
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('更新失败: $e')),
+                        );
+                      }
                     }
                   },
                   child: const Text('保存'),

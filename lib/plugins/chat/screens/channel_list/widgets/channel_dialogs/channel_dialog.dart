@@ -148,7 +148,6 @@ class _ChannelDialogState extends State<ChannelDialog> {
                   priority: widget.channel!.priority,
                   lastMessage: widget.channel!.lastMessage,
                   draft: widget.channel!.draft,
-                  members: widget.channel!.members,
                   messages: widget.channel!.messages,
                 );
 
@@ -173,7 +172,6 @@ class _ChannelDialogState extends State<ChannelDialog> {
                     icon: _selectedIcon,
                     backgroundColor: _selectedColor,
                     priority: 0,
-                    members: [], // 添加空的成员列表
                     messages: [], // 添加空的消息列表
                   );
 

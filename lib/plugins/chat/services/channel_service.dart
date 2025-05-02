@@ -75,14 +75,12 @@ class ChannelService {
             'chat/messages/$channelId',
           );
           List<Message> messages = [];
-
           if (messagesData.isNotEmpty && messagesData.containsKey('messages')) {
             final List<dynamic> messagesJson =
                 messagesData['messages'] as List<dynamic>;
-            final allUsers = _userService.getAllUsers();
             messages = await Future.wait(
               messagesJson.map(
-                (m) => Message.fromJson(m as Map<String, dynamic>, allUsers),
+                (m) => Message.fromJson(m as Map<String, dynamic>,),
               ),
             );
           }
@@ -98,7 +96,6 @@ class ChannelService {
           final channel = Channel.fromJson(
             channelJson, 
             messages: messages,
-            users: _userService.getAllUsers(),
           );
           channel.draft = draft;
           _channels.add(channel);
@@ -106,7 +103,6 @@ class ChannelService {
 
         // 按优先级和最后消息时间排序
         _channels.sort(Channel.compare);
-        print('Loaded ${_channels.length} channels.');
       }
     } catch (e) {
       debugPrint('Error loading channels: $e');
@@ -542,7 +538,6 @@ class ChannelService {
         id: 'default_${DateTime.now().millisecondsSinceEpoch}',
         title: '默认对话',
         icon: Icons.chat_bubble_outline,
-        members: _userService.getAllUsers(),
         messages: [],
         priority: 0,
       );

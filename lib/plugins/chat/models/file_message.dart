@@ -97,7 +97,7 @@ class FileMessage {
     final fileName = originalFileName ?? path.basename(file.path);
 
     // 确保文件路径使用正确的相对路径格式
-    String relativePath = await PathUtils.toRelativePath(file.path);
+    String relativePath = await ImageUtils.toRelativePath(file.path);
     // 确保路径以 './' 开头
     if (!relativePath.startsWith('./')) {
       relativePath = './${relativePath.replaceFirst('app_data/', '')}';
@@ -118,10 +118,10 @@ class FileMessage {
   // 获取文件的绝对路径
   Future<String> getAbsolutePath() async {
     if (filePath.startsWith('./')) {
-      return await PathUtils.toAbsolutePath(filePath);
+      return await ImageUtils.getAbsolutePath(filePath);
     }
     // 处理可能没有 './' 前缀的旧数据
-    return await PathUtils.toAbsolutePath('./$filePath');
+    return await ImageUtils.getAbsolutePath('./$filePath');
   }
 
   // 转换为Map

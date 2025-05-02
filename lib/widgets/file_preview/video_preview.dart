@@ -31,7 +31,7 @@ class _VideoPreviewState extends State<VideoPreview> {
   Future<void> _initializePlayer() async {
     try {
       // 使用 PathUtils 转换路径
-      final absolutePath = await PathUtils.toAbsolutePath(widget.filePath);
+      final absolutePath = await ImageUtils.getAbsolutePath(widget.filePath);
       if (absolutePath.isEmpty) {
         throw Exception('无法获取视频文件的绝对路径');
       }

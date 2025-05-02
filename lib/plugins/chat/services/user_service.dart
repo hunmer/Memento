@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import '../../../core/event/event_manager.dart';
+import '../events/user_events.dart';
 import '../models/user.dart';
 import '../chat_plugin.dart';
 
@@ -81,27 +83,6 @@ class UserService {
     _addOrUpdateUser(user);
     _plugin.notifyListeners();
   }
-
-  // 更新用户信息，包括头像
-  Future<void> updateCurrentUser({String? username, String? avatarPath}) async {
-    if (username != null || avatarPath != null) {
-      final updatedUser = User(
-        id: _currentUser!.id,
-        username: username ?? _currentUser!.username,
-        iconPath: avatarPath ?? _currentUser!.iconPath,
-      );
-      _currentUser = updatedUser;
-
-      // 更新用户列表中的用户信息
-      _addOrUpdateUser(_currentUser!);
-      
-      // 保存所有用户信息
-      await _saveAllUsers();
-
-      _plugin.notifyListeners();
-    }
-  }
-  
   // 保存所有用户信息到存储
   Future<void> _saveAllUsers() async {
     await _plugin.storage.write('chat/users', {
@@ -113,11 +94,7 @@ class UserService {
   Future<void> updateUser(User user) async {
     // 如果是当前用户，则使用updateCurrentUser方法
     if (user.id == _currentUser?.id) {
-      await updateCurrentUser(
-        username: user.username,
-        avatarPath: user.iconPath,
-      );
-      return;
+      _currentUser = user;
     }
     
     // 更新用户列表中的用户信息
@@ -125,6 +102,12 @@ class UserService {
     
     // 保存所有用户信息
     await _saveAllUsers();
+    
+    // 广播用户头像更新事件
+    EventManager.instance.broadcast(
+      UserEventNames.userAvatarUpdated,
+      UserAvatarUpdatedEventArgs(user)
+    );
     
     // 通知监听器更新
     _plugin.notifyListeners();

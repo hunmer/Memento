@@ -15,9 +15,6 @@ class ChannelInfoScreen extends StatelessWidget {
         children: [
           // 频道基本信息
           _buildChannelBasicInfo(),
-          const Divider(),
-          // 成员列表
-          _buildMembersList(),
         ],
       ),
     );
@@ -48,11 +45,6 @@ class ChannelInfoScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${channel.members.length}个成员',
-                      style: const TextStyle(color: Colors.grey),
-                    ),
                   ],
                 ),
               ),
@@ -67,40 +59,6 @@ class ChannelInfoScreen extends StatelessWidget {
           const Text('这是一个频道的详细描述信息...', style: TextStyle(color: Colors.grey)),
         ],
       ),
-    );
-  }
-
-  Widget _buildMembersList() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text(
-            '频道成员',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: channel.members.length,
-          itemBuilder: (context, index) {
-            final User member = channel.members[index];
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.grey.shade200,
-                child: Text(
-                  member.username[0].toUpperCase(),
-                  style: const TextStyle(color: Colors.black54),
-                ),
-              ),
-              title: Text(member.username),
-              subtitle: Text('ID: ${member.id}'),
-            );
-          },
-        ),
-      ],
     );
   }
 }

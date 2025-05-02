@@ -1,5 +1,6 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
-import '../controllers/agent_controller.dart';
+import '../openai_plugin.dart';
 import '../controllers/provider_controller.dart';
 
 class FilterDialog extends StatefulWidget {
@@ -21,7 +22,8 @@ class FilterDialog extends StatefulWidget {
 class _FilterDialogState extends State<FilterDialog> {
   late Set<String> _selectedProviders;
   late Set<String> _selectedTags;
-  final AgentController _controller = AgentController();
+  late final OpenAIPlugin _plugin;
+  late final _controller;
   final ProviderController _providerController = ProviderController();
   List<String> _allTags = [];
   List<String> _allProviders = [];
@@ -29,6 +31,8 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   void initState() {
     super.initState();
+    _plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+    _controller = _plugin.controller;
     _selectedProviders = Set.from(widget.selectedProviders);
     _selectedTags = Set.from(widget.selectedTags);
     _loadData();

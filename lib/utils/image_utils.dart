@@ -4,92 +4,6 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
-/// 全局工具类，用于路径转换
-class PathUtils {
-  /// 将绝对路径转换为相对路径
-  /// [absolutePath] 绝对路径
-  /// 返回相对于应用数据目录的路径，格式为 ./xxx/xxx
-  static Future<String> toRelativePath(String absolutePath) async {
-    final appDir = await getApplicationDocumentsDirectory();
-    final appDataPath = path.join(appDir.path, 'app_data');
-
-    if (absolutePath.startsWith(appDataPath)) {
-      String relativePath = absolutePath.substring(appDir.path.length);
-      // 统一使用正斜杠
-      relativePath = relativePath.replaceAll(r'\', '/');
-      
-      if (relativePath.startsWith('/app_data/') || relativePath.startsWith('\\app_data\\')) {
-        return '.${relativePath.substring('/app_data'.length).replaceAll(r'\', '/')}';
-      } else if (relativePath.startsWith('/') || relativePath.startsWith('\\')) {
-        // 处理其他可能的情况，确保使用正斜杠
-        return '.${relativePath.replaceAll(r'\', '/')}';
-      }
-    }
-
-    // 如果已经是相对路径格式，直接返回（确保使用正斜杠）
-    if (absolutePath.startsWith('./')) {
-      return absolutePath.replaceAll(r'\', '/');
-    }
-
-    // 如果不是应用数据目录下的文件，尝试构造相对路径
-    final fileName = path.basename(absolutePath);
-    if (fileName.contains('.')) {
-      return './chat/chat_files/${fileName.replaceAll(r'\', '/')}';
-    }
-
-    // 最后的回退方案，返回原路径
-    return absolutePath;
-  }
-
-  /// 获取绝对路径
-  /// [relativePath] 相对路径
-  /// 返回绝对路径
-  static Future<String> toAbsolutePath(String? relativePath) async {
-    if (relativePath == null || relativePath.isEmpty) {
-      return '';
-    }
-
-    // 如果已经是绝对路径，直接返回
-    if (path.isAbsolute(relativePath)) {
-      return relativePath;
-    }
-
-    final appDir = await getApplicationDocumentsDirectory();
-
-    // 移除开头的 './'（如果存在）
-    final normalizedPath =
-        relativePath.startsWith('./')
-            ? relativePath.substring(2)
-            : relativePath;
-
-    // 检查路径是否已经包含 app_data
-    if (normalizedPath.startsWith('app_data/')) {
-      return path.join(appDir.path, normalizedPath);
-    } else {
-      // 添加 app_data 前缀
-      final result = path.join(appDir.path, 'app_data', normalizedPath);
-      // 确认文件是否存在，如果不存在，尝试其他可能的路径
-      if (!await File(result).exists()) {
-        // 尝试直接在应用目录下查找
-        final directPath = path.join(appDir.path, normalizedPath);
-        if (await File(directPath).exists()) {
-          return directPath;
-        }
-        // 尝试在 chat_files 目录下查找
-        final chatFilesPath = path.join(
-          appDir.path,
-          'app_data/chat/chat_files',
-          path.basename(normalizedPath),
-        );
-        if (await File(chatFilesPath).exists()) {
-          return chatFilesPath;
-        }
-      }
-      return result;
-    }
-  }
-}
-
 class ImageUtils {
   /// 将图片保存到应用数据目录，并返回相对路径
   /// [imageFile] 源图片文件
@@ -217,5 +131,40 @@ class ImageUtils {
       debugPrint('删除图片失败: $e');
       return false;
     }
+  }
+
+    /// 将绝对路径转换为相对路径
+  /// [absolutePath] 绝对路径
+  /// 返回相对于应用数据目录的路径，格式为 ./xxx/xxx
+  static Future<String> toRelativePath(String absolutePath) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final appDataPath = path.join(appDir.path, 'app_data');
+
+    if (absolutePath.startsWith(appDataPath)) {
+      String relativePath = absolutePath.substring(appDir.path.length);
+      // 统一使用正斜杠
+      relativePath = relativePath.replaceAll(r'\', '/');
+      
+      if (relativePath.startsWith('/app_data/') || relativePath.startsWith('\\app_data\\')) {
+        return '.${relativePath.substring('/app_data'.length).replaceAll(r'\', '/')}';
+      } else if (relativePath.startsWith('/') || relativePath.startsWith('\\')) {
+        // 处理其他可能的情况，确保使用正斜杠
+        return '.${relativePath.replaceAll(r'\', '/')}';
+      }
+    }
+
+    // 如果已经是相对路径格式，直接返回（确保使用正斜杠）
+    if (absolutePath.startsWith('./')) {
+      return absolutePath.replaceAll(r'\', '/');
+    }
+
+    // 如果不是应用数据目录下的文件，尝试构造相对路径
+    final fileName = path.basename(absolutePath);
+    if (fileName.contains('.')) {
+      return './chat/chat_files/${fileName.replaceAll(r'\', '/')}';
+    }
+
+    // 最后的回退方案，返回原路径
+    return absolutePath;
   }
 }

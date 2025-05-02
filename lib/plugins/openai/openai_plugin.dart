@@ -1,16 +1,32 @@
+import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
-import 'l10n/openai_localizations.dart';
 import 'screens/agent_list_screen.dart';
 import 'screens/plugin_settings_screen.dart';
 import 'handlers/chat_event_handler.dart';
 import 'controllers/prompt_replacement_controller.dart';
+import 'controllers/agent_controller.dart';
 
 class OpenAIPlugin extends BasePlugin {
-  final ChatEventHandler _chatEventHandler = ChatEventHandler();
+  static OpenAIPlugin? _instance;
+  
+  // 获取插件实例的静态方法
+  static OpenAIPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      if (_instance == null) {
+        throw StateError('OpenAIPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
+
   final PromptReplacementController _promptReplacementController = PromptReplacementController();
+  final ChatEventHandler _chatEventHandler = ChatEventHandler();
+  final String storageDir = 'openai';
+
   @override
   String get id => 'openai';
 
@@ -40,31 +56,30 @@ class OpenAIPlugin extends BasePlugin {
   @override
   Future<void> initializeDefaultData() async {
     // 确保 agents.json 文件存在并初始化默认智能体
-      final agentData = await storage.read('$storageDir/agents.json');
-      if (agentData.isEmpty) {
-        // 如果文件为空，创建包含默认智能体的文件
-        final defaultAgents = [
-          {
-            'id': 'assistant-1',
-            'name': '通用助手', // 默认使用中文，后续可通过UI更新
-            'description': '一个友好的AI助手，可以帮助回答各种问题和完成各种任务。',
-            'serviceProviderId': 'ollama',
-            'baseUrl': 'http://localhost:11434',
-            'headers': {'api-key': 'ollama'},
-            'model': 'llama3',
-            'systemPrompt': '你是一个乐于助人的AI助手，擅长回答问题并提供有用的建议。请用友好的语气与用户交流。',
-            'tags': ['通用', '问答', '建议'],
-            'model': 'llama3',
-            'createdAt': DateTime.now().toIso8601String(),
-            'updatedAt': DateTime.now().toIso8601String(),
-          },
-        ];
+    final agentData = await storage.read('$storageDir/agents.json');
+    if (agentData.isEmpty) {
+      // 如果文件为空，创建包含默认智能体的文件
+      final defaultAgents = [
+        {
+          'id': 'assistant-1',
+          'name': '通用助手', // 默认使用中文，后续可通过UI更新
+          'description': '一个友好的AI助手，可以帮助回答各种问题和完成各种任务。',
+          'serviceProviderId': 'ollama',
+          'baseUrl': 'http://localhost:11434',
+          'headers': {'api-key': 'ollama'},
+          'model': 'llama3',
+          'systemPrompt': '你是一个乐于助人的AI助手，擅长回答问题并提供有用的建议。请用友好的语气与用户交流。',
+          'tags': ['通用', '问答', '建议'],
+          'createdAt': DateTime.now().toIso8601String(),
+          'updatedAt': DateTime.now().toIso8601String(),
+        },
+      ];
 
-        await storage.write('$storageDir/agents.json', {
-          'agents': defaultAgents,
-        });
-        debugPrint('已初始化默认智能体');
-      }
+      await storage.write('$storageDir/agents.json', {
+        'agents': defaultAgents,
+      });
+      debugPrint('已初始化默认智能体');
+    }
   }
 
   @override
@@ -127,6 +142,9 @@ class OpenAIPlugin extends BasePlugin {
   PromptReplacementController getPromptReplacementController() {
     return _promptReplacementController;
   }
+
+  /// 获取 AgentController 实例
+  AgentController get controller => AgentController();
 
   @override
   IconData get icon => Icons.smart_toy;

@@ -137,8 +137,7 @@ class _MessageBubbleState extends State<MessageBubble> {
           children: [
             if (!_isCurrentUser && widget.showAvatar)
               MessageAvatar(
-                iconPath: widget.message.user.iconPath,
-                username: widget.message.user.username,
+                user: widget.message.user,
                 onTap: widget.onAvatarTap,
               )
             else
@@ -207,8 +206,7 @@ class _MessageBubbleState extends State<MessageBubble> {
             const SizedBox(width: 8),
             if (_isCurrentUser && widget.showAvatar)
               MessageAvatar(
-                iconPath: widget.message.user.iconPath,
-                username: widget.message.user.username,
+                user: widget.message.user,
                 onTap: widget.onAvatarTap,
               )
             else

@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import '../../../core/event/event.dart';
-import '../controllers/agent_controller.dart';
+import '../openai_plugin.dart';
 import '../services/request_service.dart';
 import '../../chat/models/message.dart';
 import '../../chat/models/user.dart';
 import '../../../utils/image_utils.dart';
 
 class ChatEventHandler {
-  final AgentController _agentController = AgentController();
+  late final _agentController = OpenAIPlugin.instance.controller;
   final eventManager = EventManager.instance;
 
   // 存储每个消息ID对应的controller，用于更新消息内容
@@ -52,7 +52,7 @@ class ChatEventHandler {
     if (metadata.containsKey('file') && metadata['file'] != null) {
       final fileMetadata = metadata['file'] as Map<String, dynamic>;
       if (fileMetadata.containsKey('path')) {
-        absoluteFilePath = await PathUtils.toAbsolutePath(fileMetadata['path']);
+        absoluteFilePath = await ImageUtils.getAbsolutePath(fileMetadata['path']);
         // 检查是否为图片文件
         final extension = absoluteFilePath.toLowerCase();
         hasImage =

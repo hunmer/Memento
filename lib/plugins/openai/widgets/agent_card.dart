@@ -64,7 +64,7 @@ class AgentCard extends StatelessWidget {
     // 如果有头像，优先显示头像
     if (agent.avatarUrl != null && agent.avatarUrl!.isNotEmpty) {
       return FutureBuilder<String>(
-        future: PathUtils.toAbsolutePath(agent.avatarUrl),
+        future: ImageUtils.getAbsolutePath(agent.avatarUrl),
         builder: (context, snapshot) {
           return SizedBox(
             width: 80,

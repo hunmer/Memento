@@ -7,9 +7,10 @@ import '../../../widgets/image_picker_dialog.dart';
 import '../models/ai_agent.dart';
 import '../models/service_provider.dart';
 import '../models/llm_models.dart';
-import '../controllers/agent_controller.dart';
+import '../openai_plugin.dart';
 import '../controllers/provider_controller.dart';
 import '../services/test_service.dart';
+import '../../../core/plugin_manager.dart';
 import 'model_search_screen.dart';
 
 class AgentEditScreen extends StatefulWidget {
@@ -237,7 +238,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     );
 
     try {
-      final controller = AgentController();
+      final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+      final controller = plugin.controller;
       if (widget.agent == null) {
         await controller.addAgent(agent);
       } else {
@@ -279,7 +281,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     if (confirmed != true || widget.agent == null) return;
 
     try {
-      final controller = AgentController();
+      final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+      final controller = plugin.controller;
       await controller.deleteAgent(widget.agent!.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -319,7 +322,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     );
 
     try {
-      final controller = AgentController();
+      final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+      final controller = plugin.controller;
       await controller.addAgent(clonedAgent);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

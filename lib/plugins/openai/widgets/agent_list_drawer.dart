@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/core/plugin_manager.dart';
 
 class AgentListDrawer extends StatefulWidget {
   /// 当前已选择的智能体列表
@@ -92,7 +93,7 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
     // 如果有头像，优先显示头像
     if (agent.avatarUrl != null && agent.avatarUrl!.isNotEmpty) {
       return FutureBuilder<String>(
-        future: PathUtils.toAbsolutePath(agent.avatarUrl),
+        future: ImageUtils.getAbsolutePath(agent.avatarUrl),
         builder: (context, snapshot) {
           return Container(
             width: 40,
@@ -207,7 +208,7 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
           ),
           const Divider(),
           FutureBuilder<List<AIAgent>>(
-            future: AgentController().loadAgents(),
+            future: (PluginManager.instance.getPlugin('openai') as OpenAIPlugin).controller.loadAgents(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 var agents = snapshot.data!;

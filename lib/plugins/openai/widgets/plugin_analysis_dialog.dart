@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:Memento/core/plugin_manager.dart';
+
 import '../services/request_service.dart';
-import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../controllers/prompt_replacement_controller.dart';
@@ -26,7 +28,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
     // 如果有头像，优先显示头像
     if (agent.avatarUrl != null && agent.avatarUrl!.isNotEmpty) {
       return FutureBuilder<String>(
-        future: PathUtils.toAbsolutePath(agent.avatarUrl),
+        future: ImageUtils.getAbsolutePath(agent.avatarUrl),
         builder: (context, snapshot) {
           return Container(
             width: 48,
@@ -153,7 +155,8 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
         onAgentSelected: (selectedAgents) async {
           if (selectedAgents.isNotEmpty) {
             try {
-              final agentController = AgentController();
+               final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+              final agentController = plugin.controller;
               final selectedAgent = await agentController.getAgent(selectedAgents.first['id']!);
               if (selectedAgent != null) {
                 setState(() {

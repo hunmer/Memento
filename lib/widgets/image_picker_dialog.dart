@@ -301,7 +301,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                             onPressed: () async {
                               Navigator.of(context).pop();
                               // 获取原始图片的相对路径
-                              final relativePath = await PathUtils.toRelativePath(originalImagePath);
+                              final relativePath = await ImageUtils.getAbsolutePath(originalImagePath);
 
                               Navigator.of(
                                 context,

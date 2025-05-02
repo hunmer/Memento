@@ -10,7 +10,6 @@ class Channel {
   String title;
   IconData icon;
   Color backgroundColor; // 图标背景颜色
-  final List<User> members;
   final List<Message> messages;
   int priority;
   final DateTime lastMessageTime;
@@ -25,7 +24,6 @@ class Channel {
     required this.title,
     required this.icon,
     this.backgroundColor = Colors.blue, // 默认蓝色背景
-    required this.members,
     required this.messages,
     this.priority = 0,
     this.groups = const [], // 默认为空列表，表示不属于任何组
@@ -60,7 +58,6 @@ class Channel {
     String? title,
     IconData? icon,
     Color? backgroundColor,
-    List<User>? members,
     List<Message>? messages,
     int? priority,
     List<String>? groups,
@@ -74,7 +71,6 @@ class Channel {
       title: title ?? this.title,
       icon: icon ?? this.icon,
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      members: members ?? this.members,
       messages: messages ?? this.messages,
       priority: priority ?? this.priority,
       groups: groups ?? this.groups,
@@ -94,7 +90,6 @@ class Channel {
       'iconFontFamily': icon.fontFamily,
       'iconFontPackage': icon.fontPackage,
       'backgroundColor': backgroundColor.toHex(),
-      'members': members.map((member) => member.toJson()).toList(),
       'priority': priority,
       'groups': groups,
       'fixedSymbol': fixedSymbol,
@@ -107,10 +102,7 @@ class Channel {
   static Channel fromJson(
     Map<String, dynamic> json, {
     List<Message> messages = const [],
-    required List<User> users,
   }) {
-    // 使用提供的用户列表
-    final List<User> members = users;
 
     // 解析图标
     final IconData icon = IconData(
@@ -130,7 +122,6 @@ class Channel {
       title: json['title'] as String,
       icon: icon,
       backgroundColor: backgroundColor,
-      members: members,
       messages: messages,
       priority: json['priority'] as int? ?? 0,
       groups:

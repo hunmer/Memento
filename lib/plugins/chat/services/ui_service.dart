@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:Memento/plugins/chat/models/user.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
 import '../l10n/chat_localizations.dart';
+import '../models/user.dart';
 import '../screens/channel_list/channel_list_screen.dart';
 import '../screens/timeline/timeline_screen.dart';
 import '../screens/profile_edit_dialog.dart';
@@ -213,17 +215,17 @@ class UIService {
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () async {
-                    final result = await showDialog<bool>(
+                    final updatedUser = await showDialog<User>(
                       context: context,
                       builder: (context) => ProfileEditDialog(
                         user: _userService.currentUser,
                         chatPlugin: _plugin,
                       ),
                     );
-
-                    if (result == true) {
+                    if (updatedUser != null) {
                       setState(() {
-                        // 对话框中已经更新了用户信息，这里只需要刷新UI
+                        // 使用返回的更新后的用户对象刷新UI
+                        _userService.setCurrentUser(updatedUser);
                       });
                     }
                   },

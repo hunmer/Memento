@@ -12,6 +12,7 @@ class AvatarPicker extends StatefulWidget {
   final String? currentAvatarPath;
   final String saveDirectory;
   final Function(String path)? onAvatarChanged;
+  final Future<Map<String, dynamic>?> Function(BuildContext context, String? initialPath)? showPickerDialog;
 
   const AvatarPicker({
     super.key,
@@ -20,6 +21,7 @@ class AvatarPicker extends StatefulWidget {
     this.currentAvatarPath,
     this.saveDirectory = 'avatars',
     this.onAvatarChanged,
+    this.showPickerDialog,
   });
 
   @override
@@ -38,7 +40,13 @@ class _AvatarPickerState extends State<AvatarPicker> {
   @override
   void didUpdateWidget(AvatarPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentAvatarPath != widget.currentAvatarPath) {
+    // 只在路径确实发生变化，且不是当前选择的路径时更新
+    if (oldWidget.currentAvatarPath != widget.currentAvatarPath && 
+        _avatarPath != widget.currentAvatarPath) {
+      // 清除可能的缓存
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+      
       setState(() {
         _avatarPath = widget.currentAvatarPath;
       });
@@ -46,18 +54,26 @@ class _AvatarPickerState extends State<AvatarPicker> {
   }
 
   Future<void> _pickImage(BuildContext context) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => ImagePickerDialog(
-        initialUrl: _avatarPath,
-        saveDirectory: widget.saveDirectory,
-        enableCrop: true,
-        cropAspectRatio: 1.0, // 强制使用1:1的裁剪比例
-      ),
-    );
+    // 使用外部提供的对话框打开方法或默认方法
+    final result = widget.showPickerDialog != null 
+        ? await widget.showPickerDialog!(context, _avatarPath)
+        : await showDialog<Map<String, dynamic>>(
+            context: context,
+            builder: (context) => ImagePickerDialog(
+              initialUrl: _avatarPath,
+              saveDirectory: widget.saveDirectory,
+              enableCrop: true,
+              cropAspectRatio: 1.0, // 强制使用1:1的裁剪比例
+            ),
+          );
 
     if (result != null) {
       final sourcePath = result['url'] as String;
+      
+      // 清除图片缓存
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+      
       setState(() {
         _avatarPath = sourcePath;
       });
@@ -66,7 +82,7 @@ class _AvatarPickerState extends State<AvatarPicker> {
       if (_avatarPath != null) {
         try {
           // 获取源文件的绝对路径
-          final sourceAbsolutePath = await PathUtils.toAbsolutePath(_avatarPath!);
+          final sourceAbsolutePath = await ImageUtils.getAbsolutePath(_avatarPath!);
           final sourceFile = File(sourceAbsolutePath);
           
           // 确保文件存在
@@ -95,12 +111,12 @@ class _AvatarPickerState extends State<AvatarPicker> {
             await sourceFile.copy(newPath);
             
             // 转换为相对路径并更新状态
-            final relativePath = await PathUtils.toRelativePath(newPath);
+            final relativePath = await ImageUtils.toRelativePath(newPath);
             setState(() {
               _avatarPath = relativePath;
             });
 
-            // 通知父组件头像已更改
+            // 通知父组件头像已更新
             widget.onAvatarChanged?.call(relativePath);
             
             debugPrint('Avatar saved successfully to: $newPath');
@@ -140,12 +156,13 @@ class _AvatarPickerState extends State<AvatarPicker> {
                           return ClipOval(
                             child: Image.file(
                               file,
-                              key: ValueKey(file.path), // 添加key以确保更新
+                              key: ValueKey('${file.path}?ts=${DateTime.now().millisecondsSinceEpoch}'), // 添加时间戳确保更新
                               width: widget.size,
                               height: widget.size,
                               fit: BoxFit.cover,
-                              cacheWidth: (widget.size * 2).toInt(), // 添加缓存控制
-                              cacheHeight: (widget.size * 2).toInt(), // 添加缓存控制
+                              cacheWidth: (widget.size * 2).toInt(),
+                              cacheHeight: (widget.size * 2).toInt(),
+                              gaplessPlayback: true, // 无缝播放，避免闪烁
                               errorBuilder: (context, error, stackTrace) {
                                 debugPrint('Error loading avatar: $error');
                                 return _buildDefaultAvatar();
@@ -178,5 +195,4 @@ class _AvatarPickerState extends State<AvatarPicker> {
     );
   }
 
-  // 移除旧的 _getAbsolutePath 方法，因为现在使用 PathUtils 类
 }

@@ -1,7 +1,8 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:flutter/material.dart';
 import '../l10n/openai_localizations.dart';
-import '../controllers/agent_controller.dart';
+import '../openai_plugin.dart';
 import '../controllers/tool_app_controller.dart';
 import '../widgets/agent_list_view.dart';
 import '../widgets/agent_grid_view.dart';
@@ -30,7 +31,7 @@ class _AgentListScreenState extends State<AgentListScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _agentController = AgentController();
+    _agentController = OpenAIPlugin.instance.controller;
     _toolAppController = ToolAppController();
     _agentController.addListener(_onAgentsChanged);
     _loadAgents();
