@@ -3,9 +3,11 @@ import '../base_plugin.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
 import 'l10n/notes_localizations.dart';
+import 'controls/prompt_controller.dart';
 
 class NotesPlugin extends BasePlugin {
   late NotesController _controller;
+  late NotesPromptController _promptController;
   bool _isInitialized = false;
 
   @override
@@ -30,7 +32,9 @@ class NotesPlugin extends BasePlugin {
   Future<void> initialize() async {
     try {
       _controller = NotesController(storage);
+      _promptController = NotesPromptController();
       await _controller.initialize();
+      _promptController.initialize(_controller);
       _isInitialized = true;
     } catch (e) {
       debugPrint('Failed to initialize NotesPlugin: $e');
@@ -154,6 +158,12 @@ class NotesPlugin extends BasePlugin {
   Future<void> registerToApp(pluginManager, configManager) async {
     // 注册插件到应用
     await initialize();
+  }
+
+  @override
+  Future<void> uninstall() async {
+    _promptController.unregisterPromptMethods();
+    await super.uninstall();
   }
 
   @override

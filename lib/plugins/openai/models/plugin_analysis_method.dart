@@ -76,5 +76,31 @@ class PluginAnalysisMethod {
         'endDate': '2025-05-03',
       },
     ),
+     PluginAnalysisMethod(
+      name: 'notes_getNotes',
+      title: '获取笔记列表',
+      template: {
+        "method": "notes_getNotes",
+        "note_ids": ["1746107873264"],
+        "folder_ids": ["1746107865041"]
+      },
+    ),
+      PluginAnalysisMethod(
+      name: 'day_getDays',
+      title: '获取纪念日列表',
+      template: {
+        "method": "day_getDays",
+        "startDate": "2025-01-01",
+        "endDate": "2025-12-30"
+      },
+    ),
+    PluginAnalysisMethod(
+      name: 'nodes_getNodePaths',
+      title: '获取笔记本节点',
+      template: {
+       "method": "nodes_getNodePaths",
+        "notebook_id": "adf36804-e475-4f40-bdb4-a82932c9a083"
+      },
+    ),
   ];
 }

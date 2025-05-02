@@ -73,9 +73,18 @@ class DayController extends ChangeNotifier {
       '${_plugin.pluginDir}/memorial_days.json',
       defaultContent,
     );
-    // 如果文件不存在或读取失败，加载测试数据
-    // _memorialDays = MemorialDay.generateTestData();
-    await _saveMemorialDays();
+    
+    try {
+      final List<dynamic> jsonList = jsonDecode(content);
+      _memorialDays.clear();
+      _memorialDays.addAll(
+        jsonList.map((json) => MemorialDay.fromJson(json)).toList(),
+      );
+    } catch (e) {
+      debugPrint('解析纪念日数据失败: $e');
+      // 如果解析失败，保持空列表
+      _memorialDays.clear();
+    }
     // 如果不使用自定义排序，则按剩余天数排序
     if (!_useCustomOrder) {
       _sortMemorialDays();

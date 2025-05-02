@@ -4,12 +4,14 @@ import '../../core/config_manager.dart';
 import '../base_plugin.dart';
 import 'screens/day_home_screen.dart';
 import 'controllers/day_controller.dart';
+import 'controls/prompt_controller.dart';
 
 class DayPlugin extends BasePlugin {
   static final DayPlugin instance = DayPlugin._internal();
   DayPlugin._internal();
 
   late DayController _controller;
+  late PromptController _promptController;
   bool _isInitialized = false;
 
   @override
@@ -55,6 +57,11 @@ class DayPlugin extends BasePlugin {
     await storage.createDirectory(pluginDir);
     _controller = DayController();
     await _controller.initialize();
+    
+    // 初始化prompt控制器
+    _promptController = PromptController();
+    _promptController.initialize();
+    
     _isInitialized = true;
   }
 
@@ -176,5 +183,10 @@ class DayPlugin extends BasePlugin {
   @override
   Widget buildMainView(BuildContext context) {
     return const DayHomeScreen();
+  }
+  
+  void dispose() {
+    // 注销prompt替换方法
+    _promptController.unregisterPromptMethods();
   }
 }

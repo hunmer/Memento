@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/plugin_base.dart';
+import '../../core/plugin_manager.dart';
+import '../openai/openai_plugin.dart';
+import 'services/prompt_replacements.dart';
 import 'controllers/nodes_controller.dart';
 import 'screens/notebooks_screen.dart';
 import 'l10n/nodes_localizations.dart';
@@ -8,8 +11,11 @@ import 'models/node.dart';
 
 class NodesPlugin extends PluginBase {
   late NodesController _controller;
+  final NodesPromptReplacements _promptReplacements = NodesPromptReplacements();
 
   NodesPlugin();
+
+  NodesController get controller => _controller;
 
   @override
   String get id => 'nodes';
@@ -29,6 +35,13 @@ class NodesPlugin extends PluginBase {
   @override
   Future<void> initialize() async {
     _controller = NodesController(storage);
+    _promptReplacements.initialize();
+    
+    // 延迟注册 prompt 替换方法，等待 OpenAI 插件初始化完成
+    Future.delayed(const Duration(seconds: 1), () {
+      _registerPromptMethods();
+    });
+    
     await Future.delayed(Duration.zero); // Ensure initialization is complete
     debugPrint('Nodes plugin initialized');
   }
@@ -60,6 +73,33 @@ class NodesPlugin extends PluginBase {
   @override
   LocalizationsDelegate<NodesLocalizations> get localizationsDelegate =>
       NodesLocalizationsDelegate.delegate;
+
+  /// 注册 prompt 替换方法
+  void _registerPromptMethods() {
+    try {
+      final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      if (openaiPlugin != null) {
+        openaiPlugin.registerPromptReplacementMethod(
+          'nodes_getNodePaths',
+          _promptReplacements.getNodePaths,
+        );
+        debugPrint('成功注册 nodes_getNodePaths 方法到 OpenAI 插件');
+      } else {
+        debugPrint('注册 nodes_getNodePaths 方法失败：未找到 OpenAI 插件，将在 5 秒后重试');
+        // 如果 OpenAI 插件还未准备好，5 秒后重试
+        Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
+      }
+    } catch (e) {
+      debugPrint('注册 prompt 替换方法时出错: $e，将在 5 秒后重试');
+      // 发生错误时，5 秒后重试
+      Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
+    }
+  }
+
+  /// 清理资源
+  void dispose() {
+    _promptReplacements.dispose();
+  }
 
   // 计算所有笔记本中的节点总数
   int _countAllNodes(List<Node> nodes) {
