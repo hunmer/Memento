@@ -150,26 +150,34 @@ class ChatEventHandler {
         'isStreaming': true,
       });
       
-      // 立即广播AI消息创建事件
-      final channelId = originalMessage.metadata?['channelId'] as String? ?? 'default';
+      // 广播AI消息创建事件
+      final channelId = originalMessage.channelId as String;
       eventManager.broadcast(
         'onMessageCreate', 
         Values<Message, String>(typingMessage, channelId),
       );
+      
+      // 添加短暂延迟，确保消息已被存储到频道中
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      developer.log(
+        '已创建AI回复消息: ${typingMessage.id}',
+        name: 'ChatEventHandler',
+      );
 
-      // 获取上下文消息
-      List<ChatCompletionMessage> contextMessages = [];
-      if (originalMessage.metadata?.containsKey('contextCount') == true) {
+      // 准备消息列表，首先添加system消息
+      List<ChatCompletionMessage> contextMessages = [
+        ChatCompletionMessage.system(
+          content: agent.systemPrompt ?? 'You are a helpful assistant.',
+        ),
+      ];
+
+      // 获取历史上下文消息
+      if (originalMessage.metadata?.containsKey('contextCount') == true && channelId != null) {
         final contextCount = originalMessage.metadata!['contextCount'] as int;
         if (contextCount > 0) {
-          final channelId = originalMessage.metadata?['channelId'] as String?;
-          if (channelId == null) {
-            developer.log(
-              '警告：消息缺少channelId参数，无法获取上下文消息',
-              name: 'ChatEventHandler',
-            );
-            return;
-          }
+          // 添加延迟以确保消息已被存储
+          await Future.delayed(const Duration(milliseconds: 500));
           
           final previousMessages = ChatPlugin.instance.channelService.getMessagesBefore(
             originalMessage.id,
@@ -177,8 +185,18 @@ class ChatEventHandler {
             channelId: channelId,
           );
           
-          // 将历史消息转换为AI消息格式
-          for (final msg in previousMessages) {
+          // 过滤掉typing消息和当前消息
+          final filteredMessages = previousMessages.where((msg) {
+            // 排除当前消息
+            if (msg.id == originalMessage.id) return false;
+            if(msg.content.contains('抱歉，生成回复时出现错误')) return false;
+            // 排除typing消息
+            // if (msg.metadata?.containsKey('isStreaming') == true) return false; // isStreaming 暂时不生效
+            return true;
+          }).toList();
+          
+          // 将历史消息转换为AI消息格式，按时间顺序添加
+          for (final msg in filteredMessages) {
             if (msg.metadata?.containsKey('isAI') == true) {
               contextMessages.add(ChatCompletionMessage.assistant(
                 content: msg.content,
@@ -192,9 +210,14 @@ class ChatEventHandler {
         }
       }
 
+      // 最后添加当前用户的消息
+      contextMessages.add(ChatCompletionMessage.user(
+        content: ChatCompletionUserMessageContent.string(originalMessage.content),
+      ));
+
       await RequestService.streamResponse(
         agent: agent,
-        prompt: originalMessage.content,
+        prompt: null, // 不再需要单独的prompt参数，因为已经添加到contextMessages中
         vision: hasImage,
         filePath: absoluteFilePath,
         contextMessages: contextMessages,

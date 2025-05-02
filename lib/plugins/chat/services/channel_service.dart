@@ -520,7 +520,7 @@ class ChannelService {
     // 如果提供了频道ID，只在指定频道中查找
     if (channelId != null) {
       final channel = _channels.firstWhere(
-        (c) => c.id == channelId
+        (c) => c.id == channelId,
       );
       
       // 如果找不到频道或频道为空，返回空列表
@@ -532,25 +532,15 @@ class ChannelService {
       // 找到消息在当前频道的位置
       final index = channel.messages.indexWhere((msg) => msg.id == messageId);
       if (index != -1) {
-        // 计算起始索引，确保不会小于0
-        final startIndex = (index - count).clamp(0, index);
+        // 由于消息是倒序存储的（新消息在前），所以我们需要从当前位置往后取消息
+        final endIndex = (index + count).clamp(index + 1, channel.messages.length);
         // 返回指定数量的消息，按时间从旧到新排序
-        return channel.messages.sublist(startIndex, index).toList()
-          ..sort((a, b) => a.date.compareTo(b.date));
-      }
-      return [];
-    }
-    
-    // 如果没有提供频道ID，在所有频道中查找（兼容旧代码）
-    for (var channel in _channels) {
-      // 找到消息在当前频道的位置
-      final index = channel.messages.indexWhere((msg) => msg.id == messageId);
-      if (index != -1) {
-        // 计算起始索引，确保不会小于0
-        final startIndex = (index - count).clamp(0, index);
-        // 返回指定数量的消息，按时间从旧到新排序
-        return channel.messages.sublist(startIndex, index).toList()
-          ..sort((a, b) => a.date.compareTo(b.date));
+        final messages = channel.messages.sublist(index + 1, endIndex).toList();
+        messages.sort((a, b) => a.date.compareTo(b.date)); // 确保按时间从旧到新排序
+        debugPrint('获取历史消息：从索引 ${index + 1} 到 $endIndex，共 ${messages.length} 条消息');
+        return messages;
+      } else {
+        debugPrint('警告：在频道 $channelId 中找不到ID为 $messageId 的消息');
       }
     }
     return [];

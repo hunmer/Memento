@@ -15,6 +15,7 @@ class Message {
   final MessageType type;
   DateTime? editedAt; // 添加编辑时间字段
   String? fixedSymbol; // 添加固定符号字段
+  String? channelId; // 添加固定符号字段
   Color? bubbleColor; // 添加气泡颜色字段
   Map<String, dynamic>? metadata; // 添加元数据字段，用于存储额外信息
   Message? replyTo; // 添加回复消息引用
@@ -35,9 +36,10 @@ class Message {
     this.editedAt,
     this.fixedSymbol,
     this.bubbleColor,
+    this.channelId,
     this.metadata,
     Message? replyTo,
-    this.replyToId,
+    this.replyToId, 
   }) : date = date ?? DateTime.now() {
     // 如果提供了replyTo，确保设置replyToId
     if (replyTo != null) {
@@ -54,6 +56,7 @@ class Message {
     DateTime? date,
     DateTime? editedAt,
     String? fixedSymbol,
+    String? channelId,
     Color? bubbleColor,
     Map<String, dynamic>? metadata,
     Message? replyTo,
@@ -62,6 +65,7 @@ class Message {
     // 创建基本消息实例
     final message = Message(
       id: id,
+      channelId: channelId,
       content: content,
       user: user,
       type: type,

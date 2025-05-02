@@ -190,17 +190,17 @@ class RequestService {
   /// 流式处理AI响应
   ///
   /// [agent] - AI助手配置
-  /// [prompt] - 用户输入的提示
+  /// [prompt] - 用户输入的提示，如果为null，则从contextMessages中获取
   /// [onToken] - 每接收到一个完整响应时的回调
   /// [onError] - 发生错误时的回调
   /// [onComplete] - 完成时的回调
   /// [vision] - 是否启用vision模式
   /// [filePath] - 图片文件路径（vision模式下使用）
   /// [replacePrompt] - 是否启用prompt替换
-  /// [contextMessages] - 上下文消息列表，按时间从旧到新排序
+  /// [contextMessages] - 上下文消息列表，包含system消息和历史消息，按时间从旧到新排序
   static Future<void> streamResponse({
     required AIAgent agent,
-    required String prompt,
+    String? prompt,
     required Function(String) onToken,
     required Function(String) onError,
     required Function() onComplete,
@@ -210,25 +210,75 @@ class RequestService {
     List<ChatCompletionMessage>? contextMessages,
   }) async {
     try {
+      // 如果提供了contextMessages，直接使用它作为消息列表
+      List<ChatCompletionMessage> messages = [];
+      if (contextMessages != null && contextMessages.isNotEmpty) {
+        messages = List<ChatCompletionMessage>.from(contextMessages);
+      } else if (prompt != null) {
+        // 如果没有提供contextMessages但有prompt，则创建基本的消息列表
+        messages = [
+          ChatCompletionMessage.system(content: agent.systemPrompt),
+          ChatCompletionMessage.user(
+            content: ChatCompletionUserMessageContent.string(prompt),
+          ),
+        ];
+      } else {
+        // 如果既没有contextMessages也没有prompt，则报错
+        onError('错误：未提供消息内容');
+        return;
+      }
+
+      // Vision模式处理
       if (vision && filePath != null) {
-        // Vision模式，使用图片文件
         final file = File(filePath);
         if (await file.exists()) {
-          final response = await chat(prompt, agent, imageFile: file);
-          onToken(response);
-          onComplete();
-          return;
+          // 读取图片文件并转换为base64
+          final bytes = await file.readAsBytes();
+          final base64Image = base64Encode(bytes);
+
+          // 找到最后一个用户消息并添加图片
+          for (int i = messages.length - 1; i >= 0; i--) {
+            if (messages[i].role == ChatCompletionMessageRole.user) {
+              final userMessage = messages[i];
+              final content = userMessage.content;
+              
+              // 获取现有的文本内容
+              String? textContent;
+              if (content is String) {
+                textContent = content;
+              } 
+
+              // 创建新的消息，包含文本（如果有）和图片
+              messages[i] = ChatCompletionMessage.user(
+                content: ChatCompletionUserMessageContent.parts([
+                  if (textContent != null)
+                    ChatCompletionMessageContentPart.text(text: textContent),
+                  ChatCompletionMessageContentPart.image(
+                    imageUrl: ChatCompletionMessageImageUrl(
+                      url: 'data:image/jpeg;base64,$base64Image',
+                    ),
+                  ),
+                ]),
+              );
+              break;
+            }
+          }
         } else {
           onError('图片文件不存在: $filePath');
           return;
         }
-      }
-
-      // 处理prompt替换
-      String processedPrompt = prompt;
-      if (replacePrompt) {
+      } else if (prompt != null && replacePrompt) {
+        // 非Vision模式下，如果有prompt且需要替换，则处理最后一个用户消息
         try {
-          processedPrompt = await PromptReplacementController().processPrompt(prompt);
+          final processedPrompt = await PromptReplacementController().processPrompt(prompt);
+          for (int i = messages.length - 1; i >= 0; i--) {
+            if (messages[i].role == ChatCompletionMessageRole.user) {
+              messages[i] = ChatCompletionMessage.user(
+                content: ChatCompletionUserMessageContent.string(processedPrompt),
+              );
+              break;
+            }
+          }
           developer.log(
             'Prompt替换结果: $processedPrompt',
             name: 'RequestService',
@@ -242,23 +292,8 @@ class RequestService {
         }
       }
 
-      // 普通流式对话模式
+      // 获取OpenAI客户端
       final client = _getClient(agent);
-
-      // 构建消息列表
-      final List<ChatCompletionMessage> messages = [
-        ChatCompletionMessage.system(content: agent.systemPrompt),
-      ];
-      
-      // 添加上下文消息
-      if (contextMessages != null && contextMessages.isNotEmpty) {
-        messages.addAll(contextMessages);
-      }
-      
-      // 添加当前用户消息
-      messages.add(ChatCompletionMessage.user(
-        content: ChatCompletionUserMessageContent.string(processedPrompt),
-      ));
 
       final request = CreateChatCompletionRequest(
         model: ChatCompletionModel.modelId(agent.model),

@@ -88,6 +88,7 @@ class MessageInputState {
           type: MessageType.sent,
           replyTo: replyTo,
           metadata: metadata,
+          channelId: ChatPlugin.instance.channelService.currentChannel!.id,
         );
 
         // 发送消息
