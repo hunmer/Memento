@@ -5,7 +5,6 @@ import 'package:Memento/core/plugin_manager.dart';
 import '../services/request_service.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import '../controllers/prompt_replacement_controller.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/ai_agent.dart';

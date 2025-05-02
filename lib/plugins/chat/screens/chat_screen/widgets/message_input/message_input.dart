@@ -35,6 +35,7 @@ class _MessageInputState extends State<MessageInput> {
   List<Map<String, String>> selectedAgents = [];
   bool showAgentList = false;
   Map<String, dynamic>? selectedFile;
+  int contextRange = 10; // 默认上下文范围为10
 
   late MessageInputState _messageInputState;
 
@@ -90,6 +91,13 @@ class _MessageInputState extends State<MessageInput> {
     });
   }
 
+  void _handleContextRangeChange(int newRange) {
+    setState(() {
+      contextRange = newRange;
+      _updateMessageInputState();
+    });
+  }
+
   void _handleFileSelected(Map<String, dynamic> file) {
     setState(() {
       selectedFile = file;
@@ -106,6 +114,11 @@ class _MessageInputState extends State<MessageInput> {
       selectedFile: selectedFile,
       showAgentList: showAgentList,
       replyTo: widget.replyTo,
+      metadata: {
+        if (selectedAgents.isNotEmpty) 'contextCount': contextRange,
+        if (selectedAgents.isNotEmpty) 'agents': selectedAgents,
+        if (selectedFile != null) 'file': selectedFile,
+      },
       onSaveDraft: widget.onSaveDraft,
       onSendMessage: widget.onSendMessage,
       onClearFile: _removeFile,
@@ -166,6 +179,8 @@ class _MessageInputState extends State<MessageInput> {
             onShowAgentListDrawer: _showAgentListDrawer,
             onFileRemove: _removeFile,
             onAgentRemove: _removeAgent,
+            contextRange: contextRange,
+            onContextRangeChange: _handleContextRangeChange,
           ),
 
           // 输入区域

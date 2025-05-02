@@ -511,6 +511,51 @@ class ChannelService {
     return null;
   }
 
+  /// 获取指定消息之前的消息
+  /// [messageId] 消息ID
+  /// [count] 获取的消息数量
+  /// [channelId] 频道ID，如果提供则只在指定频道中查找
+  /// 返回消息列表，按时间从旧到新排序
+  List<Message> getMessagesBefore(String messageId, int count, {String? channelId}) {
+    // 如果提供了频道ID，只在指定频道中查找
+    if (channelId != null) {
+      final channel = _channels.firstWhere(
+        (c) => c.id == channelId
+      );
+      
+      // 如果找不到频道或频道为空，返回空列表
+      if (channel.id.isEmpty) {
+        debugPrint('警告：找不到ID为 $channelId 的频道');
+        return [];
+      }
+      
+      // 找到消息在当前频道的位置
+      final index = channel.messages.indexWhere((msg) => msg.id == messageId);
+      if (index != -1) {
+        // 计算起始索引，确保不会小于0
+        final startIndex = (index - count).clamp(0, index);
+        // 返回指定数量的消息，按时间从旧到新排序
+        return channel.messages.sublist(startIndex, index).toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
+      }
+      return [];
+    }
+    
+    // 如果没有提供频道ID，在所有频道中查找（兼容旧代码）
+    for (var channel in _channels) {
+      // 找到消息在当前频道的位置
+      final index = channel.messages.indexWhere((msg) => msg.id == messageId);
+      if (index != -1) {
+        // 计算起始索引，确保不会小于0
+        final startIndex = (index - count).clamp(0, index);
+        // 返回指定数量的消息，按时间从旧到新排序
+        return channel.messages.sublist(startIndex, index).toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
+      }
+    }
+    return [];
+  }
+
   // 加载回复消息
   Future<Message?> loadReplyMessage(String? replyToId) async {
     if (replyToId == null) return null;

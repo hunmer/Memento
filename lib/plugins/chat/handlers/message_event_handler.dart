@@ -29,9 +29,10 @@ class MessageEventHandler {
 
   /// 处理消息更新事件
   Future<void> _handleMessageUpdated(EventArgs args) async {
-    if (args is! Value<Message>) return;
+    if (args is! Values<Message, String>) return;
     
-    final message = args.value;
+    final message = args.value1;
+    final channelId = args.value2;
     developer.log('处理消息更新: ${message.id}, 内容: ${message.content.substring(0, message.content.length > 20 ? 20 : message.content.length)}...', name: 'MessageEventHandler');
     
     try {
@@ -74,17 +75,15 @@ class MessageEventHandler {
     developer.log('处理新消息接收: ${message.id}', name: 'MessageEventHandler');
     
     try {
-      // 获取当前活跃频道
-      var currentChannel = _channelService.currentChannel;
-      
-      // 如果没有活跃的频道，尝试获取或创建默认频道
+      // 获取当前活跃频道ID
+      final currentChannel = _channelService.currentChannel;
       if (currentChannel == null) {
         developer.log(
           '无活跃频道，尝试获取或创建默认频道',
           name: 'MessageEventHandler'
         );
-        currentChannel = await _channelService.getOrCreateDefaultChannel();
-        if (currentChannel == null) {
+        final channel = await _channelService.getOrCreateDefaultChannel();
+        if (channel == null) {
           throw Exception('无法创建默认频道');
         }
       }
@@ -92,8 +91,8 @@ class MessageEventHandler {
       // 创建一个Future<Message>对象，因为addMessage方法需要Future<Message>类型
       final messageFuture = Future<Message>.value(message);
       
-      // 将新消息添加到当前频道
-      await _channelService.addMessage(currentChannel.id, messageFuture);
+      // 将新消息添加到当前活跃频道
+      await _channelService.addMessage(_channelService.currentChannel!.id, messageFuture);
       
       developer.log(
         '新消息添加成功: ${message.id}, 内容: ${message.content}',
@@ -112,32 +111,18 @@ class MessageEventHandler {
 
   /// 处理消息创建事件（用于流式响应开始前创建聊天气泡）
   Future<void> _handleMessageCreate(EventArgs args) async {
-    if (args is! Value<Message>) return;
+    if (args is! Values<Message, String>) return;
     
-    final message = args.value;
+    final message = args.value1;
+    final channelId = args.value2;
     developer.log('处理消息创建: ${message.id}', name: 'MessageEventHandler');
     
     try {
-      // 获取当前活跃频道
-      var currentChannel = _channelService.currentChannel;
-      
-      // 如果没有活跃的频道，尝试获取或创建默认频道
-      if (currentChannel == null) {
-        developer.log(
-          '无活跃频道，尝试获取或创建默认频道',
-          name: 'MessageEventHandler'
-        );
-        currentChannel = await _channelService.getOrCreateDefaultChannel();
-        if (currentChannel == null) {
-          throw Exception('无法创建默认频道');
-        }
-      }
-      
       // 创建一个Future<Message>对象
       final messageFuture = Future<Message>.value(message);
       
-      // 将新消息添加到当前频道
-      await _channelService.addMessage(currentChannel.id, messageFuture);
+      // 将新消息添加到指定频道
+      await _channelService.addMessage(channelId, messageFuture);
       
       developer.log(
         '消息气泡创建成功: ${message.id}, 准备接收流式内容',

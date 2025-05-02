@@ -12,6 +12,7 @@ class MessageInputState {
   final Map<String, dynamic>? selectedFile;
   final bool showAgentList;
   final Message? replyTo;
+  final Map<String, dynamic>? metadata;
   final Function(String) onSaveDraft;
   final Function(
     String, {
@@ -35,6 +36,7 @@ class MessageInputState {
     required this.onSaveDraft,
     required this.onSendMessage,
     this.onClearFile,
+    this.metadata,
   });
 
   void sendMessage() {
@@ -62,12 +64,19 @@ class MessageInputState {
 
       // 如果有消息文本，再发送消息
       if (hasMessage) {
-        // 添加智能体信息
-        if (selectedAgents.isNotEmpty) {
-          metadata['agents'] =
-              selectedAgents
-                  .map((agent) => agent)
-                  .toList();
+        // 如果有预设的元数据，先添加
+        if (this.metadata != null) {
+          metadata.addAll(this.metadata!);
+        }
+        
+        // 添加智能体信息（如果元数据中没有）
+        if (selectedAgents.isNotEmpty && !metadata.containsKey('agents')) {
+          metadata['agents'] = selectedAgents.map((agent) => agent).toList();
+        }
+        
+        // 确保上下文数量存在（如果元数据中没有）
+        if (selectedAgents.isNotEmpty && !metadata.containsKey('contextCount')) {
+          metadata['contextCount'] = 20; // 默认上下文数量
         }
         // 创建用户对象
         final user = ChatPlugin.instance.userService.currentUser;

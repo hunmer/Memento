@@ -84,6 +84,7 @@ class RequestService {
     AIAgent agent, {
     File? imageFile,
     bool replacePrompt = true,
+    List<ChatCompletionMessage>? contextMessages,
   }) async {
     try {
       developer.log('开始聊天请求: ${agent.id}', name: 'RequestService');
@@ -135,14 +136,24 @@ class RequestService {
           maxTokens: 4096,
         );
       } else {
+        // 构建消息列表
+        final List<ChatCompletionMessage> messages = [
+          ChatCompletionMessage.system(content: agent.systemPrompt),
+        ];
+        
+        // 添加上下文消息（如果有）
+        if (contextMessages != null && contextMessages.isNotEmpty) {
+          messages.addAll(contextMessages);
+        }
+        
+        // 添加当前用户消息
+        messages.add(ChatCompletionMessage.user(
+          content: ChatCompletionUserMessageContent.string(processedInput),
+        ));
+        
         request = CreateChatCompletionRequest(
           model: ChatCompletionModel.modelId(agent.model),
-          messages: [
-            ChatCompletionMessage.system(content: agent.systemPrompt),
-            ChatCompletionMessage.user(
-              content: ChatCompletionUserMessageContent.string(processedInput),
-            ),
-          ],
+          messages: messages,
           temperature: 0.7,
           maxTokens: 1000,
         );
@@ -186,6 +197,7 @@ class RequestService {
   /// [vision] - 是否启用vision模式
   /// [filePath] - 图片文件路径（vision模式下使用）
   /// [replacePrompt] - 是否启用prompt替换
+  /// [contextMessages] - 上下文消息列表，按时间从旧到新排序
   static Future<void> streamResponse({
     required AIAgent agent,
     required String prompt,
@@ -195,6 +207,7 @@ class RequestService {
     bool vision = false,
     String? filePath,
     bool replacePrompt = true,
+    List<ChatCompletionMessage>? contextMessages,
   }) async {
     try {
       if (vision && filePath != null) {
@@ -232,14 +245,24 @@ class RequestService {
       // 普通流式对话模式
       final client = _getClient(agent);
 
+      // 构建消息列表
+      final List<ChatCompletionMessage> messages = [
+        ChatCompletionMessage.system(content: agent.systemPrompt),
+      ];
+      
+      // 添加上下文消息
+      if (contextMessages != null && contextMessages.isNotEmpty) {
+        messages.addAll(contextMessages);
+      }
+      
+      // 添加当前用户消息
+      messages.add(ChatCompletionMessage.user(
+        content: ChatCompletionUserMessageContent.string(processedPrompt),
+      ));
+
       final request = CreateChatCompletionRequest(
         model: ChatCompletionModel.modelId(agent.model),
-        messages: [
-          ChatCompletionMessage.system(content: agent.systemPrompt),
-          ChatCompletionMessage.user(
-            content: ChatCompletionUserMessageContent.string(processedPrompt),
-          ),
-        ],
+        messages: messages,
         temperature: 0.7,
       );
 

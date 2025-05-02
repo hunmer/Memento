@@ -7,6 +7,12 @@ class MetadataDisplay extends StatelessWidget {
   final Function() onShowAgentListDrawer;
   final Function() onFileRemove;
   final Function(String) onAgentRemove;
+  final int contextRange;
+  final Function(int) onContextRangeChange;
+
+  static const int minRange = 0;
+  static const int maxRange = 50;
+  static const int defaultRange = 10;
 
   const MetadataDisplay({
     super.key,
@@ -15,11 +21,16 @@ class MetadataDisplay extends StatelessWidget {
     required this.onShowAgentListDrawer,
     required this.onFileRemove,
     required this.onAgentRemove,
+    this.contextRange = defaultRange,
+    required this.onContextRangeChange,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (selectedFile == null && selectedAgents.isEmpty) return const SizedBox();
+    if (selectedFile == null && selectedAgents.isEmpty) {
+      // 没有文件和智能体时不显示任何内容
+      return const SizedBox();
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -74,6 +85,12 @@ class MetadataDisplay extends StatelessWidget {
           // 如果两者都存在，添加一个间隔
           if (selectedFile != null && selectedAgents.isNotEmpty)
             const SizedBox(width: 8),
+            
+          // 只有在选择了智能体时才显示上下文范围
+          if (selectedAgents.isNotEmpty) ...[
+            _buildContextRangeChip(context),
+            const SizedBox(width: 8),
+          ],
 
           // 智能体状态展示
           if (selectedAgents.isNotEmpty)
@@ -108,6 +125,85 @@ class MetadataDisplay extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildContextRangeChip(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.zero,
+      child: GestureDetector(
+        onTap: () => _showContextRangeDialog(context),
+        child: Chip(
+          avatar: Icon(
+            Icons.history,
+            size: 18,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+          label: Text('上下文: $contextRange'),
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          labelStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showContextRangeDialog(BuildContext context) async {
+    double currentValue = contextRange.toDouble();
+    
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('设置上下文范围'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('当前范围: ${currentValue.round()}'),
+                  Slider(
+                    value: currentValue,
+                    min: minRange.toDouble(),
+                    max: maxRange.toDouble(),
+                    divisions: maxRange - minRange,
+                    label: currentValue.round().toString(),
+                    onChanged: (value) {
+                      setState(() {
+                        currentValue = value;
+                      });
+                    },
+                  ),
+                  const Text(
+                    '范围: 0-50，0表示不使用上下文',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('取消'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    onContextRangeChange(currentValue.round());
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('确定'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

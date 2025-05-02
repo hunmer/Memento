@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import '../../../core/event/event.dart';
+import 'package:openai_dart/openai_dart.dart';
+import '../../chat/chat_plugin.dart';
 import '../openai_plugin.dart';
 import '../services/request_service.dart';
 import '../../chat/models/message.dart';
@@ -37,9 +39,11 @@ class ChatEventHandler {
     final metadata = message.metadata;
 
     // 立即广播用户消息
+    final channelId = message.metadata?['channelId'] as String? ?? 'default';
+    
     eventManager.broadcast(
       'onMessageUpdated',
-      Value<Message>(message),
+      Values<Message, String>(message, channelId),
     );
     developer.log('收到新消息: ${message.content}', name: 'ChatEventHandler');
 
@@ -147,14 +151,53 @@ class ChatEventHandler {
       });
       
       // 立即广播AI消息创建事件
-      eventManager.broadcast('onMessageCreate', Value<Message>(typingMessage));
+      final channelId = originalMessage.metadata?['channelId'] as String? ?? 'default';
+      eventManager.broadcast(
+        'onMessageCreate', 
+        Values<Message, String>(typingMessage, channelId),
+      );
 
-      // 启动流式响应
+      // 获取上下文消息
+      List<ChatCompletionMessage> contextMessages = [];
+      if (originalMessage.metadata?.containsKey('contextCount') == true) {
+        final contextCount = originalMessage.metadata!['contextCount'] as int;
+        if (contextCount > 0) {
+          final channelId = originalMessage.metadata?['channelId'] as String?;
+          if (channelId == null) {
+            developer.log(
+              '警告：消息缺少channelId参数，无法获取上下文消息',
+              name: 'ChatEventHandler',
+            );
+            return;
+          }
+          
+          final previousMessages = ChatPlugin.instance.channelService.getMessagesBefore(
+            originalMessage.id,
+            contextCount,
+            channelId: channelId,
+          );
+          
+          // 将历史消息转换为AI消息格式
+          for (final msg in previousMessages) {
+            if (msg.metadata?.containsKey('isAI') == true) {
+              contextMessages.add(ChatCompletionMessage.assistant(
+                content: msg.content,
+              ));
+            } else {
+              contextMessages.add(ChatCompletionMessage.user(
+                content: ChatCompletionUserMessageContent.string(msg.content),
+              ));
+            }
+          }
+        }
+      }
+
       await RequestService.streamResponse(
         agent: agent,
         prompt: originalMessage.content,
-        vision: hasImage, // 如果有图片，启用vision模式
-        filePath: absoluteFilePath, // 传递文件路径
+        vision: hasImage,
+        filePath: absoluteFilePath,
+        contextMessages: contextMessages,
         onToken: (token) async {
           if (!streamController.isClosed) {
             if (tokenCount == 0) {
@@ -173,9 +216,10 @@ class ChatEventHandler {
               typingMessage.content = processedContent;
               // 保持agent标识
               typingMessage.metadata?['agentId'] = agentData['id'];
+              final channelId = originalMessage.metadata?['channelId'] as String? ?? 'default';
               eventManager.broadcast(
                 'onMessageUpdated',
-                Value<Message>(typingMessage),
+                Values<Message, String>(typingMessage, channelId),
               );
             }
           }
@@ -184,9 +228,10 @@ class ChatEventHandler {
           if (typingMessage != null) {
             typingMessage.content = '抱歉，生成回复时出现错误：$error';
             typingMessage.metadata?.addAll({'isError': true});
+            final channelId = originalMessage.metadata?['channelId'] as String? ?? 'default';
             eventManager.broadcast(
               'onMessageUpdated',
-              Value<Message>(typingMessage),
+              Values<Message, String>(typingMessage, channelId),
             );
           }
           // 清理资源
@@ -214,9 +259,10 @@ class ChatEventHandler {
             }; // 移除 isStreaming 标记
 
             // 广播最终的消息更新事件
+            final channelId = originalMessage.metadata?['channelId'] as String? ?? 'default';
             eventManager.broadcast(
               'onMessageUpdated',
-              Value<Message>(typingMessage),
+              Values<Message, String>(typingMessage, channelId),
             );
           }
 
@@ -241,9 +287,10 @@ class ChatEventHandler {
       if (typingMessage != null) {
         typingMessage.content = '处理AI回复时出错：$e';
         typingMessage.metadata?.addAll({'isError': true});
+        final channelId = originalMessage.metadata?['channelId'] as String? ?? 'default';
         eventManager.broadcast(
           'onMessageUpdated',
-          Value<Message>(typingMessage),
+          Values<Message, String>(typingMessage, channelId),
         );
       } else {
         // 如果typingMessage未创建，则创建一个新的错误消息
@@ -266,7 +313,11 @@ class ChatEventHandler {
     );
 
     // 广播消息创建事件
-    eventManager.broadcast('onMessageCreate', Value<Message>(message));
+    final channelId = message.metadata?['channelId'] as String? ?? 'default';
+    eventManager.broadcast(
+      'onMessageCreate',
+      Values<Message, String>(message, channelId),
+    );
   }
 
   // 检查AI用户是否已初始化
