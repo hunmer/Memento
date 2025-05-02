@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../utils/color_extension.dart';
+import '../services/user_service.dart';
+import '../chat_plugin.dart';
 import 'message.dart';
 import 'user.dart';
 
@@ -105,13 +107,10 @@ class Channel {
   static Channel fromJson(
     Map<String, dynamic> json, {
     List<Message> messages = const [],
+    required List<User> users,
   }) {
-    // 解析成员列表
-    final List<dynamic> membersJson = json['members'] as List<dynamic>;
-    final List<User> members =
-        membersJson
-            .map((m) => User.fromJson(m as Map<String, dynamic>))
-            .toList();
+    // 使用提供的用户列表
+    final List<User> members = users;
 
     // 解析图标
     final IconData icon = IconData(

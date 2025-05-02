@@ -20,7 +20,9 @@ class StorageManager {
 
   /// 检查文件是否存在
   Future<bool> _checkFileExists(String filePath) async {
-    final file = io.File(path.join(_basePath, filePath));
+    // 使用path.join确保路径分隔符在不同平台上兼容
+    final normalizedPath = path.normalize(path.join(_basePath, filePath));
+    final file = io.File(normalizedPath);
     return await file.exists();
   }
 
@@ -110,7 +112,8 @@ class StorageManager {
       } else {
         // 非Web平台使用文件系统
         final directory = await getApplicationDocumentsDirectory();
-        _basePath = '${directory.path}/app_data';
+        // 使用path.join确保路径分隔符在不同平台上兼容
+        _basePath = path.join(directory.path, 'app_data');
 
         // 确保基础目录存在
         final baseDir = io.Directory(_basePath);
@@ -329,7 +332,13 @@ class StorageManager {
   }
 
   /// 读取 JSON 文件
-  Future<Map<String, dynamic>> read(String path) async {
+  /// 
+  /// [path] 文件路径
+  /// [defaultValue] 当文件不存在或读取失败时返回的默认值，如果不指定则返回空对象 {}
+  Future<Map<String, dynamic>> read(
+    String path, [
+    Map<String, dynamic>? defaultValue,
+  ]) async {
     try {
       if (kIsWeb) {
         // Web平台使用抽象接口
@@ -337,17 +346,15 @@ class StorageManager {
         if (data != null && data is Map<String, dynamic>) {
           return data;
         }
-        return {};
+        return defaultValue ?? {};
       } else {
         final content = await readString(path);
         return json.decode(content) as Map<String, dynamic>;
       }
     } catch (e) {
-      debugPrint('读取 JSON 文件失败: $e');
-      return {};
+      return defaultValue ?? {};
     }
   }
-
   /// 写入 JSON 文件
   Future<void> write(String path, Map<String, dynamic> data) async {
     await writeJson(path, data);
@@ -383,7 +390,12 @@ class StorageManager {
         }
 
         // 从缓存中删除所有相关项
-        _cache.removeWhere((key, _) => key.startsWith(dirPath));
+        // 确保路径分隔符处理正确，使用标准化的路径格式进行比较
+        final normalizedDirPath = path.normalize(dirPath);
+        _cache.removeWhere((key, _) {
+          final normalizedKey = path.normalize(key);
+          return normalizedKey.startsWith(normalizedDirPath);
+        });
 
         // 这里可以添加目录删除事件监控代码，用于后续同步到WebDAV
       } catch (e) {
@@ -413,8 +425,6 @@ class StorageManager {
       return await readString(path);
     } catch (e) {
       if (defaultValue != null) {
-        // 如果提供了默认值且读取失败，返回默认值
-        debugPrint('文件读取失败，使用默认值: $path - $e');
         return defaultValue;
       }
       // 如果没有提供默认值，则继续抛出异常
@@ -429,7 +439,7 @@ class StorageManager {
 
   /// 获取插件存储路径
   String getPluginStoragePath(String pluginId) {
-    // 返回插件的完整存储路径
+    // 返回插件的完整存储路径，确保路径分隔符在不同平台上兼容
     if (kIsWeb) {
       return path.join('web_app_data', pluginId);
     } else {
@@ -446,6 +456,7 @@ class StorageManager {
   /// 读取插件文件
   Future<String> readPluginFile(String pluginId, String fileName) async {
     final pluginPath = getPluginStoragePath(pluginId);
+    // 使用path.join确保路径分隔符在不同平台上兼容
     return await readString(path.join(pluginPath, fileName));
   }
 
@@ -456,6 +467,7 @@ class StorageManager {
     String content,
   ) async {
     final pluginPath = getPluginStoragePath(pluginId);
+    // 使用path.join确保路径分隔符在不同平台上兼容
     await writeString(path.join(pluginPath, fileName), content);
   }
 

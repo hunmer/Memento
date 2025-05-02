@@ -1,6 +1,6 @@
 import 'dart:io';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
-import '../utils/path_utils.dart';
 
 class MessageAvatar extends StatelessWidget {
   final String? iconPath;
@@ -42,7 +42,7 @@ class MessageAvatar extends StatelessWidget {
           ),
           child: iconPath != null
               ? FutureBuilder<String>(
-                  future: getAbsolutePath(iconPath!),
+                  future: ImageUtils.getAbsolutePath(iconPath!),
                   builder: (context, snapshot) {
                     if (snapshot.hasData && snapshot.data != null) {
                       return ClipOval(

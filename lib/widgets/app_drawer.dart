@@ -48,33 +48,6 @@ class AppDrawer extends StatelessWidget {
                             body: Column(
                               children: [
                                 ListTile(
-                                  title: Text(
-                                    '版本: ${plugin is PluginBase ? plugin.version : "未知"}',
-                                  ),
-                                  subtitle: Text(
-                                    plugin is PluginBase
-                                        ? plugin.description
-                                        : "无描述",
-                                  ),
-                                  onTap: () {
-                                    Navigator.pop(context); // 关闭抽屉
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (context) =>
-                                                plugin is PluginBase
-                                                    ? plugin.buildMainView(
-                                                      context,
-                                                    )
-                                                    : const Center(
-                                                      child: Text('插件未提供视图'),
-                                                    ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                ListTile(
                                   leading: const Icon(Icons.settings),
                                   title: const Text('插件设置'),
                                   onTap: () {

@@ -8,17 +8,43 @@ import '../chat_plugin.dart';
 class UserService {
   final ChatPlugin _plugin;
 
+  // 所有用户列表
+  final List<User> _users = [];
+  
   // 当前用户
   User? _currentUser;
   User get currentUser {
-    if (_currentUser == null) {
-      // 创建一个默认用户，避免抛出异常
-      _currentUser = User(id: 'default_user', username: 'Default User');
-      debugPrint(
-        'Warning: Using default user because ChatPlugin is not properly initialized.',
-      );
-    }
     return _currentUser!;
+  }
+  
+  /// 获取默认用户
+  User _getDefaultUser() {
+    return _getUserById('default_user') ?? 
+      User(id: 'default_user', username: 'Default User');
+  }
+  
+  /// 根据ID获取用户
+  User? _getUserById(String id) {
+    try {
+      return _users.firstWhere((user) => user.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  /// 获取所有用户列表
+  List<User> getAllUsers() {
+    return List.from(_users);
+  }
+  
+  /// 添加或更新用户
+  void _addOrUpdateUser(User user) {
+    final index = _users.indexWhere((u) => u.id == user.id);
+    if (index >= 0) {
+      _users[index] = user;
+    } else {
+      _users.add(user);
+    }
   }
 
 
@@ -27,30 +53,32 @@ class UserService {
   Future<void> initialize() async {
     // 确保头像目录存在
     await _plugin.storage.createDirectory('chat/avatars');
-
-    // 设置默认用户（如果尚未设置）
-    if (_currentUser == null) {
       // 尝试从存储中加载用户信息
-      final userData = await _plugin.storage.read('chat/current_user');
-      if (userData.isNotEmpty && userData.containsKey('user')) {
-        _currentUser = User.fromJson(userData['user'] as Map<String, dynamic>);
-      } else {
-        // 如果没有存储的用户信息，创建默认用户
-        _currentUser = User(id: 'default_user', username: 'Default User');
-        // 保存默认用户信息
-        await _plugin.storage.write('chat/current_user', {
-          'user': _currentUser!.toJson(),
-        });
+      final userData = await _plugin.storage.read('chat/users', {
+        'users': [
+          {
+            'id': 'default_user',
+            'username': 'Default User',
+          }
+        ]
+      });
+      
+      // 加载所有用户信息
+      final usersList = userData['users'] as List<dynamic>;
+      for (var userJson in usersList) {
+        final user = User.fromJson(userJson as Map<String, dynamic>);
+        _addOrUpdateUser(user);
       }
-    }
-
-    // 确保头像目录存在
-    await _plugin.storage.createDirectory('chat/avatars');
+      
+      // 设置当前用户为默认用户
+      _currentUser = _getDefaultUser();
   }
 
   // 设置当前用户
   void setCurrentUser(User user) {
     _currentUser = user;
+    // 确保用户存在于用户列表中
+    _addOrUpdateUser(user);
     _plugin.notifyListeners();
   }
 
@@ -64,13 +92,21 @@ class UserService {
       );
       _currentUser = updatedUser;
 
-      // 保存更新后的用户信息
-      await _plugin.storage.write('chat/current_user', {
-        'user': _currentUser!.toJson(),
-      });
+      // 更新用户列表中的用户信息
+      _addOrUpdateUser(_currentUser!);
+      
+      // 保存所有用户信息
+      await _saveAllUsers();
 
       _plugin.notifyListeners();
     }
+  }
+  
+  // 保存所有用户信息到存储
+  Future<void> _saveAllUsers() async {
+    await _plugin.storage.write('chat/users', {
+      'users': _users.map((user) => user.toJson()).toList(),
+    });
   }
   
   /// 更新任意用户信息
@@ -84,17 +120,13 @@ class UserService {
       return;
     }
     
+    // 更新用户列表中的用户信息
+    _addOrUpdateUser(user);
+    
+    // 保存所有用户信息
+    await _saveAllUsers();
+    
     // 通知监听器更新
     _plugin.notifyListeners();
-  }
-
-  // 获取头像的绝对路径
-  Future<String> getAvatarPath(String relativePath) async {
-    final appDir = await getApplicationDocumentsDirectory();
-    return path.join(
-      appDir.path,
-      'app_data',
-      relativePath.replaceFirst('./', ''),
-    );
   }
 }

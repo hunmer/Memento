@@ -1,3 +1,4 @@
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../../../../../plugins/chat/models/message.dart';
@@ -5,7 +6,6 @@ import '../../../../../../../plugins/chat/models/file_message.dart';
 import '../../../../../../../plugins/chat/widgets/image_message_widget.dart';
 import '../../../../../../../widgets/file_preview/index.dart';
 import '../../audio_message_bubble.dart';
-import '../utils/path_utils.dart' show getAbsolutePath;
 import '../../../../../../../widgets/file_preview/file_preview_screen.dart';
 
 class MessageContent extends StatelessWidget {
@@ -41,7 +41,7 @@ class MessageContent extends StatelessWidget {
         );
       } else {
         return FutureBuilder<String>(
-          future: getAbsolutePath(filePath),
+          future: ImageUtils.getAbsolutePath(filePath),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done &&
                 snapshot.hasData) {

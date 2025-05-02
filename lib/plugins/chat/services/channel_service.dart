@@ -3,11 +3,15 @@ import '../models/channel.dart';
 import '../models/message.dart';
 import '../models/user.dart';
 import '../chat_plugin.dart';
+import 'user_service.dart';
 
 /// 负责管理频道相关的功能
 class ChannelService {
   final ChatPlugin _plugin;
   final List<Channel> _channels = [];
+  
+  // 获取 UserService 实例
+  UserService get _userService => _plugin.userService;
   
   // 当前活跃频道
   Channel? _currentChannel;
@@ -63,14 +67,8 @@ class ChannelService {
             continue;
           }
 
-          // 加载频道成员
+          // 获取频道数据
           final channelJson = channelData['channel'] as Map<String, dynamic>;
-          final List<dynamic> membersJson =
-              channelJson['members'] as List<dynamic>;
-          final List<User> members =
-              membersJson
-                  .map((m) => User.fromJson(m as Map<String, dynamic>))
-                  .toList();
 
           // 加载消息
           final messagesData = await _plugin.storage.read(
@@ -81,9 +79,10 @@ class ChannelService {
           if (messagesData.isNotEmpty && messagesData.containsKey('messages')) {
             final List<dynamic> messagesJson =
                 messagesData['messages'] as List<dynamic>;
+            final allUsers = _userService.getAllUsers();
             messages = await Future.wait(
               messagesJson.map(
-                (m) => Message.fromJson(m as Map<String, dynamic>, members),
+                (m) => Message.fromJson(m as Map<String, dynamic>, allUsers),
               ),
             );
           }
@@ -95,8 +94,12 @@ class ChannelService {
             draft = draftData['draft'] as String;
           }
 
-          // 创建频道对象
-          final channel = Channel.fromJson(channelJson, messages: messages);
+          // 创建频道对象，使用 UserService 中的所有用户
+          final channel = Channel.fromJson(
+            channelJson, 
+            messages: messages,
+            users: _userService.getAllUsers(),
+          );
           channel.draft = draft;
           _channels.add(channel);
         }
@@ -535,16 +538,11 @@ class ChannelService {
       }
       
       // 如果没有任何频道，创建默认频道
-      final defaultUser = User(
-        id: 'user',
-        username: '用户',
-      );
-      
       final defaultChannel = Channel(
         id: 'default_${DateTime.now().millisecondsSinceEpoch}',
         title: '默认对话',
         icon: Icons.chat_bubble_outline,
-        members: [defaultUser],
+        members: _userService.getAllUsers(),
         messages: [],
         priority: 0,
       );

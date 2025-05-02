@@ -128,7 +128,7 @@ class _AvatarPickerState extends State<AvatarPicker> {
         child: _avatarPath != null
             ? FutureBuilder<String>(
                 key: ValueKey(_avatarPath), // 添加key以确保更新
-                future: PathUtils.toAbsolutePath(_avatarPath!),
+                future: ImageUtils.getAbsolutePath(_avatarPath!),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data != null) {
                     final file = File(snapshot.data!);

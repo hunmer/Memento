@@ -48,14 +48,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         child: ListenableBuilder(
           listenable: ChatPlugin.instance,
           builder: (context, _) {
-            // 获取最新的用户信息
-            final currentUser = ChatPlugin.instance.userService.currentUser;
+            // 使用传递过来的用户信息
+            final user = widget.user;
             return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (currentUser.iconPath != null)
+            if (user.iconPath != null)
               FutureBuilder<String>(
-                future: ImageUtils.getAbsolutePath(currentUser.iconPath!),
+                future: ImageUtils.getAbsolutePath(user.iconPath!),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data != null) {
                     return CircleAvatar(
@@ -69,7 +69,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     backgroundColor:
                         Theme.of(context).colorScheme.primaryContainer,
                     child: Text(
-                      currentUser.username[0].toUpperCase(),
+                      user.username[0].toUpperCase(),
                       style: TextStyle(
                         fontSize: 48,
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -83,7 +83,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 radius: 60,
                 backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                 child: Text(
-                  currentUser.username[0].toUpperCase(),
+                  user.username[0].toUpperCase(),
                   style: TextStyle(
                     fontSize: 48,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,

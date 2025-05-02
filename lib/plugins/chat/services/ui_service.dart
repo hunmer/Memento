@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
 import '../l10n/chat_localizations.dart';
 import '../screens/channel_list/channel_list_screen.dart';
@@ -239,7 +240,7 @@ class UIService {
     final currentUser = _userService.currentUser;
     if (currentUser.iconPath != null) {
       return FutureBuilder<String>(
-        future: _userService.getAvatarPath(currentUser.iconPath!),
+        future: ImageUtils.getAbsolutePath(currentUser.iconPath!),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data != null) {
             return ClipOval(
