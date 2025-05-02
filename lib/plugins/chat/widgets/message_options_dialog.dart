@@ -148,11 +148,13 @@ class MessageOptionsDialog extends StatelessWidget {
             ),
           ),
           const Divider(),
-          // 功能按钮区域 - 只显示图标并排
+          // 功能按钮区域 - 使用Wrap实现自动换行，每行最多5个
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12.0, // 水平间距
+              runSpacing: 12.0, // 垂直间距
               children: [
                 // 设置固定标记
                 _buildIconButton(
@@ -215,7 +217,10 @@ class MessageOptionsDialog extends StatelessWidget {
                       onReply!(message);
                     },
                   ),
-              ],
+              ].map((button) => SizedBox(
+                width: 50, // 固定宽度，确保每行最多5个
+                child: button,
+              )).toList(),
             ),
           ),
         ],

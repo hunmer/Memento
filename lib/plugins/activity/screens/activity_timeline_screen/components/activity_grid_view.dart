@@ -29,6 +29,9 @@ class _ActivityGridViewState extends State<ActivityGridView> {
   bool _isDragging = false;
   bool _isMouseDown = false;
 
+  // 存储已使用的颜色，用于确保颜色有明显区别
+  final Map<String, Color> _tagColorCache = {};
+  
   final GlobalKey _gridKey = GlobalKey();
 
   // 计算网格索引对应的时间
@@ -44,7 +47,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
     );
   }
 
-  // 从标签生成颜色
+  // 从标签生成颜色，确保与之前的颜色有明显区别
   Color _getColorFromTags(List<String> tags) {
     if (tags.isEmpty) {
       return Colors.blue;
@@ -52,9 +55,93 @@ class _ActivityGridViewState extends State<ActivityGridView> {
 
     // 根据第一个标签生成颜色
     final tag = tags.first;
-    // 使用标签的哈希值来生成一个稳定的颜色
-    final hue = (tag.hashCode % 360).abs().toDouble();
-    return HSLColor.fromAHSL(1.0, hue, 0.6, 0.5).toColor();
+    
+    // 检查是否已经为这个标签缓存了颜色
+    if (_tagColorCache.containsKey(tag)) {
+      return _tagColorCache[tag]!;
+    }
+    
+    // 生成新颜色
+    Color newColor = _generateDistinctColor(tag);
+    
+    // 缓存这个颜色
+    _tagColorCache[tag] = newColor;
+    
+    return newColor;
+  }
+  
+  // 生成与现有颜色有明显区别的新颜色
+  Color _generateDistinctColor(String tag) {
+    // 使用标签的哈希值作为基础
+    double baseHue = (tag.hashCode % 360).abs().toDouble();
+    double saturation = 0.6;
+    double lightness = 0.5;
+    
+    // 如果没有缓存的颜色，直接返回基础颜色
+    if (_tagColorCache.isEmpty) {
+      return HSLColor.fromAHSL(1.0, baseHue, saturation, lightness).toColor();
+    }
+    
+    // 尝试找到一个与现有颜色有足够差异的颜色
+    const int maxAttempts = 10;
+    const double minHueDifference = 40.0; // 色相差异至少40度
+    
+    Color bestColor = HSLColor.fromAHSL(1.0, baseHue, saturation, lightness).toColor();
+    double bestDifference = 0;
+    
+    for (int i = 0; i < maxAttempts; i++) {
+      // 在基础色相上增加一个偏移
+      double hueOffset = (360 / maxAttempts) * i;
+      double newHue = (baseHue + hueOffset) % 360;
+      
+      // 创建候选颜色
+      Color candidateColor = HSLColor.fromAHSL(1.0, newHue, saturation, lightness).toColor();
+      
+      // 计算与现有颜色的最小差异
+      double minDifference = _calculateMinColorDifference(candidateColor);
+      
+      // 如果找到更好的颜色，更新最佳颜色
+      if (minDifference > bestDifference) {
+        bestDifference = minDifference;
+        bestColor = candidateColor;
+        
+        // 如果差异已经足够大，可以提前返回
+        if (bestDifference >= minHueDifference) {
+          break;
+        }
+      }
+    }
+    
+    return bestColor;
+  }
+  
+  // 计算一个颜色与所有缓存颜色的最小差异
+  double _calculateMinColorDifference(Color newColor) {
+    if (_tagColorCache.isEmpty) return 360.0;
+    
+    double minDifference = 360.0;
+    HSLColor newHSL = HSLColor.fromColor(newColor);
+    
+    for (Color existingColor in _tagColorCache.values) {
+      HSLColor existingHSL = HSLColor.fromColor(existingColor);
+      
+      // 计算色相差异（考虑环形色相空间）
+      double hueDiff = (newHSL.hue - existingHSL.hue).abs();
+      if (hueDiff > 180) hueDiff = 360 - hueDiff;
+      
+      // 也考虑饱和度和亮度的差异
+      double satDiff = (newHSL.saturation - existingHSL.saturation).abs();
+      double lightDiff = (newHSL.lightness - existingHSL.lightness).abs();
+      
+      // 综合差异，主要权重给色相
+      double totalDiff = hueDiff * 0.8 + satDiff * 0.1 + lightDiff * 0.1;
+      
+      if (totalDiff < minDifference) {
+        minDifference = totalDiff;
+      }
+    }
+    
+    return minDifference;
   }
 
   // 获取该时间点对应的活动

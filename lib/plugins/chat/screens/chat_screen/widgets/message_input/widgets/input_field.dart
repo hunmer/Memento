@@ -20,36 +20,49 @@ class InputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 获取屏幕高度，用于计算输入框的最大高度
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxHeight = screenHeight / 2; // 最大高度为屏幕高度的一半
+    
     return KeyboardListener(
       focusNode: keyboardListenerFocusNode,
       onKeyEvent: Platform.isMacOS || Platform.isWindows || Platform.isLinux
           ? onKeyEvent
           : null,
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        style: TextStyle(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white
-              : Colors.black87,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: maxHeight, // 限制最大高度
         ),
-        decoration: InputDecoration(
-          hintText: '输入消息...',
-          hintStyle: TextStyle(
+        child: TextField(
+          controller: controller,
+          onChanged: onChanged,
+          style: TextStyle(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.grey[400]
-                : Colors.grey[600],
+                ? Colors.white
+                : Colors.black87,
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 10,
+          decoration: InputDecoration(
+            hintText: '输入消息...',
+            hintStyle: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[400]
+                  : Colors.grey[600],
+            ),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 10,
+            ),
+            // 确保内容不会被裁剪
+            isCollapsed: false,
           ),
+          maxLines: null, // 允许多行
+          minLines: 1,    // 最少显示1行
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
+          focusNode: focusNode,
+          scrollPhysics: const ClampingScrollPhysics(), // 添加滚动物理效果
         ),
-        maxLines: null,
-        keyboardType: TextInputType.multiline,
-        textInputAction: TextInputAction.none,
-        focusNode: focusNode,
       ),
     );
   }

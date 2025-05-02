@@ -156,7 +156,7 @@ class _MessageBubbleState extends State<MessageBubble> {
           // 回复引用将在气泡内部显示
           Container(
             margin: EdgeInsets.only(
-              left: isCurrentUser ? 48.0 : (widget.showAvatar ? 0 : 8.0),
+              left: isCurrentUser ? 48.0 : (widget.showAvatar ? 8.0 : 8.0), // 为左侧头像添加8.0的左边距
               right: isCurrentUser ? 8.0 : 48.0,
               top: 8.0, // 添加顶部间距
               bottom: 8.0, // 添加底部间距
@@ -288,7 +288,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                               ],
                               Container(
                                 constraints: BoxConstraints(
-                                  maxWidth: constraints.maxWidth * 0.7,
+                                  maxWidth: constraints.maxWidth - 40,
                                   minWidth: 0,
                                 ),
                                 child:
@@ -604,28 +604,27 @@ class _MessageBubbleState extends State<MessageBubble> {
               ],
             ),
           );
-        } else {
-          content = MarkdownBody(
-            data: widget.message.content,
-            styleSheet: MarkdownStyleSheet(
-              p: const TextStyle(fontSize: 14),
-              blockSpacing: 0,
-              listIndent: 8,
-            ),
-          );
         }
         break;
-      default:
-        // case MessageType.sent:
-        // case MessageType.received:
+      case MessageType.sent:
+      case MessageType.received:
+        // 将单个换行符替换为两个换行符，确保Markdown正确渲染换行
+          String processedContent = widget.message.content;
+        // 1. 先将连续的两个换行符替换为特殊标记
+        processedContent = processedContent.replaceAll('\n\n', '{{DOUBLE_NEWLINE}}');
+        // 2. 将剩余的单个换行符替换为两个换行符
+        processedContent = processedContent.replaceAll('\n', '\n\n');
+        // 3. 最后将特殊标记替换为带空格的四个换行符
+        processedContent = processedContent.replaceAll('{{DOUBLE_NEWLINE}}', '\n\n&nbsp;\n\n');
         content = MarkdownBody(
-          data: widget.message.content,
+          data: processedContent,
           styleSheet: MarkdownStyleSheet(
-            p: const TextStyle(fontSize: 14),
-            blockSpacing: 0,
+            p: const TextStyle(fontSize: 14, height: 1.2), // 调整行高使文本更紧凑
+            blockSpacing: 0, // 增加段落之间的间距
             listIndent: 8,
           ),
         );
+        break;
     }
 
     // 如果有回复引用，将其添加到消息内容上方
