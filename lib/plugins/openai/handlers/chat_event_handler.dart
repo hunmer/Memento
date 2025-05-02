@@ -230,21 +230,35 @@ class ChatEventHandler {
             contentBuffer.write(token);
             tokenCount++;
 
-            // 检查并处理思考过程的标记
+            // 立即处理并更新消息内容
             String currentContent = contentBuffer.toString();
-            String processedContent =  RequestService.processThinkingContent(currentContent);
+            String processedContent = RequestService.processThinkingContent(currentContent);
 
-            // 更新 typingMessage 的内容
+            // 立即更新 typingMessage 的内容并广播
             if (typingMessage != null) {
               typingMessage.content = processedContent;
-              // 保持agent标识
-              typingMessage.metadata?['agentId'] = agentData['id'];
+              typingMessage.metadata?.addAll({
+                'agentId': agentData['id'],
+                'isStreaming': true,
+                'lastUpdate': DateTime.now().millisecondsSinceEpoch,
+              });
+              
+              // 获取频道ID并立即广播更新
               final channelId = originalMessage.metadata?['channelId'] as String? ?? 'default';
-              eventManager.broadcast(
-                'onMessageUpdated',
-                Values<Message, String>(typingMessage, channelId),
-              );
+              
+              // 使用 microtask 确保UI更新优先级
+              Future.microtask(() {
+                if (!streamController.isClosed) {
+                  eventManager.broadcast(
+                    'onMessageUpdated',
+                    Values<Message, String>(typingMessage!, channelId),
+                  );
+                }
+              });
             }
+            
+            // 添加短暂延迟，避免过于频繁的更新
+            await Future.delayed(const Duration(milliseconds: 10));
           }
         },
         onError: (error) async {
@@ -271,34 +285,53 @@ class ChatEventHandler {
           // 直接更新 typingMessage 的内容和元数据
           if (typingMessage != null) {
             // 在完成时也处理一次思考过程的标记
-            String finalContent =  RequestService.processThinkingContent(
+            String finalContent = RequestService.processThinkingContent(
               contentBuffer.toString(),
             );
             typingMessage.content = finalContent;
-            // 保持agent标识
+            
+            // 更新元数据，移除 isStreaming 标记
             typingMessage.metadata = {
               'isAI': true,
               'agentId': agentData['id'],
-            }; // 移除 isStreaming 标记
+              'isCompleted': true,
+              'completedAt': DateTime.now().millisecondsSinceEpoch,
+            };
 
-            // 广播最终的消息更新事件
+            // 立即广播最终的消息更新事件
             final channelId = originalMessage.metadata?['channelId'] as String? ?? 'default';
-            eventManager.broadcast(
-              'onMessageUpdated',
-              Values<Message, String>(typingMessage, channelId),
-            );
+            
+            // 使用 microtask 确保UI更新优先级
+            Future.microtask(() {
+              eventManager.broadcast(
+                'onMessageUpdated',
+                Values<Message, String>(typingMessage!, channelId),
+              );
+              
+              // 再次广播一次，确保UI更新
+              Future.delayed(const Duration(milliseconds: 100), () {
+                eventManager.broadcast(
+                  'onMessageUpdated',
+                  Values<Message, String>(typingMessage!, channelId),
+                );
+              });
+            });
           }
 
+          // 延迟一下再清理资源，确保最后的更新被处理
+          await Future.delayed(const Duration(milliseconds: 200));
+          
           // 清理资源
-          streamController.close();
+          if (!streamController.isClosed) {
+            streamController.close();
+          }
+          
           if (typingMessage != null) {
             _cleanupMessageResources(typingMessage.id);
           }
-        },
+        }
       );
     } catch (e) {
-      developer.log('处理AI回复时出错', name: 'ChatEventHandler', error: e);
-      
       // 创建一个默认的AI用户，用于显示错误消息
       if (!_isAiUserInitialized(aiUser)) {
         aiUser = User(
@@ -315,10 +348,6 @@ class ChatEventHandler {
           'onMessageUpdated',
           Values<Message, String>(typingMessage, channelId),
         );
-      } else {
-        // 如果typingMessage未创建，则创建一个新的错误消息
-        final errorMessageId = DateTime.now().millisecondsSinceEpoch.toString();
-        await _handleErrorMessage(errorMessageId, '处理AI回复时出错：$e', aiUser);
       }
       return; // 使用return替代continue，因为我们现在在一个独立的异步方法中
     }

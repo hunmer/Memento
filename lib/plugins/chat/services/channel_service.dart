@@ -537,10 +537,7 @@ class ChannelService {
         // 返回指定数量的消息，按时间从旧到新排序
         final messages = channel.messages.sublist(index + 1, endIndex).toList();
         messages.sort((a, b) => a.date.compareTo(b.date)); // 确保按时间从旧到新排序
-        debugPrint('获取历史消息：从索引 ${index + 1} 到 $endIndex，共 ${messages.length} 条消息');
         return messages;
-      } else {
-        debugPrint('警告：在频道 $channelId 中找不到ID为 $messageId 的消息');
       }
     }
     return [];

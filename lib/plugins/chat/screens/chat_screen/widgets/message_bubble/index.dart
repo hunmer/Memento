@@ -71,9 +71,12 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   void _handleMessageUpdated(EventArgs args) {
-    if (args is! Value<Message>) return;
+     if (args is! Values<Message, String>) {
+      return;
+    }
+    // if (args is! Value<Message>) return;
 
-    final updatedMessage = args.value;
+    final updatedMessage = args.value1 as Message;
     if (updatedMessage.id == widget.message.id ||
         (widget.message.replyToId != null &&
             updatedMessage.id == widget.message.replyToId)) {

@@ -5,10 +5,12 @@ import '../models/message.dart';
 import '../services/channel_service.dart';
 import '../chat_plugin.dart';
 
+// 事件管理器实例
+final eventManager = EventManager.instance;
+
 /// 处理聊天消息相关事件的处理器
 class MessageEventHandler {
   late final ChannelService _channelService;
-  final eventManager = EventManager.instance;
   final ChatPlugin _plugin;
 
   MessageEventHandler(this._plugin) {
@@ -29,10 +31,23 @@ class MessageEventHandler {
 
   /// 处理消息更新事件
   Future<void> _handleMessageUpdated(EventArgs args) async {
-    if (args is! Values<Message, String>) return;
+    if (args is! Values<Message, String>) {
+      developer.log(
+        '消息更新事件参数类型错误',
+        name: 'MessageEventHandler',
+        error: 'Expected Values<Message, String>, got ${args.runtimeType}'
+      );
+      return;
+    }
     
     final message = args.value1;
     final channelId = args.value2;
+    
+    // 检查消息状态
+    developer.log(
+      '处理消息更新开始: ID=${message.id}, 元数据=${message.metadata}',
+      name: 'MessageEventHandler'
+    );
     developer.log('处理消息更新: ${message.id}, 内容: ${message.content.substring(0, message.content.length > 20 ? 20 : message.content.length)}...', name: 'MessageEventHandler');
     
     try {
@@ -48,11 +63,22 @@ class MessageEventHandler {
         await _channelService.getOrCreateDefaultChannel();
       }
       
-      // 更新当前频道中的消息，但不写入本地文件以提高性能
+      // 更新消息元数据
+      if (message.metadata == null) {
+        message.metadata = {};
+      }
+      message.metadata!['isThinking'] = false;
+      
+      // 更新当前频道中的消息，并写入本地文件
       await _channelService.updateMessage(message, persist: true);
       
       // 强制通知监听器更新UI
       _plugin.notifyListeners();
+      
+      developer.log(
+        '消息状态更新完成，metadata: ${message.metadata}',
+        name: 'MessageEventHandler'
+      );
       
       developer.log(
         '消息更新成功: ${message.id}, 内容长度: ${message.content.length}',
@@ -69,9 +95,22 @@ class MessageEventHandler {
 
   /// 处理新消息接收事件
   Future<void> _handleMessageReceived(EventArgs args) async {
-    if (args is! Value<Message>) return;
+    if (args is! Value<Message>) {
+      developer.log(
+        '新消息接收事件参数类型错误',
+        name: 'MessageEventHandler',
+        error: 'Expected Value<Message>, got ${args.runtimeType}'
+      );
+      return;
+    }
     
     final message = args.value;
+    
+    // 检查消息状态
+    developer.log(
+      '处理新消息接收开始: ID=${message.id}, 元数据=${message.metadata}',
+      name: 'MessageEventHandler'
+    );
     developer.log('处理新消息接收: ${message.id}', name: 'MessageEventHandler');
     
     try {
@@ -94,6 +133,17 @@ class MessageEventHandler {
       // 将新消息添加到当前活跃频道
       await _channelService.addMessage(_channelService.currentChannel!.id, messageFuture);
       
+      // 确保UI更新
+      _plugin.notifyListeners();
+      
+      // 手动触发消息更新事件，确保UI更新
+      // 使用当前频道ID
+      final currentChannelId = _channelService.currentChannel!.id;
+      eventManager.broadcast(
+        'onMessageUpdated',
+        Values<Message, String>(message, currentChannelId),
+      );
+      
       developer.log(
         '新消息添加成功: ${message.id}, 内容: ${message.content}',
         name: 'MessageEventHandler'
@@ -111,10 +161,28 @@ class MessageEventHandler {
 
   /// 处理消息创建事件（用于流式响应开始前创建聊天气泡）
   Future<void> _handleMessageCreate(EventArgs args) async {
-    if (args is! Values<Message, String>) return;
+    if (args is! Values<Message, String>) {
+      developer.log(
+        '消息创建事件参数类型错误',
+        name: 'MessageEventHandler',
+        error: 'Expected Values<Message, String>, got ${args.runtimeType}'
+      );
+      return;
+    }
     
     final message = args.value1;
     final channelId = args.value2;
+    
+    // 初始化消息状态
+    if (message.metadata == null) {
+      message.metadata = {};
+    }
+    message.metadata!['isThinking'] = true;
+    
+    developer.log(
+      '处理消息创建开始: ID=${message.id}, 元数据=${message.metadata}',
+      name: 'MessageEventHandler'
+    );
     developer.log('处理消息创建: ${message.id}', name: 'MessageEventHandler');
     
     try {
@@ -123,6 +191,12 @@ class MessageEventHandler {
       
       // 将新消息添加到指定频道
       await _channelService.addMessage(channelId, messageFuture);
+      
+      // 手动触发消息更新事件，确保UI更新
+      eventManager.broadcast(
+        'onMessageUpdated',
+        Values<Message, String>(message, channelId),
+      );
       
       developer.log(
         '消息气泡创建成功: ${message.id}, 准备接收流式内容',

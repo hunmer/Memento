@@ -7,6 +7,7 @@ import '../../../../../../../plugins/chat/widgets/image_message_widget.dart';
 import '../../../../../../../widgets/file_preview/index.dart';
 import '../../audio_message_bubble.dart';
 import '../../../../../../../widgets/file_preview/file_preview_screen.dart';
+import 'thinking_indicator.dart';
 
 class MessageContent extends StatelessWidget {
   final Message message;
@@ -20,6 +21,14 @@ class MessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 检查消息是否处于"正在思考"状态
+    final bool isThinking = message.metadata?.containsKey('isThinking') == true && 
+                          message.metadata!['isThinking'] == true;
+    
+    if (isThinking) {
+      return ThinkingIndicator(textColor: textColor);
+    }
+    
     // 检查消息是否包含文件信息
     if (message.metadata?.containsKey(Message.metadataKeyFileInfo) == true) {
       final fileInfo = message.metadata![Message.metadataKeyFileInfo] as Map<String, dynamic>;

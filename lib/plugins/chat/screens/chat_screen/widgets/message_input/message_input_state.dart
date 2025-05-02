@@ -43,6 +43,13 @@ class MessageInputState {
     final messageText = controller.text.trim();
     final hasFile = selectedFile != null;
     final hasMessage = messageText.isNotEmpty;
+    final currentChannel = ChatPlugin.instance.channelService.currentChannel;
+
+    // 检查是否有当前频道
+    if (currentChannel == null) {
+      debugPrint('无法发送消息：当前没有选择频道');
+      return;
+    }
 
     if (hasFile || hasMessage) {
       Map<String, dynamic>? metadata = {};
@@ -88,7 +95,7 @@ class MessageInputState {
           type: MessageType.sent,
           replyTo: replyTo,
           metadata: metadata,
-          channelId: ChatPlugin.instance.channelService.currentChannel!.id,
+          channelId: currentChannel.id,
         );
 
         // 发送消息
