@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'custom_dialog.dart';
 import '../constants/app_icons.dart';
 
@@ -15,6 +17,12 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
   late IconData selectedIcon;
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
+  int _currentPage = 0;
+  static const int _iconsPerPage = 200;
+  List<IconData> _cachedFilteredIcons = [];
+  late List<String> _iconNames;
+  late List<IconData> _iconData;
 
   // 使用预定义的图标映射表中的图标
   late List<IconData> allIcons;
@@ -25,24 +33,56 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
     selectedIcon = widget.currentIcon;
     // 从AppIcons中获取所有预定义图标
     allIcons = AppIcons.predefinedIcons.values.toList();
+    _iconNames = AppIcons.predefinedIcons.keys.toList();
+    _iconData = AppIcons.predefinedIcons.values.toList();
+    _updateFilteredIcons();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
   // 过滤图标列表
-  List<IconData> get filteredIcons {
+  List<IconData> get filteredIcons => _cachedFilteredIcons;
+
+  void _updateFilteredIcons() {
+    List<IconData> result;
     if (searchQuery.isEmpty) {
-      return allIcons;
+      result = _iconData;
+    } else {
+      // 先过滤名称列表
+      final filteredIndices = _iconNames.asMap().entries.where((entry) {
+        return entry.value.toLowerCase().contains(searchQuery.toLowerCase());
+      }).map((entry) => entry.key).toList();
+      
+      // 转换为对应的图标数据
+      result = filteredIndices.map((index) => _iconData[index]).toList();
     }
-    // 这里的过滤逻辑比较简单，实际应用中可能需要更复杂的匹配算法
-    return allIcons.where((icon) {
-      final name = icon.toString().toLowerCase();
-      return name.contains(searchQuery.toLowerCase());
-    }).toList();
+    
+    // 重置页码当过滤结果变化时
+    if (_currentPage > 0 && _currentPage * _iconsPerPage >= result.length) {
+      _currentPage = 0;
+    }
+    
+    _cachedFilteredIcons = result;
+  }
+
+  // 获取当前页的图标
+  List<IconData> get _currentPageIcons {
+    final start = _currentPage * _iconsPerPage;
+    final end = start + _iconsPerPage;
+    return filteredIcons.sublist(
+      start.clamp(0, filteredIcons.length),
+      end.clamp(0, filteredIcons.length),
+    );
+  }
+
+  // 总页数
+  int get _totalPages {
+    return (filteredIcons.length / _iconsPerPage).ceil();
   }
 
   @override
@@ -67,8 +107,14 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
               ),
             ),
             onChanged: (value) {
-              setState(() {
-                searchQuery = value;
+              if (_debounceTimer?.isActive ?? false) {
+                _debounceTimer?.cancel();
+              }
+              _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+                setState(() {
+                  searchQuery = value;
+                  _updateFilteredIcons();
+                });
               });
             },
           ),
@@ -86,45 +132,48 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
               ),
-              itemCount: filteredIcons.length,
+              itemCount: _currentPageIcons.length,
               itemBuilder: (context, index) {
-                final icon = filteredIcons[index];
+                final icon = _currentPageIcons[index];
                 final isSelected = icon == selectedIcon;
-                return InkWell(
-                  onTap: () {
+                return IconButton(
+                  icon: Icon(icon),
+                  color: isSelected 
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                  onPressed: () {
                     setState(() {
                       selectedIcon = icon;
                     });
                   },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color:
-                          isSelected
-                              ? Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.2)
-                              : null,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color:
-                            isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey.withOpacity(0.3),
-                      ),
-                    ),
-                    child: Icon(
-                      icon,
-                      color:
-                          isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : null,
-                    ),
-                  ),
                 );
               },
             ),
           ),
+          if (_totalPages > 1) ...[
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  onPressed: _currentPage > 0
+                      ? () => setState(() => _currentPage--)
+                      : null,
+                ),
+                Text(
+                  '${_currentPage + 1}/$_totalPages',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: _currentPage < _totalPages - 1
+                      ? () => setState(() => _currentPage++)
+                      : null,
+                ),
+              ],
+            ),
+          ],
         ],
       ),
       actions: [
