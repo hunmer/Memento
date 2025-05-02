@@ -20,6 +20,12 @@ class Message {
   Message? replyTo; // 添加回复消息引用
   String? replyToId; // 添加回复消息ID
 
+  // 添加getter，将updatedAt映射到editedAt
+  DateTime? get updatedAt => editedAt;
+  
+  // 添加getter，将createdAt映射到date
+  DateTime get createdAt => date;
+
   Message({
     required this.id,
     required this.content,

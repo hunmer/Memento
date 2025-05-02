@@ -500,12 +500,14 @@ class ChannelService {
   // 根据消息ID获取完整消息
   Message? getMessageById(String messageId) {
     for (var channel in _channels) {
-      // 使用 try-catch 来处理没有找到消息的情况
-      Message? message;
-        message = channel.messages.firstWhere(
+      try {
+        return channel.messages.firstWhere(
           (msg) => msg.id == messageId,
         );
-      return message;
+      } catch (e) {
+        // 在当前频道中没有找到消息，继续查找下一个频道
+        continue;
+      }
     }
     return null;
   }

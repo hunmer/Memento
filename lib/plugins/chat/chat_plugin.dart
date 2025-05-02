@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -68,6 +69,12 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
     
     // 初始化消息事件处理器
     messageEventHandler = MessageEventHandler(this);
+  }
+
+  /// 根据消息ID获取消息
+  /// 代理到 channelService.getMessageById
+  Future<Message?> getMessage(String messageId) async {
+    return channelService.getMessageById(messageId);
   }
 
   @override
