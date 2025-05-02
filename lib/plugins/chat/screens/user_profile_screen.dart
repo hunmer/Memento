@@ -3,8 +3,6 @@ import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/screens/profile_edit_dialog.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 import '../models/user.dart';
 
 class UserProfileScreen extends StatefulWidget {

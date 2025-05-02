@@ -1,10 +1,8 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io' show Platform, Process;
 import '../../../../../../core/event/event.dart';
 import '../../../../models/message.dart';
-import '../../../../models/user.dart';
 
 class MessageInputState {
   final TextEditingController controller;

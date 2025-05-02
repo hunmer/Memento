@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/ai_agent.dart';
 import '../../../core/plugin_manager.dart';

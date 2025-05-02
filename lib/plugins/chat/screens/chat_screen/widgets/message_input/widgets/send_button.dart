@@ -4,9 +4,9 @@ class SendButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const SendButton({
-    Key? key,
+    super.key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

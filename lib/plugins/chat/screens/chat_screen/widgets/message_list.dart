@@ -5,7 +5,6 @@ import '../../../utils/message_options_handler.dart';
 import 'message_bubble.dart';
 import '../widgets/date_separator.dart';
 import '../../../utils/date_formatter.dart';
-import '../../../chat_plugin.dart';
 import '../../../../../widgets/file_preview/index.dart';
 
 class MessageList extends StatelessWidget {

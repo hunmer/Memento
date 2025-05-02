@@ -1,6 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
+/// 表示已处理的方法替换结果
+class ProcessedMethodReplacement {
+  final String originalPattern;
+  final String replacementResult;
+
+  ProcessedMethodReplacement(this.originalPattern, this.replacementResult);
+}
+
 /// 用于替换prompt中特定方法的回调函数类型
 typedef PromptReplacementCallback = Future<String> Function(Map<String, dynamic> params);
 
@@ -71,5 +79,69 @@ class PromptReplacementController {
   void dispose() {
     _methods.clear();
     debugPrint('清理所有prompt替换方法');
+  }
+  
+  /// 获取已注册方法的名称列表
+  List<String> getRegisteredMethodNames() {
+    return _methods.keys.toList();
+  }
+  
+  /// 检查方法是否已注册
+  bool hasMethod(String methodName) {
+    return _methods.containsKey(methodName);
+  }
+  
+  /// 预处理prompt中的所有方法替换
+  /// 返回一个包含所有需要替换的模式及其结果的列表
+  Future<List<ProcessedMethodReplacement>> preprocessPromptReplacements(String prompt) async {
+    final List<ProcessedMethodReplacement> replacements = [];
+    
+    try {
+      // 使用正则表达式查找所有 {...} 格式的内容
+      final regex = RegExp(r'{[^}]+}');
+
+      for (final match in regex.allMatches(prompt)) {
+        final jsonStr = match.group(0);
+        if (jsonStr == null) continue;
+
+        try {
+          final Map<String, dynamic> params = json.decode(jsonStr);
+          
+          // 检查是否包含method字段
+          if (params.containsKey('method')) {
+            final methodName = params['method'];
+            final callback = _methods[methodName];
+
+            if (callback != null) {
+              // 执行对应的方法并获取结果
+              final result = await callback(params);
+              replacements.add(ProcessedMethodReplacement(jsonStr, result));
+              debugPrint('预处理prompt中的方法: $methodName');
+            }
+          }
+        } catch (e) {
+          debugPrint('预处理JSON失败: $e');
+          // 如果不是有效的JSON或不符合预期格式，跳过这个匹配项
+          continue;
+        }
+      }
+      
+      return replacements;
+    } catch (e) {
+      debugPrint('预处理prompt替换时出错: $e');
+      return [];
+    }
+  }
+  
+  /// 应用预处理的替换结果到prompt
+  static String applyProcessedReplacements(String prompt, List<ProcessedMethodReplacement> replacements) {
+    String processedPrompt = prompt;
+    for (final replacement in replacements) {
+      processedPrompt = processedPrompt.replaceFirst(
+        replacement.originalPattern, 
+        replacement.replacementResult
+      );
+    }
+    return processedPrompt;
   }
 }

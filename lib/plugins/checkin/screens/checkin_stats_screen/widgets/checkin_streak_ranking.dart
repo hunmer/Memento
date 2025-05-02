@@ -36,7 +36,7 @@ class CheckinStreakRanking extends StatelessWidget {
         return ListTile(
           leading: _buildRankBadge(rank, theme),
           title: Text(item.name),
-          subtitle: Text('${item.group}'),
+          subtitle: Text(item.group),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

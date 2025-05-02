@@ -3,7 +3,7 @@ import 'provider_settings_screen.dart';
 import 'model_list_screen.dart';
 
 class PluginSettingsScreen extends StatelessWidget {
-  const PluginSettingsScreen({Key? key}) : super(key: key);
+  const PluginSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

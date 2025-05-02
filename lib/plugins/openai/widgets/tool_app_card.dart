@@ -6,10 +6,10 @@ class ToolAppCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const ToolAppCard({
-    Key? key,
+    super.key,
     required this.app,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

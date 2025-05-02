@@ -13,10 +13,10 @@ class PluginAnalysisForm extends StatefulWidget {
   final Function(String) onConfirm;
 
   const PluginAnalysisForm({
-    Key? key,
+    super.key,
     required this.method,
     required this.onConfirm,
-  }) : super(key: key);
+  });
 
   @override
   State<PluginAnalysisForm> createState() => _PluginAnalysisFormState();
@@ -60,7 +60,9 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
   @override
   void dispose() {
     // 释放所有控制器
-    _controllers.values.forEach((controller) => controller.dispose());
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -110,7 +112,7 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                     
                     
                     // 底部按钮

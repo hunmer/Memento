@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../openai/controllers/prompt_replacement_controller.dart';
 import '../models/activity_record.dart';
 import '../services/activity_service.dart';
 import '../../../core/storage/storage_manager.dart';
@@ -131,7 +130,7 @@ class ActivityPromptReplacements {
   /// 格式化活动数据为JSON文本
   String _formatActivitiesToText(List<ActivityRecord> activities) {
     if (activities.isEmpty) {
-      return '{\"status\": \"empty\", \"msg\": \"在指定时间段内没有找到活动记录。\"}';
+      return '{"status": "empty", "msg": "在指定时间段内没有找到活动记录。"}';
     }
     
     // 计算总活动时长（分钟）

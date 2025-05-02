@@ -135,7 +135,9 @@ abstract class TagManagerDialogState extends State<TagManagerDialog> {
   void deleteSelectedTags() {
     if (!widget.enableEditing || 
         selectedGroup == config.newGroupLabel || 
-        selectedTags.isEmpty) return;
+        selectedTags.isEmpty) {
+      return;
+    }
 
     setState(() {
       DialogService.deleteSelectedTags(

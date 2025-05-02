@@ -5,7 +5,7 @@ import '../controllers/provider_controller.dart';
 class ProviderEditScreen extends StatefulWidget {
   final ServiceProvider? provider;
 
-  const ProviderEditScreen({Key? key, this.provider}) : super(key: key);
+  const ProviderEditScreen({super.key, this.provider});
 
   @override
   State<ProviderEditScreen> createState() => _ProviderEditScreenState();

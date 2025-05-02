@@ -4,7 +4,7 @@ import '../controllers/model_controller.dart';
 import '../l10n/openai_localizations.dart';
 
 class ModelListScreen extends StatefulWidget {
-  const ModelListScreen({Key? key}) : super(key: key);
+  const ModelListScreen({super.key});
 
   @override
   State<ModelListScreen> createState() => _ModelListScreenState();

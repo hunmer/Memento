@@ -35,7 +35,7 @@ class PluginAnalysisService {
     
     await RequestService.streamResponse(
       agent: agent,
-      prompt: "$message",
+      prompt: message,
       onToken: (token) {
         responseBuffer.write(token);
       },

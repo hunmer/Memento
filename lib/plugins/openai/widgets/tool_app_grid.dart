@@ -4,7 +4,7 @@ import '../controllers/tool_app_controller.dart';
 import '../models/tool_app.dart';
 
 class ToolAppGrid extends StatelessWidget {
-  const ToolAppGrid({Key? key}) : super(key: key);
+  const ToolAppGrid({super.key});
 
   @override
   Widget build(BuildContext context) {

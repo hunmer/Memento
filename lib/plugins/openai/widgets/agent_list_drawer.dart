@@ -30,7 +30,7 @@ class AgentListDrawer extends StatefulWidget {
   final bool Function(AIAgent)? agentFilter;
 
   const AgentListDrawer({
-    Key? key,
+    super.key,
     required this.selectedAgents,
     required this.onAgentSelected,
     this.textController,
@@ -39,7 +39,7 @@ class AgentListDrawer extends StatefulWidget {
     this.cancelButtonText = '取消',
     this.allowMultipleSelection = true,
     this.agentFilter,
-  }) : super(key: key);
+  });
 
   @override
   State<AgentListDrawer> createState() => _AgentListDrawerState();

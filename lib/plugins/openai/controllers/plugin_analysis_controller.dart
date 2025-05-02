@@ -1,8 +1,5 @@
 import 'package:Memento/plugins/openai/widgets/plugin_analysis_dialog.dart';
 import 'package:flutter/material.dart';
-import '../models/plugin_analysis_method.dart';
-import '../widgets/method_selection_dialog.dart';
-import '../widgets/plugin_analysis_form.dart';
 
 class PluginAnalysisController {
   // 单例模式

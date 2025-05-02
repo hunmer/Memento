@@ -7,7 +7,7 @@ import '../screens/agent_edit_screen.dart';
 class AgentCard extends StatelessWidget {
   final AIAgent agent;
 
-  const AgentCard({Key? key, required this.agent}) : super(key: key);
+  const AgentCard({super.key, required this.agent});
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/file_message.dart';
-import 'package:path/path.dart' as path;
 import 'package:url_launcher/url_launcher.dart';
 
 class FileMessageWidget extends StatelessWidget {

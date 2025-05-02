@@ -4,7 +4,6 @@ import '../../../core/event/event.dart';
 import '../models/message.dart';
 import '../services/channel_service.dart';
 import '../chat_plugin.dart';
-import '../models/channel.dart';
 
 /// 处理聊天消息相关事件的处理器
 class MessageEventHandler {

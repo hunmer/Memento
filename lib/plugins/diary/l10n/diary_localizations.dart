@@ -106,7 +106,7 @@ DiaryLocalizations lookupDiaryLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-    'DiaryLocalizations.delegate failed to load unsupported locale \"$locale\". This is likely '
+    'DiaryLocalizations.delegate failed to load unsupported locale "${locale}". This is likely '
     'an issue with the localization\'s implementation.'
   );
 }

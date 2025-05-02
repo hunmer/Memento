@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../bill_plugin.dart';
-import '../models/account.dart';
-import '../models/bill.dart';
 import '../models/bill_model.dart';
 
 class BillStatsScreen extends StatefulWidget {

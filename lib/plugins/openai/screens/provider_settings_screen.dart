@@ -4,7 +4,7 @@ import '../controllers/provider_controller.dart';
 import 'provider_edit_screen.dart';
 
 class ProviderSettingsScreen extends StatefulWidget {
-  const ProviderSettingsScreen({Key? key}) : super(key: key);
+  const ProviderSettingsScreen({super.key});
 
   @override
   State<ProviderSettingsScreen> createState() => _ProviderSettingsScreenState();

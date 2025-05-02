@@ -118,7 +118,7 @@ class _PromptEditorState extends State<PromptEditor> {
               ),
             ),
           );
-        }).toList(),
+        }),
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: _addPrompt,

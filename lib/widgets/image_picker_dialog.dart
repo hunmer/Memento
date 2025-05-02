@@ -3,8 +3,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:crop_your_image/crop_your_image.dart';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 import '../utils/image_utils.dart';
 
 class ImagePickerDialog extends StatefulWidget {

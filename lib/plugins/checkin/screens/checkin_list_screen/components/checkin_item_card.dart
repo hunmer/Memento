@@ -3,7 +3,6 @@ import '../../../controllers/checkin_list_controller.dart';
 import '../../../models/checkin_item.dart';
 import '../../../screens/checkin_record_screen.dart';
 import '../../../widgets/checkin_record_dialog.dart';
-import '../../../models/checkin_item.dart';
 import 'package:intl/intl.dart';
 import 'weekly_checkin_circles.dart';
 

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/tool_app.dart';
 import 'plugin_analysis_controller.dart';

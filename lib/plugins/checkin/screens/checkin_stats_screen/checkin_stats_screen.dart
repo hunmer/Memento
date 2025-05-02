@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import '../../models/checkin_item.dart';
 import '../../checkin_plugin.dart';
 import 'widgets/daily_checkin_chart.dart';
 import 'widgets/checkin_streak_ranking.dart';

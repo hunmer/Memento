@@ -6,7 +6,6 @@ import '../../services/activity_service.dart';
 import '../../../../plugins/diary/l10n/diary_localizations.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'activity_form_utils.dart';
-import 'activity_form_widget.dart';
 import 'activity_time_section.dart';
 
 class ActivityFormState extends State<ActivityFormWidget> {

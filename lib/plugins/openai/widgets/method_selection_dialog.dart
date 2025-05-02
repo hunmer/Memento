@@ -5,9 +5,9 @@ class MethodSelectionDialog extends StatelessWidget {
   final Function(PluginAnalysisMethod) onMethodSelected;
 
   const MethodSelectionDialog({
-    Key? key,
+    super.key,
     required this.onMethodSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

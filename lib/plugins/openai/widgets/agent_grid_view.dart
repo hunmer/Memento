@@ -6,9 +6,9 @@ class AgentGridView extends StatelessWidget {
   final List<AIAgent> agents;
 
   const AgentGridView({
-    Key? key,
+    super.key,
     required this.agents,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

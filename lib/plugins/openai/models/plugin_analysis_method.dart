@@ -24,7 +24,7 @@ class PluginAnalysisMethod {
     
     // 移除最后一个逗号
     if (result.endsWith(',\n')) {
-      result = result.substring(0, result.length - 2) + '\n';
+      result = '${result.substring(0, result.length - 2)}\n';
     }
     
     result += '}';

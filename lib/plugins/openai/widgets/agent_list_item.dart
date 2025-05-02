@@ -2,8 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../utils/image_utils.dart';
 import '../models/ai_agent.dart';
-import '../models/service_provider.dart';
-import '../controllers/provider_controller.dart';
 import '../screens/agent_edit_screen.dart';
 
 class AgentListItem extends StatelessWidget {

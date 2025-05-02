@@ -5,7 +5,7 @@ import '../controllers/model_controller.dart';
 class ModelSearchScreen extends StatefulWidget {
   final String? initialModelId;
 
-  const ModelSearchScreen({Key? key, this.initialModelId}) : super(key: key);
+  const ModelSearchScreen({super.key, this.initialModelId});
 
   @override
   State<ModelSearchScreen> createState() => _ModelSearchScreenState();

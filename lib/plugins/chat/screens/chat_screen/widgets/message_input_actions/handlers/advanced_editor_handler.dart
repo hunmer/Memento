@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../../../../widgets/markdown_editor/index.dart';
-import '../../../../../models/message.dart';
 import '../types.dart';
 
 Future<void> handleAdvancedEditor({

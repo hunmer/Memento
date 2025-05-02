@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
-import 'screens/warehouse_list_screen.dart';
 import 'screens/goods_main_screen.dart';
 import 'models/warehouse.dart';
 import 'models/goods_item.dart';

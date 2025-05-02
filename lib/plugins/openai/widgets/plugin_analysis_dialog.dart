@@ -1,8 +1,10 @@
 import 'dart:io';
-import 'dart:isolate';
+import 'dart:async';
+import '../services/request_service.dart';
 import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import '../controllers/prompt_replacement_controller.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/ai_agent.dart';
 import '../widgets/agent_list_drawer.dart';
@@ -18,7 +20,7 @@ class PluginAnalysisDialog extends StatefulWidget {
   State<PluginAnalysisDialog> createState() => _PluginAnalysisDialogState();
 }
 
-class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
+class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with TickerProviderStateMixin {
   // 构建智能体图标
   Widget _buildAgentIcon(AIAgent agent) {
     // 如果有头像，优先显示头像
@@ -121,17 +123,19 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
   AIAgent? _selectedAgent;
   String? _responseMessage;
   bool _isLoading = false;
-  int _currentTabIndex = 0; // 当前选中的标签页索引
-  final TabController? _tabController = null; // 将在initState中初始化
+  late TabController _tabController;
+  final PromptReplacementController _promptReplacementController = PromptReplacementController();
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   void dispose() {
-    _promptController.dispose();
+    _tabController.dispose();
+     _promptController.dispose();
     super.dispose();
   }
 
@@ -174,76 +178,98 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
     );
   }
 
-  // 此方法不再需要，已经在按钮的onPressed中直接处理
-
-  // 在后台线程处理API请求的方法
-  static Future<String> _processInBackground(Map<String, dynamic> params) async {
-    final agent = params['agent'] as AIAgent;
-    final prompt = params['prompt'] as String;
-    final service = PluginAnalysisService();
-    
-    try {
-      return await service.sendToAgent(agent, prompt);
-    } catch (e) {
-      return "ERROR: $e";
-    }
-  }
-
-  // 发送到智能体
+  // 处理发送到智能体的请求
   Future<void> _sendToAgent() async {
     final localizations = OpenAILocalizations.of(context);
     
+    // 验证输入
     if (_selectedAgent == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(localizations.pleaseSelectAgentFirst)),
-      );
-      return;
-    }
-
-    if (_promptController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(localizations.pleaseEnterPrompt)),
+        SnackBar(content: Text(localizations.noAgentSelected)),
       );
       return;
     }
 
     setState(() {
       _isLoading = true;
-      _responseMessage = null;
-      _currentTabIndex = 1; // 立即切换到输出标签页
     });
+    
+    // 使用TabController切换到输出标签页
+    _tabController.animateTo(1);
 
     try {
+      // 在主线程中预处理所有方法替换
+      final processedReplacements = await _promptReplacementController.preprocessPromptReplacements(
+        _promptController.text
+      );
+
       // 使用compute在后台线程处理请求
       final response = await compute(_processInBackground, {
         'agent': _selectedAgent!,
         'prompt': _promptController.text,
+        'processedReplacements': processedReplacements,
       });
 
       if (!mounted) return;
 
       setState(() {
-        if (response.startsWith("ERROR:")) {
-          _responseMessage = '${localizations.sendingFailed} ${response.substring(6)}';
-        } else {
-          _responseMessage = response;
-        }
+        _responseMessage = response;
+        _isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
       
       setState(() {
-        _responseMessage = '${localizations.sendingFailed} $e';
+        _responseMessage = "ERROR: $e";
+        _isLoading = false;
       });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
   }
 
+  // 在后台线程处理API请求的方法
+  static Future<String> _processInBackground(Map<String, dynamic> params) async {
+    final agent = params['agent'] as AIAgent;
+    final prompt = params['prompt'] as String;
+    final processedReplacements = params['processedReplacements'] as List<ProcessedMethodReplacement>;
+    final service = PluginAnalysisService();
+
+    try {
+      // 应用预处理的替换结果
+      final processedPrompt = PromptReplacementController.applyProcessedReplacements(
+        prompt,
+        processedReplacements
+      );
+      
+      // 创建一个Completer来处理异步响应
+      final completer = Completer<String>();
+      final responseBuffer = StringBuffer();
+      
+      // 使用RequestService直接发送请求
+      await RequestService.streamResponse(
+        agent: agent,
+        prompt: processedPrompt,
+        onToken: (token) {
+          responseBuffer.write(token);
+        },
+        onError: (error) {
+          if (!completer.isCompleted) {
+            completer.completeError(error);
+          }
+        },
+        onComplete: () {
+          if (!completer.isCompleted) {
+            completer.complete(responseBuffer.toString());
+          }
+        },
+        replacePrompt: true,
+      );
+      
+      return await completer.future;
+    } catch (e) {
+      return "ERROR: $e";
+    }
+    // 注意：不需要在这里清理方法，因为我们现在在主线程中预处理了
+  }
   // 构建表单标签页
   Widget _buildFormTab(OpenAILocalizations localizations) {
     return Column(
@@ -417,17 +443,10 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
             
             // 添加标签页
             Expanded(
-              child: DefaultTabController(
-                length: 2,
-                initialIndex: _currentTabIndex,
-                child: Column(
+              child: Column(
                   children: [
                     TabBar(
-                      onTap: (index) {
-                        setState(() {
-                          _currentTabIndex = index;
-                        });
-                      },
+                      controller: _tabController,
                       tabs: [
                         Tab(text: localizations.form),
                         Tab(text: localizations.output),
@@ -436,7 +455,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
                     const SizedBox(height: 16),
                     Expanded(
                       child: TabBarView(
-                        physics: const NeverScrollableScrollPhysics(), // 禁用滑动以确保IndexedStack的行为
+                        controller: _tabController,
                         children: [
                           // 表单标签页内容
                           _buildFormTab(localizations),
@@ -449,7 +468,6 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> {
                   ],
                 ),
               ),
-            ),
             
             // 底部按钮
             const SizedBox(height: 16),

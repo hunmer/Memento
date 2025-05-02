@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:openai_dart/openai_dart.dart';
-import 'package:http/http.dart' as http;
 import '../models/ai_agent.dart';
 import '../controllers/prompt_replacement_controller.dart';
 import 'dart:developer' as developer;

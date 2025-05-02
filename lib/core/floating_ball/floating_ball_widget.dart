@@ -3,7 +3,6 @@ import 'package:flutter/gestures.dart';
 import 'dart:async';
 import 'floating_ball_service.dart';
 import 'floating_ball_manager.dart';
-import 'floating_ball_service.dart';
 import 'settings_screen.dart';
 
 class FloatingBallWidget extends StatefulWidget {

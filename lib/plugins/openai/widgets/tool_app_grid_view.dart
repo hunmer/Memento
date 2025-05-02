@@ -8,10 +8,10 @@ class ToolAppGridView extends StatelessWidget {
   final ToolAppController? controller;
   
   const ToolAppGridView({
-    Key? key,
+    super.key,
     required this.apps,
     this.controller,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

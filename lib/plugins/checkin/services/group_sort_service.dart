@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
 
 enum GroupSortType {

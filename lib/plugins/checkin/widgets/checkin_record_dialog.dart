@@ -72,6 +72,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('添加打卡记录'),

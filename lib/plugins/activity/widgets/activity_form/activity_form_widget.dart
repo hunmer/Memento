@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/activity_record.dart';
 import '../../../../plugins/diary/l10n/diary_localizations.dart';
-import 'activity_time_section.dart';
 import 'constants.dart';
 import 'activity_form_state.dart';
 

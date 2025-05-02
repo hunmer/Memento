@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../checkin_plugin.dart';
-import '../models/checkin_item.dart';
 
 class CheckinPromptReplacements {
   /// 获取指定日期范围内的打卡记录

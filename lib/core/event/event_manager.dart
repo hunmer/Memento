@@ -78,7 +78,9 @@ class EventManager {
     if (handler == null) {
       // 如果没有提供handler，取消该事件的所有订阅
       removed = subscriptions.isNotEmpty;
-      subscriptions.forEach((subscription) => subscription.cancel());
+      for (var subscription in subscriptions) {
+        subscription.cancel();
+      }
       subscriptions.clear();
     } else {
       // 如果提供了handler，只取消匹配的订阅
@@ -158,13 +160,13 @@ class EventManager {
     final controller = StreamController<EventArgs>();
     late final String subscriptionId;
     
-    final handler = (EventArgs args) {
+    handler(EventArgs args) {
       if (controller.isClosed) {
         unsubscribeById(subscriptionId);
         return;
       }
       controller.add(args);
-    };
+    }
     
     subscriptionId = subscribe(eventName, handler);
     

@@ -55,7 +55,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
       // 如果是相对路径（不是以系统分隔符开头），则转换为绝对路径
       if (!path.isAbsolute(resolvedPath)) {
         // 移除可能的 './' 前缀
-        if (resolvedPath.startsWith('./') || resolvedPath.startsWith('.' + path.separator)) {
+        if (resolvedPath.startsWith('./') || resolvedPath.startsWith('.${path.separator}')) {
           resolvedPath = resolvedPath.substring(2);
         }
 

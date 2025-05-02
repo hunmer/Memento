@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
 import '../../models/note.dart';
-import '../note_edit_screen.dart';
 import '../notes_screen.dart';
 
 class NotesScreenState extends State<NotesScreen> {

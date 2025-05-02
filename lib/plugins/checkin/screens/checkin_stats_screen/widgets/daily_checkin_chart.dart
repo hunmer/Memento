@@ -48,7 +48,7 @@ class DailyCheckinChart extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
-                      isMonthly ? '${index + 1}日' : '${_getWeekday(index)}',
+                      isMonthly ? '${index + 1}日' : _getWeekday(index),
                       style: theme.textTheme.bodySmall,
                     ),
                   );

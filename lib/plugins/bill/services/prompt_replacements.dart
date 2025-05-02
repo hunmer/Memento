@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../openai/controllers/prompt_replacement_controller.dart';
 import '../models/bill.dart';
 import '../controls/bill_controller.dart';
 
@@ -96,7 +95,7 @@ class BillPromptReplacements {
   /// 格式化账单数据为JSON文本
   String _formatBillsToText(List<Bill> bills) {
     if (bills.isEmpty) {
-      return '{\"status\": \"empty\", \"msg\": \"在指定时间段内没有找到账单记录。\"}';
+      return '{"status": "empty", "msg": "在指定时间段内没有找到账单记录。"}';
     }
     
     // 计算总收入和总支出

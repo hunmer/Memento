@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:Memento/screens/home_screen/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'plugin_base.dart';
 import 'storage/storage_manager.dart';
 
