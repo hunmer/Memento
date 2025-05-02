@@ -66,7 +66,7 @@ class MessageInputState {
         if (selectedAgents.isNotEmpty) {
           metadata['agents'] =
               selectedAgents
-                  .map((agent) => {'id': agent['id'], 'name': agent['name']})
+                  .map((agent) => agent)
                   .toList();
         }
         // 创建用户对象

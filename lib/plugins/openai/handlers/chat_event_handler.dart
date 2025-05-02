@@ -98,10 +98,17 @@ class ChatEventHandler {
     late User aiUser;
     Message? typingMessage;
     try {
-      // 创建AI用户
+      // 获取完整的agent对象
+      final agent = await _agentController.getAgent(agentData['id']);
+      if (agent == null) {
+        throw Exception('找不到指定的AI助手配置');
+      }
+      
+      // 使用完整的agent信息创建AI用户
       aiUser = User(
-        id: agentData['id'] ?? 'ai',
-        username: agentData['name'] ?? 'AI',
+        id: agent.id,
+        username: agent.name,
+        iconPath: agent.avatarUrl != null ? await ImageUtils.getAbsolutePath(agent.avatarUrl) : '',
       );
 
       // 创建AI回复消息，使用agent的ID确保唯一性
@@ -142,13 +149,6 @@ class ChatEventHandler {
       // 立即广播AI消息创建事件
       eventManager.broadcast('onMessageCreate', Value<Message>(typingMessage));
 
-      // 获取agent配置
-      final agent = await _agentController.getAgent(agentData['id']);
-      if (agent == null) {
-        _updateTypingMessage(messageId, '抱歉，找不到指定的AI助手配置', aiUser);
-        return; // 使用return替代continue，因为我们现在在一个独立的异步方法中
-      }
-
       // 启动流式响应
       await RequestService.streamResponse(
         agent: agent,
@@ -180,20 +180,15 @@ class ChatEventHandler {
             }
           }
         },
-        onError: (error) {
-          developer.log(
-            '生成回复时出现错误: $error',
-            name: 'ChatEventHandler',
-            error: error,
-          );
+        onError: (error) async {
           if (typingMessage != null) {
-            _updateTypingMessage(
-              typingMessage.id,
-              '抱歉，生成回复时出现错误：$error',
-              aiUser,
+            typingMessage.content = '抱歉，生成回复时出现错误：$error';
+            typingMessage.metadata?.addAll({'isError': true});
+            eventManager.broadcast(
+              'onMessageUpdated',
+              Value<Message>(typingMessage),
             );
           }
-
           // 清理资源
           final messageId = typingMessage?.id ?? '';
           streamController.close();
@@ -234,19 +229,35 @@ class ChatEventHandler {
       );
     } catch (e) {
       developer.log('处理AI回复时出错', name: 'ChatEventHandler', error: e);
+      
+      // 创建一个默认的AI用户，用于显示错误消息
+      if (!_isAiUserInitialized(aiUser)) {
+        aiUser = User(
+          id: agentData['id'] ?? 'ai',
+          username: agentData['name'] ?? 'AI',
+        );
+      }
+      
       if (typingMessage != null) {
-        _updateTypingMessage(typingMessage.id, '处理AI回复时出错：$e', aiUser);
+        typingMessage.content = '处理AI回复时出错：$e';
+        typingMessage.metadata?.addAll({'isError': true});
+        eventManager.broadcast(
+          'onMessageUpdated',
+          Value<Message>(typingMessage),
+        );
       } else {
         // 如果typingMessage未创建，则创建一个新的错误消息
         final errorMessageId = DateTime.now().millisecondsSinceEpoch.toString();
-        _updateTypingMessage(errorMessageId, '处理AI回复时出错：$e', aiUser);
+        await _handleErrorMessage(errorMessageId, '处理AI回复时出错：$e', aiUser);
       }
       return; // 使用return替代continue，因为我们现在在一个独立的异步方法中
     }
   }
 
-  void _updateTypingMessage(String messageId, String content, User user) async {
-    final updatedMessage = await Message.create(
+  // 使用与更新正常消息相同的方法处理错误消息
+  Future<void> _handleErrorMessage(String messageId, String content, User user) async {
+    // 首先创建消息
+    final message = await Message.create(
       id: messageId,
       content: content,
       user: user,
@@ -254,7 +265,13 @@ class ChatEventHandler {
       metadata: {'isAI': true, 'isError': true, 'agentId': user.id},
     );
 
-    eventManager.broadcast('onMessageUpdated', Value<Message>(updatedMessage));
+    // 广播消息创建事件
+    eventManager.broadcast('onMessageCreate', Value<Message>(message));
+  }
+
+  // 检查AI用户是否已初始化
+  bool _isAiUserInitialized(User? user) {
+    return user != null && user.id.isNotEmpty;
   }
 
   void dispose() {
