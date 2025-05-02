@@ -121,9 +121,10 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
   final TextEditingController _promptController = TextEditingController();
   final PluginAnalysisService _service = PluginAnalysisService();
   AIAgent? _selectedAgent;
-  String? _responseMessage;
+  String _responseMessage = '';  // 改为空字符串初始值，方便拼接
   bool _isLoading = false;
   late TabController _tabController;
+  final StreamController<String> _streamController = StreamController<String>();
   final PromptReplacementController _promptReplacementController = PromptReplacementController();
 
   @override
@@ -135,7 +136,8 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
   @override
   void dispose() {
     _tabController.dispose();
-     _promptController.dispose();
+    _promptController.dispose();
+    _streamController.close();
     super.dispose();
   }
 
@@ -198,29 +200,53 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
     _tabController.animateTo(1);
 
     try {
+      // 清空之前的响应
+      setState(() {
+        _responseMessage = '';
+      });
+
       // 在主线程中预处理所有方法替换
       final processedReplacements = await _promptReplacementController.preprocessPromptReplacements(
         _promptController.text
       );
 
-      // 使用compute在后台线程处理请求
-      final response = await compute(_processInBackground, {
-        'agent': _selectedAgent!,
-        'prompt': _promptController.text,
-        'processedReplacements': processedReplacements,
-      });
-
-      if (!mounted) return;
-
-      setState(() {
-        _responseMessage = response;
-        _isLoading = false;
-      });
+      // 处理提示词替换
+      final processedPrompt = PromptReplacementController.applyProcessedReplacements(
+        _promptController.text,
+        processedReplacements
+      );
+      String raw = '';
+      // 直接在当前上下文处理流式响应
+      await RequestService.streamResponse(
+        agent: _selectedAgent!,
+        prompt: processedPrompt,
+        onToken: (token) {
+          if (!mounted) return;
+          setState(() {
+            // 处理思考内容，转换为Markdown格式
+            raw += token;
+            _responseMessage = RequestService.processThinkingContent(raw);
+          });
+        },
+        onError: (error) {
+          if (!mounted) return;
+          setState(() {
+            _responseMessage += "\nERROR: $error";
+            _isLoading = false;
+          });
+        },
+        onComplete: () {
+          if (!mounted) return;
+          setState(() {
+            _isLoading = false;
+          });
+        },
+        replacePrompt: true,
+      );
     } catch (e) {
       if (!mounted) return;
-      
       setState(() {
-        _responseMessage = "ERROR: $e";
+        _responseMessage += "\nERROR: $e";
         _isLoading = false;
       });
     }
@@ -388,22 +414,20 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
                 color: Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _responseMessage != null
-                  ? MarkdownBody(
-                      data: _responseMessage!,
-                      selectable: true, // 允许选择文本
-                    )
-                  : Center(
-                      child: Text(
-                        localizations.noResponseYet,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                        ),
-                      ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  MarkdownBody(
+                    data: _responseMessage,
+                    selectable: true,
+                  ),
+                  if (_isLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: LinearProgressIndicator(),
                     ),
+                ],
+              ),
             ),
           ),
         ),

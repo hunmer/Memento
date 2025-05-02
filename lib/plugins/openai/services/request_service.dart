@@ -7,6 +7,31 @@ import '../controllers/prompt_replacement_controller.dart';
 import 'dart:developer' as developer;
 
 class RequestService {
+  /// 处理思考内容，将<think>标签转换为Markdown格式
+  static String processThinkingContent(String content) {
+    // 使用正则表达式匹配<think>标签内的内容
+    final thinkPattern = RegExp(r'<think>(.*?)</think>', dotAll: true);
+    
+    // 替换所有匹配到的内容
+    return content.replaceAllMapped(thinkPattern, (match) {
+      // 获取标签内的文本
+      String thinkContent = match.group(1) ?? '';
+      
+      // 如果内容为空，直接返回空字符串
+      if (thinkContent.trim().isEmpty) {
+        return '';
+      }
+      
+      // 分割成行，为每行添加前缀 ">"，并重新组合
+      String formattedContent = thinkContent
+          .split('\n')
+          .map((line) => line.trim().isEmpty ? '>' : '> $line')
+          .join('\n');
+      
+      return formattedContent;
+    });
+  }
+
   static final Map<String, OpenAIClient> _clients = {};
 
   /// 获取或创建OpenAI客户端

@@ -25,6 +25,7 @@ class CheckinPromptReplacements {
                     // 不需要key字段，因为它是内部使用的
                     'name': item.name,
                     'group': item.group.isNotEmpty ? item.group : null,
+                    'date': entry.value.checkinTime, // 添加日期字段用于排序
                     'done': _formatDate(entry.value.checkinTime),
                     'note': entry.value.note?.isNotEmpty == true ? entry.value.note : null,
                   };
@@ -44,7 +45,12 @@ class CheckinPromptReplacements {
       }
       
       // 按日期排序
-      records.sort((a, b) => a['date'].compareTo(b['date']));
+      records.sort((a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime));
+      
+      // 排序后移除用于排序的原始日期字段
+      for (var record in records) {
+        record.remove('date');
+      }
       
       return records.isEmpty 
           ? '在指定日期范围内没有找到打卡记录。'

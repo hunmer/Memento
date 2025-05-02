@@ -159,7 +159,7 @@ class ChatEventHandler {
 
             // 检查并处理思考过程的标记
             String currentContent = contentBuffer.toString();
-            String processedContent = _processThinkingContent(currentContent);
+            String processedContent =  RequestService.processThinkingContent(currentContent);
 
             // 更新 typingMessage 的内容
             if (typingMessage != null) {
@@ -201,7 +201,7 @@ class ChatEventHandler {
           // 直接更新 typingMessage 的内容和元数据
           if (typingMessage != null) {
             // 在完成时也处理一次思考过程的标记
-            String finalContent = _processThinkingContent(
+            String finalContent =  RequestService.processThinkingContent(
               contentBuffer.toString(),
             );
             typingMessage.content = finalContent;
@@ -248,40 +248,6 @@ class ChatEventHandler {
     );
 
     eventManager.broadcast('onMessageUpdated', Value<Message>(updatedMessage));
-  }
-
-  String _processThinkingContent(String content) {
-    // 检查是否存在完整的思考过程（已结束的思考）
-    if (content.contains('<think>') && content.contains('</think>')) {
-      // 使用正则表达式匹配所有思考过程
-      final pattern = RegExp(r'<think>(.*?)</think>', dotAll: true);
-      return content.replaceAllMapped(pattern, (match) {
-        // 将思考过程转换为 Markdown blockquote 格式
-        String thinkingContent = match.group(1) ?? '';
-        // 在每一行前面添加 > 符号，实现 blockquote 效果
-        String formattedContent = thinkingContent
-            .trim()
-            .split('\n')
-            .map((line) => '> $line')
-            .join('\n');
-        return '\n\n**思考过程：**\n$formattedContent\n\n';
-      });
-    }
-    // 处理未结束的思考过程
-    else if (content.contains('<think>')) {
-      // 将未结束的思考过程转换为 blockquote 格式
-      final pattern = RegExp(r'<think>(.*)$', dotAll: true);
-      return content.replaceAllMapped(pattern, (match) {
-        String thinkingContent = match.group(1) ?? '';
-        String formattedContent = thinkingContent
-            .trim()
-            .split('\n')
-            .map((line) => '> $line')
-            .join('\n');
-        return '\n\n**思考中...**\n$formattedContent';
-      });
-    }
-    return content;
   }
 
   void dispose() {
