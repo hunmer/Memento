@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../../../models/activity_record.dart';
 
 class ActivityGridView extends StatefulWidget {
@@ -24,20 +25,22 @@ class ActivityGridView extends StatefulWidget {
 class _ActivityGridViewState extends State<ActivityGridView> {
   DateTime? _selectionStart;
   DateTime? _selectionEnd;
+  DateTime? _lastEnteredTime;  // 添加变量跟踪最后一次进入的时间块
   bool _isDragging = false;
   bool _isMouseDown = false;
 
-  // 不再需要跟踪鼠标位置
   final GlobalKey _gridKey = GlobalKey();
 
   // 计算网格索引对应的时间
+  // 注意：网格显示的时间从每小时的05分钟开始（如0:05, 1:05...），而不是从00分钟开始
+  // 这是为了让用户更容易看到时间段的开始，但在实际创建活动时，我们需要将开始时间向前调整5分钟
   DateTime _getTimeFromIndex(int hourIndex, int minuteIndex) {
     return DateTime(
       widget.selectedDate.year,
       widget.selectedDate.month,
       widget.selectedDate.day,
       hourIndex,
-      minuteIndex * 5 + 5,  // 实际时间从05开始
+      minuteIndex * 5 + 5,  // 实际时间从05开始，每格5分钟
     );
   }
 
@@ -75,12 +78,13 @@ class _ActivityGridViewState extends State<ActivityGridView> {
     }
 
     // 检查是否在选择范围内
-    if (_isDragging && _selectionStart != null) {
-      final selectionEnd = _selectionEnd ?? time;
-      if ((time.isAfter(_selectionStart!) && time.isBefore(selectionEnd)) ||
-          (time.isAfter(selectionEnd) && time.isBefore(_selectionStart!)) ||
-          time.isAtSameMomentAs(_selectionStart!) ||
-          time.isAtSameMomentAs(selectionEnd)) {
+    if (_isDragging && _selectionStart != null && _lastEnteredTime != null) {
+      final start = _selectionStart!;
+      final end = _lastEnteredTime!;
+      if ((time.isAfter(start) && time.isBefore(end)) ||
+          (time.isAfter(end) && time.isBefore(start)) ||
+          time.isAtSameMomentAs(start) ||
+          time.isAtSameMomentAs(end)) {
         return Colors.lightBlue.withOpacity(0.3);
       }
     }
@@ -95,70 +99,35 @@ class _ActivityGridViewState extends State<ActivityGridView> {
     return Colors.grey.withOpacity(0.1);
   }
 
-  void _onGridTapDown(DateTime time) {
-    // 如果点击的时间超过当前时间，不允许选择
-    if (time.isAfter(DateTime.now())) {
-      return;
-    }
-
-    // 检查是否点击了已有活动
-    final activity = _getActivityAtTime(time);
-    if (activity != null) {
-      // 如果点击的是已有活动，触发编辑回调
-      widget.onActivityTap(activity);
-      return;
-    }
-
-    // 如果点击的是空白区域，开始新的选择
-    setState(() {
-      _selectionStart = time;
-      _selectionEnd = time;
-      _isDragging = true;
-    });
-
-    // 通知选择范围变化
-    if (widget.onSelectionChanged != null) {
-      widget.onSelectionChanged!(_selectionStart, _selectionEnd);
-    }
-  }
-
-  void _onGridDragUpdate(DateTime time) {
-    if (_isDragging || _isMouseDown) {
-      // 如果拖动到超过当前时间的位置，使用当前时间作为结束时间
-      final now = DateTime.now();
-      final endTime = time.isAfter(now) ? now : time;
-      setState(() {
-        _selectionEnd = endTime;
-      });
-
-      // 通知选择范围变化
-      if (widget.onSelectionChanged != null && _selectionStart != null) {
-        widget.onSelectionChanged!(_selectionStart, _selectionEnd);
-      }
-    }
-  }
-
   void _onGridDragEnd() {
-    if (_isDragging && _selectionStart != null && _selectionEnd != null) {
-      final start =
-          _selectionStart!.isBefore(_selectionEnd!)
-              ? _selectionStart!
-              : _selectionEnd!;
-      final end =
-          _selectionStart!.isBefore(_selectionEnd!)
-              ? _selectionEnd!
-              : _selectionStart!;
-      // 调整开始时间，向前偏移5分钟
-      final adjustedStart = start.subtract(const Duration(minutes: 5));
-      widget.onUnrecordedTimeTap(adjustedStart, end);
+    if (_isDragging && _selectionStart != null && _lastEnteredTime != null) {
+      // 确定实际的开始和结束时间
+      final rawStart = _selectionStart!.isBefore(_lastEnteredTime!)
+          ? _selectionStart!
+          : _lastEnteredTime!;
+      final end = _selectionStart!.isBefore(_lastEnteredTime!)
+          ? _lastEnteredTime!
+          : _selectionStart!;
+          
+      // 由于网格时间从每小时的05分钟开始，我们需要将开始时间向前调整5分钟
+      // 例如：如果选择了8:05，实际应该从8:00开始
+      final start = rawStart.subtract(const Duration(minutes: 5));
+      
+      // 调用回调函数，传入调整后的开始时间和原始结束时间
+      widget.onUnrecordedTimeTap(start, end);
     }
     setState(() {
       _isDragging = false;
+      _isMouseDown = false; // 确保鼠标/触摸状态也被重置
       _selectionStart = null;
       _selectionEnd = null;
+      _lastEnteredTime = null; // 重置最后进入的时间
     });
 
     // 通知选择范围清空
+    if (widget.onSelectionChanged != null) {
+      widget.onSelectionChanged!(null, null);
+    }
     if (widget.onSelectionChanged != null) {
       widget.onSelectionChanged!(null, null);
     }
@@ -166,25 +135,38 @@ class _ActivityGridViewState extends State<ActivityGridView> {
 
   // 不再需要根据鼠标位置计算时间，直接使用网格的时间
   
-  // 处理网格的鼠标悬停事件
+  // 处理网格的鼠标悬停或触摸移动事件
   void _handleGridHover(DateTime time) {
-    if (_isMouseDown) {
+    // 如果是鼠标事件，需要检查鼠标是否按下
+    // 如果是触摸事件（通过onPanUpdate或onLongPressMoveUpdate触发），则直接更新
+    if (_isMouseDown || _isDragging) {
       if (!_isDragging) {
-        // 第一次进入拖动状态
+        // 第一次进入拖动状态，设置起始时间
         setState(() {
           _isDragging = true;
           _selectionStart = time;
+          _lastEnteredTime = time;  // 初始化最后进入的时间
           _selectionEnd = time;
         });
-        // 通知选择范围变化
-        if (widget.onSelectionChanged != null) {
-          widget.onSelectionChanged!(_selectionStart, _selectionEnd);
-        }
       } else {
-        // 更新拖动终点
-        _onGridDragUpdate(time);
-      }
+        // 已经在拖动状态，更新最后进入的时间块
+        final now = DateTime.now();
+        final currentTime = time.isAfter(now) ? now : time;
+        
+        // 只有当进入新的时间块时才更新
+        if (_lastEnteredTime != currentTime) {
+          setState(() {
+            _lastEnteredTime = currentTime;
+            _selectionEnd = currentTime;
+          });
+          
+          // 通知选择范围变化
+          if (widget.onSelectionChanged != null) {
+            widget.onSelectionChanged!(_selectionStart, _selectionEnd);
+          }
+        }
     }
+  }
   }
 
   @override
@@ -197,7 +179,29 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       },
       onPointerMove: (PointerMoveEvent event) {
         if (!_isMouseDown) return;
-        // 继续跟踪鼠标移动状态
+        // 获取指针位置对应的网格
+        final RenderBox? renderBox = _gridKey.currentContext?.findRenderObject() as RenderBox?;
+        if (renderBox != null) {
+          final result = BoxHitTestResult();
+          // 将全局坐标转换为本地坐标
+          final localPosition = renderBox.globalToLocal(event.position);
+          // 执行命中测试
+          if (renderBox.hitTest(result, position: localPosition)) {
+            // 遍历所有命中的对象
+            for (final hit in result.path) {
+              // 检查是否找到了带有时间数据的Container
+              if (hit.target is RenderMetaData) {
+                final metadata = hit.target as RenderMetaData;
+                if (metadata.metaData is DateTime) {
+                  final time = metadata.metaData as DateTime;
+                  // 使用获取到的时间更新选择范围
+                  _handleGridHover(time);
+                  break;
+                }
+              }
+            }
+          }
+      };
       },
       onPointerUp: (PointerUpEvent event) {
         if (_isMouseDown) {
@@ -222,7 +226,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                     return Expanded(
                       child: Center(
                         child: Text(
-                          '${(index * 5 + 5) % 60}'.padLeft(2, '0'),  // 显示从05开始
+                          '${(index * 5 + 5) % 60}'.padLeft(2, '0'),  // 显示从05开始，但在创建活动时会向前调整5分钟
                           style: const TextStyle(fontSize: 12),
                         ),
                       ),
@@ -262,30 +266,10 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                               );
                               return Expanded(
                                 child: MouseRegion(
-                                  cursor:
-                                      _isDragging
-                                          ? SystemMouseCursors.grabbing
-                                          : SystemMouseCursors.click,
-                                  // 添加鼠标悬停事件处理
-                                  onEnter: (_) => _handleGridHover(time),
                                   child: GestureDetector(
-                                    onTapDown: (_) {
-                                      if (!_isDragging) {
-                                        _onGridTapDown(time);
-                                      }
-                                    },
-                                    // 移动端长按事件
-                                    onLongPressStart: (_) {
-                                      // 检查是否点击了已有活动
-                                      final activity = _getActivityAtTime(time);
-                                      if (activity == null) {
-                                        _onGridTapDown(time);
-                                      }
-                                    },
-                                    onLongPressMoveUpdate:
-                                        (_) => _onGridDragUpdate(time),
-                                    onLongPressEnd: (_) => _onGridDragEnd(),
-                                    child: Container(
+                                    child: MetaData(
+                                      metaData: time,
+                                      child: Container(
                                       height: hourHeight - 2, // 减去margin的高度
                                       margin: const EdgeInsets.all(
                                         1.0,
@@ -302,6 +286,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                                       ),
                                     ),
                                   ),
+                                ),
                                 ),
                               );
                             }),

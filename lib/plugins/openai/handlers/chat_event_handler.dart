@@ -36,7 +36,7 @@ class ChatEventHandler {
     final message = args.value;
     final metadata = message.metadata;
 
-    // 在AI发消息前更新消息内容
+    // 立即广播用户消息
     eventManager.broadcast(
       'onMessageUpdated',
       Value<Message>(message),
@@ -131,8 +131,15 @@ class ChatEventHandler {
         name: 'ChatEventHandler',
       );
 
-      // 发布AI回复消息创建事件，添加agent标识
-      typingMessage.metadata?['agentId'] = agentData['id'];
+      // 发布AI回复消息创建事件
+      typingMessage.metadata?.addAll({
+        'agentId': agentData['id'],
+        'replyTo': originalMessage.id,
+        'isAI': true,
+        'isStreaming': true,
+      });
+      
+      // 立即广播AI消息创建事件
       eventManager.broadcast('onMessageCreate', Value<Message>(typingMessage));
 
       // 获取agent配置

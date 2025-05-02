@@ -12,24 +12,38 @@ class RequestService {
     // 使用正则表达式匹配<think>标签内的内容
     final thinkPattern = RegExp(r'<think>(.*?)</think>', dotAll: true);
     
-    // 替换所有匹配到的内容
-    return content.replaceAllMapped(thinkPattern, (match) {
+    // 创建一个StringBuffer来构建最终的内容
+    final StringBuffer result = StringBuffer();
+    int lastMatchEnd = 0;
+    
+    // 查找所有匹配项
+    for (final match in thinkPattern.allMatches(content)) {
+      // 添加标签之前的内容（不在think标签内的内容）
+      result.write(content.substring(lastMatchEnd, match.start));
+      
       // 获取标签内的文本
       String thinkContent = match.group(1) ?? '';
       
-      // 如果内容为空，直接返回空字符串
-      if (thinkContent.trim().isEmpty) {
-        return '';
+      // 如果内容不为空，则格式化并添加
+      if (thinkContent.trim().isNotEmpty) {
+        // 分割成行，为每行添加前缀 ">"
+        String formattedContent = thinkContent
+            .split('\n')
+            .map((line) => line.trim().isEmpty ? '>' : '> $line')
+            .join('\n');
+        
+        // 添加格式化后的内容
+        result.write(formattedContent);
       }
       
-      // 分割成行，为每行添加前缀 ">"，并重新组合
-      String formattedContent = thinkContent
-          .split('\n')
-          .map((line) => line.trim().isEmpty ? '>' : '> $line')
-          .join('\n');
-      
-      return formattedContent;
-    });
+      // 更新lastMatchEnd为当前匹配的结束位置
+      lastMatchEnd = match.end;
+    }
+    
+    // 添加最后一个标签之后的内容
+    result.write(content.substring(lastMatchEnd));
+    
+    return result.toString();
   }
 
   static final Map<String, OpenAIClient> _clients = {};
