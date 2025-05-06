@@ -3,19 +3,20 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../services/file_service.dart';
 import 'handlers/index.dart';
 import 'types.dart';
-
 /// 构建消息输入动作列表
 class MessageInputActionsBuilder {
   final BuildContext context;
   final FileService fileService;
   final OnFileSelected? onFileSelected;
   final OnSendMessage? onSendMessage;
+  final TextEditingController? textController;
 
   MessageInputActionsBuilder({
     required this.context,
     required this.fileService,
     this.onFileSelected,
     this.onSendMessage,
+    this.textController,
   });
 
   /// 获取默认的消息输入动作列表（静态方法）
@@ -23,6 +24,7 @@ class MessageInputActionsBuilder {
     BuildContext context, {
     OnFileSelected? onFileSelected,
     OnSendMessage? onSendMessage,
+    TextEditingController? textController,
   }) {
     // 创建一个FileService实例
     final fileService = FileService();
@@ -33,6 +35,7 @@ class MessageInputActionsBuilder {
       fileService: fileService,
       onFileSelected: onFileSelected,
       onSendMessage: onSendMessage,
+      textController: textController,
     ).buildActions();
   }
 
@@ -142,6 +145,20 @@ class MessageInputActionsBuilder {
         ),
       );
     }
+
+    // 添加智能体动作
+    actions.add(
+      MessageInputAction(
+        title: '智能体',
+        icon: Icons.smart_toy,
+        onTap: () {
+          // 直接在文本框末尾添加 @ 符号，这会触发 MessageInput 中的处理逻辑
+          if (textController != null) {
+            textController!.text = '@';
+          }
+        },
+      ),
+    );
 
     return actions;
   }

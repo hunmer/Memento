@@ -1,3 +1,6 @@
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
+import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -528,29 +531,67 @@ class _ChatScreenState extends State<ChatScreen> {
                                   _controller.toggleMessageSelection,
                               scrollController: _controller.scrollController,
                               onAvatarTap: (message) async {
-                                final chatPlugin = ChatPlugin.instance;
-                                final users = chatPlugin.userService.getAllUsers();
-                                final targetUser = users.firstWhere(
-                                  (user) => user.id == message.user.id,
-                                  orElse: () => message.user,
-                                );
+                                // 检查消息的metadata.isAI字段
+                                final isAI = message.metadata?['isAI'] as bool?;
+                                final agentId = message.metadata?['agentId'] as String?;
                                 
-                                final updatedUser = await showDialog<User>(
-                                  context: context,
-                                  builder: (context) => ProfileEditDialog(
-                                    user: targetUser,
-                                    chatPlugin: chatPlugin,
-                                  ),
-                                );
-                                
-                                if (updatedUser != null && mounted) {
-                                  // 如果是当前用户，则更新当前用户信息
-                                  if (targetUser.id == chatPlugin.userService.currentUser.id) {
-                                    chatPlugin.userService.setCurrentUser(updatedUser);
+                                if (isAI == true && agentId != null) {
+                                  // 如果是AI消息且有agentId，跳转到AI编辑界面
+                                  if (mounted) {
+                                    try {
+                                      // 获取OpenAI插件并转换类型
+                                      final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+                                      // 获取agent
+                                      final agent = await openaiPlugin.controller.getAgent(agentId);
+                                      if (agent != null) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => AgentEditScreen(agent: agent),
+                                          ),
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('找不到对应的AI助手'),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      // 插件不可用或类型转换失败时显示提示
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('无法访问AI编辑界面，OpenAI插件可能未加载'),
+                                        ),
+                                      );
+                                    }
                                   }
-                                  // 否则只更新用户列表中的用户信息
-                                  else {
-                                    await chatPlugin.userService.updateUser(updatedUser);
+                                } else {
+                                  // 如果不是AI消息，显示用户资料编辑对话框
+                                  final chatPlugin = ChatPlugin.instance;
+                                  final users = chatPlugin.userService.getAllUsers();
+                                  final targetUser = users.firstWhere(
+                                    (user) => user.id == message.user.id,
+                                    orElse: () => message.user,
+                                  );
+                                  
+                                  final updatedUser = await showDialog<User>(
+                                    context: context,
+                                    builder: (context) => ProfileEditDialog(
+                                      user: targetUser,
+                                      chatPlugin: chatPlugin,
+                                    ),
+                                  );
+                                  
+                                  if (updatedUser != null && mounted) {
+                                    // 如果是当前用户，则更新当前用户信息
+                                    if (targetUser.id == chatPlugin.userService.currentUser.id) {
+                                      chatPlugin.userService.setCurrentUser(updatedUser);
+                                    }
+                                    // 否则只更新用户列表中的用户信息
+                                    else {
+                                      await chatPlugin.userService.updateUser(updatedUser);
+                                    }
                                   }
                                 }
                               },

@@ -259,7 +259,6 @@ class _MessageInputState extends State<MessageInput> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // 添加文件按钮
               IconButton(
                 icon: const Icon(Icons.add),
                 onPressed: () {
@@ -270,6 +269,7 @@ class _MessageInputState extends State<MessageInput> {
                           actions: MessageInputActionsBuilder.getDefaultActions(
                             context,
                             onFileSelected: _handleFileSelected,
+                            textController: widget.controller,
                           ),
                           onFileSelected: _handleFileSelected,
                         ),

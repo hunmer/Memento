@@ -8,12 +8,14 @@ class MessageInputActions extends StatelessWidget {
   final FileService fileService;
   final OnFileSelected? onFileSelected;
   final OnSendMessage? onSendMessage;
+  final TextEditingController? textController;
 
   const MessageInputActions({
     super.key,
     required this.fileService,
     this.onFileSelected,
     this.onSendMessage,
+    this.textController,
   });
 
   @override
@@ -27,6 +29,7 @@ class MessageInputActions extends StatelessWidget {
           fileService: fileService,
           onFileSelected: onFileSelected,
           onSendMessage: onSendMessage,
+          textController: textController
         );
 
         // 获取所有可用的动作
