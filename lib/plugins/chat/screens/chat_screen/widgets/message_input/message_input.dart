@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:flutter/material.dart';
 import 'message_input_types.dart';
 import 'message_input_state.dart';
@@ -45,12 +46,37 @@ class _MessageInputState extends State<MessageInput> {
     _focusNode = widget.focusNode ?? FocusNode();
     _keyboardListenerFocusNode = FocusNode();
 
+    // 加载频道的元数据
+    _loadChannelMetadata();
+
     _updateMessageInputState();
 
     widget.controller.addListener(_onTextChanged);
   }
 
   @override
+  // 加载频道元数据
+  void _loadChannelMetadata() {
+    if (ChatPlugin.instance.channelService.currentChannel != null) {
+      final currentChannel = ChatPlugin.instance.channelService.currentChannel!;
+      final metadata = currentChannel.metadata;
+      
+      if (metadata != null) {
+        // 加载保存的智能体列表
+        final savedAgents = metadata['selectedAgents'] as List<dynamic>?;
+        if (savedAgents != null) {
+          selectedAgents = savedAgents.map((agent) => Map<String, String>.from(agent)).toList();
+        }
+
+        // 加载保存的上下文范围
+        final savedContextRange = metadata['contextRange'] as int?;
+        if (savedContextRange != null) {
+          contextRange = savedContextRange;
+        }
+      }
+    }
+  }
+
   void dispose() {
     if (widget.focusNode == null) {
       _focusNode.dispose();
@@ -89,6 +115,17 @@ class _MessageInputState extends State<MessageInput> {
       showAgentList = false;
       _updateMessageInputState();
     });
+    
+    // 保存选择的智能体到频道元数据
+    if (ChatPlugin.instance.channelService.currentChannel != null) {
+      final channelId = ChatPlugin.instance.channelService.currentChannel!.id;
+      ChatPlugin.instance.channelService.updateChannelMetadata(
+        channelId,
+        {
+          'selectedAgents': agents,
+        },
+      );
+    }
   }
 
   void _handleContextRangeChange(int newRange) {
@@ -96,6 +133,17 @@ class _MessageInputState extends State<MessageInput> {
       contextRange = newRange;
       _updateMessageInputState();
     });
+    
+    // 保存上下文范围到频道元数据
+    if (ChatPlugin.instance.channelService.currentChannel != null) {
+      final channelId = ChatPlugin.instance.channelService.currentChannel!.id;
+      ChatPlugin.instance.channelService.updateChannelMetadata(
+        channelId,
+        {
+          'contextRange': newRange,
+        },
+      );
+    }
   }
 
   void _handleFileSelected(Map<String, dynamic> file) {

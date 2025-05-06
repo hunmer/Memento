@@ -18,6 +18,7 @@ class Channel {
   String? draft; // 频道的草稿内容
   String? backgroundPath; // 频道背景图片路径
   Message? _lastMessage; // 最后一条消息的缓存
+  Map<String, dynamic>? metadata; // 存储频道的元数据，如上下文范围和最后选择的智能体
 
   Channel({
     required this.id,
@@ -31,6 +32,7 @@ class Channel {
     this.draft,
     this.backgroundPath,
     Message? lastMessage,
+    this.metadata,
   }) : lastMessageTime =
            messages.isNotEmpty ? messages.last.date : DateTime.now() {
     _lastMessage = lastMessage ?? (messages.isNotEmpty ? messages.last : null);
@@ -65,6 +67,7 @@ class Channel {
     String? draft,
     String? backgroundPath,
     Message? lastMessage,
+    Map<String, dynamic>? metadata,
   }) {
     return Channel(
       id: id,
@@ -78,6 +81,7 @@ class Channel {
       draft: draft ?? this.draft,
       backgroundPath: backgroundPath ?? this.backgroundPath,
       lastMessage: lastMessage ?? _lastMessage,
+      metadata: metadata ?? this.metadata,
     );
   }
 
@@ -95,6 +99,7 @@ class Channel {
       'fixedSymbol': fixedSymbol,
       'backgroundPath': backgroundPath,
       'lastMessageTime': lastMessageTime.toIso8601String(),
+      'metadata': metadata,
     };
   }
 
@@ -130,6 +135,7 @@ class Channel {
               : const [],
       fixedSymbol: json['fixedSymbol'] as String?,
       backgroundPath: json['backgroundPath'] as String?,
+      metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
 }

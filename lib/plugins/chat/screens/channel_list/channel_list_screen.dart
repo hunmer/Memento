@@ -144,6 +144,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   }
 
   void _navigateToChat(Channel channel) {
+    widget.chatPlugin.channelService.setCurrentChannel(channel);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ChatScreen(channel: channel)),

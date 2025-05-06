@@ -149,6 +149,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
                   lastMessage: widget.channel!.lastMessage,
                   draft: widget.channel!.draft,
                   messages: widget.channel!.messages,
+                  backgroundPath: widget.channel!.backgroundPath, // 保留背景图片路径
                 );
 
                 widget.onUpdateChannel!(updatedChannel);

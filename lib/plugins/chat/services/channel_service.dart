@@ -142,6 +142,37 @@ class ChannelService {
     await saveChannel(updatedChannel);
   }
 
+  // 更新频道元数据
+  Future<Channel> updateChannelMetadata(
+    String channelId,
+    Map<String, dynamic> metadata,
+  ) async {
+    // 找到并更新频道
+    final channel = _channels.firstWhere((c) => c.id == channelId);
+    
+    // 合并现有元数据和新元数据
+    Map<String, dynamic> updatedMetadata = {};
+    if (channel.metadata != null) {
+      updatedMetadata.addAll(channel.metadata!);
+    }
+    updatedMetadata.addAll(metadata);
+    
+    final updatedChannel = channel.copyWith(metadata: updatedMetadata);
+    
+    // 如果是当前活跃频道，更新 _currentChannel
+    if (_currentChannel?.id == channelId) {
+      _currentChannel = updatedChannel;
+    }
+    
+    // 保存更新后的频道
+    await saveChannel(updatedChannel);
+    
+    // 确保 UI 得到更新
+    _plugin.notifyListeners();
+    
+    return updatedChannel;
+  }
+
   // 更新频道背景
   Future<Channel> updateChannelBackground(
     String channelId,
