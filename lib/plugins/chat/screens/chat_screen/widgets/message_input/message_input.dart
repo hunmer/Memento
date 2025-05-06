@@ -178,6 +178,30 @@ class _MessageInputState extends State<MessageInput> {
       selectedAgents.removeWhere((agent) => agent['id'] == agentId);
       _updateMessageInputState();
     });
+    
+    // 更新频道元数据中的智能体列表
+    if (ChatPlugin.instance.channelService.currentChannel != null) {
+      final channelId = ChatPlugin.instance.channelService.currentChannel!.id;
+      
+      // 如果移除后没有选中的智能体，则清空元数据中的智能体列表和上下文范围
+      if (selectedAgents.isEmpty) {
+        ChatPlugin.instance.channelService.updateChannelMetadata(
+          channelId,
+          {
+            'selectedAgents': [],
+            'contextRange': null,
+          },
+        );
+      } else {
+        // 否则只更新智能体列表
+        ChatPlugin.instance.channelService.updateChannelMetadata(
+          channelId,
+          {
+            'selectedAgents': selectedAgents,
+          },
+        );
+      }
+    }
   }
 
   void _removeFile() {
