@@ -114,6 +114,22 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
           backgroundColor: _selectedColor,
         );
         await widget.billPlugin.createAccount(newAccount);
+        
+        if (mounted) {
+          // 检查是否是第一个账户
+          if (widget.billPlugin.accounts.length == 1) {
+            // 如果是第一个账户，自动设置为选中账户并进入
+            widget.billPlugin.selectedAccount = widget.billPlugin.accounts.first;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => widget.billPlugin.buildPluginEntryWidget(context),
+              ),
+            );
+            return;
+          }
+          Navigator.pop(context);
+        }
       } else {
         // 更新现有账户
         final updatedAccount = widget.account!.copyWith(
@@ -122,9 +138,9 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
           backgroundColor: _selectedColor,
         );
         await widget.billPlugin.saveAccount(updatedAccount);
-      }
-      if (mounted) {
-        Navigator.pop(context);
+        if (mounted) {
+          Navigator.pop(context);
+        }
       }
     } catch (e) {
       if (mounted) {

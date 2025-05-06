@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../bill_plugin.dart';
 import '../models/account.dart';
 import '../models/bill.dart';
 import '../models/bill_statistics.dart';
@@ -10,7 +10,18 @@ class BillController with ChangeNotifier {
   static final BillController _instance = BillController._internal();
   factory BillController() => _instance;
   
+  late final BillPlugin _plugin;
+  
   BillController._internal() {
+    // 延迟初始化，等待BillPlugin实例化完成后再加载数据
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAccounts();
+    });
+  }
+  
+  // 设置BillPlugin实例
+  void setPlugin(BillPlugin plugin) {
+    _plugin = plugin;
     _loadAccounts();
   }
 
@@ -60,36 +71,60 @@ class BillController with ChangeNotifier {
     }
   }
 
-  // 从本地存储加载账户列表
+  // 从插件存储加载账户列表
   Future<void> _loadAccounts() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final accountsJson = prefs.getStringList(_accountsKey) ?? [];
-      _accounts.clear();
-      _accounts.addAll(
-        accountsJson.map((json) => Account.fromJson(jsonDecode(json))),
+      // 确保_plugin已初始化
+      if (!_hasPlugin) {
+        debugPrint('BillPlugin尚未设置，无法加载账户');
+        return;
+      }
+      
+      final accountsData = await _plugin.storage.read(
+        '${_plugin.getPluginStoragePath()}/$_accountsKey.json',
+        {'accounts': []}
       );
+      
+      final accountsJson = List<String>.from(accountsData['accounts'] ?? []);
+      _accounts.clear();
+      
+      if (accountsJson.isNotEmpty) {
+        _accounts.addAll(
+          accountsJson.map((json) => Account.fromJson(jsonDecode(json))),
+        );
+      }
+      
       notifyListeners();
     } catch (e) {
       debugPrint('加载账户失败: $e');
     }
   }
+  
+  // 检查BillPlugin是否已设置
+  bool get _hasPlugin => _plugin != null;
 
-  // 保存账户列表到本地存储
+  // 保存账户列表到插件存储
   Future<void> _saveAccounts() async {
     try {
+      // 确保_plugin已初始化
+      if (!_hasPlugin) {
+        throw '保存账户失败: BillPlugin尚未设置';
+      }
+      
       // 确保所有账户的总金额都是最新的
       for (var i = 0; i < _accounts.length; i++) {
         _accounts[i].calculateTotal();
       }
       
-      final prefs = await SharedPreferences.getInstance();
       final accountsJson =
           _accounts.map((account) => jsonEncode(account.toJson())).toList();
-      final success = await prefs.setStringList(_accountsKey, accountsJson);
-      if (!success) {
-        throw '保存账户数据失败';
-      }
+          
+      // 将数据保存到插件的storage中
+      await _plugin.storage.write(
+        '${_plugin.getPluginStoragePath()}/$_accountsKey.json',
+        {'accounts': accountsJson}
+      );
+      
     } catch (e) {
       debugPrint('保存账户失败: $e');
       throw '保存账户失败: $e';
@@ -202,14 +237,33 @@ class BillController with ChangeNotifier {
   Future<Map<String, dynamic>> checkBillsStorage() async {
     try {
       await _ensureInitialized();
-      final prefs = await SharedPreferences.getInstance();
+      
+      Map<String, dynamic> storageData = {};
+      List<String> storageKeys = [];
+      
+      if (_hasPlugin) {
+        try {
+          storageData = await _plugin.storage.read(
+            '${_plugin.getPluginStoragePath()}/$_accountsKey.json',
+            {}
+          );
+          
+          // 获取插件存储中的所有键
+          final pluginPath = _plugin.getPluginStoragePath();
+          storageKeys = ['$pluginPath/$_accountsKey.json'];
+        } catch (e) {
+          debugPrint('获取存储数据失败: $e');
+        }
+      }
       
       return {
         'success': true,
         'accountsCount': _accounts.length,
         'billsCount': _accounts.fold<int>(0, (sum, account) => sum + account.bills.length),
         'initialized': _initialized,
-        'storageKeys': prefs.getKeys().toList(),
+        'storageData': storageData,
+        'storageKeys': storageKeys,
+        'hasPlugin': _hasPlugin,
       };
     } catch (e) {
       return {

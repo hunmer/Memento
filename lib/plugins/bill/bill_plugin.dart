@@ -16,7 +16,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   late final PromptController _promptController;
 
   BillPlugin() {
-    _billController = BillController();
+    _billController = BillController()..setPlugin(this);
     _promptController = PromptController();
   }
 
@@ -272,7 +272,10 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   }
   
   // 委托方法到BillController
-  Future<void> createAccount(Account account) => _billController.createAccount(account);
+  Future<void> createAccount(Account account) async {
+    await _billController.createAccount(account);
+    notifyListeners(); // 添加通知，确保UI更新
+  }
   
   // 修改saveAccount方法，在保存账户后通知监听器
   Future<void> saveAccount(Account account) async {

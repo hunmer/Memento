@@ -3,13 +3,36 @@ import '../bill_plugin.dart';
 import '../models/account.dart';
 import 'account_edit_screen.dart';
 
-class AccountListScreen extends StatelessWidget {
+class AccountListScreen extends StatefulWidget {
   final BillPlugin billPlugin;
 
   const AccountListScreen({
     super.key,
     required this.billPlugin,
   });
+
+  @override
+  State<AccountListScreen> createState() => _AccountListScreenState();
+}
+
+class _AccountListScreenState extends State<AccountListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    widget.billPlugin.addListener(_onAccountsChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.billPlugin.removeListener(_onAccountsChanged);
+    super.dispose();
+  }
+
+  void _onAccountsChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +46,7 @@ class AccountListScreen extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => AccountEditScreen(
-              billPlugin: billPlugin,
+              billPlugin: widget.billPlugin,
             ),
           ),
         ),
@@ -33,22 +56,68 @@ class AccountListScreen extends StatelessWidget {
   }
 
   Widget _buildAccountList() {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        billPlugin.addListener(() => setState(() {}));
+    if (widget.billPlugin.accounts.isEmpty) {
+      return const Center(
+        child: Text('暂无账户，点击右下角按钮创建'),
+      );
+    }
 
-        if (billPlugin.accounts.isEmpty) {
-          return const Center(
-            child: Text('暂无账户，点击右下角按钮创建'),
-          );
-        }
-
-        return ListView.builder(
-          itemCount: billPlugin.accounts.length,
-          itemBuilder: (context, index) {
-            final account = billPlugin.accounts[index];
-            return _buildAccountCard(context, account);
+    return ListView.builder(
+      itemCount: widget.billPlugin.accounts.length,
+      itemBuilder: (context, index) {
+        final account = widget.billPlugin.accounts[index];
+        return Dismissible(
+          key: Key(account.id),
+          background: Container(
+            color: Colors.red,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            alignment: Alignment.centerRight,
+            child: const Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+          ),
+          direction: DismissDirection.endToStart,
+          confirmDismiss: (direction) async {
+            return await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('确认删除'),
+                  content: Text('确定要删除账户"${account.title}"吗？\n删除后该账户下的所有账单记录都将被删除！'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('取消'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text(
+                        '删除',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
           },
+          onDismissed: (direction) {
+            widget.billPlugin.deleteAccount(account.id);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('账户"${account.title}"已删除'),
+                action: SnackBarAction(
+                  label: '撤销',
+                  onPressed: () {
+                    // 重新创建账户
+                    widget.billPlugin.createAccount(account);
+                  },
+                ),
+              ),
+            );
+          },
+          child: _buildAccountCard(context, account),
         );
       },
     );
@@ -100,12 +169,12 @@ class AccountListScreen extends StatelessWidget {
 
   void _openAccountBills(BuildContext context, Account account) {
     // 设置选中的账户
-    billPlugin.selectedAccount = account;
+    widget.billPlugin.selectedAccount = account;
     // 返回到主视图并显示选中账户的账单
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => billPlugin.buildPluginEntryWidget(context),
+        builder: (context) => widget.billPlugin.buildPluginEntryWidget(context),
       ),
     );
   }
@@ -115,7 +184,7 @@ class AccountListScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => AccountEditScreen(
-          billPlugin: billPlugin,
+          billPlugin: widget.billPlugin,
           account: account,
         ),
       ),
