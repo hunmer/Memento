@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../models/goods_item.dart';
 import '../controllers/form_controller.dart';
 import '../../goods_item_selector_dialog.dart';
+import '../goods_item_form_page.dart';
 
 class SubItemsTab extends StatefulWidget {
   final GoodsItemFormController controller;
@@ -43,6 +44,26 @@ class _SubItemsTabState extends State<SubItemsTab> {
       widget.controller.removeSubItem(item);
       widget.onStateChanged();
     });
+  }
+
+  void _editSubItem(GoodsItem item) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GoodsItemFormPage(
+          itemId: item.id,
+          onSaved: (savedItem) {
+            // 更新子物品状态
+            widget.controller.updateSubItem(savedItem);
+            widget.onStateChanged();
+          },
+        ),
+      ),
+    );
+
+    if (result == true) {
+      setState(() {});
+    }
   }
   
   Future<Widget> _buildLeadingWidget(GoodsItem item) async {
@@ -104,6 +125,7 @@ class _SubItemsTabState extends State<SubItemsTab> {
                   final item = widget.controller.subItems[index];
                   return Card(
                     child: ListTile(
+                      onTap: () => _editSubItem(item),
                       leading: FutureBuilder<Widget>(
                         future: _buildLeadingWidget(item),
                         builder: (context, snapshot) {

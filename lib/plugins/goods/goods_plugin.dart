@@ -5,6 +5,15 @@ import '../../core/config_manager.dart';
 import 'screens/goods_main_screen.dart';
 import 'models/warehouse.dart';
 import 'models/goods_item.dart';
+import 'models/find_item_result.dart';
+
+/// 用于递归查找物品及其父物品的结果类
+class _ItemSearchResult {
+  final GoodsItem? item;
+  final GoodsItem? parent;
+
+  _ItemSearchResult(this.item, this.parent);
+}
 
 class GoodsPlugin extends BasePlugin {
   static final GoodsPlugin instance = GoodsPlugin._internal();
@@ -21,6 +30,62 @@ class GoodsPlugin extends BasePlugin {
     } catch (e) {
       return null;
     }
+  }
+
+  /// 在所有仓库中查找指定ID的物品
+  /// 
+  /// 如果找到物品，返回包含物品和所属仓库ID的结果
+  /// 如果未找到，返回null
+  FindItemResult? findGoodsItemById(String itemId) {
+    for (final warehouse in _warehouses) {
+      // 首先在仓库的顶级物品中查找
+      final item = _findItemRecursively(warehouse.items, itemId);
+      if (item != null) {
+        return FindItemResult(
+          item: item,
+          warehouseId: warehouse.id,
+        );
+      }
+    }
+    return null;
+  }
+
+  /// 递归查找物品及其子物品，同时返回父物品（如果存在）
+  _ItemSearchResult _findItemAndParentRecursively(List<GoodsItem> items, String itemId, [GoodsItem? parent]) {
+    // 在当前层级查找
+    for (final item in items) {
+      if (item.id == itemId) {
+        return _ItemSearchResult(item, parent);
+      }
+      
+      // 递归查找子物品
+      if (item.subItems.isNotEmpty) {
+        final result = _findItemAndParentRecursively(item.subItems, itemId, item);
+        if (result.item != null) {
+          return result;
+        }
+      }
+    }
+    return _ItemSearchResult(null, null);
+  }
+
+  /// 递归查找物品及其子物品
+  GoodsItem? _findItemRecursively(List<GoodsItem> items, String itemId) {
+    return _findItemAndParentRecursively(items, itemId, null).item;
+  }
+
+  /// 在所有仓库中查找指定ID的物品的父物品
+  FindItemResult? findParentGoodsItem(String itemId) {
+    for (final warehouse in _warehouses) {
+      final result = _findItemAndParentRecursively(warehouse.items, itemId);
+      if (result.parent != null) {
+        return FindItemResult(
+          item: result.parent!,
+          warehouseId: warehouse.id,
+        );
+      }
+    }
+    return null;
   }
 
   void addListener(Function() listener) {
@@ -141,11 +206,12 @@ class GoodsPlugin extends BasePlugin {
   Future<void> saveGoodsItem(String warehouseId, GoodsItem item) async {
     try {
       final warehouse = _warehouses.firstWhere((w) => w.id == warehouseId);
-      final itemIndex = warehouse.items.indexWhere((i) => i.id == item.id);
-
-      if (itemIndex != -1) {
-        warehouse.items[itemIndex] = item;
-      } else {
+      
+      // 递归更新物品或其子物品
+      bool updated = _updateItemRecursively(warehouse.items, item);
+      
+      // 如果没有找到要更新的物品，则作为新物品添加到仓库
+      if (!updated) {
         warehouse.items.add(item);
       }
 
@@ -156,15 +222,64 @@ class GoodsPlugin extends BasePlugin {
     }
   }
 
+  /// 递归更新物品及其子物品
+  /// 返回是否找到并更新了物品
+  bool _updateItemRecursively(List<GoodsItem> items, GoodsItem updatedItem) {
+    // 在当前层级查找
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].id == updatedItem.id) {
+        items[i] = updatedItem;
+        return true;
+      }
+      
+      // 递归查找子物品
+      if (items[i].subItems.isNotEmpty) {
+        if (_updateItemRecursively(items[i].subItems, updatedItem)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   Future<void> deleteGoodsItem(String warehouseId, String itemId) async {
     try {
       final warehouse = _warehouses.firstWhere((w) => w.id == warehouseId);
-      warehouse.items.removeWhere((item) => item.id == itemId);
+      
+      // 尝试递归删除物品
+      bool deleted = _deleteItemRecursively(warehouse.items, itemId);
+      
+      if (!deleted) {
+        // 如果递归删除失败，尝试直接从顶级物品中删除
+        warehouse.items.removeWhere((item) => item.id == itemId);
+      }
+      
       await saveWarehouse(warehouse);
     } catch (e) {
       debugPrint('Error deleting goods item: $e');
       rethrow;
     }
+  }
+  
+  /// 递归删除物品及其子物品
+  /// 返回是否找到并删除了物品
+  bool _deleteItemRecursively(List<GoodsItem> items, String itemId) {
+    // 直接从当前层级删除
+    int initialLength = items.length;
+    items.removeWhere((item) => item.id == itemId);
+    if (items.length < initialLength) {
+      return true;
+    }
+    
+    // 递归查找子物品
+    for (var item in items) {
+      if (item.subItems.isNotEmpty) {
+        if (_deleteItemRecursively(item.subItems, itemId)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   Future<void> clearWarehouse(String warehouseId) async {

@@ -97,6 +97,14 @@ class GoodsItemFormController {
   void removeSubItem(GoodsItem item) {
     _subItems.removeWhere((element) => element.id == item.id);
   }
+  
+  // 更新子物品
+  void updateSubItem(GoodsItem updatedItem) {
+    final index = _subItems.indexWhere((item) => item.id == updatedItem.id);
+    if (index != -1) {
+      _subItems[index] = updatedItem;
+    }
+  }
 
   bool validate() {
     return formKey.currentState?.validate() ?? false;
