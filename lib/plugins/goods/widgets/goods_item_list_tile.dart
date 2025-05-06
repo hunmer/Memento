@@ -29,11 +29,20 @@ class _GoodsItemListTileState extends State<GoodsItemListTile> {
 
   Future<void> _resolveImageUrl() async {
     if (widget.item.imageUrl != null) {
-      final url = await widget.item.getImageUrl();
-      if (mounted) {
-        setState(() {
-          _resolvedImageUrl = url;
-        });
+      try {
+        final url = await widget.item.getImageUrl();
+        if (mounted) {
+          setState(() {
+            _resolvedImageUrl = url;
+          });
+        }
+      } catch (e) {
+        debugPrint('获取图片URL失败: $e');
+        if (mounted) {
+          setState(() {
+            _resolvedImageUrl = null;
+          });
+        }
       }
     }
   }
@@ -58,27 +67,56 @@ class _GoodsItemListTileState extends State<GoodsItemListTile> {
   }
 
   Widget _buildLeading() {
-    if (widget.item.imageUrl != null) {
-      if (_resolvedImageUrl == null) {
-        return const SizedBox(
-          width: 48,
-          height: 48,
-          child: Center(child: CircularProgressIndicator()),
-        );
-      }
+    if (widget.item.imageUrl != null && _resolvedImageUrl != null) {
+      final imageUrl = _resolvedImageUrl!;
       return SizedBox(
         width: 48,
         height: 48,
-        child: Image.file(
-          File(_resolvedImageUrl!),
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildIcon();
-          },
-        ),
+        child: _buildImage(imageUrl),
       );
     }
     return _buildIcon();
+  }
+
+  Widget _buildImage(String imageUrl) {
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      // 网络图片
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('网络图片加载失败: $error');
+          return _buildIcon();
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          );
+        },
+      );
+    } else {
+      // 本地图片
+      try {
+        final file = File(imageUrl);
+        return Image.file(
+          file,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('本地图片加载失败: $error\n路径: $imageUrl');
+            return _buildIcon();
+          },
+        );
+      } catch (e) {
+        debugPrint('创建File对象失败: $e\n路径: $imageUrl');
+        return _buildIcon();
+      }
+    }
   }
 
   Widget _buildIcon() {

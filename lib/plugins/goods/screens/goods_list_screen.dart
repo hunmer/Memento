@@ -17,6 +17,9 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   bool _isGridView = true;
   String _sortBy = 'none'; // none, price, lastUsed
   String? _filterWarehouseId;
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
   
   @override
   void initState() {
@@ -27,6 +30,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   @override
   void dispose() {
     GoodsPlugin.instance.removeListener(_onDataChanged);
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -34,6 +38,24 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  // 切换仓库筛选
+  void _onWarehouseFilterChanged(String? warehouseId) {
+    setState(() {
+      // 处理特殊的\"所有仓库\"标记
+      if (warehouseId == "all_warehouses") {
+        _filterWarehouseId = null;
+        return;
+      }
+      
+      // 如果选择的是当前已选中的仓库，则清除筛选
+      if (_filterWarehouseId == warehouseId) {
+        _filterWarehouseId = null;
+      } else {
+        _filterWarehouseId = warehouseId;
+      }
+    });
   }
 
   // 获取所有物品的列表，包含仓库信息
@@ -47,6 +69,15 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
       }
       
       for (var item in warehouse.items) {
+        // 如果有搜索查询，过滤不匹配的项目
+        if (_searchQuery.isNotEmpty) {
+          final searchLower = _searchQuery.toLowerCase();
+          final titleLower = item.title.toLowerCase();
+          if (!titleLower.contains(searchLower)) {
+            continue;
+          }
+        }
+        
         allItems.add({
           'item': item,
           'warehouse': warehouse,
@@ -107,37 +138,98 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   @override
   Widget build(BuildContext context) {
     final allItems = _getAllItems();
-    final warehouses = GoodsPlugin.instance.warehouses;
+    // 获取仓库列表并添加"所有仓库"选项
+    final List<Map<String, String>> warehouses = [
+      // 添加"所有仓库"选项
+      {'id': 'all_warehouses', 'title': '所有仓库'},
+      // 将现有仓库转换为简单的id和title映射
+      ...GoodsPlugin.instance.warehouses.map((w) => {
+        'id': w.id,
+        'title': w.title,
+      }),
+    ];
     
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            const Text('所有物品'),
-            const SizedBox(width: 8),
-            Text(
-              '(${allItems.length})',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
-        actions: [
-          // 仓库筛选按钮
-          PopupMenuButton<String?>(
-            icon: const Icon(Icons.filter_list),
-            onSelected: (value) {
-              setState(() {
-                _filterWarehouseId = value;
-              });
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: null,
-                child: Text('所有仓库'),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: '搜索物品...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: Theme.of(context).hintColor),
+                ),
+                style: TextStyle(color: Theme.of(context).textTheme.titleLarge?.color),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              )
+            : Row(
+                children: [
+                  const Text('所有物品'),
+                  const SizedBox(width: 8),
+                  Text(
+                    '(${allItems.length})',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
               ),
+        actions: _isSearching
+            ? [
+                // 搜索模式下只显示关闭按钮
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    setState(() {
+                      _isSearching = false;
+                      _searchController.clear();
+                      _searchQuery = '';
+                    });
+                  },
+                ),
+              ]
+            : [
+                // 搜索按钮
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    setState(() {
+                      _isSearching = true;
+                    });
+                  },
+                ),
+                // 仓库筛选按钮
+                PopupMenuButton<String?>(
+                    icon: Icon(
+                      Icons.filter_list,
+                      // 当有筛选时显示不同的图标颜色
+                      color: _filterWarehouseId != null
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                    ),
+                    initialValue: _filterWarehouseId,
+                    onSelected: _onWarehouseFilterChanged,
+                  itemBuilder: (context) => [
+              // 删除单独的"所有仓库"选项，因为现在它已经包含在warehouses列表中
               ...warehouses.map((warehouse) => PopupMenuItem(
-                    value: warehouse.id,
-                    child: Text(warehouse.title),
+                    value: warehouse['id'],
+                    child: Row(
+                      children: [
+                        Text(warehouse['title']!),
+                        if (_filterWarehouseId == warehouse['id'])
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Icon(
+                              Icons.check,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 20,
+                            ),
+                          ),
+                      ],
+                    ),
                   )),
             ],
           ),

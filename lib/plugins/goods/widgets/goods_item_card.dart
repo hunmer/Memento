@@ -27,13 +27,30 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
     _resolveImageUrl();
   }
 
+  @override
+  void didUpdateWidget(GoodsItemCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.item.imageUrl != widget.item.imageUrl) {
+      _resolveImageUrl();
+    }
+  }
+
   Future<void> _resolveImageUrl() async {
     if (widget.item.imageUrl != null) {
-      final url = await widget.item.getImageUrl();
-      if (mounted) {
-        setState(() {
-          _resolvedImageUrl = url;
-        });
+      try {
+        final url = await widget.item.getImageUrl();
+        if (mounted) {
+          setState(() {
+            _resolvedImageUrl = url;
+          });
+        }
+      } catch (e) {
+        debugPrint('获取图片URL失败: $e');
+        if (mounted) {
+          setState(() {
+            _resolvedImageUrl = null;
+          });
+        }
       }
     }
   }
@@ -68,21 +85,50 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (widget.item.purchasePrice != null)
-                        Text(
-                          '¥${widget.item.purchasePrice!.toStringAsFixed(2)}',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      if (widget.item.totalPrice != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '¥${widget.item.totalPrice!.toStringAsFixed(2)}',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.copyWith(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (widget.item.subItems.isNotEmpty && widget.item.purchasePrice != null)
+                              Text(
+                                '基础价: ¥${widget.item.purchasePrice!.toStringAsFixed(2)}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                  fontSize: 10,
+                                ),
+                              ),
+                          ],
                         ),
                     ],
                   ),
                   const SizedBox(height: 4),
 
                   // 使用记录信息行
+                  // 子物品信息行
+                  if (widget.item.subItems.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Icon(Icons.layers, size: 12, color: Colors.grey[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${widget.item.subItems.length}个子物品',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[600], fontSize: 11),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                  
                   if (widget.item.usageRecords.isNotEmpty) ...[
                     Row(
                       children: [
@@ -169,8 +215,9 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
 
   Widget _buildImage() {
     if (_resolvedImageUrl == null) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildIcon();
     }
+    
     final imageUrl = _resolvedImageUrl!;
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       // 网络图片
@@ -196,15 +243,20 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
       );
     } else {
       // 本地图片
-      final file = File(imageUrl);
-      return Image.file(
-        file,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          debugPrint('本地图片加载失败: $error\n路径: $imageUrl');
-          return _buildIcon();
-        },
-      );
+      try {
+        final file = File(imageUrl);
+        return Image.file(
+          file,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('本地图片加载失败: $error\n路径: $imageUrl');
+            return _buildIcon();
+          },
+        );
+      } catch (e) {
+        debugPrint('创建File对象失败: $e\n路径: $imageUrl');
+        return _buildIcon();
+      }
     }
   }
 }

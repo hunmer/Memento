@@ -3,6 +3,7 @@ import '../../models/goods_item.dart';
 import 'controllers/form_controller.dart';
 import 'widgets/basic_info_tab.dart';
 import 'widgets/usage_records_tab.dart';
+import 'widgets/sub_items_tab.dart';
 
 class GoodsItemForm extends StatefulWidget {
   final GoodsItem? initialData;
@@ -28,7 +29,7 @@ class _GoodsItemFormState extends State<GoodsItemForm>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _formController = GoodsItemFormController(initialData: widget.initialData);
   }
 
@@ -55,11 +56,12 @@ class _GoodsItemFormState extends State<GoodsItemForm>
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: const Text('编辑物品'),
+          centerTitle: true,
           leading: TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('取消'),
@@ -67,7 +69,13 @@ class _GoodsItemFormState extends State<GoodsItemForm>
           actions: [
             TextButton(onPressed: _submitForm, child: const Text('保存')),
           ],
-          bottom: const TabBar(tabs: [Tab(text: '基本信息'), Tab(text: '使用记录')]),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: '基本信息'),
+              Tab(text: '使用记录'),
+              Tab(text: '子物品'),
+            ],
+          ),
         ),
         body: Form(
           key: _formController.formKey,
@@ -80,6 +88,10 @@ class _GoodsItemFormState extends State<GoodsItemForm>
                 showDeleteButton: widget.initialData != null,
               ),
               UsageRecordsTab(
+                controller: _formController,
+                onStateChanged: () => setState(() {}),
+              ),
+              SubItemsTab(
                 controller: _formController,
                 onStateChanged: () => setState(() {}),
               ),

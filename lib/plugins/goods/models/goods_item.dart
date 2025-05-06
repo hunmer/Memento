@@ -12,7 +12,7 @@ class GoodsItem {
 
   // 获取图片URL，如果是相对路径则转换为绝对路径
   Future<String?> getImageUrl() async {
-    if (_imageUrl == null) return null;
+    if (_imageUrl == null || _imageUrl == "") return null;
     final appDir = await getApplicationDocumentsDirectory();
     // 使用清理路径方法确保没有多余斜杠
     return GoodsPathConstants.cleanPath(
@@ -25,7 +25,7 @@ class GoodsItem {
 
   // 设置图片URL，如果是绝对路径则转换为相对路径
   set imageUrl(String? value) {
-    _imageUrl = GoodsPathConstants.toRelativePath(value);
+    _imageUrl = value == "" ? "" : GoodsPathConstants.toRelativePath(value);
   }
 
   final Color? iconColor;
@@ -35,6 +35,19 @@ class GoodsItem {
   final List<UsageRecord> usageRecords;
   final List<CustomField> customFields;
   final String? notes;
+  final List<GoodsItem> subItems;
+
+  // 计算总价格（包含子物品）
+  double? get totalPrice {
+    if (purchasePrice == null) return null;
+    double total = purchasePrice!;
+    for (var subItem in subItems) {
+      if (subItem.totalPrice != null) {
+        total += subItem.totalPrice!;
+      }
+    }
+    return total;
+  }
 
   GoodsItem({
     required this.id,
@@ -48,9 +61,11 @@ class GoodsItem {
     List<UsageRecord>? usageRecords,
     List<CustomField>? customFields,
     this.notes,
+    List<GoodsItem>? subItems,
   }) : tags = tags ?? [],
        usageRecords = usageRecords ?? [],
-       customFields = customFields ?? [] {
+       customFields = customFields ?? [],
+       subItems = subItems ?? [] {
     this.imageUrl = imageUrl; // 使用setter来设置图片路径
   }
 
@@ -92,6 +107,11 @@ class GoodsItem {
               .toList() ??
           [],
       notes: json['notes'] as String?,
+      subItems:
+          (json['subItems'] as List?)
+              ?.map((e) => GoodsItem.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 
@@ -108,6 +128,7 @@ class GoodsItem {
       'usageRecords': usageRecords.map((record) => record.toJson()).toList(),
       'customFields': customFields.map((field) => field.toJson()).toList(),
       'notes': notes,
+      'subItems': subItems.map((item) => item.toJson()).toList(),
     };
   }
 
@@ -122,6 +143,7 @@ class GoodsItem {
     List<UsageRecord>? usageRecords,
     List<CustomField>? customFields,
     String? notes,
+    List<GoodsItem>? subItems,
   }) {
     return GoodsItem(
       id: id,
@@ -135,6 +157,7 @@ class GoodsItem {
       usageRecords: usageRecords ?? List.from(this.usageRecords),
       customFields: customFields ?? List.from(this.customFields),
       notes: notes ?? this.notes,
+      subItems: subItems ?? List.from(this.subItems),
     );
   }
 
