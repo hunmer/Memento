@@ -88,7 +88,7 @@ class MessageOperations {
         // 发布消息更新事件
         EventManager.instance.broadcast(
           'onMessageUpdated',
-          Value<Message>(updatedMessage),
+          Values<Message, String>(updatedMessage, channel.id),
         );
       }
     }
@@ -178,7 +178,7 @@ class MessageOperations {
       // 发布消息更新事件
       EventManager.instance.broadcast(
         'onMessageUpdated',
-        Value<Message>(updatedMessage),
+        Values<Message, String>(updatedMessage, channel.id),
       );
     }
   }
@@ -201,7 +201,7 @@ class MessageOperations {
       // 发布消息更新事件
       EventManager.instance.broadcast(
         'onMessageUpdated',
-        Value<Message>(updatedMessage),
+        Values<Message, String>(updatedMessage, channel.id),
       );
     }
   }

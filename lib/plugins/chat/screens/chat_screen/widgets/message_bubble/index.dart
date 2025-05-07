@@ -100,6 +100,12 @@ class _MessageBubbleState extends State<MessageBubble> {
   bool get _isCurrentUser => widget.message.user.id == widget.currentUserId;
 
   Color _getBackgroundColor(BuildContext context) {
+    // 优先使用消息的自定义气泡颜色
+    if (widget.message.bubbleColor != null) {
+      return widget.message.bubbleColor!;
+    }
+    
+    // 如果没有自定义颜色，则使用默认主题颜色
     if (widget.isSelected) {
       return Theme.of(context).colorScheme.primaryContainer;
     }

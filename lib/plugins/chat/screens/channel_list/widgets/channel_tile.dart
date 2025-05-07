@@ -109,15 +109,35 @@ class ChannelTile extends StatelessWidget {
       );
     } else {
       final lastMessage = channel.lastMessage;
-      String subtitle = lastMessage != null
-          ? '${lastMessage.content}\n${DateFormatter.formatDateTime(lastMessage.date, context)}'
-          : ChatLocalizations.of(context)?.enterMessage ?? 'Type a message...';
-      return Text(
-        subtitle,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: Colors.grey[600], fontSize: 13),
-      );
+      if (lastMessage != null) {
+        // 使用Row和Column组合布局，确保时间始终显示
+        return Row(
+          children: [
+            // 消息内容占用大部分空间
+            Expanded(
+              child: Text(
+                lastMessage.content,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+              ),
+            ),
+            // 时间显示在右侧，固定宽度
+            const SizedBox(width: 8),
+            Text(
+              DateFormatter.formatDateTime(lastMessage.date, context),
+              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+            ),
+          ],
+        );
+      } else {
+        return Text(
+          ChatLocalizations.of(context)?.enterMessage ?? 'Type a message...',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+        );
+      }
     }
   }
 }

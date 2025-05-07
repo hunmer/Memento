@@ -21,12 +21,20 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
   bool _isRecording = false;
   Duration _duration = Duration.zero;
   DateTime? _startTime;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _startRecording();
+    // 延迟执行录音初始化，以确保对话框完全显示
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_isInitialized) {
+        _isInitialized = true;
+        _startRecording();
+      }
+    });
   }
+
 
   @override
   void dispose() {
@@ -36,6 +44,12 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
 
   Future<void> _startRecording() async {
     try {
+      // 检查录音权限
+      final hasPermission = await _audioRecorder.hasPermission();
+      if (!hasPermission) {
+        throw '需要录音权限才能录制语音消息';
+      }
+
       // 获取临时目录
       final tempDir = await getTemporaryDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -62,6 +76,25 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
     } catch (e) {
       debugPrint('开始录音时出错: $e');
       if (mounted) {
+        // 显示错误提示对话框
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('录音失败'),
+            content: Text(
+              e.toString().contains('权限') 
+                  ? '请在系统设置中允许应用使用麦克风，以便录制语音消息。'
+                  : '开始录音时出现错误，请检查麦克风是否正常工作并重试。'
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('知道了'),
+              ),
+            ],
+          ),
+        );
+        // 关闭录音对话框
         Navigator.of(context).pop();
       }
     }
@@ -88,6 +121,22 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
       }
     } catch (e) {
       debugPrint('停止录音时出错: $e');
+      if (mounted) {
+        // 显示错误提示对话框
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('录音失败'),
+            content: const Text('停止录音时出现错误，录音可能未能保存。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('知道了'),
+              ),
+            ],
+          ),
+        );
+      }
     }
 
     if (mounted) {
