@@ -1,0 +1,424 @@
+import 'package:flutter/material.dart';
+import '../models/models.dart';
+import '../controllers/controllers.dart';
+
+class TaskForm extends StatefulWidget {
+  final Task? task; // 如果为null，则是创建新任务
+  final TaskController taskController;
+  final ReminderController reminderController;
+
+  const TaskForm({
+    Key? key,
+    this.task,
+    required this.taskController,
+    required this.reminderController,
+  }) : super(key: key);
+
+  @override
+  State<TaskForm> createState() => _TaskFormState();
+}
+
+class _TaskFormState extends State<TaskForm> {
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+  late DateTime? _dueDate;
+  late TaskPriority _priority;
+  late List<String> _tags;
+  late List<Subtask> _subtasks;
+  late List<DateTime> _reminders;
+  late TextEditingController _subtaskController;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.task?.title ?? '');
+    _descriptionController = TextEditingController(text: widget.task?.description ?? '');
+    _dueDate = widget.task?.dueDate;
+    _priority = widget.task?.priority ?? TaskPriority.medium;
+    
+    // 初始化标签
+    _tags = widget.task?.tags.toList() ?? [];
+    
+    _subtasks = widget.task?.subtasks.toList() ?? [];
+    _reminders = widget.task?.reminders.toList() ?? [];
+    _subtaskController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _subtaskController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+    );
+    if (picked != null && picked != _dueDate) {
+      setState(() {
+        _dueDate = picked;
+      });
+    }
+  }
+
+  void _addSubtask() {
+    if (_subtaskController.text.isNotEmpty) {
+      setState(() {
+        _subtasks.add(
+          Subtask(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            title: _subtaskController.text,
+          ),
+        );
+        _subtaskController.clear();
+      });
+    }
+  }
+
+  void _toggleSubtask(int index) {
+    setState(() {
+      _subtasks[index].isCompleted = !_subtasks[index].isCompleted;
+    });
+  }
+
+  void _removeSubtask(int index) {
+    setState(() {
+      _subtasks.removeAt(index);
+    });
+  }
+
+  Future<void> _addReminder() async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (pickedTime != null) {
+      final now = DateTime.now();
+      DateTime reminderDate = _dueDate ?? now;
+      reminderDate = DateTime(
+        reminderDate.year,
+        reminderDate.month,
+        reminderDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+
+      // 如果设置的时间已经过去，则设置为明天同一时间
+      if (reminderDate.isBefore(now)) {
+        reminderDate = reminderDate.add(const Duration(days: 1));
+      }
+
+      setState(() {
+        _reminders.add(reminderDate);
+      });
+    }
+  }
+
+  void _removeReminder(int index) {
+    setState(() {
+      _reminders.removeAt(index);
+    });
+  }
+
+  Future<void> _saveTask() async {
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a title')),
+      );
+      return;
+    }
+
+
+    if (widget.task == null) {
+      // 创建新任务
+      await widget.taskController.createTask(
+        title: _titleController.text,
+        description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+        dueDate: _dueDate,
+        priority: _priority,
+        tags: _tags,
+        subtasks: _subtasks,
+        reminders: _reminders,
+      );
+    } else {
+      // 更新现有任务
+      final updatedTask = Task(
+        id: widget.task!.id,
+        title: _titleController.text,
+        description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+        createdAt: widget.task!.createdAt,
+        dueDate: _dueDate,
+        priority: _priority,
+        status: widget.task!.status,
+        tags: _tags,
+        subtasks: _subtasks,
+        reminders: _reminders,
+      );
+      await widget.taskController.updateTask(updatedTask);
+    }
+
+    if (mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.task == null ? 'New Task' : 'Edit Task'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: _saveTask,
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 标题
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: 'Title',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // 描述
+            TextField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            
+            // 截止日期
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Due Date: ${_dueDate == null ? 'Not set' : '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}'}',
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => _selectDate(context),
+                  child: const Text('Select Date'),
+                ),
+                if (_dueDate != null)
+                  IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() {
+                        _dueDate = null;
+                      });
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            // 优先级
+            const Text('Priority:'),
+            const SizedBox(height: 8),
+            SegmentedButton<TaskPriority>(
+              segments: const [
+                ButtonSegment<TaskPriority>(
+                  value: TaskPriority.low,
+                  label: Text('Low'),
+                  icon: Icon(Icons.arrow_downward),
+                ),
+                ButtonSegment<TaskPriority>(
+                  value: TaskPriority.medium,
+                  label: Text('Medium'),
+                  icon: Icon(Icons.remove),
+                ),
+                ButtonSegment<TaskPriority>(
+                  value: TaskPriority.high,
+                  label: Text('High'),
+                  icon: Icon(Icons.arrow_upward),
+                ),
+              ],
+              selected: {_priority},
+              onSelectionChanged: (Set<TaskPriority> newSelection) {
+                setState(() {
+                  _priority = newSelection.first;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            
+            // 标签
+            const Text('Tags:'),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 4.0,
+              children: [
+                ..._tags.map((tag) => Chip(
+                  label: Text(tag),
+                  deleteIcon: const Icon(Icons.close, size: 18),
+                  onDeleted: () {
+                    setState(() {
+                      _tags.remove(tag);
+                    });
+                  },
+                )).toList(),
+                ActionChip(
+                  avatar: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Tag'),
+                  onPressed: () {
+                    _showAddTagDialog();
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            
+            // 子任务
+            const Text(
+              'Subtasks',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _subtaskController,
+                    decoration: const InputDecoration(
+                      labelText: 'New Subtask',
+                      border: OutlineInputBorder(),
+                    ),
+                    onSubmitted: (_) => _addSubtask(),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: _addSubtask,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _subtasks.length,
+              itemBuilder: (context, index) {
+                final subtask = _subtasks[index];
+                return ListTile(
+                  leading: Checkbox(
+                    value: subtask.isCompleted,
+                    onChanged: (_) => _toggleSubtask(index),
+                  ),
+                  title: Text(
+                    subtask.title,
+                    style: TextStyle(
+                      decoration: subtask.isCompleted
+                          ? TextDecoration.lineThrough
+                          : null,
+                    ),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () => _removeSubtask(index),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            
+            // 提醒
+            const Text(
+              'Reminders',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              icon: const Icon(Icons.add_alarm),
+              label: const Text('Add Reminder'),
+              onPressed: _addReminder,
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _reminders.length,
+              itemBuilder: (context, index) {
+                final reminder = _reminders[index];
+                return ListTile(
+                  leading: const Icon(Icons.alarm),
+                  title: Text(
+                    '${reminder.year}/${reminder.month}/${reminder.day} ${reminder.hour}:${reminder.minute.toString().padLeft(2, '0')}',
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () => _removeReminder(index),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  // 显示添加标签对话框
+  void _showAddTagDialog() {
+    final TextEditingController tagController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Tag'),
+        content: TextField(
+          controller: tagController,
+          decoration: const InputDecoration(
+            labelText: 'Tag Name',
+            hintText: 'Enter a tag name',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final tagName = tagController.text.trim();
+              if (tagName.isNotEmpty && !_tags.contains(tagName)) {
+                setState(() {
+                  _tags.add(tagName);
+                });
+              }
+              Navigator.of(context).pop();
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+}
