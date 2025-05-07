@@ -13,7 +13,6 @@ class TodoPlugin extends BasePlugin {
   TodoPlugin._();
 
   late TaskController _taskController;
-  late CategoryController _categoryController;
   late ReminderController _reminderController;
 
   @override
@@ -40,7 +39,6 @@ class TodoPlugin extends BasePlugin {
   @override
   Future<void> initialize() async {
     _taskController = TaskController(storageManager, storageDir);
-    _categoryController = CategoryController(storageManager, storageDir);
     _reminderController = ReminderController();
 
     // 加载默认设置

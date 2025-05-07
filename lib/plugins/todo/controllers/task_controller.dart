@@ -54,7 +54,11 @@ class TaskController extends ChangeNotifier {
     _currentFilter = filter;
     _applyFilter(filter);
     print('Filtered tasks count: ${_filteredTasks.length}');
-    notifyListeners();
+    
+    // 确保在UI线程安全地通知监听器
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   // 清除过滤

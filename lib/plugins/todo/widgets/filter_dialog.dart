@@ -185,7 +185,6 @@ class _FilterDialogState extends State<FilterDialog> {
               'showIncomplete': _showIncomplete,
             };
             widget.onFilter(filter);
-            Navigator.pop(context);
           },
           child: const Text('Apply'),
         ),
