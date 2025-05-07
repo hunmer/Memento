@@ -169,6 +169,14 @@ class WarehouseCard extends StatelessWidget {
       if (item.purchasePrice != null) {
         total += item.purchasePrice!;
       }
+      // 计算子物品的价值
+      if (item.subItems != null && item.subItems!.isNotEmpty) {
+        for (var subItem in item.subItems!) {
+          if (subItem.purchasePrice != null) {
+            total += subItem.purchasePrice!;
+          }
+        }
+      }
     }
     return total;
   }
