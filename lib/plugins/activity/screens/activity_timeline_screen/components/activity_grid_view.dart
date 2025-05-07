@@ -288,7 +288,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
               }
             }
           }
-      };
+      }
       },
       onPointerUp: (PointerUpEvent event) {
         if (_isMouseDown) {

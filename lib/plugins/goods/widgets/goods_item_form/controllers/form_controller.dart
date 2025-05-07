@@ -3,7 +3,6 @@ import '../../../models/goods_item.dart';
 import '../../../models/usage_record.dart';
 import '../../../models/custom_field.dart';
 import '../../../goods_plugin.dart';
-import 'package:flutter/foundation.dart';
 
 class GoodsItemFormController {
   final formKey = GlobalKey<FormState>();

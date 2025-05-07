@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/channel.dart';
 import '../models/message.dart';
-import '../models/user.dart';
 import '../chat_plugin.dart';
 import 'user_service.dart';
 

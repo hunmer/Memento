@@ -1,6 +1,3 @@
-import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 import '../../../core/event/event_manager.dart';
 import '../events/user_events.dart';
 import '../models/user.dart';

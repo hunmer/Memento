@@ -79,7 +79,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     }
     // if (args is! Value<Message>) return;
 
-    final updatedMessage = args.value1 as Message;
+    final updatedMessage = args.value1;
     if (updatedMessage.id == widget.message.id ||
         (widget.message.replyToId != null &&
             updatedMessage.id == widget.message.replyToId)) {
@@ -117,7 +117,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     }
     return _isCurrentUser
         ? Theme.of(context).colorScheme.primaryContainer
-        : Theme.of(context).colorScheme.surfaceVariant;
+        : Theme.of(context).colorScheme.surfaceContainerHighest;
   }
 
   Color _getTextColor(BuildContext context) {

@@ -173,7 +173,7 @@ class ChatEventHandler {
       ];
 
       // 获取历史上下文消息
-      if (originalMessage.metadata?.containsKey('contextCount') == true && channelId != null) {
+      if (originalMessage.metadata?.containsKey('contextCount') == true) {
         final contextCount = originalMessage.metadata!['contextCount'] as int;
         if (contextCount > 0) {
           // 添加延迟以确保消息已被存储

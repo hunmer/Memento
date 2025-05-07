@@ -483,7 +483,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
           
           return PieChartSectionData(
             value: entry.value.toDouble(),
-            title: percentage + '%',
+            title: '$percentage%',
             titleStyle: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,

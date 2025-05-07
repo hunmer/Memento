@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/channel.dart';
-import '../models/user.dart';
 
 class ChannelInfoScreen extends StatelessWidget {
   final Channel channel;

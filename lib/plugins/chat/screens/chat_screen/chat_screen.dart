@@ -3,7 +3,6 @@ import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'dart:io'; // 添加File类支持
 import '../../models/channel.dart';

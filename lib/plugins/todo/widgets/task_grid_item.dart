@@ -8,11 +8,11 @@ class TaskGridItem extends StatelessWidget {
   final Function(TaskStatus) onStatusChanged;
 
   const TaskGridItem({
-    Key? key,
+    super.key,
     required this.task,
     required this.onTap,
     required this.onStatusChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

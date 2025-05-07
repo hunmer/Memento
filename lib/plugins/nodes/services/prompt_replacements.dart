@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/plugin_manager.dart';
 import '../nodes_plugin.dart';
 import '../models/node.dart';
-import '../models/notebook.dart';
 
 class NodesPromptReplacements {
   NodesPromptReplacements();

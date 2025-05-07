@@ -8,11 +8,11 @@ class TaskGridView extends StatelessWidget {
   final Function(Task, TaskStatus) onTaskStatusChanged;
 
   const TaskGridView({
-    Key? key,
+    super.key,
     required this.tasks,
     required this.onTaskTap,
     required this.onTaskStatusChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../utils/color_extension.dart';
-import '../services/user_service.dart';
-import '../chat_plugin.dart';
 import 'message.dart';
-import 'user.dart';
 
 class Channel {
   final String id;

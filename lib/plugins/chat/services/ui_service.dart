@@ -3,7 +3,6 @@ import 'package:Memento/plugins/chat/models/user.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
 import '../l10n/chat_localizations.dart';
-import '../models/user.dart';
 import '../screens/channel_list/channel_list_screen.dart';
 import '../screens/timeline/timeline_screen.dart';
 import '../screens/profile_edit_dialog.dart';

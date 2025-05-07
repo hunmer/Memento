@@ -64,9 +64,7 @@ class MessageEventHandler {
       }
       
       // 更新消息元数据
-      if (message.metadata == null) {
-        message.metadata = {};
-      }
+      message.metadata ??= {};
       message.metadata!['isThinking'] = false;
       
       // 更新当前频道中的消息，并写入本地文件
@@ -174,9 +172,7 @@ class MessageEventHandler {
     final channelId = args.value2;
     
     // 初始化消息状态
-    if (message.metadata == null) {
-      message.metadata = {};
-    }
+    message.metadata ??= {};
     message.metadata!['isThinking'] = true;
     
     developer.log(

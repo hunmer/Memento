@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:convert';
 import '../models/plugin_analysis_method.dart';
 import '../services/plugin_analysis_service.dart';
-import 'agent_list_drawer.dart';
-import '../models/ai_agent.dart';
-import '../controllers/agent_controller.dart';
 import '../l10n/openai_localizations.dart';
 
 class PluginAnalysisForm extends StatefulWidget {

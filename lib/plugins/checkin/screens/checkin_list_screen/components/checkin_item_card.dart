@@ -241,7 +241,7 @@ class CheckinItemCard extends StatelessWidget {
             ],
           ),
         );
-      }).toList(),
+      }),
     ];
   }
 

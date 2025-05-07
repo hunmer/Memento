@@ -77,6 +77,7 @@ class _MessageInputState extends State<MessageInput> {
     }
   }
 
+  @override
   void dispose() {
     if (widget.focusNode == null) {
       _focusNode.dispose();

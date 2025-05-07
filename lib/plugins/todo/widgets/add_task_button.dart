@@ -4,9 +4,9 @@ class AddTaskButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const AddTaskButton({
-    Key? key,
+    super.key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

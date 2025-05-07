@@ -8,11 +8,11 @@ class TaskForm extends StatefulWidget {
   final ReminderController reminderController;
 
   const TaskForm({
-    Key? key,
+    super.key,
     this.task,
     required this.taskController,
     required this.reminderController,
-  }) : super(key: key);
+  });
 
   @override
   State<TaskForm> createState() => _TaskFormState();
@@ -276,7 +276,7 @@ class _TaskFormState extends State<TaskForm> {
                       _tags.remove(tag);
                     });
                   },
-                )).toList(),
+                )),
                 ActionChip(
                   avatar: const Icon(Icons.add, size: 18),
                   label: const Text('Add Tag'),

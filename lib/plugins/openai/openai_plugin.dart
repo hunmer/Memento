@@ -25,6 +25,7 @@ class OpenAIPlugin extends BasePlugin {
 
   final PromptReplacementController _promptReplacementController = PromptReplacementController();
   final ChatEventHandler _chatEventHandler = ChatEventHandler();
+  @override
   final String storageDir = 'openai';
 
   @override

@@ -8,10 +8,10 @@ class FilterDialog extends StatefulWidget {
   final List<String> availableTags;
 
   const FilterDialog({
-    Key? key,
+    super.key,
     required this.onFilter,
     required this.availableTags,
-  }) : super(key: key);
+  });
 
   @override
   _FilterDialogState createState() => _FilterDialogState();
@@ -213,10 +213,10 @@ class MultiSelectDialog extends StatefulWidget {
   final List<String> initialSelected;
 
   const MultiSelectDialog({
-    Key? key,
+    super.key,
     required this.items,
     required this.initialSelected,
-  }) : super(key: key);
+  });
 
   @override
   _MultiSelectDialogState createState() => _MultiSelectDialogState();

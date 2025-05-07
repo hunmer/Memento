@@ -10,11 +10,11 @@ class TaskDetailView extends StatelessWidget {
   final ReminderController reminderController;
 
   const TaskDetailView({
-    Key? key,
+    super.key,
     required this.task,
     required this.taskController,
     required this.reminderController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -13,10 +13,10 @@ class TodoMainView extends StatelessWidget {
   final ReminderController reminderController;
 
   const TodoMainView({
-    Key? key,
+    super.key,
     required this.taskController,
     required this.reminderController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

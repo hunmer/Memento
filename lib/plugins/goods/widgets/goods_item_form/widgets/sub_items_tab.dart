@@ -2,9 +2,7 @@ import 'dart:io';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
 import '../../../models/goods_item.dart';
-import '../controllers/form_controller.dart';
 import '../../goods_item_selector_dialog.dart';
-import '../goods_item_form_page.dart';
 
 class SubItemsTab extends StatefulWidget {
   final GoodsItemFormController controller;

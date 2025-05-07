@@ -43,11 +43,11 @@ class CheckinPromptReplacements {
                   };
                   
                   // 只有当开始时间和结束时间相差至少1分钟时才添加这两个字段
-                  if (record.startTime != null && record.endTime != null) {
-                    final difference = record.endTime!.difference(record.startTime!).inMinutes;
+                  if (record.endTime != null) {
+                    final difference = record.endTime.difference(record.startTime).inMinutes;
                     if (difference >= 1) {
-                      map['start'] = _formatDate(record.startTime!);
-                      map['end'] = _formatDate(record.endTime!);
+                      map['start'] = _formatDate(record.startTime);
+                      map['end'] = _formatDate(record.endTime);
                     }
                   }
                   

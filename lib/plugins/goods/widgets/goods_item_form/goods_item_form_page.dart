@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../models/goods_item.dart';
-import '../../models/find_item_result.dart';
 import '../../goods_plugin.dart';
 import 'goods_item_form.dart';
 

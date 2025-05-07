@@ -9,10 +9,10 @@ class MemorialDayCard extends StatefulWidget {
   final VoidCallback? onTap;
 
   const MemorialDayCard({
-    Key? key,
+    super.key,
     required this.memorialDay,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<MemorialDayCard> createState() => _MemorialDayCardState();

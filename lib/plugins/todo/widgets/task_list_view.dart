@@ -9,12 +9,12 @@ class TaskListView extends StatelessWidget {
   final Function(Task) onTaskDismissed;
 
   const TaskListView({
-    Key? key,
+    super.key,
     required this.tasks,
     required this.onTaskTap,
     required this.onTaskStatusChanged,
     required this.onTaskDismissed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

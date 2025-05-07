@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 
 class InputField extends StatelessWidget {
