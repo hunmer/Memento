@@ -11,8 +11,8 @@ class CheckinItem {
   List<bool> frequency;
   // 提醒设置
   ReminderSettings? reminderSettings;
-  // 打卡记录，包含时间范围和备注
-  final Map<DateTime, CheckinRecord> checkInRecords;
+  // 打卡记录，包含时间范围和备注，key为yyyy-MM-dd格式的日期字符串
+  final Map<String, List<CheckinRecord>> checkInRecords;
 
   CheckinItem({
     String? id,
@@ -23,7 +23,7 @@ class CheckinItem {
     String? description,
     List<bool>? frequency,
     this.reminderSettings,
-    Map<DateTime, CheckinRecord>? checkInRecords,
+    Map<String, List<CheckinRecord>>? checkInRecords,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        color = color ?? Colors.blue,
        group = group ?? '默认分组',
@@ -31,63 +31,96 @@ class CheckinItem {
        frequency = frequency ?? List.filled(7, true),
        checkInRecords = checkInRecords ?? {};
 
+  // 将DateTime转换为yyyy-MM-dd格式的字符串
+  String _dateToString(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  // 将yyyy-MM-dd格式的字符串转换为DateTime
+  DateTime _stringToDate(String dateStr) {
+    final parts = dateStr.split('-');
+    return DateTime(
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+      int.parse(parts[2]),
+    );
+  }
+
   // 检查今天是否已打卡
   bool isCheckedToday() {
     final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    return checkInRecords.containsKey(todayDate);
+    final todayStr = _dateToString(today);
+    return checkInRecords.containsKey(todayStr) && checkInRecords[todayStr]!.isNotEmpty;
   }
 
   // 获取最后一次打卡日期
   DateTime? get lastCheckinDate {
     if (checkInRecords.isEmpty) return null;
-    return checkInRecords.keys.reduce((a, b) => a.isAfter(b) ? a : b);
+    final lastDateStr = checkInRecords.keys
+        .reduce((a, b) => _stringToDate(a).isAfter(_stringToDate(b)) ? a : b);
+    return _stringToDate(lastDateStr);
   }
 
   // 获取今天的打卡记录列表
   List<CheckinRecord> getTodayRecords() {
     final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    final records = <CheckinRecord>[];
-    checkInRecords.forEach((date, record) {
-      if (date.year == todayDate.year &&
-          date.month == todayDate.month &&
-          date.day == todayDate.day) {
-        records.add(record);
-      }
-    });
+    final todayStr = _dateToString(today);
+    return checkInRecords[todayStr]?.toList() ?? [];
+  }
+
+  // 获取指定日期的打卡记录列表
+  List<CheckinRecord> getDateRecords(DateTime date) {
+    final dateStr = _dateToString(date);
+    final records = checkInRecords[dateStr]?.toList() ?? [];
     return records..sort((a, b) => b.checkinTime.compareTo(a.checkinTime));
   }
 
   // 添加打卡记录
   Future<void> addCheckinRecord(CheckinRecord record) async {
-    final checkinTime = record.checkinTime;
-    final recordDate = DateTime(
-      checkinTime.year,
-      checkinTime.month,
-      checkinTime.day,
-      checkinTime.hour,
-      checkinTime.minute,
-      checkinTime.second,
-    );
-    checkInRecords[recordDate] = record;
+    final dateStr = _dateToString(record.checkinTime);
+    if (!checkInRecords.containsKey(dateStr)) {
+      checkInRecords[dateStr] = [];
+    }
+    checkInRecords[dateStr]!.add(record);
+    checkInRecords[dateStr]!.sort((a, b) => b.checkinTime.compareTo(a.checkinTime));
     await CheckinPlugin.shared.triggerSave();
   }
 
   // 取消打卡
-  Future<void> cancelCheckinRecord(DateTime recordTime) async {
-    checkInRecords.remove(recordTime);
+  Future<void> cancelCheckinRecord(DateTime recordTime, {int? recordIndex}) async {
+    final dateStr = _dateToString(recordTime);
+    if (checkInRecords.containsKey(dateStr)) {
+      if (recordIndex != null && recordIndex >= 0 && recordIndex < checkInRecords[dateStr]!.length) {
+        // 如果提供了索引，只删除指定索引的记录
+        checkInRecords[dateStr]!.removeAt(recordIndex);
+      } else {
+        // 如果没有提供索引，找到第一个匹配的记录删除
+        final index = checkInRecords[dateStr]!.indexWhere(
+          (record) => record.checkinTime.isAtSameMomentAs(recordTime)
+        );
+        if (index >= 0) {
+          checkInRecords[dateStr]!.removeAt(index);
+        }
+      }
+      
+      // 如果该日期下没有记录了，移除该日期
+      if (checkInRecords[dateStr]!.isEmpty) {
+        checkInRecords.remove(dateStr);
+      }
+    }
     await CheckinPlugin.shared.triggerSave();
   }
 
   // 获取指定月份的打卡记录
-  Map<DateTime, CheckinRecord> getMonthlyRecords(int year, int month) {
-    return checkInRecords.entries
-        .where((entry) => entry.key.year == year && entry.key.month == month)
-        .fold({}, (map, entry) {
-          map[entry.key] = entry.value;
-          return map;
-        });
+  Map<DateTime, List<CheckinRecord>> getMonthlyRecords(int year, int month) {
+    final result = <DateTime, List<CheckinRecord>>{};
+    checkInRecords.forEach((dateStr, records) {
+      final date = _stringToDate(dateStr);
+      if (date.year == year && date.month == month) {
+        result[date] = records;
+      }
+    });
+    return result;
   }
 
   // 获取连续打卡天数
@@ -98,17 +131,9 @@ class CheckinItem {
 
     for (int i = 0; i < 365; i++) {
       final date = todayDate.subtract(Duration(days: i));
-      final dateRecords =
-          checkInRecords.entries
-              .where(
-                (entry) =>
-                    entry.key.year == date.year &&
-                    entry.key.month == date.month &&
-                    entry.key.day == date.day,
-              )
-              .toList();
-
-      if (dateRecords.isNotEmpty) {
+      final dateStr = _dateToString(date);
+      
+      if (checkInRecords.containsKey(dateStr) && checkInRecords[dateStr]!.isNotEmpty) {
         consecutiveDays++;
       } else {
         break;
@@ -134,7 +159,7 @@ class CheckinItem {
       'group': group,
       'reminderSettings': reminderSettings?.toJson(),
       'checkInRecords': checkInRecords.map(
-        (key, value) => MapEntry(key.toIso8601String(), value.toJson()),
+        (key, value) => MapEntry(key, value.map((record) => record.toJson()).toList()),
       ),
     };
   }
@@ -164,8 +189,10 @@ class CheckinItem {
           : null,
       checkInRecords: (json['checkInRecords'] as Map<String, dynamic>).map(
         (key, value) => MapEntry(
-          DateTime.parse(key),
-          CheckinRecord.fromJson(value as Map<String, dynamic>),
+          key,
+          (value as List<dynamic>)
+              .map((recordJson) => CheckinRecord.fromJson(recordJson as Map<String, dynamic>))
+              .toList(),
         ),
       ),
     );

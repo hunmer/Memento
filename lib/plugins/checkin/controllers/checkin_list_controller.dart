@@ -138,22 +138,14 @@ class CheckinListController {
   // 切换打卡状态
   void toggleCheckin(CheckinItem item) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
     
-    // 检查今天是否已打卡
-    if (item.isCheckedToday()) {
-      // 取消今天的打卡
-      item.checkInRecords.removeWhere((key, _) => 
-        key.year == today.year && key.month == today.month && key.day == today.day);
-    } else {
-      // 添加今天的打卡记录
-      final record = CheckinRecord(
-        startTime: now,
-        endTime: now,
-        checkinTime: now,
-      );
-      item.addCheckinRecord(record);
-    }
+    // 添加今天的打卡记录
+    final record = CheckinRecord(
+      startTime: now,
+      endTime: now,
+      checkinTime: now,
+    );
+    item.addCheckinRecord(record);
     onStateChanged();
   }
 

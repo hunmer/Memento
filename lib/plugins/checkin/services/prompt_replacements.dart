@@ -17,24 +17,38 @@ class CheckinPromptReplacements {
       for (final item in checkinItems) {
         // 筛选指定日期范围内的记录
         final dateRangeRecords = item.checkInRecords.entries
-            .where((entry) => 
-                entry.key.isAfter(startDate.subtract(const Duration(days: 1))) && 
-                entry.key.isBefore(endDate.add(const Duration(days: 1))))
-            .map((entry) {
+            .where((entry) {
+              // 解析日期字符串为DateTime对象
+              final dateParts = entry.key.split('-');
+              if (dateParts.length != 3) return false;
+              
+              final date = DateTime(
+                int.parse(dateParts[0]),
+                int.parse(dateParts[1]),
+                int.parse(dateParts[2]),
+              );
+              
+              return date.isAfter(startDate.subtract(const Duration(days: 1))) && 
+                     date.isBefore(endDate.add(const Duration(days: 1)));
+            })
+            .expand((entry) => entry.value) // 展开List<CheckinRecord>
+            .map((record) {
                   final map = <String, dynamic>{
                     // 不需要key字段，因为它是内部使用的
                     'name': item.name,
                     'group': item.group.isNotEmpty ? item.group : null,
-                    'date': entry.value.checkinTime, // 添加日期字段用于排序
-                    'done': _formatDate(entry.value.checkinTime),
-                    'note': entry.value.note?.isNotEmpty == true ? entry.value.note : null,
+                    'date': record.checkinTime, // 添加日期字段用于排序
+                    'done': _formatDate(record.checkinTime),
+                    'note': record.note?.isNotEmpty == true ? record.note : null,
                   };
                   
                   // 只有当开始时间和结束时间相差至少1分钟时才添加这两个字段
-                  final difference = entry.value.endTime.difference(entry.value.startTime).inMinutes;
-                  if (difference >= 1) {
-                    map['start'] = _formatDate(entry.value.startTime);
-                    map['end'] = _formatDate(entry.value.endTime);
+                  if (record.startTime != null && record.endTime != null) {
+                    final difference = record.endTime!.difference(record.startTime!).inMinutes;
+                    if (difference >= 1) {
+                      map['start'] = _formatDate(record.startTime!);
+                      map['end'] = _formatDate(record.endTime!);
+                    }
                   }
                   
                   return map;

@@ -39,20 +39,11 @@ class CheckinDetailScreen extends StatelessWidget {
 
             await checkinItem.addCheckinRecord(record);
           } else {
-            // 获取今天的所有打卡记录并取消第一个
+            // 获取今天的所有打卡记录并取消最新的一个
             final todayRecords = checkinItem.getTodayRecords();
             if (todayRecords.isNotEmpty) {
-              // 找到对应的记录键
-              DateTime? recordKey;
-              checkinItem.checkInRecords.forEach((key, value) {
-                if (value == todayRecords.first) {
-                  recordKey = key;
-                }
-              });
-
-              if (recordKey != null) {
-                await checkinItem.cancelCheckinRecord(recordKey!);
-              }
+              // 取消最新的打卡记录
+              await checkinItem.cancelCheckinRecord(todayRecords.first.checkinTime);
             }
           }
 
@@ -77,7 +68,7 @@ class CheckinDetailScreen extends StatelessWidget {
     final consecutiveDays = checkinItem.getConsecutiveDays();
     final now = DateTime.now();
     final monthlyRecords = checkinItem.getMonthlyRecords(now.year, now.month);
-    final monthlyCount = monthlyRecords.length;
+    final monthlyCount = monthlyRecords.keys.length; // 统计打卡天数而不是记录数
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -133,13 +124,10 @@ class CheckinDetailScreen extends StatelessWidget {
       itemCount: dates.length,
       itemBuilder: (context, index) {
         final date = dates[index];
-        // 检查该日期是否有打卡记录
-        final hasRecord = checkinItem.checkInRecords.keys.any(
-          (key) =>
-              key.year == date.year &&
-              key.month == date.month &&
-              key.day == date.day,
-        );
+        // 获取该日期的打卡记录
+        final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        final dayRecords = checkinItem.checkInRecords[dateStr] ?? [];
+        final hasRecord = dayRecords.isNotEmpty;
 
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
@@ -165,12 +153,40 @@ class CheckinDetailScreen extends StatelessWidget {
               '${date.year}年${date.month}月${date.day}日',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            trailing: Text(
-              hasRecord ? '已打卡' : '未打卡',
-              style: TextStyle(
-                color: hasRecord ? checkinItem.color : Colors.grey,
-              ),
-            ),
+            trailing: hasRecord
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (dayRecords.length > 1)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: checkinItem.color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${dayRecords.length}次',
+                            style: TextStyle(
+                              color: checkinItem.color,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        '已打卡',
+                        style: TextStyle(
+                          color: checkinItem.color,
+                        ),
+                      ),
+                    ],
+                  )
+                : Text(
+                    '未打卡',
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
           ),
         );
       },

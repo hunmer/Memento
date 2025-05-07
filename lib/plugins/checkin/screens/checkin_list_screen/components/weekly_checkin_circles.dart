@@ -3,10 +3,12 @@ import '../../../models/checkin_item.dart';
 
 class WeeklyCheckinCircles extends StatelessWidget {
   final CheckinItem item;
+  final Function(DateTime selectedDate)? onDateSelected;
 
   const WeeklyCheckinCircles({
     super.key,
     required this.item,
+    this.onDateSelected,
   });
 
   bool _isReminderDay(int weekday) {
@@ -32,10 +34,9 @@ class WeeklyCheckinCircles extends StatelessWidget {
         final isToday = date.year == now.year &&
             date.month == now.month &&
             date.day == now.day;
-        final hasCheckin = item.checkInRecords.keys.any((checkinDate) =>
-            checkinDate.year == date.year &&
-            checkinDate.month == date.month &&
-            checkinDate.day == date.day);
+        final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        final hasCheckin = item.checkInRecords.containsKey(dateStr) && item.checkInRecords[dateStr]!.isNotEmpty;
+        final checkinsCount = item.checkInRecords[dateStr]?.length ?? 0;
         final isEnabled = item.frequency[index];
 
         return Column(
@@ -71,10 +72,20 @@ class WeeklyCheckinCircles extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
+                GestureDetector(
+                  onTap: () {
+                    if (isEnabled && onDateSelected != null) {
+                      onDateSelected?.call(DateTime(
+                        date.year,
+                        date.month,
+                        date.day,
+                      ));
+                    }
+                  },
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: hasCheckin
                         ? Colors.green
@@ -99,8 +110,9 @@ class WeeklyCheckinCircles extends StatelessWidget {
                           color: Colors.white,
                         )
                       : null,
+                  ),
                 ),
-                if (isToday && item.getTodayRecords().length > 1)
+                if (checkinsCount > 1)
                   Positioned(
                     top: -8,
                     right: -8,
@@ -122,7 +134,7 @@ class WeeklyCheckinCircles extends StatelessWidget {
                         ],
                       ),
                       child: Text(
-                        '${item.getTodayRecords().length}',
+                        '$checkinsCount',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,

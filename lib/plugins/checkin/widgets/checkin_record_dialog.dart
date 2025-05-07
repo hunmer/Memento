@@ -6,12 +6,14 @@ class CheckinRecordDialog extends StatefulWidget {
   final CheckinItem item;
   final CheckinListController controller;
   final VoidCallback onCheckinCompleted;
+  final DateTime? selectedDate;
 
   const CheckinRecordDialog({
     super.key,
     required this.item,
     required this.controller,
     required this.onCheckinCompleted,
+    this.selectedDate,
   });
 
   @override
@@ -21,6 +23,7 @@ class CheckinRecordDialog extends StatefulWidget {
 class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _noteController;
+  late DateTime _selectedDate;
   late DateTime _startTime;
   late DateTime _endTime;
 
@@ -29,14 +32,63 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
     super.initState();
     _noteController = TextEditingController();
     final now = DateTime.now();
-    _startTime = now;
-    _endTime = now;
+    _selectedDate = widget.selectedDate ?? now;
+    // 如果提供了selectedDate，则使用该日期的00:00作为起始时间
+    if (widget.selectedDate != null) {
+      _startTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        0,
+        0,
+      );
+      _endTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        0,
+        0,
+      );
+    } else {
+      _startTime = now;
+      _endTime = now;
+    }
   }
 
   @override
   void dispose() {
     _noteController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        // 保持时分不变，只改变年月日
+        _startTime = DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          _startTime.hour,
+          _startTime.minute,
+        );
+        _endTime = DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          _endTime.hour,
+          _endTime.minute,
+        );
+      });
+    }
   }
 
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
@@ -47,11 +99,10 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
 
     if (picked != null) {
       setState(() {
-        final now = DateTime.now();
         final selectedDateTime = DateTime(
-          now.year,
-          now.month,
-          now.day,
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
           picked.hour,
           picked.minute,
         );
@@ -75,7 +126,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('添加打卡记录'),
+      title: Text(widget.selectedDate != null ? '添加指定日期打卡' : '添加打卡记录'),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -83,6 +134,17 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 日期选择
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('日期'),
+                trailing: TextButton(
+                  onPressed: () => _selectDate(context),
+                  child: Text(
+                    '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}',
+                  ),
+                ),
+              ),
               // 起始时间选择
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -119,7 +181,9 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               const SizedBox(height: 16),
               // 打卡时间显示
               Text(
-                '打卡时间：${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+                widget.selectedDate != null 
+                    ? '打卡日期：${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}'
+                    : '打卡时间：${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).hintColor,
                 ),
@@ -140,7 +204,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               final record = CheckinRecord(
                 startTime: _startTime,
                 endTime: _endTime,
-                checkinTime: now,
+                checkinTime: widget.selectedDate != null ? _selectedDate : now,
                 note: _noteController.text.trim().isNotEmpty 
                     ? _noteController.text.trim() 
                     : null,

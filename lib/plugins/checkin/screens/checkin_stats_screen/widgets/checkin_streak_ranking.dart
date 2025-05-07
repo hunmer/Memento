@@ -119,31 +119,18 @@ class CheckinStreakRanking extends StatelessWidget {
     final todayWithoutTime = DateTime(today.year, today.month, today.day);
 
     // 检查最新记录是否是今天或昨天
-    final latestDate = sortedDates.first;
-    final latestWithoutTime = DateTime(
-      latestDate.year,
-      latestDate.month,
-      latestDate.day,
-    );
+    final latestDate = _parseDate(sortedDates.first);
     
     // 如果最新记录不是今天或昨天，则不计算连续打卡
-    final dayDifference = todayWithoutTime.difference(latestWithoutTime).inDays;
+    final dayDifference = todayWithoutTime.difference(latestDate).inDays;
     if (dayDifference > 1) {
       return 0;
     }
 
     // 计算连续打卡天数
     for (int i = 0; i < sortedDates.length - 1; i++) {
-      final current = DateTime(
-        sortedDates[i].year,
-        sortedDates[i].month,
-        sortedDates[i].day,
-      );
-      final next = DateTime(
-        sortedDates[i + 1].year,
-        sortedDates[i + 1].month,
-        sortedDates[i + 1].day,
-      );
+      final current = _parseDate(sortedDates[i]);
+      final next = _parseDate(sortedDates[i + 1]);
 
       final difference = current.difference(next).inDays;
       if (difference == 1) {
@@ -154,6 +141,18 @@ class CheckinStreakRanking extends StatelessWidget {
     }
 
     return streak;
+  }
+  // 解析日期字符串为DateTime对象
+  DateTime _parseDate(String dateStr) {
+    final parts = dateStr.split('-');
+    if (parts.length != 3) {
+      throw FormatException('Invalid date format: $dateStr');
+    }
+    return DateTime(
+      int.parse(parts[0]), // 年
+      int.parse(parts[1]), // 月
+      int.parse(parts[2]), // 日
+    );
   }
 }
 

@@ -85,10 +85,20 @@ class DailyCheckinChart extends StatelessWidget {
     List<int> dailyCount = List.filled(days, 0);
 
     for (var item in checkinItems) {
-      for (var date in item.checkInRecords.keys) {
-        final diff = now.difference(date).inDays;
-        if (diff < days) {
-          dailyCount[days - diff - 1]++;
+      for (var dateStr in item.checkInRecords.keys) {
+        // 解析日期字符串 (格式: YYYY-MM-DD)
+        final dateParts = dateStr.split('-');
+        if (dateParts.length == 3) {
+          final date = DateTime(
+            int.parse(dateParts[0]),
+            int.parse(dateParts[1]),
+            int.parse(dateParts[2]),
+          );
+          final diff = now.difference(date).inDays;
+          if (diff < days) {
+            // 统计每个项目在每天的打卡次数
+            dailyCount[days - diff - 1]++;
+          }
         }
       }
     }

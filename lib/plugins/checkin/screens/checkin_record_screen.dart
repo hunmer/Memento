@@ -24,11 +24,18 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
   @override
   Widget build(BuildContext context) {
     // 按日期分组打卡记录
-    final recordsByDate = <DateTime, List<MapEntry<DateTime, CheckinRecord>>>{};
-
+    final recordsByDate = <DateTime, List<CheckinRecord>>{};
     for (var entry in widget.checkinItem.checkInRecords.entries) {
-      final date = DateTime(entry.key.year, entry.key.month, entry.key.day);
-      recordsByDate.putIfAbsent(date, () => []).add(entry);
+      // 解析日期字符串为DateTime
+      final dateParts = entry.key.split('-');
+      if (dateParts.length == 3) {
+        final date = DateTime(
+          int.parse(dateParts[0]), 
+          int.parse(dateParts[1]), 
+          int.parse(dateParts[2])
+        );
+        recordsByDate.putIfAbsent(date, () => []).addAll(entry.value);
+      }
     }
 
     // 对日期进行排序（降序）
@@ -45,7 +52,7 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
                 itemBuilder: (context, index) {
                   final date = sortedDates[index];
                   final records = recordsByDate[date]!;
-                  records.sort((a, b) => b.key.compareTo(a.key)); // 按时间降序排序
+                  records.sort((a, b) => b.checkinTime.compareTo(a.checkinTime)); // 按打卡时间降序排序
 
                   return Card(
                     margin: const EdgeInsets.symmetric(
@@ -87,7 +94,7 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: records.length,
                           itemBuilder: (context, recordIndex) {
-                            final record = records[recordIndex].value;
+                            final record = records[recordIndex];
                             return ListTile(
                               leading: CircleAvatar(
                                 backgroundColor: widget.checkinItem.color,
@@ -123,7 +130,7 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
                                 icon: const Icon(Icons.delete_outline),
                                 onPressed:
                                     () => _showDeleteConfirmDialog(
-                                      records[recordIndex].key,
+                                      records[recordIndex].checkinTime,
                                     ),
                               ),
                             );
