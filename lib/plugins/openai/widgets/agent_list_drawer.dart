@@ -187,7 +187,15 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    // 获取屏幕高度
+    final screenHeight = MediaQuery.of(context).size.height;
+    // 计算抽屉最大高度为屏幕高度的70%
+    final maxDrawerHeight = screenHeight * 0.7;
+    
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: maxDrawerHeight,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -207,21 +215,23 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
             ),
           ),
           const Divider(),
-          FutureBuilder<List<AIAgent>>(
-            future: (PluginManager.instance.getPlugin('openai') as OpenAIPlugin).controller.loadAgents(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var agents = snapshot.data!;
-                
-                // 应用过滤器（如果有）
-                if (widget.agentFilter != null) {
-                  agents = agents.where(widget.agentFilter!).toList();
-                }
+          Flexible(
+            child: FutureBuilder<List<AIAgent>>(
+              future: (PluginManager.instance.getPlugin('openai') as OpenAIPlugin).controller.loadAgents(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  var agents = snapshot.data!;
+                  
+                  // 应用过滤器（如果有）
+                  if (widget.agentFilter != null) {
+                    agents = agents.where(widget.agentFilter!).toList();
+                  }
 
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: agents.length,
-                  itemBuilder: (context, index) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: agents.length,
+                    itemBuilder: (context, index) {
                     final agent = agents[index];
                     final agentData = {'id': agent.id, 'name': agent.name};
                     final isSelected = _isAgentSelected(agent.id);
@@ -239,18 +249,19 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
                       onTap: () => _toggleAgentSelection(agentData),
                     );
                   },
-                );
-              } else if (snapshot.hasError) {
+                  );
+                } else if (snapshot.hasError) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text('加载智能体列表失败'),
+                  );
+                }
                 return const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('加载智能体列表失败'),
+                  child: CircularProgressIndicator(),
                 );
-              }
-              return const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
-              );
-            },
+              },
+            ),
           ),
           const SizedBox(height: 16),
           Padding(
