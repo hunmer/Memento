@@ -29,15 +29,6 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
   // 预定义的背景图片列表
   final List<String> _predefinedBackgroundImages = [
     'https://images.unsplash.com/photo-1506744038136-46273834b3fb', // 自然风景
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e', // 海滩
-    'https://images.unsplash.com/photo-1519681393784-d120267933ba', // 星空
-    'https://images.unsplash.com/photo-1554080353-a576cf803bda', // 山脉
-    'https://images.unsplash.com/photo-1490750967868-88aa4486c946', // 花朵
-    'https://images.unsplash.com/photo-1513151233558-d860c5398176', // 城市
-    'https://images.unsplash.com/photo-1501785888041-af3ef285b470', // 日落
-    'https://images.unsplash.com/photo-1515266591878-f93e32bc5937', // 雪景
-    'https://images.unsplash.com/photo-1500964757637-c85e8a162699', // 田野
-    'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5', // 森林
   ];
 
   @override

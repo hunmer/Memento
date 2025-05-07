@@ -1,16 +1,70 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import '../models/memorial_day.dart';
 import '../l10n/day_localizations.dart';
+import '../../../utils/image_utils.dart';
 
-class MemorialDayCard extends StatelessWidget {
+class MemorialDayCard extends StatefulWidget {
   final MemorialDay memorialDay;
   final VoidCallback? onTap;
 
   const MemorialDayCard({
-    super.key,
+    Key? key,
     required this.memorialDay,
     this.onTap,
-  });
+  }) : super(key: key);
+
+  @override
+  State<MemorialDayCard> createState() => _MemorialDayCardState();
+}
+
+class _MemorialDayCardState extends State<MemorialDayCard> {
+  ImageProvider? _imageProvider;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImage();
+  }
+
+  @override
+  void didUpdateWidget(covariant MemorialDayCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.memorialDay.backgroundImageUrl != widget.memorialDay.backgroundImageUrl) {
+      _loadImage();
+    }
+  }
+
+  Future<void> _loadImage() async {
+    if (widget.memorialDay.backgroundImageUrl == null) {
+      setState(() {
+        _imageProvider = null;
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final url = widget.memorialDay.backgroundImageUrl!;
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      setState(() {
+        _imageProvider = NetworkImage(url);
+        _isLoading = false;
+      });
+    } else {
+      try {
+        setState(() => _isLoading = true);
+        _imageProvider = FileImage(File(await ImageUtils.getAbsolutePath(url))); // 相对路径加载图片
+        setState(() => _isLoading = false);
+      } catch (e) {
+        debugPrint('Error loading image: $e');
+        setState(() {
+          _imageProvider = null;
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +75,13 @@ class MemorialDayCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       elevation: 4,
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: memorialDay.backgroundColor,
-            image: memorialDay.backgroundImageUrl != null
+            color: widget.memorialDay.backgroundColor,
+            image: _imageProvider != null
                 ? DecorationImage(
-                    image: NetworkImage(memorialDay.backgroundImageUrl!),
+                    image: _imageProvider!,
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
                       Colors.black.withOpacity(0.3),
@@ -42,7 +96,7 @@ class MemorialDayCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  memorialDay.title,
+                  widget.memorialDay.title,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: Colors.white,
                     shadows: [
@@ -58,7 +112,7 @@ class MemorialDayCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  memorialDay.formattedTargetDate,
+                  widget.memorialDay.formattedTargetDate,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
                     shadows: [
@@ -72,9 +126,9 @@ class MemorialDayCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  memorialDay.isExpired
-                      ? localizations.daysPassed(memorialDay.daysPassed)
-                      : localizations.daysRemaining(memorialDay.daysRemaining),
+                  widget.memorialDay.isExpired
+                      ? localizations.daysPassed(widget.memorialDay.daysPassed)
+                      : localizations.daysRemaining(widget.memorialDay.daysRemaining),
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -87,10 +141,10 @@ class MemorialDayCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (memorialDay.notes.isNotEmpty) ...[
+                if (widget.memorialDay.notes.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
-                    memorialDay.notes.first,
+                    widget.memorialDay.notes.first,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.white,
                       shadows: [

@@ -31,7 +31,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
             onPressed: _handleSave,
             child: Text(
               l10n.save,
-              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],
