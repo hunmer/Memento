@@ -17,6 +17,7 @@ class MessageList extends StatelessWidget {
   final void Function(Message, String?) onSetFixedSymbol;
   final void Function(Message, Color?) onSetBubbleColor;
   final void Function(Message) onReply; // 添加回复消息回调
+  final void Function(Message) onToggleFavorite; // 添加收藏消息回调
   final void Function(String) onToggleMessageSelection;
   final void Function(String) onReplyTap; // 添加回复消息点击回调
   final ScrollController scrollController;
@@ -39,6 +40,7 @@ class MessageList extends StatelessWidget {
     required this.onSetFixedSymbol,
     required this.onSetBubbleColor,
     required this.onReply,
+    required this.onToggleFavorite,
     required this.onToggleMessageSelection,
     required this.onReplyTap,
     required this.scrollController,
@@ -85,6 +87,7 @@ class MessageList extends StatelessWidget {
                     onSetFixedSymbol: onSetFixedSymbol,
                     onSetBubbleColor: onSetBubbleColor,
                     onReply: onReply,
+                    onToggleFavorite: onToggleFavorite,
                   );
                 },
                 onDoubleTap: () {
@@ -98,6 +101,7 @@ class MessageList extends StatelessWidget {
                     onSetFixedSymbol: onSetFixedSymbol,
                     onSetBubbleColor: onSetBubbleColor,
                     onReply: onReply,
+                    onToggleFavorite: onToggleFavorite,
                     initiallyShowFixedSymbolDialog: true, // 直接显示固态符号编辑对话框
                   );
                 },
@@ -155,6 +159,8 @@ class MessageList extends StatelessWidget {
                       shouldHighlight &&
                       highlightedMessage != null &&
                       item.id == highlightedMessage?.id,
+                  onToggleFavorite: () => onToggleFavorite(item),
+                  onReplyTap: onReplyTap,
                 ),
               ),
             ],

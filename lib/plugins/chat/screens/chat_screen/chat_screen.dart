@@ -150,6 +150,14 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.focusNode.requestFocus();
   }
 
+  // 处理消息收藏
+  void _handleToggleFavorite(Message message) async {
+    await _messageOperations.toggleFavorite(message);
+    if (mounted) {
+      _updateMessages(); // 更新消息列表
+    }
+  }
+
   // 清除回复
   void _clearReply() {
     setState(() {
@@ -520,23 +528,31 @@ class _ChatScreenState extends State<ChatScreen> {
                             child: MessageList(
                               items: messageItems,
                               isMultiSelectMode: _controller.isMultiSelectMode,
-                              selectedMessageIds:
-                                  _controller.selectedMessageIds,
+                              selectedMessageIds: _controller.selectedMessageIds,
                               onMessageEdit: _showEditDialog,
-                              onMessageDelete: _deleteMessage,
-                              onMessageCopy: _copyMessageToClipboard,
-                              onSetFixedSymbol: _setFixedSymbol,
-                              onSetBubbleColor: _setBubbleColor,
-                              onToggleMessageSelection:
-                                  _controller.toggleMessageSelection,
+                              onMessageDelete: _controller.deleteMessage,
+                              onMessageCopy: (message) => _messageOperations.copyMessage(message),
+                              onSetFixedSymbol: (message, symbol) =>
+                                  _messageOperations.setFixedSymbol(message, symbol),
+                              onSetBubbleColor: (message, color) =>
+                                  _messageOperations.setBubbleColor(message, color),
+                              onReply: _handleReply,
+                              onToggleFavorite: _handleToggleFavorite,
+                              onToggleMessageSelection: _controller.toggleMessageSelection,
+                              onReplyTap: _handleReplyTap,
                               scrollController: _controller.scrollController,
+                              currentUserId: ChatPlugin.instance.userService.currentUser.id,
+                              highlightedMessage: widget.highlightMessage,
+                              shouldHighlight: widget.highlightMessage != null,
                               onAvatarTap: (message) async {
-                                // 检查消息的metadata.isAI字段
-                                final isAI = message.metadata?['isAI'] as bool?;
-                                final agentId = message.metadata?['agentId'] as String?;
-                                
-                                if (isAI == true && agentId != null) {
-                                  // 如果是AI消息且有agentId，跳转到AI编辑界面
+                                // 检查是否为AI消息
+                                final metadata = message.metadata;
+                                if (metadata != null && 
+                                    metadata.containsKey('ai') && 
+                                    metadata['ai'] == true && 
+                                    metadata.containsKey('agentId')) {
+                                  final agentId = metadata['agentId'] as String;
+                                  
                                   if (mounted) {
                                     try {
                                       // 获取OpenAI插件并转换类型
@@ -595,24 +611,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   }
                                 }
                               },
-                              showAvatar:
-                                  ChatPlugin
-                                      .instance
-                                      .settingsService
-                                      .showAvatarInChat,
-                              currentUserId:
-                                  ChatPlugin.instance.isInitialized
-                                      ? ChatPlugin
-                                          .instance
-                                          .userService
-                                          .currentUser
-                                          .id
-                                      : '',
-                              highlightedMessage: _controller.highlightMessage,
-                              shouldHighlight:
-                                  _controller.highlightMessage != null,
-                              onReply: _handleReply,
-                              onReplyTap: _handleReplyTap,
+                              showAvatar: ChatPlugin.instance.settingsService.showAvatarInChat,
                             ),
                           ),
                           MessageInput(

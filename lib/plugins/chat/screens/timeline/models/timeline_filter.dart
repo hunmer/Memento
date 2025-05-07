@@ -5,6 +5,8 @@ class TimelineFilter {
   bool includeChannels;
   bool includeUsernames;
   bool includeContent;
+  bool? isAI;
+  bool? isFavorite;
 
   // 日期范围
   DateTime? startDate;
@@ -18,6 +20,8 @@ class TimelineFilter {
     this.includeChannels = true,
     this.includeUsernames = true,
     this.includeContent = true,
+    this.isAI,
+    this.isFavorite,
     this.startDate,
     this.endDate,
     Set<String>? selectedChannelIds,
@@ -30,6 +34,8 @@ class TimelineFilter {
     bool? includeChannels,
     bool? includeUsernames,
     bool? includeContent,
+    bool? isAI,
+    bool? isFavorite,
     DateTime? startDate,
     DateTime? endDate,
     Set<String>? selectedChannelIds,
@@ -39,6 +45,8 @@ class TimelineFilter {
       includeChannels: includeChannels ?? this.includeChannels,
       includeUsernames: includeUsernames ?? this.includeUsernames,
       includeContent: includeContent ?? this.includeContent,
+      isAI: isAI ?? this.isAI,
+      isFavorite: isFavorite ?? this.isFavorite,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       selectedChannelIds: selectedChannelIds ?? this.selectedChannelIds,
@@ -51,6 +59,8 @@ class TimelineFilter {
     includeChannels = true;
     includeUsernames = true;
     includeContent = true;
+    isAI = null;
+    isFavorite = null;
     startDate = null;
     endDate = null;
     selectedChannelIds.clear();

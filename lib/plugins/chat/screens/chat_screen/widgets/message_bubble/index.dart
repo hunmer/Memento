@@ -3,6 +3,7 @@ import '../../../../../../core/event/event.dart';
 import '../../../../../../plugins/chat/chat_plugin.dart';
 import '../../../../../../plugins/chat/models/message.dart';
 import 'components/avatar.dart';
+import 'components/favorite_icon.dart';
 import 'components/fixed_symbol.dart';
 import 'components/message_actions.dart';
 import 'components/message_content.dart';
@@ -27,6 +28,7 @@ class MessageBubble extends StatefulWidget {
   final String currentUserId;
   final bool isHighlighted;
   final Function(String)? onReplyTap;
+  final VoidCallback? onToggleFavorite;
 
   const MessageBubble({
     super.key,
@@ -44,6 +46,7 @@ class MessageBubble extends StatefulWidget {
     this.showAvatar = true,
     this.isHighlighted = false,
     this.onReplyTap,
+    this.onToggleFavorite,
   });
 
   @override
@@ -202,6 +205,11 @@ class _MessageBubbleState extends State<MessageBubble> {
                         ),
                       if (widget.message.fixedSymbol != null)
                         FixedSymbolWidget(symbol: widget.message.fixedSymbol!),
+                      if (widget.onToggleFavorite != null && widget.message.metadata?['isFavorite'] == true)
+                        FavoriteIcon(
+                          isFavorite: true,
+                          onTap: widget.onToggleFavorite!,
+                        ),
                       const SizedBox(width: 5),
                       MessageTimestamp(
                         date: widget.message.updatedAt ?? widget.message.createdAt,

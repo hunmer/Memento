@@ -17,6 +17,7 @@ class ChannelsView extends StatelessWidget {
   final Function(Message) onReply;
   final Function(String) onReplyTap;
   final Function(Message)? onAvatarTap;
+  final Function(Message) onToggleFavorite;
   final bool showAvatar;
   final String? currentUserId;
   final Message? highlightedMessage;
@@ -33,6 +34,7 @@ class ChannelsView extends StatelessWidget {
     required this.onSetBubbleColor,
     required this.onReply,
     required this.onReplyTap,
+    required this.onToggleFavorite,
     this.onAvatarTap,
     this.showAvatar = true,
     this.currentUserId,
@@ -66,6 +68,7 @@ class ChannelsView extends StatelessWidget {
                 scrollController: controller.scrollController,
                 onReply: onReply,
                 onReplyTap: onReplyTap,
+                onToggleFavorite: onToggleFavorite,
                 onAvatarTap: onAvatarTap,
                 showAvatar: showAvatar,
                 currentUserId: currentUserId,

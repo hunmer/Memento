@@ -71,6 +71,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
         // 更新单个消息的状态
         _controller.updateMessage(message);
       },
+      onToggleFavorite: (message) async {
+        await _messageOperations.toggleFavorite(message);
+        // 更新单个消息的状态
+        _controller.updateMessage(message);
+      },
     );
 
     // 确保在构建完成后添加滚动监听器

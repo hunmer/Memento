@@ -18,6 +18,7 @@ class MessageOptionsHandler {
     required void Function(Message, String?) onSetFixedSymbol,
     required void Function(Message, Color?) onSetBubbleColor,
     void Function(Message)? onReply,
+    void Function(Message)? onToggleFavorite,
     bool useRecentSymbols = true,
     bool initiallyShowFixedSymbolDialog = false,
   }) {
@@ -30,6 +31,7 @@ class MessageOptionsHandler {
       onSetFixedSymbol: onSetFixedSymbol,
       onSetBubbleColor: onSetBubbleColor,
       onReply: onReply,
+      onToggleFavorite: onToggleFavorite,
       useRecentSymbols: useRecentSymbols,
       initiallyShowFixedSymbolDialog: initiallyShowFixedSymbolDialog,
     );

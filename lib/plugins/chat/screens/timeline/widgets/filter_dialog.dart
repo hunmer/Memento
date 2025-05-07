@@ -104,6 +104,43 @@ class _FilterDialogState extends State<FilterDialog> {
             
             const Divider(),
             
+            // 元数据过滤选项
+            Text(
+              'Metadata filters:',
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            
+            // AI 消息过滤选项
+            CheckboxListTile(
+              title: const Text('AI Messages'),
+              subtitle: const Text('Filter messages created by AI'),
+              value: _filter.isAI,
+              tristate: true,
+              onChanged: (value) {
+                setState(() {
+                  _filter.isAI = value;
+                });
+              },
+              dense: true,
+            ),
+            
+            // 收藏消息过滤选项
+            CheckboxListTile(
+              title: const Text('Favorite Messages'),
+              subtitle: const Text('Show only favorited messages'),
+              value: _filter.isFavorite,
+              tristate: true,
+              onChanged: (value) {
+                setState(() {
+                  _filter.isFavorite = value;
+                });
+              },
+              dense: true,
+            ),
+            
+            const Divider(),
+            
             // 日期范围选择
             Text(
               l10n?.dateRange ?? 'Date range:',

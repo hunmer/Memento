@@ -12,6 +12,7 @@ class MessageOptionsDialog extends StatelessWidget {
   final void Function(Message, String?) onSetFixedSymbol;
   final void Function(Message, Color?) onSetBubbleColor;
   final void Function(Message)? onReply; // 添加回复回调函数
+  final void Function(Message)? onToggleFavorite; // 添加收藏回调函数
   final bool useRecentSymbols;
   final bool initiallyShowFixedSymbolDialog;
 
@@ -24,6 +25,7 @@ class MessageOptionsDialog extends StatelessWidget {
     required this.onSetFixedSymbol,
     required this.onSetBubbleColor,
     this.onReply,
+    this.onToggleFavorite,
     this.useRecentSymbols = true,
     this.initiallyShowFixedSymbolDialog = false,
   });
@@ -38,6 +40,7 @@ class MessageOptionsDialog extends StatelessWidget {
     required void Function(Message, String?) onSetFixedSymbol,
     required void Function(Message, Color?) onSetBubbleColor,
     void Function(Message)? onReply,
+    void Function(Message)? onToggleFavorite,
     bool useRecentSymbols = true,
     bool initiallyShowFixedSymbolDialog = false,
   }) {
@@ -51,6 +54,7 @@ class MessageOptionsDialog extends StatelessWidget {
         onSetFixedSymbol: onSetFixedSymbol,
         onSetBubbleColor: onSetBubbleColor,
         onReply: onReply,
+        onToggleFavorite: onToggleFavorite,
         useRecentSymbols: useRecentSymbols,
         initiallyShowFixedSymbolDialog: initiallyShowFixedSymbolDialog,
       ),
@@ -215,6 +219,20 @@ class MessageOptionsDialog extends StatelessWidget {
                     () {
                       Navigator.pop(context);
                       onReply!(message);
+                    },
+                  ),
+                // 收藏
+                if (onToggleFavorite != null)
+                  _buildIconButton(
+                    context,
+                    // 根据消息是否已收藏显示不同图标
+                    (message.metadata?['isFavorite'] as bool?) == true 
+                        ? Icons.star 
+                        : Icons.star_border,
+                    Colors.amber,
+                    () {
+                      Navigator.pop(context);
+                      onToggleFavorite!(message);
                     },
                   ),
               ].map((button) => SizedBox(

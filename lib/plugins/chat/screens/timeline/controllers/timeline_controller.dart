@@ -17,6 +17,7 @@ class TimelineController extends ChangeNotifier {
   void Function(Message)? onMessageCopy;
   void Function(Message, String?)? onSetFixedSymbol;
   void Function(Message, Color?)? onSetBubbleColor;
+  void Function(Message)? onToggleFavorite;
 
   // 分页相关 - 增加每页加载的消息数量
   static const int pageSize = 100; // 增加每页显示的消息数量
@@ -43,6 +44,7 @@ class TimelineController extends ChangeNotifier {
     this.onMessageCopy,
     this.onSetFixedSymbol,
     this.onSetBubbleColor,
+    this.onToggleFavorite,
   }) {
     // 监听搜索输入变化
     searchController.addListener(_onSearchChanged);
@@ -254,6 +256,24 @@ class TimelineController extends ChangeNotifier {
               return matchesStartDate && matchesEndDate;
             }).toList();
       }
+
+      // 过滤 AI 消息
+      if (filter.isAI != null) {
+        result = result.where((message) {
+          final isAI = message.metadata?['isAI'] as bool? ?? false;
+          return filter.isAI! ? isAI : !isAI;
+        }).toList();
+        debugPrint('Timeline: 应用 AI 消息过滤，剩余 ${result.length} 条消息');
+      }
+
+      // 过滤收藏消息
+      if (filter.isFavorite != null) {
+        result = result.where((message) {
+          final isFavorite = message.metadata?['isFavorite'] as bool? ?? false;
+          return filter.isFavorite! ? isFavorite : !isFavorite;
+        }).toList();
+        debugPrint('Timeline: 应用收藏消息过滤，剩余 ${result.length} 条消息');
+      }
     }
 
     _filteredMessages = result;
@@ -289,6 +309,8 @@ class TimelineController extends ChangeNotifier {
       filter.endDate = newFilter.endDate;
       filter.selectedChannelIds = newFilter.selectedChannelIds;
       filter.selectedUserIds = newFilter.selectedUserIds;
+      filter.isAI = newFilter.isAI;
+      filter.isFavorite = newFilter.isFavorite;
 
       // 检查过滤器是否有效
       _isFilterActive =
@@ -298,7 +320,9 @@ class TimelineController extends ChangeNotifier {
           filter.endDate != null ||
           !filter.includeChannels ||
           !filter.includeUsernames ||
-          !filter.includeContent;
+          !filter.includeContent ||
+          filter.isAI != null ||
+          filter.isFavorite != null;
 
       _filterMessages();
       notifyListeners();
@@ -422,6 +446,13 @@ class TimelineController extends ChangeNotifier {
   void handleSetBubbleColor(Message message, Color? color) {
     if (onSetBubbleColor != null) {
       onSetBubbleColor!(message, color);
+    }
+  }
+
+  /// 处理消息收藏
+  void handleToggleFavorite(Message message) {
+    if (onToggleFavorite != null) {
+      onToggleFavorite!(message);
     }
   }
 

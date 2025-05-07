@@ -206,6 +206,55 @@ class MessageOperations {
     }
   }
 
+  /// 收藏/取消收藏消息
+  Future<void> toggleFavorite(Message message) async {
+    final channel = _findMessageChannel(message);
+    if (channel == null) return;
+
+    // 获取当前消息的metadata，如果不存在则创建一个新的
+    final metadata = Map<String, dynamic>.from(message.metadata ?? {});
+    
+    // 切换收藏状态
+    final isFavorite = metadata['isFavorite'] as bool? ?? false;
+    metadata['isFavorite'] = !isFavorite;
+    
+    // 如果收藏，添加收藏时间
+    if (metadata['isFavorite'] == true) {
+      metadata['favoritedAt'] = DateTime.now().toIso8601String();
+    } else {
+      // 如果取消收藏，移除收藏时间
+      metadata.remove('favoritedAt');
+    }
+
+    // 更新消息
+    final updatedMessage = await message.copyWith(metadata: metadata);
+    final index = channel.messages.indexWhere((m) => m.id == message.id);
+    if (index != -1) {
+      // 更新消息
+      channel.messages[index] = updatedMessage;
+      // 保存更新后的消息列表
+      await _chatPlugin.channelService.saveMessages(
+        channel.id,
+        channel.messages,
+      );
+      // 发布消息更新事件
+      EventManager.instance.broadcast(
+        'onMessageUpdated',
+        Values<Message, String>(updatedMessage, channel.id),
+      );
+      
+      // 显示操作结果
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(metadata['isFavorite'] ? '已添加到收藏' : '已从收藏中移除'),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
+    }
+  }
+
   /// 根据消息找到对应的频道
   Channel? _findMessageChannel(Message message) {
     // 如果消息中包含频道信息（时间线视图），则直接使用

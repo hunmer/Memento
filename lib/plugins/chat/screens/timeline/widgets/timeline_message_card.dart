@@ -58,6 +58,7 @@ class TimelineMessageCard extends StatelessWidget {
                     controller.handleSetFixedSymbol(message, symbol),
             onSetBubbleColor:
                 (msg, color) => controller.handleSetBubbleColor(message, color),
+            onToggleFavorite: (_) => controller.handleToggleFavorite(message),
           );
         },
         onTap: () async {
