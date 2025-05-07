@@ -16,6 +16,14 @@ class ActivityPlugin extends BasePlugin {
   late ActivityPromptController _promptController;
   bool _isInitialized = false;
 
+  // 获取活动服务实例
+  ActivityService get activityService {
+    if (!_isInitialized) {
+      throw StateError('ActivityPlugin has not been initialized');
+    }
+    return _activityService;
+  }
+
   @override
   final String id = 'activity_plugin';
 
@@ -243,10 +251,18 @@ class _ActivityMainViewState extends State<ActivityMainView> {
   int _selectedIndex = 0;
 
   // 页面列表
-  final List<Widget> _pages = const [
-    ActivityTimelineScreen(),
-    ActivityStatisticsScreen(),
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      const ActivityTimelineScreen(),
+      ActivityStatisticsScreen(
+        activityService: ActivityPlugin.instance.activityService,
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
