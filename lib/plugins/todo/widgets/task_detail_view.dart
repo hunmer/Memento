@@ -126,21 +126,20 @@ class TaskDetailView extends StatelessWidget {
 
             // 标签
             if (task.tags.isNotEmpty) ...[
-                Text(
-                  'Tags',
-                  style: theme.textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: task.tags.map((tag) => Chip(
-                    label: Text(tag),
-                    backgroundColor: Colors.blue.shade100,
-                  )).toList(),
-                ),
-                const SizedBox(height: 16),
-              ],
+              Text(
+                'Tags',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 4.0,
+                children: task.tags.map((tag) => Chip(
+                  label: Text(tag),
+                  backgroundColor: Colors.blue.shade100,
+                )).toList(),
+              ),
+              const SizedBox(height: 16),
             ],
 
             // 日期信息
@@ -149,18 +148,22 @@ class TaskDetailView extends StatelessWidget {
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('Created'),
-              subtitle: Text(dateFormat.format(task.createdAt)),
+            Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.calendar_today),
+                  title: const Text('Created'),
+                  subtitle: Text(dateFormat.format(task.createdAt)),
+                ),
+                if (task.dueDate != null)
+                  ListTile(
+                    leading: const Icon(Icons.event),
+                    title: const Text('Due Date'),
+                    subtitle: Text(dateFormat.format(task.dueDate!)),
+                  ),
+                const SizedBox(height: 16),
+              ],
             ),
-            if (task.dueDate != null)
-              ListTile(
-                leading: const Icon(Icons.event),
-                title: const Text('Due Date'),
-                subtitle: Text(dateFormat.format(task.dueDate!)),
-              ),
-            const SizedBox(height: 16),
 
             // 子任务
             if (task.subtasks.isNotEmpty) ...[

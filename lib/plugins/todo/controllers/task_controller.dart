@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import '../models/models.dart';
 import '../../../core/storage/storage_manager.dart';
 import 'package:uuid/uuid.dart';
@@ -22,8 +23,12 @@ class TaskController extends ChangeNotifier {
     _loadTasks();
   }
 
+  // 过滤状态
+  List<Task> _filteredTasks = [];
+  Map<String, dynamic>? _currentFilter;
+
   // Getters
-  List<Task> get tasks => _tasks;
+  List<Task> get tasks => _currentFilter != null ? _filteredTasks : _tasks;
   bool get isGridView => _isGridView;
   SortBy get sortBy => _sortBy;
 
@@ -37,7 +42,80 @@ class TaskController extends ChangeNotifier {
   void setSortBy(SortBy sortBy) {
     _sortBy = sortBy;
     _sortTasks();
+    if (_currentFilter != null) {
+      _applyFilter(_currentFilter!);
+    }
     notifyListeners();
+  }
+
+  // 应用过滤
+  void applyFilter(Map<String, dynamic> filter) {
+    print('Applying filter: $filter');
+    _currentFilter = filter;
+    _applyFilter(filter);
+    print('Filtered tasks count: ${_filteredTasks.length}');
+    notifyListeners();
+  }
+
+  // 清除过滤
+  void clearFilter() {
+    _currentFilter = null;
+    notifyListeners();
+  }
+
+  // 实际执行过滤逻辑
+  void _applyFilter(Map<String, dynamic> filter) {
+    print('Original tasks count: ${_tasks.length}');
+    _filteredTasks = _tasks.where((task) {
+      print('Checking task: ${task.title}');
+      // 关键词过滤
+      final keyword = filter['keyword'] as String?;
+      if (keyword != null && keyword.isNotEmpty) {
+        final keywordMatch = task.title.toLowerCase().contains(keyword.toLowerCase()) ||
+            (task.description != null && 
+             task.description!.toLowerCase().contains(keyword.toLowerCase()));
+        if (!keywordMatch) return false;
+      }
+
+      // 优先级过滤
+      final priority = filter['priority'] as TaskPriority?;
+      if (priority != null && task.priority != priority) {
+        return false;
+      }
+
+      // 标签过滤
+      final tags = filter['tags'] as List<String>?;
+      if (tags != null && tags.isNotEmpty) {
+        final hasAllTags = tags.every((tag) => task.tags.contains(tag));
+        if (!hasAllTags) return false;
+      }
+
+      // 日期范围过滤
+      final startDate = filter['startDate'] as DateTime?;
+      final endDate = filter['endDate'] as DateTime?;
+      if (startDate != null || endDate != null) {
+        if (task.dueDate == null) return false;
+        if (startDate != null && task.dueDate!.isBefore(startDate)) {
+          return false;
+        }
+        if (endDate != null && task.dueDate!.isAfter(endDate)) {
+          return false;
+        }
+      }
+
+      // 完成状态过滤
+      final showCompleted = filter['showCompleted'] as bool? ?? true;
+      final showIncomplete = filter['showIncomplete'] as bool? ?? true;
+      if (!showCompleted && task.status == TaskStatus.done) {
+        return false;
+      }
+      if (!showIncomplete && task.status != TaskStatus.done) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+    _sortTasks();
   }
 
   // 根据当前排序方式对任务进行排序

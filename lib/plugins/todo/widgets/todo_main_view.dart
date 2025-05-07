@@ -6,6 +6,7 @@ import 'task_grid_view.dart';
 import 'add_task_button.dart';
 import 'task_detail_view.dart';
 import 'task_form.dart';
+import 'filter_dialog.dart';
 
 class TodoMainView extends StatelessWidget {
   final TaskController taskController;
@@ -23,6 +24,26 @@ class TodoMainView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Todo'),
         actions: [
+          // 过滤按钮
+          IconButton(
+            icon: const Icon(Icons.filter_alt),
+            onPressed: () async {
+              final tags = taskController.tasks
+                  .expand((task) => task.tags)
+                  .toSet()
+                  .toList();
+              final filter = await showDialog<Map<String, dynamic>>(
+                context: context,
+                builder: (context) => FilterDialog(
+                  onFilter: (filter) => Navigator.pop(context, filter),
+                  availableTags: tags,
+                ),
+              );
+              if (filter != null) {
+                taskController.applyFilter(filter);
+              }
+            },
+          ),
           // 切换视图按钮
           IconButton(
             icon: Icon(
