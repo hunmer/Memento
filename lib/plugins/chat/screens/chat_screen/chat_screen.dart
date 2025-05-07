@@ -548,8 +548,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                 // 检查是否为AI消息
                                 final metadata = message.metadata;
                                 if (metadata != null && 
-                                    metadata.containsKey('ai') && 
-                                    metadata['ai'] == true && 
+                                    metadata.containsKey('isAI') && 
+                                    metadata['isAI'] == true && 
                                     metadata.containsKey('agentId')) {
                                   final agentId = metadata['agentId'] as String;
                                   
