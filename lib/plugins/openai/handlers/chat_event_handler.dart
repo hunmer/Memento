@@ -112,7 +112,7 @@ class ChatEventHandler {
       aiUser = User(
         id: agent.id,
         username: agent.name,
-        iconPath: agent.avatarUrl != null ? await ImageUtils.getAbsolutePath(agent.avatarUrl) : '',
+        iconPath:await ImageUtils.getAbsolutePath(agent.avatarUrl),
       );
 
       // 创建AI回复消息，使用agent的ID确保唯一性

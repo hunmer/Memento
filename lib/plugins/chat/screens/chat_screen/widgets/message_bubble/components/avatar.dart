@@ -92,7 +92,7 @@ class _MessageAvatarState extends State<MessageAvatar> {
             shape: BoxShape.circle,
             color: Theme.of(context).colorScheme.primaryContainer,
         ),
-        child: user.iconPath != null
+        child: user.iconPath != null && user.iconPath != ''
             ? FutureBuilder<String>(
                 future: ImageUtils.getAbsolutePath(user.iconPath!),
                   builder: (context, snapshot) {
