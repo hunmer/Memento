@@ -43,6 +43,9 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
   String get author => 'Memento团队';
 
   @override
+  IconData get icon => Icons.track_changes;
+
+  @override
   Future<void> initialize() async {
     await NotificationUtils.initialize();
     await _controller.loadInitialData();
@@ -106,6 +109,96 @@ await TrackerPlugin.initializeAndRegister(pluginManager, configManager);
 
   @override
   Widget buildCardView(BuildContext context) {
-    return TrackerSummaryCard();
+    final theme = Theme.of(context);
+    final controller = TrackerController();
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color?.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 24, color: color),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 统计信息卡片
+          Column(
+            children: [
+              // 第一行 - 今日完成和本月完成
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // 今日完成
+                  Column(
+                    children: [
+                      Text('今日完成', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${controller.getTodayCompletedGoals()} 个',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  // 本月完成
+                  Column(
+                    children: [
+                      Text('本月完成', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${controller.getMonthCompletedGoals()} 个',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              // 第二行 - 本月新增
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Text('本月新增', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${controller.getMonthAddedGoals()} 个',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

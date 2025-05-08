@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/models/record.dart';
 import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
+import 'package:Memento/plugins/tracker/widgets/goal_edit_page.dart';
+import 'package:Memento/plugins/tracker/widgets/record_dialog.dart';
 import 'package:provider/provider.dart';
 
 class GoalDetailScreen extends StatelessWidget {
@@ -19,8 +21,18 @@ class GoalDetailScreen extends StatelessWidget {
         title: Text(goal.name),
         actions: [
           IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () => controller.toggleGoalCompletion(goal.id),
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GoalEditPage(
+                    controller: controller,
+                    goal: goal,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -41,21 +53,46 @@ class GoalDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
             if (goal.reminderTime != null)
               Text('提醒时间: ${goal.reminderTime}'),
-            const Spacer(),
+            const SizedBox(height: 16),
+            Text('记录历史', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Expanded(
+              child: FutureBuilder<List<Record>>(
+                future: controller.getRecordsForGoal(goal.id),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('暂无记录'));
+                  }
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final record = snapshot.data![index];
+                      return ListTile(
+                        title: Text('${record.value}${goal.unitType}'),
+                        subtitle: Text(record.recordedAt.toLocal().toString()),
+                        trailing: Text(record.note ?? ''),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          // TODO: 实现快速记录功能
-          final record = Record(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            goalId: goal.id,
-            value: 1, // 默认值
-            recordedAt: DateTime.now(),
+          showDialog(
+            context: context,
+            builder: (context) => RecordDialog(
+              goal: goal,
+              controller: controller,
+            ),
           );
-          controller.addRecord(record, goal);
         },
       ),
     );

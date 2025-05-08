@@ -1,5 +1,5 @@
 
-import 'package:Memento/widgets/icon_picker_dialog.dart';
+import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
@@ -27,6 +27,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
   late String _dateType;
   late DateTime? _startDate;
   late DateTime? _endDate;
+  late TimeOfDay? _reminderTime;
 
   @override
   void initState() {
@@ -39,14 +40,18 @@ class _GoalEditPageState extends State<GoalEditPage> {
       _dateType = widget.goal!.dateSettings.type;
       _startDate = widget.goal!.dateSettings.startDate;
       _endDate = widget.goal!.dateSettings.endDate;
+      _reminderTime = widget.goal!.reminderTime != null 
+          ? TimeOfDay.fromDateTime(DateTime.parse('1970-01-01 ${widget.goal!.reminderTime!}'))
+          : null;
     } else {
       _name = '';
       _icon = '0';
       _unitType = '';
       _targetValue = 0;
-      _dateType = 'daily';
+      _dateType = 'daily';  // 确保初始值与下拉选项匹配
       _startDate = null;
       _endDate = null;
+      _reminderTime = null;
     }
   }
 
@@ -67,6 +72,17 @@ class _GoalEditPageState extends State<GoalEditPage> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
+            CircleIconPicker(
+              currentIcon: IconData(int.parse(_icon), fontFamily: 'MaterialIcons'),
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              onIconSelected: (icon) {
+                setState(() => _icon = icon.codePoint.toString());
+              },
+              onColorSelected: (color) {
+                // 颜色变化处理，如果需要可以保存颜色
+              },
+            ),
+            const SizedBox(height: 24),
             TextFormField(
               initialValue: _name,
               decoration: const InputDecoration(labelText: '目标名称'),
@@ -91,23 +107,6 @@ class _GoalEditPageState extends State<GoalEditPage> {
               onSaved: (value) => _unitType = value!,
             ),
             const SizedBox(height: 16),
-            ListTile(
-              title: const Text('选择图标'),
-              leading: Icon(IconData(int.parse(_icon), fontFamily: 'MaterialIcons')),
-              trailing: const Icon(Icons.arrow_forward),
-              onTap: () async {
-                final selectedIcon = await showDialog<IconData>(
-                  context: context,
-                  builder: (context) => IconPickerDialog(
-                    currentIcon: IconData(int.parse(_icon), fontFamily: 'MaterialIcons'),
-                  ),
-                );
-                if (selectedIcon != null) {
-                  setState(() => _icon = selectedIcon.codePoint.toString());
-                }
-              },
-            ),
-            const SizedBox(height: 16),
             TextFormField(
               initialValue: _targetValue.toString(),
               decoration: const InputDecoration(labelText: '目标值'),
@@ -124,6 +123,22 @@ class _GoalEditPageState extends State<GoalEditPage> {
               onSaved: (value) => _targetValue = double.parse(value!),
             ),
             const SizedBox(height: 16),
+            ListTile(
+              title: Text(_reminderTime == null 
+                  ? '设置每日提醒时间' 
+                  : '提醒时间: ${_reminderTime!.format(context)}'),
+              trailing: const Icon(Icons.access_time),
+              onTap: () async {
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: _reminderTime ?? TimeOfDay.now(),
+                );
+                if (time != null) {
+                  setState(() => _reminderTime = time);
+                }
+              },
+            ),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _dateType,
               decoration: const InputDecoration(labelText: '时间类型'),
@@ -133,7 +148,11 @@ class _GoalEditPageState extends State<GoalEditPage> {
                         child: Text(_getDateTypeName(type)),
                       ))
                   .toList(),
-              onChanged: (value) => setState(() => _dateType = value!),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _dateType = value);
+                }
+              },
             ),
             if (_dateType == 'custom') ...[
               const SizedBox(height: 16),
@@ -207,9 +226,9 @@ class _GoalEditPageState extends State<GoalEditPage> {
           startDate: _startDate,
           endDate: _endDate,
         ),
-        reminderTime: null,
-        isLoopReset: false,
-        createdAt: widget.goal?.createdAt ?? DateTime.now(),
+        reminderTime: _reminderTime?.format(context),
+      isLoopReset: false,
+      createdAt: widget.goal?.createdAt ?? DateTime.now(),
       );
 
       if (widget.goal != null) {

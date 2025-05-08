@@ -1,4 +1,5 @@
 
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
 import 'package:Memento/plugins/tracker/widgets/goal_card.dart';
@@ -26,6 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('目标跟踪'),
+         leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) => setState(() => _filterStatus = value),

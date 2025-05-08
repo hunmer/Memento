@@ -162,4 +162,35 @@ class TrackerController with ChangeNotifier {
   int getGoalCount() {
     return _goals.length;
   }
+
+  // 获取特定目标的记录
+  Future<List<Record>> getRecordsForGoal(String goalId) async {
+    return _records.where((r) => r.goalId == goalId).toList();
+  }
+
+  // 获取今日完成的目标数
+  int getTodayCompletedGoals() {
+    final today = tracker_date_utils.DateUtils.startOfDay(DateTime.now());
+    return _goals.where((g) => 
+      g.isCompleted && 
+      g.createdAt.isAfter(today)
+    ).length;
+  }
+
+  // 获取本月完成的目标数
+  int getMonthCompletedGoals() {
+    final firstDayOfMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    return _goals.where((g) => 
+      g.isCompleted && 
+      g.createdAt.isAfter(firstDayOfMonth)
+    ).length;
+  }
+
+  // 获取本月新增的目标数
+  int getMonthAddedGoals() {
+    final firstDayOfMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    return _goals.where((g) => 
+      g.createdAt.isAfter(firstDayOfMonth)
+    ).length;
+  }
 }
