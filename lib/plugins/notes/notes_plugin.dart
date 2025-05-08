@@ -96,54 +96,44 @@ class NotesPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Column(
               children: [
-                // 总笔记数
+                // 第一行 - 总笔记数和七日笔记数
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text(
-                      NotesLocalizations.of(context)?.totalNotes ?? 'Total Notes',
-                      style: theme.textTheme.bodyMedium
+                    // 总笔记数
+                    Column(
+                      children: [
+                        Text(
+                          NotesLocalizations.of(context)?.totalNotes ?? 'Total Notes',
+                          style: theme.textTheme.bodyMedium
+                        ),
+                        Text(
+                          '$totalNotes',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '$totalNotes',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color:
-                            totalNotes > 0 ? theme.colorScheme.primary : null,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-                // 七日笔记数
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('七日笔记数', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '$recentNotes',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color:
-                            recentNotes > 0 ? theme.colorScheme.primary : null,
-                      ),
+                    
+                    // 七日笔记数
+                    Column(
+                      children: [
+                        Text('七日笔记数', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '$recentNotes',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ),
         ],
       ),
     );

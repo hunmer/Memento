@@ -323,4 +323,19 @@ class TaskController extends ChangeNotifier {
     return getTaskCountByStatus(TaskStatus.todo, tag: tag) + 
            getTaskCountByStatus(TaskStatus.inProgress, tag: tag);
   }
+
+  // 获取总任务数量
+  int getTotalTaskCount() {
+    return _tasks.length;
+  }
+
+  // 获取最近7天的任务数量
+  int getWeeklyTaskCount() {
+    final now = DateTime.now();
+    final sevenDaysAgo = now.subtract(const Duration(days: 7));
+    return _tasks.where((task) {
+      return (task.createdAt.isAfter(sevenDaysAgo) || 
+              (task.dueDate != null && task.dueDate!.isAfter(sevenDaysAgo)));
+    }).length;
+  }
 }

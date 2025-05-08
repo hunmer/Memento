@@ -42,7 +42,7 @@ class UIService {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  _plugin.icon ?? Icons.chat_bubble_outline,
+                  _plugin.icon,
                   size: 24,
                   color: _plugin.color ?? theme.primaryColor,
                 ),
@@ -58,69 +58,63 @@ class UIService {
           ),
           const SizedBox(height: 16),
 
-          // 统计信息卡片
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withAlpha(77),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Column(
+          // 统计信息卡片 - 两行显示
+          Column(
               children: [
-                // 频道数量
+                // 第一行
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text('频道数量', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '${channels.length}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      children: [
+                        Text('频道数量', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '${channels.length}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const VerticalDivider(),
+                    Column(
+                      children: [
+                        Text('总消息数量', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '${_plugin.channelService.getTotalMessageCount()}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
-                // 总消息数量
+                const SizedBox(height: 12),
+                
+                // 第二行
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text('总消息数量', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '${_plugin.channelService.getTotalMessageCount()}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
-                // 今日新增消息
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('今日新增消息', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '${_plugin.channelService.getTodayMessageCount()}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color:
-                            _plugin.channelService.getTodayMessageCount() > 0
-                                ? theme.colorScheme.primary
-                                : null,
-                      ),
+                    Column(
+                      children: [
+                        Text('今日新增消息', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '${_plugin.channelService.getTodayMessageCount()}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color:
+                                _plugin.channelService.getTodayMessageCount() > 0
+                                    ? theme.colorScheme.primary
+                                    : null,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ),
         ],
       ),
     );

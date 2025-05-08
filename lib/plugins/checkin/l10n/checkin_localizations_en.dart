@@ -11,10 +11,10 @@ class CheckinLocalizationsEn extends CheckinLocalizations {
   String get checkinPluginDescription => 'Manage daily check-in items';
 
   @override
-  String get todayCheckin => 'Today\'s Check-ins';
+  String get todayCheckin => 'Today';
 
   @override
-  String get totalCheckinCount => 'Total Check-ins';
+  String get totalCheckinCount => 'Total';
 
   @override
   String get createCheckin => 'Create Check-in';

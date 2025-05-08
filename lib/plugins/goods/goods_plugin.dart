@@ -387,68 +387,65 @@ class GoodsPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Column(
+         Column(
               children: [
-                // 物品总数量
+                // 第一行 - 物品总数量和总价值
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text('总数量', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '${getTotalItemsCount()}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    // 物品总数量
+                    Column(
+                      children: [
+                        Text('总数量', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '${getTotalItemsCount()}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    // 物品总价值
+                    Column(
+                      children: [
+                        Text('总价值', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '¥${getTotalItemsValue().toStringAsFixed(2)}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
-                // 物品总价值
+                
+                const SizedBox(height: 12),
+                
+                // 第二行 - 一个月未使用
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('总价值', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '¥${getTotalItemsValue().toStringAsFixed(2)}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
-                // 一个月未使用
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('一个月未使用', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '${getUnusedItemsCount()}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color:
-                            getUnusedItemsCount() > 0
-                                ? theme.colorScheme.error
-                                : null,
-                      ),
+                    Column(
+                      children: [
+                        Text('一个月未使用', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '${getUnusedItemsCount()}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color:
+                                getUnusedItemsCount() > 0
+                                    ? theme.colorScheme.error
+                                    : null,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ),
         ],
       ),
     );

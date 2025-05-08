@@ -31,7 +31,7 @@ class TodoPlugin extends BasePlugin {
   String get author => 'Memento Team';
 
   @override
-  IconData get icon => Icons.check_circle_outline;
+  IconData get icon => Icons.check_box;
 
   @override
   Color get color => Colors.blue;
@@ -63,6 +63,79 @@ class TodoPlugin extends BasePlugin {
     return TodoMainView(
       taskController: _taskController,
       reminderController: _reminderController,
+    );
+  }
+
+  @override
+  Widget? buildCardView(BuildContext context) {
+    final theme = Theme.of(context);
+    final totalTasks = _taskController.getTotalTaskCount();
+    final weeklyTasks = _taskController.getWeeklyTaskCount();
+
+    return  Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                  // 顶部图标和标题
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: color.withAlpha(30),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(icon, size: 24, color: color),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '总任务数',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '$totalTasks',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '七日任务数',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '$weeklyTasks',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
     );
   }
 

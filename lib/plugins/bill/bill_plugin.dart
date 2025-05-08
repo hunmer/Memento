@@ -95,68 +95,64 @@ class BillPlugin extends PluginBase with ChangeNotifier {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withAlpha(77),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Column(
+          Column(
               children: [
-                // 今日财务
+                // 第一行 - 今日财务和本月财务
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text('今日财务', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '¥${_billController.getTodayFinance().toStringAsFixed(2)}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color:
-                            _billController.getTodayFinance() >= 0 ? Colors.green : Colors.red,
-                      ),
+                    // 今日财务
+                    Column(
+                      children: [
+                        Text('今日财务', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '¥${_billController.getTodayFinance().toStringAsFixed(2)}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color:
+                                _billController.getTodayFinance() >= 0 ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    // 本月财务
+                    Column(
+                      children: [
+                        Text('本月财务', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '¥${_billController.getMonthFinance().toStringAsFixed(2)}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color:
+                                _billController.getMonthFinance() >= 0 ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
-                // 本月财务
+                const SizedBox(height: 12),
+                
+                // 第二行 - 本月记账
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('本月财务', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '¥${_billController.getMonthFinance().toStringAsFixed(2)}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color:
-                            _billController.getMonthFinance() >= 0 ? Colors.green : Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
-                // 本月记账
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('本月记账', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '${_billController.getMonthBillCount()} 笔',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      children: [
+                        Text('本月记账', style: theme.textTheme.bodyMedium),
+                        Text(
+                          '${_billController.getMonthBillCount()} 笔',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ),
         ],
       ),
     );

@@ -32,6 +32,9 @@ class DayPlugin extends BasePlugin {
   @override
   String get author => 'Zhuanz';
 
+   @override
+  IconData get icon => Icons.event_outlined;
+
   @override
   Future<void> registerToApp(
     PluginManager pluginManager,
@@ -108,7 +111,7 @@ class DayPlugin extends BasePlugin {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  Icons.event_outlined,
+                  icon,
                   size: 24,
                   color: theme.primaryColor,
                 ),
@@ -124,57 +127,40 @@ class DayPlugin extends BasePlugin {
           ),
           const SizedBox(height: 16),
 
-          // 统计信息卡片
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // 纪念日总数
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // 纪念日数
+                Column(
                   children: [
                     Text('纪念日数', style: theme.textTheme.bodyMedium),
                     Text(
                       '$totalCount',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color:
-                            totalCount > 0 ? theme.colorScheme.primary : null,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                
+                // 即将到来
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text('即将到来', style: theme.textTheme.bodyMedium),
-                    Expanded(
-                      child: Text(
-                        upcomingDays.isNotEmpty ? upcomingDays.join('，') : '无',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color:
-                              totalCount > 0 ? theme.colorScheme.primary : null,
-                        ),
-                        textAlign: TextAlign.end,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                    Text(
+                      upcomingDays.isNotEmpty ? upcomingDays.join('，') : '无',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ],
                 ),
               ],
             ),
-          ),
         ],
       ),
     );

@@ -17,10 +17,10 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
   String get statistics => 'Statistics';
   
   @override
-  String get todayActivities => 'Today\'s Activities';
+  String get todayActivities => 'Activities';
   
   @override
-  String get todayDuration => 'Today\'s Duration';
+  String get todayDuration => 'Duration';
   
   @override
   String get remainingTime => 'Remaining Time';

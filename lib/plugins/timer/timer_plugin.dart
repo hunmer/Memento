@@ -44,6 +44,9 @@ class TimerPlugin extends BasePlugin {
   @override
   String get pluginDir => _pluginDir;
 
+    @override
+  IconData get icon => Icons.timer;
+
   @override
   Future<void> initialize() async {
     await _loadTasks();
@@ -164,7 +167,7 @@ class TimerPlugin extends BasePlugin {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  icon ?? Icons.timer,
+                  icon,
                   size: 24,
                   color: color ?? theme.primaryColor,
                 ),
@@ -181,17 +184,11 @@ class TimerPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withAlpha(76),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Column(
+          Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 // 总计时器数
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
                   children: [
                     Text('总计时器', style: theme.textTheme.bodyMedium),
                     Text(
@@ -202,34 +199,26 @@ class TimerPlugin extends BasePlugin {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
+                
                 // 当前运行中的计时器
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text('当前运行', style: theme.textTheme.bodyMedium),
-                    Expanded(
-                      child: Text(
-                        runningTasks.isEmpty ? '无' : runningTaskNames,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color:
-                              runningTasks.isNotEmpty
-                                  ? theme.colorScheme.primary
-                                  : null,
-                        ),
-                        textAlign: TextAlign.end,
+                    Text(
+                      runningTasks.isEmpty ? '无' : runningTaskNames,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            runningTasks.isNotEmpty
+                                ? theme.colorScheme.primary
+                                : null,
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-          ),
         ],
       ),
     );

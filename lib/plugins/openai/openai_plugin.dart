@@ -194,36 +194,34 @@ class OpenAIPlugin extends BasePlugin {
               const SizedBox(height: 16),
 
               // 统计信息卡片
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(
-                    76,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
+              Column(
                   children: [
-                    // 智能体总数
+                    // 第一行 - 智能体总数和活跃智能体
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text(OpenAILocalizations.of(context).totalAgents, style: theme.textTheme.bodyMedium),
-                        Text(
-                          '$agentsCount',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                agentsCount > 0
-                                    ? theme.colorScheme.primary
-                                    : null,
-                          ),
+                        // 智能体总数
+                        Column(
+                          children: [
+                            Text(OpenAILocalizations.of(context).totalAgents, style: theme.textTheme.bodyMedium),
+                            Text(
+                              '$agentsCount',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    agentsCount > 0
+                                        ? theme.colorScheme.primary
+                                        : null,
+                              ),
+                            ),
+                          ],
                         ),
+                        
                       ],
                     ),
+            
                   ],
                 ),
-              ),
             ],
           ),
         );

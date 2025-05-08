@@ -104,21 +104,6 @@ class PluginListDialog extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // 如果空间足够，显示简短描述
-            if (MediaQuery.of(context).size.width > 350)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                child: Text(
-                  plugin.description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
           ],
         ),
       ),

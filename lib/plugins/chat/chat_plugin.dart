@@ -53,6 +53,9 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
   @override
   String get author => 'Zhuanz';
 
+    @override
+  IconData get icon => Icons.chat_bubble;
+
   @override
   Future<void> initialize() async {
     // Initialize services

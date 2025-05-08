@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../controllers/controllers.dart';
 import '../controllers/task_controller.dart'; // 直接导入以获取 SortBy 枚举
@@ -23,6 +24,10 @@ class TodoMainView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Todo'),
+         leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
         actions: [
           // 过滤按钮
           IconButton(

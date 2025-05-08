@@ -173,75 +173,60 @@ class NodesPlugin extends PluginBase {
               ),
               const SizedBox(height: 16),
 
-              // 统计信息卡片
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(
-                    76,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
+            Column(
                   children: [
-                    // 笔记本数量
+                    // 第一行 - 笔记本数量和节点数量
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text('笔记本数量', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '$notebookCount',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                notebookCount > 0
-                                    ? theme.colorScheme.primary
-                                    : null,
-                          ),
+                        // 笔记本数量
+                        Column(
+                          children: [
+                            Text('笔记本数量', style: theme.textTheme.bodyMedium),
+                            Text(
+                              '$notebookCount',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                        // 节点数量
+                        Column(
+                          children: [
+                            Text('节点数量', style: theme.textTheme.bodyMedium),
+                            Text(
+                              '$nodeCount',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    const Divider(),
-                    const SizedBox(height: 8),
-
-                    // 节点数量
+                    const SizedBox(height: 12),
+                    
+                    // 第二行 - 待办节点数
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('节点数量', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '$nodeCount',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Divider(),
-                    const SizedBox(height: 8),
-
-                    // 待办节点数量
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('待办节点数', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '$todoCount',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                todoCount > 0
-                                    ? theme.colorScheme.primary
-                                    : null,
-                          ),
+                        Column(
+                          children: [
+                            Text('待办节点数', style: theme.textTheme.bodyMedium),
+                            Text(
+                              '$todoCount',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ],
                 ),
-              ),
             ],
           ),
         );

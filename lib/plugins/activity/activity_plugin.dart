@@ -42,6 +42,9 @@ class ActivityPlugin extends BasePlugin {
   @override
   String get author => 'Zhuanz';
 
+    @override
+  IconData get icon => Icons.timeline;
+
   @override
   Future<void> registerToApp(
     PluginManager pluginManager,
@@ -122,7 +125,7 @@ class ActivityPlugin extends BasePlugin {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  Icons.timer_outlined,
+                  icon,
                   size: 24,
                   color: theme.primaryColor,
                 ),
@@ -139,13 +142,7 @@ class ActivityPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withAlpha(77),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: FutureBuilder<List<int>>(
+           FutureBuilder<List<int>>(
               future: Future.wait([
                 getTodayActivityCount(),
                 getTodayActivityDuration(),
@@ -159,67 +156,71 @@ class ActivityPlugin extends BasePlugin {
 
                 return Column(
                   children: [
-                    // 今日活动数
+                    // 第一行 - 两个统计项
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text(
-                          ActivityLocalizations.of(context)?.todayActivities ?? '今日活动',
-                          style: theme.textTheme.bodyMedium
+                        // 今日活动数
+                        Column(
+                          children: [
+                            Text(
+                              ActivityLocalizations.of(context)!.todayActivities,
+                              style: theme.textTheme.bodyMedium
+                            ),
+                            Text(
+                              '$activityCount',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    activityCount > 0
+                                        ? theme.colorScheme.primary
+                                        : null,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '$activityCount',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                activityCount > 0
-                                    ? theme.colorScheme.primary
-                                    : null,
-                          ),
+                        
+                        // 今日活动时长
+                        Column(
+                          children: [
+                            Text(
+                              ActivityLocalizations.of(context)!.todayDuration ,
+                              style: theme.textTheme.bodyMedium
+                            ),
+                            Text(
+                              '${(activityDuration / 60).toStringAsFixed(1)}H',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    const Divider(),
-                    const SizedBox(height: 8),
-
-                    // 今日活动时长
+                    
+                    const SizedBox(height: 12),
+                    
+                    // 第二行 - 剩余时间
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          ActivityLocalizations.of(context)?.todayDuration ?? '今日时长',
-                          style: theme.textTheme.bodyMedium
-                        ),
-                        Text(
-                          '${(activityDuration / 60).toStringAsFixed(1)}H',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Divider(),
-                    const SizedBox(height: 8),
-
-                    // 今日剩余时间
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          ActivityLocalizations.of(context)?.remainingTime ?? '剩余时间',
-                          style: theme.textTheme.bodyMedium
-                        ),
-                        Text(
-                          '${(remainingTime / 60).toStringAsFixed(1)}H',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                remainingTime < 120
-                                    ? theme.colorScheme.error
-                                    : null,
-                          ),
+                        Column(
+                          children: [
+                            Text(
+                              ActivityLocalizations.of(context)!.remainingTime,
+                              style: theme.textTheme.bodyMedium
+                            ),
+                            Text(
+                              '${(remainingTime / 60).toStringAsFixed(1)}H',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    remainingTime < 120
+                                        ? theme.colorScheme.error
+                                        : null,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -227,7 +228,6 @@ class ActivityPlugin extends BasePlugin {
                 );
               },
             ),
-          ),
         ],
       ),
     );

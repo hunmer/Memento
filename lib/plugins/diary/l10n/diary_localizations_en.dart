@@ -30,10 +30,10 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
   String get diaryPluginDescription => 'Diary management plugin';
 
   @override
-  String get todayWordCount => 'Today\'s word count';
+  String get todayWordCount => 'Today word';
 
   @override
-  String get monthWordCount => 'Month\'s word count';
+  String get monthWordCount => 'Month word';
 
   // Activity form translations
   @override

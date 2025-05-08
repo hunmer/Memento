@@ -28,6 +28,7 @@ import 'plugins/notes/notes_plugin.dart'; // Notes插件
 import 'plugins/goods/goods_plugin.dart'; // 物品插件
 import 'plugins/bill/bill_plugin.dart'; // 账单插件
 import 'plugins/openai/openai_plugin.dart'; // OpenAI插件
+import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 
 // 全局单例实例
@@ -70,6 +71,7 @@ void main() async {
       TimerPlugin.instance,
       TodoPlugin.instance,
       DayPlugin.instance,
+      await TrackerPlugin.initializeAndRegister(globalPluginManager, globalConfigManager),
       NodesPlugin(), // 添加笔记插件
       NotesPlugin(), // 添加Notes插件
       GoodsPlugin.instance, // 添加物品插件

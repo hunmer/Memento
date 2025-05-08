@@ -95,6 +95,9 @@ class CheckinPlugin extends BasePlugin {
   @override
   String get author => 'Memento Team';
 
+    @override
+  IconData get icon => Icons.checklist;
+
   List<CheckinItem> _checkinItems = [];
   static const String _storageKey = 'checkin_items';
 
@@ -222,7 +225,7 @@ class CheckinPlugin extends BasePlugin {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  icon ?? Icons.check_circle,
+                  icon,
                   size: 24,
                   color: color ?? theme.primaryColor,
                 ),
@@ -239,44 +242,30 @@ class CheckinPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withAlpha(76),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Column(
+         Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 // 今日打卡数
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
                   children: [
                     Text(
-                      CheckinLocalizations.of(context)?.todayCheckin ?? '今日打卡',
+                      CheckinLocalizations.of(context)!.todayCheckin,
                       style: theme.textTheme.bodyMedium
                     ),
                     Text(
                       '${getTodayCheckins()}/${_checkinItems.length}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color:
-                            getTodayCheckins() > 0
-                                ? theme.colorScheme.primary
-                                : null,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
+                
                 // 总打卡数
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
                   children: [
                     Text(
-                      CheckinLocalizations.of(context)?.totalCheckinCount ?? '总打卡数',
+                      CheckinLocalizations.of(context)!.totalCheckinCount,
                       style: theme.textTheme.bodyMedium
                     ),
                     Text(
@@ -289,7 +278,6 @@ class CheckinPlugin extends BasePlugin {
                 ),
               ],
             ),
-          ),
         ],
       ),
     );
