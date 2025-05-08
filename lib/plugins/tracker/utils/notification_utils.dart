@@ -1,4 +1,3 @@
-
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -12,44 +11,59 @@ class NotificationUtils {
   // 通知点击回调
   static Function(String?)? onNotificationClicked;
 
-  static Future<void> initialize({Function(String?)? onSelectNotification}) async {
+  static Future<void> initialize({
+    Function(String?)? onSelectNotification,
+  }) async {
     // 设置点击回调
     onNotificationClicked = onSelectNotification;
 
     // Android初始化设置
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('app_icon');
-    
+
     // iOS初始化设置
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
+
+    // macOS初始化设置
+    const DarwinInitializationSettings initializationSettingsMacOS =
+        DarwinInitializationSettings(
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
     // Windows初始化设置
     const WindowsInitializationSettings initializationSettingsWindows =
         WindowsInitializationSettings(
-      appName: '目标跟踪提醒',
-      appUserModelId: 'com.example.memento.tracker',
-      guid: 'd3a8f7c2-1b23-4e5a-9d8f-6e7c5a4b3d21', // 标准GUID格式
-    );
+          appName: '目标跟踪提醒',
+          appUserModelId: 'com.example.memento.tracker',
+          guid: 'd3a8f7c2-1b23-4e5a-9d8f-6e7c5a4b3d21', // 标准GUID格式
+        );
 
     // 统一初始化设置
     const InitializationSettings initializationSettings =
         InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-      windows: initializationSettingsWindows,
-    );
-    
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsIOS,
+          macOS: initializationSettingsMacOS,
+          windows: initializationSettingsWindows,
+        );
+
     // 初始化插件
     await _notificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (details) {
-        if (details.payload != null) {
-          onNotificationClicked?.call(details.payload);
+        try {
+          if (details.payload != null && onNotificationClicked != null) {
+            onNotificationClicked!(details.payload);
+          }
+        } catch (e) {
+          _logger.warning('Error handling notification response', e);
         }
       },
     );
@@ -68,7 +82,8 @@ class NotificationUtils {
 
     await _notificationsPlugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(channel);
   }
 
@@ -83,15 +98,15 @@ class NotificationUtils {
     try {
       // 初始化时区
       tz.initializeTimeZones();
-      
+
       const AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(
-        'tracker_channel',
-        '目标跟踪提醒',
-        channelDescription: '用于目标跟踪的提醒通知',
-        importance: Importance.max,
-        priority: Priority.high,
-      );
+            'tracker_channel',
+            '目标跟踪提醒',
+            channelDescription: '用于目标跟踪的提醒通知',
+            importance: Importance.max,
+            priority: Priority.high,
+          );
 
       const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
         presentAlert: true,
@@ -99,14 +114,22 @@ class NotificationUtils {
         presentSound: true,
       );
 
-      const WindowsNotificationDetails windowsDetails = WindowsNotificationDetails();
+      const DarwinNotificationDetails macOSDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const WindowsNotificationDetails windowsDetails =
+          WindowsNotificationDetails();
 
       const NotificationDetails platformDetails = NotificationDetails(
         android: androidDetails,
         iOS: iOSDetails,
+        macOS: macOSDetails,
         windows: windowsDetails,
       );
-      
+
       // 设置明天的通知时间
       final now = tz.TZDateTime.now(tz.local);
       var scheduledDate = tz.TZDateTime(
@@ -117,11 +140,11 @@ class NotificationUtils {
         hour,
         minute,
       );
-      
+
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
-      
+
       await _notificationsPlugin.zonedSchedule(
         id,
         title,
@@ -176,12 +199,12 @@ class NotificationUtils {
     try {
       const AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(
-        'tracker_channel',
-        '目标跟踪提醒',
-        channelDescription: '用于目标跟踪的提醒通知',
-        importance: Importance.max,
-        priority: Priority.high,
-      );
+            'tracker_channel',
+            '目标跟踪提醒',
+            channelDescription: '用于目标跟踪的提醒通知',
+            importance: Importance.max,
+            priority: Priority.high,
+          );
 
       const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
         presentAlert: true,
@@ -189,14 +212,22 @@ class NotificationUtils {
         presentSound: true,
       );
 
-      const WindowsNotificationDetails windowsDetails = WindowsNotificationDetails();
+      const DarwinNotificationDetails macOSDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const WindowsNotificationDetails windowsDetails =
+          WindowsNotificationDetails();
 
       const NotificationDetails platformDetails = NotificationDetails(
         android: androidDetails,
         iOS: iOSDetails,
+        macOS: macOSDetails,
         windows: windowsDetails,
       );
-    
+
       await _notificationsPlugin.show(
         0,
         title,

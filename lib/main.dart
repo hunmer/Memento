@@ -39,7 +39,7 @@ late final PluginManager globalPluginManager;
 void main() async {
   // 确保Flutter绑定初始化
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 初始化 MediaKit
   MediaKit.ensureInitialized();
 
@@ -71,7 +71,10 @@ void main() async {
       TimerPlugin.instance,
       TodoPlugin.instance,
       DayPlugin.instance,
-      await TrackerPlugin.initializeAndRegister(globalPluginManager, globalConfigManager),
+      await TrackerPlugin.initializeAndRegister(
+        globalPluginManager,
+        globalConfigManager,
+      ),
       NodesPlugin(), // 添加笔记插件
       NotesPlugin(), // 添加Notes插件
       GoodsPlugin.instance, // 添加物品插件
@@ -83,19 +86,32 @@ void main() async {
     for (final plugin in plugins) {
       try {
         await globalPluginManager.registerPlugin(plugin);
-        debugPrint('插件注册成功: ${plugin.name}');
       } catch (e) {
-        debugPrint('插件注册失败: ${plugin.name} - $e');
+        _showError('插件注册失败: ${plugin.name} - $e');
       }
     }
 
     final updateController = AutoUpdateController.instance;
     updateController.initialize();
   } catch (e) {
-    debugPrint('初始化失败: $e');
+    _showError('初始化失败: $e');
   }
 
   runApp(const MyApp());
+}
+
+// 临时错误处理桥接，直到MyApp初始化完成
+void _showError(String message) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final context = WidgetsBinding.instance.renderViewElement;
+    if (context != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), duration: const Duration(seconds: 5)),
+      );
+    } else {
+      debugPrint('Error: $message'); // 回退到打印日志
+    }
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -106,14 +122,28 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+
   @override
   void initState() {
     super.initState();
+
+    // 设置全局错误处理器
+    FlutterError.onError = (details) {
+      _showError(details.exceptionAsString());
+    };
 
     // 延迟执行以确保context可用
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupAutoUpdate();
     });
+  }
+
+  void _showError(String message) {
+    scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 5)),
+    );
   }
 
   void _setupAutoUpdate() {
@@ -128,7 +158,6 @@ class _MyAppState extends State<MyApp> {
   Future<void> checkForUpdates() async {
     if (!mounted) return;
 
-    debugPrint('MyApp: 手动检查更新');
     final updateController = AutoUpdateController.instance;
     updateController.context = context;
 
@@ -139,14 +168,13 @@ class _MyAppState extends State<MyApp> {
       if (hasUpdate) {
         updateController.showUpdateDialog(skipCheck: true);
       }
-    } catch (e) {
-      debugPrint('MyApp: 检查更新失败: $e');
-    }
+    } catch (e) {}
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       title: 'Memento',
       debugShowCheckedModeBanner: false, // 关闭调试横幅
       localizationsDelegates: [
