@@ -38,12 +38,22 @@ class GoalCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        IconData(int.parse(goal.icon), fontFamily: 'MaterialIcons'),
-                        size: 24,
-                        color: isCompleted ? Colors.green : Theme.of(context).primaryColor,
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: (isCompleted ? Colors.green : Theme.of(context).primaryColor).withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            IconData(int.parse(goal.icon), fontFamily: 'MaterialIcons'),
+                            size: 20,
+                            color: isCompleted ? Colors.green : Theme.of(context).primaryColor,
+                          ),
+                        ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       Text(
                         goal.name,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(

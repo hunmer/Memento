@@ -33,26 +33,9 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
     _noteController = TextEditingController();
     final now = DateTime.now();
     _selectedDate = widget.selectedDate ?? now;
-    // 如果提供了selectedDate，则使用该日期的00:00作为起始时间
-    if (widget.selectedDate != null) {
-      _startTime = DateTime(
-        _selectedDate.year,
-        _selectedDate.month,
-        _selectedDate.day,
-        0,
-        0,
-      );
-      _endTime = DateTime(
-        _selectedDate.year,
-        _selectedDate.month,
-        _selectedDate.day,
-        0,
-        0,
-      );
-    } else {
-      _startTime = now;
-      _endTime = now;
-    }
+    // 无论是否提供selectedDate，都使用当前时间作为默认时间
+    _startTime = now;
+    _endTime = now;
   }
 
   @override
