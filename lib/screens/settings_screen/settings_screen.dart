@@ -1,9 +1,11 @@
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:flutter/material.dart';
 import './controllers/settings_screen_controller.dart';
 import './widgets/webdav_settings_dialog.dart';
 import './controllers/webdav_controller.dart';
 import '../../core/floating_ball/settings_screen.dart';
 import '../../core/floating_ball/floating_ball_manager.dart';
+import '../../widgets/backup_time_picker.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -15,6 +17,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late SettingsScreenController _controller;
   late WebDAVController _webdavController;
+  bool _isWebDAVConnected = false;
 
   @override
   void initState() {
@@ -44,9 +47,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.dispose();
   }
 
-  // WebDAV配置状态
-  bool _isWebDAVConnected = false;
-
   // 检查WebDAV配置
   Future<void> _checkWebDAVConfig() async {
     final config = await _webdavController.getWebDAVConfig();
@@ -54,6 +54,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
       setState(() {
         _isWebDAVConnected = config?['isConnected'] == true;
       });
+    }
+  }
+
+  Future<void> _showBackupScheduleDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) => BackupTimePicker(
+        initialSchedule: _controller.backupSchedule, // 传入当前备份计划
+        onScheduleSelected: (schedule) {
+          // 保存备份计划
+          _controller.setBackupSchedule(schedule);
+          // 检查是否需要立即备份
+          _checkAndTriggerBackup();
+        },
+      ),
+    );
+  }
+
+  Future<void> _checkAndTriggerBackup() async {
+    final shouldBackup = await _controller.shouldPerformBackup();
+    if (shouldBackup && mounted) {
+      _showBackupOptionsDialog();
+    }
+  }
+
+  Future<void> _showBackupOptionsDialog() async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('备份选项'),
+        content: const Text('请选择备份方式'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'export'),
+            child: const Text('导出应用数据'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'full'),
+            child: const Text('完整备份'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'webdav'),
+            child: const Text('WebDAV同步'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && mounted) {
+      switch (result) {
+        case 'export':
+          _controller.exportData();
+          break;
+        case 'full':
+          _controller.exportAllData();
+          break;
+        case 'webdav':
+          _showWebDAVSettings();
+          break;
+      }
+      // 重置备份检测日期
+      _controller.resetBackupCheckDate();
     }
   }
 
@@ -162,6 +224,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
               );
             },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.schedule),
+            title: const Text('自动备份设置'),
+            subtitle: const Text('设置自动备份计划'),
+            onTap: _showBackupScheduleDialog,
           ),
           const Divider(),
           ListTile(

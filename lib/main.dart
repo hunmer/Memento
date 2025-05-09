@@ -1,4 +1,7 @@
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
+import 'package:Memento/screens/settings_screen/controllers/settings_screen_controller.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -30,7 +33,10 @@ import 'plugins/bill/bill_plugin.dart'; // 账单插件
 import 'plugins/openai/openai_plugin.dart'; // OpenAI插件
 import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
+import 'core/services/backup_service.dart'; // 备份服务
 
+// 全局导航键
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 // 全局单例实例
 late final StorageManager globalStorage;
 late final ConfigManager globalConfigManager;
@@ -93,6 +99,20 @@ void main() async {
 
     final updateController = AutoUpdateController.instance;
     updateController.initialize();
+    
+    // 延迟备份服务初始化到Widget构建完成后
+    late final BackupService backupService;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = navigatorKey.currentContext;
+      if (context != null) {
+        backupService = BackupService(SettingsScreenController(context));
+      }
+
+          // 插件初始化完成，发布事件
+        EventManager.instance.broadcast('plugins_initialized');
+    });
+    
+
   } catch (e) {
     _showError('初始化失败: $e');
   }
@@ -175,6 +195,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
+      navigatorKey: navigatorKey,
       title: 'Memento',
       debugShowCheckedModeBanner: false, // 关闭调试横幅
       localizationsDelegates: [
