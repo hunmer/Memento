@@ -3,6 +3,7 @@ class Goal {
   final String id;
   final String name;
   final String icon;
+  final int? iconColor;
   final String unitType;
   final double targetValue;
   final double currentValue;
@@ -17,6 +18,7 @@ class Goal {
     required this.id,
     required this.name,
     required this.icon,
+    this.iconColor,
     required this.unitType,
     required this.targetValue,
     required this.currentValue,
@@ -31,6 +33,7 @@ class Goal {
       id: json['id'],
       name: json['name'],
       icon: json['icon'],
+      iconColor: json['iconColor'],
       unitType: json['unitType'],
       targetValue: json['targetValue'],
       currentValue: json['currentValue'],
@@ -46,6 +49,7 @@ class Goal {
       'id': id,
       'name': name,
       'icon': icon,
+      'iconColor': iconColor,
       'unitType': unitType,
       'targetValue': targetValue,
       'currentValue': currentValue,
@@ -60,6 +64,7 @@ class Goal {
     String? id,
     String? name,
     String? icon,
+    int? iconColor,
     String? unitType,
     double? targetValue,
     double? currentValue,
@@ -72,6 +77,7 @@ class Goal {
       id: id ?? this.id,
       name: name ?? this.name,
       icon: icon ?? this.icon,
+      iconColor: iconColor ?? this.iconColor,
       unitType: unitType ?? this.unitType,
       targetValue: targetValue ?? this.targetValue,
       currentValue: currentValue ?? this.currentValue,

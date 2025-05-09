@@ -22,6 +22,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
   final _formKey = GlobalKey<FormState>();
   late String _name;
   late String _icon;
+  Color? _iconColor; // 改为可空类型
   late String _unitType;
   late double _targetValue;
   late String _dateType;
@@ -32,12 +33,18 @@ class _GoalEditPageState extends State<GoalEditPage> {
   @override
   void initState() {
     super.initState();
+    final validDateTypes = ['daily', 'weekly', 'monthly', 'custom'];
     if (widget.goal != null) {
       _name = widget.goal!.name;
       _icon = widget.goal!.icon;
+      _iconColor = widget.goal!.iconColor != null 
+          ? Color(widget.goal!.iconColor!)
+          : null;
       _unitType = widget.goal!.unitType;
       _targetValue = widget.goal!.targetValue;
-      _dateType = widget.goal!.dateSettings.type;
+      _dateType = validDateTypes.contains(widget.goal!.dateSettings.type) 
+          ? widget.goal!.dateSettings.type 
+          : 'daily'; // 默认值
       _startDate = widget.goal!.dateSettings.startDate;
       _endDate = widget.goal!.dateSettings.endDate;
       _reminderTime = widget.goal!.reminderTime != null 
@@ -46,6 +53,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
     } else {
       _name = '';
       _icon = '0';
+      _iconColor = null;
       _unitType = '';
       _targetValue = 0;
       _dateType = 'daily';  // 确保初始值与下拉选项匹配
@@ -53,6 +61,12 @@ class _GoalEditPageState extends State<GoalEditPage> {
       _endDate = null;
       _reminderTime = null;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _iconColor ??= Theme.of(context).colorScheme.primary;
   }
 
   @override
@@ -74,12 +88,12 @@ class _GoalEditPageState extends State<GoalEditPage> {
           children: [
             CircleIconPicker(
               currentIcon: IconData(int.parse(_icon), fontFamily: 'MaterialIcons'),
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: _iconColor ?? Theme.of(context).colorScheme.primaryContainer,
               onIconSelected: (icon) {
                 setState(() => _icon = icon.codePoint.toString());
               },
               onColorSelected: (color) {
-                // 颜色变化处理，如果需要可以保存颜色
+                setState(() => _iconColor = color);
               },
             ),
             const SizedBox(height: 24),
@@ -218,6 +232,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
         id: widget.goal?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         name: _name,
         icon: _icon,
+        iconColor: _iconColor?.value,
         unitType: _unitType,
         targetValue: _targetValue,
         currentValue: widget.goal?.currentValue ?? 0,

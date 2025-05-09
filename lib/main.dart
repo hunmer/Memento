@@ -110,7 +110,6 @@ void main() async {
       if (context != null) {
         backupService = BackupService(SettingsScreenController(), context);
       }
-
           // 插件初始化完成，发布事件
         EventManager.instance.broadcast('plugins_initialized');
     });
@@ -127,9 +126,6 @@ void main() async {
 void _showError(String message) {
   // 使用LoggerUtil记录错误
   LoggerUtil().log(message, level: 'ERROR');
-  
-  // 回退到打印日志
-  debugPrint('Error: $message');
 }
 
 class MyApp extends StatefulWidget {
@@ -149,6 +145,7 @@ class _MyAppState extends State<MyApp> {
 
     // 设置全局错误处理器
     FlutterError.onError = (details) {
+      print(details);
       _showError(details.exceptionAsString());
     };
 
