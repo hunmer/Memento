@@ -44,6 +44,7 @@ class SettingsScreenController extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     await _loadBackupSchedule();
     await _loadLastBackupCheckDate();
+    enableLogging = _prefs.getBool('enable_logging') ?? false;
   }
 
   Future<void> _loadBackupSchedule() async {
@@ -124,6 +125,14 @@ class SettingsScreenController extends ChangeNotifier {
     _autoUpdateController.autoCheckUpdate = value;
   }
   
+  bool _enableLogging = false;
+  bool get enableLogging => _enableLogging;
+  set enableLogging(bool value) {
+    _enableLogging = value;
+    _prefs.setBool('enable_logging', value);
+    notifyListeners();
+  }
+
   Future<void> checkForUpdates() => _autoUpdateController.showUpdateDialog();
 
   // 备份相关方法

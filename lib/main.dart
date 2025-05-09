@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/screens/settings_screen/controllers/settings_screen_controller.dart';
 
@@ -122,16 +125,11 @@ void main() async {
 
 // 临时错误处理桥接，直到MyApp初始化完成
 void _showError(String message) {
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    final context = WidgetsBinding.instance.renderViewElement;
-    if (context != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), duration: const Duration(seconds: 5)),
-      );
-    } else {
-      debugPrint('Error: $message'); // 回退到打印日志
-    }
-  });
+  // 使用LoggerUtil记录错误
+  LoggerUtil().log(message, level: 'ERROR');
+  
+  // 回退到打印日志
+  debugPrint('Error: $message');
 }
 
 class MyApp extends StatefulWidget {
@@ -161,9 +159,22 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _showError(String message) {
-    scaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 5)),
-    );
+    // 使用LoggerUtil记录错误
+    LoggerUtil().log(message, level: 'ERROR');
+    
+    if (!mounted) return;
+    
+    // 使用runZonedGuarded捕获可能的异步错误
+    runZonedGuarded(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text(message), duration: const Duration(seconds: 5)),
+        );
+      });
+    }, (error, stack) {
+      debugPrint('Failed to show error: $error\nOriginal error: $message');
+    });
   }
 
   void _setupAutoUpdate() {
