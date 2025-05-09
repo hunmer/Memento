@@ -152,8 +152,8 @@ class _MessageBubbleState extends State<MessageBubble> {
                 user: widget.message.user,
                 onTap: widget.onAvatarTap,
               )
-            else
-              const SizedBox(width: 40),
+            else if (!_isCurrentUser && !widget.showAvatar)
+              const SizedBox(width: 0),
             const SizedBox(width: 8),
             Flexible(
               child: Column(
@@ -226,8 +226,8 @@ class _MessageBubbleState extends State<MessageBubble> {
                 user: widget.message.user,
                 onTap: widget.onAvatarTap,
               )
-            else
-              const SizedBox(width: 40),
+            else if (_isCurrentUser && !widget.showAvatar)
+              const SizedBox(width: 0),
           ],
         ),
       ),
