@@ -102,7 +102,7 @@ void main() async {
 
     final updateController = AutoUpdateController.instance;
     updateController.initialize();
-    
+
     // 延迟备份服务初始化到Widget构建完成后
     late final BackupService backupService;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -110,11 +110,9 @@ void main() async {
       if (context != null) {
         backupService = BackupService(SettingsScreenController(), context);
       }
-          // 插件初始化完成，发布事件
-        EventManager.instance.broadcast('plugins_initialized');
+      // 插件初始化完成，发布事件
+      EventManager.instance.broadcast('plugins_initialized');
     });
-    
-
   } catch (e) {
     _showError('初始化失败: $e');
   }
@@ -124,6 +122,7 @@ void main() async {
 
 // 临时错误处理桥接，直到MyApp初始化完成
 void _showError(String message) {
+  debugPrint(message);
   // 使用LoggerUtil记录错误
   LoggerUtil().log(message, level: 'ERROR');
 }
@@ -142,7 +141,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
     // 设置全局错误处理器
     FlutterError.onError = (details) {
       print(details);
@@ -158,20 +156,26 @@ class _MyAppState extends State<MyApp> {
   void _showError(String message) {
     // 使用LoggerUtil记录错误
     LoggerUtil().log(message, level: 'ERROR');
-    
+
     if (!mounted) return;
-    
+
     // 使用runZonedGuarded捕获可能的异步错误
-    runZonedGuarded(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        scaffoldMessengerKey.currentState?.showSnackBar(
-          SnackBar(content: Text(message), duration: const Duration(seconds: 5)),
-        );
-      });
-    }, (error, stack) {
-      debugPrint('Failed to show error: $error\nOriginal error: $message');
-    });
+    runZonedGuarded(
+      () {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          scaffoldMessengerKey.currentState?.showSnackBar(
+            SnackBar(
+              content: Text(message),
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        });
+      },
+      (error, stack) {
+        debugPrint('Failed to show error: $error\nOriginal error: $message');
+      },
+    );
   }
 
   void _setupAutoUpdate() {
