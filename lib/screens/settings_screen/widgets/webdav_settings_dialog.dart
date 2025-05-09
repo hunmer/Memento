@@ -135,7 +135,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       _isConnecting = true;
     });
 
-    final success = await widget.controller.syncLocalToWebDAV();
+    final success = await widget.controller.syncLocalToWebDAV(context);
 
     setState(() {
       _isConnecting = false;
@@ -150,7 +150,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       _isConnecting = true;
     });
 
-    final success = await widget.controller.syncWebDAVToLocal();
+    final success = await widget.controller.syncWebDAVToLocal(context);
 
     setState(() {
       _isConnecting = false;

@@ -75,7 +75,7 @@ class BackupService {
           _controller.exportAllData();
           break;
         case 'webdav':
-          // WebDAV设置由SettingsScreen处理
+          _controller.uploadAllToWebDAV();
           break;
       }
       _controller.resetBackupCheckDate();

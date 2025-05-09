@@ -23,8 +23,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = SettingsScreenController(context);
-    _webdavController = WebDAVController(context);
+    _controller = SettingsScreenController();
+    _webdavController = WebDAVController();
+    
     _controller.addListener(() {
       if (mounted) {
         setState(() {});
@@ -38,8 +39,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 在这里初始化主题，这是安全的，因为此时 BuildContext 已经准备好了
-    _controller.initTheme();
+    // 在这里初始化控制器和主题，这是安全的，因为此时 BuildContext 已经准备好了
+    _controller.initializeControllers(context);
+    _controller.initTheme(context);
+    _backupService = BackupService(_controller, context);
   }
 
   @override
@@ -82,6 +85,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_controller.isInitialized() || _backupService == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
     return Scaffold(
       appBar: AppBar(title: const Text('设置')),
       body: ListView(
@@ -112,7 +119,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.upload),
             title: const Text('导出应用数据'),
             subtitle: const Text('将插件数据导出到文件'),
-            onTap: _controller.exportData,
+            onTap: () {
+              if (mounted) {
+                _controller.exportData(context);
+              }
+            },
           ),
           ListTile(
             leading: const Icon(Icons.download),
@@ -143,7 +154,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _isWebDAVConnected
                     ? const Icon(Icons.check_circle, color: Colors.green)
                     : null,
-            onTap: _showWebDAVSettings,
+            onTap: () {
+              if (mounted) {
+                _showWebDAVSettings();
+              }
+            },
           ),
           const Divider(),
           FutureBuilder<bool>(

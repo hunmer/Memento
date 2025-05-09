@@ -51,22 +51,36 @@ class AppDrawer extends StatelessWidget {
                                   leading: const Icon(Icons.settings),
                                   title: const Text('插件设置'),
                                   onTap: () {
+                                  // 添加安全检查，防止黑屏
+                                  if (context.mounted) {
                                     Navigator.pop(context); // 关闭抽屉
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (context) => Scaffold(
+                                    // 添加加载状态管理
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) => const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                    // 延迟确保加载动画显示
+                                    Future.microtask(() {
+                                      if (context.mounted) {
+                                        Navigator.of(context).pop(); // 关闭加载
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => Scaffold(
                                               appBar: AppBar(
                                                 title: Text('${plugin.name}设置'),
                                               ),
-                                              body: plugin.buildSettingsView(
-                                                context,
-                                              ),
+                                              body: plugin.buildSettingsView(context),
                                             ),
-                                      ),
-                                    );
-                                  },
+                                          ),
+                                        );
+                                      }
+                                    });
+                                  }
+                                },
                                 ),
                               ],
                             ),
@@ -82,11 +96,10 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings),
             title: const Text('设置'),
             onTap: () {
-              Navigator.pop(context); // 关闭抽屉
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                );
             },
           ),
         ],

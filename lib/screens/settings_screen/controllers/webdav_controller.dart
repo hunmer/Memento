@@ -8,13 +8,12 @@ import 'dart:async';
 import '../widgets/backup_progress_dialog.dart';
 
 class WebDAVController {
-  final BuildContext context;
   webdav.Client? _client;
   bool _isConnected = false;
   final _progressController = StreamController<BackupProgress>.broadcast();
   Stream<BackupProgress> get progressStream => _progressController.stream;
 
-  WebDAVController(this.context);
+  WebDAVController();
 
   void dispose() {
     _progressController.close();
@@ -116,7 +115,7 @@ class WebDAVController {
   }
 
   // 从本地同步到WebDAV
-  Future<bool> syncLocalToWebDAV() async {
+  Future<bool> syncLocalToWebDAV(BuildContext context) async {
     if (!_isConnected || _client == null) {
       debugPrint('WebDAV未连接或客户端为空');
       return false;
@@ -282,15 +281,12 @@ class WebDAVController {
       return true;
     } catch (e) {
       debugPrint('上传目录失败: $e');
-
-      // 只记录错误日志，不显示SnackBar
-      if (!context.mounted) return false;
       return false;
     }
   }
 
   // 从WebDAV同步到本地
-  Future<bool> syncWebDAVToLocal() async {
+  Future<bool> syncWebDAVToLocal(BuildContext context) async {
     if (!_isConnected || _client == null) {
       return false;
     }
@@ -438,9 +434,6 @@ class WebDAVController {
       return await downloadFiles(remotePath, localDir);
     } catch (e) {
       debugPrint('下载目录失败: $e');
-
-      // 只记录错误日志，不显示SnackBar
-      if (!context.mounted) return false;
       return false;
     }
   }
@@ -468,9 +461,6 @@ class WebDAVController {
       return config;
     } catch (e) {
       debugPrint('获取WebDAV配置失败: $e');
-
-      // 只记录错误日志，不显示SnackBar
-      if (!context.mounted) return null;
     }
     return null;
   }

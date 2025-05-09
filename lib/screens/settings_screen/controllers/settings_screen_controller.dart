@@ -10,25 +10,34 @@ import 'auto_update_controller.dart';
 import 'package:Memento/widgets/backup_time_picker.dart';
 
 class SettingsScreenController extends ChangeNotifier {
-  final BuildContext context;
   final BaseSettingsController _baseController;
-  final ExportController _exportController;
-  final ImportController _importController;
-  final FullBackupController _fullBackupController;
-  final WebDAVSyncController _webdavSyncController;
-  final AutoUpdateController _autoUpdateController;
+  late ExportController _exportController;
+  late ImportController _importController;
+  late FullBackupController _fullBackupController;
+  late WebDAVSyncController _webdavSyncController;
+  late AutoUpdateController _autoUpdateController;
   late SharedPreferences _prefs;
   BackupSchedule? _backupSchedule;
   DateTime? _lastBackupCheckDate;
+  BuildContext? _context;
+  bool _initialized = false;
 
-  SettingsScreenController(this.context)
-    : _baseController = BaseSettingsController(context),
-      _exportController = ExportController(context),
-      _importController = ImportController(context),
-      _fullBackupController = FullBackupController(context),
-      _webdavSyncController = WebDAVSyncController(context),
-      _autoUpdateController = AutoUpdateController(context) {
+  bool isInitialized() => _initialized;
+
+  SettingsScreenController()
+    : _baseController = BaseSettingsController() {
     initPrefs();
+  }
+
+  void initializeControllers(BuildContext context) {
+    _context = context;
+    _exportController = ExportController(context);
+    _importController = ImportController(context);
+    _fullBackupController = FullBackupController(context);
+    _webdavSyncController = WebDAVSyncController(context);
+    _autoUpdateController = AutoUpdateController(context);
+    _initialized = true;
+    notifyListeners();
   }
 
   Future<void> initPrefs() async {
@@ -73,7 +82,12 @@ class SettingsScreenController extends ChangeNotifier {
 
   // 主题相关
   bool get isDarkMode => _baseController.isDarkMode;
-  Future<void> initTheme() => _baseController.initTheme();
+  Future<void> initTheme(BuildContext context) {
+    if (_context == null) {
+      initializeControllers(context);
+    }
+    return _baseController.initTheme(context);
+  }
   Future<void> toggleTheme() => _baseController.toggleTheme();
 
   // 语言相关
@@ -82,7 +96,7 @@ class SettingsScreenController extends ChangeNotifier {
   Future<void> toggleLanguage() => _baseController.toggleLanguage();
 
   // 数据导出
-  Future<void> exportData() => _exportController.exportData();
+  Future<void> exportData([BuildContext? context]) => _exportController.exportData(context ?? _context);
 
   // 数据导入
   Future<void> importData() => _importController.importData();
@@ -155,7 +169,7 @@ class SettingsScreenController extends ChangeNotifier {
           scheduledTime.hour, scheduledTime.minute
         );
         return now.isAfter(scheduledDateTime) && 
-               now.difference(lastCheck).inDays >= 0;
+               now.difference(lastCheck).inDays >= 1;
       case BackupScheduleType.weekly:
         // 每周指定日检查，且时间已过设定的时间点
         final currentDay = now.weekday;

@@ -11,16 +11,22 @@ import '../widgets/plugin_selection_dialog.dart';
 import 'permission_controller.dart';
 
 class ExportController {
-  final BuildContext context;
-  final bool _mounted;
-  final PermissionController _permissionController;
+  BuildContext? _context;
+  bool _mounted = true;
+  late PermissionController _permissionController;
 
-  ExportController(this.context)
-    : _mounted = true,
-      _permissionController = PermissionController(context);
+  ExportController(BuildContext context) {
+    initialize(context);
+  }
 
-  Future<void> exportData() async {
-    if (!_mounted) return;
+  void initialize(BuildContext context) {
+    _context = context;
+    _permissionController = PermissionController(context);
+  }
+
+  Future<void> exportData([BuildContext? context]) async {
+    final currentContext = context ?? _context;
+    if (currentContext == null || !_mounted) return;
     try {
       // 检查权限
       final hasPermission =
@@ -50,8 +56,8 @@ class ExportController {
 
       if (invalidPlugins.isNotEmpty) {
         if (!_mounted) return;
-        final proceed = await showDialog<bool>(
-          context: context,
+      final proceed = await showDialog<bool>(
+        context: currentContext,
           builder:
               (context) => AlertDialog(
                 title: const Text('数据完整性警告'),
@@ -79,7 +85,7 @@ class ExportController {
       if (!_mounted) return;
       // 显示插件选择对话框
       final selectedPlugins = await showDialog<List<String>>(
-        context: context,
+        context: currentContext,
         builder: (BuildContext context) {
           return PluginSelectionDialog(plugins: plugins);
         },
@@ -169,13 +175,13 @@ class ExportController {
       if (savePath != null) {
         if (!_mounted) return;
         ScaffoldMessenger.of(
-          context,
+          currentContext,
         ).showSnackBar(SnackBar(content: Text('数据已导出到: $savePath')));
       }
     } catch (e) {
       if (!_mounted) return;
       ScaffoldMessenger.of(
-        context,
+        currentContext,
       ).showSnackBar(SnackBar(content: Text('导出失败: $e')));
     }
   }
