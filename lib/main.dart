@@ -105,7 +105,7 @@ void main() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final context = navigatorKey.currentContext;
       if (context != null) {
-        backupService = BackupService(SettingsScreenController(context));
+        backupService = BackupService(SettingsScreenController(context), context);
       }
 
           // 插件初始化完成，发布事件

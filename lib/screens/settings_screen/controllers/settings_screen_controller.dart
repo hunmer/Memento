@@ -54,6 +54,13 @@ class SettingsScreenController extends ChangeNotifier {
         days: _prefs.getStringList('backup_days')?.map(int.parse).toList() ?? [],
         monthDays: _prefs.getStringList('backup_month_days')?.map(int.parse).toList() ?? [],
       );
+    } else {
+      // 设置默认备份计划 - 每天凌晨2点备份
+      _backupSchedule = BackupSchedule(
+        type: BackupScheduleType.daily,
+        time: TimeOfDay(hour: 2, minute: 0),
+      );
+      await setBackupSchedule(_backupSchedule!);
     }
   }
 
@@ -125,7 +132,10 @@ class SettingsScreenController extends ChangeNotifier {
 
   Future<bool> shouldPerformBackup() async {
     if (_backupSchedule == null) return false;
-    if (_lastBackupCheckDate == null) return false; // 首次设置时不立即备份
+    if (_lastBackupCheckDate == null) {
+      await resetBackupCheckDate(); // 首次设置时初始化检查时间
+      return false; 
+    }
 
     final now = DateTime.now();
     final lastCheck = _lastBackupCheckDate!;
@@ -182,20 +192,4 @@ class SettingsScreenController extends ChangeNotifier {
 
   // 获取当前备份计划
   BackupSchedule? get backupSchedule => _backupSchedule;
-
-  // 显示备份选项对话框
-  Future<void> showBackupOptionsDialog() async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return BackupTimePicker(
-          initialSchedule: _backupSchedule,
-          onScheduleSelected: (schedule) async {
-            await setBackupSchedule(schedule);
-            Navigator.of(context).pop();
-          },
-        );
-      },
-    );
-  }
 }
