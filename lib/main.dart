@@ -74,6 +74,7 @@ void main() async {
 
     // 注册内置插件
     final plugins = [
+      OpenAIPlugin(), // 添加OpenAI插件
       ChatPlugin.instance,
       DiaryPlugin.instance,
       ActivityPlugin.instance,
@@ -90,7 +91,6 @@ void main() async {
       NotesPlugin(), // 添加Notes插件
       GoodsPlugin.instance, // 添加物品插件
       BillPlugin(), // 添加账单插件
-      OpenAIPlugin(), // 添加OpenAI插件
     ];
 
     // 遍历并注册插件

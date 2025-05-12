@@ -1,6 +1,5 @@
 
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
-import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/widgets/store_view.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/base_plugin.dart';
@@ -29,47 +28,26 @@ class StorePlugin extends BasePlugin {
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
-    // 注册插件到应用
+    await pluginManager.registerPlugin(this);
   }
+
+  StoreController? _controller;
 
   @override
   Future<void> initialize() async {
-    // 初始化测试数据
-    final controller = StoreController();
-    
-    // 添加示例商品
-    controller.addProduct(Product(
-      id: '1',
-      name: '精美笔记本',
-      description: '高品质纸质笔记本',
-      image: 'https://example.com/notebook.jpg',
-      stock: 10,
-      price: 500,
-      exchangeStart: DateTime.now().subtract(const Duration(days: 1)),
-      exchangeEnd: DateTime.now().add(const Duration(days: 30)),
-      useDuration: 90,
-    ));
-
-    controller.addProduct(Product(
-      id: '2',
-      name: '马克杯',
-      description: '公司定制马克杯',
-      image: 'https://example.com/mug.jpg',
-      stock: 5,
-      price: 800,
-      exchangeStart: DateTime.now().subtract(const Duration(days: 1)),
-      exchangeEnd: DateTime.now().add(const Duration(days: 15)),
-      useDuration: 180,
-    ));
-
-    // 添加初始积分
-    controller.addPoints(2000, '初始积分');
+    _controller = StoreController(this);
+    await _controller!.loadFromStorage();
   }
 
   @override
   Widget buildMainView(BuildContext context) {
+    _controller ??= StoreController();
     return StoreView(
-      controller: StoreController(),
+      controller: _controller!,
+      onDataChanged: (products, points) async {
+        // 当数据变化时保存到本地
+        await _controller!.saveToStorage();
+      },
     );
   }
 }

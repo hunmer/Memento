@@ -1,4 +1,6 @@
 
+import 'dart:io';
+import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 
@@ -27,9 +29,30 @@ class ProductCard extends StatelessWidget {
               // 商品图片
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: Image.network(
-                  product.image,
-                  fit: BoxFit.cover,
+                child: FutureBuilder<String>(
+                  future: ImageUtils.getAbsolutePath(product.image),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      if (snapshot.hasData) {
+                        final imagePath = snapshot.data!;
+                        return isNetworkImage(imagePath)
+                            ? Image.network(
+                                imagePath,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildErrorImage(),
+                              )
+                            : Image.file(
+                                File(imagePath),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildErrorImage(),
+                              );
+                      }
+                      return _buildErrorImage();
+                    }
+                    return _buildLoadingIndicator();
+                  },
                 ),
               ),
               // 商品信息
@@ -80,5 +103,17 @@ class ProductCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  bool isNetworkImage(String path) {
+    return path.startsWith('http://') || path.startsWith('https://');
+  }
+
+  Widget _buildLoadingIndicator() {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  Widget _buildErrorImage() {
+    return const Icon(Icons.broken_image, size: 48);
   }
 }
