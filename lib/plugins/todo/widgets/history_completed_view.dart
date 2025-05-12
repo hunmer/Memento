@@ -1,4 +1,5 @@
 
+import 'package:Memento/plugins/todo/widgets/history_task_detail_view.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
 import '../controllers/task_controller.dart';
@@ -33,17 +34,29 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
         itemCount: widget.completedTasks.length,
         itemBuilder: (context, index) {
           final task = widget.completedTasks[index];
-          return ListTile(
-            title: Text(task.title),
-            subtitle: Text(
-              'Completed on: ${task.completedDate?.toLocal()}',
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                await widget.taskController.removeFromHistory(task.id);
-                setState(() {});
-              },
+          return InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HistoryTaskDetailView(
+                    task: task,
+                  ),
+                ),
+              );
+            },
+            child: ListTile(
+              title: Text(task.title),
+              subtitle: Text(
+                'Completed on: ${task.completedDate?.toLocal()}',
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () async {
+                  await widget.taskController.removeFromHistory(task.id);
+                  setState(() {});
+                },
+              ),
             ),
           );
         },
