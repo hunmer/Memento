@@ -23,6 +23,7 @@ class _RecordDialogState extends State<RecordDialog> {
   late DateTime _recordedAt;
   late double _value;
   late String? _note;
+  bool _autoCalculateDiff = false;
 
   @override
   void initState() {
@@ -50,24 +51,36 @@ class _RecordDialogState extends State<RecordDialog> {
                 onTap: () => _pickDateTime(),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                initialValue: _value.toString(),
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: '增加值 (${widget.goal.unitType})',
-                  border: const OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '请输入增加值';
-                  }
-                  final numValue = double.tryParse(value);
-                  if (numValue == null || numValue <= 0) {
-                    return '请输入有效的正数';
-                  }
-                  return null;
-                },
-                onSaved: (value) => _value = double.parse(value!),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: TextEditingController(text: _value.toString()),
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: '增加值 (${widget.goal.unitType})',
+                        border: const OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入增加值';
+                        }
+                        final numValue = double.tryParse(value);
+                        if (numValue == null || numValue <= 0) {
+                          return '请输入有效的正数';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) => _value = double.parse(value!),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _calculateDifference,
+                    child: const Text('计算差值'),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -123,6 +136,46 @@ class _RecordDialogState extends State<RecordDialog> {
         time.minute,
       );
     });
+  }
+
+  void _calculateDifference() async {
+    final textController = TextEditingController();
+    final targetValue = await showDialog<double>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('计算差值'),
+          content: TextFormField(
+            controller: textController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: '输入目标值',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                final value = double.tryParse(textController.text);
+                if (value != null) {
+                  Navigator.pop(context, value);
+                }
+              },
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (targetValue != null) {
+      setState(() {
+        _value = targetValue - widget.goal.currentValue;
+      });
+    }
   }
 
   void _submit() {

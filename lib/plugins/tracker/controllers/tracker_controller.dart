@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
@@ -95,19 +97,6 @@ class TrackerController with ChangeNotifier {
     notifyListeners();
   }
 
-  // 记录管理
-  Future<void> addRecord(Record record, Goal goal) async {
-    Record.validate(record, goal);
-    _records.add(record);
-    await _saveRecords();
-    
-    // 更新目标当前值
-    final updatedGoal = goal.copyWith(
-      currentValue: goal.currentValue + record.value
-    );
-    await updateGoal(goal.id, updatedGoal);
-  }
-
   // 进度计算
   double calculateProgress(Goal goal) {
     return goal.currentValue / goal.targetValue;
@@ -163,6 +152,20 @@ class TrackerController with ChangeNotifier {
     return _goals.length;
   }
 
+  // 获取特定目标的记录流
+  Stream<List<Record>> watchRecordsForGoal(String goalId) {
+    return Stream.fromFuture(Future.value(_records.where((r) => r.goalId == goalId).toList()))
+      .asyncExpand((_) {
+        final controller = StreamController<List<Record>>();
+        void update() {
+          controller.add(_records.where((r) => r.goalId == goalId).toList());
+        }
+        addListener(update);
+        controller.onCancel = () => removeListener(update);
+        return controller.stream;
+      });
+  }
+
   // 获取特定目标的记录
   Future<List<Record>> getRecordsForGoal(String goalId) async {
     return _records.where((r) => r.goalId == goalId).toList();
@@ -192,5 +195,41 @@ class TrackerController with ChangeNotifier {
     return _goals.where((g) => 
       g.createdAt.isAfter(firstDayOfMonth)
     ).length;
+  }
+
+  // 清空特定目标的所有记录
+  Future<void> clearRecordsForGoal(String goalId) async {
+    final goal = _goals.firstWhere((g) => g.id == goalId);
+    _records.removeWhere((r) => r.goalId == goalId);
+    await _saveRecords();
+    // 重置目标当前值
+    await updateGoal(goalId, goal.copyWith(currentValue: 0));
+    notifyListeners();
+  }
+
+  // 删除单条记录
+  Future<void> deleteRecord(String recordId) async {
+    final record = _records.firstWhere((r) => r.id == recordId);
+    final goal = _goals.firstWhere((g) => g.id == record.goalId);
+    _records.removeWhere((r) => r.id == recordId);
+    await _saveRecords();
+    // 更新目标当前值
+    await updateGoal(goal.id, goal.copyWith(
+      currentValue: goal.currentValue - record.value
+    ));
+    notifyListeners();
+  }
+
+  // 添加记录并更新目标值
+  Future<void> addRecord(Record record, Goal goal) async {
+    Record.validate(record, goal);
+    _records.add(record);
+    await _saveRecords();
+    // 更新目标当前值
+    final updatedGoal = goal.copyWith(
+      currentValue: goal.currentValue + record.value
+    );
+    await updateGoal(goal.id, updatedGoal);
+    notifyListeners();
   }
 }

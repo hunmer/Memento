@@ -23,14 +23,16 @@ class WeeklyCheckinCircles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final weekdays = ['一', '二', '三', '四', '五', '六', '日'];
     final now = DateTime.now();
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-
+    final weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+    final startDate = now.subtract(const Duration(days: 3));
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(7, (index) {
-        final date = startOfWeek.add(Duration(days: index));
+        final date = startDate.add(Duration(days: index));
+        final weekdayIndex = date.weekday - 1;
+        final weekdayStr = weekdays[weekdayIndex];
         final isToday = date.year == now.year &&
             date.month == now.month &&
             date.day == now.day;
@@ -44,8 +46,8 @@ class WeeklyCheckinCircles extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Text(
-                  weekdays[index],
+                  Text(
+                  weekdayStr,
                   style: TextStyle(
                     fontSize: 12,
                     color: isToday
@@ -53,7 +55,7 @@ class WeeklyCheckinCircles extends StatelessWidget {
                         : Theme.of(context).hintColor,
                   ),
                 ),
-                if (_isReminderDay(index + 1))
+                if (_isReminderDay(date.weekday))
                   Positioned(
                     top: -4,
                     right: -4,

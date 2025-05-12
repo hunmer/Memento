@@ -56,10 +56,44 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: controller.goals.length,
         itemBuilder: (context, index) {
           final goal = controller.goals[index];
-          return GoalCard(
-            goal: goal,
-            controller: controller,
-            onTap: () => TrackerPlugin.instance.openGoalDetail(context, goal),
+          return Dismissible(
+            key: Key(goal.id),
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
+            confirmDismiss: (direction) async {
+              return await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('确认删除'),
+                  content: Text('确定要删除目标"${goal.name}"吗？'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('取消'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('删除', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+            },
+            onDismissed: (direction) {
+              controller.deleteGoal(goal.id);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('已删除目标"${goal.name}"')),
+              );
+            },
+            child: GoalCard(
+              goal: goal,
+              controller: controller,
+              onTap: () => TrackerPlugin.instance.openGoalDetail(context, goal),
+            ),
           );
         },
       ),

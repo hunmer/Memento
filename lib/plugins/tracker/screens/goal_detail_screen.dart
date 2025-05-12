@@ -14,12 +14,40 @@ class GoalDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.read<TrackerController>();
-
-    return Scaffold(
+    return Consumer<TrackerController>(
+      builder: (context, controller, child) {
+        return Scaffold(
       appBar: AppBar(
         title: Text(goal.name),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('确认清空'),
+                  content: const Text('确定要清空所有记录吗？此操作不可撤销。'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('取消'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('确认'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed == true) {
+                await controller.clearRecordsForGoal(goal.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('记录已清空')),
+                );
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
@@ -49,7 +77,7 @@ class GoalDetailScreen extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             const SizedBox(height: 16),
-            Text('当前进度: ${goal.currentValue}/${goal.targetValue}${goal.unitType}'),
+            Text('当前进度: ${controller.goals.firstWhere((g) => g.id == goal.id).currentValue}/${goal.targetValue}${goal.unitType}'),
             const SizedBox(height: 16),
             if (goal.reminderTime != null)
               Text('提醒时间: ${goal.reminderTime}'),
@@ -59,21 +87,62 @@ class GoalDetailScreen extends StatelessWidget {
             Expanded(
               child: FutureBuilder<List<Record>>(
                 future: controller.getRecordsForGoal(goal.id),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+                builder: (context, initialSnapshot) {
+                  if (initialSnapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('暂无记录'));
-                  }
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final record = snapshot.data![index];
-                      return ListTile(
-                        title: Text('${record.value}${goal.unitType}'),
-                        subtitle: Text(record.recordedAt.toLocal().toString()),
-                        trailing: Text(record.note ?? ''),
+                  
+                  return StreamBuilder<List<Record>>(
+                    stream: controller.watchRecordsForGoal(goal.id),
+                    initialData: initialSnapshot.data,
+                    builder: (context, snapshot) {
+                      final records = snapshot.data ?? [];
+                      if (records.isEmpty) {
+                        return const Center(child: Text('暂无记录'));
+                      }
+                      return ListView.builder(
+                        itemCount: records.length,
+                        itemBuilder: (context, index) {
+                          final record = records[index];
+                          return ListTile(
+                            title: Text('${record.value}${goal.unitType}'),
+                            subtitle: Text(record.recordedAt.toLocal().toString()),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(record.note ?? ''),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, size: 20),
+                                  onPressed: () async {
+                                    final confirmed = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('确认删除'),
+                                        content: const Text('确定要删除这条记录吗？'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, false),
+                                            child: const Text('取消'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, true),
+                                            child: const Text('确认'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    if (confirmed == true) {
+                                      await controller.deleteRecord(record.id);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('记录已删除')),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       );
                     },
                   );
@@ -95,6 +164,8 @@ class GoalDetailScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
     );
   }
 }

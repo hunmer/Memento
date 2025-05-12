@@ -175,8 +175,18 @@ class CheckinItem {
 
   // 从Map创建对象
   factory CheckinItem.fromJson(Map<String, dynamic> json) {
-    // 使用预定义的MaterialIcons常量
-    final icon = materialIcons[json['icon'] as int] ?? Icons.help_outline;
+    // 尝试从预定义的MaterialIcons常量中查找图标
+    IconData icon;
+    final iconCodePoint = json['icon'] as int;
+    if (materialIcons.containsKey(iconCodePoint)) {
+      icon = materialIcons[iconCodePoint]!;
+    } else {
+      // 如果不在预定义列表中，直接创建IconData
+      icon = IconData(
+        iconCodePoint,
+        fontFamily: 'MaterialIcons',
+      );
+    }
 
     return CheckinItem(
       id: json['id'],
