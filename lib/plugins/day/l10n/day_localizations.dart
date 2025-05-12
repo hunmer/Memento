@@ -37,6 +37,9 @@ abstract class DayLocalizations {
   String get information;
   String get appearance;
   String get preview;
+  String get upcomingSort;
+  String get recentSort;
+  String get sortOptions;
 }
 
 /// 中文实现
@@ -128,6 +131,15 @@ class DayLocalizationsZh implements DayLocalizations {
 
   @override
   String get preview => '预览';
+  
+  @override
+  String get upcomingSort => '即将发生';
+  
+  @override
+  String get recentSort => '最近添加';
+  
+  @override
+  String get sortOptions => '排序选项';
 }
 
 /// 英文实现
@@ -219,6 +231,15 @@ class DayLocalizationsEn implements DayLocalizations {
 
   @override
   String get preview => 'Preview';
+  
+  @override
+  String get upcomingSort => 'Upcoming';
+  
+  @override
+  String get recentSort => 'Recently Added';
+  
+  @override
+  String get sortOptions => 'Sort Options';
 }
 
 /// 本地化代理

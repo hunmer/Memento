@@ -22,6 +22,11 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
   void initState() {
     super.initState();
     controller = widget.controller;
+    // 恢复最后一次排序设置
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await controller.restoreLastSortSetting();
+      if (mounted) setState(() {});
+    });
   }
 
   void _handleStateChanged() {
@@ -50,17 +55,11 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           // 排序按钮
           IconButton(
             icon: const Icon(Icons.sort),
-            onPressed: () {
-              controller.showGroupSortDialog();
+            onPressed: () async {
+              await controller.showGroupSortDialog();
+              if (mounted) setState(() {});
             },
             tooltip: '排序',
-          ),
-          IconButton(
-            icon: Icon(controller.isEditMode ? Icons.done : Icons.edit),
-            onPressed: () {
-              controller.toggleEditMode();
-              _handleStateChanged();
-            },
           ),
           IconButton(
             icon: const Icon(Icons.folder),

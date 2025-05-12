@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/checkin_item.dart';
 import '../screens/checkin_form_screen.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +14,6 @@ class CheckinListController {
   final List<CheckinItem> checkinItems;
   final Function() onStateChanged;
   final Map<String, bool> expandedGroups;
-  bool isEditMode = false;
   GroupSortType currentSortType = GroupSortType.upcoming;
   bool isReversed = false;
 
@@ -106,16 +106,41 @@ class CheckinListController {
     return {'total': items.length, 'completed': completed};
   }
 
+  // 恢复最后一次排序设置
+  Future<void> restoreLastSortSetting() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastSortTypeIndex = prefs.getInt('lastSortType');
+      final lastIsReversed = prefs.getBool('isReversed');
+      
+      if (lastSortTypeIndex != null) {
+        currentSortType = GroupSortType.values[lastSortTypeIndex];
+      }
+      if (lastIsReversed != null) {
+        isReversed = lastIsReversed;
+      }
+    } catch (e) {
+      print('恢复排序设置失败: $e');
+      // 使用默认排序设置
+      currentSortType = GroupSortType.upcoming;
+      isReversed = false;
+    }
+  }
+
   // 显示分组排序对话框
-  void showGroupSortDialog() {
-    showDialog(
+  Future<void> showGroupSortDialog() async {
+    await showDialog(
       context: context,
       builder: (context) => GroupSortDialog(
         currentSortType: currentSortType,
         isReversed: isReversed,
-        onSortChanged: (sortType, reversed) {
+        onSortChanged: (sortType, reversed) async {
           currentSortType = sortType;
           isReversed = reversed;
+          // 保存排序设置
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setInt('lastSortType', sortType.index);
+          await prefs.setBool('isReversed', reversed);
           onStateChanged();
         },
       ),
@@ -194,11 +219,6 @@ class CheckinListController {
         ],
       ),
     );
-  }
-
-  void toggleEditMode() {
-    isEditMode = !isEditMode;
-    onStateChanged();
   }
 
   // 显示打卡项目操作菜单

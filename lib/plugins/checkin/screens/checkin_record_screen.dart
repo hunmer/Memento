@@ -96,13 +96,6 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
                           itemBuilder: (context, recordIndex) {
                             final record = records[recordIndex];
                             return ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: widget.checkinItem.color,
-                                child: Text(
-                                  '${recordIndex + 1}',
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
                               title: Row(
                                 children: [
                                   Text(

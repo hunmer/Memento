@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';
 import '../../checkin_plugin.dart';
 import 'widgets/daily_checkin_chart.dart';
@@ -5,7 +6,12 @@ import 'widgets/checkin_streak_ranking.dart';
 import 'widgets/checkin_group_pie_chart.dart';
 
 class CheckinStatsScreen extends StatefulWidget {
-  const CheckinStatsScreen({super.key});
+  final List<CheckinItem> checkinItems;
+  
+  const CheckinStatsScreen({
+    super.key,
+    required this.checkinItems,
+  });
 
   @override
   State<CheckinStatsScreen> createState() => _CheckinStatsScreenState();
@@ -70,7 +76,7 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
                     height: 200,
                     child: DailyCheckinChart(
                       isMonthly: _isMonthly,
-                      checkinItems: CheckinPlugin.instance.checkinItems,
+                      checkinItems: widget.checkinItems,
                     ),
                   ),
                 ],
@@ -92,7 +98,7 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
                   ),
                   const SizedBox(height: 16),
                   CheckinStreakRanking(
-                    checkinItems: CheckinPlugin.instance.checkinItems,
+                    checkinItems: widget.checkinItems,
                   ),
                 ],
               ),
@@ -115,7 +121,7 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
                   SizedBox(
                     height: 200,
                     child: CheckinGroupPieChart(
-                      checkinItems: CheckinPlugin.instance.checkinItems,
+                      checkinItems: widget.checkinItems,
                     ),
                   ),
                 ],

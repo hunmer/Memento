@@ -18,6 +18,7 @@ class DayHomeScreen extends StatefulWidget {
 
 class _DayHomeScreenState extends State<DayHomeScreen> {
   Future<void> _showEditDialog(BuildContext context, [MemorialDay? memorialDay]) async {
+    if (!mounted) return;
     final result = await showDialog<dynamic>(
       context: context,
       builder: (context) => EditMemorialDayDialog(memorialDay: memorialDay),
@@ -31,7 +32,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
     // 用户点击删除按钮
     if (result == 'delete' && memorialDay != null) {
       if (!mounted) return;
-    final confirmed = await showDialog<bool>(
+      final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           title: Text(DayLocalizations.of(context).deleteMemorialDay),
@@ -55,7 +56,8 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
       if (confirmed == true && mounted) {
         await _controller.deleteMemorialDay(memorialDay.id);
       }
-    } else if (result != null && result is MemorialDay && mounted) {
+    } else if (result != null && result is MemorialDay) {
+      if (!mounted) return;
       // 用户保存了更改
       if (memorialDay != null) {
         await _controller.updateMemorialDay(result);
@@ -93,14 +95,25 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
         ),
               title: Text(DayLocalizations.of(context).memorialDays),
               actions: [
-                // 视图切换按钮
-                // 排序模式切换按钮
-                IconButton(
-                  icon: Icon(controller.useCustomOrder ? Icons.sort : Icons.sort_by_alpha),
-                  onPressed: controller.toggleSortMode,
-                  tooltip: controller.useCustomOrder 
-                    ? DayLocalizations.of(context).autoSort 
-                    : DayLocalizations.of(context).manualSort,
+                // 排序菜单
+                PopupMenuButton<SortMode>(
+                  icon: const Icon(Icons.sort),
+                  tooltip: DayLocalizations.of(context).sortOptions,
+                  onSelected: (mode) => controller.setSortMode(mode),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: SortMode.upcoming,
+                      child: Text(DayLocalizations.of(context).upcomingSort),
+                    ),
+                    PopupMenuItem(
+                      value: SortMode.recent,
+                      child: Text(DayLocalizations.of(context).recentSort),
+                    ),
+                    PopupMenuItem(
+                      value: SortMode.manual,
+                      child: Text(DayLocalizations.of(context).manualSort),
+                    ),
+                  ],
                 ),
                 // 视图切换按钮
                 IconButton(
@@ -133,11 +146,11 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
     }
 
     return controller.isCardView
-        ? _buildCardView(controller.memorialDays)
-        : _buildListView(controller.memorialDays);
+        ? _buildCardView(controller.memorialDays, controller.sortMode == SortMode.manual)
+        : _buildListView(controller.memorialDays, controller.sortMode == SortMode.manual);
   }
 
-  Widget _buildCardView(List<MemorialDay> days) {
+  Widget _buildCardView(List<MemorialDay> days, bool allowReorder) {
     return ReorderableGridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -154,7 +167,12 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
           onTap: () => _showEditDialog(context, days[index]),
         );
       },
-      onReorder: _controller.reorderMemorialDays,
+      onReorder: (oldIndex, newIndex) async {
+        // 仅在manualSort模式下允许排序
+        if (_controller.sortMode == SortMode.manual) {
+          await _controller.reorderMemorialDays(oldIndex, newIndex);
+        }
+      },
       // 自定义拖拽装饰，移除边框
       dragWidgetBuilder: (index, child) {
         return Material(
@@ -169,7 +187,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
     );
   }
 
-  Widget _buildListView(List<MemorialDay> days) {
+  Widget _buildListView(List<MemorialDay> days, bool allowReorder) {
     return ReorderableListView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: days.length,
@@ -180,7 +198,12 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
           onTap: () => _showEditDialog(context, days[index]),
         );
       },
-      onReorder: _controller.reorderMemorialDays,
+      onReorder: (oldIndex, newIndex) async {
+        // 仅在manualSort模式下允许排序
+        if (_controller.sortMode == SortMode.manual) {
+          await _controller.reorderMemorialDays(oldIndex, newIndex);
+        }
+      },
       // 自定义拖拽装饰，移除边框
       proxyDecorator: (child, index, animation) {
         return AnimatedBuilder(

@@ -10,6 +10,7 @@ class MemorialDay {
   final List<String> notes;
   final Color backgroundColor;
   final String? backgroundImageUrl;
+  final int sortIndex;
 
   MemorialDay({
     String? id,
@@ -19,11 +20,13 @@ class MemorialDay {
     List<String>? notes,
     Color? backgroundColor,
     this.backgroundImageUrl,
+    int? sortIndex,
   }) : 
     id = id ?? const Uuid().v4(),
     creationDate = creationDate ?? DateTime.now(),
     notes = notes ?? [],
-    backgroundColor = backgroundColor ?? _getRandomColor();
+    backgroundColor = backgroundColor ?? _getRandomColor(),
+    sortIndex = sortIndex ?? 0;
 
   // 计算剩余天数
   int get daysRemaining {
@@ -57,6 +60,7 @@ class MemorialDay {
       notes: List<String>.from(json['notes'] ?? []),
       backgroundColor: Color(json['backgroundColor']),
       backgroundImageUrl: json['backgroundImageUrl'],
+      sortIndex: json['sortIndex'] ?? 0,
     );
   }
 
@@ -70,6 +74,7 @@ class MemorialDay {
       'notes': notes,
       'backgroundColor': backgroundColor.value,
       'backgroundImageUrl': backgroundImageUrl,
+      'sortIndex': sortIndex,
     };
   }
 
@@ -101,6 +106,7 @@ class MemorialDay {
     List<String>? notes,
     Color? backgroundColor,
     String? backgroundImageUrl,
+    int? sortIndex,
   }) {
     return MemorialDay(
       id: id,

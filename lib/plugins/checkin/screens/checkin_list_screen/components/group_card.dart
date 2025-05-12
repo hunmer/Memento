@@ -57,13 +57,6 @@ class GroupCard extends StatelessWidget {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (controller.isEditMode) ...[
-                  // 分组拖拽手柄
-                  ReorderableDragStartListener(
-                    index: groupIndex,
-                    child: const Icon(Icons.drag_handle),
-                  ),
-                ],
                 IconButton(
                   icon: Icon(
                     isExpanded ? Icons.expand_less : Icons.expand_more,

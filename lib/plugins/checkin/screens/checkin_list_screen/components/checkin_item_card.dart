@@ -33,9 +33,7 @@ class CheckinItemCard extends StatelessWidget {
         horizontal: 8,
       ),
       child: InkWell(
-        onTap: controller.isEditMode
-            ? null
-            : () {
+        onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -46,9 +44,7 @@ class CheckinItemCard extends StatelessWidget {
                   ),
                 ).then((_) => onStateChanged());
               },
-        onLongPress: controller.isEditMode
-            ? null
-            : () {
+        onLongPress: () {
                 controller.showItemOptionsDialog(item);
               },
         child: Padding(
@@ -58,15 +54,6 @@ class CheckinItemCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  if (controller.isEditMode) ...[
-                    // 编辑模式下的拖拽手柄
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: const Icon(Icons.drag_handle),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-
                   // 项目名称、图标和描述
                   Expanded(
                     child: Row(
@@ -103,24 +90,6 @@ class CheckinItemCard extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // 编辑模式下的操作按钮
-                  if (controller.isEditMode) ...[
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        controller.showEditItemDialog(item);
-                        onStateChanged();
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        controller.deleteItem(item);
-                        onStateChanged();
-                      },
-                    ),
-                  ],
                 ],
               ),
 
@@ -155,24 +124,23 @@ class CheckinItemCard extends StatelessWidget {
               ),
 
               // 周打卡圆圈
-              if (!controller.isEditMode)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: WeeklyCheckinCircles(
-                    item: item,
-                    onDateSelected: (selectedDate) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => CheckinRecordDialog(
-                          item: item,
-                          controller: controller,
-                          onCheckinCompleted: onStateChanged,
-                          selectedDate: selectedDate,
-                        ),
-                      );
-                    },
-                  ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: WeeklyCheckinCircles(
+                  item: item,
+                  onDateSelected: (selectedDate) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => CheckinRecordDialog(
+                        item: item,
+                        controller: controller,
+                        onCheckinCompleted: onStateChanged,
+                        selectedDate: selectedDate,
+                      ),
+                    );
+                  },
                 ),
+              ),
             ],
           ),
         ),
@@ -207,7 +175,6 @@ class CheckinItemCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
-              if (!controller.isEditMode)
                 IconButton(
                   icon: const Icon(Icons.close, size: 16),
                   onPressed: () {

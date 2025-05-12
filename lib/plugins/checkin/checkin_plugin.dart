@@ -41,7 +41,14 @@ class _CheckinMainViewState extends State<CheckinMainView> {
             },
           ),
           // 统计页面
-          const CheckinStatsScreen(),
+          ValueListenableBuilder(
+            valueListenable: ValueNotifier(CheckinPlugin.instance.checkinItems),
+            builder: (context, _, __) {
+              return CheckinStatsScreen(
+                checkinItems: CheckinPlugin.instance.checkinItems,
+              );
+            },
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -138,13 +145,11 @@ class CheckinPlugin extends BasePlugin {
           pluginPath,
         );
         if (storedData.containsKey('items')) {
-          _checkinItems =
-              (storedData['items'] as List)
-                  .map(
-                    (item) =>
-                        CheckinItem.fromJson(item as Map<String, dynamic>),
-                  )
-                  .toList();
+          _checkinItems = List.from(
+        (storedData['items'] as List).map(
+          (item) => CheckinItem.fromJson(item as Map<String, dynamic>),
+        ),
+      );
         }
       }
     } catch (e) {
@@ -192,6 +197,8 @@ class CheckinPlugin extends BasePlugin {
       final itemsJson = _checkinItems.map((item) => item.toJson()).toList();
       final pluginPath = 'checkin/$_storageKey';
       await storage.writeJson(pluginPath, {'items': itemsJson});
+      // 通知监听者数据已更新
+      (ValueNotifier(_checkinItems)..value = _checkinItems).notifyListeners();
     } catch (e) {
       debugPrint('保存打卡项目失败: $e');
     }

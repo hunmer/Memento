@@ -27,32 +27,7 @@ class CheckinItemList extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: items.length,
       onReorder: (oldIndex, newIndex) {
-        if (controller.isEditMode) {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
 
-          // 获取当前分组的所有项目
-          final groupItems = List<CheckinItem>.from(items);
-
-          // 重新排序项目
-          final movedItem = groupItems.removeAt(oldIndex);
-          groupItems.insert(newIndex, movedItem);
-
-          // 更新 checkinItems
-          final allItems = controller.checkinItems;
-          final firstGroupItemIndex = allItems.indexWhere(
-            (item) => item.group == group,
-          );
-
-          // 移除旧的分组项目
-          allItems.removeWhere((item) => item.group == group);
-
-          // 在正确位置插入新的分组项目
-          allItems.insertAll(firstGroupItemIndex, groupItems);
-
-          onStateChanged();
-        }
       },
       itemBuilder: (context, index) {
         final item = items[index];

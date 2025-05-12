@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import '../models/memorial_day.dart';
 import '../day_plugin.dart';
 
+enum SortMode {
+  upcoming,  // 即将发生
+  recent,    // 最近添加
+  manual     // 手动排序
+}
+
 class DayController extends ChangeNotifier {
   final _plugin = DayPlugin.instance;
   final List<MemorialDay> _memorialDays = [];
@@ -42,7 +48,7 @@ class DayController extends ChangeNotifier {
       );
     } catch (e) {
       _isCardView = true;
-      _useCustomOrder = false;
+      _sortMode = SortMode.upcoming;
     }
   }
 
@@ -53,7 +59,7 @@ class DayController extends ChangeNotifier {
         '${_plugin.pluginDir}/view_preference.json',
         jsonEncode({
           'isCardView': _isCardView,
-          'useCustomOrder': _useCustomOrder,
+          'sortMode': _sortMode.toString(),
         }),
       );
     } catch (e) {
@@ -77,18 +83,22 @@ class DayController extends ChangeNotifier {
     try {
       final List<dynamic> jsonList = jsonDecode(content);
       _memorialDays.clear();
+      // 为每个项目分配sortIndex
       _memorialDays.addAll(
         jsonList.map((json) => MemorialDay.fromJson(json)).toList(),
       );
+      // 为未设置sortIndex的项目分配-1
+      for (var i = 0; i < _memorialDays.length; i++) {
+        if (_memorialDays[i].sortIndex == 0) {
+          _memorialDays[i] = _memorialDays[i].copyWith(sortIndex: -1);
+        }
+      }
     } catch (e) {
       debugPrint('解析纪念日数据失败: $e');
-      // 如果解析失败，保持空列表
       _memorialDays.clear();
     }
-    // 如果不使用自定义排序，则按剩余天数排序
-    if (!_useCustomOrder) {
-      _sortMemorialDays();
-    }
+    // 始终按当前排序模式排序
+    _sortMemorialDays();
   }
 
   // 保存纪念日数据
@@ -130,35 +140,60 @@ class DayController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 按剩余天数排序
+  // 按当前排序模式排序
   void _sortMemorialDays() {
-    _memorialDays.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+    switch (_sortMode) {
+      case SortMode.upcoming:
+        _memorialDays.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+        break;
+      case SortMode.recent:
+        _memorialDays.sort((a, b) => b.creationDate.compareTo(a.creationDate));
+        break;
+      case SortMode.manual:
+        _memorialDays.sort((a, b) {
+          // 未设置sortIndex的项目(-1)排在最后
+          if (a.sortIndex == -1) return 1;
+          if (b.sortIndex == -1) return -1;
+          return a.sortIndex.compareTo(b.sortIndex);
+        });
+        break;
+    }
   }
 
   // 手动重新排序纪念日
   Future<void> reorderMemorialDays(int oldIndex, int newIndex) async {
     if (oldIndex < newIndex) {
-      // 如果将项目向下移动，需要减1，因为移除oldIndex后，newIndex的位置会变化
       newIndex -= 1;
     }
     final item = _memorialDays.removeAt(oldIndex);
     _memorialDays.insert(newIndex, item);
+    
+    // 更新所有项目的sortIndex
+    for (var i = 0; i < _memorialDays.length; i++) {
+      _memorialDays[i] = _memorialDays[i].copyWith(
+        sortIndex: i,
+      );
+    }
+    
+    // 立即同步保存数据
     await _saveMemorialDays();
     notifyListeners();
   }
 
   // 设置自定义排序顺序
-  bool _useCustomOrder = false;
-  bool get useCustomOrder => _useCustomOrder;
+  SortMode _sortMode = SortMode.upcoming;
+  SortMode get sortMode => _sortMode;
 
-  // 切换排序模式
-  Future<void> toggleSortMode() async {
-    _useCustomOrder = !_useCustomOrder;
-    if (!_useCustomOrder) {
-      // 如果切换回自动排序，重新按剩余天数排序
-      _sortMemorialDays();
-    }
+  // 设置排序模式
+  Future<void> setSortMode(SortMode mode) async {
+    _sortMode = mode;
+    _sortMemorialDays();
+    // 保存排序模式到偏好设置
     await _saveViewPreference();
+    // 如果是手动排序模式，立即保存当前排序
+    if (_sortMode == SortMode.manual) {
+      await _saveMemorialDays();
+    }
     notifyListeners();
   }
 }
