@@ -16,6 +16,8 @@ class Task {
   List<Subtask> subtasks;
   List<DateTime> reminders;
 
+  final DateTime? completedDate;
+
   Task({
     required this.id,
     required this.title,
@@ -27,9 +29,38 @@ class Task {
     List<String>? tags,
     List<Subtask>? subtasks,
     List<DateTime>? reminders,
+    this.completedDate,
   })  : subtasks = subtasks ?? [],
         reminders = reminders ?? [],
         tags = tags ?? [];
+
+  Task copyWith({
+    String? id,
+    String? title,
+    String? description,
+    DateTime? createdAt,
+    DateTime? dueDate,
+    TaskPriority? priority,
+    TaskStatus? status,
+    List<String>? tags,
+    List<Subtask>? subtasks,
+    List<DateTime>? reminders,
+    DateTime? completedDate,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      dueDate: dueDate ?? this.dueDate,
+      priority: priority ?? this.priority,
+      status: status ?? this.status,
+      tags: tags ?? this.tags,
+      subtasks: subtasks ?? this.subtasks,
+      reminders: reminders ?? this.reminders,
+      completedDate: completedDate ?? this.completedDate,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -42,6 +73,7 @@ class Task {
         'tags': tags,
         'subtasks': subtasks.map((e) => e.toJson()).toList(),
         'reminders': reminders.map((e) => e.toIso8601String()).toList(),
+        'completedDate': completedDate?.toIso8601String(),
       };
 
   factory Task.fromJson(Map<String, dynamic> json) => Task(
@@ -61,6 +93,9 @@ class Task {
         reminders: (json['reminders'] as List)
             .map((e) => DateTime.parse(e))
             .toList(),
+        completedDate: json['completedDate'] != null 
+            ? DateTime.parse(json['completedDate']) 
+            : null,
       );
 
   Color get priorityColor {

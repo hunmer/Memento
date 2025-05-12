@@ -146,6 +146,13 @@ class TaskController extends ChangeNotifier {
       if (data.isNotEmpty) {
         final List<dynamic> taskList = data['tasks'] as List<dynamic>;
         _tasks = taskList.map((item) => Task.fromJson(item)).toList();
+        
+        // 加载已完成任务历史
+        if (data['completedTasks'] != null) {
+          final List<dynamic> completedTaskList = data['completedTasks'] as List<dynamic>;
+          _completedTasks = completedTaskList.map((item) => Task.fromJson(item)).toList();
+        }
+        
         _sortTasks();
         notifyListeners();
       }
@@ -158,7 +165,8 @@ class TaskController extends ChangeNotifier {
   Future<void> _saveTasks() async {
     try {
       final data = {
-        'tasks': _tasks.map((task) => task.toJson()).toList()
+        'tasks': _tasks.map((task) => task.toJson()).toList(),
+        'completedTasks': _completedTasks.map((task) => task.toJson()).toList(),
       };
       await _storage.write('$_storageDir/tasks.json', data);
     } catch (e) {
@@ -212,9 +220,26 @@ class TaskController extends ChangeNotifier {
     }
   }
 
+  // 已完成任务历史
+  List<Task> _completedTasks = [];
+
+  List<Task> get completedTasks => _completedTasks;
+
   // 删除任务
   Future<void> deleteTask(String taskId) async {
+    final task = _tasks.firstWhere((t) => t.id == taskId);
+    if (task.status == TaskStatus.done) {
+      // 如果是已完成任务，添加到历史记录
+      _completedTasks.add(task.copyWith(completedDate: DateTime.now()));
+    }
     _tasks.removeWhere((task) => task.id == taskId);
+    notifyListeners();
+    await _saveTasks();
+  }
+
+  // 从历史记录中删除任务
+  Future<void> removeFromHistory(String taskId) async {
+    _completedTasks.removeWhere((task) => task.id == taskId);
     notifyListeners();
     await _saveTasks();
   }

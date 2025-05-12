@@ -8,6 +8,7 @@ import 'add_task_button.dart';
 import 'task_detail_view.dart';
 import 'task_form.dart';
 import 'filter_dialog.dart';
+import 'history_completed_view.dart';
 
 class TodoMainView extends StatelessWidget {
   final TaskController taskController;
@@ -55,6 +56,21 @@ class TodoMainView extends StatelessWidget {
               taskController.isGridView ? Icons.view_list : Icons.grid_view,
             ),
             onPressed: taskController.toggleViewMode,
+          ),
+          // 历史完成按钮
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HistoryCompletedView(
+                    completedTasks: taskController.completedTasks,
+                    taskController: taskController,
+                  ),
+                ),
+              );
+            },
           ),
           // 排序按钮
           PopupMenuButton<SortBy>(
