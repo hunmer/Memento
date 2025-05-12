@@ -21,13 +21,21 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   late DateTime _selectedDay;
   Map<DateTime, DiaryEntry> _diaryEntries = {};
   CalendarFormat _calendarFormat = CalendarFormat.month;
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _focusedDay = DateTime.now();
     _selectedDay = DateTime.now();
+    _scrollController = ScrollController();
     _loadDiaryEntries();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDiaryEntries() async {
@@ -275,16 +283,18 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Expanded(
-                    child: Scrollbar(
-                      thumbVisibility: true, // 始终显示滚动条
-                      child: SingleChildScrollView(
-                        child: Text(
-                          _diaryEntries[_selectedDay]?.content ?? '',
+                    Expanded(
+                      child: Scrollbar(
+                        thumbVisibility: true, // 始终显示滚动条
+                        controller: _scrollController,
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          child: Text(
+                            _diaryEntries[_selectedDay]?.content ?? '',
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
