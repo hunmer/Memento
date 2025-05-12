@@ -380,10 +380,14 @@ class ActivityTimeline extends StatelessWidget {
             const SizedBox(width: 16),
             // 活动内容
             Expanded(
-              child: Dismissible(
-                key: Key('activity_${activity.id}'),
-                direction: DismissDirection.endToStart,
-                confirmDismiss: (direction) async {
+                child: Dismissible(
+                  key: Key('activity_${activity.id}'),
+                  direction: DismissDirection.endToStart,
+                  dismissThresholds: const {
+                    DismissDirection.endToStart: 0.4
+                  },
+                  movementDuration: const Duration(milliseconds: 200),
+                  confirmDismiss: (direction) async {
                   return await showDialog(
                     context: context,
                     builder: (BuildContext context) {

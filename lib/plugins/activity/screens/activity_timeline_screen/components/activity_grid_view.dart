@@ -354,6 +354,12 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                               return Expanded(
                                 child: MouseRegion(
                                   child: GestureDetector(
+                                    onTap: () {
+                                      final activity = _getActivityAtTime(time);
+                                      if (activity != null) {
+                                        widget.onActivityTap(activity);
+                                      }
+                                    },
                                     child: MetaData(
                                       metaData: time,
                                       child: Container(
