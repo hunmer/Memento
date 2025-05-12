@@ -207,6 +207,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   void didPopNext() {
     // 当从其他页面返回到HomeScreen时触发
     super.didPopNext();
+    setState(() {
+      _pluginsFuture = _initializePlugins();
+    });
   }
 
   @override
