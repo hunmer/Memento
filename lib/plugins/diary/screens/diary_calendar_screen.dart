@@ -45,7 +45,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
     }
   }
 
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+  void _onDayDoubleClicked(DateTime selectedDay, DateTime focusedDay) {
     // 检查选择的日期是否大于今天
     if (selectedDay.isAfter(DateTime.now())) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,7 +82,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                   initialContent:
                       _diaryEntries[normalizedSelectedDay]?.content ?? '',
                 ),
-          ),
+            ),
         )
         .then((_) => _loadDiaryEntries());
   }
@@ -102,14 +102,26 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       ),
       body: Column(
         children: [
-          TableCalendar<DiaryEntry>(
-            firstDay: DateTime.utc(2020, 1, 1),
-            daysOfWeekHeight: 40, // 设置星期行的高度
-            rowHeight: 85, // 设置日期行的高度
-            lastDay: DateTime.now(),
-            focusedDay: _focusedDay,
+          Expanded(
+            flex: 2, // 日历区域占2份空间
+            child: TableCalendar<DiaryEntry>(
+              firstDay: DateTime.utc(2020, 1, 1),
+              daysOfWeekHeight: 40, // 设置星期行的高度
+              rowHeight: 85, // 设置日期行的高度
+              lastDay: DateTime.now(),
+              focusedDay: _focusedDay,
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            onDaySelected: _onDaySelected,
+            onDaySelected: (selectedDay, focusedDay) {
+              // 保持选中状态更新
+              setState(() {
+                _selectedDay = DateTime(
+                  selectedDay.year,
+                  selectedDay.month,
+                  selectedDay.day,
+                );
+                _focusedDay = focusedDay;
+              });
+            },
             calendarFormat: _calendarFormat,
             onFormatChanged: (format) {
               setState(() {
@@ -182,10 +194,62 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                   ),
                 );
               },
+              dowBuilder: (context, day) {
+                return Center(
+                  child: Text(
+                    DateFormat.E().format(day),
+                    style: TextStyle(
+                      color: day.weekday == DateTime.saturday || day.weekday == DateTime.sunday
+                          ? Colors.red
+                          : null,
+                    ),
+                  ),
+                );
+              },
+              defaultBuilder: (context, day, focusedDay) {
+                DateTime normalizedDay = DateTime(day.year, day.month, day.day);
+                bool isSelected = isSameDay(_selectedDay, normalizedDay);
+                bool isToday = isSameDay(DateTime.now(), normalizedDay);
+                
+                return GestureDetector(
+                  onDoubleTap: () => _onDayDoubleClicked(day, focusedDay),
+                  child: Container(
+                    margin: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+                          : null,
+                      border: isToday
+                          ? Border.all(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                              width: 1.5,
+                            )
+                          : null,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : day.weekday == DateTime.saturday || day.weekday == DateTime.sunday
+                                  ? Colors.red
+                                  : null,
+                          fontWeight: isSelected || isToday ? FontWeight.bold : null,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          if (_diaryEntries.containsKey(_selectedDay))
-            Container(
+        ),
+        if (_diaryEntries.containsKey(_selectedDay))
+          Expanded(
+            flex: 1, // 预览区域占1份空间
+            child: Container(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,16 +275,22 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    _diaryEntries[_selectedDay]?.content ?? '',
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+                  Expanded(
+                    child: Scrollbar(
+                      thumbVisibility: true, // 始终显示滚动条
+                      child: SingleChildScrollView(
+                        child: Text(
+                          _diaryEntries[_selectedDay]?.content ?? '',
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-        ],
-      ),
+          ),
+      ],
+    ),
     );
   }
 }

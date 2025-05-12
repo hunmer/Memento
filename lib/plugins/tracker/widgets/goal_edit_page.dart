@@ -129,8 +129,12 @@ class _GoalEditPageState extends State<GoalEditPage> {
                 if (value == null || value.isEmpty) {
                   return '请输入目标值';
                 }
-                if (double.tryParse(value) == null) {
+                final numValue = double.tryParse(value);
+                if (numValue == null) {
                   return '请输入有效的数字';
+                }
+                if (numValue <= 0) {
+                  return '目标值不能小于等于0';
                 }
                 return null;
               },
@@ -156,7 +160,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
             DropdownButtonFormField<String>(
               value: _dateType,
               decoration: const InputDecoration(labelText: '时间类型'),
-              items: ['daily', 'weekly', 'monthly', 'custom']
+              items: ['none', 'daily', 'weekly', 'monthly', 'custom']
                   .map((type) => DropdownMenuItem(
                         value: type,
                         child: Text(_getDateTypeName(type)),
@@ -193,6 +197,8 @@ class _GoalEditPageState extends State<GoalEditPage> {
 
   String _getDateTypeName(String type) {
     switch (type) {
+      case 'none':
+        return '无';
       case 'daily':
         return '每日';
       case 'weekly':
