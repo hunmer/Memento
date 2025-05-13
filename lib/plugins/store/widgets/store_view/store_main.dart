@@ -44,14 +44,28 @@ class _StoreMainState extends State<StoreMain> {
         title: const Text('物品兑换'),
         actions: [
           if (_selectedIndex == 1)
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _showClearConfirmation(context),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.filter_alt),
+                  onPressed: () => _navigateToFilterPage(context),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () => _showClearConfirmation(context),
+                ),
+              ],
             ),
-          if (_selectedIndex == 0 || _selectedIndex == 1)
+          if (_selectedIndex == 0)
             IconButton(
               icon: const Icon(Icons.sort),
               onPressed: _showSortDialog,
+            ),
+          if (_selectedIndex == 2)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () => _showClearPointsLogsConfirmation(context),
             ),
         ],
       ),
@@ -114,7 +128,7 @@ class _StoreMainState extends State<StoreMain> {
         ),
         UserItems(
           controller: widget.controller,
-          key: const PageStorageKey('user_items'),
+          key: _userItemsKey,
         ),
         PointsHistory(
           controller: widget.controller,
@@ -226,42 +240,276 @@ class _StoreMainState extends State<StoreMain> {
       ),
     );
   }
+  
+  void _showClearPointsLogsConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认清空'),
+        content: const Text('确定要清空所有积分记录吗？此操作不可撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await widget.controller.clearPointsLogs();
+              if (mounted) setState(() {});
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('已清空积分记录')),
+              );
+            },
+            child: const Text('清空', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 
-  void _showSortDialog() {
+  final GlobalKey<State<UserItems>> _userItemsKey = GlobalKey();
+
+  void _navigateToFilterPage(BuildContext context) {
+    int statusIndex = 0; // 0:全部, 1:可使用, 2:已过期
+    String? nameFilter;
+    DateTimeRange? dateRange;
+    final priceMinController = TextEditingController();
+    final priceMaxController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('排序方式'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('按库存数'),
-                onTap: () {
-                  widget.controller.sortProducts('stock');
-                  setState(() {});
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('按单价'),
-                onTap: () {
-                  widget.controller.sortProducts('price');
-                  setState(() {});
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('按有效兑换期'),
-                onTap: () {
-                  widget.controller.sortProducts('exchangeEnd');
-                  setState(() {});
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+          title: const Text('物品筛选', textAlign: TextAlign.left),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('物品状态', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                StatefulBuilder(
+                  builder: (context, setDialogState) {
+                    return Column(
+                      children: [
+                        RadioListTile<int>(
+                          title: const Text('全部'),
+                          value: 0,
+                          groupValue: statusIndex,
+                          onChanged: (value) {
+                            setDialogState(() => statusIndex = value!);
+                          },
+                        ),
+                        RadioListTile<int>(
+                          title: const Text('可使用'),
+                          value: 1,
+                          groupValue: statusIndex,
+                          onChanged: (value) {
+                            setDialogState(() => statusIndex = value!);
+                          },
+                        ),
+                        RadioListTile<int>(
+                          title: const Text('已过期'),
+                          value: 2,
+                          groupValue: statusIndex,
+                          onChanged: (value) {
+                            setDialogState(() => statusIndex = value!);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                const Text('名称筛选', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                TextField(
+                  decoration: const InputDecoration(
+                    hintText: '输入物品名称关键词',
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (value) => nameFilter = value,
+                ),
+                const SizedBox(height: 24),
+                const Text('价格区间', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: priceMinController,
+                        decoration: const InputDecoration(
+                          hintText: '最低价',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: priceMaxController,
+                        decoration: const InputDecoration(
+                          hintText: '最高价',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                const Text('日期范围', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('选择日期范围'),
+                  subtitle: Text(dateRange == null 
+                    ? '未选择' 
+                    : '${dateRange!.start.toLocal().toString().split(' ')[0]} 至 ${dateRange!.end.toLocal().toString().split(' ')[0]}'),
+                  onTap: () async {
+                    final picked = await showDateRangePicker(
+                      context: context,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (picked != null) {
+                      setState(() => dateRange = picked);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                // 应用名称筛选
+                if (nameFilter != null && nameFilter!.isNotEmpty) {
+                  widget.controller.applyFilters(name: nameFilter);
+                }
+                
+                // 应用价格区间筛选
+                final minPrice = double.tryParse(priceMinController.text);
+                final maxPrice = double.tryParse(priceMaxController.text);
+                if (minPrice != null && maxPrice != null) {
+                  widget.controller.applyPriceFilter(minPrice, maxPrice);
+                }
+                
+                // 更新状态筛选
+                if (_userItemsKey.currentState != null) {
+                  (_userItemsKey.currentState as dynamic).updateStatusFilter(statusIndex);
+                }
+                
+                // 刷新界面
+                setState(() {});
+                Navigator.pop(context);
+              },
+              child: const Text('应用'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSortDialog() {
+    final priceRangeController = TextEditingController();
+    final nameFilterController = TextEditingController();
+    String? selectedSort;
+    DateTimeRange? dateRange;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('排序与筛选'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('排序方式', style: TextStyle(fontWeight: FontWeight.bold)),
+                RadioListTile<String>(
+                  title: const Text('按库存数'),
+                  value: 'stock',
+                  groupValue: selectedSort,
+                  onChanged: (value) => setState(() => selectedSort = value),
+                ),
+                RadioListTile<String>(
+                  title: const Text('按单价'),
+                  value: 'price',
+                  groupValue: selectedSort,
+                  onChanged: (value) => setState(() => selectedSort = value),
+                ),
+                RadioListTile<String>(
+                  title: const Text('按有效兑换期'),
+                  value: 'exchangeEnd',
+                  groupValue: selectedSort,
+                  onChanged: (value) => setState(() => selectedSort = value),
+                ),
+                const Divider(),
+                const Text('筛选条件', style: TextStyle(fontWeight: FontWeight.bold)),
+                TextField(
+                  controller: nameFilterController,
+                  decoration: const InputDecoration(
+                    labelText: '名称筛选',
+                    hintText: '输入商品名称关键词',
+                  ),
+                ),
+                TextField(
+                  controller: priceRangeController,
+                  decoration: const InputDecoration(
+                    labelText: '价格范围',
+                    hintText: '例如: 100-500',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                ListTile(
+                  title: const Text('日期范围'),
+                  subtitle: Text(dateRange == null 
+                    ? '未选择' 
+                    : '${dateRange!.start.toLocal().toString().split(' ')[0]} 至 ${dateRange!.end.toLocal().toString().split(' ')[0]}'),
+                  onTap: () async {
+                    final picked = await showDateRangePicker(
+                      context: context,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (picked != null) {
+                      setState(() => dateRange = picked);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (selectedSort != null) {
+                  widget.controller.sortProducts(selectedSort!);
+                }
+                // 应用筛选条件
+                widget.controller.applyFilters(
+                  name: nameFilterController.text,
+                  priceRange: priceRangeController.text,
+                  dateRange: dateRange,
+                );
+                setState(() {});
+                Navigator.pop(context);
+              },
+              child: const Text('应用'),
+            ),
+          ],
         );
       },
     );

@@ -1,14 +1,16 @@
 
 import 'package:Memento/plugins/store/models/used_item.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import '../models/product.dart';
 import '../models/user_item.dart';
 import '../models/points_log.dart';
 
-class StoreController {
+class StoreController with ChangeNotifier {
   List<Product> _products = [];
+  List<Product> _archivedProducts = [];
   List<UserItem> _userItems = [];
   List<PointsLog> _pointsLogs = [];
   int _userPoints = 0;
@@ -28,10 +30,17 @@ class StoreController {
 
   // 获取商品列表
   List<Product> get products => _products;
+  
+  // 获取存档商品列表
+  List<Product> get archivedProducts => _archivedProducts;
 
   // 获取可序列化的商品列表
   List<Map<String, dynamic>> get productsJson => 
       _products.map((p) => p.toJson()).toList();
+      
+  // 获取可序列化的存档商品列表
+  List<Map<String, dynamic>> get archivedProductsJson => 
+      _archivedProducts.map((p) => p.toJson()).toList();
 
   // 获取用户物品
   List<UserItem> get userItems => _userItems;
@@ -109,6 +118,7 @@ class StoreController {
     await saveProducts();
     await savePoints();
     await saveUserItems();
+    notifyListeners(); // 通知UI更新
     return true;
   }
 
@@ -130,6 +140,7 @@ class StoreController {
     }
     await saveUserItems();
     await saveUsedItems();
+    notifyListeners(); // 通知UI更新
     return true;
   }
 
@@ -210,9 +221,32 @@ class StoreController {
     await saveUserItems();
   }
 
+  // 存档产品
+  Future<void> archiveProduct(Product product) async {
+    // 从产品列表中移除
+    _products.removeWhere((p) => p.id == product.id);
+    // 添加到存档列表
+    _archivedProducts.add(product);
+    await saveProducts();
+    await saveArchivedProducts();
+    notifyListeners();
+  }
+  
+  // 恢复存档产品
+  Future<void> restoreProduct(Product product) async {
+    // 从存档列表中移除
+    _archivedProducts.removeWhere((p) => p.id == product.id);
+    // 添加到产品列表
+    _products.add(product);
+    await saveProducts();
+    await saveArchivedProducts();
+    notifyListeners();
+  }
+
   // 从存储加载数据
   Future<void> loadFromStorage() async {
     final storedProducts = await plugin.storage.read('store/products');
+    final storedArchivedProducts = await plugin.storage.read('store/archived_products');
     final storedPoints = await plugin.storage.read('store/points');
     final storedUserItems = await plugin.storage.read('store/user_items');
     await loadUsedItems();
@@ -224,6 +258,19 @@ class StoreController {
       for (final productData in productsList) {
         if (productData is Map<String, dynamic>) {
           addProductFromJson(productData);
+        }
+      }
+      
+      // 加载存档产品
+      if (storedArchivedProducts is Map<String, dynamic>) {
+        final archivedList = storedArchivedProducts['products'] is List 
+            ? storedArchivedProducts['products'] as List 
+            : [];
+        _archivedProducts.clear();
+        for (final productData in archivedList) {
+          if (productData is Map<String, dynamic>) {
+            _archivedProducts.add(Product.fromJson(productData));
+          }
         }
       }
     } catch (e) {
@@ -253,6 +300,11 @@ class StoreController {
   Future<void> saveProducts() async {
     await plugin.storage.write('store/products', {'products': productsJson});
   }
+  
+  // 保存存档商品数据
+  Future<void> saveArchivedProducts() async {
+    await plugin.storage.write('store/archived_products', {'products': archivedProductsJson});
+  }
 
   // 保存积分数据
   Future<void> savePoints() async {
@@ -272,6 +324,7 @@ class StoreController {
   // 完整保存所有数据
   Future<void> saveToStorage() async {
     await saveProducts();
+    await saveArchivedProducts();
     await savePoints();
     await saveUserItems();
     await saveUsedItems();
@@ -280,6 +333,7 @@ class StoreController {
   // 初始化默认数据
   Future<void> initializeDefaultData() async {
     _products.clear();
+    _archivedProducts.clear();
     _userPoints = 0;
     await saveToStorage();
   }
@@ -288,5 +342,54 @@ class StoreController {
   Future<void> clearUserItems() async {
     _userItems.clear();
     await saveUserItems();
+  }
+  
+  // 清空积分记录
+  Future<void> clearPointsLogs() async {
+    _pointsLogs.clear();
+    await savePoints();
+    notifyListeners();
+  }
+
+  // 应用价格筛选
+  void applyPriceFilter(double minPrice, double maxPrice) {
+    _products = _products.where((p) => 
+      p.price >= minPrice && p.price <= maxPrice
+    ).toList();
+    notifyListeners();
+  }
+
+  // 应用筛选条件
+  void applyFilters({
+    String? name,
+    String? priceRange,
+    DateTimeRange? dateRange,
+  }) {
+    if (name != null && name.isNotEmpty) {
+      _products = _products.where((p) => 
+        p.name.toLowerCase().contains(name.toLowerCase())
+      ).toList();
+    }
+
+    if (priceRange != null && priceRange.isNotEmpty) {
+      final parts = priceRange.split('-');
+      if (parts.length == 2) {
+        final min = int.tryParse(parts[0]);
+        final max = int.tryParse(parts[1]);
+        if (min != null && max != null) {
+          _products = _products.where((p) => 
+            p.price >= min && p.price <= max
+          ).toList();
+        }
+      }
+    }
+
+    if (dateRange != null) {
+      _products = _products.where((p) => 
+        !p.exchangeEnd.isBefore(dateRange.start) &&
+        !p.exchangeStart.isAfter(dateRange.end)
+      ).toList();
+    }
+    notifyListeners();
   }
 }

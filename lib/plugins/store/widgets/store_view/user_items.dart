@@ -1,14 +1,19 @@
+import 'dart:io';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/widgets/user_item_card.dart';
+import 'package:Memento/plugins/store/widgets/user_item_detail_page.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
+import 'package:Memento/utils/image_utils.dart';
 
 class UserItems extends StatefulWidget {
   final StoreController controller;
+  final int initialStatusIndex;
 
   const UserItems({
     Key? key,
     required this.controller,
+    this.initialStatusIndex = 0,
   }) : super(key: key);
 
   @override
@@ -16,8 +21,19 @@ class UserItems extends StatefulWidget {
 }
 
 class _UserItemsState extends State<UserItems> {
-  int _filterIndex = 0; // 0:我的物品, 1:使用记录
-  int _statusIndex = 0; // 0:全部, 1:可使用, 2:已过期
+  late int _statusIndex; // 0:全部, 1:可使用, 2:已过期
+
+  @override
+  void initState() {
+    super.initState();
+    _statusIndex = widget.initialStatusIndex;
+  }
+
+  void updateStatusFilter(int statusIndex) {
+    setState(() {
+      _statusIndex = statusIndex;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,61 +41,15 @@ class _UserItemsState extends State<UserItems> {
       return const Center(child: Text('暂无物品'));
     }
     
-    return Column(
-      children: [
-        // 过滤栏
-        Column(
-          children: [
-            // 第一行过滤
-            Row(
-              children: [
-                _buildFilterButton('我的物品', 0),
-                _buildFilterButton('使用记录', 1),
-              ],
-            ),
-            // 第二行状态过滤
-            if (_filterIndex == 0)
-              Row(
-                children: [
-                  _buildStatusButton('全部', 0),
-                  _buildStatusButton('可使用', 1),
-                  _buildStatusButton('已过期', 2),
-                ],
-              ),
-          ],
-        ),
-        // 物品列表
-        Expanded(
-          child: _filterIndex == 0 
-              ? _buildMyItemsView()
-              : _buildUsedItemsView(),
-        ),
-      ],
-    );
+    return _buildMyItemsView();
   }
 
   Widget _buildFilterButton(String text, int index) {
-    return Expanded(
-      child: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: _filterIndex == index ? Colors.blue[100] : null,
-        ),
-        onPressed: () => setState(() => _filterIndex = index),
-        child: Text(text),
-      ),
-    );
+    return Container(); // 不再使用，保留方法签名
   }
 
   Widget _buildStatusButton(String text, int index) {
-    return Expanded(
-      child: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: _statusIndex == index ? Colors.blue[100] : null,
-        ),
-        onPressed: () => setState(() => _statusIndex = index),
-        child: Text(text),
-      ),
-    );
+    return Container(); // 不再使用，保留方法签名
   }
 
   Widget _buildMyItemsView() {
@@ -97,25 +67,43 @@ class _UserItemsState extends State<UserItems> {
       itemCount: groupedItems.length,
       itemBuilder: (context, index) {
         final group = groupedItems[index];
-        return UserItemCard(
-          item: group.item,
-          count: group.count,
-          onUse: () async {
-            // 优先使用最早过期的物品
-            final itemToUse = widget.controller.sortedUserItems
-                .firstWhere((item) => item.productId == group.item.productId);
+        return GestureDetector(
+          onTap: () {
+            // 获取同类型的所有物品
+            final sameTypeItems = widget.controller.userItems
+                .where((item) => item.productId == group.item.productId)
+                .toList();
             
-            if (await widget.controller.useItem(itemToUse)) {
-              setState(() {});
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('使用成功')),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('物品已过期')),
-              );
-            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UserItemDetailPage(
+                  controller: widget.controller,
+                  items: sameTypeItems,
+                ),
+              ),
+            );
           },
+          child: UserItemCard(
+            item: group.item,
+            count: group.count,
+            onUse: () async {
+              // 优先使用最早过期的物品
+              final itemToUse = widget.controller.sortedUserItems
+                  .firstWhere((item) => item.productId == group.item.productId);
+              
+              if (await widget.controller.useItem(itemToUse)) {
+                setState(() {});
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('使用成功')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('物品已过期')),
+                );
+              }
+            },
+          ),
         );
       },
     );
@@ -136,18 +124,16 @@ class _UserItemsState extends State<UserItems> {
 
   List<UserItem> _getFilteredItems() {
     final now = DateTime.now();
-    switch (_statusIndex) {
-      case 1: // 可使用
-        return widget.controller.userItems
-            .where((item) => item.expireDate.isAfter(now))
-            .toList();
-      case 2: // 已过期
-        return widget.controller.userItems
-            .where((item) => item.expireDate.isBefore(now))
-            .toList();
-      default: // 全部
-        return widget.controller.userItems;
-    }
+    return widget.controller.userItems.where((item) {
+      switch (_statusIndex) {
+        case 1: // 可使用
+          return item.expireDate.isAfter(now);
+        case 2: // 已过期
+          return item.expireDate.isBefore(now);
+        default: // 全部
+          return true;
+      }
+    }).toList();
   }
 
   List<ItemGroup> _groupItems(List<UserItem> items) {

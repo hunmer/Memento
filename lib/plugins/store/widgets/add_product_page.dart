@@ -1,5 +1,7 @@
 
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import '../models/product.dart';
@@ -54,6 +56,31 @@ class _AddProductPageState extends State<AddProductPage> {
         _imageUrl = result['url'];
         _imageBytes = result['bytes'];
       });
+    }
+  }
+
+  Future<void> _confirmArchive() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认存档'),
+        content: const Text('确定要将这个商品存档吗？存档后可以在筛选器中查看。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('存档'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && widget.product != null) {
+      await widget.controller.archiveProduct(widget.product!);
+      Navigator.pop(context);
     }
   }
 
@@ -124,11 +151,16 @@ class _AddProductPageState extends State<AddProductPage> {
       appBar: AppBar(
         title: const Text('添加商品'),
         actions: [
-          if (widget.product != null)
+          if (widget.product != null) ...[
+            IconButton(
+              icon: const Icon(Icons.archive),
+              onPressed: _confirmArchive,
+            ),
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _confirmDelete,
             ),
+          ],
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: _submit,
@@ -151,9 +183,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: _imageBytes != null
-                      ? Image.memory(_imageBytes!, fit: BoxFit.cover)
-                      : const Icon(Icons.add_a_photo, size: 50),
+                  child: _buildImagePreview(),
                 ),
               ),
               const SizedBox(height: 20),
@@ -224,6 +254,50 @@ class _AddProductPageState extends State<AddProductPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildImagePreview() {
+    if (_imageBytes != null) {
+      return Image.memory(_imageBytes!, fit: BoxFit.cover);
+    } else if (_imageUrl != null && _imageUrl!.isNotEmpty) {
+      return FutureBuilder<String>(
+        future: ImageUtils.getAbsolutePath(_imageUrl!),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasData) {
+              final imagePath = snapshot.data!;
+              return isNetworkImage(imagePath)
+                  ? Image.network(
+                      imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildErrorImage(),
+                    )
+                  : Image.file(
+                      File(imagePath),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildErrorImage(),
+                    );
+            }
+          }
+          return _buildLoadingIndicator();
+        },
+      );
+    }
+    return const Icon(Icons.add_a_photo, size: 50);
+  }
+
+  bool isNetworkImage(String path) {
+    return path.startsWith('http://') || path.startsWith('https://');
+  }
+
+  Widget _buildLoadingIndicator() {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  Widget _buildErrorImage() {
+    return const Icon(Icons.broken_image, size: 48);
   }
 
   @override

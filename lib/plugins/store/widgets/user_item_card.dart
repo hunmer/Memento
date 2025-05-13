@@ -66,24 +66,39 @@ class UserItemCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '物品ID: ${item.id}',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Row(
+                      children: [
+                        Icon(Icons.shopping_bag, size: 16, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          item.productName,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '剩余使用次数: ${item.remaining}',
-                      style: Theme.of(context).textTheme.bodyLarge,
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.inventory, size: 16, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          '数量: $count',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '同类物品数: $count',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '有效期至: ${_formatDate(item.expireDate)}',
-                      style: Theme.of(context).textTheme.bodySmall,
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today, size: 16, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          '有效期至: ${_formatDate(item.expireDate)}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -96,7 +111,7 @@ class UserItemCard extends StatelessWidget {
             right: 12,
             child: FloatingActionButton.small(
               onPressed: onUse,
-              child: const Icon(Icons.check),
+              child: const Icon(Icons.shopping_cart),
             ),
           ),
         ],

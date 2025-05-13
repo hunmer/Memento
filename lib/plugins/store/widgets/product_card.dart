@@ -63,26 +63,50 @@ class ProductCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      product.name,
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Row(
+                      children: [
+                        Icon(Icons.shopping_bag, size: 16, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          product.name,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${product.price}积分',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.monetization_on, size: 16, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${product.price}积分',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '库存: ${product.stock}',
-                      style: Theme.of(context).textTheme.bodySmall,
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.inventory, size: 16, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          '库存: ${product.stock}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '兑换期限: ${_formatDate(product.exchangeStart)} - ${_formatDate(product.exchangeEnd)}',
-                      style: Theme.of(context).textTheme.bodySmall,
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today, size: 16, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${_formatDate(product.exchangeStart)} - ${_formatDate(product.exchangeEnd)}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                     ),
                   ],
                 ),
