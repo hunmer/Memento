@@ -110,8 +110,29 @@ class UserItemCard extends StatelessWidget {
             bottom: 12,
             right: 12,
             child: FloatingActionButton.small(
-              onPressed: onUse,
-              child: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('使用确认'),
+                    content: Text('确定要使用 ${item.productName} 吗？'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          onUse();
+                        },
+                        child: const Text('确定'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: const Icon(Icons.redeem, size: 20),
             ),
           ),
         ],

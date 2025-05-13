@@ -45,8 +45,30 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
         title: const Text('物品详情'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _useCurrentItem,
+            icon: const Icon(Icons.redeem),
+            onPressed: () {
+              final currentItem = widget.items[_currentIndex];
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('使用确认'),
+                  content: Text('确定要使用 ${currentItem.productName} 吗？'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('取消'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _useCurrentItem();
+                      },
+                      child: const Text('确定'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -59,15 +81,40 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 for (int i = 0; i < widget.items.length; i++)
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentIndex == i 
-                          ? Theme.of(context).primaryColor 
-                          : Colors.grey,
+                  GestureDetector(
+                    onTap: () {
+                      _pageController.animateToPage(
+                        i,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _currentIndex == i 
+                            ? Theme.of(context).primaryColor 
+                            : Colors.grey.withOpacity(0.3),
+                        border: Border.all(
+                          color: _currentIndex == i 
+                              ? Theme.of(context).primaryColor 
+                              : Colors.grey,
+                          width: 1,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${i + 1}',
+                          style: TextStyle(
+                            color: _currentIndex == i ? Colors.white : Colors.grey[700],
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
               ],

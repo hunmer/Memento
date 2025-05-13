@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:Memento/plugins/store/models/used_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,16 @@ class StoreController with ChangeNotifier {
   int _userPoints = 0;
   late final BasePlugin plugin;
   
+  // 添加流控制器
+  final _productsStreamController = StreamController<int>.broadcast();
+  final _userItemsStreamController = StreamController<int>.broadcast();
+  final _pointsStreamController = StreamController<int>.broadcast();
+  
+  // 获取流
+  Stream<int> get productsStream => _productsStreamController.stream;
+  Stream<int> get userItemsStream => _userItemsStreamController.stream;
+  Stream<int> get pointsStream => _pointsStreamController.stream;
+  
   StoreController([BasePlugin? plugin]) {
     if (plugin != null) {
       this.plugin = plugin;
@@ -26,6 +38,24 @@ class StoreController with ChangeNotifier {
       }
       this.plugin = pluginInstance as BasePlugin;
     }
+    
+    // 初始化流数据
+    _updateStreams();
+  }
+  
+  @override
+  void dispose() {
+    _productsStreamController.close();
+    _userItemsStreamController.close();
+    _pointsStreamController.close();
+    super.dispose();
+  }
+  
+  // 更新所有流
+  void _updateStreams() {
+    _productsStreamController.add(_products.length);
+    _userItemsStreamController.add(_userItems.length);
+    _pointsStreamController.add(_userPoints);
   }
 
   // 获取商品列表
@@ -62,6 +92,7 @@ class StoreController with ChangeNotifier {
   // 添加商品
   Future<void> addProduct(Product product) async {
     _products.add(product);
+    _updateStreams();
   }
 
   // 从JSON添加商品
@@ -140,6 +171,7 @@ class StoreController with ChangeNotifier {
     }
     await saveUserItems();
     await saveUsedItems();
+    _updateStreams();
     notifyListeners(); // 通知UI更新
     return true;
   }
@@ -178,6 +210,8 @@ class StoreController with ChangeNotifier {
       timestamp: DateTime.now(),
     ));
     await savePoints();
+    _updateStreams();
+    notifyListeners();
   }
 
   // 排序商品
@@ -250,6 +284,10 @@ class StoreController with ChangeNotifier {
     final storedPoints = await plugin.storage.read('store/points');
     final storedUserItems = await plugin.storage.read('store/user_items');
     await loadUsedItems();
+    
+    _products.clear();
+    _pointsLogs.clear();
+    _userItems.clear();
     try {
       final productsData = storedProducts as Map<String, dynamic>;
       final productsList = productsData['products'] is List 
@@ -294,6 +332,9 @@ class StoreController with ChangeNotifier {
         _userItems = (itemsData as List).whereType<Map<String, dynamic>>().map((item) => UserItem.fromJson(item)).toList();
       }
     }
+    
+    // 更新流数据
+    _updateStreams();
   }
 
   // 保存商品数据
@@ -328,6 +369,7 @@ class StoreController with ChangeNotifier {
     await savePoints();
     await saveUserItems();
     await saveUsedItems();
+    _updateStreams();
   }
 
   // 初始化默认数据
@@ -342,12 +384,15 @@ class StoreController with ChangeNotifier {
   Future<void> clearUserItems() async {
     _userItems.clear();
     await saveUserItems();
+    _updateStreams();
+    notifyListeners();
   }
   
   // 清空积分记录
   Future<void> clearPointsLogs() async {
     _pointsLogs.clear();
     await savePoints();
+    _updateStreams();
     notifyListeners();
   }
 

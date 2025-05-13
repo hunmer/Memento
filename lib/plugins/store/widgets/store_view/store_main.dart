@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/store/widgets/store_view/archived_products.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/widgets/store_view/badge_icon.dart';
 import 'package:Memento/plugins/store/widgets/store_view/product_list.dart';
@@ -27,10 +28,26 @@ class _StoreMainState extends State<StoreMain> {
   void initState() {
     super.initState();
     _initializeData();
+    // 添加控制器监听
+    widget.controller.addListener(_onControllerUpdate);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onControllerUpdate);
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onControllerUpdate() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _initializeData() async {
     if (!_isInitialized) {
+      await widget.controller.loadFromStorage();
       if (mounted) {
         setState(() => _isInitialized = true);
       }
@@ -41,7 +58,11 @@ class _StoreMainState extends State<StoreMain> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('物品兑换'),
+        title: Text(_selectedIndex == 0 
+          ? '积分商城' 
+          : _selectedIndex == 1 
+            ? '我的物品'
+            : '积分记录'),
         actions: [
           if (_selectedIndex == 1)
             Row(
@@ -58,9 +79,59 @@ class _StoreMainState extends State<StoreMain> {
               ],
             ),
           if (_selectedIndex == 0)
-            IconButton(
-              icon: const Icon(Icons.sort),
-              onPressed: _showSortDialog,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.sort),
+                  onPressed: _showSortDialog,
+                ),
+                // 添加存档按钮
+                IconButton(
+                  icon: Stack(
+                    children: [
+                      const Icon(Icons.archive),
+                      if (widget.controller.archivedProducts.isNotEmpty)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(1),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 12,
+                              minHeight: 12,
+                            ),
+                            child: Text(
+                              '${widget.controller.archivedProducts.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ArchivedProductsPage(
+                          controller: widget.controller,
+                        ),
+                      ),
+                    ).then((_) {
+                      if (mounted) setState(() {});
+                    });
+                  },
+                  tooltip: '查看存档商品',
+                ),
+              ],
             ),
           if (_selectedIndex == 2)
             IconButton(
@@ -82,24 +153,42 @@ class _StoreMainState extends State<StoreMain> {
         },
         items: [
           BottomNavigationBarItem(
-            icon: BadgeIcon(
-              icon: const Icon(Icons.shopping_bag),
-              count: widget.controller.products.length,
+            icon: StreamBuilder<int>(
+              stream: widget.controller.productsStream,
+              initialData: widget.controller.products.length,
+              builder: (context, snapshot) {
+                return BadgeIcon(
+                  icon: const Icon(Icons.shopping_bag),
+                  count: snapshot.data ?? 0,
+                );
+              },
             ),
             label: '商品列表',
           ),
           BottomNavigationBarItem(
-            icon: BadgeIcon(
-              icon: const Icon(Icons.inventory),
-              count: widget.controller.userItems.length,
+            icon: StreamBuilder<int>(
+              stream: widget.controller.userItemsStream,
+              initialData: widget.controller.userItems.length,
+              builder: (context, snapshot) {
+                return BadgeIcon(
+                  icon: const Icon(Icons.inventory),
+                  count: snapshot.data ?? 0,
+                );
+              },
             ),
             label: '我的物品',
           ),
           BottomNavigationBarItem(
-            icon: BadgeIcon(
-              icon: const Icon(Icons.history),
-              count: widget.controller.currentPoints,
-              isPoints: true,
+            icon: StreamBuilder<int>(
+              stream: widget.controller.pointsStream,
+              initialData: widget.controller.currentPoints,
+              builder: (context, snapshot) {
+                return BadgeIcon(
+                  icon: const Icon(Icons.history),
+                  count: snapshot.data ?? 0,
+                  isPoints: true,
+                );
+              },
             ),
             label: '积分记录',
           ),
@@ -111,11 +200,6 @@ class _StoreMainState extends State<StoreMain> {
 
   final PageController _pageController = PageController();
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
 
   Widget _buildCurrentPage() {
     return PageView(

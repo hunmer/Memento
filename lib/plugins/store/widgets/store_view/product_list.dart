@@ -20,6 +20,53 @@ class ProductList extends StatefulWidget {
 class _ProductListState extends State<ProductList> {
   int _sortIndex = 0; // 0:默认, 1:库存, 2:价格, 3:兑换期限
 
+  Widget _buildArchivedButton() {
+    return IconButton(
+      icon: Stack(
+        children: [
+          const Icon(Icons.archive),
+          if (widget.controller.archivedProducts.isNotEmpty)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: const EdgeInsets.all(1),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 12,
+                  minHeight: 12,
+                ),
+                child: Text(
+                  '${widget.controller.archivedProducts.length}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ArchivedProductsPage(
+              controller: widget.controller,
+            ),
+          ),
+        ).then((_) {
+          if (mounted) setState(() {});
+        });
+      },
+      tooltip: '查看存档商品',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // 去重处理
@@ -36,8 +83,10 @@ class _ProductListState extends State<ProductList> {
     // 应用排序
     final sortedProducts = _applySort(uniqueProducts);
 
-    return Column(
-      children: [
+    return DefaultTabController(
+      length: 4,
+      child: Column(
+        children: [
         // 排序栏
         Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -54,79 +103,8 @@ class _ProductListState extends State<ProductList> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 存档按钮
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.archive),
-                        label: Text('查看存档商品 (${widget.controller.archivedProducts.length})'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ArchivedProductsPage(
-                                controller: widget.controller,
-                              ),
-                            ),
-                          ).then((_) {
-                            if (mounted) setState(() {});
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               // 排序选项
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ChoiceChip(
-                        label: const Text('默认'),
-                        selected: _sortIndex == 0,
-                        onSelected: (selected) {
-                          setState(() => _sortIndex = 0);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ChoiceChip(
-                        label: const Text('库存'),
-                        selected: _sortIndex == 1,
-                        onSelected: (selected) {
-                          setState(() => _sortIndex = 1);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ChoiceChip(
-                        label: const Text('价格'),
-                        selected: _sortIndex == 2,
-                        onSelected: (selected) {
-                          setState(() => _sortIndex = 2);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ChoiceChip(
-                        label: const Text('兑换期限'),
-                        selected: _sortIndex == 3,
-                        onSelected: (selected) {
-                          setState(() => _sortIndex = 3);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // 排序选项将使用store_main.dart中的对话框
             ],
           ),
         ),
@@ -178,6 +156,7 @@ class _ProductListState extends State<ProductList> {
           ),
         ),
       ],
+      )
     );
   }
 

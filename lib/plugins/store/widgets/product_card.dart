@@ -118,8 +118,29 @@ class ProductCard extends StatelessWidget {
             bottom: 12,
             right: 12,
             child: FloatingActionButton.small(
-              onPressed: onExchange,
-              child: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('兑换确认'),
+                    content: Text('确定要兑换 ${product.name} 吗？\n需要消耗 ${product.price} 积分'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          onExchange();
+                        },
+                        child: const Text('确定'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: const Icon(Icons.shopping_bag, size: 20),
             ),
           ),
         ],
