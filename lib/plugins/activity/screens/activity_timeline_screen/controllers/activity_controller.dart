@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../models/activity_record.dart';
 import '../../../services/activity_service.dart';
 import '../../../widgets/activity_form.dart';
+import '../../../../../core/event/event_manager.dart';
+import '../../../../../core/event/item_event_args.dart';
 
 class ActivityController {
   final ActivityService activityService;
@@ -45,9 +47,22 @@ class ActivityController {
     _sortActivities();
     onActivitiesChanged();
   }
+  
+  // 发送事件通知
+  void _notifyEvent(String action, ActivityRecord activity) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'activity_${action}',
+      itemId: activity.id,
+      title: activity.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('activity_${action}', eventArgs);
+  }
 
   Future<void> deleteActivity(ActivityRecord activity) async {
     await activityService.deleteActivity(activity);
+    // 发送活动删除事件
+    _notifyEvent('deleted', activity);
     activities.remove(activity);
     _sortActivities();
     onActivitiesChanged();
@@ -90,6 +105,8 @@ class ActivityController {
           if (activity.tags.isNotEmpty) {
             onTagsUpdated(activity.tags);
           }
+          // 发送活动添加事件
+          _notifyEvent('added', activity);
           await loadActivities(selectedDate);
         },
       ),

@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'dart:async';
-import '../../plugins/store/controllers/store_controller.dart';
-import '../../plugins/store/models/points_log.dart';
 
 /// 事件参数基类
 class EventArgs {
@@ -153,40 +151,9 @@ class EventManager {
     }
   }
 
-  /// 初始化事件处理器，注册积分相关的事件处理
+  /// 初始化事件处理器
   void _initializeEventHandlers() {
-    // 监听消息发送事件
-    subscribe('onMessageSent', _handleMessageSent);
-    
-    // 监听记录添加事件
-    subscribe('onRecordAdded', _handleRecordAdded);
-    
-    // 监听日记添加事件
-    subscribe('onDiaryAdded', _handleDiaryAdded);
-  }
-
-  /// 处理消息发送事件
-  Future<void> _handleMessageSent(EventArgs args) async {
-    // 每发送一条消息奖励1积分
-    await _awardPoints(1, '发送消息奖励');
-  }
-
-  /// 处理记录添加事件
-  Future<void> _handleRecordAdded(EventArgs args) async {
-    // 每添加一条记录奖励2积分
-    await _awardPoints(2, '添加记录奖励');
-  }
-
-  /// 处理日记添加事件
-  Future<void> _handleDiaryAdded(EventArgs args) async {
-    // 每添加一篇日记奖励5积分
-    await _awardPoints(5, '添加日记奖励');
-  }
-
-  /// 添加积分
-  Future<void> _awardPoints(int points, String reason) async {
-    final storeController = StoreController();
-    await storeController.addPoints(points, reason);
+    // 初始化基本事件处理
   }
 
   /// 清理所有订阅

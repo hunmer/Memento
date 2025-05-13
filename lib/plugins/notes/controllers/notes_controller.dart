@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/event/event_manager.dart';
+import '../../../core/event/item_event_args.dart';
 import '../models/folder.dart';
 import '../models/note.dart';
 
@@ -8,6 +10,17 @@ class NotesController {
   final StorageManager _storage;
   final Map<String, Folder> _folders = {};
   final Map<String, List<Note>> _notes = {};
+
+  // 发送事件通知
+  void _notifyEvent(String action, Note note) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'note_${action}',
+      itemId: note.id,
+      title: note.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('note_${action}', eventArgs);
+  }
 
   NotesController(this._storage);
 
@@ -151,6 +164,10 @@ class NotesController {
       if (index != -1) {
         note.updatedAt = DateTime.now();
         notes[index] = note;
+        // 发送完成事件（如果笔记内容有更新）
+        if (notes[index].content != note.content || notes[index].title != note.title) {
+          _notifyEvent('completed', note);
+        }
         await _saveNotes();
       }
     }
@@ -163,7 +180,10 @@ class NotesController {
       final notes = entry.value;
       final noteIndex = notes.indexWhere((note) => note.id == noteId);
       if (noteIndex != -1) {
+        final note = notes[noteIndex];
         notes.removeAt(noteIndex);
+        // 发送删除事件
+        _notifyEvent('deleted', note);
         await _saveNotes();
         break;
       }

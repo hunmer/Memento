@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/event/event_manager.dart';
+import '../../../core/event/item_event_args.dart';
 import 'package:uuid/uuid.dart';
 
 // 排序方式枚举，移到类外部
@@ -10,6 +12,17 @@ class TaskController extends ChangeNotifier {
   final StorageManager _storage;
   final String _storageDir;
   List<Task> _tasks = [];
+
+  // 发送事件通知
+  void _notifyEvent(String action, Task task) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'task_${action}',
+      itemId: task.id,
+      title: task.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('task_${action}', eventArgs);
+  }
   
   // 视图模式
   bool _isGridView = false;
@@ -177,6 +190,8 @@ class TaskController extends ChangeNotifier {
   // 添加任务
   Future<void> addTask(Task task) async {
     _tasks.add(task);
+    // 发送添加事件
+    _notifyEvent('added', task);
     _sortTasks();
     notifyListeners();
     await _saveTasks();
@@ -213,7 +228,12 @@ class TaskController extends ChangeNotifier {
   Future<void> updateTask(Task task) async {
     final index = _tasks.indexWhere((t) => t.id == task.id);
     if (index != -1) {
+      final oldTask = _tasks[index];
       _tasks[index] = task;
+      // 如果任务从未完成变为已完成，发送完成事件
+      if (task.status == TaskStatus.done && oldTask.status != TaskStatus.done) {
+        _notifyEvent('completed', task);
+      }
       _sortTasks();
       notifyListeners();
       await _saveTasks();
@@ -233,6 +253,8 @@ class TaskController extends ChangeNotifier {
       _completedTasks.add(task.copyWith(completedDate: DateTime.now()));
     }
     _tasks.removeWhere((task) => task.id == taskId);
+    // 发送删除事件
+    _notifyEvent('deleted', task);
     notifyListeners();
     await _saveTasks();
   }

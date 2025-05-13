@@ -1,6 +1,7 @@
 
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/widgets/store_view.dart';
+import 'package:Memento/plugins/store/events/point_award_event.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -32,13 +33,21 @@ class StorePlugin extends BasePlugin {
   }
 
   StoreController? _controller;
+  PointAwardEvent? _pointAwardEvent;
   bool _isInitialized = false;
+
+  /// 获取商店控制器
+  StoreController get controller {
+    assert(_isInitialized, 'StorePlugin must be initialized before accessing controller');
+    return _controller!;
+  }
 
   @override
   Future<void> initialize() async {
     if (!_isInitialized) {
       _controller = StoreController(this);
       await _controller!.loadFromStorage();
+      _pointAwardEvent = PointAwardEvent(this);
       _isInitialized = true;
     }
   }

@@ -3,6 +3,8 @@ import '../../../models/goods_item.dart';
 import '../../../models/usage_record.dart';
 import '../../../models/custom_field.dart';
 import '../../../goods_plugin.dart';
+import '../../../../../core/event/event_manager.dart';
+import '../../../../../core/event/item_event_args.dart';
 
 class GoodsItemFormController {
   final formKey = GlobalKey<FormState>();
@@ -10,6 +12,17 @@ class GoodsItemFormController {
   final descriptionController = TextEditingController();
   final priceController = TextEditingController();
   final stockController = TextEditingController();
+  
+  // 发送事件通知
+  void _notifyEvent(String action, GoodsItem item) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'goods_${action}',
+      itemId: item.id,
+      title: item.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('goods_${action}', eventArgs);
+  }
 
   IconData? icon;
   Color? iconColor;
@@ -76,6 +89,8 @@ class GoodsItemFormController {
     );
     
     _subItems.add(cleanedItem);
+    // 发送添加事件
+    _notifyEvent('added', cleanedItem);
 
     // 从原仓库中删除该物品
     try {
@@ -95,6 +110,8 @@ class GoodsItemFormController {
   // 移除子物品
   void removeSubItem(GoodsItem item) {
     _subItems.removeWhere((element) => element.id == item.id);
+    // 发送删除事件
+    _notifyEvent('deleted', item);
   }
   
   // 更新子物品

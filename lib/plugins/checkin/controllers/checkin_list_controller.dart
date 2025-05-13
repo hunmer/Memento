@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import '../checkin_plugin.dart';
 import '../services/group_sort_service.dart';
 import '../widgets/group_sort_dialog.dart';
+import '../../../core/event/event_manager.dart';
+import '../../../core/event/item_event_args.dart';
 
 class CheckinListController {
   final BuildContext context;
@@ -161,6 +163,17 @@ class CheckinListController {
   }
 
   // 切换打卡状态
+  // 发送事件通知
+  void _notifyEvent(String action, CheckinItem item) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'checkin_${action}',
+      itemId: item.id,
+      title: item.name,
+      action: action,
+    );
+    EventManager.instance.broadcast('checkin_${action}', eventArgs);
+  }
+
   void toggleCheckin(CheckinItem item) {
     final now = DateTime.now();
     
@@ -171,6 +184,8 @@ class CheckinListController {
       checkinTime: now,
     );
     item.addCheckinRecord(record);
+    // 发送完成事件
+    _notifyEvent('completed', item);
     onStateChanged();
   }
 
@@ -210,9 +225,11 @@ class CheckinListController {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              checkinItems.removeWhere((i) => i.id == item.id);
-              CheckinPlugin.shared.triggerSave();
-              onStateChanged();
+                  checkinItems.removeWhere((i) => i.id == item.id);
+                  // 发送删除事件
+                  _notifyEvent('deleted', item);
+                  CheckinPlugin.shared.triggerSave();
+                  onStateChanged();
             },
             child: const Text('删除', style: TextStyle(color: Colors.red)),
           ),
@@ -331,6 +348,8 @@ class CheckinListController {
                 onPressed: () async {
                   Navigator.pop(context);
                   checkinItems.remove(item);
+                  // 发送删除事件
+                  _notifyEvent('deleted', item);
                   await CheckinPlugin.shared.triggerSave();
                   onStateChanged();
                   ScaffoldMessenger.of(
