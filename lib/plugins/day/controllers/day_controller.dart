@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/memorial_day.dart';
 import '../day_plugin.dart';
@@ -16,6 +17,9 @@ class DayController extends ChangeNotifier {
 
   List<MemorialDay> get memorialDays => _memorialDays;
   bool get isCardView => _isCardView;
+  
+  // 判断是否允许拖拽排序
+  bool get isDraggable => _sortMode == SortMode.manual;
 
   // 初始化
   Future<void> initialize() async {
@@ -39,14 +43,34 @@ class DayController extends ChangeNotifier {
       // 设置默认的配置JSON字符串
       final defaultConfig = jsonEncode({
         'isCardView': true,
-        'useCustomOrder': false,
+        'sortMode': SortMode.upcoming.toString(),
       });
 
-      final config = await _plugin.storage.readFile(
+      final configStr = await _plugin.storage.readFile(
         '${_plugin.pluginDir}/view_preference.json',
         defaultConfig,
       );
+      
+      final config = jsonDecode(configStr);
+      _isCardView = config['isCardView'] ?? true;
+      
+      // 解析排序模式
+      if (config['sortMode'] != null) {
+        final sortModeStr = config['sortMode'].toString();
+        if (sortModeStr.contains('upcoming')) {
+          _sortMode = SortMode.upcoming;
+        } else if (sortModeStr.contains('recent')) {
+          _sortMode = SortMode.recent;
+        } else if (sortModeStr.contains('manual')) {
+          _sortMode = SortMode.manual;
+        } else {
+          _sortMode = SortMode.upcoming;
+        }
+      } else {
+        _sortMode = SortMode.upcoming;
+      }
     } catch (e) {
+      debugPrint('加载视图偏好设置失败: $e');
       _isCardView = true;
       _sortMode = SortMode.upcoming;
     }
@@ -83,15 +107,20 @@ class DayController extends ChangeNotifier {
     try {
       final List<dynamic> jsonList = jsonDecode(content);
       _memorialDays.clear();
-      // 为每个项目分配sortIndex
+      // 加载所有纪念日
       _memorialDays.addAll(
         jsonList.map((json) => MemorialDay.fromJson(json)).toList(),
       );
-      // 为未设置sortIndex的项目分配-1
-      for (var i = 0; i < _memorialDays.length; i++) {
-        if (_memorialDays[i].sortIndex == 0) {
-          _memorialDays[i] = _memorialDays[i].copyWith(sortIndex: -1);
+      
+      // 检查是否所有项目都有有效的sortIndex
+      var hasInvalidIndex = _memorialDays.any((day) => day.sortIndex < 0);
+      if (hasInvalidIndex) {
+        // 如果有无效的索引，重新分配所有索引
+        for (var i = 0; i < _memorialDays.length; i++) {
+          _memorialDays[i] = _memorialDays[i].copyWith(sortIndex: i);
         }
+        // 保存更新后的索引
+        await _saveMemorialDays();
       }
     } catch (e) {
       debugPrint('解析纪念日数据失败: $e');
@@ -116,8 +145,16 @@ class DayController extends ChangeNotifier {
 
   // 添加纪念日
   Future<void> addMemorialDay(MemorialDay memorialDay) async {
-    _memorialDays.add(memorialDay);
-    _sortMemorialDays();
+    // 在手动排序模式下，新项目添加到末尾
+    if (_sortMode == SortMode.manual) {
+      final newMemorialDay = memorialDay.copyWith(
+        sortIndex: _memorialDays.isEmpty ? 0 : _memorialDays.map((d) => d.sortIndex).reduce(max) + 1
+      );
+      _memorialDays.add(newMemorialDay);
+    } else {
+      _memorialDays.add(memorialDay);
+      _sortMemorialDays();
+    }
     await _saveMemorialDays();
     notifyListeners();
   }
@@ -150,33 +187,49 @@ class DayController extends ChangeNotifier {
         _memorialDays.sort((a, b) => b.creationDate.compareTo(a.creationDate));
         break;
       case SortMode.manual:
-        _memorialDays.sort((a, b) {
-          // 未设置sortIndex的项目(-1)排在最后
-          if (a.sortIndex == -1) return 1;
-          if (b.sortIndex == -1) return -1;
-          return a.sortIndex.compareTo(b.sortIndex);
-        });
+        // 按 sortIndex 排序
+        _memorialDays.sort((a, b) => a.sortIndex.compareTo(b.sortIndex));
         break;
     }
   }
 
   // 手动重新排序纪念日
   Future<void> reorderMemorialDays(int oldIndex, int newIndex) async {
+    // 确保在手动排序模式下
+    if (_sortMode != SortMode.manual) return;
+
+    // 调整新索引（ReorderableListView的要求）
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
+
+    // 移动项目
     final item = _memorialDays.removeAt(oldIndex);
     _memorialDays.insert(newIndex, item);
-    
-    // 更新所有项目的sortIndex
-    for (var i = 0; i < _memorialDays.length; i++) {
-      _memorialDays[i] = _memorialDays[i].copyWith(
-        sortIndex: i,
-      );
+
+    // 计算新的排序索引
+    double newSortIndex;
+    if (newIndex == 0) {
+      // 移动到开头
+      newSortIndex = _memorialDays[1].sortIndex - 1.0;
+    } else if (newIndex == _memorialDays.length - 1) {
+      // 移动到末尾
+      newSortIndex = _memorialDays[newIndex - 1].sortIndex + 1.0;
+    } else {
+      // 移动到中间，取前后两项sortIndex的平均值
+      newSortIndex = (_memorialDays[newIndex - 1].sortIndex + 
+                      _memorialDays[newIndex + 1].sortIndex) / 2.0;
     }
-    
-    // 立即同步保存数据
+
+    // 更新移动项目的sortIndex
+    _memorialDays[newIndex] = _memorialDays[newIndex].copyWith(
+      sortIndex: newSortIndex.round(),
+    );
+
+    // 保存更改
     await _saveMemorialDays();
+    
+    // 通知监听器
     notifyListeners();
   }
 
@@ -190,10 +243,6 @@ class DayController extends ChangeNotifier {
     _sortMemorialDays();
     // 保存排序模式到偏好设置
     await _saveViewPreference();
-    // 如果是手动排序模式，立即保存当前排序
-    if (_sortMode == SortMode.manual) {
-      await _saveMemorialDays();
-    }
     notifyListeners();
   }
 }

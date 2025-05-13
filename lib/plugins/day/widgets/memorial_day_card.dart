@@ -7,11 +7,13 @@ import '../../../utils/image_utils.dart';
 class MemorialDayCard extends StatefulWidget {
   final MemorialDay memorialDay;
   final VoidCallback? onTap;
+  final bool isDraggable;
 
   const MemorialDayCard({
     super.key,
     required this.memorialDay,
     this.onTap,
+    this.isDraggable = false,
   });
 
   @override
@@ -83,18 +85,16 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
                 ? DecorationImage(
                     image: _imageProvider!,
                     fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.3),
-                      BlendMode.darken,
-                    ),
                   )
                 : null,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 Text(
                   widget.memorialDay.title,
                   style: theme.textTheme.titleLarge?.copyWith(
@@ -162,8 +162,10 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
               ],
             ),
           ),
+            ]
         ),
       ),
+      )
     );
   }
 }

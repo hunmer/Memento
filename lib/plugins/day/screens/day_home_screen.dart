@@ -146,11 +146,34 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
     }
 
     return controller.isCardView
-        ? _buildCardView(controller.memorialDays, controller.sortMode == SortMode.manual)
-        : _buildListView(controller.memorialDays, controller.sortMode == SortMode.manual);
+        ? _buildCardView(controller.memorialDays, controller.isDraggable)
+        : _buildListView(controller.memorialDays, controller.isDraggable);
   }
 
   Widget _buildCardView(List<MemorialDay> days, bool allowReorder) {
+    // 如果不允许重排序，使用普通GridView
+    if (!allowReorder) {
+      return GridView.builder(
+        padding: const EdgeInsets.all(8),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.85,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+        ),
+        itemCount: days.length,
+        itemBuilder: (context, index) {
+          return MemorialDayCard(
+            key: ValueKey(days[index].id),
+            memorialDay: days[index],
+            isDraggable: false,
+            onTap: () => _showEditDialog(context, days[index]),
+          );
+        },
+      );
+    }
+    
+    // 允许重排序时使用ReorderableGridView
     return ReorderableGridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -161,17 +184,15 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
       ),
       itemCount: days.length,
       itemBuilder: (context, index) {
-        return MemorialDayCard(
-          key: ValueKey(days[index].id),
-          memorialDay: days[index],
-          onTap: () => _showEditDialog(context, days[index]),
+          return MemorialDayCard(
+            key: ValueKey(days[index].id),
+            memorialDay: days[index],
+            isDraggable: true,
+            onTap: () => _showEditDialog(context, days[index]),
         );
       },
       onReorder: (oldIndex, newIndex) async {
-        // 仅在manualSort模式下允许排序
-        if (_controller.sortMode == SortMode.manual) {
-          await _controller.reorderMemorialDays(oldIndex, newIndex);
-        }
+        await _controller.reorderMemorialDays(oldIndex, newIndex);
       },
       // 自定义拖拽装饰，移除边框
       dragWidgetBuilder: (index, child) {
@@ -188,6 +209,23 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
   }
 
   Widget _buildListView(List<MemorialDay> days, bool allowReorder) {
+    // 如果不允许重排序，使用普通ListView
+    if (!allowReorder) {
+      return ListView.builder(
+        padding: const EdgeInsets.all(8),
+        itemCount: days.length,
+        itemBuilder: (context, index) {
+          return MemorialDayListItem(
+            key: ValueKey(days[index].id),
+            memorialDay: days[index],
+            isDraggable: false,
+            onTap: () => _showEditDialog(context, days[index]),
+          );
+        },
+      );
+    }
+    
+    // 允许重排序时使用ReorderableListView
     return ReorderableListView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: days.length,
@@ -195,14 +233,12 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
         return MemorialDayListItem(
           key: ValueKey(days[index].id),
           memorialDay: days[index],
+          isDraggable: true,
           onTap: () => _showEditDialog(context, days[index]),
         );
       },
       onReorder: (oldIndex, newIndex) async {
-        // 仅在manualSort模式下允许排序
-        if (_controller.sortMode == SortMode.manual) {
-          await _controller.reorderMemorialDays(oldIndex, newIndex);
-        }
+        await _controller.reorderMemorialDays(oldIndex, newIndex);
       },
       // 自定义拖拽装饰，移除边框
       proxyDecorator: (child, index, animation) {

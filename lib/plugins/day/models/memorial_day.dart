@@ -116,6 +116,7 @@ class MemorialDay {
       notes: notes ?? this.notes,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       backgroundImageUrl: backgroundImageUrl ?? this.backgroundImageUrl,
+      sortIndex: sortIndex ?? this.sortIndex,
     );
   }
 

@@ -5,11 +5,13 @@ import '../l10n/day_localizations.dart';
 class MemorialDayListItem extends StatelessWidget {
   final MemorialDay memorialDay;
   final VoidCallback? onTap;
+  final bool isDraggable;
 
   const MemorialDayListItem({
     super.key,
     required this.memorialDay,
     this.onTap,
+    this.isDraggable = false,
   });
 
   @override
@@ -17,11 +19,12 @@ class MemorialDayListItem extends StatelessWidget {
     final theme = Theme.of(context);
     final localizations = DayLocalizations.of(context);
 
-    return Card(
+    Widget content = Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         onTap: onTap,
         leading: _buildLeadingIcon(),
+        trailing: isDraggable ? const Icon(Icons.drag_handle) : null,
         title: Text(memorialDay.title),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,6 +43,13 @@ class MemorialDayListItem extends StatelessWidget {
         ),
       ),
     );
+
+    return isDraggable
+        ? MouseRegion(
+            cursor: SystemMouseCursors.grab,
+            child: content,
+          )
+        : content;
   }
 
   Widget _buildLeadingIcon() {
