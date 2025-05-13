@@ -29,31 +29,33 @@ class ProductCard extends StatelessWidget {
               // 商品图片
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: FutureBuilder<String>(
-                  future: ImageUtils.getAbsolutePath(product.image),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.hasData) {
-                        final imagePath = snapshot.data!;
-                        return isNetworkImage(imagePath)
-                            ? Image.network(
-                                imagePath,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _buildErrorImage(),
-                              )
-                            : Image.file(
-                                File(imagePath),
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _buildErrorImage(),
-                              );
-                      }
-                      return _buildErrorImage();
-                    }
-                    return _buildLoadingIndicator();
-                  },
-                ),
+                child: product.image.isEmpty 
+                    ? _buildErrorImage()
+                    : FutureBuilder<String>(
+                        future: ImageUtils.getAbsolutePath(product.image),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done) {
+                            if (snapshot.hasData) {
+                              final imagePath = snapshot.data!;
+                              return isNetworkImage(imagePath)
+                                  ? Image.network(
+                                      imagePath,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          _buildErrorImage(),
+                                    )
+                                  : Image.file(
+                                      File(imagePath),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          _buildErrorImage(),
+                                    );
+                            }
+                            return _buildErrorImage();
+                          }
+                          return _buildLoadingIndicator();
+                        },
+                      ),
               ),
               // 商品信息
               Padding(

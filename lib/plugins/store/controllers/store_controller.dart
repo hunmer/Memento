@@ -1,4 +1,5 @@
 
+import 'package:Memento/plugins/store/models/used_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
@@ -37,23 +38,30 @@ class StoreController {
 
   // 获取积分记录
   List<PointsLog> get pointsLogs => _pointsLogs;
+  final List<UsedItem> _usedItems = [];
+  List<UsedItem> get usedItems => _usedItems;
 
   // 获取用户积分
   int get userPoints => _userPoints;
   int get currentPoints => _userPoints;
 
+  // 获取按过期时间排序的物品列表
+  List<UserItem> get sortedUserItems {
+    return _userItems..sort((a, b) => a.expireDate.compareTo(b.expireDate));
+  }
+
   // 添加商品
-  void addProduct(Product product) {
+  Future<void> addProduct(Product product) async {
     _products.add(product);
   }
 
   // 从JSON添加商品
-  void addProductFromJson(Map<String, dynamic> json) {
+  Future<void> addProductFromJson(Map<String, dynamic> json) async {
     _products.add(Product.fromJson(json));
   }
 
   // 兑换商品
-  bool exchangeProduct(Product product) {
+  Future<bool> exchangeProduct(Product product) async {
     // 校验积分和库存
     if (_userPoints < product.price) return false;
     if (product.stock <= 0) return false;
@@ -77,13 +85,17 @@ class StoreController {
       useDuration: product.useDuration,
     );
 
-    // 添加用户物品
-    _userItems.add(UserItem(
+    // 添加用户物品(保存购买时的商品快照)
+    final newItem = UserItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       productId: product.id,
       remaining: 1,
       expireDate: DateTime.now().add(Duration(days: product.useDuration)),
-    ));
+      purchaseDate: DateTime.now(),
+      purchasePrice: product.price,
+      productSnapshot: product.toJson(),
+    );
+    _userItems.add(newItem);
 
     // 添加积分记录
     _pointsLogs.add(PointsLog(
@@ -94,22 +106,58 @@ class StoreController {
       timestamp: DateTime.now(),
     ));
 
+    await saveProducts();
+    await savePoints();
+    await saveUserItems();
     return true;
   }
 
   // 使用物品
-  bool useItem(UserItem item) {
+  Future<bool> useItem(UserItem item) async {
     if (DateTime.now().isAfter(item.expireDate)) return false;
+    
+    // 记录使用历史
+    _usedItems.add(UsedItem(
+      id: item.id,
+      productId: item.productId,
+      useDate: DateTime.now(),
+      productSnapshot: item.productSnapshot,
+    ));
     
     item.use();
     if (item.remaining <= 0) {
       _userItems.remove(item);
     }
+    await saveUserItems();
+    await saveUsedItems();
     return true;
   }
 
+  // 保存已使用物品
+  Future<void> saveUsedItems() async {
+    await plugin.storage.write('store/used_items', {
+      'items': _usedItems.map((item) => item.toJson()).toList()
+    });
+  }
+
+  // 加载已使用物品
+  Future<void> loadUsedItems() async {
+    final storedUsedItems = await plugin.storage.read('store/used_items');
+    if (storedUsedItems is Map<String, dynamic>) {
+      final itemsData = storedUsedItems['items'];
+      if (itemsData is List) {
+        _usedItems.clear();
+        _usedItems.addAll(
+          (itemsData as List).whereType<Map<String, dynamic>>()
+            .map((item) => UsedItem.fromJson(item))
+            .toList()
+        );
+      }
+    }
+  }
+
   // 添加积分
-  void addPoints(int value, String reason) {
+  Future<void> addPoints(int value, String reason) async {
     _userPoints += value;
     _pointsLogs.add(PointsLog(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -118,10 +166,11 @@ class StoreController {
       reason: reason,
       timestamp: DateTime.now(),
     ));
+    await savePoints();
   }
 
   // 排序商品
-  void sortProducts(String field, {bool ascending = true}) {
+  Future<void> sortProducts(String field, {bool ascending = true}) async {
     _products.sort((a, b) {
       int compareResult;
       switch (field) {
@@ -139,10 +188,11 @@ class StoreController {
       }
       return ascending ? compareResult : -compareResult;
     });
+    await saveProducts();
   }
 
   // 排序用户物品
-  void sortUserItems(String field, {bool ascending = true}) {
+  Future<void> sortUserItems(String field, {bool ascending = true}) async {
     _userItems.sort((a, b) {
       int compareResult;
       switch (field) {
@@ -157,29 +207,20 @@ class StoreController {
       }
       return ascending ? compareResult : -compareResult;
     });
+    await saveUserItems();
   }
 
   // 从存储加载数据
   Future<void> loadFromStorage() async {
-    final storedProducts = await plugin.storage.read('products');
-    final storedPoints = await plugin.storage.read('points');
-    
-    if (storedProducts == null || storedProducts is! Map<String, dynamic>) {
-      await initializeDefaultData();
-      return;
-    }
-
+    final storedProducts = await plugin.storage.read('store/products');
+    final storedPoints = await plugin.storage.read('store/points');
+    final storedUserItems = await plugin.storage.read('store/user_items');
+    await loadUsedItems();
     try {
       final productsData = storedProducts as Map<String, dynamic>;
       final productsList = productsData['products'] is List 
           ? productsData['products'] as List 
           : [];
-      
-      if (productsList.isEmpty) {
-        await initializeDefaultData();
-        return;
-      }
-
       for (final productData in productsList) {
         if (productData is Map<String, dynamic>) {
           addProductFromJson(productData);
@@ -191,52 +232,61 @@ class StoreController {
     }
 
     if (storedPoints is Map<String, dynamic>) {
-      try {
         _userPoints = storedPoints['value'] is int 
             ? storedPoints['value'] as int 
             : 2000;
-      } catch (e) {
-        _userPoints = 2000;
+        final logsData = storedPoints['logs'];
+        if (logsData is List) {
+          _pointsLogs = (logsData as List).whereType<Map<String, dynamic>>().map((log) => PointsLog.fromJson(log)).toList();
+        }
+    }
+
+    if (storedUserItems is Map<String, dynamic>) {
+      final itemsData = storedUserItems['items'];
+      if (itemsData is List) {
+        _userItems = (itemsData as List).whereType<Map<String, dynamic>>().map((item) => UserItem.fromJson(item)).toList();
       }
-    } else {
-      _userPoints = 2000;
     }
   }
 
-  // 保存数据到存储
+  // 保存商品数据
+  Future<void> saveProducts() async {
+    await plugin.storage.write('store/products', {'products': productsJson});
+  }
+
+  // 保存积分数据
+  Future<void> savePoints() async {
+    await plugin.storage.write('store/points', {
+      'value': _userPoints,
+      'logs': _pointsLogs.map((log) => log.toJson()).toList()
+    });
+  }
+
+  // 保存用户物品数据
+  Future<void> saveUserItems() async {
+    await plugin.storage.write('store/user_items', {
+      'items': _userItems.map((item) => item.toJson()).toList()
+    });
+  }
+
+  // 完整保存所有数据
   Future<void> saveToStorage() async {
-    await plugin.storage.write('products', {'products': productsJson});
-    await plugin.storage.write('points', {'value': _userPoints});
+    await saveProducts();
+    await savePoints();
+    await saveUserItems();
+    await saveUsedItems();
   }
 
   // 初始化默认数据
   Future<void> initializeDefaultData() async {
     _products.clear();
-    addProduct(Product(
-      id: '1',
-      name: '精美笔记本',
-      description: '高品质纸质笔记本',
-      image: 'https://example.com/notebook.jpg',
-      stock: 10,
-      price: 500,
-      exchangeStart: DateTime.now().subtract(const Duration(days: 1)),
-      exchangeEnd: DateTime.now().add(const Duration(days: 30)),
-      useDuration: 90,
-    ));
-
-    addProduct(Product(
-      id: '2',
-      name: '马克杯',
-      description: '公司定制马克杯',
-      image: 'https://example.com/mug.jpg',
-      stock: 5,
-      price: 800,
-      exchangeStart: DateTime.now().subtract(const Duration(days: 1)),
-      exchangeEnd: DateTime.now().add(const Duration(days: 15)),
-      useDuration: 180,
-    ));
-
-    _userPoints = 2000;
+    _userPoints = 0;
     await saveToStorage();
+  }
+
+  // 清空用户物品
+  Future<void> clearUserItems() async {
+    _userItems.clear();
+    await saveUserItems();
   }
 }

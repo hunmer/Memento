@@ -1,14 +1,19 @@
 
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import '../models/user_item.dart';
+import '../models/product.dart';
 
 class UserItemCard extends StatelessWidget {
   final UserItem item;
+  final int count;
   final VoidCallback onUse;
 
   const UserItemCard({
     Key? key,
     required this.item,
+    required this.count,
     required this.onUse,
   }) : super(key: key);
 
@@ -24,13 +29,36 @@ class UserItemCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 物品图片占位
+              // 物品图片
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: Container(
-                  color: Colors.grey[200],
-                  child: const Center(child: Icon(Icons.image, size: 64)),
-                ),
+                child: item.productImage.isEmpty 
+                    ? _buildErrorImage()
+                    : FutureBuilder<String>(
+                        future: ImageUtils.getAbsolutePath(item.productImage),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done) {
+                            if (snapshot.hasData) {
+                              final imagePath = snapshot.data!;
+                              return isNetworkImage(imagePath)
+                                  ? Image.network(
+                                      imagePath,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          _buildErrorImage(),
+                                    )
+                                  : Image.file(
+                                      File(imagePath),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          _buildErrorImage(),
+                                    );
+                            }
+                            return _buildErrorImage();
+                          }
+                          return _buildLoadingIndicator();
+                        },
+                      ),
               ),
               // 物品信息
               Padding(
@@ -44,7 +72,12 @@ class UserItemCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '剩余数量: ${item.remaining}',
+                      '剩余使用次数: ${item.remaining}',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '同类物品数: $count',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 4),
@@ -73,5 +106,17 @@ class UserItemCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  bool isNetworkImage(String path) {
+    return path.startsWith('http://') || path.startsWith('https://');
+  }
+
+  Widget _buildLoadingIndicator() {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  Widget _buildErrorImage() {
+    return const Icon(Icons.broken_image, size: 48);
   }
 }

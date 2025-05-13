@@ -32,22 +32,20 @@ class StorePlugin extends BasePlugin {
   }
 
   StoreController? _controller;
+  bool _isInitialized = false;
 
   @override
   Future<void> initialize() async {
-    _controller = StoreController(this);
-    await _controller!.loadFromStorage();
+    if (!_isInitialized) {
+      _controller = StoreController(this);
+      await _controller!.loadFromStorage();
+      _isInitialized = true;
+    }
   }
 
   @override
   Widget buildMainView(BuildContext context) {
-    _controller ??= StoreController();
-    return StoreView(
-      controller: _controller!,
-      onDataChanged: (products, points) async {
-        // 当数据变化时保存到本地
-        await _controller!.saveToStorage();
-      },
-    );
+    assert(_controller != null, 'StoreController must be initialized first');
+    return StoreView(controller: _controller!);
   }
 }

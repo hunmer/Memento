@@ -7,12 +7,12 @@ import '../controllers/store_controller.dart';
 
 class AddProductPage extends StatefulWidget {
   final StoreController controller;
-  final Function(List<Product>, int)? onDataChanged;
+  final Product? product;
 
   const AddProductPage({
     super.key, 
     required this.controller,
-    this.onDataChanged,
+    this.product,
   });
 
   @override
@@ -27,6 +27,18 @@ class _AddProductPageState extends State<AddProductPage> {
   final _descController = TextEditingController();
   String? _imageUrl;
   Uint8List? _imageBytes;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.product != null) {
+      _nameController.text = widget.product!.name;
+      _priceController.text = widget.product!.price.toString();
+      _stockController.text = widget.product!.stock.toString();
+      _descController.text = widget.product!.description;
+      _imageUrl = widget.product!.image;
+    }
+  }
 
   Future<void> _pickImage() async {
     final result = await showDialog<Map<String, dynamic>>(
@@ -45,25 +57,63 @@ class _AddProductPageState extends State<AddProductPage> {
     }
   }
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      final product = Product(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameController.text,
-        description: _descController.text,
-        image: _imageUrl ?? '',
-        stock: int.parse(_stockController.text),
-        price: int.parse(_priceController.text),
-        exchangeStart: DateTime.now(),
-        exchangeEnd: DateTime.now().add(const Duration(days: 30)),
-        useDuration: 30,
-      );
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认删除'),
+        content: const Text('确定要删除这个商品吗？此操作不可撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('删除', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
 
+    if (confirmed == true) {
+      widget.controller.products.removeWhere((p) => p.id == widget.product!.id);
+      await widget.controller.saveProducts();
+      Navigator.pop(context);
+    }
+  }
+
+  Future<void> _submit() async {
+    if (_formKey.currentState!.validate()) {
+      final product = widget.product != null
+          ? Product(
+              id: widget.product!.id,
+              name: _nameController.text,
+              description: _descController.text,
+              image: _imageUrl ?? widget.product!.image,
+              stock: int.parse(_stockController.text),
+              price: int.parse(_priceController.text),
+              exchangeStart: widget.product!.exchangeStart,
+              exchangeEnd: widget.product!.exchangeEnd,
+              useDuration: widget.product!.useDuration,
+            )
+          : Product(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              name: _nameController.text,
+              description: _descController.text,
+              image: _imageUrl ?? '',
+              stock: int.parse(_stockController.text),
+              price: int.parse(_priceController.text),
+              exchangeStart: DateTime.now(),
+              exchangeEnd: DateTime.now().add(const Duration(days: 30)),
+              useDuration: 30,
+            );
+
+      if (widget.product != null) {
+        widget.controller.products.removeWhere((p) => p.id == product.id);
+      }
       widget.controller.addProduct(product);
-      widget.onDataChanged?.call(
-        widget.controller.products,
-        widget.controller.currentPoints,
-      );
+      await widget.controller.saveProducts();
       Navigator.pop(context);
     }
   }
@@ -74,6 +124,11 @@ class _AddProductPageState extends State<AddProductPage> {
       appBar: AppBar(
         title: const Text('添加商品'),
         actions: [
+          if (widget.product != null)
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _confirmDelete,
+            ),
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: _submit,
