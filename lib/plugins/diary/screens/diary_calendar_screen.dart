@@ -120,15 +120,20 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
               focusedDay: _focusedDay,
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             onDaySelected: (selectedDay, focusedDay) {
-              // 保持选中状态更新
-              setState(() {
-                _selectedDay = DateTime(
-                  selectedDay.year,
-                  selectedDay.month,
-                  selectedDay.day,
-                );
-                _focusedDay = focusedDay;
-              });
+              if (isSameDay(_selectedDay, selectedDay)) {
+                // 如果点击的是已选中的日期，直接打开编辑器
+                _onDayDoubleClicked(selectedDay, focusedDay);
+              } else {
+                // 否则只更新选中状态
+                setState(() {
+                  _selectedDay = DateTime(
+                    selectedDay.year,
+                    selectedDay.month,
+                    selectedDay.day,
+                  );
+                  _focusedDay = focusedDay;
+                });
+              }
             },
             calendarFormat: _calendarFormat,
             onFormatChanged: (format) {

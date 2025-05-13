@@ -5,11 +5,13 @@ import '../goods_plugin.dart';
 class GoodsItemSelectorDialog extends StatefulWidget {
   final String? excludeItemId; // 要排除的物品ID（避免选择自己或已选择的子物品）
   final List<String>? excludeItemIds; // 要排除的物品ID列表
+  final String? defaultCategory; // 默认选择的分类
 
   const GoodsItemSelectorDialog({
     super.key,
     this.excludeItemId,
     this.excludeItemIds,
+    this.defaultCategory,
   });
 
   @override
@@ -18,12 +20,48 @@ class GoodsItemSelectorDialog extends StatefulWidget {
 
 class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
   String _searchQuery = '';
+  String? _selectedCategory;
   final TextEditingController _searchController = TextEditingController();
+  List<String> _availableCategories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategory = widget.defaultCategory;
+    _loadCategories();
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  // 加载所有可用的分类（从物品的tags中提取）
+  void _loadCategories() {
+    final Set<String> categories = {};
+    
+    // 从所有物品的标签中收集分类
+    for (final warehouse in GoodsPlugin.instance.warehouses) {
+      for (final item in warehouse.items) {
+        categories.addAll(item.tags);
+        
+        // 递归获取子物品的标签
+        _collectTagsFromSubItems(item, categories);
+      }
+    }
+    
+    setState(() {
+      _availableCategories = categories.toList()..sort();
+    });
+  }
+  
+  // 递归收集子物品的标签
+  void _collectTagsFromSubItems(GoodsItem item, Set<String> categories) {
+    for (final subItem in item.subItems) {
+      categories.addAll(subItem.tags);
+      _collectTagsFromSubItems(subItem, categories);
+    }
   }
 
   // 获取可选择的物品列表
@@ -39,6 +77,13 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
         return false;
       }
 
+      // 分类过滤
+      if (_selectedCategory != null && _selectedCategory!.isNotEmpty) {
+        if (!item.tags.contains(_selectedCategory)) {
+          return false;
+        }
+      }
+
       // 搜索过滤
       if (_searchQuery.isNotEmpty) {
         final searchLower = _searchQuery.toLowerCase();
@@ -50,6 +95,29 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
     }).toList();
 
     return allItems;
+  }
+
+  // 递归获取所有物品（包括子物品）
+  List<GoodsItem> _getAllItemsRecursively() {
+    final List<GoodsItem> result = [];
+    
+    // 从所有仓库中获取物品
+    for (final warehouse in GoodsPlugin.instance.warehouses) {
+      for (final item in warehouse.items) {
+        result.add(item);
+        _addSubItemsRecursively(item, result);
+      }
+    }
+    
+    return result;
+  }
+  
+  // 递归添加子物品
+  void _addSubItemsRecursively(GoodsItem item, List<GoodsItem> result) {
+    for (final subItem in item.subItems) {
+      result.add(subItem);
+      _addSubItemsRecursively(subItem, result);
+    }
   }
 
   @override
@@ -75,6 +143,31 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            // 分类选择器
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: '按分类筛选',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.category),
+              ),
+              value: _selectedCategory,
+              items: [
+                const DropdownMenuItem<String>(
+                  value: null,
+                  child: Text('所有分类'),
+                ),
+                ..._availableCategories.map((category) => DropdownMenuItem<String>(
+                  value: category,
+                  child: Text(category),
+                )).toList(),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedCategory = value;
+                });
+              },
             ),
             const SizedBox(height: 16),
             TextField(

@@ -120,6 +120,22 @@ class GoodsPlugin extends BasePlugin {
   @override
   IconData get icon => Icons.inventory_2;
 
+  // 用于存储用户的排序偏好
+  final Map<String, String> _warehouseSortPreferences = {};
+
+  // 获取特定仓库的排序偏好
+  String getSortPreference(String warehouseId) {
+    return _warehouseSortPreferences[warehouseId] ?? 'none';
+  }
+
+  // 保存特定仓库的排序偏好
+  Future<void> saveSortPreference(String warehouseId, String sortBy) async {
+    _warehouseSortPreferences[warehouseId] = sortBy;
+    await storage.write('goods/preferences', {
+      'warehouseSortPreferences': _warehouseSortPreferences
+    });
+  }
+
   @override
   Future<void> initialize() async {
     // 确保物品管理数据目录存在
@@ -127,6 +143,27 @@ class GoodsPlugin extends BasePlugin {
 
     // 加载仓库数据
     await _loadWarehouses();
+    
+    // 加载排序偏好
+    await _loadSortPreferences();
+  }
+
+  Future<void> _loadSortPreferences() async {
+    try {
+      final preferencesData = await storage.read('goods/preferences');
+      if (preferencesData.isNotEmpty && 
+          preferencesData.containsKey('warehouseSortPreferences')) {
+        final Map<String, dynamic> sortPrefs = 
+            Map<String, dynamic>.from(preferencesData['warehouseSortPreferences']);
+        
+        _warehouseSortPreferences.clear();
+        sortPrefs.forEach((key, value) {
+          _warehouseSortPreferences[key] = value.toString();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading sort preferences: $e');
+    }
   }
 
   Future<void> _loadWarehouses() async {

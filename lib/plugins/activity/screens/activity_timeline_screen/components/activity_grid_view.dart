@@ -31,6 +31,25 @@ class _ActivityGridViewState extends State<ActivityGridView> {
 
   // 存储已使用的颜色，用于确保颜色有明显区别
   final Map<String, Color> _tagColorCache = {};
+
+  // 检查时间是否与现有活动重叠
+  bool _isTimeOverlapping(DateTime time) {
+    return widget.activities.any((activity) {
+      return time.isAfter(activity.startTime) && 
+             time.isBefore(activity.endTime) ||
+             time.isAtSameMomentAs(activity.startTime) ||
+             time.isAtSameMomentAs(activity.endTime);
+    });
+  }
+
+  // 检查时间范围是否与现有活动重叠
+  bool _isRangeOverlapping(DateTime start, DateTime end) {
+    return widget.activities.any((activity) {
+      return (start.isBefore(activity.endTime) && end.isAfter(activity.startTime)) ||
+             start.isAtSameMomentAs(activity.startTime) ||
+             end.isAtSameMomentAs(activity.endTime);
+    });
+  }
   
   final GlobalKey _gridKey = GlobalKey();
 
@@ -227,6 +246,11 @@ class _ActivityGridViewState extends State<ActivityGridView> {
     // 如果是鼠标事件，需要检查鼠标是否按下
     // 如果是触摸事件（通过onPanUpdate或onLongPressMoveUpdate触发），则直接更新
     if (_isMouseDown || _isDragging) {
+      // 检查时间点是否已经有活动
+      if (_isTimeOverlapping(time)) {
+        return; // 如果时间点已经有活动，不允许选择
+      }
+      
       if (!_isDragging) {
         // 第一次进入拖动状态，设置起始时间
         setState(() {
@@ -240,6 +264,17 @@ class _ActivityGridViewState extends State<ActivityGridView> {
         final now = DateTime.now();
         final currentTime = time.isAfter(now) ? now : time;
         
+        // 检查当前选择范围是否与现有活动重叠
+        if (_selectionStart != null) {
+          DateTime start = _selectionStart!.isBefore(currentTime) ? _selectionStart! : currentTime;
+          DateTime end = _selectionStart!.isBefore(currentTime) ? currentTime : _selectionStart!;
+          
+          // 如果选择范围与现有活动重叠，不更新选择范围
+          if (_isRangeOverlapping(start, end)) {
+            return;
+          }
+        }
+        
         // 只有当进入新的时间块时才更新
         if (_lastEnteredTime != currentTime) {
           setState(() {
@@ -252,8 +287,8 @@ class _ActivityGridViewState extends State<ActivityGridView> {
             widget.onSelectionChanged!(_selectionStart, _selectionEnd);
           }
         }
+      }
     }
-  }
   }
 
   @override

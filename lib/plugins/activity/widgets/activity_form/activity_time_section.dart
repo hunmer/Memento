@@ -139,7 +139,10 @@ class ActivityTimeSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}',
+                    // 如果endTime是00:00，显示为23:59
+                    endTime.hour == 0 && endTime.minute == 0
+                        ? '23:59'
+                        : '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),

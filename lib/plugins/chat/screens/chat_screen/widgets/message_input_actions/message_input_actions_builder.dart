@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../services/file_service.dart';
 import 'handlers/index.dart';
 import 'types.dart';
+import 'package:Memento/plugins/openai/widgets/plugin_analysis_dialog.dart';
 /// 构建消息输入动作列表
 class MessageInputActionsBuilder {
   final BuildContext context;
@@ -112,6 +113,20 @@ class MessageInputActionsBuilder {
               fileService: fileService,
               onFileSelected: onFileSelected,
             ),
+      ),
+    );
+
+    // 添加插件分析功能
+    actions.add(
+      MessageInputAction(
+        title: '插件分析',
+        icon: Icons.analytics,
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => const PluginAnalysisDialog(),
+          );
+        },
       ),
     );
 

@@ -18,13 +18,15 @@ class WarehouseDetailScreen extends StatefulWidget {
 
 class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
   bool _isGridView = true;
-  String _sortBy = 'none'; // none, price, lastUsed
+  late String _sortBy; // none, price, lastUsed
   late Warehouse _warehouse;
 
   @override
   void initState() {
     super.initState();
     _warehouse = widget.warehouse;
+    // 从插件中获取该仓库的排序偏好
+    _sortBy = GoodsPlugin.instance.getSortPreference(_warehouse.id);
   }
 
   Future<void> _refreshWarehouse() async {
@@ -236,10 +238,12 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
           // 排序按钮
           PopupMenuButton<String>(
             icon: const Icon(Icons.sort),
-            onSelected: (value) {
+            onSelected: (value) async {
               setState(() {
                 _sortBy = value;
               });
+              // 保存排序偏好
+              await GoodsPlugin.instance.saveSortPreference(_warehouse.id, value);
             },
             itemBuilder:
                 (context) => [

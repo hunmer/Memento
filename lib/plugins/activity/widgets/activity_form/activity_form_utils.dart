@@ -49,5 +49,22 @@ TimeOfDay getInitialTime({
     return TimeOfDay.fromDateTime(selectedDate);
   }
 
+  // 如果是结束时间，确保不超过23:59
+  if (!isStartTime) {
+    final now = DateTime.now();
+    if (now.hour == 0 && now.minute == 0) {
+      // 如果当前是00:00，则返回23:59
+      return const TimeOfDay(hour: 23, minute: 59);
+    }
+  }
+
   return TimeOfDay.fromDateTime(DateTime.now());
+}
+
+/// 确保结束时间不超过23:59
+TimeOfDay ensureValidEndTime(TimeOfDay time) {
+  if (time.hour == 0 && time.minute == 0) {
+    return const TimeOfDay(hour: 23, minute: 59);
+  }
+  return time;
 }
