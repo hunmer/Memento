@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/event/event.dart';
 import 'l10n/diary_localizations.dart';
 import 'controls/prompt_controller.dart';
 import 'screens/diary_calendar_screen.dart';

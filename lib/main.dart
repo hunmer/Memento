@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
@@ -113,7 +114,7 @@ void main() async {
         backupService = BackupService(SettingsScreenController(), context);
       }
       // 插件初始化完成，发布事件
-      EventManager.instance.broadcast('plugins_initialized');
+      eventManager.broadcast('plugins_initialized', EventArgs('plugins_initialized'));
     });
   } catch (e) {
     _showError('初始化失败: $e');

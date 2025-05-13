@@ -1,7 +1,7 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../core/event/event.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
 import '../utils/date_utils.dart' as tracker_date_utils;
@@ -230,6 +230,13 @@ class TrackerController with ChangeNotifier {
       currentValue: goal.currentValue + record.value
     );
     await updateGoal(goal.id, updatedGoal);
+    
+    // 广播记录添加事件
+    eventManager.broadcast(
+      'onRecordAdded',
+      Value<Record>(record),
+    );
+    
     notifyListeners();
   }
 }

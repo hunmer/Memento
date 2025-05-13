@@ -3,8 +3,7 @@ import 'package:flutter/services.dart';
 import '../chat_plugin.dart';
 import '../models/message.dart';
 import '../models/channel.dart';
-import '../../../core/event/event_args.dart';
-import '../../../core/event/event_manager.dart';
+import '../../../core/event/event.dart';
 
 /// 统一管理消息操作的处理器
 class MessageOperations {
@@ -86,7 +85,7 @@ class MessageOperations {
           channel.messages,
         );
         // 发布消息更新事件
-        EventManager.instance.broadcast(
+        eventManager.broadcast(
           'onMessageUpdated',
           Values<Message, String>(updatedMessage, channel.id),
         );
@@ -176,7 +175,7 @@ class MessageOperations {
         channel.messages,
       );
       // 发布消息更新事件
-      EventManager.instance.broadcast(
+      eventManager.broadcast(
         'onMessageUpdated',
         Values<Message, String>(updatedMessage, channel.id),
       );
@@ -199,7 +198,7 @@ class MessageOperations {
         channel.messages,
       );
       // 发布消息更新事件
-      EventManager.instance.broadcast(
+      eventManager.broadcast(
         'onMessageUpdated',
         Values<Message, String>(updatedMessage, channel.id),
       );
@@ -238,7 +237,7 @@ class MessageOperations {
         channel.messages,
       );
       // 发布消息更新事件
-      EventManager.instance.broadcast(
+      eventManager.broadcast(
         'onMessageUpdated',
         Values<Message, String>(updatedMessage, channel.id),
       );

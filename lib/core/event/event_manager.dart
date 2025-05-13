@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'dart:async';
+import '../../plugins/store/controllers/store_controller.dart';
+import '../../plugins/store/models/points_log.dart';
 
 /// 事件参数基类
 class EventArgs {
@@ -38,7 +40,9 @@ class EventManager {
   static EventManager get instance => _instance;
   
   // 私有构造函数
-  EventManager._internal();
+  EventManager._internal() {
+    _initializeEventHandlers();
+  }
 
   // 存储事件名称到订阅列表的映射
   final Map<String, List<EventSubscription>> _eventSubscriptions = {};
@@ -126,75 +130,67 @@ class EventManager {
     return removed;
   }
 
-  /// 触发指定事件
+  /// 广播事件
   /// [eventName] 事件名称
-  /// [args] 事件参数，如果不提供则使用默认的EventArgs
-  void broadcast(String eventName, [EventArgs? args]) {
-    final eventArgs = args ?? EventArgs(eventName);
-    
-    if (kDebugMode) {
-      print('Event (debug): ${DateTime.now()} Broadcasting Event "$eventName"');
-    }
-
+  /// [args] 事件参数
+  void broadcast(String eventName, EventArgs args) {
     final subscriptions = _eventSubscriptions[eventName];
-    if (subscriptions != null) {
-      // 创建订阅列表的副本，以防在回调过程中发生修改
-      final activeSubscriptions = subscriptions
-          .where((subscription) => subscription.isActive)
-          .toList();
-      
-      for (var subscription in activeSubscriptions) {
-        try {
-          subscription.handler(eventArgs);
-        } catch (e) {
-          debugPrint('Error in event handler for $eventName: $e');
+    if (subscriptions == null) return;
+    
+    // 创建订阅列表的副本，以防在处理过程中列表被修改
+    final activeSubscriptions = subscriptions
+        .where((subscription) => subscription.isActive)
+        .toList();
+    
+    for (var subscription in activeSubscriptions) {
+      try {
+        subscription.handler(args);
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error handling event "$eventName": $e');
         }
       }
     }
   }
 
-  /// 将事件广播到Stream
-  /// [eventName] 事件名称
-  /// 返回包含事件参数的Stream
-  Stream<EventArgs> asStream(String eventName) {
-    final controller = StreamController<EventArgs>();
-    late final String subscriptionId;
+  /// 初始化事件处理器，注册积分相关的事件处理
+  void _initializeEventHandlers() {
+    // 监听消息发送事件
+    subscribe('onMessageSent', _handleMessageSent);
     
-    handler(EventArgs args) {
-      if (controller.isClosed) {
-        unsubscribeById(subscriptionId);
-        return;
-      }
-      controller.add(args);
-    }
+    // 监听记录添加事件
+    subscribe('onRecordAdded', _handleRecordAdded);
     
-    subscriptionId = subscribe(eventName, handler);
-    
-    // 当Stream被取消时，自动取消事件订阅
-    controller.onCancel = () {
-      unsubscribeById(subscriptionId);
-      controller.close();
-    };
-    
-    return controller.stream;
+    // 监听日记添加事件
+    subscribe('onDiaryAdded', _handleDiaryAdded);
   }
 
-  /// 清除指定事件的所有订阅
-  /// [eventName] 事件名称
-  void clearEvent(String eventName) {
-    _eventSubscriptions.remove(eventName);
+  /// 处理消息发送事件
+  Future<void> _handleMessageSent(EventArgs args) async {
+    // 每发送一条消息奖励1积分
+    await _awardPoints(1, '发送消息奖励');
   }
 
-  /// 清除所有事件的订阅
-  void clearAllEvents() {
+  /// 处理记录添加事件
+  Future<void> _handleRecordAdded(EventArgs args) async {
+    // 每添加一条记录奖励2积分
+    await _awardPoints(2, '添加记录奖励');
+  }
+
+  /// 处理日记添加事件
+  Future<void> _handleDiaryAdded(EventArgs args) async {
+    // 每添加一篇日记奖励5积分
+    await _awardPoints(5, '添加日记奖励');
+  }
+
+  /// 添加积分
+  Future<void> _awardPoints(int points, String reason) async {
+    final storeController = StoreController();
+    await storeController.addPoints(points, reason);
+  }
+
+  /// 清理所有订阅
+  void dispose() {
     _eventSubscriptions.clear();
-  }
-
-  /// 获取指定事件的活跃订阅数量
-  /// [eventName] 事件名称
-  int getSubscriptionCount(String eventName) {
-    return _eventSubscriptions[eventName]
-        ?.where((subscription) => subscription.isActive)
-        .length ?? 0;
   }
 }
