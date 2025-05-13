@@ -9,23 +9,28 @@ class PointAwardEvent {
     _initializeEventHandlers();
   }
 
+  /// 获取事件对应的积分值
+  int _getPointsForEvent(String eventName) {
+    return _storePlugin.pointAwardSettings[eventName] ?? 0;
+  }
+
   /// 初始化事件处理器
   void _initializeEventHandlers() {
     final eventManager = EventManager.instance;
     
-    // 监听活动添加事件 (3点)
+    // 监听活动添加事件
     eventManager.subscribe('activity_added', _handleActivityAdded);
     
-    // 监听签到完成事件 (10点)
+    // 监听签到完成事件
     eventManager.subscribe('checkin_completed', _handleCheckinCompleted);
     
-    // 监听任务完成事件 (20点)
+    // 监听任务完成事件
     eventManager.subscribe('task_completed', _handleTaskCompleted);
     
-    // 监听笔记添加事件 (10点)
+    // 监听笔记添加事件
     eventManager.subscribe('note_added', _handleNoteAdded);
     
-    // 监听物品添加事件 (5点)
+    // 监听物品添加事件
     eventManager.subscribe('goods_added', _handleGoodsAdded);
     
     // 监听消息发送事件
@@ -40,47 +45,49 @@ class PointAwardEvent {
 
   /// 处理活动添加事件
   Future<void> _handleActivityAdded(EventArgs args) async {
-    await _awardPoints(3, '添加活动奖励');
+    await _awardPoints(_getPointsForEvent('activity_added'), '添加活动奖励');
   }
 
   /// 处理签到完成事件
   Future<void> _handleCheckinCompleted(EventArgs args) async {
-    await _awardPoints(10, '签到完成奖励');
+    await _awardPoints(_getPointsForEvent('checkin_completed'), '签到完成奖励');
   }
 
   /// 处理任务完成事件
   Future<void> _handleTaskCompleted(EventArgs args) async {
-    await _awardPoints(20, '完成任务奖励');
+    await _awardPoints(_getPointsForEvent('task_completed'), '完成任务奖励');
   }
 
   /// 处理笔记添加事件
   Future<void> _handleNoteAdded(EventArgs args) async {
-    await _awardPoints(10, '添加笔记奖励');
+    await _awardPoints(_getPointsForEvent('note_added'), '添加笔记奖励');
   }
 
   /// 处理物品添加事件
   Future<void> _handleGoodsAdded(EventArgs args) async {
-    await _awardPoints(5, '添加物品奖励');
+    await _awardPoints(_getPointsForEvent('goods_added'), '添加物品奖励');
   }
 
   /// 处理消息发送事件
   Future<void> _handleMessageSent(EventArgs args) async {
-    await _awardPoints(1, '发送消息奖励');
+    await _awardPoints(_getPointsForEvent('onMessageSent'), '发送消息奖励');
   }
 
   /// 处理记录添加事件
   Future<void> _handleRecordAdded(EventArgs args) async {
-    await _awardPoints(2, '添加记录奖励');
+    await _awardPoints(_getPointsForEvent('onRecordAdded'), '添加记录奖励');
   }
 
   /// 处理日记添加事件
   Future<void> _handleDiaryAdded(EventArgs args) async {
-    await _awardPoints(5, '添加日记奖励');
+    await _awardPoints(_getPointsForEvent('onDiaryAdded'), '添加日记奖励');
   }
 
   /// 添加积分
   Future<void> _awardPoints(int points, String reason) async {
-    await _storePlugin.controller.addPoints(points, reason);
+    if (points > 0) {
+      await _storePlugin.controller.addPoints(points, reason);
+    }
   }
 
   /// 清理事件订阅

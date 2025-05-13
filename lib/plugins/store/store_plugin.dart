@@ -1,4 +1,3 @@
-
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/widgets/store_view.dart';
 import 'package:Memento/plugins/store/events/point_award_event.dart';
@@ -42,9 +41,30 @@ class StorePlugin extends BasePlugin {
     return _controller!;
   }
 
+  /// 默认积分配置
+  static const Map<String, dynamic> defaultPointSettings = {
+    'point_awards': {
+      'activity_added': 3,      // 添加活动奖励
+      'checkin_completed': 10,  // 签到完成奖励
+      'task_completed': 20,     // 完成任务奖励
+      'note_added': 10,         // 添加笔记奖励
+      'goods_added': 5,         // 添加物品奖励
+      'onMessageSent': 1,       // 发送消息奖励
+      'onRecordAdded': 2,       // 添加记录奖励
+      'onDiaryAdded': 5,        // 添加日记奖励
+    }
+  };
+
+  /// 获取事件积分配置
+  Map<String, int> get pointAwardSettings => 
+    (settings['point_awards'] as Map<String, dynamic>).map(
+      (key, value) => MapEntry(key, value as int)
+    );
+
   @override
   Future<void> initialize() async {
     if (!_isInitialized) {
+      await loadSettings(defaultPointSettings);
       _controller = StoreController(this);
       await _controller!.loadFromStorage();
       _pointAwardEvent = PointAwardEvent(this);
@@ -56,5 +76,82 @@ class StorePlugin extends BasePlugin {
   Widget buildMainView(BuildContext context) {
     assert(_controller != null, 'StoreController must be initialized first');
     return StoreView(controller: _controller!);
+  }
+
+  @override
+  Widget buildSettingsView(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '积分奖励设置',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView(
+              children: pointAwardSettings.entries.map((entry) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          _getEventDisplayName(entry.key),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextFormField(
+                          initialValue: entry.value.toString(),
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            suffix: Text('积分'),
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (value) async {
+                            final points = int.tryParse(value) ?? entry.value;
+                            final newSettings = Map<String, dynamic>.from(settings);
+                            (newSettings['point_awards'] as Map<String, dynamic>)[entry.key] = points;
+                            await updateSettings(newSettings);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 获取事件显示名称
+  String _getEventDisplayName(String eventKey) {
+    switch (eventKey) {
+      case 'activity_added':
+        return '添加活动';
+      case 'checkin_completed':
+        return '完成签到';
+      case 'task_completed':
+        return '完成任务';
+      case 'note_added':
+        return '添加笔记';
+      case 'goods_added':
+        return '添加物品';
+      case 'onMessageSent':
+        return '发送消息';
+      case 'onRecordAdded':
+        return '添加记录';
+      case 'onDiaryAdded':
+        return '添加日记';
+      default:
+        return eventKey;
+    }
   }
 }
