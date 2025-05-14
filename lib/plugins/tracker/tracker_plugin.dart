@@ -1,6 +1,6 @@
 
 import 'package:Memento/core/config_manager.dart';
-import 'package:Memento/plugins/tracker/utils/notification_utils.dart';
+import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -8,7 +8,6 @@ import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:provider/provider.dart';
 import 'controllers/tracker_controller.dart';
-import 'widgets/tracker_summary_card.dart';
 import 'screens/home_screen.dart';
 
 export 'models/goal.dart';
@@ -19,7 +18,7 @@ export 'widgets/goal_detail_page.dart';
 export 'widgets/goal_edit_page.dart';
 export 'widgets/record_dialog.dart';
 export 'utils/date_utils.dart';
-export 'utils/notification_utils.dart';
+export 'utils/tracker_notification_utils.dart';
 export 'l10n/tracker_localizations.dart';
 
 class TrackerPlugin extends PluginBase with ChangeNotifier {
@@ -47,7 +46,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
 
   @override
   Future<void> initialize() async {
-    await NotificationUtils.initialize();
+    await TrackerNotificationUtils.initialize();
     await _controller.loadInitialData();
   }
 

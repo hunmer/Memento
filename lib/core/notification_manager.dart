@@ -3,8 +3,8 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:logging/logging.dart';
 
-class NotificationUtils {
-  static final _logger = Logger('NotificationUtils');
+class NotificationManager {
+  static final _logger = Logger('NotificationManager');
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -13,6 +13,11 @@ class NotificationUtils {
 
   static Future<void> initialize({
     Function(String?)? onSelectNotification,
+    String appName = 'Memento',
+    String appId = 'com.example.memento',
+    String channelId = 'memento_channel',
+    String channelName = '提醒通知',
+    String channelDescription = '用于应用的提醒通知',
   }) async {
     // 设置点击回调
     onNotificationClicked = onSelectNotification;
@@ -38,15 +43,15 @@ class NotificationUtils {
         );
 
     // Windows初始化设置
-    const WindowsInitializationSettings initializationSettingsWindows =
+    final WindowsInitializationSettings initializationSettingsWindows =
         WindowsInitializationSettings(
-          appName: '目标跟踪提醒',
-          appUserModelId: 'com.example.memento.tracker',
+          appName: appName,
+          appUserModelId: appId,
           guid: 'd3a8f7c2-1b23-4e5a-9d8f-6e7c5a4b3d21', // 标准GUID格式
         );
 
     // 统一初始化设置
-    const InitializationSettings initializationSettings =
+    final InitializationSettings initializationSettings =
         InitializationSettings(
           android: initializationSettingsAndroid,
           iOS: initializationSettingsIOS,
@@ -69,14 +74,22 @@ class NotificationUtils {
     );
 
     // 创建通知渠道(Android 8.0+需要)
-    await _createNotificationChannel();
+    await _createNotificationChannel(
+      channelId: channelId,
+      channelName: channelName,
+      channelDescription: channelDescription,
+    );
   }
 
-  static Future<void> _createNotificationChannel() async {
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'tracker_channel',
-      '目标跟踪提醒',
-      description: '用于目标跟踪的提醒通知',
+  static Future<void> _createNotificationChannel({
+    required String channelId,
+    required String channelName,
+    required String channelDescription,
+  }) async {
+    final AndroidNotificationChannel channel = AndroidNotificationChannel(
+      channelId,
+      channelName,
+      description: channelDescription,
       importance: Importance.max,
     );
 
@@ -87,23 +100,26 @@ class NotificationUtils {
         ?.createNotificationChannel(channel);
   }
 
-  static Future<void> scheduleDailyNotification({
+  static Future<void> scheduleNotification({
     required int id,
     required String title,
     required String body,
-    required int hour,
-    required int minute,
+    required DateTime scheduledDate,
+    String? channelId = 'memento_channel',
+    String? channelName = '提醒通知',
+    String? channelDescription = '用于应用的提醒通知',
+    bool isDaily = false,
     String? payload,
   }) async {
     try {
       // 初始化时区
       tz.initializeTimeZones();
 
-      const AndroidNotificationDetails androidDetails =
+      final AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(
-            'tracker_channel',
-            '目标跟踪提醒',
-            channelDescription: '用于目标跟踪的提醒通知',
+            channelId ?? 'memento_channel',
+            channelName ?? '提醒通知',
+            channelDescription: channelDescription ?? '用于应用的提醒通知',
             importance: Importance.max,
             priority: Priority.high,
           );
@@ -123,37 +139,41 @@ class NotificationUtils {
       const WindowsNotificationDetails windowsDetails =
           WindowsNotificationDetails();
 
-      const NotificationDetails platformDetails = NotificationDetails(
+      final NotificationDetails platformDetails = NotificationDetails(
         android: androidDetails,
         iOS: iOSDetails,
         macOS: macOSDetails,
         windows: windowsDetails,
       );
 
-      // 设置明天的通知时间
       final now = tz.TZDateTime.now(tz.local);
-      var scheduledDate = tz.TZDateTime(
+      var tzScheduledDate = tz.TZDateTime(
         tz.local,
-        now.year,
-        now.month,
-        now.day,
-        hour,
-        minute,
+        scheduledDate.year,
+        scheduledDate.month,
+        scheduledDate.day,
+        scheduledDate.hour,
+        scheduledDate.minute,
       );
 
-      if (scheduledDate.isBefore(now)) {
-        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      if (tzScheduledDate.isBefore(now)) {
+        if (isDaily) {
+          tzScheduledDate = tzScheduledDate.add(const Duration(days: 1));
+        } else {
+          _logger.warning('Scheduled date is in the past');
+          return;
+        }
       }
 
       await _notificationsPlugin.zonedSchedule(
         id,
         title,
         body,
-        scheduledDate,
+        tzScheduledDate,
         platformDetails,
         payload: payload,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time,
+        matchDateTimeComponents: isDaily ? DateTimeComponents.time : null,
       );
     } catch (e) {
       _logger.warning('Failed to schedule notification', e);
@@ -172,18 +192,18 @@ class NotificationUtils {
     required int id,
     required String title,
     required String body,
-    required int hour,
-    required int minute,
+    required DateTime scheduledDate,
+    bool isDaily = false,
     String? payload,
   }) async {
     try {
       await cancelNotification(id);
-      await scheduleDailyNotification(
+      await scheduleNotification(
         id: id,
         title: title,
         body: body,
-        hour: hour,
-        minute: minute,
+        scheduledDate: scheduledDate,
+        isDaily: isDaily,
         payload: payload,
       );
     } catch (e) {
@@ -194,14 +214,17 @@ class NotificationUtils {
   static Future<void> showInstantNotification({
     required String title,
     required String body,
+    String? channelId = 'memento_channel',
+    String? channelName = '提醒通知',
+    String? channelDescription = '用于应用的提醒通知',
     String? payload,
   }) async {
     try {
-      const AndroidNotificationDetails androidDetails =
+      final AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(
-            'tracker_channel',
-            '目标跟踪提醒',
-            channelDescription: '用于目标跟踪的提醒通知',
+            channelId ?? 'memento_channel',
+            channelName ?? '提醒通知',
+            channelDescription: channelDescription ?? '用于应用的提醒通知',
             importance: Importance.max,
             priority: Priority.high,
           );
@@ -221,7 +244,7 @@ class NotificationUtils {
       const WindowsNotificationDetails windowsDetails =
           WindowsNotificationDetails();
 
-      const NotificationDetails platformDetails = NotificationDetails(
+      final NotificationDetails platformDetails = NotificationDetails(
         android: androidDetails,
         iOS: iOSDetails,
         macOS: macOSDetails,

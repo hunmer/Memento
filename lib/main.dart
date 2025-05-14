@@ -34,6 +34,7 @@ import 'plugins/nodes/nodes_plugin.dart'; // 笔记插件
 import 'plugins/notes/notes_plugin.dart'; // Notes插件
 import 'plugins/goods/goods_plugin.dart'; // 物品插件
 import 'plugins/bill/bill_plugin.dart'; // 账单插件
+import 'plugins/calendar/calendar_plugin.dart'; // 日历插件
 import 'plugins/openai/openai_plugin.dart'; // OpenAI插件
 import 'plugins/store/store_plugin.dart'; // store插件
 import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
@@ -87,6 +88,7 @@ void main() async {
         globalPluginManager,
         globalConfigManager,
       ),
+      CalendarPlugin(), 
       StorePlugin(), 
       NodesPlugin(), // 添加笔记插件
       NotesPlugin(), // 添加Notes插件
