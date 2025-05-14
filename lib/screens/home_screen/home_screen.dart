@@ -189,16 +189,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   void _handleReorder(int oldIndex, int newIndex) {
     setState(() {
-      final List<PluginBase> plugins = globalPluginManager.allPlugins;
-      if (oldIndex < newIndex) {
-        newIndex -= 1;
-      }
-      final plugin = plugins[oldIndex];
-      plugins.removeAt(oldIndex);
-      plugins.insert(newIndex, plugin);
-
       // 更新插件顺序
-      _pluginOrderManager.pluginOrder = plugins.map((p) => p.id).toList();
+      _pluginOrderManager.updatePluginOrder(oldIndex, newIndex);
       _pluginOrderManager.savePluginOrder();
     });
   }

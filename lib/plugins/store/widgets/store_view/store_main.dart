@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/store/widgets/store_view/archived_products.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/widgets/store_view/badge_icon.dart';
@@ -58,6 +59,11 @@ class _StoreMainState extends State<StoreMain> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // 添加返回按钮
+      leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
         title: Text(_selectedIndex == 0 
           ? '积分商城' 
           : _selectedIndex == 1 

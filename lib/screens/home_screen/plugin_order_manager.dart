@@ -30,4 +30,16 @@ class PluginOrderManager {
       debugPrint('Error saving plugin order: $e');
     }
   }
+
+  // 更新插件顺序
+  void updatePluginOrder(int oldIndex, int newIndex) {
+    final List<String> currentOrder = List.from(pluginOrder);
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final String item = currentOrder[oldIndex];
+    currentOrder.removeAt(oldIndex);
+    currentOrder.insert(newIndex, item);
+    pluginOrder = currentOrder;
+  }
 }

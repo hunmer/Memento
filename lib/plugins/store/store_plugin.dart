@@ -79,6 +79,114 @@ class StorePlugin extends BasePlugin {
   }
 
   @override
+  Widget? buildCardView(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.blue.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.store, size: 24, color: Colors.blue),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 统计信息卡片
+          Column(
+            children: [
+              // 第一行 - 商品数量和物品数量
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // 商品数量
+                  Column(
+                    children: [
+                      Text('商品数量', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${controller.getGoodsCount()} 件',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  // 物品数量
+                  Column(
+                    children: [
+                      Text('物品数量', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${controller.getItemsCount()} 件',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              // 第二行 - 我的积分和七天到期
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // 我的积分
+                  Column(
+                    children: [
+                      Text('我的积分', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${controller.currentPoints} 分',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  // 七天到期
+                  Column(
+                    children: [
+                      Text('七天到期', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${controller.getExpiringItemsCount()} 件',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget buildSettingsView(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),

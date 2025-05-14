@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
@@ -16,6 +17,8 @@ class AccountListScreen extends StatefulWidget {
 }
 
 class _AccountListScreenState extends State<AccountListScreen> {
+  var PluginManager;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +42,11 @@ class _AccountListScreenState extends State<AccountListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('账户管理'),
+        // 添加返回按钮
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => PluginManager.toHomeScreen(context),
+          ),
       ),
       body: _buildAccountList(),
       floatingActionButton: FloatingActionButton(

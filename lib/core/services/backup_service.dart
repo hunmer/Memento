@@ -44,6 +44,9 @@ class BackupService {
   }
 
   Future<void> showBackupOptionsDialog() async {
+    // 在弹出对话框之前先保存当前备份检查日期
+    _controller.resetBackupCheckDate();
+    
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -78,7 +81,6 @@ class BackupService {
           _controller.uploadAllToWebDAV();
           break;
       }
-      _controller.resetBackupCheckDate();
     }
   }
 

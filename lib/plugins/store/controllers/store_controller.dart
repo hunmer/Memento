@@ -89,6 +89,26 @@ class StoreController with ChangeNotifier {
     return _userItems..sort((a, b) => a.expireDate.compareTo(b.expireDate));
   }
 
+  // 获取商品总数
+  int getGoodsCount() {
+    return _products.length;
+  }
+
+  // 获取用户物品总数
+  int getItemsCount() {
+    return _userItems.length;
+  }
+
+  // 获取七天内到期的物品数量
+  int getExpiringItemsCount() {
+    final now = DateTime.now();
+    final sevenDaysLater = now.add(const Duration(days: 7));
+    return _userItems.where((item) => 
+      item.expireDate.isAfter(now) && 
+      item.expireDate.isBefore(sevenDaysLater)
+    ).length;
+  }
+
   // 添加商品
   Future<void> addProduct(Product product) async {
     _products.add(product);
