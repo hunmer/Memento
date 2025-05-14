@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 import '../../todo/controllers/task_controller.dart';
 import '../../todo/models/task.dart';
 import '../models/event.dart';

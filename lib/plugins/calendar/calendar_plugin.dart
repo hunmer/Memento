@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../base_plugin.dart';
@@ -11,14 +10,13 @@ import './pages/completed_events_page.dart';
 import './pages/event_list_page.dart';
 import './widgets/event_detail_card.dart';
 import './services/todo_event_service.dart';
-import '../todo/controllers/task_controller.dart';
 import '../todo/todo_plugin.dart';
 
-class CalendarPlugin extends BasePlugin with ChangeNotifier {
+class CalendarPlugin extends BasePlugin {
+  // 总控制器，管理所有日历相关服务
   late final app.CalendarController _controller;
+  // SyncFusion日历控制器
   late final syncfusion.CalendarController _sfController;
-  late CalendarDataSource _events;
-  TodoEventService? _todoEventService;
 
   final List<syncfusion.CalendarView> _allowedViews = <syncfusion.CalendarView>[
     syncfusion.CalendarView.day,
@@ -48,6 +46,7 @@ class CalendarPlugin extends BasePlugin with ChangeNotifier {
 
   @override
   Future<void> initialize() async {
+    // 初始化总控制器
     _controller = app.CalendarController(storageManager);
     _sfController = syncfusion.CalendarController();
     
@@ -59,7 +58,6 @@ class CalendarPlugin extends BasePlugin with ChangeNotifier {
     } else {
       _sfController.view = syncfusion.CalendarView.month;
     }
-    await _controller.events; // 触发事件加载
   }
 
   syncfusion.CalendarView _getCalendarViewFromString(String viewString) {
@@ -128,7 +126,10 @@ class CalendarPlugin extends BasePlugin with ChangeNotifier {
     if (todoPlugin != null) {
       final taskController = todoPlugin.taskController;
       if (taskController != null) {
-        _todoEventService = TodoEventService(taskController);
+        // 创建TodoEventService并设置到总控制器
+        final todoEventService = TodoEventService(taskController);
+        _controller.setTodoEventService(todoEventService);
+        
         // 监听任务变化
         taskController.addListener(() {
           _controller.notifyListeners();
@@ -209,10 +210,8 @@ class CalendarPlugin extends BasePlugin with ChangeNotifier {
 
   // 将 CalendarEvent 转换为 Appointment
   List<syncfusion.Appointment> _getUserAppointments() {
-    final List<CalendarEvent> allEvents = [
-      ..._controller.events,
-      if (_todoEventService != null) ..._todoEventService!.getTaskEvents(),
-    ];
+    // 使用总控制器获取所有事件（包括普通事件和Todo任务事件）
+    final List<CalendarEvent> allEvents = _controller.getAllEvents();
     
     return allEvents.map((event) => syncfusion.Appointment(
       startTime: event.startTime,
@@ -235,8 +234,9 @@ class CalendarPlugin extends BasePlugin with ChangeNotifier {
       // 检查是否为Todo任务事件
       if (eventId.startsWith('todo_')) {
         // Todo任务事件只显示，不允许编辑
-        final events = _todoEventService?.getTaskEvents();
-        if (events != null) {
+        final todoEventService = _controller.todoEventService;
+        if (todoEventService != null) {
+          final events = todoEventService.getTaskEvents();
           final event = events.firstWhere(
             (event) => event.id == eventId,
             orElse: () => throw Exception('Event not found'),
