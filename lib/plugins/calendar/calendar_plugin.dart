@@ -331,6 +331,128 @@ class CalendarPlugin extends BasePlugin {
     );
   }
 
+  // 获取所有活动数量
+  int _getEventCount() {
+    return _controller.getAllEvents().length;
+  }
+
+  // 获取7天内的活动数量
+  int _getUpcomingEventCount() {
+    final now = DateTime.now();
+    final sevenDaysLater = now.add(const Duration(days: 7));
+    return _controller.getAllEvents().where((event) {
+      return event.startTime.isAfter(now) && 
+             event.startTime.isBefore(sevenDaysLater);
+    }).length;
+  }
+
+  // 获取过期活动数量
+  int _getExpiredEventCount() {
+    final now = DateTime.now();
+    return _controller.getAllEvents().where((event) {
+      return event.startTime.isBefore(now);
+    }).length;
+  }
+
+  @override
+  Widget? buildCardView(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 顶部图标和标题
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withAlpha(30),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.calendar_month, size: 24, color: Colors.blue),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 统计信息卡片
+              Column(
+                children: [
+                  // 第一行 - 活动数量和7天活动
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // 活动数量
+                      Column(
+                        children: [
+                          Text('活动数量', style: theme.textTheme.bodyMedium),
+                          Text(
+                            '${_getEventCount()} 个',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      // 7天活动
+                      Column(
+                        children: [
+                          Text('7天活动', style: theme.textTheme.bodyMedium),
+                          Text(
+                            '${_getUpcomingEventCount()} 个',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  // 第二行 - 过期活动
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Text('过期活动', style: theme.textTheme.bodyMedium),
+                          Text(
+                            '${_getExpiredEventCount()} 个',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Future<void> uninstall() async {
     await storageManager.delete('calendar_events');

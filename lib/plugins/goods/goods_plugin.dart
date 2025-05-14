@@ -374,7 +374,6 @@ class GoodsPlugin extends BasePlugin {
     ConfigManager configManager,
   ) async {
     await initialize();
-    await pluginManager.registerPlugin(this);
     await configManager.savePluginConfig(id, {
       'version': version,
       'enabled': true,

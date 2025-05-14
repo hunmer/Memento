@@ -126,10 +126,6 @@ class DiaryPlugin extends BasePlugin {
   ) async {
     // 初始化插件
     await initialize();
-
-    // 注册插件到插件管理器
-    await pluginManager.registerPlugin(this);
-
     // 保存插件配置
     await configManager.savePluginConfig(id, {
       'version': version,

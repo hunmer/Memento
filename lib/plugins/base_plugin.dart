@@ -56,10 +56,13 @@ abstract class BasePlugin extends PluginBase {
   String get storageDir => getPluginStoragePath();
 
   /// 向应用注册插件
+  @override
   Future<void> registerToApp(
     PluginManager pluginManager,
     ConfigManager configManager,
-  );
+  ) async {
+    // 子类需要实现此方法
+  }
 
   /// 初始化插件
   @override

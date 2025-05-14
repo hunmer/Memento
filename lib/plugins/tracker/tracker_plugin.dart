@@ -82,8 +82,9 @@ await TrackerPlugin.initializeAndRegister(pluginManager, configManager);
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
-    // 注册插件到应用
-    await pluginManager.registerPlugin(this);
+    // 不要在这里调用registerPlugin，因为PluginManager.registerPlugin已经调用了registerToApp
+    // 这会导致循环调用和栈溢出
+    // 在这里可以进行其他初始化操作
   }
 
   @override

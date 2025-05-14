@@ -28,7 +28,7 @@ class StorePlugin extends BasePlugin {
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
-    await pluginManager.registerPlugin(this);
+    await initialize();
   }
 
   StoreController? _controller;

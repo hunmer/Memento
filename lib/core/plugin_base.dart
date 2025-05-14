@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'storage/storage_manager.dart';
+import 'plugin_manager.dart';
+import 'config_manager.dart';
 
 /// 插件基类，所有插件必须继承此类
 abstract class PluginBase {
@@ -97,6 +99,10 @@ abstract class PluginBase {
 
   /// 初始化插件
   Future<void> initialize();
+
+  /// 注册到应用程序
+  /// 用于在插件初始化后进行额外的设置，如注册服务、设置监听器等
+  Future<void> registerToApp(PluginManager pluginManager, ConfigManager configManager) async {}
 
   /// 构建插件主视图
   Widget buildMainView(BuildContext context);

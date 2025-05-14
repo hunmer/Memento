@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'plugin_base.dart';
@@ -47,11 +48,10 @@ class PluginManager {
       if (_storageManager != null) {
         plugin.setStorageManager(_storageManager!);
       }
-      await plugin.initialize();
       _plugins.add(plugin);
+      await plugin.registerToApp(this, ConfigManager(_storageManager!));
     }
   }
-
   /// 获取所有已注册的插件
   /// [sortByRecentlyOpened] 是否按最近打开时间排序
   List<PluginBase> getAllPlugins({bool sortByRecentlyOpened = false}) {
