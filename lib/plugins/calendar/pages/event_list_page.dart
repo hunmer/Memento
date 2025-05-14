@@ -22,6 +22,36 @@ class EventListPage extends StatefulWidget {
 }
 
 class _EventListPageState extends State<EventListPage> {
+  String _getReminderText(int minutes) {
+    if (minutes >= 1440) {
+      final days = minutes ~/ 1440;
+      return '提前$days天';
+    } else if (minutes >= 60) {
+      final hours = minutes ~/ 60;
+      return '提前$hours小时';
+    } else {
+      return '提前$minutes分钟';
+    }
+  }
+  
+  String _formatEventTime(CalendarEvent event) {
+    final startFormat = DateFormat('MM-dd HH:mm');
+    final endFormat = DateFormat('MM-dd HH:mm');
+    
+    String timeText = startFormat.format(event.startTime);
+    if (event.endTime != null) {
+      // 如果是同一天，只显示一次日期
+      if (event.startTime.year == event.endTime!.year && 
+          event.startTime.month == event.endTime!.month && 
+          event.startTime.day == event.endTime!.day) {
+        timeText += ' - ${DateFormat('HH:mm').format(event.endTime!)}';
+      } else {
+        timeText += ' - ${endFormat.format(event.endTime!)}';
+      }
+    }
+    return timeText;
+  }
+
   late List<CalendarEvent> _events;
 
   @override
@@ -105,20 +135,83 @@ class _EventListPageState extends State<EventListPage> {
                       _events.removeAt(index);
                     });
                   },
-                  child: ListTile(
-                    leading: Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: event.color,
-                        shape: BoxShape.circle,
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            event.icon,
+                            color: event.color,
+                            size: 36,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  event.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.access_time, size: 14),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        _formatEventTime(event),
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (event.description.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    event.description,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                                if (event.reminderMinutes != null) ...[
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.notifications, size: 14),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _getReminderText(event.reminderMinutes!),
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_right),
+                            onPressed: () => _showEventDetails(event),
+                          ),
+                        ],
                       ),
                     ),
-                    title: Text(event.title),
-                    subtitle: Text(
-                      DateFormat('yyyy-MM-dd HH:mm').format(event.startTime),
-                    ),
-                    onTap: () => _showEventDetails(event),
                   ),
                 );
               },

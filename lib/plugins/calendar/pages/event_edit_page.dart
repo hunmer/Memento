@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/event.dart';
 import '../../../widgets/circle_icon_picker.dart';
+import '../utils/calendar_notification_utils.dart';
 
 class EventEditPage extends StatefulWidget {
   final CalendarEvent? event;
@@ -19,12 +20,25 @@ class EventEditPage extends StatefulWidget {
 }
 
 class _EventEditPageState extends State<EventEditPage> {
+  String _getReminderText(int minutes) {
+    if (minutes >= 1440) {
+      final days = minutes ~/ 1440;
+      return '提前$days天';
+    } else if (minutes >= 60) {
+      final hours = minutes ~/ 60;
+      return '提前$hours小时';
+    } else {
+      return '提前$minutes分钟';
+    }
+  }
+
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
   late DateTime _startDate;
   late TimeOfDay _startTime;
   DateTime? _endDate;
   TimeOfDay? _endTime;
+  int? _reminderMinutes;
   late IconData _selectedIcon;
   late Color _selectedColor;
 
@@ -40,6 +54,7 @@ class _EventEditPageState extends State<EventEditPage> {
       _endDate = event!.endTime;
       _endTime = TimeOfDay.fromDateTime(event.endTime!);
     }
+    _reminderMinutes = event?.reminderMinutes;
     _selectedIcon = event?.icon ?? Icons.event;
     _selectedColor = event?.color ?? Colors.blue;
   }
@@ -88,6 +103,40 @@ class _EventEditPageState extends State<EventEditPage> {
     }
   }
 
+  Future<void> _selectReminderMinutes() async {
+    final items = [
+      {'label': '不提醒', 'value': null},
+      {'label': '提前5分钟', 'value': 5},
+      {'label': '提前15分钟', 'value': 15},
+      {'label': '提前30分钟', 'value': 30},
+      {'label': '提前1小时', 'value': 60},
+      {'label': '提前2小时', 'value': 120},
+      {'label': '提前1天', 'value': 1440},
+      {'label': '提前2天', 'value': 2880},
+    ];
+
+    final result = await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text('选择提醒时间'),
+          children: items.map((item) => SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context, item['value'] as int?);
+            },
+            child: Text(item['label'] as String),
+          )).toList(),
+        );
+      }
+    );
+
+    if (result != null) {
+      setState(() {
+        _reminderMinutes = result;
+      });
+    }
+  }
+
   Future<void> _selectEndTime() async {
     if (_endDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -117,7 +166,7 @@ class _EventEditPageState extends State<EventEditPage> {
     );
   }
 
-  void _saveEvent() {
+  Future<void> _saveEvent() async {
     if (_titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('请输入事件标题')),
@@ -153,8 +202,24 @@ class _EventEditPageState extends State<EventEditPage> {
       endTime: endDateTime, // 现在endDateTime总是有值
       icon: _selectedIcon,
       color: _selectedColor,
+      reminderMinutes: _reminderMinutes,
+      source: 'default',
     );
 
+    // 设置提醒
+    if (_reminderMinutes != null) {
+      final reminderTime = startDateTime.subtract(Duration(minutes: _reminderMinutes!));
+      if (reminderTime.isAfter(DateTime.now())) {
+        await CalendarNotificationUtils.scheduleEventNotification(
+          id: int.parse(event.id), // 确保ID是整数
+          title: event.title,
+          body: event.description,
+          scheduledDateTime: reminderTime,
+          payload: event.id,
+        );
+      }
+    }
+    
     widget.onSave(event);
     Navigator.of(context).pop();
   }
@@ -209,6 +274,22 @@ class _EventEditPageState extends State<EventEditPage> {
               ),
               onTap: _selectDateRange,
             ),
+            ListTile(
+              title: const Text('提醒设置'),
+              subtitle: Text(
+                _reminderMinutes != null
+                    ? _getReminderText(_reminderMinutes!)
+                    : '不提醒'
+              ),
+              trailing: _reminderMinutes != null
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () => setState(() => _reminderMinutes = null),
+                    )
+                  : null,
+              onTap: _selectReminderMinutes,
+            ),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(

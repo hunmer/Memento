@@ -12,7 +12,7 @@ class TodoPlugin extends BasePlugin {
   // 私有构造函数
   TodoPlugin._();
 
-  late TaskController _taskController;
+  late TaskController taskController;
   late ReminderController _reminderController;
 
   @override
@@ -38,7 +38,7 @@ class TodoPlugin extends BasePlugin {
 
   @override
   Future<void> initialize() async {
-    _taskController = TaskController(storageManager, storageDir);
+    taskController = TaskController(storageManager, storageDir);
     _reminderController = ReminderController();
 
     // 加载默认设置
@@ -61,7 +61,7 @@ class TodoPlugin extends BasePlugin {
   @override
   Widget buildMainView(BuildContext context) {
     return TodoMainView(
-      taskController: _taskController,
+      taskController: taskController,
       reminderController: _reminderController,
     );
   }
@@ -69,8 +69,8 @@ class TodoPlugin extends BasePlugin {
   @override
   Widget? buildCardView(BuildContext context) {
     final theme = Theme.of(context);
-    final totalTasks = _taskController.getTotalTaskCount();
-    final weeklyTasks = _taskController.getWeeklyTaskCount();
+    final totalTasks = taskController.getTotalTaskCount();
+    final weeklyTasks = taskController.getWeeklyTaskCount();
 
     return  Padding(
           padding: const EdgeInsets.all(16.0),
@@ -144,4 +144,5 @@ class TodoPlugin extends BasePlugin {
     // 清理插件数据
     await storageManager.delete(storageDir);
   }
+  
 }

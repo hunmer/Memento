@@ -9,6 +9,7 @@ class Task {
   String title;
   String? description;
   final DateTime createdAt;
+  DateTime? startDate;
   DateTime? dueDate;
   TaskPriority priority;
   TaskStatus status;
@@ -23,6 +24,7 @@ class Task {
     required this.title,
     this.description,
     required this.createdAt,
+    this.startDate,
     this.dueDate,
     this.priority = TaskPriority.medium,
     this.status = TaskStatus.todo,
@@ -39,6 +41,7 @@ class Task {
     String? title,
     String? description,
     DateTime? createdAt,
+    DateTime? startDate,
     DateTime? dueDate,
     TaskPriority? priority,
     TaskStatus? status,
@@ -52,6 +55,7 @@ class Task {
       title: title ?? this.title,
       description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
+      startDate: startDate ?? this.startDate,
       dueDate: dueDate ?? this.dueDate,
       priority: priority ?? this.priority,
       status: status ?? this.status,
@@ -67,6 +71,7 @@ class Task {
         'title': title,
         'description': description,
         'createdAt': createdAt.toIso8601String(),
+        'startDate': startDate?.toIso8601String(),
         'dueDate': dueDate?.toIso8601String(),
         'priority': priority.index,
         'status': status.index,
@@ -81,6 +86,7 @@ class Task {
         title: json['title'],
         description: json['description'],
         createdAt: DateTime.parse(json['createdAt']),
+        startDate: json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
         dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
         priority: TaskPriority.values[json['priority']],
         status: TaskStatus.values[json['status']],

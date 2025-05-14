@@ -8,8 +8,8 @@ class CalendarEvent {
   final DateTime? endTime;
   final IconData icon;
   final Color color;
-  final bool isSystem;
-  final DateTime? reminder;
+  final String source;
+  final int? reminderMinutes; // 提前提醒的分钟数
   final DateTime? completedTime;
 
   CalendarEvent({
@@ -20,8 +20,8 @@ class CalendarEvent {
     this.endTime,
     required this.icon,
     required this.color,
-    this.isSystem = false,
-    this.reminder,
+    this.source = 'default',
+    this.reminderMinutes,
     this.completedTime,
   });
 
@@ -33,8 +33,8 @@ class CalendarEvent {
     DateTime? endTime,
     IconData? icon,
     Color? color,
-    bool? isSystem,
-    DateTime? reminder,
+    String? source,
+    int? reminderMinutes,
     DateTime? completedTime,
   }) {
     return CalendarEvent(
@@ -45,8 +45,8 @@ class CalendarEvent {
       endTime: endTime ?? this.endTime,
       icon: icon ?? this.icon,
       color: color ?? this.color,
-      isSystem: isSystem ?? this.isSystem,
-      reminder: reminder ?? this.reminder,
+      source: source ?? this.source,
+      reminderMinutes: reminderMinutes ?? this.reminderMinutes,
       completedTime: completedTime ?? this.completedTime,
     );
   }
@@ -59,8 +59,8 @@ class CalendarEvent {
     'endTime': endTime?.toIso8601String(),
     'icon': icon.codePoint,
     'color': color.value,
-    'isSystem': isSystem,
-    'reminder': reminder?.toIso8601String(),
+    'source': source,
+    'reminderMinutes': reminderMinutes,
     'completedTime': completedTime?.toIso8601String(),
   };
 
@@ -72,8 +72,8 @@ class CalendarEvent {
     endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
     icon: IconData(json['icon'], fontFamily: 'MaterialIcons'),
     color: Color(json['color']),
-    isSystem: json['isSystem'] ?? false,
-    reminder: json['reminder'] != null ? DateTime.parse(json['reminder']) : null,
+    source: json['source'] ?? 'default',
+    reminderMinutes: json['reminderMinutes'],
     completedTime: json['completedTime'] != null ? DateTime.parse(json['completedTime']) : null,
   );
 }

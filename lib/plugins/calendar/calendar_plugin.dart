@@ -10,11 +10,15 @@ import './pages/event_edit_page.dart';
 import './pages/completed_events_page.dart';
 import './pages/event_list_page.dart';
 import './widgets/event_detail_card.dart';
+import './services/todo_event_service.dart';
+import '../todo/controllers/task_controller.dart';
+import '../todo/todo_plugin.dart';
 
-class CalendarPlugin extends BasePlugin {
+class CalendarPlugin extends BasePlugin with ChangeNotifier {
   late final app.CalendarController _controller;
   late final syncfusion.CalendarController _sfController;
   late CalendarDataSource _events;
+  TodoEventService? _todoEventService;
 
   final List<syncfusion.CalendarView> _allowedViews = <syncfusion.CalendarView>[
     syncfusion.CalendarView.day,
@@ -118,6 +122,19 @@ class CalendarPlugin extends BasePlugin {
     ConfigManager configManager,
   ) async {
     await initialize();
+    
+    // 获取Todo插件的TaskController实例
+    final todoPlugin = pluginManager.getPlugin('todo') as TodoPlugin?;
+    if (todoPlugin != null) {
+      final taskController = todoPlugin.taskController;
+      if (taskController != null) {
+        _todoEventService = TodoEventService(taskController);
+        // 监听任务变化
+        taskController.addListener(() {
+          _controller.notifyListeners();
+        });
+      }
+    }
   }
 
   void _showEventDetails(BuildContext context, CalendarEvent event) {
@@ -192,7 +209,12 @@ class CalendarPlugin extends BasePlugin {
 
   // 将 CalendarEvent 转换为 Appointment
   List<syncfusion.Appointment> _getUserAppointments() {
-    return _controller.events.map((event) => syncfusion.Appointment(
+    final List<CalendarEvent> allEvents = [
+      ..._controller.events,
+      if (_todoEventService != null) ..._todoEventService!.getTaskEvents(),
+    ];
+    
+    return allEvents.map((event) => syncfusion.Appointment(
       startTime: event.startTime,
       endTime: event.endTime ?? event.startTime.add(const Duration(hours: 1)),
       subject: event.title,
@@ -208,11 +230,27 @@ class CalendarPlugin extends BasePlugin {
     if (details.targetElement == syncfusion.CalendarElement.calendarCell) {
       _controller.selectDate(details.date!);
     } else if (details.targetElement == syncfusion.CalendarElement.appointment) {
-      final CalendarEvent? tappedEvent = _controller.events.firstWhere(
-        (event) => event.id == (details.appointments?.first.id as String),
-        orElse: () => throw Exception('Event not found'),
-      );
-      _showEventDetails(context, tappedEvent!);
+      final String eventId = details.appointments?.first.id as String;
+      
+      // 检查是否为Todo任务事件
+      if (eventId.startsWith('todo_')) {
+        // Todo任务事件只显示，不允许编辑
+        final events = _todoEventService?.getTaskEvents();
+        if (events != null) {
+          final event = events.firstWhere(
+            (event) => event.id == eventId,
+            orElse: () => throw Exception('Event not found'),
+          );
+          _showEventDetails(context, event);
+        }
+      } else {
+        // 普通日历事件
+        final event = _controller.events.firstWhere(
+          (event) => event.id == eventId,
+          orElse: () => throw Exception('Event not found'),
+        );
+        _showEventDetails(context, event);
+      }
     }
   }
 

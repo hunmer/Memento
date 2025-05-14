@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:device_calendar/device_calendar.dart';
 import '../models/event.dart';
 import '../../../core/storage/storage_manager.dart';
 
@@ -9,14 +10,90 @@ class CalendarController extends ChangeNotifier {
   DateTime _focusedMonth = DateTime.now();
   List<CalendarEvent> _events = [];
   List<CalendarEvent> _completedEvents = [];
+  List<CalendarEvent> _systemEvents = [];
+  final DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
   
   CalendarController(this.storage) {
-    _loadEvents();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await _loadEvents();
+    await _loadSystemCalendars();
+  }
+
+  Future<void> _loadSystemCalendars() async {
+    try {
+      var permissionsGranted = await _deviceCalendarPlugin.hasPermissions();
+      if (permissionsGranted.isSuccess && !permissionsGranted.data!) {
+        permissionsGranted = await _deviceCalendarPlugin.requestPermissions();
+        if (!permissionsGranted.isSuccess || !permissionsGranted.data!) {
+          return;
+        }
+      }
+
+      final calendarsResult = await _deviceCalendarPlugin.retrieveCalendars();
+      final List<Calendar> calendars = calendarsResult.data ?? [];
+      
+      _systemEvents.clear();
+      for (var calendar in calendars) {
+        if (calendar.id == null) continue;
+        
+        final eventsResult = await _deviceCalendarPlugin.retrieveEvents(
+          calendar.id,
+          RetrieveEventsParams(
+            startDate: DateTime.now().subtract(const Duration(days: 30)),
+            endDate: DateTime.now().add(const Duration(days: 365)),
+          ),
+        );
+        
+        if (eventsResult.isSuccess && eventsResult.data != null) {
+          for (var event in eventsResult.data!) {
+            if (event.title == null || event.start == null) continue;
+            
+            _systemEvents.add(CalendarEvent(
+              id: '${calendar.id}_${event.eventId}',
+              title: event.title!,
+              description: event.description ?? '',
+              startTime: event.start!,
+              endTime: event.end,
+              icon: Icons.calendar_today,
+              color: _getColorForCalendar(calendar.id!),
+              source: 'system_${calendar.id}',
+            ));
+          }
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading system calendars: $e');
+    }
+  }
+
+  Color _getColorForCalendar(String calendarId) {
+    // 根据日历ID生成固定的颜色
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+    ];
+    
+    int hash = 0;
+    for (var i = 0; i < calendarId.length; i++) {
+      hash = calendarId.codeUnitAt(i) + ((hash << 5) - hash);
+    }
+    return colors[hash.abs() % colors.length];
   }
 
   DateTime get selectedDate => _selectedDate;
   DateTime get focusedMonth => _focusedMonth;
-  List<CalendarEvent> get events => _events.where((e) => e.completedTime == null).toList();
+  List<CalendarEvent> get events {
+    final activeEvents = _events.where((e) => e.completedTime == null).toList();
+    return [...activeEvents, ..._systemEvents];
+  }
   List<CalendarEvent> get completedEvents => _completedEvents;
 
   void selectDate(DateTime date) {
@@ -65,6 +142,11 @@ class CalendarController extends ChangeNotifier {
   }
 
   Future<void> updateEvent(CalendarEvent updatedEvent) async {
+    // 只允许更新source为'default'的事件
+    if (updatedEvent.source != 'default') {
+      debugPrint('Cannot update system calendar event');
+      return;
+    }
     final index = _events.indexWhere((e) => e.id == updatedEvent.id);
     if (index != -1) {
       _events[index] = updatedEvent;
@@ -75,6 +157,11 @@ class CalendarController extends ChangeNotifier {
   }
 
   Future<void> deleteEvent(CalendarEvent event) async {
+    // 只允许删除source为'default'的事件
+    if (event.source != 'default') {
+      debugPrint('Cannot delete system calendar event');
+      return;
+    }
     _events.removeWhere((e) => e.id == event.id);
     _completedEvents.removeWhere((e) => e.id == event.id);
     await _saveEvents();
@@ -82,6 +169,11 @@ class CalendarController extends ChangeNotifier {
   }
 
   Future<void> completeEvent(CalendarEvent event) async {
+    // 只允许完成source为'default'的事件
+    if (event.source != 'default') {
+      debugPrint('Cannot complete system calendar event');
+      return;
+    }
     // 从活动事件列表中移除
     _events.removeWhere((e) => e.id == event.id);
     // 标记完成时间

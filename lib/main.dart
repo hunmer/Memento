@@ -88,12 +88,12 @@ void main() async {
         globalPluginManager,
         globalConfigManager,
       ),
-      CalendarPlugin(), 
       StorePlugin(), 
       NodesPlugin(), // 添加笔记插件
       NotesPlugin(), // 添加Notes插件
       GoodsPlugin.instance, // 添加物品插件
       BillPlugin(), // 添加账单插件
+      CalendarPlugin(), 
     ];
 
     // 遍历并注册插件

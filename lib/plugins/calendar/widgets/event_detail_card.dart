@@ -3,6 +3,18 @@ import '../models/event.dart';
 import 'package:intl/intl.dart';
 
 class EventDetailCard extends StatelessWidget {
+  String _getReminderText(int minutes) {
+    if (minutes >= 1440) {
+      final days = minutes ~/ 1440;
+      return '提前$days天';
+    } else if (minutes >= 60) {
+      final hours = minutes ~/ 60;
+      return '提前$hours小时';
+    } else {
+      return '提前$minutes分钟';
+    }
+  }
+  
   final CalendarEvent event;
   final VoidCallback onEdit;
   final VoidCallback onComplete;
@@ -25,10 +37,22 @@ class EventDetailCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 标题
-            Text(
-              event.title,
-              style: Theme.of(context).textTheme.titleLarge,
+            // 标题和图标
+            Row(
+              children: [
+                Icon(
+                  event.icon,
+                  size: 24,
+                  color: event.color,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    event.title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             
@@ -36,8 +60,16 @@ class EventDetailCard extends StatelessWidget {
             _buildInfoRow(
               context,
               Icons.access_time,
-              '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}\n${event.endTime != null ? DateFormat('yyyy-MM-dd HH:mm').format(event.endTime!) : ''}',
+              '${DateFormat('yyyy-MM-dd HH:mm').format(event.startTime)}\n${event.endTime != null ? "至\n${DateFormat('yyyy-MM-dd HH:mm').format(event.endTime!)}" : ''}',
             ),
+            if (event.reminderMinutes != null) ...[
+              const SizedBox(height: 16),
+              _buildInfoRow(
+                context,
+                Icons.notifications,
+                '提醒设置：${_getReminderText(event.reminderMinutes!)}',
+              ),
+            ],
             const SizedBox(height: 16),
             
             // 描述
@@ -110,14 +142,16 @@ class EventDetailCard extends StatelessWidget {
     Color color,
     VoidCallback onPressed,
   ) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: Colors.white),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white),
+        tooltip: label,
+        onPressed: onPressed,
+        padding: const EdgeInsets.all(12),
       ),
     );
   }

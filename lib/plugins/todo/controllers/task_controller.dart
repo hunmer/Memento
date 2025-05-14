@@ -106,15 +106,33 @@ class TaskController extends ChangeNotifier {
       }
 
       // 日期范围过滤
-      final startDate = filter['startDate'] as DateTime?;
-      final endDate = filter['endDate'] as DateTime?;
-      if (startDate != null || endDate != null) {
-        if (task.dueDate == null) return false;
-        if (startDate != null && task.dueDate!.isBefore(startDate)) {
-          return false;
+      final filterStartDate = filter['startDate'] as DateTime?;
+      final filterEndDate = filter['endDate'] as DateTime?;
+      if (filterStartDate != null || filterEndDate != null) {
+        // 如果任务没有开始日期和截止日期，则不符合过滤条件
+        if (task.startDate == null && task.dueDate == null) return false;
+        
+        // 检查任务的日期范围是否与过滤条件有交集
+        if (filterStartDate != null) {
+          // 如果任务有截止日期，且截止日期早于过滤的开始日期，则不符合条件
+          if (task.dueDate != null && task.dueDate!.isBefore(filterStartDate)) {
+            return false;
+          }
+          // 如果任务只有开始日期，没有截止日期，且开始日期早于过滤的开始日期，则不符合条件
+          if (task.dueDate == null && task.startDate != null && task.startDate!.isBefore(filterStartDate)) {
+            return false;
+          }
         }
-        if (endDate != null && task.dueDate!.isAfter(endDate)) {
-          return false;
+        
+        if (filterEndDate != null) {
+          // 如果任务有开始日期，且开始日期晚于过滤的截止日期，则不符合条件
+          if (task.startDate != null && task.startDate!.isAfter(filterEndDate)) {
+            return false;
+          }
+          // 如果任务只有截止日期，没有开始日期，且截止日期晚于过滤的截止日期，则不符合条件
+          if (task.startDate == null && task.dueDate != null && task.dueDate!.isAfter(filterEndDate)) {
+            return false;
+          }
         }
       }
 
@@ -201,6 +219,7 @@ class TaskController extends ChangeNotifier {
   Future<Task> createTask({
     required String title,
     String? description,
+    DateTime? startDate,
     DateTime? dueDate,
     TaskPriority priority = TaskPriority.medium,
     List<String>? tags,
@@ -212,6 +231,7 @@ class TaskController extends ChangeNotifier {
       title: title,
       description: description,
       createdAt: DateTime.now(),
+      startDate: startDate,
       dueDate: dueDate,
       priority: priority,
       status: TaskStatus.todo,

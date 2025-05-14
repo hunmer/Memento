@@ -21,6 +21,7 @@ class TaskForm extends StatefulWidget {
 class _TaskFormState extends State<TaskForm> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
+  late DateTime? _startDate;
   late DateTime? _dueDate;
   late TaskPriority _priority;
   late List<String> _tags;
@@ -33,6 +34,7 @@ class _TaskFormState extends State<TaskForm> {
     super.initState();
     _titleController = TextEditingController(text: widget.task?.title ?? '');
     _descriptionController = TextEditingController(text: widget.task?.description ?? '');
+    _startDate = widget.task?.startDate;
     _dueDate = widget.task?.dueDate;
     _priority = widget.task?.priority ?? TaskPriority.medium;
     
@@ -52,18 +54,31 @@ class _TaskFormState extends State<TaskForm> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      initialDate: _dueDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDateRange: _startDate != null && _dueDate != null
+          ? DateTimeRange(start: _startDate!, end: _dueDate!)
+          : DateTimeRange(
+              start: DateTime.now(),
+              end: DateTime.now().add(const Duration(days: 7)),
+            ),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
     );
-    if (picked != null && picked != _dueDate) {
+    if (picked != null) {
       setState(() {
-        _dueDate = picked;
+        _startDate = picked.start;
+        _dueDate = picked.end;
       });
     }
+  }
+
+  void _clearDateRange() {
+    setState(() {
+      _startDate = null;
+      _dueDate = null;
+    });
   }
 
   void _addSubtask() {
@@ -140,6 +155,7 @@ class _TaskFormState extends State<TaskForm> {
       await widget.taskController.createTask(
         title: _titleController.text,
         description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+        startDate: _startDate,
         dueDate: _dueDate,
         priority: _priority,
         tags: _tags,
@@ -153,6 +169,7 @@ class _TaskFormState extends State<TaskForm> {
         title: _titleController.text,
         description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
         createdAt: widget.task!.createdAt,
+        startDate: _startDate,
         dueDate: _dueDate,
         priority: _priority,
         status: widget.task!.status,
@@ -206,26 +223,31 @@ class _TaskFormState extends State<TaskForm> {
             ),
             const SizedBox(height: 16),
             
-            // 截止日期
+            // 日期范围
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    'Due Date: ${_dueDate == null ? 'Not set' : '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}'}',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Start Date: ${_startDate == null ? 'Not set' : '${_startDate!.year}/${_startDate!.month}/${_startDate!.day}'}',
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Due Date: ${_dueDate == null ? 'Not set' : '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}'}',
+                      ),
+                    ],
                   ),
                 ),
                 TextButton(
-                  onPressed: () => _selectDate(context),
-                  child: const Text('Select Date'),
+                  onPressed: () => _selectDateRange(context),
+                  child: const Text('Select Dates'),
                 ),
-                if (_dueDate != null)
+                if (_startDate != null || _dueDate != null)
                   IconButton(
                     icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() {
-                        _dueDate = null;
-                      });
-                    },
+                    onPressed: _clearDateRange,
                   ),
               ],
             ),
