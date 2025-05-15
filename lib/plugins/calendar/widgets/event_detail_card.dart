@@ -83,7 +83,7 @@ class EventDetailCard extends StatelessWidget {
             ],
             
             // 按钮行
-            Row(
+            if(event.source == 'default') Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildActionButton(

@@ -84,10 +84,7 @@ void main() async {
       TimerPlugin.instance,
       TodoPlugin.instance,
       DayPlugin.instance,
-      await TrackerPlugin.initializeAndRegister(
-        globalPluginManager,
-        globalConfigManager,
-      ),
+      TrackerPlugin.instance, // 使用单例
       StorePlugin(), 
       NodesPlugin(), // 添加笔记插件
       NotesPlugin(), // 添加Notes插件
