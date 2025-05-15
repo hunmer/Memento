@@ -7,7 +7,7 @@ import '../widgets/date_separator.dart';
 import '../../../utils/date_formatter.dart';
 import '../../../../../widgets/file_preview/index.dart';
 
-class MessageList extends StatelessWidget {
+class MessageList extends StatefulWidget {
   final List<dynamic> items;
   final bool isMultiSelectMode;
   final Set<String> selectedMessageIds;
@@ -50,14 +50,19 @@ class MessageList extends StatelessWidget {
   });
 
   @override
+  State<MessageList> createState() => _MessageListState();
+}
+
+class _MessageListState extends State<MessageList> {
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      controller: scrollController,
+      controller: widget.scrollController,
       reverse: true,
-      itemCount: items.length,
+      itemCount: widget.items.length,
       itemBuilder: (context, index) {
-        final item = items[index];
-        final nextItem = index > 0 ? items[index - 1] : null;
+        var item = widget.items[index];
+        final nextItem = index > 0 ? widget.items[index - 1] : null;
 
         // 处理日期分隔符
         Widget? dateSeparator;
@@ -72,51 +77,71 @@ class MessageList extends StatelessWidget {
         }
 
         if (item is Message) {
+          // 确保消息的 metadata 中包含 channelId
+          if (item.metadata == null || !item.metadata!.containsKey('channelId')) {
+            final metadata = Map<String, dynamic>.from(item.metadata ?? {});
+            metadata['channelId'] = item.channelId; // 使用消息对象中的 channelId
+            // 创建一个临时消息对象，等待异步操作完成
+            Message tempMessage = item;
+            // 使用 Future.microtask 来确保状态更新是安全的
+            Future.microtask(() async {
+              final updatedMessage = await item.copyWith(metadata: metadata);
+              if (mounted) {
+                setState(() {
+                  // 更新items中的消息
+                  final index = widget.items.indexOf(tempMessage);
+                  if (index != -1 && widget.items[index] is Message) {
+                    widget.items[index] = updatedMessage;
+                  }
+                });
+              }
+            });
+          }
           return Column(
             children: [
               if (dateSeparator != null) dateSeparator,
               GestureDetector(
-                onLongPress: () {
-                  // 使用统一的消息选项处理器
-                  MessageOptionsHandler.showOptionsDialog(
-                    context: context,
-                    message: item,
-                    onMessageEdit: onMessageEdit,
-                    onMessageDelete: onMessageDelete,
-                    onMessageCopy: onMessageCopy,
-                    onSetFixedSymbol: onSetFixedSymbol,
-                    onSetBubbleColor: onSetBubbleColor,
-                    onReply: onReply,
-                    onToggleFavorite: onToggleFavorite,
-                  );
-                },
+                  onLongPress: () {
+                    // 使用统一的消息选项处理器
+                    MessageOptionsHandler.showOptionsDialog(
+                      context: context,
+                      message: item,
+                      onMessageEdit: widget.onMessageEdit,
+                      onMessageDelete: widget.onMessageDelete,
+                      onMessageCopy: widget.onMessageCopy,
+                      onSetFixedSymbol: widget.onSetFixedSymbol,
+                      onSetBubbleColor: widget.onSetBubbleColor,
+                      onReply: widget.onReply,
+                      onToggleFavorite: widget.onToggleFavorite,
+                    );
+                  },
                 onDoubleTap: () {
                   // 使用统一的消息选项处理器，直接显示固态符号编辑对话框
                   MessageOptionsHandler.showOptionsDialog(
                     context: context,
                     message: item,
-                    onMessageEdit: onMessageEdit,
-                    onMessageDelete: onMessageDelete,
-                    onMessageCopy: onMessageCopy,
-                    onSetFixedSymbol: onSetFixedSymbol,
-                    onSetBubbleColor: onSetBubbleColor,
-                    onReply: onReply,
-                    onToggleFavorite: onToggleFavorite,
+                    onMessageEdit: widget.onMessageEdit,
+                    onMessageDelete: widget.onMessageDelete,
+                    onMessageCopy: widget.onMessageCopy,
+                    onSetFixedSymbol: widget.onSetFixedSymbol,
+                    onSetBubbleColor: widget.onSetBubbleColor,
+                    onReply: widget.onReply,
+                    onToggleFavorite: widget.onToggleFavorite,
                     initiallyShowFixedSymbolDialog: true, // 直接显示固态符号编辑对话框
                   );
                 },
                 child: MessageBubble(
                   message: item,
-                  isSelected: selectedMessageIds.contains(item.id),
-                  isMultiSelectMode: isMultiSelectMode,
-                  onEdit: () => onMessageEdit(item),
-                  onDelete: () => onMessageDelete(item),
-                  onCopy: () => onMessageCopy(item),
-                  onSetFixedSymbol: (symbol) => onSetFixedSymbol(item, symbol),
+                  isSelected: widget.selectedMessageIds.contains(item.id),
+                  isMultiSelectMode: widget.isMultiSelectMode,
+                  onEdit: () => widget.onMessageEdit(item),
+                  onDelete: () => widget.onMessageDelete(item),
+                  onCopy: () => widget.onMessageCopy(item),
+                  onSetFixedSymbol: (symbol) => widget.onSetFixedSymbol(item, symbol),
                   onLongPress: null, // 移除重复的长按处理
                   onTap:
-                      isMultiSelectMode
-                          ? () => onToggleMessageSelection(item.id)
+                      widget.isMultiSelectMode
+                          ? () => widget.onToggleMessageSelection(item.id)
                           : () {
                             if ((item.type == MessageType.file ||
                                     item.type == MessageType.video ||
@@ -152,15 +177,15 @@ class MessageList extends StatelessWidget {
                             }
                           },
                   onAvatarTap:
-                      onAvatarTap != null ? () => onAvatarTap!(item) : null,
-                  showAvatar: showAvatar,
-                  currentUserId: currentUserId ?? '',
+                      widget.onAvatarTap != null ? () => widget.onAvatarTap!(item) : null,
+                  showAvatar: widget.showAvatar,
+                  currentUserId: widget.currentUserId ?? '',
                   isHighlighted:
-                      shouldHighlight &&
-                      highlightedMessage != null &&
-                      item.id == highlightedMessage?.id,
-                  onToggleFavorite: () => onToggleFavorite(item),
-                  onReplyTap: onReplyTap,
+                      widget.shouldHighlight &&
+                      widget.highlightedMessage != null &&
+                      item.id == widget.highlightedMessage?.id,
+                  onToggleFavorite: () => widget.onToggleFavorite(item),
+                  onReplyTap: widget.onReplyTap,
                 ),
               ),
             ],

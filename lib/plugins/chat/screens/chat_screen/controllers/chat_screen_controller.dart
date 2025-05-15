@@ -7,16 +7,11 @@ import '../../../../../../utils/audio_service.dart';
 
 class ChatScreenController extends ChangeNotifier {
   // 重新加载消息列表
-  void reloadMessages() {
-    final channelIndex = chatPlugin.channelService.channels.indexWhere(
-      (c) => c.id == channel.id,
-    );
-    
-    if (channelIndex != -1) {
-      messages = List<Message>.from(
-        chatPlugin.channelService.channels[channelIndex].messages,
-      )..sort((a, b) => b.date.compareTo(a.date));
-      
+  void reloadMessages() async {
+    final channelMessages = await chatPlugin.channelService.getChannelMessages(channel.id);
+    if (channelMessages != null) {
+      messages = List<Message>.from(channelMessages)
+        ..sort((a, b) => b.date.compareTo(a.date));
       notifyListeners();
     }
   }
@@ -143,25 +138,18 @@ class ChatScreenController extends ChangeNotifier {
 
     try {
       // 从ChatPlugin加载最新的消息
-      debugPrint(
-        'Loading messages - Searching for channel with id: ${channel.id}',
-      );
-      debugPrint(
-        'Available channels: ${chatPlugin.channelService.channels.map((c) => c.id).join(', ')}',
-      );
-      final channelIndex = chatPlugin.channelService.channels.indexWhere(
-        (c) => c.id == channel.id,
-      );
-      debugPrint('Found channel at index: $channelIndex');
-      if (channelIndex == -1) {
+      debugPrint('Loading messages for channel: ${channel.id}');
+      
+      // 获取频道消息
+      final channelMessages = await chatPlugin.channelService.getChannelMessages(channel.id);
+      if (channelMessages == null) {
         debugPrint('Channel not found in ChatPlugin');
         return;
       }
 
       // 获取最新的消息列表并按时间倒序排序
-      final allMessages = List<Message>.from(
-        chatPlugin.channelService.channels[channelIndex].messages,
-      )..sort((a, b) => b.date.compareTo(a.date));
+      final allMessages = List<Message>.from(channelMessages)
+        ..sort((a, b) => b.date.compareTo(a.date));
 
       // 计算当前页的消息范围
       final totalMessages = allMessages.length;
@@ -208,14 +196,11 @@ class ChatScreenController extends ChangeNotifier {
   Future<void> _loadMoreMessages() async {
     if (isLoading) return;
 
-    // 获取总消息数
-    final channelIndex = chatPlugin.channelService.channels.indexWhere(
-      (c) => c.id == channel.id,
-    );
-    if (channelIndex == -1) return;
+    // 获取频道消息
+    final channelMessages = await chatPlugin.channelService.getChannelMessages(channel.id);
+    if (channelMessages == null) return;
 
-    final totalMessages =
-        chatPlugin.channelService.channels[channelIndex].messages.length;
+    final totalMessages = channelMessages.length;
     final totalPages = (totalMessages / pageSize).ceil();
 
     debugPrint('Current page: $currentPage, Total pages: $totalPages');
@@ -294,34 +279,6 @@ class ChatScreenController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveEditedMessage() async {
-    if (messageBeingEdited == null) return;
-
-    final editedMessage = await Message.create(
-      id: messageBeingEdited!.id,
-      content: editingController.text,
-      user: messageBeingEdited!.user,
-      date: messageBeingEdited!.date,
-      type: messageBeingEdited!.type,
-      editedAt: DateTime.now(),
-    );
-
-    try {
-      final index = messages.indexWhere((m) => m.id == editedMessage.id);
-      if (index != -1) {
-        messages[index] = editedMessage;
-        await chatPlugin.channelService.saveMessages(channel.id, messages);
-      }
-    } catch (e) {
-      // Handle error
-      debugPrint('Error updating message: $e');
-    } finally {
-      messageBeingEdited = null;
-      editingController.clear();
-      notifyListeners();
-    }
-  }
-
   Future<void> deleteMessage(Message message) async {
     try {
       messages.removeWhere((m) => m.id == message.id);
@@ -330,20 +287,6 @@ class ChatScreenController extends ChangeNotifier {
     } catch (e) {
       // Handle error
       debugPrint('Error deleting message: $e');
-    }
-  }
-
-  Future<void> setFixedSymbol(Message message, String? symbol) async {
-    try {
-      final index = messages.indexWhere((m) => m.id == message.id);
-      if (index != -1) {
-        message.setFixedSymbol(symbol);
-        await chatPlugin.channelService.saveMessages(channel.id, messages);
-        notifyListeners();
-      }
-    } catch (e) {
-      // Handle error
-      debugPrint('Error setting fixed symbol: $e');
     }
   }
 
@@ -417,37 +360,16 @@ class ChatScreenController extends ChangeNotifier {
         replyTo: replyTo,
       );
 
-      // 获取ChatPlugin中的频道索引
-      debugPrint(
-        'Sending message - Searching for channel with id: ${channel.id}',
-      );
-      debugPrint(
-        'Available channels: ${chatPlugin.channelService.channels.map((c) => c.id).join(', ')}',
-      );
-      final channelIndex = chatPlugin.channelService.channels.indexWhere(
-        (c) => c.id == channel.id,
-      );
-      debugPrint('Found channel at index: $channelIndex');
-      if (channelIndex != -1) {
-        // 先将消息添加到本地列表
-        messages.insert(0, newMessage);
-        
-        // 更新 channelService 中的消息
-        final channelMessages = chatPlugin.channelService.channels[channelIndex].messages;
-        channelMessages.add(newMessage);
-        // 在原始数据上进行排序
-        channelMessages.sort((a, b) => b.date.compareTo(a.date));
-        
-        // 保存更新后的消息
-        await chatPlugin.channelService.saveMessages(channel.id, channelMessages);
-        
-        // 确保本地消息列表与服务中的保持一致
-        messages = List<Message>.from(channelMessages);
-      } else {
-        // 如果找不到频道，则先添加到本地列表，再使用旧方法保存
-        messages.insert(0, newMessage);
-        await chatPlugin.channelService.saveMessages(channel.id, messages);
-      }
+      debugPrint('Sending message to channel: ${channel.id}');
+      
+      // 将新消息添加到本地消息列表
+      messages.insert(0, newMessage);
+      
+      // 使用updateMessage来触发UI更新
+      await chatPlugin.channelService.updateMessage(newMessage);
+      
+      // 确保消息被添加到频道
+      await chatPlugin.channelService.addMessage(channel.id, newMessage);
 
       // 清除草稿
       draftController.clear();
@@ -457,9 +379,7 @@ class ChatScreenController extends ChangeNotifier {
       requestScrollToLatest();
 
       // 确保在主线程中更新UI
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifyListeners();
-      });
+      notifyListeners();
 
       // 根据设置决定是否播放提示音
       if (chatPlugin.settingsService.shouldPlayMessageSound()) {
@@ -505,57 +425,15 @@ class ChatScreenController extends ChangeNotifier {
     }
   }
 
-  Future<void> setBubbleColor(Message message, Color? color) async {
-    try {
-      final index = messages.indexWhere((m) => m.id == message.id);
-      if (index != -1) {
-        // 创建消息的新副本并更新颜色
-        messages[index] = await messages[index].copyWith(bubbleColor: color);
-
-        // 获取ChatPlugin中的频道索引
-        debugPrint(
-          'Setting bubble color - Searching for channel with id: ${channel.id}',
-        );
-        debugPrint(
-          'Available channels: ${chatPlugin.channelService.channels.map((c) => c.id).join(', ')}',
-        );
-        final channelIndex = chatPlugin.channelService.channels.indexWhere(
-          (c) => c.id == channel.id,
-        );
-        print('Found channel at index: $channelIndex');
-
-        if (channelIndex != -1) {
-          // 保存到存储
-          await chatPlugin.channelService.saveMessages(channel.id, messages);
-          debugPrint(
-            'Successfully updated bubble color for message ${message.id}',
-          );
-        } else {
-          debugPrint('Channel not found in ChatPlugin');
-        }
-
-        // 通知监听器更新UI
-        notifyListeners();
-      } else {
-        debugPrint('Message not found in the list');
-      }
-    } catch (e) {
-      debugPrint('Error setting bubble color: $e');
-      // 可以在这里添加错误处理，比如显示一个提示
-    }
-  }
 
   Future<void> _loadUntilMessageFound() async {
     if (initialMessage == null) return;
 
-    final channelIndex = chatPlugin.channelService.channels.indexWhere(
-      (c) => c.id == channel.id,
-    );
-    if (channelIndex == -1) return;
+    // 获取频道消息
+    final channelMessages = await chatPlugin.channelService.getChannelMessages(channel.id);
+    if (channelMessages == null) return;
 
-    final allMessages =
-        chatPlugin.channelService.channels[channelIndex].messages;
-    final targetMessageIndex = allMessages.indexWhere(
+    final targetMessageIndex = channelMessages.indexWhere(
       (m) => m.id == initialMessage!.id,
     );
 

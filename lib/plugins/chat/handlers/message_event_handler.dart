@@ -68,18 +68,13 @@ class MessageEventHandler {
       message.metadata!['isThinking'] = false;
       
       // 更新当前频道中的消息，并写入本地文件
-      await _channelService.updateMessage(message, persist: true);
+      await _channelService.saveMessage(message);
       
       // 强制通知监听器更新UI
       _plugin.notifyListeners();
       
       developer.log(
         '消息状态更新完成，metadata: ${message.metadata}',
-        name: 'MessageEventHandler'
-      );
-      
-      developer.log(
-        '消息更新成功: ${message.id}, 内容长度: ${message.content.length}',
         name: 'MessageEventHandler'
       );
     } catch (e) {
@@ -125,11 +120,8 @@ class MessageEventHandler {
         }
       }
       
-      // 创建一个Future<Message>对象，因为addMessage方法需要Future<Message>类型
-      final messageFuture = Future<Message>.value(message);
-      
       // 将新消息添加到当前活跃频道
-      await _channelService.addMessage(_channelService.currentChannel!.id, messageFuture);
+      await _channelService.addMessage(_channelService.currentChannel!.id, message);
       
       // 确保UI更新
       _plugin.notifyListeners();
@@ -182,11 +174,8 @@ class MessageEventHandler {
     developer.log('处理消息创建: ${message.id}', name: 'MessageEventHandler');
     
     try {
-      // 创建一个Future<Message>对象
-      final messageFuture = Future<Message>.value(message);
-      
       // 将新消息添加到指定频道
-      await _channelService.addMessage(channelId, messageFuture);
+      await _channelService.addMessage(channelId, message);
       
       // 手动触发消息更新事件，确保UI更新
       eventManager.broadcast(

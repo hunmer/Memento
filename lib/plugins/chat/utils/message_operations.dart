@@ -14,9 +14,6 @@ class MessageOperations {
 
   /// 编辑消息
   Future<void> editMessage(Message message) async {
-    final channel = _findMessageChannel(message);
-    if (channel == null) return;
-
     final controller = TextEditingController(text: message.content);
 
     // 显示编辑对话框
@@ -75,21 +72,9 @@ class MessageOperations {
         content: controller.text,
         editedAt: DateTime.now(),
       );
-      final index = channel.messages.indexWhere((m) => m.id == message.id);
-      if (index != -1) {
-        // 更新消息
-        channel.messages[index] = updatedMessage;
-        // 保存更新后的消息列表
-        await _chatPlugin.channelService.saveMessages(
-          channel.id,
-          channel.messages,
-        );
-        // 发布消息更新事件
-        eventManager.broadcast(
-          'onMessageUpdated',
-          Values<Message, String>(updatedMessage, channel.id),
-        );
-      }
+      
+      // 直接调用 updateMessage 方法更新消息
+      await _chatPlugin.channelService.updateMessage(updatedMessage);
     }
 
     controller.dispose();
@@ -97,9 +82,6 @@ class MessageOperations {
 
   /// 删除消息
   Future<void> deleteMessage(Message message) async {
-    final channel = _findMessageChannel(message);
-    if (channel == null) return;
-
     // 显示确认对话框
     final confirmed = await showDialog<bool>(
       context: context,
@@ -121,23 +103,29 @@ class MessageOperations {
 
     if (confirmed == true) {
       try {
-        // 获取消息的索引
-        final index = channel.messages.indexWhere((m) => m.id == message.id);
-        if (index == -1) return;
-
+        // 获取频道ID
+        final channelId = message.metadata?['channelId'] as String?;
+        if (channelId == null) {
+          throw Exception('消息没有关联的频道ID');
+        }
+        
+        // 获取频道
+        final channel = _chatPlugin.channelService.channels
+            .firstWhere((c) => c.id == channelId);
+        
         // 从频道的消息列表中删除消息
         final updatedMessages = List<Message>.from(channel.messages)
-          ..removeAt(index);
-
-        // 保存更新后的消息列表
-        await _chatPlugin.channelService.saveMessages(
-          channel.id,
-          updatedMessages,
-        );
-
+          ..removeWhere((m) => m.id == message.id);
+        
         // 更新频道的消息列表
         channel.messages.clear();
         channel.messages.addAll(updatedMessages);
+        
+        // 保存更新后的消息列表
+        await _chatPlugin.channelService.saveMessages(
+          channelId,
+          updatedMessages,
+        );
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -161,55 +149,20 @@ class MessageOperations {
 
   /// 设置固定符号
   Future<void> setFixedSymbol(Message message, String? symbol) async {
-    final channel = _findMessageChannel(message);
-    if (channel == null) return;
-
     final updatedMessage = await message.copyWith(fixedSymbol: symbol);
-    final index = channel.messages.indexWhere((m) => m.id == message.id);
-    if (index != -1) {
-      // 更新消息
-      channel.messages[index] = updatedMessage;
-      // 保存更新后的消息列表
-      await _chatPlugin.channelService.saveMessages(
-        channel.id,
-        channel.messages,
-      );
-      // 发布消息更新事件
-      eventManager.broadcast(
-        'onMessageUpdated',
-        Values<Message, String>(updatedMessage, channel.id),
-      );
-    }
+    // 直接调用 updateMessage 方法更新消息
+    await _chatPlugin.channelService.updateMessage(updatedMessage);
   }
 
   /// 设置气泡颜色
   Future<void> setBubbleColor(Message message, Color? color) async {
-    final channel = _findMessageChannel(message);
-    if (channel == null) return;
-
     final updatedMessage = await message.copyWith(bubbleColor: color);
-    final index = channel.messages.indexWhere((m) => m.id == message.id);
-    if (index != -1) {
-      // 更新消息
-      channel.messages[index] = updatedMessage;
-      // 保存更新后的消息列表
-      await _chatPlugin.channelService.saveMessages(
-        channel.id,
-        channel.messages,
-      );
-      // 发布消息更新事件
-      eventManager.broadcast(
-        'onMessageUpdated',
-        Values<Message, String>(updatedMessage, channel.id),
-      );
-    }
+    // 直接调用 updateMessage 方法更新消息
+    await _chatPlugin.channelService.updateMessage(updatedMessage);
   }
 
   /// 收藏/取消收藏消息
   Future<void> toggleFavorite(Message message) async {
-    final channel = _findMessageChannel(message);
-    if (channel == null) return;
-
     // 获取当前消息的metadata，如果不存在则创建一个新的
     final metadata = Map<String, dynamic>.from(message.metadata ?? {});
     
@@ -227,30 +180,18 @@ class MessageOperations {
 
     // 更新消息
     final updatedMessage = await message.copyWith(metadata: metadata);
-    final index = channel.messages.indexWhere((m) => m.id == message.id);
-    if (index != -1) {
-      // 更新消息
-      channel.messages[index] = updatedMessage;
-      // 保存更新后的消息列表
-      await _chatPlugin.channelService.saveMessages(
-        channel.id,
-        channel.messages,
+    
+    // 直接调用 updateMessage 方法更新消息
+    await _chatPlugin.channelService.updateMessage(updatedMessage);
+    
+    // 显示操作结果
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(metadata['isFavorite'] ? '已添加到收藏' : '已从收藏中移除'),
+          duration: const Duration(seconds: 1),
+        ),
       );
-      // 发布消息更新事件
-      eventManager.broadcast(
-        'onMessageUpdated',
-        Values<Message, String>(updatedMessage, channel.id),
-      );
-      
-      // 显示操作结果
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(metadata['isFavorite'] ? '已添加到收藏' : '已从收藏中移除'),
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      }
     }
   }
 
