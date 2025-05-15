@@ -237,7 +237,12 @@ class _StoreMainState extends State<StoreMain> {
           product: product,
         ),
       ),
-    ).then((_) => setState(() {}));
+    ).then((_) {
+      if (mounted) {
+        setState(() {});
+        widget.controller.loadFromStorage(); // 重新加载数据
+      }
+    });
   }
 
   void _showAddPointsDialog(BuildContext context) {
@@ -271,7 +276,7 @@ class _StoreMainState extends State<StoreMain> {
             onPressed: () async {
               if (pointsController.text.isNotEmpty) {
                 final points = int.tryParse(pointsController.text) ?? 0;
-                if (points > 0) {
+                if (points != 0) {
                   await widget.controller.addPoints(
                     points,
                     reasonController.text.isEmpty ? '积分调整' : reasonController.text,

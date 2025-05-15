@@ -169,12 +169,12 @@ class _MyAppState extends State<MyApp> {
       () {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          scaffoldMessengerKey.currentState?.showSnackBar(
-            SnackBar(
-              content: Text(message),
-              duration: const Duration(seconds: 5),
-            ),
-          );
+          // scaffoldMessengerKey.currentState?.showSnackBar(
+          //   SnackBar(
+          //     content: Text(message),
+          //     duration: const Duration(seconds: 5),
+          //   ),
+          // );
         });
       },
       (error, stack) {

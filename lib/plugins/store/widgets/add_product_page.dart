@@ -106,6 +106,8 @@ class _AddProductPageState extends State<AddProductPage> {
     if (confirmed == true) {
       widget.controller.products.removeWhere((p) => p.id == widget.product!.id);
       await widget.controller.saveProducts();
+      await widget.controller.saveToStorage(); // 保存所有相关数据
+      widget.controller.notifyListeners(); // 通知UI更新
       Navigator.pop(context);
     }
   }
@@ -256,6 +258,22 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
+  // 判断是否为网络图片
+  bool isNetworkImage(String path) {
+    return path.startsWith('http://') || path.startsWith('https://');
+  }
+
+  // 构建加载指示器
+  Widget _buildLoadingIndicator() {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  // 构建错误图片显示
+  Widget _buildErrorImage() {
+    return const Icon(Icons.broken_image, size: 48);
+  }
+
+  // 构建图片预览
   Widget _buildImagePreview() {
     if (_imageBytes != null) {
       return Image.memory(_imageBytes!, fit: BoxFit.cover);
@@ -288,17 +306,6 @@ class _AddProductPageState extends State<AddProductPage> {
     return const Icon(Icons.add_a_photo, size: 50);
   }
 
-  bool isNetworkImage(String path) {
-    return path.startsWith('http://') || path.startsWith('https://');
-  }
-
-  Widget _buildLoadingIndicator() {
-    return const Center(child: CircularProgressIndicator());
-  }
-
-  Widget _buildErrorImage() {
-    return const Icon(Icons.broken_image, size: 48);
-  }
 
   @override
   void dispose() {

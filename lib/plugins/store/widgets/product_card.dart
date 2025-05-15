@@ -67,9 +67,26 @@ class ProductCard extends StatelessWidget {
                       children: [
                         Icon(Icons.shopping_bag, size: 16, color: Theme.of(context).primaryColor),
                         const SizedBox(width: 8),
-                        Text(
-                          product.name,
-                          style: Theme.of(context).textTheme.titleMedium,
+                        Expanded(
+                          child: Text(
+                            product.name,
+                            style: Theme.of(context).textTheme.titleMedium,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '库存: ${product.stock}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -83,17 +100,6 @@ class ProductCard extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.inventory, size: 16, color: Theme.of(context).primaryColor),
-                        const SizedBox(width: 8),
-                        Text(
-                          '库存: ${product.stock}',
-                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
@@ -149,7 +155,9 @@ class ProductCard extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return '${date.year.toString().substring(2)}/'+
+           '${date.month.toString().padLeft(2, '0')}/'+
+           '${date.day.toString().padLeft(2, '0')}';
   }
 
   bool isNetworkImage(String path) {

@@ -169,8 +169,10 @@ class StoreController with ChangeNotifier {
     await saveProducts();
     await savePoints();
     await saveUserItems();
+    _updateStreams(); // 更新badge显示
     notifyListeners(); // 通知UI更新
     return true;
+
   }
 
   // 使用物品
@@ -189,9 +191,10 @@ class StoreController with ChangeNotifier {
     if (item.remaining <= 0) {
       _userItems.remove(item);
     }
+    await saveProducts();
+    await savePoints();
     await saveUserItems();
-    await saveUsedItems();
-    _updateStreams();
+    _updateStreams(); // 更新badge显示
     notifyListeners(); // 通知UI更新
     return true;
   }
@@ -224,7 +227,7 @@ class StoreController with ChangeNotifier {
     _userPoints += value;
     _pointsLogs.add(PointsLog(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      type: '获得',
+      type: value > 0 ? '获得' : '失去',
       value: value,
       reason: reason,
       timestamp: DateTime.now(),
@@ -339,7 +342,7 @@ class StoreController with ChangeNotifier {
     if (storedPoints is Map<String, dynamic>) {
         _userPoints = storedPoints['value'] is int 
             ? storedPoints['value'] as int 
-            : 2000;
+            : 0;
         final logsData = storedPoints['logs'];
         if (logsData is List) {
           _pointsLogs = (logsData as List).whereType<Map<String, dynamic>>().map((log) => PointsLog.fromJson(log)).toList();
