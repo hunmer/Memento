@@ -5,13 +5,9 @@ import '../utils/diary_utils.dart';
 class DiaryPromptReplacements {
   
   void initialize() {
-    // 初始化服务，如果需要的话
-    debugPrint('DiaryPromptReplacements 初始化完成');
   }
   
   void dispose() {
-    // 清理资源，如果需要的话
-    debugPrint('DiaryPromptReplacements 资源已清理');
   }
   
   /// 获取指定日期范围内的日记

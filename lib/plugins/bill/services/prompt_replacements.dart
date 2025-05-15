@@ -8,7 +8,6 @@ class BillPromptReplacements {
   
   /// 初始化并注册所有prompt替换方法
   void initialize() {
-    debugPrint('初始化Bill插件的Prompt替换服务');
     // 确保BillController已初始化
     _billController.initialize().catchError((e) {
       debugPrint('初始化BillController失败: $e');
@@ -190,6 +189,5 @@ class BillPromptReplacements {
   
   /// 释放资源
   void dispose() {
-    debugPrint('释放Bill插件的Prompt替换服务资源');
   }
 }

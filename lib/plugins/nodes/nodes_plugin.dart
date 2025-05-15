@@ -1,3 +1,4 @@
+import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/plugin_base.dart';
@@ -12,6 +13,7 @@ import 'models/node.dart';
 class NodesPlugin extends PluginBase {
   late NodesController _controller;
   final NodesPromptReplacements _promptReplacements = NodesPromptReplacements();
+  bool _isInitialized = false;
 
   NodesPlugin();
 
@@ -42,12 +44,26 @@ class NodesPlugin extends PluginBase {
       _registerPromptMethods();
     });
     
-    await Future.delayed(Duration.zero); // Ensure initialization is complete
-    debugPrint('Nodes plugin initialized');
+    _isInitialized = true;
+  }
+
+  @override
+  Future<void> registerToApp(
+    PluginManager pluginManager,
+    ConfigManager configManager,
+  ) async {
+    await initialize();
   }
 
   @override
   Widget buildMainView(BuildContext context) {
+    // 确保controller已经初始化
+    if (!_isInitialized) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<NodesController>.value(value: _controller),

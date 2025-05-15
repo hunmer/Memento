@@ -26,7 +26,6 @@ class NotesPromptController {
           'notes_getNotes',
           _promptReplacements.getNotes,
         );
-        debugPrint('成功注册notes_getNotes方法到OpenAI插件');
       } else {
         debugPrint('注册notes_getNotes方法失败：未找到OpenAI插件，将在5秒后重试');
         // 如果OpenAI插件还未准备好，5秒后重试
@@ -44,7 +43,6 @@ class NotesPromptController {
     final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
     if (openaiPlugin != null) {
       openaiPlugin.unregisterPromptReplacementMethod('notes_getNotes');
-      debugPrint('成功注销notes_getNotes方法');
     }
     
     // 清理prompt替换服务

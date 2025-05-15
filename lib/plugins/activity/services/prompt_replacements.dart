@@ -9,7 +9,6 @@ class ActivityPromptReplacements {
   
   /// 初始化并注册所有prompt替换方法
   void initialize(StorageManager storage, String pluginDir) {
-    debugPrint('初始化Activity插件的Prompt替换服务');
     _activityService = ActivityService(storage, pluginDir);
   }
 
@@ -202,6 +201,5 @@ class ActivityPromptReplacements {
   
   /// 释放资源
   void dispose() {
-    debugPrint('释放Activity插件的Prompt替换服务资源');
   }
 }

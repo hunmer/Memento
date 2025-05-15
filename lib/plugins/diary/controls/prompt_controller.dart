@@ -25,7 +25,6 @@ class DiaryPromptController {
           'diary_getDiaries',
           _promptReplacements.getDiaries,
         );
-        debugPrint('成功注册diary_getDiaries方法到OpenAI插件');
       } else {
         debugPrint('注册diary_getDiaries方法失败：未找到OpenAI插件，将在5秒后重试');
         // 如果OpenAI插件还未准备好，5秒后重试
@@ -43,7 +42,6 @@ class DiaryPromptController {
     final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
     if (openaiPlugin != null) {
       openaiPlugin.unregisterPromptReplacementMethod('diary_getDiaries');
-      debugPrint('成功注销diary_getDiaries方法');
     }
     
     // 清理prompt替换服务

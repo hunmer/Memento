@@ -25,7 +25,6 @@ class PromptController {
           'day_getDays',
           _promptReplacements.getDays,
         );
-        debugPrint('成功注册day_getDays方法到OpenAI插件');
       } else {
         debugPrint('注册day_getDays方法失败：未找到OpenAI插件，将在5秒后重试');
         // 如果OpenAI插件还未准备好，5秒后重试
@@ -43,7 +42,6 @@ class PromptController {
     final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
     if (openaiPlugin != null) {
       openaiPlugin.unregisterPromptReplacementMethod('day_getDays');
-      debugPrint('成功注销day_getDays方法');
     }
     
     // 清理prompt替换服务

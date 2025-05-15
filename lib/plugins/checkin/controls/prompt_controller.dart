@@ -25,7 +25,6 @@ class PromptController {
           'checkin_getCheckinHistory',
           _promptReplacements.getCheckinHistory,
         );
-        debugPrint('成功注册checkin_getCheckinHistory方法到OpenAI插件');
       } else {
         debugPrint('注册checkin_getCheckinHistory方法失败：未找到OpenAI插件，将在5秒后重试');
         // 如果OpenAI插件还未准备好，5秒后重试
@@ -43,7 +42,6 @@ class PromptController {
     final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
     if (openaiPlugin != null) {
       openaiPlugin.unregisterPromptReplacementMethod('checkin_getCheckinHistory');
-      debugPrint('成功注销checkin_getCheckinHistory方法');
     }
     
     // 清理prompt替换服务

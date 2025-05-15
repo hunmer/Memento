@@ -30,7 +30,6 @@ class ActivityPromptController {
           'activity_getActivitys',
           _promptReplacements.getActivities,
         );
-        debugPrint('成功注册activity_getActivitys方法到OpenAI插件');
       } else {
         debugPrint('注册activity_getActivitys方法失败：未找到OpenAI插件，将在5秒后重试');
         // 如果OpenAI插件还未准备好，5秒后重试

@@ -8,7 +8,6 @@ class DayPromptReplacements {
   
   /// 初始化并注册所有prompt替换方法
   void initialize() {
-    debugPrint('初始化Day插件的Prompt替换服务');
     // 确保DayController已初始化
     _dayController.initialize().catchError((e) {
       debugPrint('初始化DayController失败: $e');
@@ -138,6 +137,5 @@ class DayPromptReplacements {
   
   /// 释放资源
   void dispose() {
-    debugPrint('释放Day插件的Prompt替换服务资源');
   }
 }
