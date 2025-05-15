@@ -4,6 +4,7 @@ import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import 'services/channel_service.dart';
+import 'services/message_service.dart';
 import 'services/settings_service.dart';
 import 'services/ui_service.dart';
 import 'services/user_service.dart';
@@ -19,6 +20,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
 
   // Services
   late final ChannelService channelService;
+  late final MessageService messageService;
   late final SettingsService settingsService;
   late final UIService uiService;
   late final UserService userService;
@@ -62,12 +64,14 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
     settingsService = SettingsService(this);
     userService = UserService(this);
     channelService = ChannelService(this);
+    messageService = MessageService(this);
     uiService = UIService(settingsService, userService, this);
 
     // Initialize all services
     await settingsService.initialize();
     await userService.initialize();
     await channelService.initialize();
+    await messageService.initialize();
     await uiService.initialize();
     
     // 初始化消息事件处理器

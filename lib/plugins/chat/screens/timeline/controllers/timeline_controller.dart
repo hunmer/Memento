@@ -1,659 +1,283 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../models/message.dart';
-import '../../../models/channel.dart';
 import '../../../chat_plugin.dart';
 import '../models/timeline_filter.dart';
+import 'timeline_controller/base_controller.dart';
+import 'timeline_controller/message_handler.dart';
+import 'timeline_controller/pagination_controller.dart';
+import 'timeline_controller/search_controller.dart';
+import 'timeline_controller/scroll_controller.dart';
+import 'timeline_controller/channel_controller.dart';
+
+/// 时间线显示模式
+enum TimelineDisplayMode {
+  /// 标准显示模式
+  standard,
+  /// 紧凑显示模式
+  compact,
+  /// 详细显示模式
+  detailed
+}
+
+/// 时间线排序方式
+enum TimelineSortOrder {
+  /// 最新消息在前
+  newestFirst,
+  
+  /// 最旧消息在前
+  oldestFirst,
+}
 
 /// Timeline 页面的控制器，负责管理消息流数据和搜索功能
-class TimelineController extends ChangeNotifier {
-  final ChatPlugin _chatPlugin;
-  final TextEditingController searchController = TextEditingController();
-  final ScrollController scrollController = ScrollController();
-
-  // 消息操作回调
-  void Function(Message)? onMessageEdit;
-  Future<void> Function(Message)? onMessageDelete;
-  void Function(Message)? onMessageCopy;
-  void Function(Message, String?)? onSetFixedSymbol;
-  void Function(Message, Color?)? onSetBubbleColor;
-  void Function(Message)? onToggleFavorite;
-
-  // 分页相关 - 增加每页加载的消息数量
-  static const int pageSize = 100; // 增加每页显示的消息数量
-  int _currentPage = 1;
-  bool _hasMoreMessages = true;
-
-  List<Message> _allMessages = [];
-  List<Message> _filteredMessages = [];
-  List<Message> _displayMessages = []; // 当前显示的消息
-  bool _isLoading = false;
-  String _searchQuery = '';
-
-  // 高级过滤器
-  final TimelineFilter filter = TimelineFilter();
-  bool _isFilterActive = false;
-
-  // 用于防抖的计时器
-  Timer? _searchDebounce;
+class TimelineController extends BaseTimelineController
+    with
+        MessageHandlerMixin,
+        PaginationControllerMixin,
+        SearchControllerMixin,
+        ScrollControllerMixin,
+        ChannelControllerMixin {
+  // 存储路径
+  static const String _storagePath = 'chat/timeline';
+  
+  /// 时间线显示模式
+  TimelineDisplayMode? _displayMode;
+  TimelineDisplayMode get displayMode => _displayMode ?? TimelineDisplayMode.standard;
+  set displayMode(TimelineDisplayMode value) {
+    _displayMode = value;
+    saveTimelineState();
+  }
+  
+  // 排序方式
+  TimelineSortOrder? _currentSortOrder;
+  TimelineSortOrder get currentSortOrder => _currentSortOrder ?? TimelineSortOrder.newestFirst;
+  set currentSortOrder(TimelineSortOrder value) {
+    _currentSortOrder = value;
+    saveTimelineState();
+  }
 
   TimelineController(
-    this._chatPlugin, {
-    this.onMessageEdit,
-    this.onMessageDelete,
-    this.onMessageCopy,
-    this.onSetFixedSymbol,
-    this.onSetBubbleColor,
-    this.onToggleFavorite,
-  }) {
+    ChatPlugin chatPlugin, {
+    void Function(Message)? onMessageEdit,
+    Future<void> Function(Message)? onMessageDelete,
+    void Function(Message)? onMessageCopy,
+    void Function(Message, String?)? onSetFixedSymbol,
+    void Function(Message, Color?)? onSetBubbleColor,
+    void Function(Message)? onToggleFavorite,
+  }) : super(
+          chatPlugin: chatPlugin,
+          searchController: TextEditingController(),
+          scrollController: ScrollController(),
+          filter: TimelineFilter(
+            type: TimelineFilterType.all,
+            title: 'All Messages',
+            icon: Icons.all_inbox,
+          ),
+          onMessageEdit: onMessageEdit,
+          onMessageDelete: onMessageDelete,
+          onMessageCopy: onMessageCopy,
+          onSetFixedSymbol: onSetFixedSymbol,
+          onSetBubbleColor: onSetBubbleColor,
+          onToggleFavorite: onToggleFavorite,
+        ) {
+    // 初始化默认值会通过getter处理
+    _currentSortOrder = null;
+    _displayMode = null;
+    
     // 监听搜索输入变化
-    searchController.addListener(_onSearchChanged);
+    searchController.addListener(onSearchChanged);
 
     // 添加聊天插件监听，当有新消息时刷新
-    _chatPlugin.addListener(_onChatDataChanged);
+    chatPlugin.addListener(_onChatDataChanged);
 
-    // 设置滚动监听（延迟添加以确保 ScrollController 已准备就绪）
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!scrollController.hasListeners) {
-        scrollController.addListener(_onScroll);
-      }
-    });
-
-    // 确保初始化时加载最新消息
-    _initializeTimeline();
-  }
-
-  bool get isLoading => _isLoading;
-  List<Message> get messages => _displayMessages;
-  String get searchQuery => _searchQuery;
-  bool get isFilterActive => _isFilterActive;
-  bool get hasMoreMessages => _hasMoreMessages;
-
-  void _onSearchChanged() {
-    // 取消之前的计时器
-    _searchDebounce?.cancel();
-
-    // 设置新的计时器，300ms 后执行搜索
-    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
-      final newQuery = searchController.text;
-
-      // 检查搜索查询是否发生了变化
-      if (_searchQuery != newQuery) {
-        debugPrint('Timeline: 搜索查询从 "$_searchQuery" 变为 "$newQuery"');
-        _searchQuery = newQuery;
-        _filterMessages();
-        notifyListeners();
-      }
+    // 先恢复状态，再初始化时间线
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      ensureScrollListener();
+      // 先恢复上次的时间线状态
+      await _restoreTimelineState();
+      // 然后再初始化时间线
+      _initializeTimeline();
     });
   }
 
-  void _onChatDataChanged() {
+  /// 初始化时间线数据
+  void _initializeTimeline() {
+    debugPrint('Timeline: 开始初始化时间线...');
     _loadAllMessages();
   }
 
   /// 从所有频道加载所有消息
   Future<void> _loadAllMessages() async {
-    if (!_isLoading) {
-      _isLoading = true;
+    if (!isLoading) {
+      isLoading = true;
       notifyListeners();
-    }
 
-    try {
-      _allMessages = [];
+      try {
+        debugPrint('Timeline: 开始加载所有消息...');
 
-      // 从所有频道收集消息
-      for (final channel in _chatPlugin.channelService.channels) {
-        // 为每条消息添加频道信息，以便在时间线中显示来源
-        final messagesWithChannel = await Future.wait(
-          channel.messages.map((message) async {
-            // 创建一个带有频道信息的消息副本
-            return await message.copyWith(
-              // 使用channelInfo字段而不是覆盖原始metadata
-              metadata: {
-                ...message.metadata ?? {}, // 保留原始metadata
-                'channelInfo': {
-                  'channelId': channel.id,
-                  'channelName': channel.title,
-                  'channelColor': channel.backgroundColor.value.toRadixString(
-                    16,
-                  ),
-                },
-              },
-            );
-          }),
-        );
+        // 从聊天插件获取所有消息
+        final messages = await chatPlugin.messageService.getAllMessages();
+        debugPrint('Timeline: 获取到 ${messages.length} 条消息');
 
-        _allMessages.addAll(messagesWithChannel.cast<Message>());
+        // 按日期降序排序消息
+        messages.sort((a, b) => b.date.compareTo(a.date));
+
+        // 更新消息列表
+        allMessages = messages;
+
+        // 应用当前的搜索和过滤器，但不保存状态
+        // 首次加载时不应该保存过滤器状态
+        filterMessages(saveState: false);
+      } catch (e) {
+        debugPrint('Timeline: 加载消息时出错: $e');
+        allMessages = [];
+        filteredMessages = [];
+        displayMessages = [];
+      } finally {
+        isLoading = false;
+        notifyListeners();
       }
-
-      // 按时间排序，最新的消息在前面
-      _allMessages.sort((a, b) => b.date.compareTo(a.date));
-
-      // 初始化时直接使用所有消息，不进行过滤
-      _filteredMessages = List<Message>.from(_allMessages);
-
-      debugPrint('Timeline: 加载了 ${_allMessages.length} 条消息');
-    } catch (e) {
-      debugPrint('Error loading timeline messages: $e');
-      _filteredMessages = [];
-    } finally {
-      // 确保加载第一页消息
-      _loadCurrentPage();
-      debugPrint('Timeline: 加载完成，显示 ${_displayMessages.length} 条消息');
     }
   }
 
-  /// 根据搜索查询和高级过滤器过滤消息
-  void _filterMessages() {
-    // 如果正在加载中，不执行过滤
-    if (_isLoading) {
-      return;
-    }
-
-    debugPrint('Timeline: 开始过滤消息...');
-
-    // 如果没有搜索词且过滤器未激活，直接使用所有消息
-    if (_searchQuery.isEmpty && !_isFilterActive) {
-      _filteredMessages = List<Message>.from(_allMessages);
-      debugPrint('Timeline: 无过滤条件，显示所有 ${_allMessages.length} 条消息');
-
-      // 重置分页并加载第一页
-      _resetPagination();
-      _loadCurrentPage();
-      return;
-    }
-
-    // 先应用基本的搜索过滤
-    List<Message> result = List<Message>.from(_allMessages);
-
-    // 应用文本搜索
-    if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
-      result =
-          result.where((message) {
-            bool matches = false;
-
-            // 根据过滤器设置决定搜索范围
-            if (filter.includeContent) {
-              matches =
-                  matches || message.content.toLowerCase().contains(query);
-            }
-
-            if (filter.includeUsernames) {
-              matches =
-                  matches ||
-                  message.user.username.toLowerCase().contains(query);
-            }
-
-            if (filter.includeChannels) {
-              final channelInfo =
-                  message.metadata?['channelInfo'] as Map<String, dynamic>?;
-              final channelName = channelInfo?['channelName'] as String?;
-              matches =
-                  matches || channelName?.toLowerCase().contains(query) == true;
-            }
-
-            return matches;
-          }).toList();
-    }
-
-    // 应用高级过滤器
-    if (_isFilterActive) {
-      // 过滤频道
-      if (filter.selectedChannelIds.isNotEmpty) {
-        result =
-            result.where((message) {
-              final channelInfo =
-                  message.metadata?['channelInfo'] as Map<String, dynamic>?;
-              final channelId = channelInfo?['channelId'] as String?;
-              return channelId != null &&
-                  filter.selectedChannelIds.contains(channelId);
-            }).toList();
-      }
-
-      // 过滤用户
-      if (filter.selectedUserIds.isNotEmpty) {
-        result =
-            result.where((message) {
-              return filter.selectedUserIds.contains(message.user.id);
-            }).toList();
-      }
-
-      // 过滤日期范围
-      if (filter.startDate != null || filter.endDate != null) {
-        result =
-            result.where((message) {
-              final messageDate = message.date;
-
-              bool matchesStartDate = true;
-              if (filter.startDate != null) {
-                final startDate = DateTime(
-                  filter.startDate!.year,
-                  filter.startDate!.month,
-                  filter.startDate!.day,
-                );
-                matchesStartDate =
-                    messageDate.isAfter(startDate) ||
-                    messageDate.isAtSameMomentAs(startDate);
-              }
-
-              bool matchesEndDate = true;
-              if (filter.endDate != null) {
-                final endDate = DateTime(
-                  filter.endDate!.year,
-                  filter.endDate!.month,
-                  filter.endDate!.day,
-                  23,
-                  59,
-                  59,
-                  999,
-                );
-                matchesEndDate =
-                    messageDate.isBefore(endDate) ||
-                    messageDate.isAtSameMomentAs(endDate);
-              }
-
-              return matchesStartDate && matchesEndDate;
-            }).toList();
-      }
-
-      // 过滤 AI 消息
-      if (filter.isAI != null) {
-        result = result.where((message) {
-          final isAI = message.metadata?['isAI'] as bool? ?? false;
-          return filter.isAI! ? isAI : !isAI;
-        }).toList();
-        debugPrint('Timeline: 应用 AI 消息过滤，剩余 ${result.length} 条消息');
-      }
-
-      // 过滤收藏消息
-      if (filter.isFavorite != null) {
-        result = result.where((message) {
-          final isFavorite = message.metadata?['isFavorite'] as bool? ?? false;
-          return filter.isFavorite! ? isFavorite : !isFavorite;
-        }).toList();
-        debugPrint('Timeline: 应用收藏消息过滤，剩余 ${result.length} 条消息');
-      }
-    }
-
-    _filteredMessages = result;
-
-    // 重置分页状态
-    _currentPage = 1;
-    _hasMoreMessages = true;
-
-    // 使用微任务确保在当前构建周期之后加载数据
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadCurrentPage();
-    });
-
-    debugPrint('Timeline: 过滤后共有 ${_filteredMessages.length} 条消息');
+  /// 聊天数据变化时的回调
+  void _onChatDataChanged() {
+    _loadAllMessages();
+    // 不在这里保存状态，因为 _loadAllMessages 会调用 filterMessages
+    // 并且 filterMessages 会在需要时保存状态
   }
 
   /// 刷新时间线数据
+  @override
   Future<void> refreshTimeline() async {
-    _resetPagination();
+    debugPrint('Timeline: 开始刷新时间线...');
+
+    // 重置分页状态
+    resetPagination();
+
+    // 重新加载所有消息
     await _loadAllMessages();
-    _ensureScrollListener(); // 确保滚动监听器已添加
-    return Future.value();
+
+    debugPrint('Timeline: 时间线刷新完成');
   }
 
-  /// 应用高级过滤器
-  void applyFilter(TimelineFilter newFilter) {
-    // 使用微任务确保在当前构建周期之后执行过滤操作
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      filter.includeChannels = newFilter.includeChannels;
-      filter.includeUsernames = newFilter.includeUsernames;
-      filter.includeContent = newFilter.includeContent;
-      filter.startDate = newFilter.startDate;
-      filter.endDate = newFilter.endDate;
-      filter.selectedChannelIds = newFilter.selectedChannelIds;
-      filter.selectedUserIds = newFilter.selectedUserIds;
-      filter.isAI = newFilter.isAI;
-      filter.isFavorite = newFilter.isFavorite;
+  /// 保存时间线视图和筛选状态
+  @override
+  Future<void> saveTimelineState() async {
+    try {
+      // 准备要保存的数据，只保存必要的过滤器数据
+      final timelineState = {
+        'filterData': {
+          'type': filter.type.index,
+          'selectedChannelIds': filter.selectedChannelIds.toList(),
+          'selectedUserIds': filter.selectedUserIds.toList(),
+          'isAI': filter.isAI,
+          'isFavorite': filter.isFavorite,
+        },
+        'viewState': {
+          'isFilterActive': isFilterActive,
+          'searchQuery': searchQuery,
+        },
+        'lastUpdate': DateTime.now().toIso8601String(),
+      };
 
-      // 检查过滤器是否有效
-      _isFilterActive =
-          filter.selectedChannelIds.isNotEmpty ||
-          filter.selectedUserIds.isNotEmpty ||
-          filter.startDate != null ||
-          filter.endDate != null ||
-          !filter.includeChannels ||
-          !filter.includeUsernames ||
-          !filter.includeContent ||
-          filter.isAI != null ||
-          filter.isFavorite != null;
-
-      _filterMessages();
-      notifyListeners();
-    });
+      // 保存到存储
+      await chatPlugin.storage.write(_storagePath, timelineState);
+      debugPrint('Timeline: 已保存时间线状态');
+    } catch (e) {
+      debugPrint('Timeline: 保存时间线状态时出错: $e');
+    }
   }
 
-  /// 重置过滤器
-  void resetFilter() {
-    // 使用微任务确保在当前构建周期之后执行过滤操作
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      filter.reset();
-      _isFilterActive = false;
-      _filterMessages();
-      _ensureScrollListener(); // 确保滚动监听器已添加
-      notifyListeners();
-    });
+  /// 更新过滤器并触发相关更新
+  void updateFilter(TimelineFilter newFilter) {
+    filter.updateFrom(newFilter);
+    filterMessages();
+    notifyListeners();
   }
 
-  /// 清空搜索并更新结果
-  void clearSearch() {
-    // 取消可能正在进行的搜索防抖
-    _searchDebounce?.cancel();
+  /// 恢复上次保存的时间线状态
+  Future<void> _restoreTimelineState() async {
+    try {
+      // 从存储中读取状态
+      final timelineState = await chatPlugin.storage.read(_storagePath);
+      if (timelineState == null) return;
 
-    // 清空搜索控制器
-    searchController.clear();
+      // 恢复过滤器设置
+      final filterData = timelineState['filterData'] as Map<String, dynamic>?;
+      if (filterData != null) {
+        final type = TimelineFilterType.values[filterData['type'] as int];
+        
+        // 只恢复必要的过滤器属性
+        filter.selectedChannelIds = Set<String>.from(filterData['selectedChannelIds'] as List? ?? []);
+        filter.selectedUserIds = Set<String>.from(filterData['selectedUserIds'] as List? ?? []);
+        filter.isAI = filterData['isAI'] as bool?;
+        filter.isFavorite = filterData['isFavorite'] as bool?;
+      }
 
-    // 立即处理清空搜索的情况
-    debugPrint('Timeline: 清空搜索查询');
-    _searchQuery = '';
-    _filterMessages();
-
-    // 使用微任务确保UI更新
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
-  }
-
-  /// 手动检查并重新添加滚动监听器（可从UI层调用）
-  void ensureScrollListenerActive() {
-    _ensureScrollListener();
-
-    // 立即检查是否需要加载更多
-    if (scrollController.hasClients && _hasMoreMessages && !_isLoadingMore) {
-      try {
-        final maxScroll = scrollController.position.maxScrollExtent;
-        final currentScroll = scrollController.position.pixels;
-        final distanceToBottom = maxScroll - currentScroll;
-        final viewportHeight = scrollController.position.viewportDimension;
-
-        debugPrint(
-          'Timeline: 主动检查滚动位置 - 距底部: $distanceToBottom, 视口高度: $viewportHeight',
-        );
-
-        // 减小触发阈值，使加载更多更容易触发
-        if (distanceToBottom < viewportHeight * 1.0) {
-          debugPrint('Timeline: 主动触发加载更多');
-          _loadMoreMessages();
+      // 恢复视图状态
+      final viewState = timelineState['viewState'] as Map<String, dynamic>?;
+      if (viewState != null) {
+        isFilterActive = viewState['isFilterActive'] as bool? ?? false;
+        
+        final lastSearchQuery = viewState['searchQuery'] as String?;
+        if (lastSearchQuery != null && lastSearchQuery.isNotEmpty) {
+          searchQuery = lastSearchQuery;
+          searchController.text = lastSearchQuery;
         }
-      } catch (e) {
-        debugPrint('Timeline: 主动检查滚动位置错误: $e');
-      }
-    }
-  }
-
-  /// 获取消息所属的频道
-  Channel? getMessageChannel(Message message) {
-    final channelInfo =
-        message.metadata?['channelInfo'] as Map<String, dynamic>?;
-    final channelId = channelInfo?['channelId'] as String?;
-    if (channelId == null) return null;
-
-    try {
-      return _chatPlugin.channelService.channels.firstWhere(
-        (c) => c.id == channelId,
-      );
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// 处理消息编辑
-  void handleMessageEdit(Message message) {
-    if (onMessageEdit != null) {
-      onMessageEdit!(message);
-    }
-  }
-
-  /// 处理消息删除
-  Future<void> handleMessageDelete(Message message) async {
-    try {
-      if (onMessageDelete != null) {
-        await onMessageDelete!(message);
       }
 
-      // 从各个列表中移除消息
-      removeMessage(message);
-
-      debugPrint('Timeline: 成功删除消息 ${message.id}');
+      // 应用恢复的设置
+      if (isFilterActive || searchQuery.isNotEmpty) {
+        filterMessages();
+      }
     } catch (e) {
-      debugPrint('Timeline: 删除消息失败: $e');
-      // 如果删除失败，刷新时间线以确保显示正确的状态
-      await refreshTimeline();
+      debugPrint('Timeline: 恢复时间线状态时出错: $e');
     }
   }
 
-  /// 处理消息复制
-  void handleMessageCopy(Message message) {
-    if (onMessageCopy != null) {
-      onMessageCopy!(message);
-    }
-  }
-
-  /// 处理设置固定标记
-  void handleSetFixedSymbol(Message message, String? symbol) {
-    if (onSetFixedSymbol != null) {
-      onSetFixedSymbol!(message, symbol);
-    }
-  }
-
-  /// 处理设置气泡颜色
-  void handleSetBubbleColor(Message message, Color? color) {
-    if (onSetBubbleColor != null) {
-      onSetBubbleColor!(message, color);
-    }
-  }
-
-  /// 处理消息收藏
-  void handleToggleFavorite(Message message) {
-    if (onToggleFavorite != null) {
-      onToggleFavorite!(message);
-    }
-  }
-
-  /// 加载当前页的消息
-  void _loadCurrentPage() {
-    debugPrint('Timeline: 开始加载第 $_currentPage 页...');
-
-    // 移除对 _isLoading 的检查，因为我们需要在 _loadAllMessages 完成后加载页面
-    // 如果需要防止重复加载，可以添加其他标志
-
-    if (_filteredMessages.isEmpty) {
-      debugPrint('Timeline: 没有可显示的消息');
-      _displayMessages = [];
-      _hasMoreMessages = false;
-      notifyListeners();
-      return;
-    }
-
-    final startIndex = (_currentPage - 1) * pageSize;
-    final endIndex = startIndex + pageSize;
-
-    // 检查是否还有更多消息
-    if (startIndex >= _filteredMessages.length) {
-      debugPrint('Timeline: 起始索引 $startIndex 超出范围 ${_filteredMessages.length}');
-      _hasMoreMessages = false;
-      notifyListeners();
-      return;
-    }
-
-    // 获取当前页的消息
-    final actualEndIndex =
-        endIndex < _filteredMessages.length
-            ? endIndex
-            : _filteredMessages.length;
-    final pageMessages = _filteredMessages.sublist(startIndex, actualEndIndex);
-
-    if (_currentPage == 1) {
-      _displayMessages = List<Message>.from(pageMessages);
-      debugPrint('Timeline: 重置显示消息列表，加载第一页 ${pageMessages.length} 条消息');
-    } else {
-      _displayMessages.addAll(pageMessages);
-      debugPrint('Timeline: 添加第 $_currentPage 页，新增 ${pageMessages.length} 条消息');
-    }
-
-    // 更新是否还有更多消息
-    _hasMoreMessages = actualEndIndex < _filteredMessages.length;
-
-    debugPrint(
-      'Timeline: 当前页 $_currentPage，本页加载 ${pageMessages.length} 条消息，'
-      '已显示 ${_displayMessages.length} 条，总共 ${_filteredMessages.length} 条，'
-      '是否还有更多: $_hasMoreMessages',
-    );
-
+  /// 设置搜索查询
+  void setSearchQuery(String query) {
+    searchQuery = query;
+    filterMessages();
     notifyListeners();
   }
 
-  // 用于防止重复加载的标志
-  bool _isLoadingMore = false;
-  DateTime? _lastLoadTime;
-
-  /// 加载更多消息
-  void _loadMoreMessages() {
-    // 检查是否正在加载或没有更多消息
-    if (_isLoadingMore || !_hasMoreMessages) {
-      debugPrint(
-        'Timeline: 跳过加载更多 - 正在加载: $_isLoadingMore, 是否有更多: $_hasMoreMessages',
-      );
-      return;
-    }
-
-    // 检查距离上次加载的时间间隔（防抖）
-    final now = DateTime.now();
-    if (_lastLoadTime != null &&
-        now.difference(_lastLoadTime!) < const Duration(seconds: 1)) {
-      debugPrint('Timeline: 跳过加载更多 - 加载过于频繁');
-      return;
-    }
-
-    debugPrint('Timeline: 开始加载更多消息...');
-    _isLoadingMore = true;
-    _lastLoadTime = now;
-
-    try {
-      _currentPage++;
-      _loadCurrentPage();
-    } finally {
-      _isLoadingMore = false;
-    }
-  }
-
-  /// 滚动监听
-  void _onScroll() {
-    // 检查是否接近底部
-    if (!scrollController.hasClients) {
-      return;
-    }
-
-    try {
-      final maxScroll = scrollController.position.maxScrollExtent;
-      final currentScroll = scrollController.position.pixels;
-
-      // 计算距离底部的距离
-      final distanceToBottom = maxScroll - currentScroll;
-      final viewportHeight = scrollController.position.viewportDimension;
-
-      // 当滚动到距离底部不足一个屏幕高度时触发加载（增大阈值）
-      final threshold = viewportHeight * 1.0;
-
-      if (distanceToBottom < threshold) {
-        _loadMoreMessages();
-      }
-    } catch (e) {
-      debugPrint('Timeline: 滚动监听器错误: $e');
-    }
-  }
-
-  /// 确保滚动监听器已添加
-  void _ensureScrollListener() {
-    if (!scrollController.hasListeners) {
-      scrollController.addListener(_onScroll);
-    }
-  }
-
-  /// 初始化时间线
-  Future<void> _initializeTimeline() async {
-    debugPrint('Timeline: 初始化时间线...');
-    _resetPagination();
-
-    try {
-      // 加载所有消息
-      await _loadAllMessages();
-    } catch (e) {
-      debugPrint('Timeline: 初始化失败: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-
-      // 在下一帧确保滚动监听器
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _ensureScrollListener();
-      });
-    }
-  }
-
-  /// 重置分页状态
-  void _resetPagination() {
-    _currentPage = 1;
-    _hasMoreMessages = true;
-    _displayMessages = [];
-    debugPrint('Timeline: 重置分页状态');
-  }
-
-  /// 从列表中删除单个消息，不刷新整个时间线
-  void removeMessage(Message message) {
-    // 从所有消息列表中移除
-    _allMessages.removeWhere((m) => m.id == message.id);
-
-    // 从过滤后的消息列表中移除
-    _filteredMessages.removeWhere((m) => m.id == message.id);
-
-    // 从当前显示的消息列表中移除
-    _displayMessages.removeWhere((m) => m.id == message.id);
-
-    debugPrint('Timeline: 移除了单条消息 ${message.id}');
+  /// 切换筛选器激活状态
+  void toggleFilterActive() {
+    isFilterActive = !isFilterActive;
+    filterMessages();
     notifyListeners();
   }
 
-  /// 更新单个消息，不刷新整个时间线
-  void updateMessage(Message message) {
-    // 查找并更新所有消息列表中的消息
-    final allIndex = _allMessages.indexWhere((m) => m.id == message.id);
-    if (allIndex != -1) {
-      _allMessages[allIndex] = message;
+  /// 根据过滤器类型获取对应的图标
+  IconData _getIconForFilterType(TimelineFilterType type) {
+    switch (type) {
+      case TimelineFilterType.all:
+        return Icons.all_inbox;
+      case TimelineFilterType.text:
+        return Icons.text_fields;
+      case TimelineFilterType.image:
+        return Icons.image;
+      case TimelineFilterType.file:
+        return Icons.file_present;
+      case TimelineFilterType.system:
+        return Icons.system_update;
+      case TimelineFilterType.dateRange:
+        return Icons.date_range;
+      case TimelineFilterType.user:
+        return Icons.person;
+      case TimelineFilterType.custom:
+        return Icons.filter_list;
     }
-
-    // 查找并更新过滤后消息列表中的消息
-    final filteredIndex = _filteredMessages.indexWhere(
-      (m) => m.id == message.id,
-    );
-    if (filteredIndex != -1) {
-      _filteredMessages[filteredIndex] = message;
-    }
-
-    // 查找并更新当前显示的消息列表中的消息
-    final displayIndex = _displayMessages.indexWhere((m) => m.id == message.id);
-    if (displayIndex != -1) {
-      _displayMessages[displayIndex] = message;
-    }
-
-    debugPrint('Timeline: 更新了单条消息 ${message.id}');
-    notifyListeners();
   }
 
   @override
   void dispose() {
-    _searchDebounce?.cancel(); // 取消搜索防抖计时器
-    searchController.dispose();
-    scrollController.removeListener(_onScroll); // 先移除监听器
-    scrollController.dispose();
-    _chatPlugin.removeListener(_onChatDataChanged);
-    _isLoadingMore = false; // 重置加载状态
+    // 移除监听器
+    chatPlugin.removeListener(_onChatDataChanged);
+    searchController.removeListener(onSearchChanged);
+    
+    // 释放控制器已在父类中处理
     super.dispose();
   }
 }

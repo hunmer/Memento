@@ -30,6 +30,15 @@ class _TimelineScreenState extends State<TimelineScreen> {
     // 创建消息操作处理器
     _messageOperations = MessageOperations(context);
 
+    // 从插件配置中恢复视图模式
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _isGridView = widget.chatPlugin.settingsService.timelineIsGridView;
+        });
+      }
+    });
+
     // 创建时间线控制器，使用消息操作处理器处理消息操作
     _controller = TimelineController(
       widget.chatPlugin,
@@ -111,6 +120,8 @@ class _TimelineScreenState extends State<TimelineScreen> {
             onPressed: () {
               setState(() {
                 _isGridView = !_isGridView;
+                // 保存视图模式到插件配置
+                widget.chatPlugin.settingsService.setTimelineIsGridView(_isGridView);
               });
             },
           ),
