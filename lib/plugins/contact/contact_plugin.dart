@@ -1,0 +1,348 @@
+import 'package:flutter/material.dart';
+import '../base_plugin.dart';
+import '../../core/plugin_manager.dart';
+import '../../core/config_manager.dart';
+import 'controllers/contact_controller.dart';
+import 'models/contact_model.dart';
+import 'models/filter_sort_config.dart';
+import 'l10n/contact_strings.dart';
+import 'widgets/contact_card.dart';
+import 'widgets/contact_form.dart';
+import 'widgets/filter_dialog.dart';
+
+class ContactPlugin extends BasePlugin {
+  late ContactController _controller;
+  bool _isListView = false;
+
+  @override
+  String get id => 'contact';
+
+  @override
+  String get name => ContactStrings.pluginName;
+
+  @override
+  String get version => '1.0.0';
+
+  @override
+  String get description => ContactStrings.pluginDescription;
+
+  @override
+  String get author => 'Memento Team';
+
+  @override
+  Future<void> initialize() async {
+    _controller = ContactController(this);
+  }
+
+  @override
+  Future<void> registerToApp(
+    PluginManager pluginManager,
+    ConfigManager configManager,
+  ) async {
+    await initialize();
+  }
+
+  @override
+  Widget buildMainView(BuildContext context) {
+    return _ContactHomePage(plugin: this);
+  }
+
+  @override
+  Widget buildCardView(BuildContext context) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _getCardStats(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final stats = snapshot.data!;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ContactStrings.pluginName,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${ContactStrings.totalContacts}: ${stats['totalContacts']}',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${ContactStrings.recentContacts}: ${stats['recentContacts']}',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<Map<String, dynamic>> _getCardStats() async {
+    final contacts = await _controller.getAllContacts();
+    final recentContacts = await _controller.getRecentlyContactedCount();
+    return {
+      'totalContacts': contacts.length,
+      'recentContacts': recentContacts,
+    };
+  }
+}
+
+class _ContactHomePage extends StatefulWidget {
+  final ContactPlugin plugin;
+
+  const _ContactHomePage({required this.plugin});
+
+  @override
+  State<_ContactHomePage> createState() => _ContactHomePageState();
+}
+
+class _ContactHomePageState extends State<_ContactHomePage> {
+  late ContactController _controller;
+  bool _isListView = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.plugin._controller;
+  }
+
+  Future<void> _showFilterDialog() async {
+    final currentFilter = await _controller.getFilterConfig();
+    final tags = await _controller.getAllTags();
+
+    if (!mounted) return;
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => FilterDialog(
+        initialFilter: currentFilter,
+        availableTags: tags,
+        onApply: (filter) async {
+          await _controller.saveFilterConfig(filter);
+          if (mounted) {
+            setState(() {});
+          }
+        },
+      ),
+    );
+  }
+
+  Future<void> _showSortMenu() async {
+    final currentSort = await _controller.getSortConfig();
+    
+    if (!mounted) return;
+
+    final result = await showDialog<SortConfig>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(ContactStrings.sortBy),
+        children: [
+          for (final type in SortType.values)
+            RadioListTile<SortType>(
+              title: Text(_getSortTypeName(type)),
+              value: type,
+              groupValue: currentSort.type,
+              onChanged: (value) {
+                Navigator.pop(
+                  context,
+                  SortConfig(
+                    type: value!,
+                    isReverse: type == currentSort.type
+                        ? !currentSort.isReverse
+                        : false,
+                  ),
+                );
+              },
+              secondary: type == currentSort.type
+                  ? Icon(currentSort.isReverse
+                      ? Icons.arrow_upward
+                      : Icons.arrow_downward)
+                  : null,
+            ),
+        ],
+      ),
+    );
+
+    if (result != null) {
+      await _controller.saveSortConfig(result);
+      setState(() {});
+    }
+  }
+
+  String _getSortTypeName(SortType type) {
+    switch (type) {
+      case SortType.name:
+        return ContactStrings.name;
+      case SortType.createdTime:
+        return ContactStrings.createdTime;
+      case SortType.lastContactTime:
+        return ContactStrings.lastContactTime;
+      case SortType.contactCount:
+        return ContactStrings.contactCount;
+    }
+  }
+
+  Future<void> _addOrEditContact([Contact? contact]) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(contact == null
+                ? ContactStrings.addContact
+                : ContactStrings.editContact),
+            actions: [
+              if (contact != null)
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => _deleteContact(contact),
+                ),
+            ],
+          ),
+          body: ContactForm(
+            contact: contact,
+            onSave: (updatedContact) async {
+              if (contact == null) {
+                await _controller.addContact(updatedContact);
+              } else {
+                await _controller.updateContact(updatedContact);
+              }
+              if (mounted) {
+                Navigator.of(context).pop();
+                setState(() {});
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteContact(Contact contact) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(ContactStrings.confirmDelete),
+        content: Text(ContactStrings.deleteConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(ContactStrings.no),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(ContactStrings.yes),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _controller.deleteContact(contact.id);
+      Navigator.pop(context);
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
+        title: Text(ContactStrings.contacts),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFilterDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.sort),
+            onPressed: _showSortMenu,
+          ),
+          IconButton(
+            icon: Icon(_isListView ? Icons.grid_view : Icons.list),
+            onPressed: () {
+              setState(() {
+                _isListView = !_isListView;
+              });
+            },
+          ),
+        ],
+      ),
+      body: FutureBuilder<List<Contact>>(
+        future: _controller.getFilteredAndSortedContacts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final contacts = snapshot.data ?? [];
+
+          if (contacts.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.person_outline, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    '没有联系人',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Colors.grey,
+                        ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (_isListView) {
+            return ListView.builder(
+              itemCount: contacts.length,
+              itemBuilder: (context, index) {
+                return ContactCard(
+                  contact: contacts[index],
+                  onTap: () => _addOrEditContact(contacts[index]),
+                  isListView: true,
+                );
+              },
+            );
+          }
+
+          return GridView.builder(
+            padding: const EdgeInsets.all(8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: contacts.length,
+            itemBuilder: (context, index) {
+              return ContactCard(
+                contact: contacts[index],
+                onTap: () => _addOrEditContact(contacts[index]),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addOrEditContact(),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}

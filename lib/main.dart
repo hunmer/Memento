@@ -4,6 +4,7 @@ import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
+import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/screens/settings_screen/controllers/settings_screen_controller.dart';
 
 import 'package:flutter/material.dart';
@@ -34,6 +35,7 @@ import 'plugins/nodes/nodes_plugin.dart'; // 笔记插件
 import 'plugins/notes/notes_plugin.dart'; // Notes插件
 import 'plugins/goods/goods_plugin.dart'; // 物品插件
 import 'plugins/bill/bill_plugin.dart'; // 账单插件
+import 'plugins/contact/contact_plugin.dart'; // 联系人插件
 import 'plugins/calendar/calendar_plugin.dart'; // 日历插件
 import 'plugins/openai/openai_plugin.dart'; // OpenAI插件
 import 'plugins/store/store_plugin.dart'; // store插件
@@ -81,6 +83,7 @@ void main() async {
       DiaryPlugin.instance,
       ActivityPlugin.instance,
       CheckinPlugin.instance,
+      ContactPlugin(),
       TimerPlugin.instance,
       TodoPlugin.instance,
       DayPlugin.instance,

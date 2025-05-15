@@ -99,6 +99,16 @@ class StorageManager {
     }
   }
 
+  /// 设置字符串值（与 writeString 功能相同，但使用更直观的命名）
+  Future<void> setString(String key, String value) async {
+    await writeString(key, value);
+  }
+
+  /// 获取字符串值（与 readString 功能相同，但使用更直观的命名）
+  Future<String> getString(String key) async {
+    return await readString(key);
+  }
+
   /// 获取基础路径
   String get basePath => _basePath;
 
