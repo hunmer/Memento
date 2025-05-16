@@ -4,37 +4,84 @@ import '../../../../../../../plugins/chat/models/message.dart';
 class ReplyWidget extends StatelessWidget {
   final Message replyMessage;
   final Function(String) onTap;
+  final bool isLoading;
+  final Color? highlightColor;
 
   const ReplyWidget({
     super.key,
     required this.replyMessage,
     required this.onTap,
+    this.isLoading = false,
+    this.highlightColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onTap(replyMessage.id),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final theme = Theme.of(context);
+    
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onTap(replyMessage.id),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: highlightColor?.withOpacity(0.1) ?? 
+                  theme.colorScheme.surfaceVariant.withOpacity(0.3),
+            border: Border.all(
+              color: highlightColor?.withOpacity(0.3) ?? 
+                    theme.colorScheme.surfaceVariant.withOpacity(0.5),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: Text(
-                  "${replyMessage.user.username}: ${replyMessage.content}",
+              if (isLoading)
+                const LinearProgressIndicator(
+                  minHeight: 2,
+                )
+              else
+                Row(
+                  children: [
+                    Icon(
+                      Icons.reply,
+                      size: 12,
+                      color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        "${replyMessage.user.username}",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              if (!isLoading) ...[
+                const SizedBox(height: 2),
+                Text(
+                  replyMessage.content,
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 11,
+                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-              ),
+              ],
             ],
           ),
-          const SizedBox(height: 4),
-        ],
+        ),
       ),
     );
   }

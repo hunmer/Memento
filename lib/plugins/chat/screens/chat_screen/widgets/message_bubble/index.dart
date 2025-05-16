@@ -13,6 +13,14 @@ import 'components/reply_widget.dart';
 // 获取ChatPlugin单例实例
 final chatPlugin = ChatPlugin.instance;
 
+// 定义回复消息加载状态
+enum ReplyLoadingState {
+  initial,
+  loading,
+  loaded,
+  error
+}
+
 class MessageBubble extends StatefulWidget {
   final Message message;
   final bool isSelected;
@@ -58,12 +66,15 @@ class _MessageBubbleState extends State<MessageBubble> {
   late String _messageUpdateSubscriptionId;
   // 保存当前消息的副本，以便在更新时替换
   late Message _currentMessage;
+  String? _currentReplyToId;
+  ReplyLoadingState _replyLoadingState = ReplyLoadingState.initial;
   
   @override
   void initState() {
     super.initState();
     // 初始化当前消息为widget传入的消息
     _currentMessage = widget.message;
+    _currentReplyToId = widget.message.replyToId;
     _loadReplyMessage();
     _messageUpdateSubscriptionId = eventManager.subscribe(
       'onMessageUpdated',
@@ -75,10 +86,11 @@ class _MessageBubbleState extends State<MessageBubble> {
   void didUpdateWidget(MessageBubble oldWidget) {
     super.didUpdateWidget(oldWidget);
     // 当widget更新时，检查消息是否发生变化
-    if (widget.message != oldWidget.message) {
-      setState(() {
-        _currentMessage = widget.message;
-      });
+    if (widget.message != oldWidget.message || 
+        widget.message.replyToId != _currentReplyToId) {
+      _currentMessage = widget.message;
+      _currentReplyToId = widget.message.replyToId;
+      _loadReplyMessage(); // 重新加载回复消息
     }
   }
   @override
@@ -93,32 +105,74 @@ class _MessageBubbleState extends State<MessageBubble> {
     }
     final updatedMessage = args.value1;
     
-    if (updatedMessage.id == widget.message.id) {
+    if (!mounted) return;
+
+    if (updatedMessage.id == _currentMessage.id) {
       // 更新当前消息对象为最新的updatedMessage
-      if (mounted) {
-        setState(() {
-          _currentMessage = updatedMessage;
-        });
-      }
-    } else if (widget.message.replyToId != null && 
-              updatedMessage.id == widget.message.replyToId) {
-      // 回复的消息被更新
-      if (mounted) {
-        setState(() {
-          replyMessage = updatedMessage;
-        });
-      }
+      setState(() {
+        final oldReplyToId = _currentMessage.replyToId;
+        _currentMessage = updatedMessage;
+        _currentReplyToId = updatedMessage.replyToId;
+        
+        // 只有当replyToId发生变化时才重新加载回复消息
+        if (oldReplyToId != updatedMessage.replyToId) {
+          _loadReplyMessage();
+        }
+      });
+    } else if (_currentReplyToId != null && 
+               updatedMessage.id == _currentReplyToId &&
+               replyMessage?.id == updatedMessage.id) {
+      // 只更新当前正在显示的回复消息
+      setState(() {
+        replyMessage = updatedMessage;
+      });
     }
   }
 
   Future<void> _loadReplyMessage() async {
-    if (_currentMessage.replyToId != null) {
-      final reply = await chatPlugin.getMessage(_currentMessage.replyToId!);
-      if (mounted) {
-        setState(() {
-          replyMessage = reply;
-        });
+    if (!mounted) return;
+
+    // 如果没有回复ID，直接清除状态
+    if (_currentMessage.replyToId == null) {
+      setState(() {
+        replyMessage = null;
+        _replyLoadingState = ReplyLoadingState.initial;
+        _currentReplyToId = null;
+      });
+      return;
+    }
+
+    // 设置加载状态
+    setState(() {
+      _replyLoadingState = ReplyLoadingState.loading;
+    });
+
+    try {
+      final replyToId = _currentMessage.replyToId!;
+      final reply = await chatPlugin.getMessage(replyToId);
+      
+      // 确保在异步操作完成后组件仍然挂载且消息ID匹配
+      if (!mounted || _currentMessage.replyToId != replyToId) {
+        return;
       }
+
+      setState(() {
+        if (reply != null) {
+          replyMessage = reply;
+          _currentReplyToId = replyToId;
+          _replyLoadingState = ReplyLoadingState.loaded;
+        } else {
+          replyMessage = null;
+          _replyLoadingState = ReplyLoadingState.error;
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      
+      setState(() {
+        replyMessage = null;
+        _replyLoadingState = ReplyLoadingState.error;
+      });
     }
   }
 
@@ -245,7 +299,7 @@ class _MessageBubbleState extends State<MessageBubble> {
             const SizedBox(width: 8),
             if (_isCurrentUser && widget.showAvatar)
               MessageAvatar(
-                user: widget.message.user,
+                user: _currentMessage.user,
                 onTap: widget.onAvatarTap,
               )
             else if (_isCurrentUser && !widget.showAvatar)
