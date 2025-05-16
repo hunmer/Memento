@@ -1,11 +1,11 @@
+import 'package:flutter/material.dart';
+import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
+import 'package:Memento/plugins/store/events/point_award_event.dart';
 import 'package:Memento/plugins/store/widgets/store_view.dart';
 import 'package:Memento/plugins/store/widgets/point_settings_view.dart';
-import 'package:flutter/material.dart';
-import 'package:Memento/plugins/base_plugin.dart';
-import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/core/config_manager.dart';
-
 /// 物品兑换插件
 class StorePlugin extends BasePlugin {
   @override
@@ -35,6 +35,7 @@ class StorePlugin extends BasePlugin {
   }
 
   StoreController? _controller;
+  PointAwardEvent? _pointAwardEvent;
   bool _isInitialized = false;
 
   /// 获取商店控制器
@@ -70,9 +71,14 @@ class StorePlugin extends BasePlugin {
       await loadSettings(defaultPointSettings);
       _controller = StoreController(this);
       await _controller!.loadFromStorage();
+      
+      // 初始化积分奖励事件处理器
+      _pointAwardEvent = PointAwardEvent(this);
+      
       _isInitialized = true;
     }
   }
+  
 
   @override
   Widget buildMainView(BuildContext context) {
