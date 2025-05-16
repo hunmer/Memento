@@ -44,6 +44,9 @@ class CalendarPlugin extends BasePlugin {
   @override
   String get author => 'Memento';
 
+   @override
+  IconData get icon => Icons.calendar_month;
+
   @override
   Future<void> initialize() async {
     // 初始化总控制器

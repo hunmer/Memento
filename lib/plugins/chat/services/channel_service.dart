@@ -78,30 +78,31 @@ class ChannelService {
           if (messagesData.isNotEmpty && messagesData.containsKey('messages')) {
             final List<dynamic> messagesJson =
                 messagesData['messages'] as List<dynamic>;
+            // 加载消息并设置channelId
             messages = await Future.wait(
-              messagesJson.map(
-                (m) => Message.fromJson(m as Map<String, dynamic>,),
-              ),
+              messagesJson.map((m) async {
+                // 创建基础消息对象
+                Message message = await Message.fromJson(m as Map<String, dynamic>);
+                // 如果消息没有channelId，则设置当前频道的ID
+                if (message.channelId == null) {
+                  message = await message.copyWith(channelId: channelId);
+                }
+                return message;
+              }),
             );
           }
 
-          // 加载草稿
-          final draftData = await _plugin.storage.read('chat/draft/$channelId');
-          String? draft;
-          if (draftData.isNotEmpty && draftData.containsKey('draft')) {
-            draft = draftData['draft'] as String;
-          }
-
-          // 创建频道对象，使用 UserService 中的所有用户
+          // 创建频道对象（草稿信息已包含在channelJson中）
           final channel = Channel.fromJson(
-            channelJson, 
+            channelJson,
             messages: messages,
           );
-          channel.draft = draft;
+
+          // 添加到频道列表
           _channels.add(channel);
         }
 
-        // 按优先级和最后消息时间排序
+        // 按优先级和最后消息时间排序频道
         _channels.sort(Channel.compare);
       }
     } catch (e) {
@@ -216,8 +217,9 @@ class ChannelService {
   // 保存消息
   Future<void> saveMessages(String channelId, List<Message> messages) async {
     // 保存消息
-    final messageJsonFutures = messages.map((m) => m.toJson());
-    final messageJsonList = await Future.wait(messageJsonFutures);
+    final messageJsonList = await Future.wait(
+      messages.map((m) => m.toJson()),
+    );
 
     await _plugin.storage.write('chat/messages/$channelId', {
       'messages': messageJsonList,
@@ -239,129 +241,62 @@ class ChannelService {
     }
   }
 
-  /// 查找消息所属的频道并更新消息
-  /// 
-  /// 此方法可以根据消息找到其所属的频道，并在频道中更新或添加消息。
-  /// 
-  /// [message] 要查找和更新的消息对象
-  /// 返回包含频道ID和消息索引的结果，如果未找到频道则返回null
-  Map<String, dynamic>? _findAndUpdateMessageInChannel(Message message) {
-    String? channelId;
-    int? messageIndex;
-    int? channelIndex;
-    
-    // 首先检查消息元数据中是否包含频道ID
-    if (message.metadata != null && message.metadata!.containsKey('channelId')) {
-      channelId = message.metadata!['channelId'] as String?;
-    }
-    
-    // 如果元数据中没有频道ID，则遍历所有频道查找消息
-    if (channelId == null) {
-      for (int i = 0; i < _channels.length; i++) {
-        final channel = _channels[i];
-        final index = channel.messages.indexWhere((m) => m.id == message.id);
-        if (index != -1) {
-          channelId = channel.id;
-          channelIndex = i;
-          messageIndex = index;
-          // 更新频道中的消息
-          channel.messages[index] = message;
-          break;
-        }
-      }
-    } else {
-      // 如果有频道ID，直接查找频道
-      channelIndex = _channels.indexWhere((c) => c.id == channelId);
-      if (channelIndex != -1) {
-        // 查找消息在频道中的索引
-        messageIndex = _channels[channelIndex].messages.indexWhere(
-          (m) => m.id == message.id
-        );
-        
-        // 如果找到消息，更新它
-        if (messageIndex != -1) {
-          _channels[channelIndex].messages[messageIndex] = message;
-        } else {
-          // 如果消息不在频道中，添加它
-          _channels[channelIndex].messages.add(message);
-          messageIndex = _channels[channelIndex].messages.length - 1;
-        }
-      }
-    }
-    
-    if (channelId != null && channelIndex != null) {
-      return {
-        'channelId': channelId,
-        'channelIndex': channelIndex,
-        'messageIndex': messageIndex,
-      };
-    }
-    
-    return null;
-  }
-
   /// 保存单条消息
   /// 
   /// 此方法可以保存单条消息而不需要传入整个消息列表。
-  /// 它会自动找到消息所属的频道，更新消息，然后保存整个频道的消息列表。
+  /// 使用消息的channelId属性来定位频道，更新消息，然后保存整个频道的消息列表。
   /// 
   /// [message] 要保存的消息对象
   /// 返回 `true` 表示保存成功，`false` 表示未找到消息所属的频道
   Future<bool> saveMessage(Message message) async {
-    // 查找并更新消息
-    final result = _findAndUpdateMessageInChannel(message);
-    
-    // 如果找到了频道，保存消息
-    if (result != null) {
-      final channelId = result['channelId'] as String;
-      final channelIndex = result['channelIndex'] as int;
-      
-      // 检查是否需要更新最后一条消息
-      if (_channels[channelIndex].lastMessage == null || 
-          message.date.isAfter(_channels[channelIndex].lastMessage!.date) ||
-          message.id == _channels[channelIndex].lastMessage!.id) {
-        _channels[channelIndex].lastMessage = message;
-      }
-      
-      // 保存消息列表
-      await saveMessages(channelId, _channels[channelIndex].messages);
-      return true;
+    if (message.channelId == null) {
+      debugPrint('无法保存消息：消息缺少channelId属性');
+      return false;
     }
-    
-    return false;
+
+    final channelIndex = _channels.indexWhere((c) => c.id == message.channelId);
+    if (channelIndex == -1) {
+      debugPrint('无法保存消息：找不到ID为 ${message.channelId} 的频道');
+      return false;
+    }
+
+    // 查找消息在频道中的索引
+    final messageIndex = _channels[channelIndex].messages.indexWhere(
+      (m) => m.id == message.id
+    );
+
+    // 更新或添加消息
+    if (messageIndex != -1) {
+      _channels[channelIndex].messages[messageIndex] = message;
+    } else {
+      _channels[channelIndex].messages.add(message);
+    }
+
+    // 检查是否需要更新最后一条消息
+    if (_channels[channelIndex].lastMessage == null || 
+        message.date.isAfter(_channels[channelIndex].lastMessage!.date) ||
+        message.id == _channels[channelIndex].lastMessage!.id) {
+      _channels[channelIndex].lastMessage = message;
+    }
+
+    // 保存消息列表
+    await saveMessages(message.channelId!, _channels[channelIndex].messages);
+    return true;
   }
 
   // 保存草稿
   Future<void> saveDraft(String channelId, String draft) async {
     try {
-      // 确保目录存在
-      await _plugin.storage.createDirectory('chat/draft');
-
       // 检查频道是否存在
       final index = _channels.indexWhere((c) => c.id == channelId);
       if (index == -1) {
         debugPrint('Cannot save draft: Channel $channelId not found');
         return;
       }
-
-      // 检查草稿文件是否存在
-      final draftExists = await _plugin.storage.fileExists(
-        'chat/draft/$channelId',
-      );
-
-      if (draft.trim().isEmpty) {
-        // 如果草稿为空且文件存在，删除草稿文件
-        if (draftExists) {
-          await _plugin.storage.delete('chat/draft/$channelId');
-        }
-        // 如果草稿为空且文件不存在，不需要任何操作
-      } else {
-        // 保存草稿
-        await _plugin.storage.write('chat/draft/$channelId', {'draft': draft});
-      }
-
       // 更新内存中的频道草稿
       _channels[index].draft = draft.trim().isEmpty ? null : draft;
+      // 保存到本地存储
+      saveChannel(_channels[index]);
 
       // 通知监听器数据已更新，以便更新UI
       _plugin.notifyListeners();
@@ -372,41 +307,11 @@ class ChannelService {
 
   // 加载草稿
   Future<String?> loadDraft(String channelId) async {
-    if (!_plugin.isInitialized) {
-      debugPrint('ChatPlugin is not initialized yet. Cannot load draft.');
-      return null;
-    }
-
-    try {
-      // 先检查文件是否存在
-      final fileExists = await _plugin.storage.fileExists(
-        'chat/draft/$channelId',
-      );
-      if (!fileExists) {
-        // 如果文件不存在，确保目录存在并创建空草稿
-        await _plugin.storage.createDirectory('chat/draft');
-        await _plugin.storage.write('chat/draft/$channelId', {'draft': ''});
-        return null;
+      final index = _channels.indexWhere((c) => c.id == channelId);
+      if (index != -1) {
+        return _channels[index].draft;
       }
-
-      // 读取草稿数据
-      final draftData = await _plugin.storage.read('chat/draft/$channelId');
-      if (draftData.isNotEmpty && draftData.containsKey('draft')) {
-        final draft = draftData['draft'] as String;
-        return draft.isEmpty ? null : draft;
-      }
-    } catch (e) {
-      debugPrint('Error loading draft: $e');
-      // 出错时创建空草稿
-      try {
-        await _plugin.storage.createDirectory('chat/draft');
-        await _plugin.storage.write('chat/draft/$channelId', {'draft': ''});
-      } catch (e2) {
-        debugPrint('Error creating empty draft: $e2');
-      }
-    }
-
-    return null;
+      return '';
   }
 
   // 保存所有频道信息
@@ -423,7 +328,6 @@ class ChannelService {
       await Future.wait([
         _plugin.storage.delete('chat/channel/$channelId'),
         _plugin.storage.delete('chat/messages/$channelId'),
-        _plugin.storage.delete('chat/draft/$channelId'),
       ]);
 
       // 从内存中移除频道
@@ -472,7 +376,15 @@ class ChannelService {
     String channelId,
     Message messageFuture,
   ) async {
-    final message = await messageFuture;
+    // 获取消息对象
+    Message message = await messageFuture;
+    
+    // 如果消息没有channelId，则设置当前频道ID
+    if (message.channelId == null) {
+      // 创建一个包含channelId的新消息
+      message = await message.copyWith(channelId: channelId);
+    }
+    
     // 找到对应频道
     final channelIndex = _channels.indexWhere((c) => c.id == channelId);
     if (channelIndex == -1) return;
@@ -482,11 +394,14 @@ class ChannelService {
 
     // 更新频道的最后一条消息
     _channels[channelIndex].lastMessage = message;
+    
+    // 异步保存到存储
+    await Future.wait([
+      saveMessages(channelId, _channels[channelIndex].messages),
+      saveDraft(channelId, ''),
+    ]);
 
-    // 保存到存储
-    await saveMessages(channelId, _channels[channelIndex].messages);
-
-    // 通知监听器数据已更新
+    // 再次通知监听器确保数据同步
     _plugin.notifyListeners();
   }
 
@@ -497,7 +412,6 @@ class ChannelService {
       await Future.wait([
         _plugin.storage.createDirectory('chat/channel'),
         _plugin.storage.createDirectory('chat/messages'),
-        _plugin.storage.createDirectory('chat/draft'),
       ]);
 
       // 添加到内存中
@@ -511,8 +425,6 @@ class ChannelService {
         }),
         // 初始化空消息列表
         _plugin.storage.write('chat/messages/${channel.id}', {'messages': []}),
-        // 初始化空草稿
-        _plugin.storage.write('chat/draft/${channel.id}', {'draft': ''}),
       ]);
 
       // 更新频道列表
@@ -536,15 +448,12 @@ class ChannelService {
         await Future.wait([
           _plugin.storage.delete('chat/channel/${channel.id}'),
           _plugin.storage.delete('chat/messages/${channel.id}'),
-          _plugin.storage.delete('chat/draft/${channel.id}'),
         ]);
       } catch (cleanupError) {
         debugPrint(
           'Error cleaning up after failed channel creation: $cleanupError',
         );
       }
-
-      // 重新抛出异常
       rethrow;
     }
   }
@@ -554,23 +463,36 @@ class ChannelService {
   /// 
   /// 此方法会更新频道中指定ID的消息内容，并触发UI刷新
   Future<void> updateMessage(Message message, {bool persist = true}) async {
-    // 查找并更新消息
-    final result = _findAndUpdateMessageInChannel(message);
-    
-    if (result != null) {
-      final channelId = result['channelId'] as String;
-      final channelIndex = result['channelIndex'] as int;
-      
+    if (message.channelId == null) {
+      debugPrint('无法更新消息：消息缺少channelId属性');
+      return;
+    }
+
+    final channelIndex = _channels.indexWhere((c) => c.id == message.channelId);
+    if (channelIndex == -1) {
+      debugPrint('无法更新消息：找不到ID为 ${message.channelId} 的频道');
+      return;
+    }
+
+    // 查找消息在频道中的索引
+    final messageIndex = _channels[channelIndex].messages.indexWhere(
+      (m) => m.id == message.id
+    );
+
+    // 如果找到消息则更新
+    if (messageIndex != -1) {
+      _channels[channelIndex].messages[messageIndex] = message;
+
       // 如果这是最后一条消息，也更新频道的lastMessage
       if (_channels[channelIndex].lastMessage?.id == message.id) {
         _channels[channelIndex].lastMessage = message;
       }
-      
+
       // 根据persist参数决定是否保存到存储
       if (persist) {
-        await saveMessages(channelId, _channels[channelIndex].messages);
+        await saveMessages(message.channelId!, _channels[channelIndex].messages);
       }
-      
+
       // 通过事件系统广播消息更新
       eventManager.broadcast(
         'onMessageUpdated',
@@ -579,7 +501,7 @@ class ChannelService {
       // 统一通知UI更新，避免多次触发
       _plugin.notifyListeners();
     } else {
-      debugPrint('无法更新消息：未找到ID为 ${message.id} 的消息');
+      debugPrint('无法更新消息：在频道 ${message.channelId} 中未找到ID为 ${message.id} 的消息');
     }
   }
 
@@ -682,45 +604,5 @@ class ChannelService {
   Future<Message?> loadReplyMessage(String? replyToId) async {
     if (replyToId == null) return null;
     return getMessageById(replyToId);
-  }
-
-  /// 获取或创建默认频道
-  /// 如果没有频道或当前没有活跃频道，则创建一个默认频道
-  Future<Channel?> getOrCreateDefaultChannel() async {
-    try {
-      // 如果已有活跃频道，直接返回
-      if (_currentChannel != null) {
-        return _currentChannel;
-      }
-      
-      // 如果有频道但没有活跃频道，设置第一个为活跃频道
-      if (_channels.isNotEmpty) {
-        _currentChannel = _channels.first;
-        _plugin.notifyListeners();
-        return _currentChannel;
-      }
-      
-      // 如果没有任何频道，创建默认频道
-      final defaultChannel = Channel(
-        id: 'default_${DateTime.now().millisecondsSinceEpoch}',
-        title: '默认对话',
-        icon: Icons.chat_bubble_outline,
-        messages: [],
-        priority: 0,
-      );
-      
-      // 创建频道
-      await createChannel(defaultChannel);
-      
-      // 设置为当前活跃频道
-      _currentChannel = defaultChannel;
-      _plugin.notifyListeners();
-      
-      debugPrint('已创建默认频道: ${defaultChannel.id}');
-      return defaultChannel;
-    } catch (e) {
-      debugPrint('创建默认频道失败: $e');
-      return null;
-    }
   }
 }

@@ -31,6 +31,9 @@ class ContactPlugin extends BasePlugin {
   String get author => 'Memento Team';
 
   @override
+  IconData get icon => Icons.contacts;
+
+  @override
   Future<void> initialize() async {
     _controller = ContactController(this);
   }
@@ -58,28 +61,75 @@ class ContactPlugin extends BasePlugin {
         }
 
         final stats = snapshot.data!;
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ContactStrings.pluginName,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${ContactStrings.totalContacts}: ${stats['totalContacts']}',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${ContactStrings.recentContacts}: ${stats['recentContacts']}',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            ),
+        final theme = Theme.of(context);
+        
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 顶部图标和标题
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withAlpha(30),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, size: 24, color: Colors.blue),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    ContactStrings.pluginName,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 统计信息
+              Column(
+                children: [
+                  // 联系人统计
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // 总联系人
+                      Column(
+                        children: [
+                          Text(ContactStrings.totalContacts, style: theme.textTheme.bodyMedium),
+                          Text(
+                            '${stats['totalContacts']}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      // 最近联系人
+                      Column(
+                        children: [
+                          Text(ContactStrings.recentContacts, style: theme.textTheme.bodyMedium),
+                          Text(
+                            '${stats['recentContacts']}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
         );
       },

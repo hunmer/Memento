@@ -173,20 +173,20 @@ class _TimelineScreenState extends State<TimelineScreen> {
       controller: _controller.scrollController,
       padding: const EdgeInsets.all(8),
       itemCount:
-          _controller.messages.length + (_controller.hasMoreMessages ? 1 : 0),
+          _controller.displayMessages.length + (_controller.hasMoreMessages ? 1 : 0),
       itemBuilder: (context, index) {
         // 显示加载更多指示器
         if (_controller.hasMoreMessages &&
-            index == _controller.messages.length) {
+            index == _controller.displayMessages.length) {
           // 触发加载更多
-          _controller.ensureScrollListenerActive();
+          _controller.loadMoreMessages();
 
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16.0),
             child: Center(child: CircularProgressIndicator()),
           );
         }
-        final message = _controller.messages[index];
+        final message = _controller.displayMessages[index];
         final channel = _controller.getMessageChannel(message);
 
         if (channel == null) return const SizedBox.shrink();
@@ -218,10 +218,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 // 显示加载更多指示器
-                if (index >= _controller.messages.length) {
+                if (index >= _controller.displayMessages.length) {
                   if (_controller.hasMoreMessages) {
                     // 触发加载更多
-                    _controller.ensureScrollListenerActive();
+                    _controller.loadMoreMessages();
                     return Container(
                       height: 80,
                       alignment: Alignment.center,
@@ -236,7 +236,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
                 return _buildGridCard(index);
               },
               childCount:
-                  _controller.messages.length +
+                  _controller.displayMessages.length +
                   (_controller.hasMoreMessages ? 1 : 0),
             ),
             gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
@@ -253,11 +253,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
   // 构建网格卡片
   Widget _buildGridCard(int index) {
     // 检查是否是加载更多指示器
-    if (index >= _controller.messages.length) {
+    if (index >= _controller.displayMessages.length) {
       return const Card(child: Center(child: CircularProgressIndicator()));
     }
 
-    final message = _controller.messages[index];
+    final message = _controller.displayMessages[index];
     final channel = _controller.getMessageChannel(message);
 
     if (channel == null) return const SizedBox.shrink();

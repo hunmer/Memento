@@ -78,8 +78,9 @@ void main() async {
 
     // 注册内置插件
     final plugins = [
-      OpenAIPlugin(), // 添加OpenAI插件
       ChatPlugin.instance,
+      OpenAIPlugin(), // 添加OpenAI插件
+
       DiaryPlugin.instance,
       ActivityPlugin.instance,
       CheckinPlugin.instance,

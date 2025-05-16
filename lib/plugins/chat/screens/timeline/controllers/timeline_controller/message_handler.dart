@@ -1,4 +1,3 @@
-import 'package:Memento/plugins/chat/screens/timeline/controllers/timeline_controller.dart';
 import 'package:flutter/material.dart';
 import '../../../../models/message.dart';
 import '../../../../models/channel.dart';
@@ -9,8 +8,7 @@ import 'base_controller.dart';
 mixin MessageHandlerMixin on BaseTimelineController {
   /// 获取消息所属的频道
   Channel? getMessageChannel(Message message) {
-    final channelInfo = message.metadata?['channelInfo'] as Map<String, dynamic>?;
-    final channelId = channelInfo?['channelId'] as String?;
+    final channelId = message.channelId;
     if (channelId == null) return null;
 
     try {

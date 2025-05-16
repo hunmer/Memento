@@ -21,8 +21,7 @@ mixin ChannelControllerMixin on BaseTimelineController {
   Set<String> getAllChannelIds() {
     final channelIds = <String>{};
     for (final message in allMessages) {
-      final channelInfo = message.metadata?['channelInfo'] as Map<String, dynamic>?;
-      final channelId = channelInfo?['channelId'] as String?;
+      final channelId = message.channelId;
       if (channelId != null) {
         channelIds.add(channelId);
       }
@@ -50,9 +49,7 @@ mixin ChannelControllerMixin on BaseTimelineController {
   /// 获取频道消息
   List<Message> getChannelMessages(String channelId) {
     return allMessages.where((message) {
-      final channelInfo = message.metadata?['channelInfo'] as Map<String, dynamic>?;
-      final messageChannelId = channelInfo?['channelId'] as String?;
-      return messageChannelId == channelId;
+      return message.channelId == channelId;
     }).toList();
   }
 

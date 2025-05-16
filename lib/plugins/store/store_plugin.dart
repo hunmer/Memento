@@ -23,6 +23,9 @@ class StorePlugin extends BasePlugin {
   @override
   String get author => '系统团队';
 
+   @override
+  IconData get icon => Icons.store;
+
   @override
   Future<void> registerToApp(
     PluginManager pluginManager,

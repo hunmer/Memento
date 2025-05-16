@@ -19,7 +19,6 @@ mixin SearchControllerMixin on BaseTimelineController {
 
       // 检查搜索查询是否发生了变化
       if (searchQuery != newQuery) {
-        debugPrint('Timeline: 搜索查询从 \"\$searchQuery\" 变为 \"\$newQuery\"');
         searchQuery = newQuery;
         filterMessages(saveState: true);
         notifyListeners();

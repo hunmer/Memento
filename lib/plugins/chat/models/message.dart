@@ -15,7 +15,7 @@ class Message {
   final MessageType type;
   DateTime? editedAt; // 添加编辑时间字段
   String? fixedSymbol; // 添加固定符号字段
-  String? channelId; // 添加固定符号字段
+  String? channelId; // 频道ID
   Color? bubbleColor; // 添加气泡颜色字段
   Map<String, dynamic>? metadata; // 添加元数据字段，用于存储额外信息
   Message? replyTo; // 添加回复消息引用
@@ -110,6 +110,7 @@ class Message {
     DateTime? editedAt,
     String? fixedSymbol,
     Color? bubbleColor,
+    String? channelId,
     Map<String, dynamic>? metadata,
     Message? replyTo,
     String? replyToId,
@@ -123,8 +124,10 @@ class Message {
       editedAt: editedAt ?? this.editedAt,
       fixedSymbol: fixedSymbol ?? this.fixedSymbol,
       bubbleColor: bubbleColor ?? this.bubbleColor,
+      channelId: channelId ?? this.channelId,
       metadata: metadata ?? this.metadata,
       replyTo: replyTo ?? this.replyTo,
+      replyToId: replyToId ?? this.replyToId,
     );
   }
 
@@ -234,6 +237,15 @@ class Message {
     // 获取回复消息ID
     final replyToId = json['replyToId'] as String?;
 
+    // 从JSON中获取channelId，如果不存在则尝试从metadata中获取
+    String? channelId = json['channelId'] as String?;
+    final metadata = json['metadata'] as Map<String, dynamic>?;
+    
+    // 如果JSON中没有channelId但metadata中有，则使用metadata中的channelId
+    if (channelId == null && metadata != null && metadata.containsKey('channelId')) {
+      channelId = metadata['channelId'] as String?;
+    }
+    
     return create(
       id: json['id'] as String,
       content: json['content'] as String,
@@ -252,7 +264,8 @@ class Message {
           json['bubbleColor'] != null
               ? HexColor.fromHex(json['bubbleColor'] as String)
               : null,
-      metadata: json['metadata'] as Map<String, dynamic>?,
+      channelId: channelId,
+      metadata: metadata,
       replyToId: replyToId,
     );
   }

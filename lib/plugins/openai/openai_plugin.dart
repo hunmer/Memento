@@ -50,7 +50,6 @@ class OpenAIPlugin extends BasePlugin {
 
     // 初始化聊天事件处理器
     _chatEventHandler.initialize();
-    
     // 初始化prompt替换控制器已在构造函数中完成
   }
 
@@ -102,6 +101,7 @@ class OpenAIPlugin extends BasePlugin {
     ConfigManager configManager,
   ) async {
     // Register plugin settings
+    await initialize();
     await configManager.savePluginConfig(id, {'providers': []});
   }
 

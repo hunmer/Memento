@@ -87,6 +87,7 @@ class Channel {
     return {
       'id': id,
       'title': title,
+      'draft': draft,
       'icon': icon.codePoint,
       'iconFontFamily': icon.fontFamily,
       'iconFontPackage': icon.fontPackage,
@@ -122,6 +123,7 @@ class Channel {
     return Channel(
       id: json['id'] as String,
       title: json['title'] as String,
+      draft: json['draft'] as String?,
       icon: icon,
       backgroundColor: backgroundColor,
       messages: messages,

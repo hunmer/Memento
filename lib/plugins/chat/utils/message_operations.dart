@@ -104,7 +104,7 @@ class MessageOperations {
     if (confirmed == true) {
       try {
         // 获取频道ID
-        final channelId = message.metadata?['channelId'] as String?;
+        final channelId = message.channelId;
         if (channelId == null) {
           throw Exception('消息没有关联的频道ID');
         }
@@ -198,7 +198,7 @@ class MessageOperations {
   /// 根据消息找到对应的频道
   Channel? _findMessageChannel(Message message) {
     // 如果消息中包含频道信息（时间线视图），则直接使用
-    final channelId = message.metadata?['channelId'] as String?;
+    final channelId = message.channelId;
     if (channelId != null) {
       try {
         return _chatPlugin.channelService.channels

@@ -1,3 +1,4 @@
+import 'package:Memento/core/event/event.dart';
 import 'package:flutter/material.dart';
 import '../../../models/channel.dart';
 import '../../../models/user.dart';
@@ -353,6 +354,7 @@ class ChatScreenController extends ChangeNotifier {
       final newMessage = await Message.create(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         content: content,
+        channelId: channel.id,
         user: currentUser,
         date: DateTime.now(),
         type: messageType,
@@ -364,9 +366,6 @@ class ChatScreenController extends ChangeNotifier {
       
       // 将新消息添加到本地消息列表
       messages.insert(0, newMessage);
-      
-      // 使用updateMessage来触发UI更新
-      await chatPlugin.channelService.updateMessage(newMessage);
       
       // 确保消息被添加到频道
       await chatPlugin.channelService.addMessage(channel.id, newMessage);
