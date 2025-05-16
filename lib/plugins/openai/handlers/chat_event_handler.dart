@@ -131,11 +131,12 @@ class ChatEventHandler {
         content: '正在思考...',
         channelId: originalMessage.channelId,
         user: aiUser,
+        replyToId: originalMessage.id, // 标记为对原消息的回复
         type: MessageType.received,
         metadata: {
+          'agentId': agentData['id'],
           'isAI': true,
           'isStreaming': true,
-          'replyTo': originalMessage.id, // 标记为对原消息的回复
         },
       );
 
@@ -150,14 +151,6 @@ class ChatEventHandler {
         '开始处理来自用户的消息: ${originalMessage.content}',
         name: 'ChatEventHandler',
       );
-
-      // 发布AI回复消息创建事件
-      typingMessage.metadata?.addAll({
-        'agentId': agentData['id'],
-        'replyTo': originalMessage.id,
-        'isAI': true,
-        'isStreaming': true,
-      });
       
       // 添加AI消息到频道
       final channelId = originalMessage.channelId as String;
@@ -319,7 +312,6 @@ class ChatEventHandler {
               'agentId': agentData['id'],
               'isCompleted': true,
               'completedAt': DateTime.now().millisecondsSinceEpoch,
-              'replyTo': originalMessage.id, // 保持回复关系
             };
 
             // 立即广播最终的消息更新事件
@@ -363,40 +355,6 @@ class ChatEventHandler {
     }
   }
 
-  // 使用与更新正常消息相同的方法处理错误消息
-  Future<void> _handleErrorMessage(String messageId, String content, User user, {String? channelId, String? replyToId}) async {
-    // 首先创建消息
-    final message = await Message.create(
-      id: messageId,
-      content: content,
-      user: user,
-      type: MessageType.received,
-      channelId: channelId ?? 'default',
-      metadata: {
-        'isAI': true, 
-        'isError': true, 
-        'agentId': user.id,
-        if (replyToId != null) 'replyTo': replyToId,
-      },
-    );
-
-    // 添加消息到频道
-    await _plugin.channelService.addMessage(message.channelId!, message);
-    
-    // 确保UI更新
-    _plugin.notifyListeners();
-    
-    // 通过事件系统广播消息更新事件
-    eventManager.broadcast(
-      'onMessageUpdated',
-      ValuesEventArgs(message, message.id),
-    );
-  }
-
-  // 检查AI用户是否已初始化
-  bool _isAiUserInitialized(User? user) {
-    return user != null && user.id.isNotEmpty;
-  }
 
   void dispose() {
     // 获取所有消息ID的副本，因为我们会在循环中修改集合

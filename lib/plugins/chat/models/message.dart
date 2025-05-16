@@ -192,10 +192,6 @@ class Message {
     
     // 确保回复关系在metadata中也有记录
     final String? replyId = replyToId ?? replyTo?.id;
-    if (replyId != null && !messageMetadata.containsKey('replyTo')) {
-      messageMetadata['replyTo'] = replyId;
-    }
-
     // channelId不需要保存
     return {
       'id': id,
@@ -244,20 +240,8 @@ class Message {
     // 获取回复消息ID，优先从JSON直接获取，其次从metadata中获取
     final metadata = json['metadata'] as Map<String, dynamic>?;
     String? replyToId = json['replyToId'] as String?;
-    
-    // 如果JSON中没有replyToId但metadata中有，则使用metadata中的replyTo
-    if (replyToId == null && metadata != null && metadata.containsKey('replyTo')) {
-      replyToId = metadata['replyTo'] as String?;
-    }
-
     // 从JSON中获取channelId，如果不存在则尝试从metadata中获取
     String? channelId = json['channelId'] as String?;
-    
-    // 如果JSON中没有channelId但metadata中有，则使用metadata中的channelId
-    if (channelId == null && metadata != null && metadata.containsKey('channelId')) {
-      channelId = metadata['channelId'] as String?;
-    }
-    
     return create(
       id: json['id'] as String,
       content: json['content'] as String,
