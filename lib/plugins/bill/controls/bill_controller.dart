@@ -5,8 +5,62 @@ import '../models/account.dart';
 import '../models/bill.dart';
 import '../models/bill_statistics.dart';
 import '../models/statistic_range.dart';
+import '../../../core/event/event_manager.dart';
+
+/// 账单添加事件参数
+class BillAddedEventArgs extends EventArgs {
+  /// 添加的账单
+  final Bill bill;
+  
+  /// 账户ID
+  final String accountId;
+  
+  /// 创建一个账单添加事件参数实例
+  BillAddedEventArgs(this.bill, this.accountId) : super('bill_added');
+}
+
+/// 账单删除事件参数
+class BillDeletedEventArgs extends EventArgs {
+  /// 被删除的账单ID
+  final String billId;
+  
+  /// 账户ID
+  final String accountId;
+  
+  /// 创建一个账单删除事件参数实例
+  BillDeletedEventArgs(this.billId, this.accountId) : super('bill_deleted');
+}
+
+/// 账户添加事件参数
+class AccountAddedEventArgs extends EventArgs {
+  /// 添加的账户
+  final Account account;
+  
+  /// 创建一个账户添加事件参数实例
+  AccountAddedEventArgs(this.account) : super('account_added');
+}
+
+/// 账户删除事件参数
+class AccountDeletedEventArgs extends EventArgs {
+  /// 被删除的账户ID
+  final String accountId;
+  
+  /// 创建一个账户删除事件参数实例
+  AccountDeletedEventArgs(this.accountId) : super('account_deleted');
+}
 
 class BillController with ChangeNotifier {
+  /// 账单添加事件名称
+  static const String billAddedEvent = 'bill_added';
+  
+  /// 账单删除事件名称
+  static const String billDeletedEvent = 'bill_deleted';
+  
+  /// 账户添加事件名称
+  static const String accountAddedEvent = 'account_added';
+  
+  /// 账户删除事件名称
+  static const String accountDeletedEvent = 'account_deleted';
   static final BillController _instance = BillController._internal();
   factory BillController() => _instance;
   
@@ -140,6 +194,13 @@ class BillController with ChangeNotifier {
     account.calculateTotal();
     _accounts.add(account);
     await _saveAccounts();
+    
+    // 发布账户添加事件
+    EventManager.instance.broadcast(
+      accountAddedEvent,
+      AccountAddedEventArgs(account),
+    );
+    
     // 确保在数据保存成功后再通知监听器
     notifyListeners();
   }
@@ -170,6 +231,13 @@ class BillController with ChangeNotifier {
   Future<void> deleteAccount(String accountId) async {
     _accounts.removeWhere((account) => account.id == accountId);
     await _saveAccounts();
+    
+    // 发布账户删除事件
+    EventManager.instance.broadcast(
+      accountDeletedEvent,
+      AccountDeletedEventArgs(accountId),
+    );
+    
     notifyListeners();
   }
 
@@ -347,6 +415,47 @@ class BillController with ChangeNotifier {
     );
   }
 
+  // 创建或更新账单
+  Future<void> saveBill(Bill bill) async {
+    final accountIndex = _accounts.indexWhere((a) => a.id == bill.accountId);
+    if (accountIndex == -1) {
+      throw '账户不存在';
+    }
+
+    final currentAccount = _accounts[accountIndex];
+    Account updatedAccount;
+
+    // 检查是否存在相同ID的账单（编辑模式）
+    final existingBillIndex = currentAccount.bills.indexWhere((b) => b.id == bill.id);
+    
+    if (existingBillIndex == -1) {
+      // 创建新账单
+      updatedAccount = currentAccount.copyWith(
+        bills: [...currentAccount.bills, bill],
+      );
+    } else {
+      // 更新现有账单
+      final updatedBills = List<Bill>.from(currentAccount.bills);
+      updatedBills[existingBillIndex] = bill;
+      updatedAccount = currentAccount.copyWith(bills: updatedBills);
+    }
+
+    // 更新账户总金额
+    updatedAccount.calculateTotal();
+    
+    // 保存更新后的账户
+    _accounts[accountIndex] = updatedAccount;
+    await _saveAccounts();
+    
+    // 发布账单添加/更新事件
+    EventManager.instance.broadcast(
+      billAddedEvent,
+      BillAddedEventArgs(bill, bill.accountId),
+    );
+    
+    notifyListeners();
+  }
+
   // 删除账单
   Future<void> deleteBill(String accountId, String billId) async {
     final accountIndex = _accounts.indexWhere((a) => a.id == accountId);
@@ -360,6 +469,13 @@ class BillController with ChangeNotifier {
     updatedAccount.calculateTotal();
     _accounts[accountIndex] = updatedAccount;
     await _saveAccounts();
+    
+    // 发布账单删除事件
+    EventManager.instance.broadcast(
+      billDeletedEvent,
+      BillDeletedEventArgs(billId, accountId),
+    );
+    
     notifyListeners();
   }
 

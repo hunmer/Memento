@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+import '../store_plugin.dart';
+
+class PointSettingsView extends StatelessWidget {
+  final StorePlugin plugin;
+
+  const PointSettingsView({
+    Key? key,
+    required this.plugin,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('积分奖励设置'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '各项行为的积分奖励',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView(
+                children: plugin.pointAwardSettings.entries.map((entry) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            plugin.getEventDisplayName(entry.key),
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: entry.value.toString(),
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              suffix: Text('积分'),
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (value) async {
+                              final points = int.tryParse(value) ?? entry.value;
+                              final newSettings = Map<String, dynamic>.from(plugin.settings);
+                              (newSettings['point_awards'] as Map<String, dynamic>)[entry.key] = points;
+                              await plugin.updateSettings(newSettings);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

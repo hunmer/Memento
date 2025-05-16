@@ -164,7 +164,7 @@ class CheckinListController {
 
   // 切换打卡状态
   // 发送事件通知
-  void _notifyEvent(String action, CheckinItem item) {
+  void notifyEvent(String action, CheckinItem item) {
     final eventArgs = ItemEventArgs(
       eventName: 'checkin_${action}',
       itemId: item.id,
@@ -172,21 +172,6 @@ class CheckinListController {
       action: action,
     );
     EventManager.instance.broadcast('checkin_${action}', eventArgs);
-  }
-
-  void toggleCheckin(CheckinItem item) {
-    final now = DateTime.now();
-    
-    // 添加今天的打卡记录
-    final record = CheckinRecord(
-      startTime: now,
-      endTime: now,
-      checkinTime: now,
-    );
-    item.addCheckinRecord(record);
-    // 发送完成事件
-    _notifyEvent('completed', item);
-    onStateChanged();
   }
 
   // 显示编辑打卡项页面
@@ -227,7 +212,7 @@ class CheckinListController {
               Navigator.pop(context);
                   checkinItems.removeWhere((i) => i.id == item.id);
                   // 发送删除事件
-                  _notifyEvent('deleted', item);
+                  notifyEvent('deleted', item);
                   CheckinPlugin.shared.triggerSave();
                   onStateChanged();
             },
@@ -349,7 +334,7 @@ class CheckinListController {
                   Navigator.pop(context);
                   checkinItems.remove(item);
                   // 发送删除事件
-                  _notifyEvent('deleted', item);
+                  notifyEvent('deleted', item);
                   await CheckinPlugin.shared.triggerSave();
                   onStateChanged();
                   ScaffoldMessenger.of(

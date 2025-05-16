@@ -2,10 +2,34 @@ import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/event/event_manager.dart';
 import 'screens/goods_main_screen.dart';
 import 'models/warehouse.dart';
 import 'models/goods_item.dart';
 import 'models/find_item_result.dart';
+
+/// 物品相关事件的基类
+abstract class GoodsEventArgs extends EventArgs {
+  final String warehouseId;
+
+  GoodsEventArgs(String eventName, this.warehouseId) : super(eventName);
+}
+
+/// 物品添加事件参数
+class GoodsItemAddedEventArgs extends GoodsEventArgs {
+  final GoodsItem item;
+
+  GoodsItemAddedEventArgs(this.item, String warehouseId) 
+      : super('goods_item_added', warehouseId);
+}
+
+/// 物品删除事件参数
+class GoodsItemDeletedEventArgs extends GoodsEventArgs {
+  final String itemId;
+
+  GoodsItemDeletedEventArgs(this.itemId, String warehouseId)
+      : super('goods_item_deleted', warehouseId);
+}
 
 /// 用于递归查找物品及其父物品的结果类
 class _ItemSearchResult {
@@ -250,8 +274,11 @@ class GoodsPlugin extends BasePlugin {
       // 如果没有找到要更新的物品，则作为新物品添加到仓库
       if (!updated) {
         warehouse.items.add(item);
+        // 广播物品添加事件
+        EventManager.instance.broadcast('goods_item_added', 
+          GoodsItemAddedEventArgs(item, warehouseId),
+        );
       }
-
       await saveWarehouse(warehouse);
     } catch (e) {
       debugPrint('Error saving goods item: $e');
@@ -290,6 +317,11 @@ class GoodsPlugin extends BasePlugin {
         // 如果递归删除失败，尝试直接从顶级物品中删除
         warehouse.items.removeWhere((item) => item.id == itemId);
       }
+
+      // 广播物品删除事件
+      EventManager.instance.broadcast('goods_item_deleted', 
+        GoodsItemDeletedEventArgs(itemId, warehouseId),
+      );
       
       await saveWarehouse(warehouse);
     } catch (e) {

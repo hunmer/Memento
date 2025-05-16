@@ -1,6 +1,6 @@
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/widgets/store_view.dart';
-import 'package:Memento/plugins/store/events/point_award_event.dart';
+import 'package:Memento/plugins/store/widgets/point_settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -35,7 +35,6 @@ class StorePlugin extends BasePlugin {
   }
 
   StoreController? _controller;
-  PointAwardEvent? _pointAwardEvent;
   bool _isInitialized = false;
 
   /// 获取商店控制器
@@ -55,6 +54,7 @@ class StorePlugin extends BasePlugin {
       'onMessageSent': 1,       // 发送消息奖励
       'onRecordAdded': 2,       // 添加记录奖励
       'onDiaryAdded': 5,        // 添加日记奖励
+      'bill_added': 10,         // 添加账单奖励
     }
   };
 
@@ -70,7 +70,6 @@ class StorePlugin extends BasePlugin {
       await loadSettings(defaultPointSettings);
       _controller = StoreController(this);
       await _controller!.loadFromStorage();
-      _pointAwardEvent = PointAwardEvent(this);
       _isInitialized = true;
     }
   }
@@ -196,46 +195,17 @@ class StorePlugin extends BasePlugin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '积分奖励设置',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView(
-              children: pointAwardSettings.entries.map((entry) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          _getEventDisplayName(entry.key),
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: entry.value.toString(),
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            suffix: Text('积分'),
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) async {
-                            final points = int.tryParse(value) ?? entry.value;
-                            final newSettings = Map<String, dynamic>.from(settings);
-                            (newSettings['point_awards'] as Map<String, dynamic>)[entry.key] = points;
-                            await updateSettings(newSettings);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
+          ListTile(
+            title: const Text('积分奖励设置'),
+            subtitle: const Text('设置各项行为的积分奖励'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => PointSettingsView(plugin: this),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -243,7 +213,7 @@ class StorePlugin extends BasePlugin {
   }
 
   /// 获取事件显示名称
-  String _getEventDisplayName(String eventKey) {
+  String getEventDisplayName(String eventKey) {
     switch (eventKey) {
       case 'activity_added':
         return '添加活动';
@@ -261,6 +231,8 @@ class StorePlugin extends BasePlugin {
         return '添加记录';
       case 'onDiaryAdded':
         return '添加日记';
+      case 'bill_added':
+        return '添加账单';
       default:
         return eventKey;
     }

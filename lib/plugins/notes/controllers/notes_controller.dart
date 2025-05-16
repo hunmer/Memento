@@ -153,6 +153,7 @@ class NotesController {
     );
     _notes.putIfAbsent(folderId, () => []).add(note);
     await _saveNotes();
+    _notifyEvent('added', note);
     return note;
   }
 
@@ -162,12 +163,7 @@ class NotesController {
     if (notes != null) {
       final index = notes.indexWhere((n) => n.id == note.id);
       if (index != -1) {
-        note.updatedAt = DateTime.now();
         notes[index] = note;
-        // 发送完成事件（如果笔记内容有更新）
-        if (notes[index].content != note.content || notes[index].title != note.title) {
-          _notifyEvent('completed', note);
-        }
         await _saveNotes();
       }
     }

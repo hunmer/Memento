@@ -115,36 +115,8 @@ class _BillEditScreenState extends State<BillEditScreen> {
                         createdAt: widget.bill?.createdAt ?? _selectedDate,
                       );
 
-                      // 获取当前账户的最新数据
-                      final currentAccount = widget.billPlugin.accounts.firstWhere(
-                        (a) => a.id == widget.accountId,
-                      );
-
-                      // 准备更新后的账户数据
-                      Account updatedAccount;
-                      if (widget.bill == null) {
-                        // 创建新账单
-                        updatedAccount = currentAccount.copyWith(
-                          bills: [...currentAccount.bills, bill],
-                        );
-                      } else {
-                        // 更新现有账单 - 替换相同ID的账单
-                        final updatedBills =
-                            currentAccount.bills.map((existingBill) {
-                              if (existingBill.id == bill.id) {
-                                return bill;
-                              }
-                              return existingBill;
-                            }).toList();
-
-                        updatedAccount = currentAccount.copyWith(bills: updatedBills);
-                      }
-
-                      // 更新账户总金额
-                      updatedAccount.calculateTotal();
-
-                      // 调用插件的保存账户方法
-                      await widget.billPlugin.saveAccount(updatedAccount);
+                      // 使用 controller 保存账单
+                      await widget.billPlugin.controller.saveBill(bill);
                       
                       // 显示成功提示
                       if (!mounted) return;

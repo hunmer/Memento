@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/event/event_manager.dart';
 import '../models/diary_entry.dart';
 import '../diary_plugin.dart';
 
@@ -105,6 +106,19 @@ class DiaryUtils {
         );
       }
 
+        // 广播事件
+      if (await storage.fileExists(entryPath)) {
+        EventManager.instance.broadcast(
+          'diary_entry_updated',
+          DiaryEntryUpdatedEventArgs(newEntry),
+        );
+      } else {
+        EventManager.instance.broadcast(
+          'diary_entry_created',
+          DiaryEntryCreatedEventArgs(newEntry),
+        );
+      }
+
       // 确保目录存在
       await storage.createDirectory(_pluginDir);
 
@@ -113,6 +127,8 @@ class DiaryUtils {
 
       // 更新索引文件
       await _updateDiaryIndex(dateStr);
+
+    
 
       debugPrint('Saved diary entry for $dateStr');
     } catch (e) {
@@ -190,6 +206,12 @@ class DiaryUtils {
 
       // 从索引中移除并更新总字数
       await _removeFromDiaryIndex(dateStr, contentLength);
+
+      // 广播删除事件
+      EventManager.instance.broadcast(
+        'diary_entry_deleted',
+        DiaryEntryDeletedEventArgs(normalizedDate),
+      );
 
       debugPrint('Deleted diary entry for $dateStr');
       return true;

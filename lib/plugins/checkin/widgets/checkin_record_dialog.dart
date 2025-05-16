@@ -194,6 +194,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               );
               widget.item.addCheckinRecord(record);
               widget.onCheckinCompleted();
+              widget.controller.notifyEvent('completed', widget.item);
               Navigator.of(context).pop();
             }
           },

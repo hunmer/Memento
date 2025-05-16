@@ -248,12 +248,7 @@ class TaskController extends ChangeNotifier {
   Future<void> updateTask(Task task) async {
     final index = _tasks.indexWhere((t) => t.id == task.id);
     if (index != -1) {
-      final oldTask = _tasks[index];
       _tasks[index] = task;
-      // 如果任务从未完成变为已完成，发送完成事件
-      if (task.status == TaskStatus.done && oldTask.status != TaskStatus.done) {
-        _notifyEvent('completed', task);
-      }
       _sortTasks();
       notifyListeners();
       await _saveTasks();
@@ -271,6 +266,7 @@ class TaskController extends ChangeNotifier {
     if (task.status == TaskStatus.done) {
       // 如果是已完成任务，添加到历史记录
       _completedTasks.add(task.copyWith(completedDate: DateTime.now()));
+      _notifyEvent('completed', task);
     }
     _tasks.removeWhere((task) => task.id == taskId);
     // 发送删除事件

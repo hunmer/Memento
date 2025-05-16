@@ -1,3 +1,4 @@
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:flutter/material.dart';
 import '../models/warehouse.dart';
 import '../widgets/warehouse_form.dart';
@@ -27,6 +28,20 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
     _warehouse = widget.warehouse;
     // 从插件中获取该仓库的排序偏好
     _sortBy = GoodsPlugin.instance.getSortPreference(_warehouse.id);
+    
+    // 监听物品添加事件
+    EventManager.instance.subscribe('goods_item_added', (args) {
+      if (args is GoodsItemAddedEventArgs && args.warehouseId == _warehouse.id) {
+        _refreshWarehouse();
+      }
+    });
+
+    // 监听物品删除事件
+    EventManager.instance.subscribe('goods_item_deleted', (args) {
+      if (args is GoodsItemDeletedEventArgs && args.warehouseId == _warehouse.id) {
+        _refreshWarehouse();
+      }
+    });
   }
 
   Future<void> _refreshWarehouse() async {
@@ -207,6 +222,14 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
             ),
           ),
     );
+  }
+
+  @override
+  void dispose() {
+    // 取消事件订阅
+    EventManager.instance.unsubscribe('goods_item_added');
+    EventManager.instance.unsubscribe('goods_item_deleted');
+    super.dispose();
   }
 
   @override

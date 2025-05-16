@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'bill.dart';
+import '../../../core/event/event_manager.dart';
+import '../controls/bill_controller.dart';
 
 class Account {
   final String id;
@@ -56,18 +58,12 @@ class Account {
     }
     bills.add(bill);
     calculateTotal();
-  }
-
-  // 更新账单
-  void updateBill(Bill updatedBill) {
-    final index = bills.indexWhere((bill) => bill.id == updatedBill.id);
-    if (index != -1) {
-      bills[index] = updatedBill;
-      calculateTotal();
-    } else {
-      // 如果找不到账单，添加为新账单
-      addBill(updatedBill);
-    }
+    
+    // 发布账单添加事件
+    EventManager.instance.broadcast(
+      BillController.billAddedEvent,
+      BillAddedEventArgs(bill, id),
+    );
   }
 
   // 转换为JSON

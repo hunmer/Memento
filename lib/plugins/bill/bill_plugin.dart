@@ -45,6 +45,9 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   set selectedAccount(Account? account) => _billController.selectedAccount = account;
   String? get selectedAccountId => _billController.selectedAccountId;
   List<Account> get accounts => _billController.accounts;
+  
+  // 暴露账单控制器
+  BillController get controller => _billController;
 
   @override
   Future<void> initialize() async {

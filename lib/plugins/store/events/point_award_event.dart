@@ -31,7 +31,7 @@ class PointAwardEvent {
     eventManager.subscribe('note_added', _handleNoteAdded);
     
     // 监听物品添加事件
-    eventManager.subscribe('goods_added', _handleGoodsAdded);
+    eventManager.subscribe('goods_item_added', _handleGoodsAdded);
     
     // 监听消息发送事件
     eventManager.subscribe('onMessageSent', _handleMessageSent);
@@ -40,7 +40,10 @@ class PointAwardEvent {
     eventManager.subscribe('onRecordAdded', _handleRecordAdded);
     
     // 监听日记添加事件
-    eventManager.subscribe('onDiaryAdded', _handleDiaryAdded);
+    eventManager.subscribe('diary_entry_created', _handleDiaryAdded);
+
+    eventManager.subscribe('bill_added', _handleBillAdded);
+
   }
 
   /// 处理活动添加事件
@@ -83,6 +86,10 @@ class PointAwardEvent {
     await _awardPoints(_getPointsForEvent('onDiaryAdded'), '添加日记奖励');
   }
 
+  Future<void> _handleBillAdded(EventArgs args) async {
+    await _awardPoints(_getPointsForEvent('bill_added'), '添加账单奖励');
+  }
+
   /// 添加积分
   Future<void> _awardPoints(int points, String reason) async {
     if (points > 0) {
@@ -97,9 +104,10 @@ class PointAwardEvent {
     eventManager.unsubscribe('checkin_completed', _handleCheckinCompleted);
     eventManager.unsubscribe('task_completed', _handleTaskCompleted);
     eventManager.unsubscribe('note_added', _handleNoteAdded);
-    eventManager.unsubscribe('goods_added', _handleGoodsAdded);
+    eventManager.unsubscribe('goods_item_added', _handleGoodsAdded);
     eventManager.unsubscribe('onMessageSent', _handleMessageSent);
     eventManager.unsubscribe('onRecordAdded', _handleRecordAdded);
-    eventManager.unsubscribe('onDiaryAdded', _handleDiaryAdded);
+    eventManager.unsubscribe('diary_entry_created', _handleDiaryAdded);
+    eventManager.unsubscribe('bill_added', _handleDiaryAdded);
   }
 }

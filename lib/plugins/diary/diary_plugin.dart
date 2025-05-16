@@ -8,6 +8,28 @@ import 'controls/prompt_controller.dart';
 import 'screens/diary_calendar_screen.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'models/diary_entry.dart';
+
+/// 日记创建事件参数
+class DiaryEntryCreatedEventArgs extends EventArgs {
+  final DiaryEntry entry;
+  
+  DiaryEntryCreatedEventArgs(this.entry) : super('diary_entry_created');
+}
+
+/// 日记更新事件参数
+class DiaryEntryUpdatedEventArgs extends EventArgs {
+  final DiaryEntry entry;
+  
+  DiaryEntryUpdatedEventArgs(this.entry) : super('diary_entry_updated');
+}
+
+/// 日记删除事件参数
+class DiaryEntryDeletedEventArgs extends EventArgs {
+  final DateTime date;
+  
+  DiaryEntryDeletedEventArgs(this.date) : super('diary_entry_deleted');
+}
 
 class DiaryPlugin extends BasePlugin {
   final DiaryPromptController _promptController = DiaryPromptController();
