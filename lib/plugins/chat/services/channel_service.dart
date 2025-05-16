@@ -216,27 +216,34 @@ class ChannelService {
 
   // 保存消息
   Future<void> saveMessages(String channelId, List<Message> messages) async {
-    // 保存消息
-    final messageJsonList = await Future.wait(
-      messages.map((m) => m.toJson()),
-    );
-
-    await _plugin.storage.write('chat/messages/$channelId', {
-      'messages': messageJsonList,
-    });
-
-    // 更新频道的最后一条消息
-    final channelIndex = _channels.indexWhere((c) => c.id == channelId);
-    if (channelIndex != -1 && messages.isNotEmpty) {
-      // 找出最新的消息
-      final latestMessage = messages.reduce(
-        (curr, next) => curr.date.isAfter(next.date) ? curr : next,
+    // 立即通知UI更新，确保消息显示
+    _plugin.notifyListeners();
+    
+    try {
+      // 保存消息
+      final messageJsonList = await Future.wait(
+        messages.map((m) => m.toJson()),
       );
 
-      // 更新频道的最后一条消息
-      _channels[channelIndex].lastMessage = latestMessage;
+      await _plugin.storage.write('chat/messages/$channelId', {
+        'messages': messageJsonList,
+      });
 
-      // 通知监听器数据已更新
+      // 更新频道的最后一条消息
+      final channelIndex = _channels.indexWhere((c) => c.id == channelId);
+      if (channelIndex != -1 && messages.isNotEmpty) {
+        // 找出最新的消息
+        final latestMessage = messages.reduce(
+          (curr, next) => curr.date.isAfter(next.date) ? curr : next,
+        );
+
+        // 更新频道的最后一条消息
+        _channels[channelIndex].lastMessage = latestMessage;
+      }
+    } catch (e) {
+      debugPrint('Error saving messages: $e');
+    } finally {
+      // 确保无论成功与否都通知UI更新
       _plugin.notifyListeners();
     }
   }
@@ -279,8 +286,14 @@ class ChannelService {
       _channels[channelIndex].lastMessage = message;
     }
 
-    // 保存消息列表
+    // 立即通知UI更新，确保消息显示
+    _plugin.notifyListeners();
+
+    // 异步保存消息列表
     await saveMessages(message.channelId!, _channels[channelIndex].messages);
+    
+    // 再次通知以确保存储同步后的状态更新
+    _plugin.notifyListeners();
     return true;
   }
 
@@ -376,33 +389,47 @@ class ChannelService {
     String channelId,
     Message messageFuture,
   ) async {
-    // 获取消息对象
-    Message message = await messageFuture;
-    
-    // 如果消息没有channelId，则设置当前频道ID
-    if (message.channelId == null) {
-      // 创建一个包含channelId的新消息
-      message = await message.copyWith(channelId: channelId);
+    try {
+      // 获取消息对象
+      Message message = await messageFuture;
+      
+      // 如果消息没有channelId，则设置当前频道ID
+      if (message.channelId == null) {
+        // 创建一个包含channelId的新消息
+        message = await message.copyWith(channelId: channelId);
+      }
+      
+      // 找到对应频道
+      final channelIndex = _channels.indexWhere((c) => c.id == channelId);
+      if (channelIndex == -1) return;
+
+      // 添加消息到内存中
+      _channels[channelIndex].messages.add(message);
+
+      // 更新频道的最后一条消息
+      _channels[channelIndex].lastMessage = message;
+      
+     
+      // 异步保存到存储
+      await Future.wait([
+        saveMessages(channelId, _channels[channelIndex].messages),
+        saveDraft(channelId, ''),
+      ]);
+      
+      // 发送消息更新事件
+      eventManager.broadcast(
+        'onMessageUpdated',
+        Value<Message>(message, 'onMessageUpdated'),
+      );
+      
+       // 立即通知UI更新，确保消息显示
+      _plugin.notifyListeners();
+      
+    } catch (e) {
+      debugPrint('Error adding message: $e');
+      // 确保即使出错也通知UI更新
+      _plugin.notifyListeners();
     }
-    
-    // 找到对应频道
-    final channelIndex = _channels.indexWhere((c) => c.id == channelId);
-    if (channelIndex == -1) return;
-
-    // 添加消息到内存中
-    _channels[channelIndex].messages.add(message);
-
-    // 更新频道的最后一条消息
-    _channels[channelIndex].lastMessage = message;
-    
-    // 异步保存到存储
-    await Future.wait([
-      saveMessages(channelId, _channels[channelIndex].messages),
-      saveDraft(channelId, ''),
-    ]);
-
-    // 再次通知监听器确保数据同步
-    _plugin.notifyListeners();
   }
 
   // 创建新频道
@@ -496,7 +523,7 @@ class ChannelService {
       // 通过事件系统广播消息更新
       eventManager.broadcast(
         'onMessageUpdated',
-        Values(message, message.id),
+        Value<Message>(message, 'onMessageUpdated'),
       );
       // 统一通知UI更新，避免多次触发
       _plugin.notifyListeners();

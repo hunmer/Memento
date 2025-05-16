@@ -57,11 +57,6 @@ class EventManager {
     final subscription = EventSubscription(id, eventName, handler);
     
     _eventSubscriptions.putIfAbsent(eventName, () => []).add(subscription);
-    
-    if (kDebugMode) {
-      print('Event (debug): ${DateTime.now()} Subscribed to Event "$eventName"');
-    }
-    
     return id;
   }
 

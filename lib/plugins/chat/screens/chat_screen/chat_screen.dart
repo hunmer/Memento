@@ -1,7 +1,10 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/event.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/plugins/openai/handlers/chat_event_handler.dart'; // 导入ValuesEventArgs
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io'; // 添加File类支持
@@ -45,6 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Message? _replyToMessage; // 添加回复消息引用
   String? _backgroundPath; // 存储背景图片的绝对路径
   bool _isLoadingBackground = true; // 标记背景图片是否正在加载
+  final eventManager = EventManager.instance; // 获取事件管理器实例
 
   @override
   void initState() {
@@ -58,6 +62,8 @@ class _ChatScreenState extends State<ChatScreen> {
     );
     // 添加监听器，当 ChatPlugin 发生变化时重新加载背景
     ChatPlugin.instance.addListener(_handleChatPluginUpdate);
+    // 订阅消息更新事件
+    eventManager.subscribe('onMessageUpdated', _handleMessageUpdated);
     _loadBackgroundPath();
     _loadChannelDraft();
   }
@@ -106,9 +112,23 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     // 移除监听器
     ChatPlugin.instance.removeListener(_handleChatPluginUpdate);
+    // 取消订阅消息更新事件
+    eventManager.unsubscribe('onMessageUpdated', _handleMessageUpdated);
     _controller.dispose();
     // MessageOperations不需要dispose
     super.dispose();
+  }
+
+  // 处理消息更新事件
+  void _handleMessageUpdated(EventArgs args) {
+    if (args is! ValuesEventArgs<Message, String>) return;
+    
+    // 检查更新的消息是否属于当前频道
+    final message = args.value1;
+    if (message.channelId != widget.channel.id) return;
+    
+    // 重新加载消息列表
+    _controller.reloadMessages();
   }
 
   // 处理 ChatPlugin 更新

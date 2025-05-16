@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'package:Memento/core/event/event_manager.dart';
 import '../../../core/event/event.dart';
 import '../../../core/plugin_manager.dart';
 import 'package:openai_dart/openai_dart.dart';
@@ -10,6 +11,21 @@ import '../../chat/models/message.dart';
 import '../../chat/models/user.dart';
 import '../../../utils/image_utils.dart';
 import '../../chat/services/channel_service.dart';
+
+/// 用于传递多个值的事件参数
+class ValuesEventArgs<T1, T2> implements EventArgs {
+  final T1 value1;
+  final T2 value2;
+  @override
+  final String eventName;
+  @override
+  final DateTime whenOccurred;
+  
+  ValuesEventArgs(this.value1, this.value2, {
+    this.eventName = '',
+    DateTime? whenOccurred,
+  }) : whenOccurred = whenOccurred ?? DateTime.now();
+}
 
 class ChatEventHandler {
   late final _agentController = OpenAIPlugin.instance.controller;
@@ -33,7 +49,6 @@ class ChatEventHandler {
   void initialize() {
     // 订阅聊天消息事件
     eventManager.subscribe('onMessageSent', _handleChatMessage);
-    developer.log('ChatEventHandler已初始化', name: 'ChatEventHandler');
   }
 
   Future<void> _handleChatMessage(EventArgs args) async {
@@ -41,12 +56,6 @@ class ChatEventHandler {
 
     final message = args.value;
     final metadata = message.metadata;
-
-    // 保存用户消息
-    final channelId = message.channelId ?? 'default';
-    await _plugin.channelService.saveMessage(message);
-    _plugin.notifyListeners();
-    developer.log('收到新消息: ${message.content}', name: 'ChatEventHandler');
 
     // 检查消息是否包含agent信息
     if (metadata == null || !metadata.containsKey('agents')) return;
@@ -73,8 +82,6 @@ class ChatEventHandler {
       metadata['agents'],
     );
     if (agents.isEmpty) return;
-
-    // eventManager.broadcast('onMessageUpdated', Value<Message>(message));
 
     // 为每个被@的AI agent创建独立的异步任务处理回复
     final List<Future<void>> agentTasks = [];
@@ -155,10 +162,9 @@ class ChatEventHandler {
       // 添加AI消息到频道
       final channelId = originalMessage.channelId as String;
       await _plugin.channelService.addMessage(channelId, typingMessage);
-      _plugin.notifyListeners();
-      
       // 添加短暂延迟，确保消息已被存储到频道中
       await Future.delayed(const Duration(milliseconds: 300));
+      _plugin.notifyListeners();
       
       developer.log(
         '已创建AI回复消息: ${typingMessage.id}',
@@ -248,8 +254,17 @@ class ChatEventHandler {
               
               // 直接更新消息，不使用microtask以避免时序问题
               if (!streamController.isClosed) {
+                // 确保消息保存并触发UI更新
                 await _plugin.channelService.saveMessage(typingMessage!);
-                // 不需要额外调用notifyListeners，saveMessage内部已包含
+                
+                // 添加额外的通知以确保UI更新
+                _plugin.notifyListeners();
+                
+                // 通过事件系统广播消息更新事件
+                eventManager.broadcast(
+                  'onMessageUpdated',
+                  ValuesEventArgs(typingMessage!, typingMessage!.id),
+                );
               }
             }
             
@@ -260,10 +275,24 @@ class ChatEventHandler {
         onError: (error) async {
           if (typingMessage != null) {
             typingMessage.content = '抱歉，生成回复时出现错误：$error';
-            typingMessage.metadata?.addAll({'isError': true});
+            typingMessage.metadata?.addAll({
+              'isError': true,
+              'isCompleted': true,
+              'completedAt': DateTime.now().millisecondsSinceEpoch,
+            });
             final channelId = originalMessage.channelId ?? 'default';
+            
+            // 保存错误消息
             await _plugin.channelService.saveMessage(typingMessage);
+            
+            // 确保UI更新
             _plugin.notifyListeners();
+            
+            // 通过事件系统广播消息更新事件
+            eventManager.broadcast(
+              'onMessageUpdated',
+              ValuesEventArgs(typingMessage, typingMessage.id),
+            );
           }
           // 清理资源
           final messageId = typingMessage?.id ?? '';
@@ -290,6 +319,7 @@ class ChatEventHandler {
               'agentId': agentData['id'],
               'isCompleted': true,
               'completedAt': DateTime.now().millisecondsSinceEpoch,
+              'replyTo': originalMessage.id, // 保持回复关系
             };
 
             // 立即广播最终的消息更新事件
@@ -298,9 +328,21 @@ class ChatEventHandler {
             // 直接保存消息，不使用microtask以避免时序问题
             await _plugin.channelService.saveMessage(typingMessage!);
             
+            // 立即通知UI更新
+            _plugin.notifyListeners();
+            
+            // 通过事件系统广播消息更新事件
+            eventManager.broadcast(
+              'onMessageUpdated',
+              ValuesEventArgs(typingMessage!, typingMessage!.id),
+            );
+            
             // 确保UI更新，使用短暂延迟后再次保存以确保消息完全更新
-            await Future.delayed(const Duration(milliseconds: 50));
+            await Future.delayed(const Duration(milliseconds: 100));
             await _plugin.channelService.saveMessage(typingMessage!);
+            
+            // 最后再次通知UI更新
+            _plugin.notifyListeners();
           }
 
           // 延迟一下再清理资源，确保最后的更新被处理
@@ -317,40 +359,38 @@ class ChatEventHandler {
         }
       );
     } catch (e) {
-      // 创建一个默认的AI用户，用于显示错误消息
-      if (!_isAiUserInitialized(aiUser)) {
-        aiUser = User(
-          id: agentData['id'] ?? 'ai',
-          username: agentData['name'] ?? 'AI',
-        );
-      }
-      
-      if (typingMessage != null) {
-        typingMessage.content = '处理AI回复时出错：$e';
-        typingMessage.metadata?.addAll({'isError': true});
-        final channelId = originalMessage.metadata?['channelId'] as String? ?? 'default';
-        await _plugin.channelService.saveMessage(typingMessage);
-        _plugin.notifyListeners();
-      }
-      return; // 使用return替代continue，因为我们现在在一个独立的异步方法中
+      return;
     }
   }
 
   // 使用与更新正常消息相同的方法处理错误消息
-  Future<void> _handleErrorMessage(String messageId, String content, User user) async {
+  Future<void> _handleErrorMessage(String messageId, String content, User user, {String? channelId, String? replyToId}) async {
     // 首先创建消息
     final message = await Message.create(
       id: messageId,
       content: content,
       user: user,
       type: MessageType.received,
-      metadata: {'isAI': true, 'isError': true, 'agentId': user.id},
+      channelId: channelId ?? 'default',
+      metadata: {
+        'isAI': true, 
+        'isError': true, 
+        'agentId': user.id,
+        if (replyToId != null) 'replyTo': replyToId,
+      },
     );
 
     // 添加消息到频道
-    final channelId = message.metadata?['channelId'] as String? ?? 'default';
-    await _plugin.channelService.addMessage(channelId, message);
+    await _plugin.channelService.addMessage(message.channelId!, message);
+    
+    // 确保UI更新
     _plugin.notifyListeners();
+    
+    // 通过事件系统广播消息更新事件
+    eventManager.broadcast(
+      'onMessageUpdated',
+      ValuesEventArgs(message, message.id),
+    );
   }
 
   // 检查AI用户是否已初始化
