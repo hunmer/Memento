@@ -9,11 +9,29 @@ import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
 
 class ContactController {
+  static ContactController? _instance;
   final BasePlugin plugin;
   late final String contactsKey;
   late final String interactionsKey;
   late final String filterConfigKey;
   late final String sortConfigKey;
+
+  // 获取单例实例
+  static ContactController getInstance(BasePlugin plugin) {
+    _instance ??= ContactController._internal(plugin);
+    return _instance!;
+  }
+
+  // 私有构造函数
+  ContactController._internal(this.plugin) {
+    // 初始化时规范化所有路径
+    contactsKey = _normalizePath('contacts${path.separator}contacts.json');
+    interactionsKey = _normalizePath('interactions');
+    filterConfigKey = _normalizePath('filter_config');
+    sortConfigKey = _normalizePath('sort_config');
+  }
+
+  @Deprecated('Use getInstance() instead')
 
   // 内存缓存
   List<Contact>? _contactsCache;
@@ -36,6 +54,12 @@ class ContactController {
     interactionsKey = _normalizePath('interactions');
     filterConfigKey = _normalizePath('filter_config');
     sortConfigKey = _normalizePath('sort_config');
+  }
+
+  // 用于测试的清理方法
+  @visibleForTesting
+  static void reset() {
+    _instance = null;
   }
 
   // 从存储加载联系人数据到缓存
@@ -133,8 +157,19 @@ class ContactController {
 
     final storage = plugin.storage;
     try {
-      final interactionsList = await storage.readJson(interactionsKey) ?? [];
-      _interactionsCache = interactionsList.map((json) => InteractionRecord.fromJson(json)).toList();
+      final dynamic rawData = await storage.readJson(interactionsKey);
+      if (rawData == null) {
+        _interactionsCache = [];
+        return;
+      }
+      
+      if (rawData is! List) {
+        throw FormatException('Interactions data must be a List');
+      }
+      
+      _interactionsCache = List<InteractionRecord>.from(
+        rawData.map((json) => InteractionRecord.fromJson(Map<String, dynamic>.from(json as Map)))
+      );
     } catch (e) {
       if (e.toString().contains('FileSystemException: 文件不存在')) {
         _interactionsCache = [];
@@ -173,12 +208,11 @@ class ContactController {
     interactions.add(interaction);
     await saveAllInteractions(interactions);
 
-    // 更新联系人的最近联系时间和联系次数
+    // 更新联系人的最近联系时间
     final contact = await getContact(interaction.contactId);
     if (contact != null) {
       final updatedContact = contact.copyWith(
         lastContactTime: interaction.date,
-        contactCount: contact.contactCount + 1,
       );
       await updateContact(updatedContact);
     }
@@ -319,26 +353,32 @@ class ContactController {
       return true;
     }).toList();
 
-    // 应用排序
-    filteredContacts.sort((a, b) {
-      int compareResult;
-      switch (sortConfig.type) {
-        case SortType.name:
-          compareResult = a.name.compareTo(b.name);
-          break;
-        case SortType.createdTime:
-          compareResult = a.createdTime.compareTo(b.createdTime);
-          break;
-        case SortType.lastContactTime:
-          compareResult = a.lastContactTime.compareTo(b.lastContactTime);
-          break;
-        case SortType.contactCount:
-          compareResult = a.contactCount.compareTo(b.contactCount);
-          break;
-      }
+      // 应用排序
+      filteredContacts.sort((a, b) {
+        int compareResult;
+        switch (sortConfig.type) {
+          case SortType.name:
+            compareResult = a.name.compareTo(b.name);
+            break;
+          case SortType.createdTime:
+            compareResult = a.createdTime.compareTo(b.createdTime);
+            break;
+          case SortType.lastContactTime:
+            compareResult = a.lastContactTime.compareTo(b.lastContactTime);
+            break;
+          case SortType.contactCount:
+            // 获取联系记录数量进行比较
+            compareResult = 0; // 默认值
+            getInteractionsByContactId(a.id).then((aInteractions) {
+              getInteractionsByContactId(b.id).then((bInteractions) {
+                compareResult = aInteractions.length.compareTo(bInteractions.length);
+              });
+            });
+            break;
+        }
 
-      return sortConfig.isReverse ? -compareResult : compareResult;
-    });
+        return sortConfig.isReverse ? -compareResult : compareResult;
+      });
 
     return filteredContacts;
   }
@@ -358,6 +398,12 @@ class ContactController {
     final contacts = await getAllContacts();
     final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
     return contacts.where((c) => c.lastContactTime.isAfter(oneMonthAgo)).length;
+  }
+  
+  // 获取联系人的联系记录数量
+  Future<int> getContactInteractionsCount(String contactId) async {
+    final interactions = await getInteractionsByContactId(contactId);
+    return interactions.length;
   }
 
   // 创建默认联系人数据
@@ -392,6 +438,28 @@ class ContactController {
       _contactsCache = defaultContacts;
       _hasContactsChanges = true;
       await _saveContactsToStorage();
+      
+      // 创建一些默认交互记录
+      final defaultInteractions = [
+        InteractionRecord(
+          id: uuid.v4(),
+          contactId: defaultContacts[0].id,
+          date: DateTime.now().subtract(const Duration(days: 5)),
+          notes: '讨论了项目进度',
+          participants: [],
+        ),
+        InteractionRecord(
+          id: uuid.v4(),
+          contactId: defaultContacts[1].id,
+          date: DateTime.now().subtract(const Duration(days: 2)),
+          notes: '电话讨论了合作事宜',
+          participants: [defaultContacts[0].id],
+        ),
+      ];
+      
+      _interactionsCache = defaultInteractions;
+      _hasInteractionsChanges = true;
+      await _saveInteractionsToStorage();
   }
 
   // 在应用退出前保存所有更改

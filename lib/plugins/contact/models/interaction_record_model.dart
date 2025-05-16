@@ -3,15 +3,15 @@ class InteractionRecord {
   final String contactId;
   final DateTime date;
   final String notes;
-  final String type;
+  final List<String> participants; // 其他参与联系的联系人ID列表
 
   InteractionRecord({
     required this.id,
     required this.contactId,
     required this.date,
     required this.notes,
-    required this.type,
-  });
+    List<String>? participants,
+  }) : participants = participants ?? [];
 
   Map<String, dynamic> toJson() {
     return {
@@ -19,7 +19,7 @@ class InteractionRecord {
       'contactId': contactId,
       'date': date.toIso8601String(),
       'notes': notes,
-      'type': type,
+      'participants': participants,
     };
   }
 
@@ -29,7 +29,23 @@ class InteractionRecord {
       contactId: json['contactId'] as String,
       date: DateTime.parse(json['date'] as String),
       notes: json['notes'] as String,
-      type: json['type'] as String,
+      participants: List<String>.from(json['participants'] as List? ?? []),
+    );
+  }
+
+  InteractionRecord copyWith({
+    String? id,
+    String? contactId,
+    DateTime? date,
+    String? notes,
+    List<String>? participants,
+  }) {
+    return InteractionRecord(
+      id: id ?? this.id,
+      contactId: contactId ?? this.contactId,
+      date: date ?? this.date,
+      notes: notes ?? this.notes,
+      participants: participants ?? List<String>.from(this.participants),
     );
   }
 }

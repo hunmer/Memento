@@ -13,7 +13,6 @@ class Contact {
   final Map<String, String> customFields;
   final DateTime createdTime;
   final DateTime lastContactTime;
-  final int contactCount;
 
   Contact({
     required this.id,
@@ -28,7 +27,6 @@ class Contact {
     Map<String, String>? customFields,
     DateTime? createdTime,
     DateTime? lastContactTime,
-    this.contactCount = 0,
   })  : tags = tags ?? [],
         customFields = customFields ?? {},
         createdTime = createdTime ?? DateTime.now(),
@@ -48,7 +46,6 @@ class Contact {
       'customFields': customFields,
       'createdTime': createdTime.toIso8601String(),
       'lastContactTime': lastContactTime.toIso8601String(),
-      'contactCount': contactCount,
     };
   }
 
@@ -66,7 +63,6 @@ class Contact {
       customFields: Map<String, String>.from(json['customFields'] as Map),
       createdTime: DateTime.parse(json['createdTime'] as String),
       lastContactTime: DateTime.parse(json['lastContactTime'] as String),
-      contactCount: json['contactCount'] as int,
     );
   }
 
@@ -81,7 +77,6 @@ class Contact {
     List<String>? tags,
     Map<String, String>? customFields,
     DateTime? lastContactTime,
-    int? contactCount,
   }) {
     return Contact(
       id: id,
@@ -96,7 +91,6 @@ class Contact {
       customFields: customFields ?? Map.from(this.customFields),
       createdTime: createdTime,
       lastContactTime: lastContactTime ?? this.lastContactTime,
-      contactCount: contactCount ?? this.contactCount,
     );
   }
 }

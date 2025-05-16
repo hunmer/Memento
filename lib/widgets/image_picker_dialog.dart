@@ -89,7 +89,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                       if (image != null) {
                         // 保存图片并获取相对路径
                         final relativePath =
-                            await ImageUtils.saveImageToAppDirectory(
+                            await ImageUtils.saveImage(
                               File(image.path),
                               widget.saveDirectory,
                             );
@@ -146,7 +146,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                       if (photo != null) {
                         // 保存图片并获取相对路径
                         final relativePath =
-                            await ImageUtils.saveImageToAppDirectory(
+                            await ImageUtils.saveImage(
                               File(photo.path),
                               widget.saveDirectory,
                             );

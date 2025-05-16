@@ -9,7 +9,7 @@ class ImageUtils {
   /// [imageFile] 源图片文件
   /// [saveDirectory] 保存目录（相对于应用数据目录的路径）
   /// 返回相对于应用数据目录的路径
-  static Future<String> saveImageToAppDirectory(
+  static Future<String> saveImage(
     File imageFile,
     String saveDirectory,
   ) async {

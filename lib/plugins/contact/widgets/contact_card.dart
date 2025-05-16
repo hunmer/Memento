@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import '../models/contact_model.dart';
@@ -5,6 +6,10 @@ import '../l10n/contact_strings.dart';
 // ignore: depend_on_referenced_packages
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../utils/image_utils.dart';
+import '../controllers/contact_controller.dart';
+import '../../base_plugin.dart';
+import '../../../core/plugin_manager.dart';
+import '_temp_base_plugin.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
@@ -20,24 +25,28 @@ class ContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-      child: InkWell(
-        onTap: onTap,
-        child: isListView ? _buildListView() : _buildCardView(),
+    return SizedBox(
+      height: 140,
+      child: Card(
+        elevation: 2,
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        child: InkWell(
+          onTap: onTap,
+          child: isListView ? _buildListView(context) : _buildCardView(),
+        ),
       ),
     );
   }
 
   Widget _buildCardView() {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _buildAvatar(size: 56),
-          const SizedBox(height: 8),
+          _buildAvatar(size: 48),
+          const SizedBox(height: 4),
           Text(
             contact.name,
             style: const TextStyle(
@@ -64,9 +73,9 @@ class ContactCard extends StatelessWidget {
     );
   }
 
-  Widget _buildListView() {
+  Widget _buildListView(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       child: Row(
         children: [
           _buildAvatar(size: 48),
@@ -99,17 +108,6 @@ class ContactCard extends StatelessWidget {
                   ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${ContactStrings.contactCount}: ${contact.contactCount}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 4),
-              _buildLastContactInfo(compact: true),
-            ],
           ),
         ],
       ),

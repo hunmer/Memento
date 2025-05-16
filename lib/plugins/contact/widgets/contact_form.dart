@@ -1,28 +1,39 @@
 import 'dart:io';
-import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import '../../../widgets/image_picker_dialog.dart';
-import '../models/contact_model.dart';
-import '../l10n/contact_strings.dart';
-import 'package:uuid/uuid.dart';
 import '../../../widgets/circle_icon_picker.dart';
+import '../../../utils/image_utils.dart';
+import '../models/contact_model.dart';
+import '../models/interaction_record_model.dart';
+import '../l10n/contact_strings.dart';
+import '../controllers/contact_controller.dart';
+import 'interaction_form.dart';
+import 'package:uuid/uuid.dart';
 
+// 首先定义ContactForm类
 class ContactForm extends StatefulWidget {
   final Contact? contact;
   final Function(Contact) onSave;
+  final ContactController controller;
+  final GlobalKey<ContactFormState>? formStateKey;
 
   const ContactForm({
     Key? key,
     this.contact,
     required this.onSave,
+    required this.controller,
+    this.formStateKey,
   }) : super(key: key);
 
   @override
-  State<ContactForm> createState() => _ContactFormState();
+  ContactFormState createState() => ContactFormState();
 }
 
-class _ContactFormState extends State<ContactForm> {
-  final _formKey = GlobalKey<FormState>();
+// 然后定义ContactFormState类
+class ContactFormState extends State<ContactForm> {
+  // 添加一个表单键，用于访问表单状态
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _addressController;
@@ -32,6 +43,7 @@ class _ContactFormState extends State<ContactForm> {
   late IconData _selectedIcon;
   late Color _selectedIconColor;
   String? _avatarUrl;
+  List<InteractionRecord> _interactions = [];
 
   @override
   void initState() {
@@ -45,13 +57,25 @@ class _ContactFormState extends State<ContactForm> {
     _selectedIcon = widget.contact?.icon ?? Icons.person;
     _selectedIconColor = widget.contact?.iconColor ?? Colors.blue;
     _avatarUrl = widget.contact?.avatar;
+    _loadInteractions();
   }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadInteractions() async {
+    if (widget.contact != null) {
+      final interactions = await widget.controller.getInteractionsByContactId(widget.contact!.id);
+      setState(() {
+        _interactions = interactions;
+      });
+    }
   }
 
   void _addTag() {
@@ -150,244 +174,328 @@ class _ContactFormState extends State<ContactForm> {
     });
   }
 
-  Future<void> _showImagePickerDialog() async {
-    final result = await showDialog<Map<String, dynamic>>(
+  void _pickAvatar() async {
+    final result = await showDialog<String>(
       context: context,
-      builder: (context) => ImagePickerDialog(
-        initialUrl: _avatarUrl,
-        saveDirectory: 'contacts',
-        enableCrop: true,
-        cropAspectRatio: 1.0,
-      ),
+      builder: (context) => const ImagePickerDialog(),
     );
-    
-    if (result != null && result['url'] != null) {
+
+    if (result != null) {
+      final savedPath = await ImageUtils.saveImage(File(result), 'avatars');
       setState(() {
-        _avatarUrl = result['url'];
+        _avatarUrl = savedPath;
       });
     }
   }
 
-  void _saveContact() {
-    if (_formKey.currentState!.validate()) {
+  // 公开的保存方法
+  void saveContact() {
+    // 使用类中定义的_formKey访问表单状态
+    if (_formKey.currentState != null && _formKey.currentState!.validate()) {
+      // 创建联系人对象
       final contact = Contact(
-        id: widget.contact?.id ?? const Uuid().v4(),
-        name: _nameController.text,
-        avatar: _avatarUrl,
-        icon: _selectedIcon,
-        iconColor: _selectedIconColor,
-        phone: _phoneController.text,
-        address: _addressController.text.isNotEmpty ? _addressController.text : null,
-        notes: _notesController.text.isNotEmpty ? _notesController.text : null,
-        tags: _tags,
-        customFields: _customFields,
-        createdTime: widget.contact?.createdTime,
-        lastContactTime: widget.contact?.lastContactTime,
-        contactCount: widget.contact?.contactCount ?? 0,
+      id: widget.contact?.id ?? const Uuid().v4(),
+      name: _nameController.text,
+      avatar: _avatarUrl,
+      icon: _selectedIcon,
+      iconColor: _selectedIconColor,
+      phone: _phoneController.text,
+      address: _addressController.text,
+      notes: _notesController.text,
+      tags: _tags,
+      customFields: _customFields,
+      createdTime: widget.contact?.createdTime ?? DateTime.now(),
+    );
+
+    // 直接调用保存回调
+    widget.onSave(contact);
+  }
+  }
+
+  void _addInteraction() async {
+    if (widget.contact == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请先保存联系人信息')),
       );
-      widget.onSave(contact);
+      return;
+    }
+
+    final result = await showDialog<InteractionRecord>(
+      context: context,
+      builder: (context) => InteractionForm(
+        contactId: widget.contact!.id,
+        controller: widget.controller,
+        onSave: (interaction) async {
+          await widget.controller.addInteraction(interaction);
+          await _loadInteractions();
+        },
+      ),
+    );
+
+    if (result != null) {
+      await _loadInteractions();
+    }
+  }
+
+  Future<void> _deleteInteraction(InteractionRecord interaction) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('删除确认'),
+        content: const Text('确定要删除这条联系记录吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await widget.controller.deleteInteraction(interaction.id);
+      await _loadInteractions();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
+    return DefaultTabController(
+      length: 2,
+      child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              InkWell(
-                onTap: _showImagePickerDialog,
-                child: SizedBox(
-                  width: 64,
-                  height: 64,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                        width: 2,
-                      ),
-                    ),
-                    child: _avatarUrl != null && _avatarUrl!.isNotEmpty
-                      ? FutureBuilder<String>(
-                          future: _avatarUrl!.startsWith('http')
-                              ? Future.value(_avatarUrl!)
-                              : ImageUtils.getAbsolutePath(_avatarUrl),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return Center(
-                                child: AspectRatio(
-                                  aspectRatio: 1.0,
-                                  child: ClipOval(
-                                    child: _avatarUrl!.startsWith('http')
-                                        ? Image.network(
-                                            snapshot.data!,
-                                            width: 64,
-                                            height: 64,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) =>
-                                                const Icon(Icons.broken_image),
-                                          )
-                                        : Image.file(
-                                            File(snapshot.data!),
-                                            width: 64,
-                                            height: 64,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) =>
-                                                const Icon(Icons.broken_image),
-                                          ),
+          const TabBar(
+            tabs: [
+              Tab(text: '基本信息'),
+              Tab(text: '联系记录'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                // 基本信息标签页
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Form(
+                    key: _formKey,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 头像和图标选择
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            GestureDetector(
+                              onTap: _pickAvatar,
+                              child: SizedBox(
+                                width: 64,
+                                height: 64,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: FutureBuilder<String?>(
+                                    future: _avatarUrl != null
+                                        ? ImageUtils.getAbsolutePath(_avatarUrl!)
+                                        : Future.value(null),
+                                    builder: (context, snapshot) {
+                                      return ClipOval(
+                                        child: snapshot.data != null
+                                            ? Image.file(
+                                                File(snapshot.data!),
+                                                width: 64,
+                                                height: 64,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Container(
+                                                color: _selectedIconColor.withOpacity(0.1),
+                                                child: const Center(
+                                                  child: Text(
+                                                    '上传',
+                                                    style: TextStyle(
+                                                      color: Colors.black54,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      );
+                                    },
                                   ),
                                 ),
-                              );
-                            } else if (snapshot.hasError) {
-                              return const Icon(Icons.broken_image);
-                            } else {
-                              return const CircularProgressIndicator();
-                            }
-                          },
-                        )
-                      : Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.add_photo_alternate_outlined, size: 24),
-                              const SizedBox(height: 2),
-                              Text(
-                                '头像',
-                                style: const TextStyle(fontSize: 12),
                               ),
-                            ],
+                            ),
+                            const SizedBox(width: 16),
+                            CircleIconPicker(
+                              currentIcon: _selectedIcon,
+                              backgroundColor: _selectedIconColor,
+                              onIconSelected: (icon) {
+                                setState(() {
+                                  _selectedIcon = icon;
+                                });
+                              },
+                              onColorSelected: (color) {
+                                setState(() {
+                                  _selectedIconColor = color;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 基本信息表单
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: '姓名',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return '请输入姓名';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _phoneController,
+                          decoration: const InputDecoration(
+                            labelText: '电话',
+                            border: OutlineInputBorder(),
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _addressController,
+                          decoration: const InputDecoration(
+                            labelText: '地址',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _notesController,
+                          decoration: const InputDecoration(
+                            labelText: '备注',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 3,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 标签
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '标签',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add),
+                              onPressed: _addTag,
+                              tooltip: '添加标签',
+                            ),
+                          ],
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          children: _tags
+                              .map((tag) => Chip(
+                                    label: Text(tag),
+                                    onDeleted: () => _removeTag(tag),
+                                  ))
+                              .toList(),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 自定义字段
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '自定义字段',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add),
+                              onPressed: _addCustomField,
+                              tooltip: '添加自定义字段',
+                            ),
+                          ],
+                        ),
+                        ..._customFields.entries.map(
+                          (entry) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '${entry.key}: ${entry.value}',
+                                    style: Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  onPressed: () =>
+                                      _removeCustomField(entry.key),
+                                  tooltip: '删除字段',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 32),
-              CircleIconPicker(
-                currentIcon: _selectedIcon,
-                backgroundColor: _selectedIconColor,
-                onIconSelected: (icon) {
-                  setState(() {
-                    _selectedIcon = icon;
-                  });
-                },
-                onColorSelected: (color) {
-                  setState(() {
-                    _selectedIconColor = color;
-                  });
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // 姓名字段
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: '姓名',
-              prefixIcon: Icon(Icons.person),
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '请输入联系人姓名';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          // 电话字段
-          TextFormField(
-            controller: _phoneController,
-            decoration: const InputDecoration(
-              labelText: '电话',
-              prefixIcon: Icon(Icons.phone),
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.phone,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '请输入联系人电话';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          // 地址字段
-          TextFormField(
-            controller: _addressController,
-            decoration: const InputDecoration(
-              labelText: '地址',
-              prefixIcon: Icon(Icons.home),
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 2,
-          ),
-          const SizedBox(height: 16),
-          // 备注字段
-          TextFormField(
-            controller: _notesController,
-            decoration: const InputDecoration(
-              labelText: '备注',
-              prefixIcon: Icon(Icons.note),
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              TextButton.icon(
-                onPressed: _addTag,
-                icon: const Icon(Icons.add),
-                label: Text(ContactStrings.addTag),
-              ),
-            ],
-          ),
-          Wrap(
-            spacing: 8,
-            children: _tags.map((tag) {
-              return Chip(
-                label: Text(tag),
-                onDeleted: () => _removeTag(tag),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                ContactStrings.customFields,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              TextButton.icon(
-                onPressed: _addCustomField,
-                icon: const Icon(Icons.add),
-                label: Text(ContactStrings.addCustomField),
-              ),
-            ],
-          ),
-          ..._customFields.entries.map((entry) {
-            return Card(
-              child: ListTile(
-                title: Text(entry.key),
-                subtitle: Text(entry.value),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _removeCustomField(entry.key),
+
+                // 联系记录标签页
+                Stack(
+                  children: [
+                    ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _interactions.length,
+                      itemBuilder: (context, index) {
+                        final interaction = _interactions[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            title: Text(interaction.notes),
+                            subtitle: Text(
+                              '${interaction.date.year}-${interaction.date.month.toString().padLeft(2, '0')}-${interaction.date.day.toString().padLeft(2, '0')} ${interaction.date.hour.toString().padLeft(2, '0')}:${interaction.date.minute.toString().padLeft(2, '0')}',
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () => _deleteInteraction(interaction),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    Positioned(
+                      right: 16,
+                      bottom: 16,
+                      child: FloatingActionButton(
+                        onPressed: _addInteraction,
+                        child: const Icon(Icons.add),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            );
-          }),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: _saveContact,
-            child: Text(ContactStrings.save),
+              ],
+            ),
           ),
         ],
       ),

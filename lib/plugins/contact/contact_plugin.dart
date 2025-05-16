@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
+
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import 'controllers/contact_controller.dart';
@@ -191,6 +192,9 @@ class _ContactHomePageState extends State<_ContactHomePage> {
   }
 
   Future<void> _addOrEditContact([Contact? contact]) async {
+    final formStateKey = GlobalKey<ContactFormState>();
+    Contact? savedContact;
+
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
@@ -199,6 +203,37 @@ class _ContactHomePageState extends State<_ContactHomePage> {
                 ? ContactStrings.addContact
                 : ContactStrings.editContact),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.save),
+                onPressed: () async {
+                  // 调用表单的保存方法
+                  formStateKey.currentState?.saveContact();
+                  if (savedContact != null) {
+                    try {
+                      if (contact == null) {
+                        await _controller.addContact(savedContact!);
+                      } else {
+                        await _controller.updateContact(savedContact!);
+                      }
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                        setState(() {});
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('保存失败: $e')),
+                        );
+                      }
+                    }
+                  } else {
+                    // 如果 savedContact 为 null，可能是表单验证失败
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('请正确填写表单')),
+                    );
+                  }
+                },
+              ),
               if (contact != null)
                 IconButton(
                   icon: const Icon(Icons.delete),
@@ -207,17 +242,12 @@ class _ContactHomePageState extends State<_ContactHomePage> {
             ],
           ),
           body: ContactForm(
+            key: formStateKey,
+            formStateKey: formStateKey,
+            controller: _controller,
             contact: contact,
-            onSave: (updatedContact) async {
-              if (contact == null) {
-                await _controller.addContact(updatedContact);
-              } else {
-                await _controller.updateContact(updatedContact);
-              }
-              if (mounted) {
-                Navigator.of(context).pop();
-                setState(() {});
-              }
+            onSave: (updatedContact) {
+              savedContact = updatedContact;
             },
           ),
         ),
@@ -327,7 +357,7 @@ class _ContactHomePageState extends State<_ContactHomePage> {
             padding: const EdgeInsets.all(8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.75,
+              childAspectRatio: 1.2,
             ),
             itemCount: contacts.length,
             itemBuilder: (context, index) {
