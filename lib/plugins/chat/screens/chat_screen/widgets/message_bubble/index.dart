@@ -177,6 +177,15 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   bool get _isCurrentUser => _currentMessage.user.id == widget.currentUserId;
+  
+  bool _isImageMessage() {
+    final metadata = _currentMessage.metadata;
+    if (metadata == null || !metadata.containsKey(Message.metadataKeyFileInfo)) {
+      return false;
+    }
+    final fileInfo = metadata[Message.metadataKeyFileInfo] as Map<String, dynamic>;
+    return fileInfo['type'] == 'image';
+  }
 
   Color _getBackgroundColor(BuildContext context) {
     // 优先使用消息的自定义气泡颜色
@@ -238,9 +247,9 @@ class _MessageBubbleState extends State<MessageBubble> {
                     : CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: _isImageMessage() ? EdgeInsets.zero : const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
-                      color: backgroundColor,
+                      color: _isImageMessage() ? Colors.transparent : backgroundColor,
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Column(
