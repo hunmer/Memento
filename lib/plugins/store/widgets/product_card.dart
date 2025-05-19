@@ -28,7 +28,7 @@ class ProductCard extends StatelessWidget {
             children: [
               // 商品图片
               AspectRatio(
-                aspectRatio: 16 / 9,
+                aspectRatio: 1/1,
                 child: product.image.isEmpty 
                     ? _buildErrorImage()
                     : FutureBuilder<String>(
