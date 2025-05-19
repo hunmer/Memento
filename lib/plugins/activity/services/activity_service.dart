@@ -16,6 +16,9 @@ class ActivityService {
   // 获取最近使用标签文件路径
   String get _recentTagsFilePath => '$_pluginDir/recent_tags.json';
 
+  // 获取最近使用心情文件路径
+  String get _recentMoodsFilePath => '$_pluginDir/recent_moods.json';
+
   // 获取特定日期的活动记录文件路径
   String _getActivityFilePath(DateTime date) {
     final dateStr =
@@ -230,6 +233,31 @@ class ActivityService {
       return List<String>.from(jsonList);
     } catch (e) {
       debugPrint('Error loading recent tags: $e');
+      return [];
+    }
+  }
+
+  // 保存最近使用的心情
+  Future<void> saveRecentMoods(List<String> moods) async {
+    try {
+      await _storage.writeJson(_recentMoodsFilePath, moods);
+    } catch (e) {
+      debugPrint('Error saving recent moods: $e');
+      rethrow;
+    }
+  }
+
+  // 获取最近使用的心情
+  Future<List<String>> getRecentMoods() async {
+    try {
+      if (!await _storage.fileExists(_recentMoodsFilePath)) {
+        return [];
+      }
+      final jsonString = await _storage.readString(_recentMoodsFilePath);
+      final List<dynamic> jsonList = jsonDecode(jsonString);
+      return List<String>.from(jsonList);
+    } catch (e) {
+      debugPrint('Error loading recent moods: $e');
       return [];
     }
   }

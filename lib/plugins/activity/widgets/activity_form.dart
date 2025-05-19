@@ -11,6 +11,8 @@ class ActivityForm extends StatelessWidget {
   final DateTime? initialStartTime;
   final DateTime? initialEndTime;
   final DateTime? lastActivityEndTime;
+  final List<String>? recentMoods;
+  final List<String>? recentTags;
 
   const ActivityForm({
     super.key,
@@ -20,6 +22,8 @@ class ActivityForm extends StatelessWidget {
     this.initialStartTime,
     this.initialEndTime,
     this.lastActivityEndTime,
+    this.recentMoods,
+    this.recentTags,
   });
 
   @override
@@ -31,6 +35,8 @@ class ActivityForm extends StatelessWidget {
       initialStartTime: initialStartTime,
       initialEndTime: initialEndTime,
       lastActivityEndTime: lastActivityEndTime,
+      recentMoods: recentMoods,
+      recentTags: recentTags,
     );
   }
 }

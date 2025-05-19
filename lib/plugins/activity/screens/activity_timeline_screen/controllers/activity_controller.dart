@@ -11,6 +11,10 @@ class ActivityController {
   
   List<ActivityRecord> activities = [];
   int sortMode = 0;
+  
+  static const int maxRecentItems = 10;
+  List<String> recentMoods = [];
+  List<String> recentTags = [];
 
   ActivityController({
     required this.activityService,
@@ -46,6 +50,43 @@ class ActivityController {
     activities = await activityService.getActivitiesForDate(date);
     _sortActivities();
     onActivitiesChanged();
+  }
+
+  Future<void> loadRecentMoodsAndTags() async {
+    recentMoods = await activityService.getRecentMoods();
+    recentTags = await activityService.getRecentTags();
+  }
+
+  Future<void> _updateRecentMood(String mood) async {
+    if (mood.isEmpty) return;
+    
+    // 将新心情添加到列表开头
+    recentMoods.remove(mood); // 如果已存在，先移除
+    recentMoods.insert(0, mood);
+    
+    // 保持列表最大长度为10
+    if (recentMoods.length > maxRecentItems) {
+      recentMoods = recentMoods.sublist(0, maxRecentItems);
+    }
+    
+    await activityService.saveRecentMoods(recentMoods);
+  }
+
+  Future<void> _updateRecentTags(List<String> tags) async {
+    if (tags.isEmpty) return;
+    
+    // 将新标签添加到列表开头
+    for (final tag in tags.reversed) {
+      recentTags.remove(tag); // 如果已存在，先移除
+      recentTags.insert(0, tag);
+    }
+    
+    // 保持列表最大长度为10
+    if (recentTags.length > maxRecentItems) {
+      recentTags = recentTags.sublist(0, maxRecentItems);
+    }
+    
+    await activityService.saveRecentTags(recentTags);
   }
   
   // 发送事件通知
@@ -94,16 +135,26 @@ class ActivityController {
         endTime.minute,
       );
     }
+    
+    // 加载最近使用的心情和标签
+    await loadRecentMoodsAndTags();
+    
     return showDialog(
       context: context,
       builder: (context) => ActivityForm(
         selectedDate: selectedDate,
         initialStartTime: initialStartTime,
         initialEndTime: initialEndTime,
+        recentMoods: recentMoods,
+        recentTags: recentTags,
         onSave: (ActivityRecord activity) async {
           await activityService.saveActivity(activity);
           if (activity.tags.isNotEmpty) {
             onTagsUpdated(activity.tags);
+            await _updateRecentTags(activity.tags);
+          }
+          if (activity.mood != null && activity.mood!.isNotEmpty) {
+            await _updateRecentMood(activity.mood!);
           }
           // 发送活动添加事件
           _notifyEvent('added', activity);
@@ -114,23 +165,31 @@ class ActivityController {
   }
 
   void editActivity(BuildContext context, ActivityRecord activity) {
-    showDialog(
-      context: context,
-      builder: (context) => ActivityForm(
-        activity: activity,
-        onSave: (ActivityRecord updatedActivity) async {
-          await activityService.updateActivity(
-            activity,
-            updatedActivity,
-          );
-          if (updatedActivity.tags.isNotEmpty) {
-            // 更新最近使用的标签
-            await activityService.saveRecentTags(updatedActivity.tags);
-          }
-          await loadActivities(activity.startTime);
-        },
-        selectedDate: activity.startTime,
-      ),
-    );
+    // 加载最近使用的心情和标签
+    loadRecentMoodsAndTags().then((_) {
+      if (!context.mounted) return;
+      showDialog(
+        context: context,
+        builder: (context) => ActivityForm(
+          activity: activity,
+          recentMoods: recentMoods,
+          recentTags: recentTags,
+          onSave: (ActivityRecord updatedActivity) async {
+            await activityService.updateActivity(
+              activity,
+              updatedActivity,
+            );
+            if (updatedActivity.tags.isNotEmpty) {
+              await _updateRecentTags(updatedActivity.tags);
+            }
+            if (updatedActivity.mood != null && updatedActivity.mood!.isNotEmpty) {
+              await _updateRecentMood(updatedActivity.mood!);
+            }
+            await loadActivities(activity.startTime);
+          },
+          selectedDate: activity.startTime,
+        ),
+      );
+    });
   }
 }

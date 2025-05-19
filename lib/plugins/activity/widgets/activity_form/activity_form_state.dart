@@ -69,24 +69,86 @@ class ActivityFormState extends State<ActivityFormWidget> {
             MoodSelector(
               selectedMood: _selectedMood,
               onMoodSelected: _selectMood,
+              recentMoods: widget.recentMoods,
             ),
             
             const SizedBox(height: 16),
             
             // 标签输入
-            TextField(
-              controller: _tagsController,
-              decoration: InputDecoration(
-                labelText: l10n.tags,
-                hintText: l10n.tagsHint,
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.tag),
-                  onPressed: _openTagManager,
-                  tooltip: l10n.tagManagement,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _tagsController,
+                  decoration: InputDecoration(
+                    labelText: l10n.tags,
+                    hintText: l10n.tagsHint,
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.tag),
+                      onPressed: _openTagManager,
+                      tooltip: l10n.tagManagement,
+                    ),
+                  ),
+                  maxLines: 1,
                 ),
-              ),
-              maxLines: 1,
+                if (widget.recentTags != null && widget.recentTags!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 4.0, bottom: 4.0),
+                    child: Text(
+                      '最近使用的标签',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: widget.recentTags!.map((tag) {
+                      final isSelected = _selectedTags.contains(tag);
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            if (!_selectedTags.contains(tag)) {
+                              _selectedTags.add(tag);
+                              _tagsController.text = _selectedTags.join(', ');
+                            }
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Theme.of(context).primaryColor.withAlpha(50)
+                                : Colors.grey.withAlpha(30),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.transparent,
+                            ),
+                          ),
+                          child: Text(
+                            tag,
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ],
             ),
             
             const SizedBox(height: 16),
@@ -120,6 +182,11 @@ class ActivityFormState extends State<ActivityFormWidget> {
     _tagsController = TextEditingController(text: _selectedTags.join(', '));
     _durationController = TextEditingController(text: '60');
     _selectedMood = activity?.mood;
+
+    // 加载最近使用的心情和标签
+    if (widget.recentMoods != null && widget.recentMoods!.isNotEmpty) {
+      _selectedMood ??= widget.recentMoods!.first;
+    }
 
     // 设置开始时间
     _startTime = getInitialTime(
