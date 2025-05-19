@@ -174,14 +174,28 @@ class ChatEventHandler {
       if (originalMessage.metadata?.containsKey('contextCount') == true) {
         final contextCount = originalMessage.metadata!['contextCount'] as int;
         if (contextCount > 0) {
-          // 添加延迟以确保消息已被存储
-          await Future.delayed(const Duration(milliseconds: 2000));
-          // BUG: 就算添加了延迟还有可能获取不到消息，因为还没来得及存储到数据库中
-          final previousMessages = ChatPlugin.instance.channelService.getMessagesBefore(
-            originalMessage.id,
-            contextCount,
-            channelId: channelId,
-          );
+          // 实现重试机制，最多重试5次，每次延迟500ms
+          int retryCount = 0;
+          const maxRetries = 5;
+          const retryDelay = Duration(milliseconds: 500);
+          List<Message> previousMessages = [];
+
+          while (retryCount < maxRetries) {
+            previousMessages = ChatPlugin.instance.channelService.getMessagesBefore(
+              originalMessage.id,
+              contextCount,
+              channelId: channelId,
+            );
+
+            // 如果获取到了消息，就跳出循环
+            if (previousMessages.isNotEmpty) {
+              break;
+            }
+
+            // 如果没有获取到消息，等待500ms后重试
+            await Future.delayed(retryDelay);
+            retryCount++;
+          }
           
           // 过滤掉typing消息和当前消息
           final filteredMessages = previousMessages.where((msg) {
