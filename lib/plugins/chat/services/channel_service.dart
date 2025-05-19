@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import '../models/channel.dart';
 import '../models/message.dart';
@@ -607,19 +609,16 @@ class ChannelService {
         (c) => c.id == channelId,
       );
       
-      // 如果找不到频道或频道为空，返回空列表
-      if (channel.id.isEmpty) {
-        debugPrint('警告：找不到ID为 $channelId 的频道');
-        return [];
-      }
-      
       // 找到消息在当前频道的位置
       final index = channel.messages.indexWhere((msg) => msg.id == messageId);
       if (index != -1) {
-        // 由于消息是倒序存储的（新消息在前），所以我们需要从当前位置往后取消息
-        final endIndex = (index + count).clamp(index + 1, channel.messages.length);
+        // 计算要获取的消息范围(从当前消息向前数count个)
+        final index1 = index ;
+        final index2 = index1 - count;
+        final startIndex = min(index1, index2);
+        final endIndex = max(index1, index2);
         // 返回指定数量的消息，按时间从旧到新排序
-        final messages = channel.messages.sublist(index + 1, endIndex).toList();
+        final messages = channel.messages.sublist(max(0, startIndex), min(endIndex, channel.messages.length - 1)).toList();
         messages.sort((a, b) => a.date.compareTo(b.date)); // 确保按时间从旧到新排序
         return messages;
       }

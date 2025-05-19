@@ -136,7 +136,6 @@ class ChatEventHandler {
         metadata: {
           'agentId': agentData['id'],
           'isAI': true,
-          'isStreaming': true,
         },
       );
 
@@ -176,8 +175,8 @@ class ChatEventHandler {
         final contextCount = originalMessage.metadata!['contextCount'] as int;
         if (contextCount > 0) {
           // 添加延迟以确保消息已被存储
-          await Future.delayed(const Duration(milliseconds: 500));
-          
+          await Future.delayed(const Duration(milliseconds: 2000));
+          // BUG: 就算添加了延迟还有可能获取不到消息，因为还没来得及存储到数据库中
           final previousMessages = ChatPlugin.instance.channelService.getMessagesBefore(
             originalMessage.id,
             contextCount,
@@ -189,8 +188,6 @@ class ChatEventHandler {
             // 排除当前消息
             if (msg.id == originalMessage.id) return false;
             if(msg.content.contains('抱歉，生成回复时出现错误')) return false;
-            // 排除typing消息
-            // if (msg.metadata?.containsKey('isStreaming') == true) return false; // isStreaming 暂时不生效
             return true;
           }).toList();
           
@@ -238,7 +235,6 @@ class ChatEventHandler {
               typingMessage.content = processedContent;
               typingMessage.metadata?.addAll({
                 'agentId': agentData['id'],
-                'isStreaming': true,
                 'lastUpdate': DateTime.now().millisecondsSinceEpoch,
               });
               
@@ -306,7 +302,7 @@ class ChatEventHandler {
             );
             typingMessage.content = finalContent;
             
-            // 更新元数据，移除 isStreaming 标记
+            // 更新元数据
             typingMessage.metadata = {
               'isAI': true,
               'agentId': agentData['id'],

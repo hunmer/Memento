@@ -361,8 +361,6 @@ class ChatScreenController extends ChangeNotifier {
         metadata: metadata,
         replyTo: replyTo,
       );
-
-      debugPrint('Sending message to channel: ${channel.id}');
       
       // 将新消息添加到本地消息列表
       messages.insert(0, newMessage);

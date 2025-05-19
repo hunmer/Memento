@@ -106,11 +106,6 @@ class MessageInputState {
           metadata: message.metadata,
         );
 
-        // 广播消息事件
-        EventManager.instance.broadcast(
-          'onMessageSent',
-          Value<Message>(message),
-        );
 
         // 清空输入框并保持焦点
         controller.clear();
@@ -120,6 +115,13 @@ class MessageInputState {
         if (onClearFile != null) {
           onClearFile!();
         }
+        
+        // 广播消息事件
+        EventManager.instance.broadcast(
+          'onMessageSent',
+          Value<Message>(message),
+        );
+        
       }
     }
   }
