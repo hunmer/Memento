@@ -94,22 +94,73 @@ class TaskGridItem extends StatelessWidget {
                 const SizedBox(height: 8),
               ],
               const Spacer(),
-              Row(
+              Column(
                 children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 12,
-                    color: isOverdue ? Colors.red : theme.disabledColor,
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      dueDate,
-                      style: TextStyle(
-                        fontSize: 12,
+                  // 显示计时器（如果任务正在进行中）
+                  if (task.status == TaskStatus.inProgress) ...[
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.timer,
+                          size: 12,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            task.formattedDuration,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                  // 显示持续时间（如果任务已完成且有记录时间）
+                  if (task.status == TaskStatus.done && task.duration != null) ...[
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.timer_off,
+                          size: 12,
+                          color: theme.disabledColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            task.formattedDuration,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.disabledColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 12,
                         color: isOverdue ? Colors.red : theme.disabledColor,
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          dueDate,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isOverdue ? Colors.red : theme.disabledColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

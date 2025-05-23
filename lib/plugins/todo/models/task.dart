@@ -18,6 +18,8 @@ class Task {
   List<DateTime> reminders;
 
   final DateTime? completedDate;
+  DateTime? startTime; // 记录任务开始时间
+  Duration? duration; // 记录任务持续时间
 
   Task({
     required this.id,
@@ -32,6 +34,8 @@ class Task {
     List<Subtask>? subtasks,
     List<DateTime>? reminders,
     this.completedDate,
+    this.startTime,
+    this.duration,
   })  : subtasks = subtasks ?? [],
         reminders = reminders ?? [],
         tags = tags ?? [];
@@ -49,6 +53,8 @@ class Task {
     List<Subtask>? subtasks,
     List<DateTime>? reminders,
     DateTime? completedDate,
+    DateTime? startTime,
+    Duration? duration,
   }) {
     return Task(
       id: id ?? this.id,
@@ -63,6 +69,8 @@ class Task {
       subtasks: subtasks ?? this.subtasks,
       reminders: reminders ?? this.reminders,
       completedDate: completedDate ?? this.completedDate,
+      startTime: startTime ?? this.startTime,
+      duration: duration ?? this.duration,
     );
   }
 
@@ -79,6 +87,8 @@ class Task {
         'subtasks': subtasks.map((e) => e.toJson()).toList(),
         'reminders': reminders.map((e) => e.toIso8601String()).toList(),
         'completedDate': completedDate?.toIso8601String(),
+        'startTime': startTime?.toIso8601String(),
+        'duration': duration?.inMilliseconds, // 将持续时间转换为毫秒存储
       };
 
   factory Task.fromJson(Map<String, dynamic> json) => Task(
@@ -102,6 +112,12 @@ class Task {
         completedDate: json['completedDate'] != null 
             ? DateTime.parse(json['completedDate']) 
             : null,
+        startTime: json['startTime'] != null 
+            ? DateTime.parse(json['startTime']) 
+            : null,
+        duration: json['duration'] != null 
+            ? Duration(milliseconds: json['duration']) 
+            : null,
       );
 
   Color get priorityColor {
@@ -124,5 +140,62 @@ class Task {
       case TaskStatus.done:
         return Icons.check_circle_outline;
     }
+  }
+  
+  // 启动任务计时
+  void startTimer() {
+    if (status != TaskStatus.inProgress) {
+      status = TaskStatus.inProgress;
+    }
+    startTime = DateTime.now();
+    duration = null; // 重置持续时间
+  }
+  
+  // 停止任务计时并计算持续时间
+  void stopTimer() {
+    if (startTime != null) {
+      final now = DateTime.now();
+      final currentDuration = now.difference(startTime!);
+      
+      // 如果已有记录的持续时间，则累加
+      if (duration != null) {
+        duration = duration! + currentDuration;
+      } else {
+        duration = currentDuration;
+      }
+    }
+  }
+  
+  // 完成任务，停止计时
+  void completeTask() {
+    stopTimer();
+    status = TaskStatus.done;
+  }
+  
+  // 格式化显示持续时间
+  String get formattedDuration {
+    if (duration == null) {
+      if (startTime != null && status == TaskStatus.inProgress) {
+        // 计算当前进行中的时间
+        final currentDuration = DateTime.now().difference(startTime!);
+        return _formatDuration(currentDuration);
+      }
+      return '00:00:00';
+    }
+    return _formatDuration(duration!);
+  }
+  
+  // 格式化时间为 HH:MM:SS 格式
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$hours:$minutes:$seconds';
+  }
+  
+  // 检查任务是否正在计时
+  bool get isTimerRunning {
+    return status == TaskStatus.inProgress && startTime != null;
   }
 }

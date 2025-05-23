@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../models/models.dart';
 import '../controllers/controllers.dart';
 import 'task_form.dart';
 import 'package:intl/intl.dart';
 
-class TaskDetailView extends StatelessWidget {
+class TaskDetailView extends StatefulWidget {
   final Task task;
   final TaskController taskController;
   final ReminderController reminderController;
@@ -15,12 +16,37 @@ class TaskDetailView extends StatelessWidget {
     required this.taskController,
     required this.reminderController,
   });
+  
+  @override
+  State<TaskDetailView> createState() => _TaskDetailViewState();
+}
+
+class _TaskDetailViewState extends State<TaskDetailView> {
+  Timer? _timer;
+  
+  @override
+  void initState() {
+    super.initState();
+    // 创建一个定时器，每秒更新一次UI，以刷新计时器显示
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (widget.task.status == TaskStatus.inProgress && widget.task.startTime != null) {
+        setState(() {});
+      }
+    });
+  }
+  
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('HH:mm');
+    final task = widget.task; // 为了代码兼容性，创建一个本地引用
 
     return Scaffold(
       appBar: AppBar(
@@ -33,9 +59,9 @@ class TaskDetailView extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => TaskForm(
-                    task: task,
-                    taskController: taskController,
-                    reminderController: reminderController,
+                    task: widget.task,
+                    taskController: widget.taskController,
+                    reminderController: widget.reminderController,
                   ),
                 ),
               );
@@ -63,7 +89,7 @@ class TaskDetailView extends StatelessWidget {
               );
 
               if (confirmed == true && context.mounted) {
-                await taskController.deleteTask(task.id);
+                await widget.taskController.deleteTask(widget.task.id);
                 Navigator.pop(context);
               }
             },
@@ -80,22 +106,22 @@ class TaskDetailView extends StatelessWidget {
               children: [
                 IconButton(
                   icon: Icon(
-                    task.statusIcon,
-                    color: task.status == TaskStatus.done
+                    widget.task.statusIcon,
+                    color: widget.task.status == TaskStatus.done
                         ? Colors.green
                         : theme.disabledColor,
                   ),
                   onPressed: () {
                     final newStatus = TaskStatus.values[
-                        (task.status.index + 1) % TaskStatus.values.length];
-                    taskController.updateTaskStatus(task.id, newStatus);
+                        (widget.task.status.index + 1) % TaskStatus.values.length];
+                    widget.taskController.updateTaskStatus(widget.task.id, newStatus);
                   },
                 ),
                 Expanded(
                   child: Text(
-                    task.title,
+                    widget.task.title,
                     style: theme.textTheme.headlineSmall?.copyWith(
-                      decoration: task.status == TaskStatus.done
+                      decoration: widget.task.status == TaskStatus.done
                           ? TextDecoration.lineThrough
                           : null,
                     ),
@@ -106,7 +132,7 @@ class TaskDetailView extends StatelessWidget {
                   height: 16,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: task.priorityColor,
+                    color: widget.task.priorityColor,
                   ),
                 ),
               ],
@@ -114,18 +140,18 @@ class TaskDetailView extends StatelessWidget {
             const SizedBox(height: 16),
 
             // 描述
-            if (task.description != null && task.description!.isNotEmpty) ...[
+            if (widget.task.description != null && widget.task.description!.isNotEmpty) ...[
               Text(
                 'Description',
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text(task.description!),
+              Text(widget.task.description!),
               const SizedBox(height: 16),
             ],
 
             // 标签
-            if (task.tags.isNotEmpty) ...[
+            if (widget.task.tags.isNotEmpty) ...[
               Text(
                 'Tags',
                 style: theme.textTheme.titleMedium,
@@ -134,7 +160,7 @@ class TaskDetailView extends StatelessWidget {
               Wrap(
                 spacing: 8.0,
                 runSpacing: 4.0,
-                children: task.tags.map((tag) => Chip(
+                children: widget.task.tags.map((tag) => Chip(
                   label: Text(tag),
                   backgroundColor: Colors.blue.shade100,
                 )).toList(),
@@ -142,6 +168,82 @@ class TaskDetailView extends StatelessWidget {
               const SizedBox(height: 16),
             ],
 
+            // 计时器信息
+            Text(
+              'Timer',
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Duration:',
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        Text(
+                          widget.task.formattedDuration,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: widget.task.status == TaskStatus.inProgress
+                                ? theme.colorScheme.primary
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Start'),
+                          onPressed: widget.task.status != TaskStatus.inProgress
+                              ? () {
+                                  widget.taskController.updateTaskStatus(
+                                      widget.task.id, TaskStatus.inProgress);
+                                  setState(() {});
+                                }
+                              : null,
+                        ),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.pause),
+                          label: const Text('Pause'),
+                          onPressed: widget.task.status == TaskStatus.inProgress
+                              ? () {
+                                  widget.taskController.updateTaskStatus(
+                                      widget.task.id, TaskStatus.todo);
+                                  setState(() {});
+                                }
+                              : null,
+                        ),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.check),
+                          label: const Text('Complete'),
+                          onPressed: widget.task.status != TaskStatus.done
+                              ? () {
+                                  widget.taskController.updateTaskStatus(
+                                      widget.task.id, TaskStatus.done);
+                                  setState(() {});
+                                }
+                              : null,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
             // 日期信息
             Text(
               'Dates',
@@ -153,20 +255,20 @@ class TaskDetailView extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
                   title: const Text('Created'),
-                  subtitle: Text(dateFormat.format(task.createdAt)),
+                  subtitle: Text(dateFormat.format(widget.task.createdAt)),
                 ),
-                if (task.dueDate != null)
+                if (widget.task.dueDate != null)
                   ListTile(
                     leading: const Icon(Icons.event),
                     title: const Text('Due Date'),
-                    subtitle: Text(dateFormat.format(task.dueDate!)),
+                    subtitle: Text(dateFormat.format(widget.task.dueDate!)),
                   ),
                 const SizedBox(height: 16),
               ],
             ),
 
             // 子任务
-            if (task.subtasks.isNotEmpty) ...[
+            if (widget.task.subtasks.isNotEmpty) ...[
               Text(
                 'Subtasks',
                 style: theme.textTheme.titleMedium,
@@ -175,15 +277,15 @@ class TaskDetailView extends StatelessWidget {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: task.subtasks.length,
+                itemCount: widget.task.subtasks.length,
                 itemBuilder: (context, index) {
-                  final subtask = task.subtasks[index];
+                  final subtask = widget.task.subtasks[index];
                   return CheckboxListTile(
                     value: subtask.isCompleted,
                     onChanged: (value) {
                       if (value != null) {
-                        taskController.updateSubtaskStatus(
-                          task.id,
+                        widget.taskController.updateSubtaskStatus(
+                          widget.task.id,
                           subtask.id,
                           value,
                         );
@@ -204,7 +306,7 @@ class TaskDetailView extends StatelessWidget {
             ],
 
             // 提醒
-            if (task.reminders.isNotEmpty) ...[
+            if (widget.task.reminders.isNotEmpty) ...[
               Text(
                 'Reminders',
                 style: theme.textTheme.titleMedium,
@@ -213,9 +315,9 @@ class TaskDetailView extends StatelessWidget {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: task.reminders.length,
+                itemCount: widget.task.reminders.length,
                 itemBuilder: (context, index) {
-                  final reminder = task.reminders[index];
+                  final reminder = widget.task.reminders[index];
                   return ListTile(
                     leading: const Icon(Icons.alarm),
                     title: Text(dateFormat.format(reminder)),

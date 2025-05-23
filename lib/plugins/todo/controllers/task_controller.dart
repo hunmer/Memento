@@ -286,11 +286,25 @@ class TaskController extends ChangeNotifier {
   Future<void> updateTaskStatus(String taskId, TaskStatus status) async {
     final index = _tasks.indexWhere((t) => t.id == taskId);
     if (index != -1) {
-      _tasks[index].status = status;
+      final task = _tasks[index];
+      final oldStatus = task.status;
       
-      // 如果任务标记为完成，自动标记所有子任务为完成
+      // 如果任务正在进行中，先停止计时
+      if (oldStatus == TaskStatus.inProgress) {
+        task.stopTimer();
+      }
+      
+      task.status = status;
+      
+      // 如果新状态是进行中，开始计时
+      if (status == TaskStatus.inProgress) {
+        task.startTimer();
+      }
+      
+      // 如果任务标记为完成，停止计时并自动标记所有子任务为完成
       if (status == TaskStatus.done) {
-        for (var subtask in _tasks[index].subtasks) {
+        task.completeTask();
+        for (var subtask in task.subtasks) {
           subtask.isCompleted = true;
         }
       }

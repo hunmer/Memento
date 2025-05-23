@@ -71,6 +71,41 @@ class TaskListItem extends StatelessWidget {
             const SizedBox(height: 4),
             Row(
               children: [
+                // 显示计时器（如果任务正在进行中）
+                if (task.status == TaskStatus.inProgress) ...[
+                  Icon(
+                    Icons.timer,
+                    size: 14,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    task.formattedDuration,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                // 显示持续时间（如果任务已完成且有记录时间）
+                if (task.status == TaskStatus.done && task.duration != null) ...[
+                  Icon(
+                    Icons.timer_off,
+                    size: 14,
+                    color: theme.disabledColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    task.formattedDuration,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.disabledColor,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 Icon(
                   Icons.calendar_today,
                   size: 14,
