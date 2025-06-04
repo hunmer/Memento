@@ -6,7 +6,7 @@ import '../controllers/day_controller.dart';
 import '../l10n/day_localizations.dart';
 import '../widgets/memorial_day_card.dart';
 import '../widgets/memorial_day_list_item.dart';
-import '../widgets/edit_memorial_day_dialog.dart';
+import '../widgets/edit_memorial_day_dialog/edit_memorial_day_dialog.dart';
 import '../models/memorial_day.dart';
 
 class DayHomeScreen extends StatefulWidget {
@@ -17,53 +17,73 @@ class DayHomeScreen extends StatefulWidget {
 }
 
 class _DayHomeScreenState extends State<DayHomeScreen> {
-  Future<void> _showEditDialog(BuildContext context, [MemorialDay? memorialDay]) async {
+  Future<void> _showEditDialog(
+    BuildContext context, [
+    MemorialDay? memorialDay,
+  ]) async {
     if (!mounted) return;
-    final result = await showDialog<dynamic>(
+    final result = await showDialog<DialogResult>(
       context: context,
       builder: (context) => EditMemorialDayDialog(memorialDay: memorialDay),
     );
 
-    // 用户点击取消按钮
-    if (result == 'cancel') {
-      return;
+    if (result == null) {
+      return; // 对话框被异常关闭
     }
-    
-    // 用户点击删除按钮
-    if (result == 'delete' && memorialDay != null) {
-      if (!mounted) return;
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(DayLocalizations.of(context).deleteMemorialDay),
-          content: Text(DayLocalizations.of(context).deleteConfirmation),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(DayLocalizations.of(context).cancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(
-                DayLocalizations.of(context).delete,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        ),
-      );
 
-      if (confirmed == true && mounted) {
-        await _controller.deleteMemorialDay(memorialDay.id);
-      }
-    } else if (result != null && result is MemorialDay) {
-      if (!mounted) return;
-      // 用户保存了更改
-      if (memorialDay != null) {
-        await _controller.updateMemorialDay(result);
-      } else {
-        await _controller.addMemorialDay(result);
-      }
+    if (!mounted) return;
+
+    switch (result.action) {
+      case DialogAction.save:
+        if (result.memorialDay != null) {
+          // 用户保存了更改
+          if (memorialDay != null) {
+            // 更新现有的纪念日
+            await _controller.updateMemorialDay(result.memorialDay!);
+          } else {
+            // 添加新的纪念日
+            await _controller.addMemorialDay(result.memorialDay!);
+          }
+        }
+        break;
+
+      case DialogAction.delete:
+        if (memorialDay != null) {
+          // 用户请求删除，显示确认对话框
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text(DayLocalizations.of(context).deleteMemorialDay),
+                  content: Text(
+                    DayLocalizations.of(context).deleteConfirmation,
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(DayLocalizations.of(context).cancel),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text(
+                        DayLocalizations.of(context).delete,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+          );
+
+          if (confirmed == true && mounted) {
+            // 确认删除后，调用控制器的删除方法
+            await _controller.deleteMemorialDay(memorialDay.id);
+          }
+        }
+        break;
+
+      case DialogAction.cancel:
+        // 用户取消操作，不做任何处理
+        break;
     }
   }
 
@@ -90,9 +110,9 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
           return Scaffold(
             appBar: AppBar(
               leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
               title: Text(DayLocalizations.of(context).memorialDays),
               actions: [
                 // 排序菜单
@@ -100,28 +120,34 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
                   icon: const Icon(Icons.sort),
                   tooltip: DayLocalizations.of(context).sortOptions,
                   onSelected: (mode) => controller.setSortMode(mode),
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: SortMode.upcoming,
-                      child: Text(DayLocalizations.of(context).upcomingSort),
-                    ),
-                    PopupMenuItem(
-                      value: SortMode.recent,
-                      child: Text(DayLocalizations.of(context).recentSort),
-                    ),
-                    PopupMenuItem(
-                      value: SortMode.manual,
-                      child: Text(DayLocalizations.of(context).manualSort),
-                    ),
-                  ],
+                  itemBuilder:
+                      (context) => [
+                        PopupMenuItem(
+                          value: SortMode.upcoming,
+                          child: Text(
+                            DayLocalizations.of(context).upcomingSort,
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: SortMode.recent,
+                          child: Text(DayLocalizations.of(context).recentSort),
+                        ),
+                        PopupMenuItem(
+                          value: SortMode.manual,
+                          child: Text(DayLocalizations.of(context).manualSort),
+                        ),
+                      ],
                 ),
                 // 视图切换按钮
                 IconButton(
-                  icon: Icon(controller.isCardView ? Icons.view_list : Icons.view_module),
+                  icon: Icon(
+                    controller.isCardView ? Icons.view_list : Icons.view_module,
+                  ),
                   onPressed: controller.toggleView,
-                  tooltip: controller.isCardView 
-                    ? DayLocalizations.of(context).listView 
-                    : DayLocalizations.of(context).cardView,
+                  tooltip:
+                      controller.isCardView
+                          ? DayLocalizations.of(context).listView
+                          : DayLocalizations.of(context).cardView,
                 ),
                 // 添加纪念日按钮
                 IconButton(
@@ -140,9 +166,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
 
   Widget _buildBody(DayController controller) {
     if (controller.memorialDays.isEmpty) {
-      return Center(
-        child: Text(DayLocalizations.of(context).noMemorialDays),
-      );
+      return Center(child: Text(DayLocalizations.of(context).noMemorialDays));
     }
 
     return controller.isCardView
@@ -172,7 +196,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
         },
       );
     }
-    
+
     // 允许重排序时使用ReorderableGridView
     return ReorderableGridView.builder(
       padding: const EdgeInsets.all(8),
@@ -184,11 +208,11 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
       ),
       itemCount: days.length,
       itemBuilder: (context, index) {
-          return MemorialDayCard(
-            key: ValueKey(days[index].id),
-            memorialDay: days[index],
-            isDraggable: true,
-            onTap: () => _showEditDialog(context, days[index]),
+        return MemorialDayCard(
+          key: ValueKey(days[index].id),
+          memorialDay: days[index],
+          isDraggable: true,
+          onTap: () => _showEditDialog(context, days[index]),
         );
       },
       onReorder: (oldIndex, newIndex) async {
@@ -199,10 +223,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
         return Material(
           color: Colors.transparent,
           elevation: 0,
-          child: Transform.scale(
-            scale: 1.05,
-            child: child,
-          ),
+          child: Transform.scale(scale: 1.05, child: child),
         );
       },
     );
@@ -224,7 +245,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
         },
       );
     }
-    
+
     // 允许重排序时使用ReorderableListView
     return ReorderableListView.builder(
       padding: const EdgeInsets.all(8),

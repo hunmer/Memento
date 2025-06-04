@@ -202,18 +202,24 @@ class _BillListScreenState extends State<BillListScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 计算总收入和总支出
+    // 计算选定时间范围内的总收入和总支出
     double totalIncome = 0;
     double totalExpense = 0;
 
     final currentAccount = widget.billPlugin.accounts.firstWhere(
       (account) => account.id == widget.accountId,
     );
+
+    // 只统计选定时间范围内的账单
     for (var bill in currentAccount.bills) {
-      if (bill.amount > 0) {
-        totalIncome += bill.amount;
-      } else {
-        totalExpense += bill.amount.abs();
+      // 检查账单是否在选定的时间范围内
+      if (bill.createdAt.isAfter(_startDate) &&
+          bill.createdAt.isBefore(_endDate.add(const Duration(seconds: 1)))) {
+        if (bill.amount > 0) {
+          totalIncome += bill.amount;
+        } else {
+          totalExpense += bill.amount.abs();
+        }
       }
     }
 
@@ -380,10 +386,7 @@ class _BillListScreenState extends State<BillListScreen>
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20.0),
         color: Colors.red,
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.delete, color: Colors.white),
       ),
       confirmDismiss: (direction) async {
         return await showDialog(
@@ -399,10 +402,7 @@ class _BillListScreenState extends State<BillListScreen>
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text(
-                    '删除',
-                    style: TextStyle(color: Colors.red),
-                  ),
+                  child: const Text('删除', style: TextStyle(color: Colors.red)),
                 ),
               ],
             );

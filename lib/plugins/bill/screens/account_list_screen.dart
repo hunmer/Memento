@@ -7,10 +7,7 @@ import 'account_edit_screen.dart';
 class AccountListScreen extends StatefulWidget {
   final BillPlugin billPlugin;
 
-  const AccountListScreen({
-    super.key,
-    required this.billPlugin,
-  });
+  const AccountListScreen({super.key, required this.billPlugin});
 
   @override
   State<AccountListScreen> createState() => _AccountListScreenState();
@@ -44,20 +41,21 @@ class _AccountListScreenState extends State<AccountListScreen> {
         title: const Text('账户管理'),
         // 添加返回按钮
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => PluginManager.toHomeScreen(context),
-          ),
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
       ),
       body: _buildAccountList(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AccountEditScreen(
-              billPlugin: widget.billPlugin,
+        onPressed:
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) =>
+                        AccountEditScreen(billPlugin: widget.billPlugin),
+              ),
             ),
-          ),
-        ),
         child: const Icon(Icons.add),
       ),
     );
@@ -65,9 +63,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
 
   Widget _buildAccountList() {
     if (widget.billPlugin.accounts.isEmpty) {
-      return const Center(
-        child: Text('暂无账户，点击右下角按钮创建'),
-      );
+      return const Center(child: Text('暂无账户，点击右下角按钮创建'));
     }
 
     return ListView.builder(
@@ -80,10 +76,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
             color: Colors.red,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             alignment: Alignment.centerRight,
-            child: const Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.delete, color: Colors.white),
           ),
           direction: DismissDirection.endToStart,
           confirmDismiss: (direction) async {
@@ -92,7 +85,9 @@ class _AccountListScreenState extends State<AccountListScreen> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: const Text('确认删除'),
-                  content: Text('确定要删除账户"${account.title}"吗？\n删除后该账户下的所有账单记录都将被删除！'),
+                  content: Text(
+                    '确定要删除账户"${account.title}"吗？\n删除后该账户下的所有账单记录都将被删除！',
+                  ),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
@@ -142,10 +137,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
             children: [
               CircleAvatar(
                 backgroundColor: account.backgroundColor,
-                child: Icon(
-                  account.icon,
-                  color: Colors.white,
-                ),
+                child: Icon(account.icon, color: Colors.white),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -191,10 +183,11 @@ class _AccountListScreenState extends State<AccountListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AccountEditScreen(
-          billPlugin: widget.billPlugin,
-          account: account,
-        ),
+        builder:
+            (context) => AccountEditScreen(
+              billPlugin: widget.billPlugin,
+              account: account,
+            ),
       ),
     );
   }

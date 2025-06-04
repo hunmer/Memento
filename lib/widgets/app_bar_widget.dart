@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final String? titleKey;
-  
-  const AppBarWidget({
-    super.key,
-    this.title,
-    this.titleKey,
-  }) : assert(title != null || titleKey != null, 'Either title or titleKey must be provided');
-  
+
+  const AppBarWidget({super.key, this.title, this.titleKey})
+    : assert(
+        title != null || titleKey != null,
+        'Either title or titleKey must be provided',
+      );
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final displayTitle = title ?? (titleKey != null ? localizations.getString(titleKey!) : '');
-    
+    final displayTitle =
+        title ?? (titleKey != null ? localizations.getString(titleKey!) : '');
+
     return AppBar(
       title: Text(displayTitle),
       centerTitle: true,
@@ -27,7 +28,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-  
+
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

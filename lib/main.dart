@@ -10,7 +10,7 @@ import 'package:Memento/screens/settings_screen/controllers/settings_screen_cont
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:media_kit/media_kit.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/diary/l10n/diary_localizations.dart';
@@ -89,12 +89,12 @@ void main() async {
       TodoPlugin.instance,
       DayPlugin.instance,
       TrackerPlugin.instance, // 使用单例
-      StorePlugin(), 
+      StorePlugin(),
       NodesPlugin(), // 添加笔记插件
       NotesPlugin(), // 添加Notes插件
       GoodsPlugin.instance, // 添加物品插件
       BillPlugin(), // 添加账单插件
-      CalendarPlugin(), 
+      CalendarPlugin(),
     ];
 
     // 遍历并注册插件
@@ -117,7 +117,10 @@ void main() async {
         backupService = BackupService(SettingsScreenController(), context);
       }
       // 插件初始化完成，发布事件
-      eventManager.broadcast('plugins_initialized', EventArgs('plugins_initialized'));
+      eventManager.broadcast(
+        'plugins_initialized',
+        EventArgs('plugins_initialized'),
+      );
     });
   } catch (e) {
     _showError('初始化失败: $e');
@@ -241,7 +244,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
-        cardTheme: const CardTheme(
+        cardTheme: const CardThemeData(
           elevation: 4,
           margin: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         ),

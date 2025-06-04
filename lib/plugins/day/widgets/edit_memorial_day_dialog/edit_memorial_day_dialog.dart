@@ -8,10 +8,7 @@ import 'appearance_tab.dart';
 class EditMemorialDayDialog extends StatefulWidget {
   final MemorialDay? memorialDay;
 
-  const EditMemorialDayDialog({
-    super.key,
-    this.memorialDay,
-  });
+  const EditMemorialDayDialog({super.key, this.memorialDay});
 
   @override
   State<EditMemorialDayDialog> createState() => _EditMemorialDayDialogState();
@@ -57,9 +54,11 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
       title: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(widget.memorialDay == null
-              ? localizations.addMemorialDay
-              : localizations.editMemorialDay),
+          Text(
+            widget.memorialDay == null
+                ? localizations.addMemorialDay
+                : localizations.editMemorialDay,
+          ),
           const SizedBox(height: 16),
           TabBar(
             controller: _tabController,
@@ -68,10 +67,7 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
                 icon: const Icon(Icons.info_outline),
                 text: localizations.information,
               ),
-              Tab(
-                icon: const Icon(Icons.notes),
-                text: localizations.notes,
-              ),
+              Tab(icon: const Icon(Icons.notes), text: localizations.notes),
               Tab(
                 icon: const Icon(Icons.palette_outlined),
                 text: localizations.appearance,
@@ -93,7 +89,7 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
               onSelectDate: _selectDate,
               formatDate: _formatDate,
             ),
-            
+
             // 笔记标签页
             NotesTab(
               notes: _notes,
@@ -101,7 +97,7 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
               onNoteChanged: _updateNote,
               onNoteRemoved: _removeNote,
             ),
-            
+
             // 外观标签页
             AppearanceTab(
               selectedColor: _selectedColor,
@@ -115,13 +111,21 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed:
+              () => Navigator.of(
+                context,
+              ).pop(const DialogResult(action: DialogAction.cancel)),
           child: Text(localizations.cancel),
         ),
-        ElevatedButton(
-          onPressed: _save,
-          child: Text(localizations.save),
-        ),
+        if (widget.memorialDay != null)
+          TextButton(
+            onPressed: _confirmDelete,
+            child: Text(
+              localizations.delete,
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ElevatedButton(onPressed: _save, child: Text(localizations.save)),
       ],
     );
   }
@@ -177,10 +181,13 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
 
   void _save() {
     // 移除空笔记
-    final filteredNotes = _notes.where((note) => note.trim().isNotEmpty).toList();
+    final filteredNotes =
+        _notes.where((note) => note.trim().isNotEmpty).toList();
 
     final memorialDay = MemorialDay(
-      id: widget.memorialDay?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          widget.memorialDay?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       title: _titleController.text.trim(),
       targetDate: _selectedDate,
       notes: filteredNotes,
@@ -189,6 +196,24 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
       creationDate: widget.memorialDay?.creationDate ?? DateTime.now(),
     );
 
-    Navigator.of(context).pop(memorialDay);
+    Navigator.of(
+      context,
+    ).pop(DialogResult(action: DialogAction.save, memorialDay: memorialDay));
   }
+
+  void _confirmDelete() {
+    // 直接返回删除操作，具体的删除确认逻辑由外部处理
+    Navigator.of(context).pop(const DialogResult(action: DialogAction.delete));
+  }
+}
+
+/// 对话框操作结果
+enum DialogAction { save, delete, cancel }
+
+/// 对话框返回结果
+class DialogResult {
+  final DialogAction action;
+  final MemorialDay? memorialDay;
+
+  const DialogResult({required this.action, this.memorialDay});
 }
