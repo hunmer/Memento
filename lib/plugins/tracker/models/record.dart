@@ -1,4 +1,3 @@
-
 import './goal.dart';
 
 class Record {
@@ -7,6 +6,7 @@ class Record {
   final double value;
   final String? note;
   final DateTime recordedAt;
+  final int? durationSeconds; // 记录时间（秒）
 
   Record({
     required this.id,
@@ -14,6 +14,7 @@ class Record {
     required this.value,
     this.note,
     required this.recordedAt,
+    this.durationSeconds,
   });
 
   factory Record.fromJson(Map<String, dynamic> json) {
@@ -23,6 +24,7 @@ class Record {
       value: json['value'],
       note: json['note'],
       recordedAt: DateTime.parse(json['recordedAt']),
+      durationSeconds: json['durationSeconds'],
     );
   }
 
@@ -33,6 +35,7 @@ class Record {
       'value': value,
       'note': note,
       'recordedAt': recordedAt.toIso8601String(),
+      'durationSeconds': durationSeconds,
     };
   }
 

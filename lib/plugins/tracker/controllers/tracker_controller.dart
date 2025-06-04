@@ -16,7 +16,8 @@ class TrackerController with ChangeNotifier {
     try {
       final savedGoals = await plugin.storage?.read('goals.json') ?? {};
       if (savedGoals.containsKey('goals')) {
-        _goals = (savedGoals['goals'] as List).map((g) => Goal.fromJson(g)).toList();
+        _goals =
+            (savedGoals['goals'] as List).map((g) => Goal.fromJson(g)).toList();
       }
     } catch (e) {
       debugPrint('加载目标数据失败: $e');
@@ -25,7 +26,10 @@ class TrackerController with ChangeNotifier {
     try {
       final savedRecords = await plugin.storage?.read('records.json') ?? {};
       if (savedRecords.containsKey('records')) {
-        _records = (savedRecords['records'] as List).map((r) => Record.fromJson(r)).toList();
+        _records =
+            (savedRecords['records'] as List)
+                .map((r) => Record.fromJson(r))
+                .toList();
       }
     } catch (e) {
       debugPrint('加载记录数据失败: $e');
@@ -59,6 +63,13 @@ class TrackerController with ChangeNotifier {
   List<Goal> get goals => _goals;
   List<Record> get records => _records;
 
+  // 获取所有分组
+  List<String> getAllGroups() {
+    final groups = _goals.map((goal) => goal.group).toSet().toList();
+    groups.sort(); // 排序
+    return groups;
+  }
+
   // 目标管理
   Future<void> addGoal(Goal goal) async {
     _validateGoalDates(goal);
@@ -82,7 +93,7 @@ class TrackerController with ChangeNotifier {
     if (index != -1) {
       final goal = _goals[index];
       _goals[index] = goal.copyWith(
-        currentValue: !goal.isCompleted ? goal.targetValue : 0
+        currentValue: !goal.isCompleted ? goal.targetValue : 0,
       );
       await _saveGoals();
       notifyListeners();
@@ -105,8 +116,8 @@ class TrackerController with ChangeNotifier {
   // 日期验证
   void _validateGoalDates(Goal goal) {
     final settings = goal.dateSettings;
-    if (settings.type == 'range' && 
-        settings.startDate != null && 
+    if (settings.type == 'range' &&
+        settings.startDate != null &&
         settings.endDate != null &&
         settings.startDate!.isAfter(settings.endDate!)) {
       throw ArgumentError('End date must be after start date');
@@ -117,9 +128,7 @@ class TrackerController with ChangeNotifier {
   // 获取今日记录数
   int getTodayRecordCount() {
     final today = tracker_date_utils.DateUtils.startOfDay(DateTime.now());
-    return _records.where((r) => 
-      r.recordedAt.isAfter(today)
-    ).length;
+    return _records.where((r) => r.recordedAt.isAfter(today)).length;
   }
 
   // 获取所有目标
@@ -142,7 +151,7 @@ class TrackerController with ChangeNotifier {
   // 计算总体进度
   double calculateOverallProgress() {
     if (_goals.isEmpty) return 0;
-    
+
     final completedGoals = _goals.where((g) => g.isCompleted).length;
     return completedGoals / _goals.length;
   }
@@ -154,16 +163,18 @@ class TrackerController with ChangeNotifier {
 
   // 获取特定目标的记录流
   Stream<List<Record>> watchRecordsForGoal(String goalId) {
-    return Stream.fromFuture(Future.value(_records.where((r) => r.goalId == goalId).toList()))
-      .asyncExpand((_) {
-        final controller = StreamController<List<Record>>();
-        void update() {
-          controller.add(_records.where((r) => r.goalId == goalId).toList());
-        }
-        addListener(update);
-        controller.onCancel = () => removeListener(update);
-        return controller.stream;
-      });
+    return Stream.fromFuture(
+      Future.value(_records.where((r) => r.goalId == goalId).toList()),
+    ).asyncExpand((_) {
+      final controller = StreamController<List<Record>>();
+      void update() {
+        controller.add(_records.where((r) => r.goalId == goalId).toList());
+      }
+
+      addListener(update);
+      controller.onCancel = () => removeListener(update);
+      return controller.stream;
+    });
   }
 
   // 获取特定目标的记录
@@ -174,27 +185,31 @@ class TrackerController with ChangeNotifier {
   // 获取今日完成的目标数
   int getTodayCompletedGoals() {
     final today = tracker_date_utils.DateUtils.startOfDay(DateTime.now());
-    return _goals.where((g) => 
-      g.isCompleted && 
-      g.createdAt.isAfter(today)
-    ).length;
+    return _goals
+        .where((g) => g.isCompleted && g.createdAt.isAfter(today))
+        .length;
   }
 
   // 获取本月完成的目标数
   int getMonthCompletedGoals() {
-    final firstDayOfMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    return _goals.where((g) => 
-      g.isCompleted && 
-      g.createdAt.isAfter(firstDayOfMonth)
-    ).length;
+    final firstDayOfMonth = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      1,
+    );
+    return _goals
+        .where((g) => g.isCompleted && g.createdAt.isAfter(firstDayOfMonth))
+        .length;
   }
 
   // 获取本月新增的目标数
   int getMonthAddedGoals() {
-    final firstDayOfMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    return _goals.where((g) => 
-      g.createdAt.isAfter(firstDayOfMonth)
-    ).length;
+    final firstDayOfMonth = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      1,
+    );
+    return _goals.where((g) => g.createdAt.isAfter(firstDayOfMonth)).length;
   }
 
   // 清空特定目标的所有记录
@@ -214,9 +229,10 @@ class TrackerController with ChangeNotifier {
     _records.removeWhere((r) => r.id == recordId);
     await _saveRecords();
     // 更新目标当前值
-    await updateGoal(goal.id, goal.copyWith(
-      currentValue: goal.currentValue - record.value
-    ));
+    await updateGoal(
+      goal.id,
+      goal.copyWith(currentValue: goal.currentValue - record.value),
+    );
     notifyListeners();
   }
 
@@ -227,16 +243,13 @@ class TrackerController with ChangeNotifier {
     await _saveRecords();
     // 更新目标当前值
     final updatedGoal = goal.copyWith(
-      currentValue: goal.currentValue + record.value
+      currentValue: goal.currentValue + record.value,
     );
     await updateGoal(goal.id, updatedGoal);
-    
+
     // 广播记录添加事件
-    eventManager.broadcast(
-      'onRecordAdded',
-      Value<Record>(record),
-    );
-    
+    eventManager.broadcast('onRecordAdded', Value<Record>(record));
+
     notifyListeners();
   }
 }

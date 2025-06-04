@@ -1,5 +1,5 @@
-
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Row, SizedBox, ListTile;
+import 'package:flutter/material.dart' as flutter show Row, SizedBox, ListTile;
 import '../models/goal.dart';
 import '../controllers/tracker_controller.dart';
 import 'record_dialog.dart';
@@ -17,11 +17,12 @@ class GoalDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final records = controller.records
-        .where((r) => r.goalId == goal.id)
-        .toList()
-        .reversed
-        .toList();
+    final records =
+        controller.records
+            .where((r) => r.goalId == goal.id)
+            .toList()
+            .reversed
+            .toList();
     final progress = controller.calculateProgress(goal);
 
     return Scaffold(
@@ -41,26 +42,29 @@ class GoalDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                flutter.Row(
                   children: [
                     Icon(
-                      IconData(int.parse(goal.icon), fontFamily: 'MaterialIcons'),
+                      IconData(
+                        int.parse(goal.icon),
+                        fontFamily: 'MaterialIcons',
+                      ),
                       size: 32,
                     ),
-                    const SizedBox(width: 8),
+                    const flutter.SizedBox(width: 8),
                     Text(
                       '${goal.targetValue}${goal.unitType}',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const flutter.SizedBox(height: 16),
                 LinearProgressIndicator(
                   value: progress,
                   minHeight: 8,
                   backgroundColor: Colors.grey[200],
                 ),
-                const SizedBox(height: 8),
+                const flutter.SizedBox(height: 8),
                 Text(
                   '${(progress * 100).toStringAsFixed(1)}% 完成',
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -74,7 +78,7 @@ class GoalDetailPage extends StatelessWidget {
               itemCount: records.length,
               itemBuilder: (context, index) {
                 final record = records[index];
-                return ListTile(
+                return flutter.ListTile(
                   leading: Text(
                     '+${record.value}${goal.unitType}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
@@ -107,10 +111,7 @@ class GoalDetailPage extends StatelessWidget {
   void _showRecordDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => RecordDialog(
-        goal: goal,
-        controller: controller,
-      ),
+      builder: (context) => RecordDialog(goal: goal, controller: controller),
     );
   }
 
@@ -118,10 +119,7 @@ class GoalDetailPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => GoalEditPage(
-        controller: controller,
-        goal: goal,
-      ),
+        builder: (context) => GoalEditPage(controller: controller, goal: goal),
       ),
     );
   }

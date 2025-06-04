@@ -1,10 +1,11 @@
-
 class Goal {
   final String id;
   final String name;
   final String icon;
   final int? iconColor;
   final String unitType;
+  final String group;
+  final String? imagePath;
   final double targetValue;
   final double currentValue;
   final DateSettings dateSettings;
@@ -26,6 +27,8 @@ class Goal {
     this.reminderTime,
     required this.isLoopReset,
     required this.createdAt,
+    this.group = '默认',
+    this.imagePath,
   });
 
   factory Goal.fromJson(Map<String, dynamic> json) {
@@ -41,6 +44,8 @@ class Goal {
       reminderTime: json['reminderTime'],
       isLoopReset: json['isLoopReset'],
       createdAt: DateTime.parse(json['createdAt']),
+      group: json['group'] ?? '默认',
+      imagePath: json['imagePath'],
     );
   }
 
@@ -57,6 +62,8 @@ class Goal {
       'reminderTime': reminderTime,
       'isLoopReset': isLoopReset,
       'createdAt': createdAt.toIso8601String(),
+      'group': group,
+      'imagePath': imagePath,
     };
   }
 
@@ -72,6 +79,8 @@ class Goal {
     String? reminderTime,
     bool? isLoopReset,
     DateTime? createdAt,
+    String? group,
+    String? imagePath,
   }) {
     return Goal(
       id: id ?? this.id,
@@ -85,6 +94,8 @@ class Goal {
       reminderTime: reminderTime ?? this.reminderTime,
       isLoopReset: isLoopReset ?? this.isLoopReset,
       createdAt: createdAt ?? this.createdAt,
+      group: group ?? this.group,
+      imagePath: imagePath ?? this.imagePath,
     );
   }
 }
@@ -107,11 +118,13 @@ class DateSettings {
   factory DateSettings.fromJson(Map<String, dynamic> json) {
     return DateSettings(
       type: json['type'],
-      startDate: json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
+      startDate:
+          json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
       endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
-      selectedDays: json['selectedDays'] != null 
-          ? List<String>.from(json['selectedDays']) 
-          : null,
+      selectedDays:
+          json['selectedDays'] != null
+              ? List<String>.from(json['selectedDays'])
+              : null,
       monthDay: json['monthDay'],
     );
   }

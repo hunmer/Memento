@@ -1,28 +1,31 @@
+import 'dart:io';
 
 import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
+import 'package:Memento/utils/image_utils.dart';
 
 class GoalEditPage extends StatefulWidget {
   final TrackerController controller;
   final Goal? goal;
 
-  const GoalEditPage({
-    Key? key,
-    required this.controller,
-    this.goal,
-  }) : super(key: key);
+  const GoalEditPage({super.key, required this.controller, this.goal});
 
   @override
-  _GoalEditPageState createState() => _GoalEditPageState();
+  State<GoalEditPage> createState() => _GoalEditPageState();
 }
 
 class _GoalEditPageState extends State<GoalEditPage> {
   final _formKey = GlobalKey<FormState>();
+  final _groupController = TextEditingController();
+
   late String _name;
   late String _icon;
-  Color? _iconColor; // 改为可空类型
+  Color? _iconColor;
+  String _group = '默认';
+  String? _imagePath;
   late String _unitType;
   late double _targetValue;
   late String _dateType;
@@ -30,37 +33,63 @@ class _GoalEditPageState extends State<GoalEditPage> {
   late DateTime? _endDate;
   late TimeOfDay? _reminderTime;
 
+  // 分组列表
+  List<String> _groups = [];
+
   @override
   void initState() {
     super.initState();
+    // 初始化分组列表
+    _groups = widget.controller.getAllGroups();
+    if (!_groups.contains('默认')) {
+      _groups.add('默认');
+    }
+
     final validDateTypes = ['daily', 'weekly', 'monthly', 'custom'];
     if (widget.goal != null) {
       _name = widget.goal!.name;
       _icon = widget.goal!.icon;
-      _iconColor = widget.goal!.iconColor != null 
-          ? Color(widget.goal!.iconColor!)
-          : null;
+      _group = widget.goal!.group;
+      // 确保当前分组在列表中
+      if (!_groups.contains(_group)) {
+        _groups.add(_group);
+      }
+      _imagePath = widget.goal!.imagePath;
+      _iconColor =
+          widget.goal!.iconColor != null
+              ? Color(widget.goal!.iconColor!)
+              : null;
       _unitType = widget.goal!.unitType;
       _targetValue = widget.goal!.targetValue;
-      _dateType = validDateTypes.contains(widget.goal!.dateSettings.type) 
-          ? widget.goal!.dateSettings.type 
-          : 'daily'; // 默认值
+      _dateType =
+          validDateTypes.contains(widget.goal!.dateSettings.type)
+              ? widget.goal!.dateSettings.type
+              : 'daily'; // 默认值
       _startDate = widget.goal!.dateSettings.startDate;
       _endDate = widget.goal!.dateSettings.endDate;
-      _reminderTime = widget.goal!.reminderTime != null 
-          ? TimeOfDay.fromDateTime(DateTime.parse('1970-01-01 ${widget.goal!.reminderTime!}'))
-          : null;
+      _reminderTime =
+          widget.goal!.reminderTime != null
+              ? TimeOfDay.fromDateTime(
+                DateTime.parse('1970-01-01 ${widget.goal!.reminderTime!}'),
+              )
+              : null;
     } else {
       _name = '';
       _icon = '0';
       _iconColor = null;
       _unitType = '';
       _targetValue = 0;
-      _dateType = 'daily';  // 确保初始值与下拉选项匹配
+      _dateType = 'daily'; // 确保初始值与下拉选项匹配
       _startDate = null;
       _endDate = null;
       _reminderTime = null;
     }
+  }
+
+  @override
+  void dispose() {
+    _groupController.dispose();
+    super.dispose();
   }
 
   @override
@@ -69,16 +98,54 @@ class _GoalEditPageState extends State<GoalEditPage> {
     _iconColor ??= Theme.of(context).colorScheme.primary;
   }
 
+  // 添加新分组
+  void _addNewGroup() async {
+    final newGroupController = TextEditingController();
+    final newGroup = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('新建分组'),
+            content: TextField(
+              controller: newGroupController,
+              decoration: const InputDecoration(labelText: '分组名称'),
+              autofocus: true,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  final value = newGroupController.text.trim();
+                  if (value.isNotEmpty) {
+                    Navigator.pop(context, value);
+                  }
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          ),
+    );
+
+    if (newGroup != null && newGroup.isNotEmpty) {
+      setState(() {
+        if (!_groups.contains(newGroup)) {
+          _groups.add(newGroup);
+        }
+        _group = newGroup;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.goal != null ? '编辑目标' : '添加新目标'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveGoal,
-          ),
+          IconButton(icon: const Icon(Icons.save), onPressed: _saveGoal),
         ],
       ),
       body: Form(
@@ -86,17 +153,168 @@ class _GoalEditPageState extends State<GoalEditPage> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            CircleIconPicker(
-              currentIcon: IconData(int.parse(_icon), fontFamily: 'MaterialIcons'),
-              backgroundColor: _iconColor ?? Theme.of(context).colorScheme.primaryContainer,
-              onIconSelected: (icon) {
-                setState(() => _icon = icon.codePoint.toString());
-              },
-              onColorSelected: (color) {
-                setState(() => _iconColor = color);
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: CircleIconPicker(
+                    currentIcon: IconData(
+                      int.tryParse(_icon) ?? 0xe145, // 默认使用 add 图标
+                      fontFamily: 'MaterialIcons',
+                    ),
+                    backgroundColor:
+                        _iconColor ??
+                        Theme.of(context).colorScheme.primaryContainer,
+                    onIconSelected: (icon) {
+                      setState(() => _icon = icon.codePoint.toString());
+                    },
+                    onColorSelected: (color) {
+                      setState(() => _iconColor = color);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final result = await showDialog<Map<String, dynamic>>(
+                        context: context,
+                        builder:
+                            (context) => ImagePickerDialog(
+                              initialUrl: _imagePath,
+                              saveDirectory: 'goal_images',
+                              enableCrop: true,
+                              cropAspectRatio: 9 / 16,
+                            ),
+                      );
+                      if (result != null && result['url'] != null) {
+                        setState(() {
+                          _imagePath = result['url'] as String;
+                        });
+                      }
+                    },
+                    child: SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.5),
+                            width: 2,
+                          ),
+                        ),
+                        child:
+                            _imagePath != null && _imagePath!.isNotEmpty
+                                ? FutureBuilder<String>(
+                                  future: ImageUtils.getAbsolutePath(
+                                    _imagePath,
+                                  ),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData &&
+                                        snapshot.data!.isNotEmpty) {
+                                      return Container(
+                                        width: 64,
+                                        height: 64,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.5),
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: ClipOval(
+                                          child: Image.file(
+                                            File(snapshot.data!),
+                                            width: 64,
+                                            height: 64,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    const Icon(
+                                                      Icons.broken_image,
+                                                    ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return const Icon(Icons.broken_image);
+                                  },
+                                )
+                                : const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.add_photo_alternate_outlined,
+                                        size: 24,
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        '图片',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
+            // 分组选择器
+            Row(
+              children: [
+                Expanded(
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: '分组',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _group,
+                        isDense: true,
+                        isExpanded: true,
+                        items: [
+                          ..._groups.map(
+                            (group) => DropdownMenuItem(
+                              value: group,
+                              child: Text(group),
+                            ),
+                          ),
+                          const DropdownMenuItem(
+                            value: '新建分组',
+                            child: Row(
+                              children: [
+                                Icon(Icons.add, size: 16),
+                                SizedBox(width: 8),
+                                Text('新建分组'),
+                              ],
+                            ),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value == '新建分组') {
+                            _addNewGroup();
+                          } else if (value != null) {
+                            setState(() => _group = value);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             TextFormField(
               initialValue: _name,
               decoration: const InputDecoration(labelText: '目标名称'),
@@ -142,9 +360,11 @@ class _GoalEditPageState extends State<GoalEditPage> {
             ),
             const SizedBox(height: 16),
             ListTile(
-              title: Text(_reminderTime == null 
-                  ? '设置每日提醒时间' 
-                  : '提醒时间: ${_reminderTime!.format(context)}'),
+              title: Text(
+                _reminderTime == null
+                    ? '设置每日提醒时间'
+                    : '提醒时间: ${_reminderTime!.format(context)}',
+              ),
               trailing: const Icon(Icons.access_time),
               onTap: () async {
                 final time = await showTimePicker(
@@ -160,12 +380,15 @@ class _GoalEditPageState extends State<GoalEditPage> {
             DropdownButtonFormField<String>(
               value: _dateType,
               decoration: const InputDecoration(labelText: '时间类型'),
-              items: ['none', 'daily', 'weekly', 'monthly', 'custom']
-                  .map((type) => DropdownMenuItem(
-                        value: type,
-                        child: Text(_getDateTypeName(type)),
-                      ))
-                  .toList(),
+              items:
+                  ['none', 'daily', 'weekly', 'monthly', 'custom']
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value: type,
+                          child: Text(_getDateTypeName(type)),
+                        ),
+                      )
+                      .toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() => _dateType = value);
@@ -175,16 +398,20 @@ class _GoalEditPageState extends State<GoalEditPage> {
             if (_dateType == 'custom') ...[
               const SizedBox(height: 16),
               ListTile(
-                title: Text(_startDate == null
-                    ? '选择开始日期'
-                    : '开始日期: ${_startDate!.toLocal().toString().split(' ')[0]}'),
+                title: Text(
+                  _startDate == null
+                      ? '选择开始日期'
+                      : '开始日期: ${_startDate!.toLocal().toString().split(' ')[0]}',
+                ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context, isStartDate: true),
               ),
               ListTile(
-                title: Text(_endDate == null
-                    ? '选择结束日期'
-                    : '结束日期: ${_endDate!.toLocal().toString().split(' ')[0]}'),
+                title: Text(
+                  _endDate == null
+                      ? '选择结束日期'
+                      : '结束日期: ${_endDate!.toLocal().toString().split(' ')[0]}',
+                ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context, isStartDate: false),
               ),
@@ -212,7 +439,10 @@ class _GoalEditPageState extends State<GoalEditPage> {
     }
   }
 
-  Future<void> _selectDate(BuildContext context, {required bool isStartDate}) async {
+  Future<void> _selectDate(
+    BuildContext context, {
+    required bool isStartDate,
+  }) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -230,14 +460,24 @@ class _GoalEditPageState extends State<GoalEditPage> {
     }
   }
 
-  void _saveGoal() {
+  Future<void> _saveGoal() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      
+
+      // 如果 _imagePath 是绝对路径，转换为相对路径
+      String? finalImagePath = _imagePath;
+      if (_imagePath != null && _imagePath!.isNotEmpty) {
+        if (File(_imagePath!).existsSync()) {
+          finalImagePath = await ImageUtils.toRelativePath(_imagePath!);
+        }
+      }
+
       final newGoal = Goal(
         id: widget.goal?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         name: _name,
         icon: _icon,
+        group: _group,
+        imagePath: finalImagePath,
         iconColor: _iconColor?.value,
         unitType: _unitType,
         targetValue: _targetValue,
@@ -248,8 +488,8 @@ class _GoalEditPageState extends State<GoalEditPage> {
           endDate: _endDate,
         ),
         reminderTime: _reminderTime?.format(context),
-      isLoopReset: false,
-      createdAt: widget.goal?.createdAt ?? DateTime.now(),
+        isLoopReset: false,
+        createdAt: widget.goal?.createdAt ?? DateTime.now(),
       );
 
       if (widget.goal != null) {
