@@ -18,22 +18,17 @@ class ActivityFormState extends State<ActivityFormWidget> {
   late TimeOfDay _endTime;
   String? _selectedMood;
   List<String> _selectedTags = [];
-  
+
   @override
   Widget build(BuildContext context) {
     l10n = DiaryLocalizations.of(context)!;
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.activity == null ? l10n.addActivity : l10n.editActivity),
-        actions: [
-          TextButton(
-            onPressed: _handleSave,
-            child: Text(
-              l10n.save,
-            ),
-          ),
-        ],
+        title: Text(
+          widget.activity == null ? l10n.addActivity : l10n.editActivity,
+        ),
+        actions: [TextButton(onPressed: _handleSave, child: Text(l10n.save))],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -50,9 +45,9 @@ class ActivityFormState extends State<ActivityFormWidget> {
               ),
               maxLines: 1,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 时间选择部分
             ActivityTimeSection(
               startTime: _startTime,
@@ -62,18 +57,18 @@ class ActivityFormState extends State<ActivityFormWidget> {
               onSelectTime: (isStartTime) => _selectTime(context, isStartTime),
               onDurationChanged: _handleDurationChanged,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 心情选择器
             MoodSelector(
               selectedMood: _selectedMood,
               onMoodSelected: _selectMood,
               recentMoods: widget.recentMoods,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 标签输入
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,67 +87,73 @@ class ActivityFormState extends State<ActivityFormWidget> {
                   ),
                   maxLines: 1,
                 ),
-                if (widget.recentTags != null && widget.recentTags!.isNotEmpty) ...[
+                if (widget.recentTags != null &&
+                    widget.recentTags!.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   const Padding(
                     padding: EdgeInsets.only(left: 4.0, bottom: 4.0),
                     child: Text(
                       '最近使用的标签',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: widget.recentTags!.map((tag) {
-                      final isSelected = _selectedTags.contains(tag);
-                      return InkWell(
-                        onTap: () {
-                          setState(() {
-                            if (!_selectedTags.contains(tag)) {
-                              _selectedTags.add(tag);
-                              _tagsController.text = _selectedTags.join(', ');
-                            }
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Theme.of(context).primaryColor.withAlpha(50)
-                                : Colors.grey.withAlpha(30),
+                    children:
+                        widget.recentTags!.map((tag) {
+                          final isSelected = _selectedTags.contains(tag);
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                if (_selectedTags.contains(tag)) {
+                                  _selectedTags.remove(tag);
+                                } else {
+                                  _selectedTags.add(tag);
+                                }
+                                _tagsController.text = _selectedTags.join(', ');
+                              });
+                            },
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isSelected
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.transparent,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    isSelected
+                                        ? Theme.of(
+                                          context,
+                                        ).primaryColor.withAlpha(50)
+                                        : Colors.grey.withAlpha(30),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color:
+                                      isSelected
+                                          ? Theme.of(context).primaryColor
+                                          : Colors.transparent,
+                                ),
+                              ),
+                              child: Text(
+                                tag,
+                                style: TextStyle(
+                                  color:
+                                      isSelected
+                                          ? Theme.of(context).primaryColor
+                                          : Colors.grey[700],
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            tag,
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.grey[700],
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                   ),
                 ],
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 描述输入
             TextField(
               controller: _descriptionController,
@@ -180,6 +181,9 @@ class ActivityFormState extends State<ActivityFormWidget> {
     );
     _selectedTags = activity?.tags ?? [];
     _tagsController = TextEditingController(text: _selectedTags.join(', '));
+
+    // 添加标签输入监听器
+    _tagsController.addListener(_onTagsChanged);
     _durationController = TextEditingController(text: '60');
     _selectedMood = activity?.mood;
 
@@ -206,10 +210,24 @@ class ActivityFormState extends State<ActivityFormWidget> {
     );
   }
 
+  void _onTagsChanged() {
+    final inputTags =
+        _tagsController.text
+            .split(',')
+            .map((tag) => tag.trim())
+            .where((tag) => tag.isNotEmpty)
+            .toList();
+
+    setState(() {
+      _selectedTags = inputTags;
+    });
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _tagsController.removeListener(_onTagsChanged);
     _tagsController.dispose();
     _durationController.dispose();
     super.dispose();
@@ -273,36 +291,37 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     // 检查时间是否有效
     if (endDateTime.isBefore(startDateTime)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('结束时间必须晚于开始时间')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('结束时间必须晚于开始时间')));
       return;
     }
 
     // 检查时间间隔是否小于1分钟
     final duration = endDateTime.difference(startDateTime);
     if (duration.inMinutes < 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('活动时间必须至少为1分钟')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('活动时间必须至少为1分钟')));
       return;
     }
 
     // 检查是否超过当天结束时间
     final dayEnd = DateTime(now.year, now.month, now.day, 23, 59);
     if (endDateTime.isAfter(dayEnd)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('活动结束时间不能超过当天23:59')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('活动结束时间不能超过当天23:59')));
       return;
     }
 
     // 处理标签
-    final inputTags = _tagsController.text
-        .split(',')
-        .map((tag) => tag.trim())
-        .where((tag) => tag.isNotEmpty)
-        .toList();
+    final inputTags =
+        _tagsController.text
+            .split(',')
+            .map((tag) => tag.trim())
+            .where((tag) => tag.isNotEmpty)
+            .toList();
 
     // 获取标签组服务
     final storage = StorageManager();
@@ -356,12 +375,14 @@ class ActivityFormState extends State<ActivityFormWidget> {
     final activity = ActivityRecord(
       startTime: startDateTime,
       endTime: endDateTime,
-      title: _titleController.text.trim().isEmpty
-          ? l10n.unnamedActivity
-          : _titleController.text.trim(),
-      description: _descriptionController.text.isEmpty
-          ? null
-          : _descriptionController.text,
+      title:
+          _titleController.text.trim().isEmpty
+              ? l10n.unnamedActivity
+              : _titleController.text.trim(),
+      description:
+          _descriptionController.text.isEmpty
+              ? null
+              : _descriptionController.text,
       tags: inputTags,
       mood: _selectedMood,
     );
@@ -385,25 +406,15 @@ class ActivityFormState extends State<ActivityFormWidget> {
     }
     if (!tagGroups.any((group) => group.name == '未分组')) {
       // 检查是否存在"最近使用"标签组
-      final recentIndex = tagGroups.indexWhere(
-        (group) => group.name == '最近使用',
-      );
+      final recentIndex = tagGroups.indexWhere((group) => group.name == '最近使用');
       if (recentIndex != -1) {
         // 在"最近使用"之后插入"未分组"
-        tagGroups.insert(
-          recentIndex + 1,
-          TagGroup(name: '未分组', tags: []),
-        );
+        tagGroups.insert(recentIndex + 1, TagGroup(name: '未分组', tags: []));
       } else {
         // 在"所有"之后插入"未分组"
-        final allIndex = tagGroups.indexWhere(
-          (group) => group.name == '所有',
-        );
+        final allIndex = tagGroups.indexWhere((group) => group.name == '所有');
         if (allIndex != -1) {
-          tagGroups.insert(
-            allIndex + 1,
-            TagGroup(name: '未分组', tags: []),
-          );
+          tagGroups.insert(allIndex + 1, TagGroup(name: '未分组', tags: []));
         } else {
           // 如果没有"所有"，直接添加到列表末尾
           tagGroups.add(TagGroup(name: '未分组', tags: []));
@@ -412,16 +423,17 @@ class ActivityFormState extends State<ActivityFormWidget> {
     }
 
     if (!mounted) return;
-    
+
     final result = await showDialog<List<String>>(
       context: context,
-      builder: (BuildContext dialogContext) => TagManagerDialog(
-        groups: tagGroups,
-        selectedTags: _selectedTags,
-        onGroupsChanged: (groups) async {
-          await activityService.saveTagGroups(groups);
-        },
-      ),
+      builder:
+          (BuildContext dialogContext) => TagManagerDialog(
+            groups: tagGroups,
+            selectedTags: _selectedTags,
+            onGroupsChanged: (groups) async {
+              await activityService.saveTagGroups(groups);
+            },
+          ),
     );
 
     if (result != null && mounted) {
