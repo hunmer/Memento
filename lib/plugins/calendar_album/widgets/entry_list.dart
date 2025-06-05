@@ -1,29 +1,92 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import '../models/calendar_entry.dart';
 import '../l10n/calendar_album_localizations.dart';
+import '../../../utils/image_utils.dart';
 
 class EntryList extends StatelessWidget {
+  Widget _buildDefaultCover() {
+    return Container(
+      height: 80,
+      width: 80,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Icon(Icons.image_not_supported, color: Colors.grey),
+    );
+  }
+
+  Widget _buildImage(String url) {
+    if (url.isEmpty) {
+      return _buildDefaultCover();
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return SizedBox(
+        height: 80,
+        width: 80,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            url,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              debugPrint('Error loading network image: $error');
+              return _buildDefaultCover();
+            },
+          ),
+        ),
+      );
+    }
+
+    return FutureBuilder<String>(
+      future: ImageUtils.getAbsolutePath(url),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          final file = File(snapshot.data!);
+          if (file.existsSync()) {
+            return SizedBox(
+              height: 80,
+              width: 80,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.file(
+                  file,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    debugPrint('Error loading local image: $error');
+                    return _buildDefaultCover();
+                  },
+                ),
+              ),
+            );
+          }
+        }
+        return _buildDefaultCover();
+      },
+    );
+  }
+
   final List<CalendarEntry> entries;
   final Function(CalendarEntry) onTap;
   final Function(CalendarEntry) onEdit;
   final Function(CalendarEntry) onDelete;
 
   const EntryList({
-    Key? key,
+    super.key,
     required this.entries,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = CalendarAlbumLocalizations.of(context);
 
     if (entries.isEmpty) {
-      return Center(
-        child: Text(l10n.get('noEntries')),
-      );
+      return Center(child: Text(l10n.get('noEntries')));
     }
 
     return ListView.builder(
@@ -111,12 +174,7 @@ class EntryList extends StatelessWidget {
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Image.network(
-                              entry.imageUrls[index],
-                              height: 80,
-                              width: 80,
-                              fit: BoxFit.cover,
-                            ),
+                            child: _buildImage(entry.imageUrls[index]),
                           );
                         },
                       ),

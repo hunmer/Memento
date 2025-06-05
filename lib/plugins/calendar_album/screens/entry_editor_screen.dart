@@ -5,8 +5,11 @@ import '../controllers/tag_controller.dart';
 import '../models/calendar_entry.dart';
 import '../l10n/calendar_album_localizations.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'dart:io';
+import '../../../widgets/image_picker_dialog.dart';
+import '../../../utils/image_utils.dart';
 
 class EntryEditorScreen extends StatefulWidget {
   final CalendarEntry? entry;
@@ -14,17 +17,80 @@ class EntryEditorScreen extends StatefulWidget {
   final bool isEditing;
 
   const EntryEditorScreen({
-    Key? key,
+    super.key,
     this.entry,
     this.initialDate,
     required this.isEditing,
-  }) : super(key: key);
+  });
 
   @override
   State<EntryEditorScreen> createState() => _EntryEditorScreenState();
 }
 
 class _EntryEditorScreenState extends State<EntryEditorScreen> {
+  Widget _buildDefaultCover() {
+    return Container(
+      height: 100,
+      width: 100,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Icon(Icons.image_not_supported, color: Colors.grey),
+    );
+  }
+
+  Widget _buildImage(String url) {
+    if (url.isEmpty) {
+      return _buildDefaultCover();
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return SizedBox(
+        height: 100,
+        width: 100,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            url,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              debugPrint('Error loading network image: $error');
+              return _buildDefaultCover();
+            },
+          ),
+        ),
+      );
+    }
+
+    return FutureBuilder<String>(
+      future: ImageUtils.getAbsolutePath(url),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          final file = File(snapshot.data!);
+          if (file.existsSync()) {
+            return SizedBox(
+              height: 100,
+              width: 100,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.file(
+                  file,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    debugPrint('Error loading local image: $error');
+                    return _buildDefaultCover();
+                  },
+                ),
+              ),
+            );
+          }
+        }
+        return _buildDefaultCover();
+      },
+    );
+  }
+
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   late TextEditingController _locationController;
@@ -62,8 +128,7 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
   Widget build(BuildContext context) {
     final l10n = CalendarAlbumLocalizations.of(context);
     final calendarController = context.watch<CalendarController>();
-    final tagController = context.watch<TagController>();
-
+    final tagController = Provider.of<TagController>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isEditing ? l10n.get('edit') : l10n.get('newEntry')),
@@ -79,8 +144,15 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.save),
-            onPressed: () {
-              _saveEntry(context, calendarController);
+            onPressed: () async {
+              try {
+                if (!mounted) return;
+                _saveEntry(context, calendarController);
+              } catch (e) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+              }
             },
           ),
         ],
@@ -153,7 +225,39 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
                       decoration: InputDecoration(
                         labelText: l10n.get('location'),
                         border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.location_on),
+                        prefixIcon: IconButton(
+                          icon: const Icon(Icons.location_on),
+                          onPressed: () async {
+                            try {
+                              // 这里应该使用定位SDK获取经纬度，这里使用示例坐标
+                              const location =
+                                  '117.130967881945,36.673222113716';
+                              final response = await http.get(
+                                Uri.parse(
+                                  'http://restapi.amap.com/v3/geocode/regeo?key=dad6a772bf826842c3049e9c7198115c&location=$location&poitype=&radius=1000&extensions=all&batch=false&roadlevel=0',
+                                ),
+                              );
+
+                              if (!mounted) return;
+
+                              if (response.statusCode == 200) {
+                                final data = json.decode(response.body);
+                                if (data['status'] == '1') {
+                                  setState(() {
+                                    _locationController.text =
+                                        data['regeocode']['formatted_address'];
+                                  });
+                                }
+                              }
+                            } catch (e) {
+                              if (!mounted) return;
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('获取位置失败: $e')),
+                              );
+                            }
+                          },
+                        ),
                       ),
                       maxLines: 1,
                     ),
@@ -239,7 +343,7 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
                     Wrap(
                       spacing: 8,
                       children: [
-                        ...tagController.tags.map((tag) {
+                        ...(tagController?.tags ?? []).map<Widget>((tag) {
                           final isSelected = _selectedTags.contains(tag.name);
                           return FilterChip(
                             label: Text(tag.name),
@@ -256,12 +360,64 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
                             backgroundColor: tag.color.withOpacity(0.2),
                             selectedColor: tag.color.withOpacity(0.6),
                           );
-                        }),
+                        }).toList(),
                         ActionChip(
                           label: Text(l10n.get('addTag')),
                           avatar: const Icon(Icons.add),
                           onPressed: () {
-                            // Show add tag dialog
+                            final textController = TextEditingController();
+                            showDialog(
+                              context: context,
+                              builder:
+                                  (context) => AlertDialog(
+                                    title: Text(l10n.get('addTag')),
+                                    content: TextField(
+                                      controller: textController,
+                                      autofocus: true,
+                                      decoration: InputDecoration(
+                                        labelText: l10n.get('tagName'),
+                                        border: const OutlineInputBorder(),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed:
+                                            () => Navigator.of(context).pop(),
+                                        child: Text(l10n.get('cancel')),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          final value = textController.text;
+                                          if (value.isNotEmpty &&
+                                              tagController != null) {
+                                            final newTag = Tag.create(
+                                              name: value,
+                                              color: Colors.blue,
+                                            );
+                                            tagController.addTag(newTag);
+                                            setState(() {
+                                              _selectedTags.add(value);
+                                            });
+                                          }
+                                          // 同步新标签到标签管理
+                                          for (final tagName in _selectedTags) {
+                                            if (!tagController.tags.any(
+                                              (tag) => tag.name == tagName,
+                                            )) {
+                                              final newTag = Tag.create(
+                                                name: tagName,
+                                                color: Colors.blue,
+                                              );
+                                              tagController.addTag(newTag);
+                                            }
+                                          }
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(l10n.get('confirm')),
+                                      ),
+                                    ],
+                                  ),
+                            );
                           },
                         ),
                       ],
@@ -287,12 +443,7 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
                               padding: const EdgeInsets.only(right: 8),
                               child: Stack(
                                 children: [
-                                  Image.network(
-                                    url,
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  ),
+                                  _buildImage(url),
                                   Positioned(
                                     top: 0,
                                     right: 0,
@@ -314,17 +465,18 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
                           ),
                           GestureDetector(
                             onTap: () async {
-                              final ImagePicker picker = ImagePicker();
-                              final XFile? image = await picker.pickImage(
-                                source: ImageSource.gallery,
-                              );
-                              if (image != null) {
-                                // In a real app, you would upload the image to a server
-                                // and get back a URL. For now, we'll just use a placeholder.
-                                setState(() {
-                                  _imageUrls.add(
-                                    'https://via.placeholder.com/150',
+                              final result =
+                                  await showDialog<Map<String, dynamic>>(
+                                    context: context,
+                                    builder:
+                                        (context) => const ImagePickerDialog(
+                                          saveDirectory:
+                                              'calendar_album/images',
+                                        ),
                                   );
+                              if (result != null && result['url'] != null) {
+                                setState(() {
+                                  _imageUrls.add(result['url'] as String);
                                 });
                               }
                             },
@@ -348,6 +500,8 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
   }
 
   void _saveEntry(BuildContext context, CalendarController calendarController) {
+    final tagController = Provider.of<TagController>(context, listen: false);
+    if (!mounted) return;
     if (_titleController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,

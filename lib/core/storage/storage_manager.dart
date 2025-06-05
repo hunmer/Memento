@@ -342,7 +342,7 @@ class StorageManager {
   }
 
   /// 读取 JSON 文件
-  /// 
+  ///
   /// [path] 文件路径
   /// [defaultValue] 当文件不存在或读取失败时返回的默认值，如果不指定则返回空对象 {}
   Future<Map<String, dynamic>> read(
@@ -365,6 +365,7 @@ class StorageManager {
       return defaultValue ?? {};
     }
   }
+
   /// 写入 JSON 文件
   Future<void> write(String path, Map<String, dynamic> data) async {
     await writeJson(path, data);

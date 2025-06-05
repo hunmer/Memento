@@ -6,6 +6,7 @@ import '../controllers/tag_controller.dart';
 import '../l10n/calendar_album_localizations.dart';
 import '../widgets/entry_list.dart';
 import 'entry_editor_screen.dart';
+import 'entry_detail_screen.dart' hide BoxDecoration, Center;
 import '../utils/date_utils.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -25,6 +26,15 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    // 确保在初始化时就选择当天日期并加载对应的日记
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.calendarController.selectDate(DateTime.now());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,15 +138,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   return Container(
                     margin: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color:
-                          hasImages
-                              ? Colors.blue.withValues(
-                                red: 0,
-                                green: 0,
-                                blue: 255,
-                                alpha: 25,
-                              )
-                              : null,
+                      color: hasImages ? Colors.blue.withOpacity(0.1) : null,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Stack(
@@ -158,8 +160,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             right: 2,
                             child: Container(
                               padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor,
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
@@ -179,9 +180,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   return Container(
                     margin: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).primaryColor.withValues(alpha: 76),
+                      color: Theme.of(context).primaryColor.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
@@ -211,23 +210,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             builder:
                                 (context) => MultiProvider(
                                   providers: [
-                                    ChangeNotifierProvider.value(
-                                      value: calendarController,
-                                    ),
-                                    ChangeNotifierProvider.value(
+                                    ChangeNotifierProvider<
+                                      CalendarController
+                                    >.value(value: calendarController),
+                                    ChangeNotifierProvider<TagController>.value(
                                       value: tagController,
                                     ),
                                   ],
-                                  child: EntryEditorScreen(
+                                  child: EntryDetailScreen(
                                     entry: entry,
-                                    isEditing: false,
+                                    date: calendarController.selectedDate,
                                   ),
                                 ),
                           ),
                         );
                       },
-                      onEdit: (entry) {
-                        Navigator.push(
+                      onEdit: (entry) async {
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder:
@@ -267,6 +266,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     onPressed: () {
                                       calendarController.deleteEntry(entry);
                                       Navigator.of(context).pop();
+                                      setState(() {}); // 强制刷新界面
                                     },
                                     child: Text(l10n.get('delete')),
                                   ),
@@ -282,16 +282,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
         floatingActionButton: Builder(
           builder:
               (context) => FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder:
                           (context) => ChangeNotifierProvider.value(
                             value: calendarController,
-                            child: EntryEditorScreen(
-                              initialDate: selectedDate,
-                              isEditing: false,
+                            child: MultiProvider(
+                              providers: [
+                                ChangeNotifierProvider.value(
+                                  value: calendarController,
+                                ),
+                                ChangeNotifierProvider.value(
+                                  value: tagController,
+                                ),
+                              ],
+                              child: EntryEditorScreen(
+                                initialDate: selectedDate,
+                                isEditing: false,
+                              ),
                             ),
                           ),
                     ),
