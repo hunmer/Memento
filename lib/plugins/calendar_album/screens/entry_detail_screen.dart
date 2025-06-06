@@ -295,12 +295,6 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                             MaterialPageRoute(
                               builder:
                                   (context) => Scaffold(
-                                    appBar: AppBar(
-                                      backgroundColor: Colors.black,
-                                      iconTheme: const IconThemeData(
-                                        color: Colors.white,
-                                      ),
-                                    ),
                                     body: EntryDetailImageViewer(
                                       imageUrls: currentEntry.imageUrls,
                                       initialIndex: index,

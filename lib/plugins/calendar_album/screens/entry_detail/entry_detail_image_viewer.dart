@@ -26,14 +26,44 @@ class _EntryDetailImageViewerState extends State<EntryDetailImageViewer> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
-    _imageProviders = widget.imageUrls.map(_createImageProvider).toList();
+    _imageProviders = List.filled(
+      widget.imageUrls.length,
+      const AssetImage('assets/placeholder.png'),
+      growable: false,
+    );
+
+    // 异步加载所有图片
+    for (var i = 0; i < widget.imageUrls.length; i++) {
+      _createImageProvider(widget.imageUrls[i])
+          .then((provider) {
+            if (mounted) {
+              setState(() {
+                _imageProviders[i] = provider;
+              });
+            }
+          })
+          .catchError((e) {
+            debugPrint('Error loading image: $e');
+            if (mounted) {
+              setState(() {
+                _imageProviders[i] = const AssetImage(
+                  'assets/error_placeholder.png',
+                );
+              });
+            }
+          });
+    }
   }
 
-  ImageProvider _createImageProvider(String url) {
+  Future<ImageProvider> _createImageProvider(String url) async {
     if (url.startsWith('http')) {
       return NetworkImage(url);
     }
-    return FileImage(File(url));
+    final absolutePath = await ImageUtils.getAbsolutePath(url);
+    if (await File(absolutePath).exists()) {
+      return FileImage(File(absolutePath));
+    }
+    throw Exception('Image file not found at path: $absolutePath');
   }
 
   @override

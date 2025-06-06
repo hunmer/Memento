@@ -57,28 +57,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
           title: GestureDetector(
             onTap: () {
-              // TODO: Implement year/month picker
-              showDialog(
+              showDatePicker(
                 context: context,
-                builder:
-                    (context) => AlertDialog(
-                      title: Text(l10n.get('selectDate')),
-                      content: const Text(
-                        'Year/Month picker to be implemented',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(l10n.get('cancel')),
-                        ),
-                      ],
-                    ),
-              );
+                initialDate: _focusedDay,
+                firstDate: DateTime(2010),
+                lastDate: DateTime(2030),
+                initialEntryMode: DatePickerEntryMode.calendarOnly,
+                initialDatePickerMode: DatePickerMode.year,
+              ).then((selectedDate) {
+                if (selectedDate != null) {
+                  setState(() {
+                    _focusedDay = selectedDate;
+                  });
+                  calendarController.selectDate(selectedDate);
+                }
+              });
             },
-            child: Text(
-              '${selectedDate.year} / ${selectedDate.month}',
-              style: const TextStyle(fontSize: 18),
-            ),
+            child: Text('日历日记', style: const TextStyle(fontSize: 18)),
           ),
           actions: [
             IconButton(
@@ -112,6 +107,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   });
                 }
               },
+              headerVisible: !isExpanded,
+              calendarStyle: CalendarStyle(
+                outsideDaysVisible: isExpanded,
+                markersAutoAligned: true,
+              ),
               selectedDayPredicate: (day) {
                 return isSameDay(selectedDate, day);
               },
@@ -138,7 +138,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   return Container(
                     margin: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: hasImages ? Colors.blue.withOpacity(0.1) : null,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Stack(
