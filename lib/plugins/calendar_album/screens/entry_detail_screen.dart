@@ -5,8 +5,6 @@ import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart'
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
 import 'package:provider/provider.dart';
 import '../controllers/calendar_controller.dart';
 import '../controllers/tag_controller.dart';
@@ -27,6 +25,30 @@ class EntryDetailScreen extends StatefulWidget {
 }
 
 class _EntryDetailScreenState extends State<EntryDetailScreen> {
+  late final CalendarController _calendarController;
+  late final TagController _tagController;
+
+  @override
+  void initState() {
+    super.initState();
+    _calendarController = Provider.of<CalendarController>(
+      context,
+      listen: false,
+    );
+    _tagController = Provider.of<TagController>(context, listen: false);
+    _calendarController.addListener(_onCalendarChange);
+  }
+
+  @override
+  void dispose() {
+    _calendarController.removeListener(_onCalendarChange);
+    super.dispose();
+  }
+
+  void _onCalendarChange() {
+    if (mounted) setState(() {});
+  }
+
   Widget _buildEntryEditorScreen({
     required CalendarController calendarController,
     required TagController tagController,
@@ -233,13 +255,11 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 ),
               );
 
-              if (updatedEntry != null && context.mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder:
-                        (context) => EntryDetailScreen(entry: updatedEntry),
-                  ),
-                );
+              if (updatedEntry != null) {
+                _calendarController.notifyListeners();
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
               }
             },
           ),
@@ -345,9 +365,9 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                       return Chip(
                         label: Text(tag.name),
                         backgroundColor: Color.fromRGBO(
-                          (tag.color.red * 255.0).round() & 0xff,
-                          (tag.color.green * 255.0).round() & 0xff,
-                          (tag.color.blue * 255.0).round() & 0xff,
+                          (tag.color.r * 255.0).round() & 0xff,
+                          (tag.color.g * 255.0).round() & 0xff,
+                          (tag.color.b * 255.0).round() & 0xff,
                           0.2,
                         ),
                       );

@@ -44,9 +44,8 @@ class CalendarController extends ChangeNotifier {
   }
 
   void collapseRange() {
-    // 保留已加载的月份，但将显示范围缩小到当前月份前后各1个月
-    _rangeStart = DateTime(_currentMonth.year, _currentMonth.month - 1);
-    _rangeEnd = DateTime(_currentMonth.year, _currentMonth.month + 1);
+    _rangeStart = DateTime(_currentMonth.year, _currentMonth.month);
+    _rangeEnd = DateTime(_currentMonth.year, _currentMonth.month);
     _updateDisplayMonths();
     notifyListeners();
   }

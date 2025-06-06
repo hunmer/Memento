@@ -7,8 +7,56 @@ import '../../../utils/image_utils.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
-class AlbumScreen extends StatelessWidget {
+class AlbumScreen extends StatefulWidget {
   const AlbumScreen({super.key});
+
+  @override
+  State<AlbumScreen> createState() => _AlbumScreenState();
+}
+
+class _AlbumScreenState extends State<AlbumScreen> {
+  late CalendarController _calendarController;
+  late CalendarAlbumLocalizations l10n;
+  List<String> _images = [];
+  late List<Widget> _imageWidgets;
+
+  @override
+  void initState() {
+    super.initState();
+    _calendarController = Provider.of<CalendarController>(
+      context,
+      listen: false,
+    );
+    _images = _calendarController.getAllImages();
+    _imageWidgets = List.filled(
+      _images.length,
+      Image.asset('assets/images/image_not_found.png', fit: BoxFit.contain),
+    );
+    _preloadImages();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    l10n = CalendarAlbumLocalizations.of(context);
+  }
+
+  Future<void> _preloadImages() async {
+    for (var i = 0; i < _images.length; i++) {
+      try {
+        final path = await ImageUtils.getAbsolutePath(_images[i]);
+        if (path.isNotEmpty) {
+          final file = File(path);
+          if (file.existsSync()) {
+            _imageWidgets[i] = Image.file(file, fit: BoxFit.contain);
+          }
+        }
+      } catch (e) {
+        debugPrint('Error loading image: $e');
+      }
+      if (mounted) setState(() {});
+    }
+  }
 
   Widget _buildDefaultCover() {
     return Container(
@@ -20,55 +68,10 @@ class AlbumScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(String url) {
-    if (url.isEmpty) {
-      return _buildDefaultCover();
-    }
-
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          url,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            debugPrint('Error loading network image: $error');
-            return _buildDefaultCover();
-          },
-        ),
-      );
-    }
-
-    return FutureBuilder<String>(
-      future: ImageUtils.getAbsolutePath(url),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          final file = File(snapshot.data!);
-          if (file.existsSync()) {
-            return ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                file,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  debugPrint('Error loading local image: $error');
-                  return _buildDefaultCover();
-                },
-              ),
-            );
-          }
-        }
-        return _buildDefaultCover();
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final l10n = CalendarAlbumLocalizations.of(context);
     final calendarController = Provider.of<CalendarController>(context);
     final images = calendarController.getAllImages();
-
     return Scaffold(
       appBar: AppBar(title: Text(l10n.get('allPhotos'))),
       body:
@@ -90,52 +93,9 @@ class AlbumScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder:
-                              (context) => Scaffold(
-                                extendBodyBehindAppBar: true,
-                                appBar: AppBar(
-                                  backgroundColor: Colors.black.withAlpha(128),
-                                  elevation: 0,
-                                  iconTheme: const IconThemeData(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                body: PhotoViewGallery.builder(
-                                  itemCount: images.length,
-                                  builder: (context, index) {
-                                    return PhotoViewGalleryPageOptions(
-                                      imageProvider: FileImage(
-                                        File(images[index]),
-                                      ),
-                                      minScale:
-                                          PhotoViewComputedScale.contained,
-                                      maxScale:
-                                          PhotoViewComputedScale.covered * 2,
-                                      initialScale:
-                                          PhotoViewComputedScale.contained,
-                                      heroAttributes: PhotoViewHeroAttributes(
-                                        tag: images[index],
-                                      ),
-                                    );
-                                  },
-                                  scrollPhysics: const BouncingScrollPhysics(),
-                                  backgroundDecoration: const BoxDecoration(
-                                    color: Colors.black,
-                                  ),
-                                  pageController: PageController(
-                                    initialPage: index,
-                                  ),
-                                  loadingBuilder:
-                                      (context, event) => Center(
-                                        child: CircularProgressIndicator(
-                                          value:
-                                              event == null
-                                                  ? 0
-                                                  : event.cumulativeBytesLoaded /
-                                                      event.expectedTotalBytes!,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                ),
+                              (context) => _PhotoViewScreen(
+                                images: images,
+                                initialIndex: index,
                               ),
                         ),
                       );
@@ -144,6 +104,129 @@ class AlbumScreen extends StatelessWidget {
                   );
                 },
               ),
+    );
+  }
+
+  Widget _buildImage(String imageUrl) {
+    if (imageUrl.isEmpty) {
+      return _buildDefaultCover();
+    }
+
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('Error loading network image: $error');
+            return _buildDefaultCover();
+          },
+        ),
+      );
+    }
+    return FutureBuilder<String>(
+      future: ImageUtils.getAbsolutePath(imageUrl),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          final file = File(snapshot.data!);
+          if (file.existsSync()) {
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                file,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Error loading local image: $error');
+                  return _buildDefaultCover();
+                },
+              ),
+            );
+          }
+        }
+        return _buildDefaultCover();
+      },
+    );
+  }
+}
+
+class _PhotoViewScreen extends StatefulWidget {
+  final List<String> images;
+  final int initialIndex;
+
+  const _PhotoViewScreen({required this.images, required this.initialIndex});
+
+  @override
+  State<_PhotoViewScreen> createState() => _PhotoViewScreenState();
+}
+
+class _PhotoViewScreenState extends State<_PhotoViewScreen> {
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Container(
+        color: Colors.black,
+        child: PhotoViewGallery.builder(
+          itemCount: widget.images.length,
+          builder: (context, index) {
+            return PhotoViewGalleryPageOptions.customChild(
+              child: FutureBuilder<String>(
+                future: ImageUtils.getAbsolutePath(widget.images[index]),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    final file = File(snapshot.data!);
+                    if (file.existsSync()) {
+                      return Image.file(file, fit: BoxFit.contain);
+                    }
+                  }
+                  return Image.asset(
+                    'assets/images/image_not_found.png',
+                    fit: BoxFit.contain,
+                  );
+                },
+              ),
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.covered * 2,
+              initialScale: PhotoViewComputedScale.contained,
+              heroAttributes: PhotoViewHeroAttributes(
+                tag: widget.images[index],
+              ),
+            );
+          },
+          scrollPhysics: const BouncingScrollPhysics(),
+          pageController: _pageController,
+          loadingBuilder:
+              (context, event) => Center(
+                child: CircularProgressIndicator(
+                  value:
+                      event == null || event.expectedTotalBytes == null
+                          ? 0
+                          : event.cumulativeBytesLoaded /
+                              event.expectedTotalBytes!,
+                  color: Colors.white,
+                ),
+              ),
+        ),
+      ),
     );
   }
 }

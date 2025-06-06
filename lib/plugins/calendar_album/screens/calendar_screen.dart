@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart' hide isSameDay;
@@ -83,9 +84,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.calendarController.selectDate(DateTime.now());
-      if (mounted) setState(() {});
+    // 增加延迟时间确保组件完全加载
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        widget.calendarController.selectDate(DateTime.now());
+        setState(() {});
+      }
     });
   }
 
@@ -135,7 +139,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => PluginManager.toHomeScreen(context),
       ),
       title: const Text('日历日记', style: TextStyle(fontSize: 18)),
       actions: [
@@ -222,6 +226,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     calendarController.displayMonths.length > 1
                         ? (focusedDay) {
                           setState(() {
+                            _focusedDay = focusedDay;
                             calendarController.currentMonth = focusedDay;
                             if (index == 0) {
                               calendarController.loadMoreMonths(true);
@@ -231,6 +236,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           });
                         }
                         : null,
+                headerStyle: HeaderStyle(
+                  formatButtonVisible: false,
+                  leftChevronIcon: Icon(Icons.chevron_left),
+                  rightChevronIcon: Icon(Icons.chevron_right),
+                  titleCentered: true,
+                ),
                 calendarBuilders: CalendarBuilders(
                   defaultBuilder: _dayCellBuilder,
                   selectedBuilder: _dayCellBuilder,
@@ -253,23 +264,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Expanded(
       child: EntryList(
         entries: calendarController.getEntriesForDate(selectedDate),
-        onTap:
-            (entry) => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) => MultiProvider(
-                      providers: [
-                        ChangeNotifierProvider.value(value: calendarController),
-                        ChangeNotifierProvider.value(value: tagController),
-                      ],
-                      child: EntryDetailScreen(
-                        entry: entry,
-                        date: selectedDate,
-                      ),
-                    ),
-              ),
+        onTap: (entry) async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider.value(value: calendarController),
+                      ChangeNotifierProvider.value(value: tagController),
+                    ],
+                    child: EntryDetailScreen(entry: entry, date: selectedDate),
+                  ),
             ),
+          );
+          if (mounted) setState(() {});
+        },
         onEdit:
             (entry) async => await Navigator.push(
               context,
