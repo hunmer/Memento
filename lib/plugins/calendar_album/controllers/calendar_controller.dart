@@ -6,28 +6,100 @@ import '../../../core/storage/storage_manager.dart';
 class CalendarController extends ChangeNotifier {
   final StorageManager _storage;
   final Map<DateTime, List<CalendarEntry>> _entries = {};
-  bool _isExpanded = false;
   DateTime _selectedDate = DateTime.now();
+  DateTime _currentMonth = DateTime.now();
+  DateTime _rangeStart = DateTime.now();
+  DateTime _rangeEnd = DateTime.now();
+  final List<DateTime> _displayMonths = [];
   final String _storageKey = 'calendar_entries';
 
   CalendarController(this._storage) {
     _loadEntries();
+    _updateDisplayMonths(); // 初始化时设置默认月份范围
   }
 
-  bool get isExpanded => _isExpanded;
   DateTime get selectedDate => _selectedDate;
-  Map<DateTime, List<CalendarEntry>> get entries => _entries;
+  DateTime get currentMonth => _currentMonth;
+  DateTime get rangeStart => _rangeStart;
+  DateTime get rangeEnd => _rangeEnd;
 
-  void toggleExpanded() {
-    _isExpanded = !_isExpanded;
+  set currentMonth(DateTime month) {
+    _currentMonth = DateTime(month.year, month.month);
+    _rangeStart = DateTime(
+      _currentMonth.year,
+      _currentMonth.month - 1,
+    ); // 默认显示前后1个月
+    _rangeEnd = DateTime(_currentMonth.year, _currentMonth.month + 1);
+    _updateDisplayMonths();
     notifyListeners();
   }
 
+  bool get isExpanded => _rangeStart.month != _rangeEnd.month;
+
+  void expandRange() {
+    _rangeStart = DateTime(_currentMonth.year, _currentMonth.month - 3);
+    _rangeEnd = DateTime(_currentMonth.year, _currentMonth.month + 3);
+    _updateDisplayMonths();
+    notifyListeners();
+  }
+
+  void collapseRange() {
+    // 保留已加载的月份，但将显示范围缩小到当前月份前后各1个月
+    _rangeStart = DateTime(_currentMonth.year, _currentMonth.month - 1);
+    _rangeEnd = DateTime(_currentMonth.year, _currentMonth.month + 1);
+    _updateDisplayMonths();
+    notifyListeners();
+  }
+
+  void toggleExpanded() {
+    if (isExpanded) {
+      collapseRange();
+    } else {
+      expandRange();
+    }
+  }
+
+  void _updateDisplayMonths() {
+    _displayMonths.clear();
+    var current = DateTime(_rangeStart.year, _rangeStart.month);
+    final end = DateTime(_rangeEnd.year, _rangeEnd.month);
+
+    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+      _displayMonths.add(current);
+      current = DateTime(current.year, current.month + 1);
+    }
+  }
+
+  Map<DateTime, List<CalendarEntry>> get entries => _entries;
+
+  bool loadMoreMonths(bool isBefore) {
+    if (_displayMonths.isEmpty) return false;
+
+    final newMonths = <DateTime>[];
+
+    if (isBefore) {
+      final firstMonth = _displayMonths.first;
+      for (int i = 1; i <= 3; i++) {
+        newMonths.add(DateTime(firstMonth.year, firstMonth.month - i));
+      }
+      _displayMonths.insertAll(0, newMonths);
+      _rangeStart = _displayMonths.first;
+    } else {
+      final lastMonth = _displayMonths.last;
+      for (int i = 1; i <= 3; i++) {
+        newMonths.add(DateTime(lastMonth.year, lastMonth.month + i));
+      }
+      _displayMonths.addAll(newMonths);
+      _rangeEnd = _displayMonths.last;
+    }
+    notifyListeners();
+    return true;
+  }
+
+  List<DateTime> get displayMonths => _displayMonths;
+
   void selectDate(DateTime date) {
     _selectedDate = DateTime(date.year, date.month, date.day);
-    if (_isExpanded) {
-      _isExpanded = false;
-    }
     notifyListeners();
   }
 
@@ -42,9 +114,10 @@ class CalendarController extends ChangeNotifier {
       final Map<String, dynamic> jsonData = json.decode(data);
       jsonData.forEach((key, value) {
         final date = DateTime.parse(key);
-        final entries = (value as List)
-            .map((e) => CalendarEntry.fromJson(e as Map<String, dynamic>))
-            .toList();
+        final entries =
+            (value as List)
+                .map((e) => CalendarEntry.fromJson(e as Map<String, dynamic>))
+                .toList();
         _entries[date] = entries;
       });
       notifyListeners();
