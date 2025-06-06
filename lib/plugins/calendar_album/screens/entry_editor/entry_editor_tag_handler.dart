@@ -33,7 +33,7 @@ class EntryEditorTagHandler extends StatelessWidget {
           ),
           readOnly: true,
           controller: TextEditingController(
-            text: controller.selectedTags.map((t) => t.name).join(', '),
+            text: controller.selectedTags.join(', '),
           ),
         ),
         if (tagController.recentTags.isNotEmpty) ...[
@@ -51,14 +51,12 @@ class EntryEditorTagHandler extends StatelessWidget {
             children:
                 tagController.recentTags.map((tag) {
                   final isSelected = controller.selectedTags.any(
-                    (t) => t.name == tag.name,
+                    (t) => t == tag,
                   );
                   return GestureDetector(
                     onTap: () {
                       if (isSelected) {
-                        controller.selectedTags.removeWhere(
-                          (t) => t.name == tag.name,
-                        );
+                        controller.selectedTags.removeWhere((t) => t == tag);
                       } else {
                         controller.selectedTags.add(tag);
                       }
@@ -82,7 +80,7 @@ class EntryEditorTagHandler extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        tag.name,
+                        tag,
                         style: TextStyle(
                           color:
                               isSelected

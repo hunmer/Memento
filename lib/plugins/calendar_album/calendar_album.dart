@@ -9,6 +9,9 @@ import 'controllers/calendar_controller.dart';
 import 'controllers/tag_controller.dart';
 
 class CalendarAlbumPlugin extends BasePlugin {
+  late final CalendarController _calendarController;
+  late final TagController _tagController;
+
   @override
   String get id => 'calendar_album_plugin';
 
@@ -26,6 +29,12 @@ class CalendarAlbumPlugin extends BasePlugin {
 
   @override
   Future<void> initialize() async {
+    _calendarController = CalendarController();
+    _tagController = TagController(
+      onTagsChanged: () {
+        _tagController.notifyListeners();
+      },
+    );
     await initializeDefaultData();
   }
 
@@ -41,22 +50,8 @@ class CalendarAlbumPlugin extends BasePlugin {
   Widget buildMainView(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => CalendarController()),
-        ChangeNotifierProvider(
-          create:
-              (context) => TagController(
-                onTagsChanged: () {
-                  // 当标签变化时刷新UI
-                  if (context != null) {
-                    final controller = Provider.of<TagController>(
-                      context!,
-                      listen: false,
-                    );
-                    controller.notifyListeners();
-                  }
-                },
-              ),
-        ),
+        ChangeNotifierProvider.value(value: _calendarController),
+        ChangeNotifierProvider.value(value: _tagController),
       ],
       child: const MainScreen(),
     );

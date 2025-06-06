@@ -203,6 +203,18 @@ class CalendarController extends ChangeNotifier {
     return taggedEntries..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
+  List<CalendarEntry> getEntriesByTags(List<String> tags) {
+    if (tags.isEmpty) return [];
+
+    final List<CalendarEntry> taggedEntries = [];
+    _entries.values.forEach((entries) {
+      taggedEntries.addAll(
+        entries.where((entry) => tags.every((tag) => entry.tags.contains(tag))),
+      );
+    });
+    return taggedEntries..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
   List<String> getAllImages() {
     final Set<String> images = {};
     _entries.values.forEach((entries) {

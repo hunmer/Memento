@@ -5,48 +5,14 @@ import '../../../../widgets/tag_manager_dialog/models/tag_group.dart' as dialog;
 import 'dart:convert';
 import '../../../core/storage/storage_manager.dart';
 
-class Tag {
-  final String id;
-  final String name;
-  final Color color;
-
-  Tag({required this.id, required this.name, Color? color})
-    : color = color ?? Colors.grey;
-
-  factory Tag.create({required String name, Color? color}) {
-    return Tag(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: name,
-      color: color,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'color': color.value};
-  }
-
-  factory Tag.fromJson(Map<String, dynamic> json) {
-    return Tag(
-      id: json['id'],
-      name: json['name'],
-      color: json.containsKey('color') ? Color(json['color']) : null,
-    );
-  }
-}
-
-extension TagGroupExtension on dialog.TagGroup {
-  List<Tag> get tagObjects {
-    return tags.map((name) => Tag.create(name: name)).toList();
-  }
-}
-
 class TagController extends ChangeNotifier {
   final VoidCallback? onTagsChanged;
 
   List<dialog.TagGroup> tagGroups = [];
-  List<Tag> selectedTags = [];
-  List<Tag> recentTags = [];
+  List<String> selectedTags = [];
+  List<String> recentTags = [];
 
+  static const String _tagGroupsKey = 'calendar_tag_groups';
   static const String _recentTagsKey = 'calendar_recent_tags';
   final String _tagGroupsFile = 'data/calendar_tag_groups.json';
   final String _recentTagsFile = 'data/calendar_recent_tags.json';
@@ -92,10 +58,7 @@ class TagController extends ChangeNotifier {
       // 尝试加载最近使用的标签
       final recentJson = await storageManager.readFile(_recentTagsFile, '[]');
       final List<dynamic> recentData = json.decode(recentJson);
-      recentTags =
-          recentData
-              .map((e) => Tag.fromJson(e as Map<String, dynamic>))
-              .toList();
+      recentTags = recentData.cast<String>().toList();
       _updateRecentTagGroup();
 
       notifyListeners();
@@ -103,7 +66,6 @@ class TagController extends ChangeNotifier {
     } catch (e, stack) {
       debugPrint('加载标签组失败: $e');
       debugPrint('Stack trace: $stack');
-      // 回退到默认初始化
       initialize();
     }
   }
@@ -112,12 +74,7 @@ class TagController extends ChangeNotifier {
     try {
       final data = json.encode(
         tagGroups
-            .map(
-              (group) => {
-                'name': group.name,
-                'tags': group.tagObjects.map((tag) => tag.toJson()).toList(),
-              },
-            )
+            .map((group) => {'name': group.name, 'tags': group.tags})
             .toList(),
       );
       await storageManager.writeFile(_tagGroupsFile, data);
@@ -128,8 +85,8 @@ class TagController extends ChangeNotifier {
 
   Future<void> _saveRecentTags() async {
     try {
-      final data = json.encode(recentTags.map((tag) => tag.toJson()).toList());
-      await storageManager.setString(_recentTagsKey, data);
+      final data = json.encode(recentTags);
+      await storageManager.writeFile(_recentTagsFile, data);
     } catch (e) {
       debugPrint('保存最近标签失败: $e');
     }
@@ -140,43 +97,37 @@ class TagController extends ChangeNotifier {
     if (recentGroupIndex != -1) {
       tagGroups[recentGroupIndex] = dialog.TagGroup(
         name: '最近使用',
-        tags: recentTags.map((tag) => tag.name).toList(),
+        tags: List.from(recentTags),
       );
     }
   }
 
-  Future<void> updateRecentTags(List<Tag> tags) async {
+  Future<void> updateRecentTags(List<String> tags) async {
     if (tags.isEmpty) return;
 
-    // 更新最近使用标签列表
     for (final tag in tags) {
-      recentTags.removeWhere((t) => t.id == tag.id);
+      recentTags.remove(tag);
       recentTags.insert(0, tag);
     }
 
-    // 限制最近使用标签数量
     if (recentTags.length > 10) {
       recentTags.removeRange(10, recentTags.length);
     }
 
-    // 更新最近使用标签组
     _updateRecentTagGroup();
-
-    // 保存最近使用的标签
     await _saveRecentTags();
     await _saveTagGroups();
-
     notifyListeners();
     onTagsChanged?.call();
   }
 
-  Future<void> showTagManagerDialog(BuildContext context) async {
+  Future<List<String>?> showTagManagerDialog(BuildContext context) async {
     final result = await showDialog<List<String>>(
       context: context,
       builder:
           (context) => TagManagerDialog(
             groups: List.from(tagGroups),
-            selectedTags: selectedTags.map((t) => t.name).toList(),
+            selectedTags: List.from(selectedTags),
             onGroupsChanged: (updatedGroups) {
               setState(() {
                 tagGroups = List.from(updatedGroups);
@@ -189,13 +140,13 @@ class TagController extends ChangeNotifier {
     );
 
     if (result != null) {
-      setState(() {
-        selectedTags = result.map((name) => Tag.create(name: name)).toList();
-      });
+      selectedTags = List.from(result);
       await updateRecentTags(selectedTags);
       notifyListeners();
       onTagsChanged?.call();
+      return selectedTags;
     }
+    return null;
   }
 
   void setState(void Function() fn) {
@@ -203,11 +154,11 @@ class TagController extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Tag> get tags {
-    return tagGroups.expand((group) => group.tagObjects).toList();
+  List<String> get tags {
+    return tagGroups.expand((group) => group.tags).toList();
   }
 
-  Future<void> addTag(Tag tag, {String? groupName}) async {
+  Future<void> addTag(String tag, {String? groupName}) async {
     final group =
         groupName != null
             ? tagGroups.firstWhere(
@@ -216,32 +167,24 @@ class TagController extends ChangeNotifier {
             )
             : tagGroups.firstWhere((g) => g.name == '最近使用');
 
-    if (!group.tagObjects.any((t) => t.id == tag.id)) {
-      group.tags.add(tag.name);
+    if (!group.tags.contains(tag)) {
+      group.tags.add(tag);
       await _saveTagGroups();
       notifyListeners();
     }
   }
 
-  Future<void> deleteTag(String tagId) async {
+  Future<void> deleteTag(String tag) async {
     for (final group in tagGroups) {
-      group.tags.removeWhere((tag) => tag == tagId);
+      group.tags.remove(tag);
     }
-    recentTags.removeWhere((tag) => tag.id == tagId);
+    recentTags.remove(tag);
     await _saveTagGroups();
     await _saveRecentTags();
     notifyListeners();
   }
 
-  Tag? getTagByName(String name) {
-    try {
-      for (final group in tagGroups) {
-        final tag = group.tagObjects.firstWhere((tag) => tag.name == name);
-        return tag;
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
+  bool hasTag(String name) {
+    return tagGroups.any((group) => group.tags.contains(name));
   }
 }

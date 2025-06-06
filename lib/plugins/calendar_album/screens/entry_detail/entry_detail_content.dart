@@ -30,12 +30,7 @@ class EntryDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tagController = Provider.of<TagController>(context);
-    final tags =
-        entry.tags
-            .map((tagName) => tagController.getTagByName(tagName))
-            .whereType<Tag>()
-            .toList();
+    final tags = entry.tags;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -56,11 +51,10 @@ class EntryDetailContent extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (context) => EntryDetailImageViewer(
-                                  imageUrls: entry.imageUrls,
-                                  initialIndex: index,
-                                ),
+                            builder: (context) => EntryDetailImageViewer(
+                              imageUrls: entry.imageUrls,
+                              initialIndex: index,
+                            ),
                           ),
                         );
                       },
@@ -98,18 +92,15 @@ class EntryDetailContent extends StatelessWidget {
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
-              children:
-                  tags.map((tag) {
-                    return Chip(
-                      label: Text(tag.name),
-                      backgroundColor: Color.fromRGBO(
-                        (tag.color.red * 255.0).round() & 0xff,
-                        (tag.color.green * 255.0).round() & 0xff,
-                        (tag.color.blue * 255.0).round() & 0xff,
-                        0.2,
-                      ),
-                    );
-                  }).toList(),
+              children: tags.map((tag) {
+                final color = Colors.primaries[tag.hashCode % Colors.primaries.length];
+                return Chip(
+                  label: Text(tag),
+                  backgroundColor: color.withOpacity(0.2),
+                  labelStyle: TextStyle(color: color),
+                  side: BorderSide(color: color.withOpacity(0.5)),
+                );
+              }).toList(),
             ),
           ],
           const SizedBox(height: 16),

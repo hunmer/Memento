@@ -26,12 +26,12 @@ class EntryDetailScreen extends StatefulWidget {
 
 class _EntryDetailScreenState extends State<EntryDetailScreen> {
   late final CalendarController _calendarController;
-  late CalendarEntry? _currentEntry; // 添加状态变量保存当前entry
+  late CalendarEntry? _currentEntry;
 
   @override
   void initState() {
     super.initState();
-    _currentEntry = widget.entry; // 初始化当前entry
+    _currentEntry = widget.entry;
     _calendarController = Provider.of<CalendarController>(
       context,
       listen: false,
@@ -53,7 +53,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
       final updatedEntry = _calendarController.getEntryById(currentEntry.id);
       if (updatedEntry != null && updatedEntry != _currentEntry) {
         setState(() {
-          _currentEntry = updatedEntry; // 更新状态变量
+          _currentEntry = updatedEntry;
         });
       }
     }
@@ -97,9 +97,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
   }
 
   Widget _buildImage(String url) {
-    if (url.isEmpty) {
-      return _buildDefaultCover();
-    }
+    if (url.isEmpty) return _buildDefaultCover();
 
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return SizedBox(
@@ -185,13 +183,12 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (context) => _buildEntryEditorScreen(
-                            calendarController: calendarController,
-                            tagController: tagController,
-                            initialDate: selectedDate,
-                            isEditing: false,
-                          ),
+                      builder: (context) => _buildEntryEditorScreen(
+                        calendarController: calendarController,
+                        tagController: tagController,
+                        initialDate: selectedDate,
+                        isEditing: false,
+                      ),
                     ),
                   );
                 },
@@ -214,13 +211,12 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder:
-                            (context) => _buildEntryEditorScreen(
-                              calendarController: calendarController,
-                              tagController: tagController,
-                              initialDate: selectedDate,
-                              isEditing: false,
-                            ),
+                        builder: (context) => _buildEntryEditorScreen(
+                          calendarController: calendarController,
+                          tagController: tagController,
+                          initialDate: selectedDate,
+                          isEditing: false,
+                        ),
                       ),
                     );
                   },
@@ -233,17 +229,12 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
         );
       }
 
-      // 如果有多个条目，显示第一个
       if (entries.isEmpty) return const SizedBox.shrink();
       return EntryDetailScreen(entry: entries.first);
     }
 
     final currentEntry = _currentEntry ?? widget.entry!;
-    final tags =
-        currentEntry.tags
-            .map((tagName) => tagController.getTagByName(tagName))
-            .whereType<Tag>()
-            .toList();
+    final tags = currentEntry.tags;
 
     return Scaffold(
       appBar: AppBar(
@@ -255,13 +246,12 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
               final updatedEntry = await Navigator.push<CalendarEntry?>(
                 context,
                 MaterialPageRoute(
-                  builder:
-                      (context) => _buildEntryEditorScreen(
-                        calendarController: calendarController,
-                        tagController: tagController,
-                        entry: currentEntry.copyWith(),
-                        isEditing: true,
-                      ),
+                  builder: (context) => _buildEntryEditorScreen(
+                    calendarController: calendarController,
+                    tagController: tagController,
+                    entry: currentEntry.copyWith(),
+                    isEditing: true,
+                  ),
                 ),
               );
 
@@ -276,27 +266,24 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
             onPressed: () {
               showDialog(
                 context: context,
-                builder:
-                    (context) => AlertDialog(
-                      title: Text(l10n.get('delete')),
-                      content: Text(
-                        '${l10n.get('delete')} "${currentEntry.title}"?',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(l10n.get('cancel')),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            calendarController.deleteEntry(currentEntry);
-                            Navigator.of(context).pop(); // 关闭对话框
-                            Navigator.of(context).pop(); // 返回上一页
-                          },
-                          child: Text(l10n.get('delete')),
-                        ),
-                      ],
+                builder: (context) => AlertDialog(
+                  title: Text(l10n.get('delete')),
+                  content: Text('${l10n.get('delete')} "${currentEntry.title}"?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(l10n.get('cancel')),
                     ),
+                    TextButton(
+                      onPressed: () {
+                        calendarController.deleteEntry(currentEntry);
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(l10n.get('delete')),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -321,13 +308,12 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder:
-                                  (context) => Scaffold(
-                                    body: EntryDetailImageViewer(
-                                      imageUrls: currentEntry.imageUrls,
-                                      initialIndex: index,
-                                    ),
-                                  ),
+                              builder: (context) => Scaffold(
+                                body: EntryDetailImageViewer(
+                                  imageUrls: currentEntry.imageUrls,
+                                  initialIndex: index,
+                                ),
+                              ),
                             ),
                           );
                         },
@@ -348,9 +334,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 ),
               ],
             ),
-
-            if (currentEntry.location != null &&
-                currentEntry.location!.isNotEmpty) ...[
+            if (currentEntry.location != null && currentEntry.location!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -363,20 +347,19 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 ],
               ),
             ],
-
             if (tags.isNotEmpty) ...[
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
-                children:
-                    tags.map((tag) {
-                      return Chip(
-                        label: Text(tag.name),
-                        backgroundColor: tag.color.withOpacity(0.2),
-                        labelStyle: TextStyle(color: tag.color),
-                        side: BorderSide(color: tag.color.withOpacity(0.5)),
-                      );
-                    }).toList(),
+                children: tags.map((tag) {
+                  final color = Colors.primaries[tag.hashCode % Colors.primaries.length];
+                  return Chip(
+                    label: Text(tag),
+                    backgroundColor: color.withOpacity(0.2),
+                    labelStyle: TextStyle(color: color),
+                    side: BorderSide(color: color.withOpacity(0.5)),
+                  );
+                }).toList(),
               ),
             ],
             const SizedBox(height: 16),

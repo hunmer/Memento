@@ -144,15 +144,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       title: const Text('日历日记', style: TextStyle(fontSize: 18)),
       actions: [
         IconButton(
-          icon: const Icon(Icons.label),
-          onPressed:
-              () => Provider.of<TagController>(
-                context,
-                listen: false,
-              ).showTagManagerDialog(context),
-          tooltip: l10n.get('tagManagement'),
-        ),
-        IconButton(
           icon: Icon(isExpanded ? Icons.unfold_less : Icons.unfold_more),
           onPressed: () => setState(() => calendarController.toggleExpanded()),
           tooltip:

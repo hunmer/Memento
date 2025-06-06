@@ -13,7 +13,7 @@ class EntryEditorController {
   late TextEditingController locationController;
   String? mood;
   String? weather;
-  List<Tag> selectedTags = [];
+  List<String> selectedTags = [];
   List<String> imageUrls = [];
   bool isPreview = false;
 
@@ -49,7 +49,7 @@ class EntryEditorController {
     if (isEditing && entry != null) {
       final updatedEntry = entry!.copyWith(
         title: titleController.text,
-        tags: selectedTags.map((t) => t.name).toList(),
+        tags: selectedTags.toList(),
         location:
             locationController.text.isEmpty ? null : locationController.text,
         mood: mood,
@@ -62,7 +62,7 @@ class EntryEditorController {
       final newEntry = CalendarEntry.create(
         title: titleController.text,
         content: contentController.text,
-        tags: selectedTags.map((t) => t.name).toList(),
+        tags: selectedTags.toList(),
         location:
             locationController.text.isEmpty ? null : locationController.text,
         mood: mood,
