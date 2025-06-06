@@ -1,10 +1,10 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../models/calendar_entry.dart';
 import 'dart:convert';
 import '../../../core/storage/storage_manager.dart';
 
 class CalendarController extends ChangeNotifier {
-  final StorageManager _storage;
   final Map<DateTime, List<CalendarEntry>> _entries = {};
   DateTime _selectedDate = DateTime.now();
   DateTime _currentMonth = DateTime.now();
@@ -13,9 +13,17 @@ class CalendarController extends ChangeNotifier {
   final List<DateTime> _displayMonths = [];
   final String _storageKey = 'calendar_entries';
 
-  CalendarController(this._storage) {
+  CalendarController() {
     _loadEntries();
     _updateDisplayMonths(); // 初始化时设置默认月份范围
+  }
+
+  StorageManager get _storage {
+    final storage = PluginManager.instance.storageManager;
+    if (storage == null) {
+      throw Exception('StorageManager is not initialized in PluginManager');
+    }
+    return storage;
   }
 
   DateTime get selectedDate => _selectedDate;

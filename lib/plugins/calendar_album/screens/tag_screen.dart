@@ -165,104 +165,80 @@ class _TagScreenState extends State<TagScreen> {
   }
 
   void _showAddTagDialog(BuildContext context) {
-    final l10n = CalendarAlbumLocalizations.of(context);
     final tagController = Provider.of<TagController>(context, listen: false);
-    final nameController = TextEditingController();
-    Color? selectedColor;
+    final TextEditingController _tagNameController = TextEditingController();
+    String? selectedGroup;
 
     showDialog(
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(l10n.get('createTag')),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(labelText: l10n.get('tagName')),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(l10n.get('tagColor')),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children:
-                        [
-                          Colors.red,
-                          Colors.pink,
-                          Colors.purple,
-                          Colors.deepPurple,
-                          Colors.indigo,
-                          Colors.blue,
-                          Colors.lightBlue,
-                          Colors.cyan,
-                          Colors.teal,
-                          Colors.green,
-                          Colors.lightGreen,
-                          Colors.lime,
-                          Colors.yellow,
-                          Colors.amber,
-                          Colors.orange,
-                          Colors.deepOrange,
-                          Colors.brown,
-                          Colors.grey,
-                          Colors.blueGrey,
-                        ].map((color) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedColor =
-                                    selectedColor == color ? null : color;
-                              });
-                            },
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: color,
-                                shape: BoxShape.circle,
-                                border:
-                                    selectedColor == color
-                                        ? Border.all(
-                                          color: Colors.black,
-                                          width: 2,
-                                        )
-                                        : null,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                  ),
-                ],
+        final groups = tagController.tagGroups.map((g) => g.name).toList();
+        return AlertDialog(
+          title: const Text('添加标签'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _tagNameController,
+                decoration: const InputDecoration(labelText: '标签名称'),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(l10n.get('cancel')),
-                ),
-                TextButton(
-                  onPressed: () {
-                    if (nameController.text.isNotEmpty) {
-                      tagController.addTag(
-                        Tag.create(
-                          name: nameController.text,
-                          color: selectedColor,
-                        ),
-                      );
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: Text(l10n.get('save')),
-                ),
-              ],
-            );
-          },
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: selectedGroup,
+                hint: const Text('选择标签组'),
+                items:
+                    groups.map((group) {
+                      return DropdownMenuItem(value: group, child: Text(group));
+                    }).toList(),
+                onChanged: (value) => selectedGroup = value,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (_tagNameController.text.isNotEmpty) {
+                  tagController.addTag(
+                    Tag.create(name: _tagNameController.text),
+                    groupName: selectedGroup,
+                  );
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('确定'),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  void _deleteTag(Tag tag) {
+    final tagController = Provider.of<TagController>(context, listen: false);
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('删除标签'),
+            content: Text('确定要删除标签 "${tag.name}" 吗？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  tagController.deleteTag(tag.id);
+                  Navigator.pop(context);
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          ),
     );
   }
 

@@ -372,12 +372,9 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                     tags.map((tag) {
                       return Chip(
                         label: Text(tag.name),
-                        backgroundColor: Color.fromRGBO(
-                          (tag.color.r * 255.0).round() & 0xff,
-                          (tag.color.g * 255.0).round() & 0xff,
-                          (tag.color.b * 255.0).round() & 0xff,
-                          0.2,
-                        ),
+                        backgroundColor: tag.color.withOpacity(0.2),
+                        labelStyle: TextStyle(color: tag.color),
+                        side: BorderSide(color: tag.color.withOpacity(0.5)),
                       );
                     }).toList(),
               ),

@@ -41,11 +41,21 @@ class CalendarAlbumPlugin extends BasePlugin {
   Widget buildMainView(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => CalendarController()),
         ChangeNotifierProvider(
-          create: (context) => CalendarController(StorageManager()),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => TagController(StorageManager()),
+          create:
+              (context) => TagController(
+                onTagsChanged: () {
+                  // 当标签变化时刷新UI
+                  if (context != null) {
+                    final controller = Provider.of<TagController>(
+                      context!,
+                      listen: false,
+                    );
+                    controller.notifyListeners();
+                  }
+                },
+              ),
         ),
       ],
       child: const MainScreen(),

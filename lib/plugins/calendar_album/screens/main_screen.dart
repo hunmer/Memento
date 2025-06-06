@@ -25,9 +25,8 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentIndex);
-    final storageManager = StorageManager();
-    _calendarController = CalendarController(storageManager);
-    _tagController = TagController(storageManager);
+    _calendarController = CalendarController();
+    _tagController = TagController();
   }
 
   @override
