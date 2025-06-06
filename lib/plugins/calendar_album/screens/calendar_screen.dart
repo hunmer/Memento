@@ -280,20 +280,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
           );
           if (mounted) setState(() {});
         },
-        onEdit:
-            (entry) async => await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) => MultiProvider(
-                      providers: [
-                        ChangeNotifierProvider.value(value: calendarController),
-                        ChangeNotifierProvider.value(value: tagController),
-                      ],
-                      child: EntryEditorScreen(entry: entry, isEditing: true),
-                    ),
-              ),
+        onEdit: (entry) async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider.value(value: calendarController),
+                      ChangeNotifierProvider.value(value: tagController),
+                    ],
+                    child: EntryEditorScreen(entry: entry, isEditing: true),
+                  ),
             ),
+          );
+          if (mounted) setState(() {});
+        },
         onDelete:
             (entry) => showDialog(
               context: context,

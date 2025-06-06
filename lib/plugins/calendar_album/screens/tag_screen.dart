@@ -168,7 +168,7 @@ class _TagScreenState extends State<TagScreen> {
     final l10n = CalendarAlbumLocalizations.of(context);
     final tagController = Provider.of<TagController>(context, listen: false);
     final nameController = TextEditingController();
-    Color selectedColor = Colors.blue;
+    Color? selectedColor;
 
     showDialog(
       context: context,
@@ -189,6 +189,7 @@ class _TagScreenState extends State<TagScreen> {
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
+                    runSpacing: 8,
                     children:
                         [
                           Colors.red,
@@ -214,7 +215,8 @@ class _TagScreenState extends State<TagScreen> {
                           return GestureDetector(
                             onTap: () {
                               setState(() {
-                                selectedColor = color;
+                                selectedColor =
+                                    selectedColor == color ? null : color;
                               });
                             },
                             child: Container(

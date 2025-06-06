@@ -147,7 +147,10 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
             onPressed: () async {
               try {
                 if (!mounted) return;
-                _saveEntry(context, calendarController);
+                final savedEntry = _saveEntry(context, calendarController);
+                if (savedEntry != null) {
+                  Navigator.of(context).pop(savedEntry);
+                }
               } catch (e) {
                 ScaffoldMessenger.of(
                   context,
@@ -392,7 +395,6 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
                                               tagController != null) {
                                             final newTag = Tag.create(
                                               name: value,
-                                              color: Colors.blue,
                                             );
                                             tagController.addTag(newTag);
                                             setState(() {
@@ -499,14 +501,17 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
     );
   }
 
-  void _saveEntry(BuildContext context, CalendarController calendarController) {
+  CalendarEntry? _saveEntry(
+    BuildContext context,
+    CalendarController calendarController,
+  ) {
     final tagController = Provider.of<TagController>(context, listen: false);
-    if (!mounted) return;
+    if (!mounted) return null;
     if (_titleController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Title cannot be empty')));
-      return;
+      return null;
     }
 
     if (widget.isEditing && widget.entry != null) {
@@ -522,6 +527,7 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
         imageUrls: _imageUrls,
       );
       calendarController.updateEntry(updatedEntry);
+      return updatedEntry;
     } else {
       // Create new entry
       final newEntry = CalendarEntry.create(
@@ -535,8 +541,7 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
         imageUrls: _imageUrls,
       );
       calendarController.addEntry(newEntry);
+      return newEntry;
     }
-
-    Navigator.of(context).pop();
   }
 }

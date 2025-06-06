@@ -7,16 +7,10 @@ class Tag {
   final String name;
   final Color color;
 
-  Tag({
-    required this.id,
-    required this.name,
-    required this.color,
-  });
+  Tag({required this.id, required this.name, Color? color})
+    : color = color ?? Colors.grey;
 
-  factory Tag.create({
-    required String name,
-    required Color color,
-  }) {
+  factory Tag.create({required String name, Color? color}) {
     return Tag(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
@@ -25,18 +19,14 @@ class Tag {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'color': color.value,
-    };
+    return {'id': id, 'name': name, 'color': color.value};
   }
 
   factory Tag.fromJson(Map<String, dynamic> json) {
     return Tag(
       id: json['id'],
       name: json['name'],
-      color: Color(json['color']),
+      color: json.containsKey('color') ? Color(json['color']) : null,
     );
   }
 }
@@ -56,15 +46,15 @@ class TagController extends ChangeNotifier {
     final String? data = await _storage.getString(_storageKey);
     if (data != null) {
       final List<dynamic> jsonData = json.decode(data);
-      _tags = jsonData
-          .map((e) => Tag.fromJson(e as Map<String, dynamic>))
-          .toList();
+      _tags =
+          jsonData.map((e) => Tag.fromJson(e as Map<String, dynamic>)).toList();
       notifyListeners();
     }
   }
 
   Future<void> _saveTags() async {
-    final List<Map<String, dynamic>> data = _tags.map((tag) => tag.toJson()).toList();
+    final List<Map<String, dynamic>> data =
+        _tags.map((tag) => tag.toJson()).toList();
     await _storage.setString(_storageKey, json.encode(data));
   }
 

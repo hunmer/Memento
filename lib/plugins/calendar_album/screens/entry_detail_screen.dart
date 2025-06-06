@@ -26,16 +26,16 @@ class EntryDetailScreen extends StatefulWidget {
 
 class _EntryDetailScreenState extends State<EntryDetailScreen> {
   late final CalendarController _calendarController;
-  late final TagController _tagController;
+  late CalendarEntry? _currentEntry; // 添加状态变量保存当前entry
 
   @override
   void initState() {
     super.initState();
+    _currentEntry = widget.entry; // 初始化当前entry
     _calendarController = Provider.of<CalendarController>(
       context,
       listen: false,
     );
-    _tagController = Provider.of<TagController>(context, listen: false);
     _calendarController.addListener(_onCalendarChange);
   }
 
@@ -46,7 +46,17 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
   }
 
   void _onCalendarChange() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+
+    final currentEntry = widget.entry;
+    if (currentEntry != null) {
+      final updatedEntry = _calendarController.getEntryById(currentEntry.id);
+      if (updatedEntry != null && updatedEntry != _currentEntry) {
+        setState(() {
+          _currentEntry = updatedEntry; // 更新状态变量
+        });
+      }
+    }
   }
 
   Widget _buildEntryEditorScreen({
@@ -228,7 +238,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
       return EntryDetailScreen(entry: entries.first);
     }
 
-    final currentEntry = widget.entry!;
+    final currentEntry = _currentEntry ?? widget.entry!;
     final tags =
         currentEntry.tags
             .map((tagName) => tagController.getTagByName(tagName))
@@ -249,17 +259,15 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                       (context) => _buildEntryEditorScreen(
                         calendarController: calendarController,
                         tagController: tagController,
-                        entry: currentEntry,
+                        entry: currentEntry.copyWith(),
                         isEditing: true,
                       ),
                 ),
               );
 
-              if (updatedEntry != null) {
-                _calendarController.notifyListeners();
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
+              if (updatedEntry != null && context.mounted) {
+                setState(() {});
+                _calendarController.updateEntry(updatedEntry);
               }
             },
           ),

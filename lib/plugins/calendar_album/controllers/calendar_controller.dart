@@ -205,4 +205,15 @@ class CalendarController extends ChangeNotifier {
     });
     return images.toList();
   }
+
+  CalendarEntry? getEntryById(String id) {
+    for (final entries in _entries.values) {
+      for (final entry in entries) {
+        if (entry.id == id) {
+          return entry;
+        }
+      }
+    }
+    return null;
+  }
 }
