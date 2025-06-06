@@ -1,11 +1,9 @@
-import 'package:Memento/plugins/activity/screens/activity_timeline_screen/controllers/tag_controller.dart';
-import 'package:Memento/plugins/calendar/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/calendar_controller.dart' hide CalendarController;
-import '../../controllers/tag_controller.dart' hide TagController;
+import '../../controllers/calendar_controller.dart';
+import '../../controllers/tag_controller.dart';
 import '../../models/calendar_entry.dart';
 import '../../l10n/calendar_album_localizations.dart';
 import 'entry_detail_app_bar.dart';

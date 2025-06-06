@@ -1,9 +1,10 @@
 import 'dart:io';
-
 import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
+import 'package:Memento/plugins/calendar_album/screens/entry_detail/entry_detail_image_viewer.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:provider/provider.dart';
@@ -88,6 +89,22 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
     return FutureBuilder<String>(
       future: ImageUtils.getAbsolutePath(url),
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            height: 200,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          debugPrint('Error loading image path: ${snapshot.error}');
+          return _buildDefaultCover();
+        }
+
         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           final file = File(snapshot.data!);
           if (file.existsSync()) {
@@ -107,6 +124,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
             );
           }
         }
+
         return _buildDefaultCover();
       },
     );
@@ -189,10 +207,11 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
     }
 
     final currentEntry = widget.entry!;
-    final tags = currentEntry.tags
-        .map((tagName) => tagController.getTagByName(tagName))
-        .whereType<Tag>()
-        .toList();
+    final tags =
+        currentEntry.tags
+            .map((tagName) => tagController.getTagByName(tagName))
+            .whereType<Tag>()
+            .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -282,70 +301,18 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                                         color: Colors.white,
                                       ),
                                     ),
-                                    body: PhotoViewGallery.builder(
-                                      scrollPhysics:
-                                          const BouncingScrollPhysics(),
-                                      builder: (
-                                        BuildContext context,
-                                        int galleryIndex,
-                                      ) {
-                                        final imageUrl =
-                                            currentEntry
-                                                .imageUrls[galleryIndex];
-                                        if (imageUrl.startsWith('http')) {
-                                          return PhotoViewGalleryPageOptions(
-                                            imageProvider: NetworkImage(
-                                              imageUrl,
-                                            ),
-                                            initialScale:
-                                                PhotoViewComputedScale
-                                                    .contained,
-                                            minScale:
-                                                PhotoViewComputedScale
-                                                    .contained *
-                                                0.8,
-                                            maxScale:
-                                                PhotoViewComputedScale.covered *
-                                                2,
-                                          );
-                                        }
-                                        final localImagePath = await ImageUtils.getAbsolutePath(imageUrl);
-                                        if (localImagePath != null && localImagePath.isNotEmpty && File(localImagePath).existsSync()) {
-                                          return PhotoViewGalleryPageOptions(
-                                            imageProvider: FileImage(File(localImagePath)),
-                                            initialScale: PhotoViewComputedScale.contained,
-                                            minScale: PhotoViewComputedScale.contained * 0.8,
-                                            maxScale: PhotoViewComputedScale.covered * 2,
-                                          );
-                                        }
-                                        return PhotoViewGalleryPageOptions(
-                                          imageProvider: const AssetImage('assets/icon/icon.png'),
-                                          initialScale: PhotoViewComputedScale.contained,
-                                        );
-                                      },
-                                      itemCount: currentEntry.imageUrls.length,
-                                      loadingBuilder:
-                                          (context, event) => const Center(
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                      backgroundDecoration: const BoxDecoration(
-                                        color: Colors.black,
-                                      ),
-                                      pageController: PageController(
-                                        initialPage: index,
-                                      ),
+                                    body: EntryDetailImageViewer(
+                                      imageUrls: currentEntry.imageUrls,
+                                      initialIndex: index,
                                     ),
                                   ),
-                                ),
-                                );
-                              },
-                              child: _buildImage(currentEntry.imageUrls[index]),
                             ),
                           );
                         },
+                        child: _buildImage(currentEntry.imageUrls[index]),
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
             const SizedBox(height: 16),
@@ -359,6 +326,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 ),
               ],
             ),
+
             if (currentEntry.location != null &&
                 currentEntry.location!.isNotEmpty) ...[
               const SizedBox(height: 8),
@@ -373,6 +341,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 ],
               ),
             ],
+
             if (tags.isNotEmpty) ...[
               const SizedBox(height: 8),
               Wrap(

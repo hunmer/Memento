@@ -119,7 +119,7 @@ class EntryDetailContent extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(String url) {
+  Future<Widget> _buildImageAsync(String url) async {
     if (url.isEmpty) return _buildDefaultCover();
 
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -139,27 +139,39 @@ class EntryDetailContent extends StatelessWidget {
       );
     }
 
-    return FutureBuilder<String>(
-      future: ImageUtils.getAbsolutePath(url),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          final file = File(snapshot.data!);
-          if (file.existsSync()) {
-            return SizedBox(
-              height: 200,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  file,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    debugPrint('Error loading local image: $error');
-                    return _buildDefaultCover();
-                  },
-                ),
+    try {
+      final localPath = await ImageUtils.getAbsolutePath(url);
+      if (localPath.isNotEmpty) {
+        final file = File(localPath);
+        if (await file.exists()) {
+          return SizedBox(
+            height: 200,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                file,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Error loading local image: $error');
+                  return _buildDefaultCover();
+                },
               ),
-            );
-          }
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error getting image path: $e');
+    }
+    return _buildDefaultCover();
+  }
+
+  Widget _buildImage(String url) {
+    return FutureBuilder<Widget>(
+      future: _buildImageAsync(url),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return snapshot.data!;
         }
         return _buildDefaultCover();
       },

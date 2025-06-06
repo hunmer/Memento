@@ -4,7 +4,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'dart:io';
 
-class EntryDetailImageViewer extends StatelessWidget {
+class EntryDetailImageViewer extends StatefulWidget {
   final List<String> imageUrls;
   final int initialIndex;
 
@@ -15,6 +15,28 @@ class EntryDetailImageViewer extends StatelessWidget {
   });
 
   @override
+  State<EntryDetailImageViewer> createState() => _EntryDetailImageViewerState();
+}
+
+class _EntryDetailImageViewerState extends State<EntryDetailImageViewer> {
+  late PageController _pageController;
+  late List<ImageProvider> _imageProviders;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: widget.initialIndex);
+    _imageProviders = widget.imageUrls.map(_createImageProvider).toList();
+  }
+
+  ImageProvider _createImageProvider(String url) {
+    if (url.startsWith('http')) {
+      return NetworkImage(url);
+    }
+    return FileImage(File(url));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -23,43 +45,34 @@ class EntryDetailImageViewer extends StatelessWidget {
       ),
       body: PhotoViewGallery.builder(
         scrollPhysics: const BouncingScrollPhysics(),
-        builder: (BuildContext context, int galleryIndex) {
-          final imageUrl = imageUrls[galleryIndex];
-          if (imageUrl.startsWith('http')) {
-            return PhotoViewGalleryPageOptions(
-              imageProvider: NetworkImage(imageUrl),
-              initialScale: PhotoViewComputedScale.contained,
-              minScale: PhotoViewComputedScale.contained * 0.8,
-              maxScale: PhotoViewComputedScale.covered * 2,
-            );
-          }
-          return FutureBuilder<String>(
-            future: ImageUtils.getAbsolutePath(imageUrl),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                return PhotoViewGalleryPageOptions(
-                  imageProvider: FileImage(File(snapshot.data!)),
-                  initialScale: PhotoViewComputedScale.contained,
-                  minScale: PhotoViewComputedScale.contained * 0.8,
-                  maxScale: PhotoViewComputedScale.covered * 2,
-                );
-              }
-              return PhotoViewGalleryPageOptions(
-                imageProvider: const AssetImage('assets/icon/icon.png'),
-                initialScale: PhotoViewComputedScale.contained,
-              );
-            },
+        builder: (BuildContext context, int index) {
+          return PhotoViewGalleryPageOptions(
+            imageProvider: _imageProviders[index],
+            initialScale: PhotoViewComputedScale.contained,
+            minScale: PhotoViewComputedScale.contained * 0.8,
+            maxScale: PhotoViewComputedScale.covered * 2,
+            heroAttributes: PhotoViewHeroAttributes(
+              tag: widget.imageUrls[index],
+            ),
           );
         },
-        itemCount: imageUrls.length,
+        itemCount: _imageProviders.length,
         loadingBuilder:
-            (context, event) =>
-                const Center(child: CircularProgressIndicator()),
+            (context, event) => Center(
+              child: SizedBox(
+                width: 20.0,
+                height: 20.0,
+                child: CircularProgressIndicator(
+                  value:
+                      event == null
+                          ? 0
+                          : event.cumulativeBytesLoaded /
+                              event.expectedTotalBytes!,
+                ),
+              ),
+            ),
         backgroundDecoration: const BoxDecoration(color: Colors.black),
-        pageController: PageController(initialPage: initialIndex),
+        pageController: _pageController,
       ),
     );
   }
