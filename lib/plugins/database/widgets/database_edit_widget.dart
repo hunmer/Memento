@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/database/controllers/field_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/database_controller.dart';
@@ -226,18 +227,16 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
           (context) => SimpleDialog(
             title: const Text('Select Field Type'),
             children: [
-              _buildFieldTypeTile('Text', Icons.text_fields),
-              _buildFieldTypeTile('Long Text', Icons.notes),
-              _buildFieldTypeTile('Integer', Icons.numbers),
-              _buildFieldTypeTile('Checkbox', Icons.check_box),
-              _buildFieldTypeTile('Dropdown', Icons.arrow_drop_down),
-              _buildFieldTypeTile('Date', Icons.calendar_today),
-              _buildFieldTypeTile('Time', Icons.access_time),
-              _buildFieldTypeTile('Date/Time', Icons.date_range),
-              _buildFieldTypeTile('Image', Icons.image),
-              _buildFieldTypeTile('URL', Icons.link),
-              _buildFieldTypeTile('Rating', Icons.star),
-              _buildFieldTypeTile('Password', Icons.lock),
+              for (final type in FieldController.getFieldTypes())
+                FieldController.buildFieldTypeTile(
+                  type: type,
+                  onTap: () {
+                    setState(() {
+                      _selectedFieldType = type;
+                    });
+                    Navigator.pop(context, type);
+                  },
+                ),
               ButtonBar(
                 children: [
                   TextButton(
@@ -262,19 +261,6 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
       );
       await _editField(newField);
     }
-  }
-
-  ListTile _buildFieldTypeTile(String type, IconData icon) {
-    return ListTile(
-      title: Text(type),
-      leading: Icon(icon),
-      onTap: () {
-        setState(() {
-          _selectedFieldType = type;
-        });
-        Navigator.pop(context, type);
-      },
-    );
   }
 
   Future<void> _saveChanges() async {

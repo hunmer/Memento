@@ -1,3 +1,5 @@
+import 'package:Memento/plugins/database/models/database_field.dart';
+import '../controllers/field_controller.dart';
 import 'package:flutter/material.dart';
 import '../controllers/database_controller.dart';
 import '../models/database_model.dart';
@@ -28,9 +30,21 @@ class _RecordEditWidgetState extends State<RecordEditWidget> {
   void initState() {
     super.initState();
     _fields = widget.initialFields ?? {};
-    // Initialize empty values for all database fields
     for (final field in widget.database.fields) {
-      _fields.putIfAbsent(field.name, () => '');
+      _fields.putIfAbsent(field.name, () {
+        switch (field.type) {
+          case 'Checkbox':
+            return false;
+          case 'Integer':
+            return 0;
+          case 'Date':
+          case 'Time':
+          case 'Date/Time':
+            return DateTime.now();
+          default:
+            return '';
+        }
+      });
     }
   }
 
@@ -52,21 +66,25 @@ class _RecordEditWidgetState extends State<RecordEditWidget> {
               for (final field in widget.database.fields)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      labelText: field.name,
-                      border: const OutlineInputBorder(),
-                    ),
-                    initialValue: _fields[field.name]?.toString(),
-                    onSaved: (value) {
-                      _fields[field.name] = value;
-                    },
-                  ),
+                  child: _buildFieldWidget(field),
                 ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFieldWidget(DatabaseField field) {
+    return FieldController.buildFieldWidget(
+      context: context,
+      field: field,
+      initialValue: _fields[field.name],
+      onChanged: (value) {
+        setState(() {
+          _fields[field.name] = value;
+        });
+      },
     );
   }
 
