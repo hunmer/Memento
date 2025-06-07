@@ -5,6 +5,7 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
+import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/screens/settings_screen/controllers/settings_screen_controller.dart';
 
 import 'package:flutter/material.dart';
@@ -44,6 +45,8 @@ import 'plugins/store/store_plugin.dart'; // store插件
 import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 import 'core/services/backup_service.dart'; // 备份服务
+import 'package:flutter/material.dart';
+import 'plugins/database/database.dart';
 
 // 全局导航键
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -86,6 +89,7 @@ void main() async {
       ActivityPlugin.instance,
       CheckinPlugin.instance,
       ContactPlugin(),
+      DatabasePlugin(),
       TimerPlugin.instance,
       TodoPlugin.instance,
       DayPlugin.instance,
