@@ -203,7 +203,6 @@ class EntryList extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
