@@ -27,7 +27,15 @@ class EntryEditorTagHandler extends StatelessWidget {
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
               icon: const Icon(Icons.label),
-              onPressed: () => tagController.showTagManagerDialog(context),
+              onPressed: () async {
+                final result = await tagController.showTagManagerDialog(
+                  context,
+                );
+                if (result != null && context.mounted) {
+                  controller.selectedTags = List.from(result);
+                  (context as Element).markNeedsBuild();
+                }
+              },
               tooltip: l10n.get('tagManagement'),
             ),
           ),
@@ -59,6 +67,9 @@ class EntryEditorTagHandler extends StatelessWidget {
                         controller.selectedTags.removeWhere((t) => t == tag);
                       } else {
                         controller.selectedTags.add(tag);
+                      }
+                      if (context.mounted) {
+                        (context as Element).markNeedsBuild();
                       }
                     },
                     child: Container(

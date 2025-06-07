@@ -294,7 +294,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
             ),
           );
-          if (mounted) setState(() {});
+          if (mounted) {
+            calendarController.selectDate(selectedDate);
+            setState(() {});
+          }
         },
         onDelete:
             (entry) => showDialog(
@@ -330,23 +333,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
     DateTime selectedDate,
   ) {
     return FloatingActionButton(
-      onPressed:
-          () async => await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider.value(value: calendarController),
-                      ChangeNotifierProvider.value(value: tagController),
-                    ],
-                    child: EntryEditorScreen(
-                      initialDate: selectedDate,
-                      isEditing: false,
-                    ),
+      onPressed: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider.value(value: calendarController),
+                    ChangeNotifierProvider.value(value: tagController),
+                  ],
+                  child: EntryEditorScreen(
+                    initialDate: selectedDate,
+                    isEditing: false,
                   ),
-            ),
+                ),
           ),
+        );
+        if (mounted) {
+          calendarController.selectDate(selectedDate);
+          setState(() {});
+        }
+      },
       child: const Icon(Icons.add),
     );
   }

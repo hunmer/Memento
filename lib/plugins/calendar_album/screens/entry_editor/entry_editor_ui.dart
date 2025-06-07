@@ -8,7 +8,7 @@ import 'entry_editor_controller.dart';
 import 'entry_editor_image_handler.dart';
 import 'entry_editor_tag_handler.dart';
 
-class EntryEditorUI extends StatelessWidget {
+class EntryEditorUI extends StatefulWidget {
   final EntryEditorController controller;
   final bool isEditing;
 
@@ -19,9 +19,24 @@ class EntryEditorUI extends StatelessWidget {
   });
 
   @override
+  State<EntryEditorUI> createState() => _EntryEditorUIState();
+}
+
+class _EntryEditorUIState extends State<EntryEditorUI> {
+  late EntryEditorController controller;
+  late bool isEditing;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = widget.controller;
+    isEditing = widget.isEditing;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = CalendarAlbumLocalizations.of(context);
-    final tagController = Provider.of<TagController>(context, listen: false);
+    final tagController = Provider.of<TagController>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -29,16 +44,22 @@ class EntryEditorUI extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(controller.isPreview ? Icons.edit : Icons.preview),
-            onPressed: () => controller.isPreview = !controller.isPreview,
+            onPressed: () {
+              setState(() {
+                controller.isPreview = !controller.isPreview;
+              });
+            },
             tooltip:
                 controller.isPreview ? l10n.get('edit') : l10n.get('preview'),
           ),
           IconButton(
             icon: const Icon(Icons.save),
-            onPressed: () {
-              final result = controller.saveEntry(context);
+            onPressed: () async {
+              final result = await controller.saveEntry(context);
               if (result != null) {
-                Navigator.of(context).pop();
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
               }
             },
           ),
