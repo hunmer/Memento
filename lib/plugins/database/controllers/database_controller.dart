@@ -18,6 +18,10 @@ class DatabaseController {
     currentDatabase = database;
   }
 
+  Future<void> createDatabase(DatabaseModel database) async {
+    await service.createDatabase(database);
+  }
+
   Future<void> deleteDatabase() async {
     if (currentDatabase != null) {
       await service.deleteDatabase(currentDatabase!.id);

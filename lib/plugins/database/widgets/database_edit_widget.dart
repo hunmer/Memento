@@ -296,10 +296,17 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                 .toList(),
       );
 
-      await widget.controller.updateDatabase(_editedDatabase);
+      if (_editedDatabase.id.isEmpty) {
+        _editedDatabase = _editedDatabase.copyWith(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+        );
+        await widget.controller.createDatabase(_editedDatabase);
+      } else {
+        await widget.controller.updateDatabase(_editedDatabase);
+      }
 
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       }
     } catch (e, stackTrace) {
       debugPrint('Save failed: $e\n$stackTrace');
