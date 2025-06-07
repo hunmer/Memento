@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/calendar_album/screens/entry_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
@@ -182,6 +183,28 @@ class _PhotoViewScreenState extends State<_PhotoViewScreen> {
         backgroundColor: Colors.black,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.note),
+            onPressed: () {
+              final currentImage =
+                  widget.images[_pageController.page?.round() ??
+                      widget.initialIndex];
+              final entry = Provider.of<CalendarController>(
+                context,
+                listen: false,
+              ).getDiaryEntryForImage(currentImage);
+              if (entry != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EntryDetailScreen(entry: entry),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: Container(
         color: Colors.black,

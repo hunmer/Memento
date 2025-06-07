@@ -232,7 +232,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ChangeNotifierProvider.value(value: calendarController),
                       ChangeNotifierProvider.value(value: tagController),
                     ],
-                    child: EntryDetailScreen(entry: entry, date: selectedDate),
+                    child: EntryDetailScreen(entry: entry),
                   ),
             ),
           );

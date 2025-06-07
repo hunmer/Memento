@@ -236,4 +236,16 @@ class CalendarController extends ChangeNotifier {
     }
     return null;
   }
+
+  CalendarEntry? getDiaryEntryForImage(String imageUrl) {
+    for (final entries in _entries.values) {
+      for (final entry in entries) {
+        if (entry.imageUrls.contains(imageUrl) ||
+            entry.extractImagesFromMarkdown().contains(imageUrl)) {
+          return entry;
+        }
+      }
+    }
+    return null;
+  }
 }

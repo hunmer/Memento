@@ -19,21 +19,21 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   late PageController _pageController;
   late CalendarController _calendarController;
-  late TagController _tagController;
+  late TagController tagController;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentIndex);
     _calendarController = CalendarController();
-    _tagController = TagController();
+    tagController = TagController();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     _calendarController.dispose();
-    _tagController.dispose();
+    tagController.dispose();
     super.dispose();
   }
 
@@ -50,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           CalendarScreen(
             calendarController: _calendarController,
-            tagController: _tagController,
+            tagController: tagController,
           ),
           TagScreen(),
           AlbumScreen(),

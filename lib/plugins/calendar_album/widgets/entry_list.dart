@@ -7,8 +7,6 @@ import '../../../utils/image_utils.dart';
 class EntryList extends StatelessWidget {
   Widget _buildDefaultCover() {
     return Container(
-      height: 80,
-      width: 80,
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
@@ -23,19 +21,15 @@ class EntryList extends StatelessWidget {
     }
 
     if (url.startsWith('http://') || url.startsWith('https://')) {
-      return SizedBox(
-        height: 80,
-        width: 80,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            url,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              debugPrint('Error loading network image: $error');
-              return _buildDefaultCover();
-            },
-          ),
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          url,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('Error loading network image: $error');
+            return _buildDefaultCover();
+          },
         ),
       );
     }
@@ -46,19 +40,15 @@ class EntryList extends StatelessWidget {
         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           final file = File(snapshot.data!);
           if (file.existsSync()) {
-            return SizedBox(
-              height: 80,
-              width: 80,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  file,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    debugPrint('Error loading local image: $error');
-                    return _buildDefaultCover();
-                  },
-                ),
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                file,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Error loading local image: $error');
+                  return _buildDefaultCover();
+                },
               ),
             );
           }
@@ -94,7 +84,7 @@ class EntryList extends StatelessWidget {
       itemBuilder: (context, index) {
         final entry = entries[index];
         return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: InkWell(
             onTap: () => onTap(entry),
             child: Padding(
@@ -102,81 +92,200 @@ class EntryList extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          entry.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              entry.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
+                          if (entry.mood != null)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.purple[50],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.purple[100]!,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.mood,
+                                      size: 12,
+                                      color: Colors.purple,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      entry.mood!,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.purple[800],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          if (entry.weather != null)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 4),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.cyan[50],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.cyan[100]!,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.cloud,
+                                      size: 12,
+                                      color: Colors.cyan,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      entry.weather!,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.cyan[800],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      if (entry.imageUrls.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                                childAspectRatio: 1.2,
+                              ),
+                          itemCount: entry.imageUrls.length,
+                          itemBuilder: (context, index) {
+                            return _buildImage(entry.imageUrls[index]);
+                          },
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => onEdit(entry),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => onDelete(entry),
-                      ),
-                    ],
-                  ),
-                  if (entry.content.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      entry.content.length > 100
-                          ? '${entry.content.substring(0, 100)}...'
-                          : entry.content,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                  if (entry.tags.isNotEmpty ||
-                      entry.location != null ||
-                      entry.mood != null ||
-                      entry.weather != null) ...[
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        if (entry.location != null)
-                          Chip(
-                            avatar: const Icon(Icons.location_on, size: 16),
-                            label: Text(entry.location!),
+                      ],
+                      if (entry.content.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        if (entry.mood != null)
-                          Chip(
-                            avatar: const Icon(Icons.mood, size: 16),
-                            label: Text(entry.mood!),
-                          ),
-                        if (entry.weather != null)
-                          Chip(
-                            avatar: const Icon(Icons.cloud, size: 16),
-                            label: Text(entry.weather!),
-                          ),
-                        ...entry.tags.map(
-                          (tag) => Chip(
-                            avatar: const Icon(Icons.label, size: 16),
-                            label: Text(tag),
+                          child: Text(
+                            entry.content,
+                            style: const TextStyle(fontSize: 14),
                           ),
                         ),
                       ],
-                    ),
-                  ],
-                  if (entry.imageUrls.isNotEmpty) ...[
+                      if (entry.tags.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ...entry.tags.map(
+                              (tag) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.green[50],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.green[100]!,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.label,
+                                      size: 12,
+                                      color: Colors.green,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      tag,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.green[800],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (entry.location != null) ...[
                     const SizedBox(height: 8),
-                    SizedBox(
-                      height: 80,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: entry.imageUrls.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: _buildImage(entry.imageUrls[index]),
-                          );
-                        },
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.blue[100]!, width: 1),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.location_on,
+                            size: 14,
+                            color: Colors.blue,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            entry.location!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue[800],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

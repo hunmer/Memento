@@ -51,6 +51,7 @@ class EntryEditorController {
     if (isEditing && entry != null) {
       final updatedEntry = entry!.copyWith(
         title: titleController.text,
+        content: contentController.text,
         tags: selectedTags.toList(),
         location:
             locationController.text.isEmpty ? null : locationController.text,

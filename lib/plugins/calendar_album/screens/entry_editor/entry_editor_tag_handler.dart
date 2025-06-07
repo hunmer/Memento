@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import '../../../../core/plugin_manager.dart';
 import '../../controllers/tag_controller.dart';
 import '../../l10n/calendar_album_localizations.dart';
 import 'entry_editor_controller.dart';
 
 class EntryEditorTagHandler extends StatelessWidget {
   final EntryEditorController controller;
-  final TagController tagController;
   final CalendarAlbumLocalizations l10n;
+  late final TagController tagController;
 
-  const EntryEditorTagHandler({
+  EntryEditorTagHandler({
     super.key,
     required this.controller,
-    required this.tagController,
     required this.l10n,
-  });
+  }) {
+    final plugin = PluginManager.instance.getPlugin('calendar_album_plugin');
+    tagController = (plugin as dynamic).tagController;
+    if (controller.selectedTags.isEmpty)
+      controller.selectedTags = controller.entry!.tags;
+  }
 
   @override
   Widget build(BuildContext context) {

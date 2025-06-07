@@ -11,14 +11,10 @@ import '../controllers/tag_controller.dart';
 import '../models/calendar_entry.dart';
 
 class EntryDetailScreen extends StatefulWidget {
-  final CalendarEntry? entry;
-  final DateTime? date;
+  final CalendarEntry entry;
 
-  const EntryDetailScreen({super.key, this.entry, this.date})
-    : assert(
-        entry != null || date != null,
-        'Either entry or date must be provided',
-      );
+  const EntryDetailScreen({super.key, required this.entry})
+    : assert(entry != null, 'Entry must be provided');
 
   @override
   State<EntryDetailScreen> createState() => _EntryDetailScreenState();
@@ -166,76 +162,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
     final calendarController = Provider.of<CalendarController>(context);
     final tagController = Provider.of<TagController>(context);
 
-    if (widget.entry == null) {
-      final selectedDate = widget.date!;
-      final entries = calendarController.getEntriesForDate(selectedDate);
-
-      if (entries.isEmpty) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              '${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}',
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => _buildEntryEditorScreen(
-                            calendarController: calendarController,
-                            tagController: tagController,
-                            initialDate: selectedDate,
-                            isEditing: false,
-                          ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.note_add, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.get('noEntriesForDate'),
-                  style: const TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => _buildEntryEditorScreen(
-                              calendarController: calendarController,
-                              tagController: tagController,
-                              initialDate: selectedDate,
-                              isEditing: false,
-                            ),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n.get('createEntry')),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-
-      if (entries.isEmpty) return const SizedBox.shrink();
-      return EntryDetailScreen(entry: entries.first);
-    }
-
-    final currentEntry = _currentEntry ?? widget.entry!;
+    final currentEntry = _currentEntry ?? widget.entry;
     final tags = currentEntry.tags;
 
     return Scaffold(
@@ -401,7 +328,10 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
               ),
             ],
             const SizedBox(height: 16),
-            MarkdownBody(data: currentEntry.content, selectable: true),
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(6),
+              child: Text(currentEntry.content),
+            ),
           ],
         ),
       ),

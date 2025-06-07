@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../widgets/location_picker.dart';
 import '../../controllers/tag_controller.dart';
 import '../../l10n/calendar_album_localizations.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'entry_editor_controller.dart';
 import 'entry_editor_image_handler.dart';
 import 'entry_editor_tag_handler.dart';
@@ -40,18 +40,13 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
   @override
   Widget build(BuildContext context) {
     final l10n = CalendarAlbumLocalizations.of(context);
-    final tagController = Provider.of<TagController>(context);
+    final plugin = PluginManager.instance.getPlugin('calendar_album_plugin');
+    final tagController = (plugin as dynamic).tagController;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? l10n.get('edit') : l10n.get('newEntry')),
         actions: [
-          IconButton(
-            icon: Icon(controller.isPreview ? Icons.edit : Icons.preview),
-            onPressed: () => _showMarkdownHelp(context, l10n),
-            tooltip:
-                controller.isPreview ? l10n.get('edit') : l10n.get('preview'),
-          ),
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () async {
@@ -73,9 +68,9 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     TagController tagController,
   ) {
     if (controller.isPreview) {
-      return Markdown(
-        data: controller.contentController.text,
-        selectable: true,
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Text(controller.contentController.text),
       );
     }
 
@@ -96,11 +91,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
           const SizedBox(height: 16),
           _buildWordCount(l10n),
           const SizedBox(height: 16),
-          EntryEditorTagHandler(
-            controller: controller,
-            tagController: tagController,
-            l10n: l10n,
-          ),
+          EntryEditorTagHandler(controller: controller, l10n: l10n),
           const SizedBox(height: 16),
           _buildLocationField(l10n),
           const SizedBox(height: 16),
@@ -128,42 +119,14 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
       decoration: InputDecoration(
         labelText: l10n.get('content'),
         border: const OutlineInputBorder(),
-        suffixIcon: IconButton(
-          icon: const Icon(Icons.info_outline),
-          onPressed: () => _showMarkdownHelp(context as BuildContext, l10n),
-        ),
       ),
       maxLines: 10,
     );
   }
 
-  void _showMarkdownHelp(
-    BuildContext context,
-    CalendarAlbumLocalizations l10n,
-  ) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Markdown Help'),
-            content: const SingleChildScrollView(
-              child: Text(
-                '# Heading 1\n## Heading 2\n**Bold**\n*Italic*\n- List item\n1. Numbered item\n[Link](url)\n![Image](url)',
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.get('close')),
-              ),
-            ],
-          ),
-    );
-  }
-
   Widget _buildWordCount(CalendarAlbumLocalizations l10n) {
     return Text(
-      '${l10n.get('wordCount')}: ${controller.contentController.text.trim().split(RegExp(r'\\s+')).where((word) => word.isNotEmpty).length}',
+      '${l10n.get('wordCount')}: ${controller.contentController.text.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).length}',
       style: const TextStyle(color: Colors.grey),
     );
   }

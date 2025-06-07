@@ -10,7 +10,7 @@ import 'controllers/tag_controller.dart';
 
 class CalendarAlbumPlugin extends BasePlugin {
   late final CalendarController _calendarController;
-  late final TagController _tagController;
+  late final TagController tagController;
 
   @override
   String get id => 'calendar_album_plugin';
@@ -30,9 +30,9 @@ class CalendarAlbumPlugin extends BasePlugin {
   @override
   Future<void> initialize() async {
     _calendarController = CalendarController();
-    _tagController = TagController(
+    tagController = TagController(
       onTagsChanged: () {
-        _tagController.notifyListeners();
+        tagController.notifyListeners();
       },
     );
     await initializeDefaultData();
@@ -51,7 +51,7 @@ class CalendarAlbumPlugin extends BasePlugin {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _calendarController),
-        ChangeNotifierProvider.value(value: _tagController),
+        ChangeNotifierProvider.value(value: tagController),
       ],
       child: const MainScreen(),
     );
