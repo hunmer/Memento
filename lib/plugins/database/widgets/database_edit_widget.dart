@@ -16,9 +16,11 @@ class DatabaseEditWidget extends StatefulWidget {
   State<DatabaseEditWidget> createState() => _DatabaseEditWidgetState();
 }
 
-class _DatabaseEditWidgetState extends State<DatabaseEditWidget> {
+class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
+    with SingleTickerProviderStateMixin {
   late DatabaseModel _editedDatabase;
   final _formKey = GlobalKey<FormState>();
+  late TabController _tabController;
 
   @override
   void initState() {
@@ -32,10 +34,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget> {
       appBar: AppBar(
         title: const Text('Edit Database'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveChanges,
-          ),
+          IconButton(icon: const Icon(Icons.save), onPressed: _saveChanges),
         ],
       ),
       body: Padding(
@@ -62,7 +61,9 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget> {
                 initialValue: _editedDatabase.description,
                 decoration: const InputDecoration(labelText: 'Description'),
                 onSaved: (value) {
-                  _editedDatabase = _editedDatabase.copyWith(description: value);
+                  _editedDatabase = _editedDatabase.copyWith(
+                    description: value,
+                  );
                 },
               ),
               // TODO: Add image picker for cover image

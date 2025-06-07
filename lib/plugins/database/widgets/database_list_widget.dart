@@ -70,9 +70,9 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   children: [
                     Expanded(
                       child:
-                          database.coverImagePath != null
-                              ? Image.asset(
-                                database.coverImagePath!,
+                          database.coverImage != null
+                              ? Image.network(
+                                database.coverImage!,
                                 fit: BoxFit.cover,
                               )
                               : Container(

@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import './database_field.dart';
 
 /// 数据库模型
+@immutable
 class DatabaseModel {
   final String id;
-  String name;
-  String? description;
-  String? coverImagePath;
-  DateTime createdAt;
-  DateTime updatedAt;
+  final String name;
+  final String? description;
+  final String? coverImage;
+  final List<DatabaseField> fields;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  DatabaseModel({
+  const DatabaseModel({
     required this.id,
     required this.name,
     this.description,
-    this.coverImagePath,
+    this.coverImage,
+    this.fields = const [],
     required this.createdAt,
     required this.updatedAt,
   });
@@ -24,7 +28,9 @@ class DatabaseModel {
       id: map['id'],
       name: map['name'],
       description: map['description'],
-      coverImagePath: map['coverImagePath'],
+      coverImage: map['coverImage'],
+      fields:
+          (map['fields'] as List).map((e) => DatabaseField.fromMap(e)).toList(),
       createdAt: DateTime.parse(map['createdAt']),
       updatedAt: DateTime.parse(map['updatedAt']),
     );
@@ -36,7 +42,8 @@ class DatabaseModel {
       'id': id,
       'name': name,
       'description': description,
-      'coverImagePath': coverImagePath,
+      'coverImage': coverImage,
+      'fields': fields.map((e) => e.toMap()).toList(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -46,7 +53,8 @@ class DatabaseModel {
     String? id,
     String? name,
     String? description,
-    String? coverImagePath,
+    String? coverImage,
+    List<DatabaseField>? fields,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -54,49 +62,10 @@ class DatabaseModel {
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
-      coverImagePath: coverImagePath ?? this.coverImagePath,
+      coverImage: coverImage ?? this.coverImage,
+      fields: fields ?? this.fields,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
-
-/// 表字段模型
-class TableField {
-  final String id;
-  String name;
-  FieldType type;
-  bool isRequired;
-  dynamic defaultValue;
-
-  TableField({
-    required this.id,
-    required this.name,
-    required this.type,
-    this.isRequired = false,
-    this.defaultValue,
-  });
-
-  factory TableField.fromMap(Map<String, dynamic> map) {
-    return TableField(
-      id: map['id'],
-      name: map['name'],
-      type: FieldType.values[map['type']],
-      isRequired: map['isRequired'] ?? false,
-      defaultValue: map['defaultValue'],
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'type': type.index,
-      'isRequired': isRequired,
-      'defaultValue': defaultValue,
-    };
-  }
-}
-
-/// 字段类型枚举
-enum FieldType { text, number, boolean, date, image, color }
