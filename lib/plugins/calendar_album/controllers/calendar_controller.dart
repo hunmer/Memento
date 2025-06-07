@@ -11,7 +11,7 @@ class CalendarController extends ChangeNotifier {
   DateTime _rangeStart = DateTime.now();
   DateTime _rangeEnd = DateTime.now();
   final List<DateTime> _displayMonths = [];
-  final String _storageKey = 'calendar_entries';
+  final String _storageKey = 'calendar_album/calendar_entries';
 
   CalendarController() {
     _loadEntries();

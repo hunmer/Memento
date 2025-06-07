@@ -16,8 +16,9 @@ class EntryEditorTagHandler extends StatelessWidget {
   }) {
     final plugin = PluginManager.instance.getPlugin('calendar_album_plugin');
     tagController = (plugin as dynamic).tagController;
-    if (controller.selectedTags.isEmpty)
-      controller.selectedTags = controller.entry!.tags;
+    if (controller.selectedTags.isEmpty && controller.entry != null) {
+      controller.selectedTags = List.from(controller.entry!.tags);
+    }
   }
 
   @override
