@@ -32,6 +32,7 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
     _controller = EntryEditorController(
       entry: widget.entry,
       isEditing: widget.isEditing,
+      initialDate: widget.initialDate,
     );
   }
 

@@ -28,19 +28,19 @@ class CalendarEntry {
   factory CalendarEntry.create({
     required String title,
     required String content,
+    required DateTime createdAt,
     List<String> tags = const [],
     String? location,
     String? mood,
     String? weather,
     List<String> imageUrls = const [],
   }) {
-    final now = DateTime.now();
     return CalendarEntry(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
       content: content,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: createdAt,
+      updatedAt: createdAt,
       tags: tags,
       location: location,
       mood: mood,
@@ -104,7 +104,11 @@ class CalendarEntry {
   }
 
   int get wordCount {
-    return content.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).length;
+    return content
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .length;
   }
 
   // 从Markdown内容中提取图片URL

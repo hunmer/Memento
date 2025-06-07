@@ -82,7 +82,6 @@ void main() async {
     final plugins = [
       ChatPlugin.instance,
       OpenAIPlugin(), // 添加OpenAI插件
-
       DiaryPlugin.instance,
       ActivityPlugin.instance,
       CheckinPlugin.instance,
@@ -90,14 +89,14 @@ void main() async {
       TimerPlugin.instance,
       TodoPlugin.instance,
       DayPlugin.instance,
-      TrackerPlugin.instance, // 使用单例
+      TrackerPlugin.instance,
       StorePlugin(),
-      NodesPlugin(), // 添加笔记插件
-      NotesPlugin(), // 添加Notes插件
-      GoodsPlugin.instance, // 添加物品插件
-      BillPlugin(), // 添加账单插件
+      NodesPlugin(),
+      NotesPlugin(),
+      GoodsPlugin.instance,
+      BillPlugin(),
       CalendarPlugin(),
-      CalendarAlbumPlugin(), // 添加日历相册插件
+      CalendarAlbumPlugin(),
     ];
 
     // 遍历并注册插件

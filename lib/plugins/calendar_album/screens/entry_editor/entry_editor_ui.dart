@@ -35,7 +35,12 @@ class EntryEditorUI extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.save),
-            onPressed: () => controller.saveEntry(context),
+            onPressed: () {
+              final result = controller.saveEntry(context);
+              if (result != null) {
+                Navigator.of(context).pop();
+              }
+            },
           ),
         ],
       ),

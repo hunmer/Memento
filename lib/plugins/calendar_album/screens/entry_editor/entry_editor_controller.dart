@@ -7,6 +7,7 @@ import '../../models/calendar_entry.dart';
 class EntryEditorController {
   final CalendarEntry? entry;
   final bool isEditing;
+  final DateTime? initialDate;
 
   late TextEditingController titleController;
   late TextEditingController contentController;
@@ -17,7 +18,11 @@ class EntryEditorController {
   List<String> imageUrls = [];
   bool isPreview = false;
 
-  EntryEditorController({this.entry, required this.isEditing}) {
+  EntryEditorController({
+    this.entry,
+    required this.isEditing,
+    this.initialDate,
+  }) {
     titleController = TextEditingController(text: entry?.title ?? '');
     contentController = TextEditingController(text: entry?.content ?? '');
     locationController = TextEditingController(text: entry?.location ?? '');
@@ -68,6 +73,7 @@ class EntryEditorController {
         mood: mood,
         weather: weather,
         imageUrls: imageUrls,
+        createdAt: initialDate ?? DateTime.now(),
       );
       calendarController.addEntry(newEntry);
       return newEntry;
