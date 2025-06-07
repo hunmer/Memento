@@ -62,7 +62,7 @@ class ContactPlugin extends BasePlugin {
 
         final stats = snapshot.data!;
         final theme = Theme.of(context);
-        
+
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -101,7 +101,10 @@ class ContactPlugin extends BasePlugin {
                       // 总联系人
                       Column(
                         children: [
-                          Text(ContactStrings.totalContacts, style: theme.textTheme.bodyMedium),
+                          Text(
+                            ContactStrings.totalContacts,
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Text(
                             '${stats['totalContacts']}',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -111,11 +114,14 @@ class ContactPlugin extends BasePlugin {
                           ),
                         ],
                       ),
-                      
+
                       // 最近联系人
                       Column(
                         children: [
-                          Text(ContactStrings.recentContacts, style: theme.textTheme.bodyMedium),
+                          Text(
+                            ContactStrings.recentContacts,
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Text(
                             '${stats['recentContacts']}',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -139,10 +145,7 @@ class ContactPlugin extends BasePlugin {
   Future<Map<String, dynamic>> _getCardStats() async {
     final contacts = await _controller.getAllContacts();
     final recentContacts = await _controller.getRecentlyContactedCount();
-    return {
-      'totalContacts': contacts.length,
-      'recentContacts': recentContacts,
-    };
+    return {'totalContacts': contacts.length, 'recentContacts': recentContacts};
   }
 }
 
@@ -173,53 +176,59 @@ class _ContactHomePageState extends State<_ContactHomePage> {
 
     await showDialog<void>(
       context: context,
-      builder: (context) => FilterDialog(
-        initialFilter: currentFilter,
-        availableTags: tags,
-        onApply: (filter) async {
-          await _controller.saveFilterConfig(filter);
-          if (mounted) {
-            setState(() {});
-          }
-        },
-      ),
+      builder:
+          (context) => FilterDialog(
+            initialFilter: currentFilter,
+            availableTags: tags,
+            onApply: (filter) async {
+              await _controller.saveFilterConfig(filter);
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
     );
   }
 
   Future<void> _showSortMenu() async {
     final currentSort = await _controller.getSortConfig();
-    
+
     if (!mounted) return;
 
     final result = await showDialog<SortConfig>(
       context: context,
-      builder: (context) => SimpleDialog(
-        title: Text(ContactStrings.sortBy),
-        children: [
-          for (final type in SortType.values)
-            RadioListTile<SortType>(
-              title: Text(_getSortTypeName(type)),
-              value: type,
-              groupValue: currentSort.type,
-              onChanged: (value) {
-                Navigator.pop(
-                  context,
-                  SortConfig(
-                    type: value!,
-                    isReverse: type == currentSort.type
-                        ? !currentSort.isReverse
-                        : false,
-                  ),
-                );
-              },
-              secondary: type == currentSort.type
-                  ? Icon(currentSort.isReverse
-                      ? Icons.arrow_upward
-                      : Icons.arrow_downward)
-                  : null,
-            ),
-        ],
-      ),
+      builder:
+          (context) => SimpleDialog(
+            title: Text(ContactStrings.sortBy),
+            children: [
+              for (final type in SortType.values)
+                RadioListTile<SortType>(
+                  title: Text(_getSortTypeName(type)),
+                  value: type,
+                  groupValue: currentSort.type,
+                  onChanged: (value) {
+                    Navigator.pop(
+                      context,
+                      SortConfig(
+                        type: value!,
+                        isReverse:
+                            type == currentSort.type
+                                ? !currentSort.isReverse
+                                : false,
+                      ),
+                    );
+                  },
+                  secondary:
+                      type == currentSort.type
+                          ? Icon(
+                            currentSort.isReverse
+                                ? Icons.arrow_upward
+                                : Icons.arrow_downward,
+                          )
+                          : null,
+                ),
+            ],
+          ),
     );
 
     if (result != null) {
@@ -247,60 +256,63 @@ class _ContactHomePageState extends State<_ContactHomePage> {
 
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text(contact == null
-                ? ContactStrings.addContact
-                : ContactStrings.editContact),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.save),
-                onPressed: () async {
-                  // 调用表单的保存方法
-                  formStateKey.currentState?.saveContact();
-                  if (savedContact != null) {
-                    try {
-                      if (contact == null) {
-                        await _controller.addContact(savedContact!);
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  contact == null
+                      ? ContactStrings.addContact
+                      : ContactStrings.editContact,
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.save),
+                    onPressed: () async {
+                      // 调用表单的保存方法
+                      formStateKey.currentState?.saveContact();
+                      if (savedContact != null) {
+                        try {
+                          if (contact == null) {
+                            await _controller.addContact(savedContact!);
+                          } else {
+                            await _controller.updateContact(savedContact!);
+                          }
+                          if (mounted) {
+                            Navigator.of(context).pop();
+                            setState(() {});
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+                          }
+                        }
                       } else {
-                        await _controller.updateContact(savedContact!);
-                      }
-                      if (mounted) {
-                        Navigator.of(context).pop();
-                        setState(() {});
-                      }
-                    } catch (e) {
-                      if (mounted) {
+                        // 如果 savedContact 为 null，可能是表单验证失败
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('保存失败: $e')),
+                          const SnackBar(content: Text('请正确填写表单')),
                         );
                       }
-                    }
-                  } else {
-                    // 如果 savedContact 为 null，可能是表单验证失败
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('请正确填写表单')),
-                    );
-                  }
+                    },
+                  ),
+                  if (contact != null)
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _deleteContact(contact),
+                    ),
+                ],
+              ),
+              body: ContactForm(
+                key: formStateKey,
+                formStateKey: formStateKey,
+                controller: _controller,
+                contact: contact,
+                onSave: (updatedContact) {
+                  savedContact = updatedContact;
                 },
               ),
-              if (contact != null)
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _deleteContact(contact),
-                ),
-            ],
-          ),
-          body: ContactForm(
-            key: formStateKey,
-            formStateKey: formStateKey,
-            controller: _controller,
-            contact: contact,
-            onSave: (updatedContact) {
-              savedContact = updatedContact;
-            },
-          ),
-        ),
+            ),
       ),
     );
   }
@@ -308,20 +320,21 @@ class _ContactHomePageState extends State<_ContactHomePage> {
   Future<void> _deleteContact(Contact contact) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(ContactStrings.confirmDelete),
-        content: Text(ContactStrings.deleteConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(ContactStrings.no),
+      builder:
+          (context) => AlertDialog(
+            title: Text(ContactStrings.confirmDelete),
+            content: Text(ContactStrings.deleteConfirmMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(ContactStrings.no),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(ContactStrings.yes),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(ContactStrings.yes),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true && mounted) {
@@ -345,10 +358,7 @@ class _ContactHomePageState extends State<_ContactHomePage> {
             icon: const Icon(Icons.filter_list),
             onPressed: _showFilterDialog,
           ),
-          IconButton(
-            icon: const Icon(Icons.sort),
-            onPressed: _showSortMenu,
-          ),
+          IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
           IconButton(
             icon: Icon(_isListView ? Icons.grid_view : Icons.list),
             onPressed: () {
@@ -377,13 +387,17 @@ class _ContactHomePageState extends State<_ContactHomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.person_outline, size: 64, color: Colors.grey),
+                  const Icon(
+                    Icons.person_outline,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     '没有联系人',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.grey,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(color: Colors.grey),
                   ),
                 ],
               ),
@@ -407,7 +421,7 @@ class _ContactHomePageState extends State<_ContactHomePage> {
             padding: const EdgeInsets.all(8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 1.2,
+              childAspectRatio: 0.8,
             ),
             itemCount: contacts.length,
             itemBuilder: (context, index) {

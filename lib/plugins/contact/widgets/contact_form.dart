@@ -33,7 +33,7 @@ class ContactForm extends StatefulWidget {
 class ContactFormState extends State<ContactForm> {
   // 添加一个表单键，用于访问表单状态
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
+
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _addressController;
@@ -50,7 +50,9 @@ class ContactFormState extends State<ContactForm> {
     super.initState();
     _nameController = TextEditingController(text: widget.contact?.name ?? '');
     _phoneController = TextEditingController(text: widget.contact?.phone ?? '');
-    _addressController = TextEditingController(text: widget.contact?.address ?? '');
+    _addressController = TextEditingController(
+      text: widget.contact?.address ?? '',
+    );
     _notesController = TextEditingController(text: widget.contact?.notes ?? '');
     _tags = List.from(widget.contact?.tags ?? []);
     _customFields = Map.from(widget.contact?.customFields ?? {});
@@ -71,7 +73,9 @@ class ContactFormState extends State<ContactForm> {
 
   Future<void> _loadInteractions() async {
     if (widget.contact != null) {
-      final interactions = await widget.controller.getInteractionsByContactId(widget.contact!.id);
+      final interactions = await widget.controller.getInteractionsByContactId(
+        widget.contact!.id,
+      );
       setState(() {
         _interactions = interactions;
       });
@@ -87,9 +91,7 @@ class ContactFormState extends State<ContactForm> {
           title: Text(ContactStrings.addTag),
           content: TextField(
             controller: controller,
-            decoration: const InputDecoration(
-              hintText: '输入标签名称',
-            ),
+            decoration: const InputDecoration(hintText: '输入标签名称'),
           ),
           actions: [
             TextButton(
@@ -132,16 +134,12 @@ class ContactFormState extends State<ContactForm> {
             children: [
               TextField(
                 controller: keyController,
-                decoration: const InputDecoration(
-                  hintText: '字段名称',
-                ),
+                decoration: const InputDecoration(hintText: '字段名称'),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: valueController,
-                decoration: const InputDecoration(
-                  hintText: '字段值',
-                ),
+                decoration: const InputDecoration(hintText: '字段值'),
               ),
             ],
           ),
@@ -175,15 +173,20 @@ class ContactFormState extends State<ContactForm> {
   }
 
   void _pickAvatar() async {
-    final result = await showDialog<String>(
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => const ImagePickerDialog(),
+      builder:
+          (context) => const ImagePickerDialog(
+            // initialUrl: _imageUrl,
+            saveDirectory: 'contacts/images',
+            enableCrop: true, // 启用裁切功能
+            cropAspectRatio: 1 / 1,
+          ),
     );
 
-    if (result != null) {
-      final savedPath = await ImageUtils.saveImage(File(result), 'avatars');
+    if (result != null && result['url'] != null) {
       setState(() {
-        _avatarUrl = savedPath;
+        _avatarUrl = result['url'];
       });
     }
   }
@@ -194,42 +197,43 @@ class ContactFormState extends State<ContactForm> {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       // 创建联系人对象
       final contact = Contact(
-      id: widget.contact?.id ?? const Uuid().v4(),
-      name: _nameController.text,
-      avatar: _avatarUrl,
-      icon: _selectedIcon,
-      iconColor: _selectedIconColor,
-      phone: _phoneController.text,
-      address: _addressController.text,
-      notes: _notesController.text,
-      tags: _tags,
-      customFields: _customFields,
-      createdTime: widget.contact?.createdTime ?? DateTime.now(),
-    );
+        id: widget.contact?.id ?? const Uuid().v4(),
+        name: _nameController.text,
+        avatar: _avatarUrl,
+        icon: _selectedIcon,
+        iconColor: _selectedIconColor,
+        phone: _phoneController.text,
+        address: _addressController.text,
+        notes: _notesController.text,
+        tags: _tags,
+        customFields: _customFields,
+        createdTime: widget.contact?.createdTime ?? DateTime.now(),
+      );
 
-    // 直接调用保存回调
-    widget.onSave(contact);
-  }
+      // 直接调用保存回调
+      widget.onSave(contact);
+    }
   }
 
   void _addInteraction() async {
     if (widget.contact == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先保存联系人信息')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请先保存联系人信息')));
       return;
     }
 
     final result = await showDialog<InteractionRecord>(
       context: context,
-      builder: (context) => InteractionForm(
-        contactId: widget.contact!.id,
-        controller: widget.controller,
-        onSave: (interaction) async {
-          await widget.controller.addInteraction(interaction);
-          await _loadInteractions();
-        },
-      ),
+      builder:
+          (context) => InteractionForm(
+            contactId: widget.contact!.id,
+            controller: widget.controller,
+            onSave: (interaction) async {
+              await widget.controller.addInteraction(interaction);
+              await _loadInteractions();
+            },
+          ),
     );
 
     if (result != null) {
@@ -240,20 +244,21 @@ class ContactFormState extends State<ContactForm> {
   Future<void> _deleteInteraction(InteractionRecord interaction) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('删除确认'),
-        content: const Text('确定要删除这条联系记录吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('删除确认'),
+            content: const Text('确定要删除这条联系记录吗？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('删除'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -268,12 +273,7 @@ class ContactFormState extends State<ContactForm> {
       length: 2,
       child: Column(
         children: [
-          const TabBar(
-            tabs: [
-              Tab(text: '基本信息'),
-              Tab(text: '联系记录'),
-            ],
-          ),
+          const TabBar(tabs: [Tab(text: '基本信息'), Tab(text: '联系记录')]),
           Expanded(
             child: TabBarView(
               children: [
@@ -299,35 +299,42 @@ class ContactFormState extends State<ContactForm> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withOpacity(0.5),
                                       width: 2,
                                     ),
                                   ),
                                   child: FutureBuilder<String?>(
-                                    future: _avatarUrl != null
-                                        ? ImageUtils.getAbsolutePath(_avatarUrl!)
-                                        : Future.value(null),
+                                    future:
+                                        _avatarUrl != null
+                                            ? ImageUtils.getAbsolutePath(
+                                              _avatarUrl!,
+                                            )
+                                            : Future.value(null),
                                     builder: (context, snapshot) {
                                       return ClipOval(
-                                        child: snapshot.data != null
-                                            ? Image.file(
-                                                File(snapshot.data!),
-                                                width: 64,
-                                                height: 64,
-                                                fit: BoxFit.cover,
-                                              )
-                                            : Container(
-                                                color: _selectedIconColor.withOpacity(0.1),
-                                                child: const Center(
-                                                  child: Text(
-                                                    '上传',
-                                                    style: TextStyle(
-                                                      color: Colors.black54,
-                                                      fontSize: 14,
+                                        child:
+                                            snapshot.data != null
+                                                ? Image.file(
+                                                  File(snapshot.data!),
+                                                  width: 64,
+                                                  height: 64,
+                                                  fit: BoxFit.cover,
+                                                )
+                                                : Container(
+                                                  color: _selectedIconColor
+                                                      .withOpacity(0.1),
+                                                  child: const Center(
+                                                    child: Text(
+                                                      '上传',
+                                                      style: TextStyle(
+                                                        color: Colors.black54,
+                                                        fontSize: 14,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
                                       );
                                     },
                                   ),
@@ -411,12 +418,15 @@ class ContactFormState extends State<ContactForm> {
                         ),
                         Wrap(
                           spacing: 8,
-                          children: _tags
-                              .map((tag) => Chip(
-                                    label: Text(tag),
-                                    onDeleted: () => _removeTag(tag),
-                                  ))
-                              .toList(),
+                          children:
+                              _tags
+                                  .map(
+                                    (tag) => Chip(
+                                      label: Text(tag),
+                                      onDeleted: () => _removeTag(tag),
+                                    ),
+                                  )
+                                  .toList(),
                         ),
                         const SizedBox(height: 16),
 
@@ -443,13 +453,14 @@ class ContactFormState extends State<ContactForm> {
                                 Expanded(
                                   child: Text(
                                     '${entry.key}: ${entry.value}',
-                                    style: Theme.of(context).textTheme.bodyLarge,
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
                                   ),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.delete_outline),
-                                  onPressed: () =>
-                                      _removeCustomField(entry.key),
+                                  onPressed:
+                                      () => _removeCustomField(entry.key),
                                   tooltip: '删除字段',
                                 ),
                               ],
