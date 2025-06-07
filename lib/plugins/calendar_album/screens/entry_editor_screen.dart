@@ -44,6 +44,10 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return EntryEditorUI(controller: _controller, isEditing: widget.isEditing);
+    return EntryEditorUI(
+      controller: _controller,
+      isEditing: widget.isEditing,
+      parentContext: context,
+    );
   }
 }

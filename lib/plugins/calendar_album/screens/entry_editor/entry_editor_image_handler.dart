@@ -78,11 +78,6 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Images',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
         SizedBox(
           height: 100,
           child: ListView(

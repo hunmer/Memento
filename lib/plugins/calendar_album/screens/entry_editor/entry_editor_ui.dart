@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
+import '../../../../widgets/location_picker.dart';
 import '../../controllers/tag_controller.dart';
 import '../../l10n/calendar_album_localizations.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -11,11 +13,13 @@ import 'entry_editor_tag_handler.dart';
 class EntryEditorUI extends StatefulWidget {
   final EntryEditorController controller;
   final bool isEditing;
+  final BuildContext parentContext;
 
   const EntryEditorUI({
     super.key,
     required this.controller,
     required this.isEditing,
+    required this.parentContext,
   });
 
   @override
@@ -44,22 +48,16 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
         actions: [
           IconButton(
             icon: Icon(controller.isPreview ? Icons.edit : Icons.preview),
-            onPressed: () {
-              setState(() {
-                controller.isPreview = !controller.isPreview;
-              });
-            },
+            onPressed: () => _showMarkdownHelp(context, l10n),
             tooltip:
                 controller.isPreview ? l10n.get('edit') : l10n.get('preview'),
           ),
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () async {
-              final result = await controller.saveEntry(context);
-              if (result != null) {
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
+              final result = controller.saveEntry(context);
+              if (result != null && mounted) {
+                Navigator.of(context).pop();
               }
             },
           ),
@@ -86,15 +84,17 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          EntryEditorImageHandler(
+            imageUrls: controller.imageUrls,
+            onImageAdded: (url) => controller.imageUrls.add(url),
+            onImageRemoved: (url) => controller.imageUrls.remove(url),
+          ),
+          const SizedBox(height: 16),
           _buildTitleField(l10n),
           const SizedBox(height: 16),
           _buildContentField(l10n),
           const SizedBox(height: 16),
           _buildWordCount(l10n),
-          const SizedBox(height: 16),
-          _buildLocationField(l10n),
-          const SizedBox(height: 16),
-          _buildMoodAndWeatherRow(l10n),
           const SizedBox(height: 16),
           EntryEditorTagHandler(
             controller: controller,
@@ -102,11 +102,9 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
             l10n: l10n,
           ),
           const SizedBox(height: 16),
-          EntryEditorImageHandler(
-            imageUrls: controller.imageUrls,
-            onImageAdded: (url) => controller.imageUrls.add(url),
-            onImageRemoved: (url) => controller.imageUrls.remove(url),
-          ),
+          _buildLocationField(l10n),
+          const SizedBox(height: 16),
+          _buildMoodAndWeatherRow(l10n),
         ],
       ),
     );
@@ -132,10 +130,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
         border: const OutlineInputBorder(),
         suffixIcon: IconButton(
           icon: const Icon(Icons.info_outline),
-          onPressed: () {
-            final currentContext = context;
-            _showMarkdownHelp(currentContext as BuildContext, l10n);
-          },
+          onPressed: () => _showMarkdownHelp(context as BuildContext, l10n),
         ),
       ),
       maxLines: 10,
@@ -182,8 +177,9 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
         prefixIcon: IconButton(
           icon: const Icon(Icons.location_on),
           onPressed: () {
-            final currentContext = context;
-            _handleLocationSelection(currentContext as BuildContext);
+            if (mounted) {
+              _handleLocationSelection(widget.parentContext);
+            }
           },
         ),
       ),
@@ -191,8 +187,26 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     );
   }
 
-  Future<void> _handleLocationSelection(BuildContext context) async {
-    // 位置选择逻辑...
+  Future<void> _handleLocationSelection(BuildContext dialogContext) async {
+    final isMobile =
+        !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
+
+    await showDialog(
+      context: dialogContext,
+      builder:
+          (BuildContext context) => LocationPicker(
+            onLocationSelected: (location) {
+              if (mounted) {
+                setState(() {
+                  controller.locationController.text = location;
+                });
+              }
+            },
+            isMobile: isMobile,
+          ),
+    );
   }
 
   Widget _buildMoodAndWeatherRow(CalendarAlbumLocalizations l10n) {
