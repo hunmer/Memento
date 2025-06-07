@@ -248,4 +248,34 @@ class CalendarController extends ChangeNotifier {
     }
     return null;
   }
+
+  int getAllEntriesCount() {
+    return _entries.values.fold(0, (sum, entries) => sum + entries.length);
+  }
+
+  int getTodayEntriesCount() {
+    final today = DateTime.now();
+    final key = DateTime(today.year, today.month, today.day);
+    return _entries[key]?.length ?? 0;
+  }
+
+  int getLast7DaysEntriesCount() {
+    final now = DateTime.now();
+    final sevenDaysAgo = now.subtract(const Duration(days: 7));
+    int count = 0;
+
+    var current = DateTime(
+      sevenDaysAgo.year,
+      sevenDaysAgo.month,
+      sevenDaysAgo.day,
+    );
+    final end = DateTime(now.year, now.month, now.day);
+
+    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+      count += _entries[current]?.length ?? 0;
+      current = current.add(const Duration(days: 1));
+    }
+
+    return count;
+  }
 }
