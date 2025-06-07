@@ -183,12 +183,13 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => _buildEntryEditorScreen(
-                        calendarController: calendarController,
-                        tagController: tagController,
-                        initialDate: selectedDate,
-                        isEditing: false,
-                      ),
+                      builder:
+                          (context) => _buildEntryEditorScreen(
+                            calendarController: calendarController,
+                            tagController: tagController,
+                            initialDate: selectedDate,
+                            isEditing: false,
+                          ),
                     ),
                   );
                 },
@@ -211,12 +212,13 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => _buildEntryEditorScreen(
-                          calendarController: calendarController,
-                          tagController: tagController,
-                          initialDate: selectedDate,
-                          isEditing: false,
-                        ),
+                        builder:
+                            (context) => _buildEntryEditorScreen(
+                              calendarController: calendarController,
+                              tagController: tagController,
+                              initialDate: selectedDate,
+                              isEditing: false,
+                            ),
                       ),
                     );
                   },
@@ -246,12 +248,13 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
               final updatedEntry = await Navigator.push<CalendarEntry?>(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => _buildEntryEditorScreen(
-                    calendarController: calendarController,
-                    tagController: tagController,
-                    entry: currentEntry.copyWith(),
-                    isEditing: true,
-                  ),
+                  builder:
+                      (context) => _buildEntryEditorScreen(
+                        calendarController: calendarController,
+                        tagController: tagController,
+                        entry: currentEntry.copyWith(),
+                        isEditing: true,
+                      ),
                 ),
               );
 
@@ -266,24 +269,27 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: Text(l10n.get('delete')),
-                  content: Text('${l10n.get('delete')} "${currentEntry.title}"?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(l10n.get('cancel')),
+                builder:
+                    (context) => AlertDialog(
+                      title: Text(l10n.get('delete')),
+                      content: Text(
+                        '${l10n.get('delete')} "${currentEntry.title}"?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(l10n.get('cancel')),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            calendarController.deleteEntry(currentEntry);
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(l10n.get('delete')),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () {
-                        calendarController.deleteEntry(currentEntry);
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(l10n.get('delete')),
-                    ),
-                  ],
-                ),
               );
             },
           ),
@@ -308,12 +314,13 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => Scaffold(
-                                body: EntryDetailImageViewer(
-                                  imageUrls: currentEntry.imageUrls,
-                                  initialIndex: index,
-                                ),
-                              ),
+                              builder:
+                                  (context) => Scaffold(
+                                    body: EntryDetailImageViewer(
+                                      imageUrls: currentEntry.imageUrls,
+                                      initialIndex: index,
+                                    ),
+                                  ),
                             ),
                           );
                         },
@@ -334,7 +341,8 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 ),
               ],
             ),
-            if (currentEntry.location != null && currentEntry.location!.isNotEmpty) ...[
+            if (currentEntry.location != null &&
+                currentEntry.location!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -351,15 +359,45 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
-                children: tags.map((tag) {
-                  final color = Colors.primaries[tag.hashCode % Colors.primaries.length];
-                  return Chip(
-                    label: Text(tag),
-                    backgroundColor: color.withOpacity(0.2),
-                    labelStyle: TextStyle(color: color),
-                    side: BorderSide(color: color.withOpacity(0.5)),
-                  );
-                }).toList(),
+                children:
+                    tags.map((tag) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.label,
+                              size: 16,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              tag,
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
               ),
             ],
             const SizedBox(height: 16),

@@ -1,6 +1,4 @@
-import 'package:Memento/plugins/activity/models/tag_group.dart';
 import 'package:flutter/material.dart';
-import '../controllers/tag_controller.dart';
 import '../../../../widgets/tag_manager_dialog/models/tag_group.dart' as dialog;
 
 class TagManagerDialog extends StatefulWidget {

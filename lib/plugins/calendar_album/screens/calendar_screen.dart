@@ -99,7 +99,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final calendarController = widget.calendarController;
     final tagController = widget.tagController;
     final selectedDate = calendarController.selectedDate;
-    final isExpanded = calendarController.isExpanded;
 
     return MultiProvider(
       providers: [
@@ -107,7 +106,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ChangeNotifierProvider.value(value: tagController),
       ],
       child: Scaffold(
-        appBar: _buildAppBar(context, l10n, calendarController, isExpanded),
+        appBar: _buildAppBar(context, l10n),
         body: Column(
           children: [
             _buildCalendarListView(calendarController, selectedDate),
@@ -130,12 +129,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  AppBar _buildAppBar(
-    BuildContext context,
-    dynamic l10n,
-    CalendarController calendarController,
-    bool isExpanded,
-  ) {
+  AppBar _buildAppBar(BuildContext context, dynamic l10n) {
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
@@ -144,12 +138,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
       title: const Text('日历日记', style: TextStyle(fontSize: 18)),
       actions: [
         IconButton(
-          icon: Icon(isExpanded ? Icons.unfold_less : Icons.unfold_more),
-          onPressed: () => setState(() => calendarController.toggleExpanded()),
-          tooltip:
-              isExpanded
-                  ? l10n.get('collapseCalendar')
-                  : l10n.get('expandCalendar'),
+          icon: const Icon(Icons.today),
+          onPressed: () {
+            setState(() {
+              _focusedDay = DateTime.now();
+              widget.calendarController.selectDate(DateTime.now());
+            });
+          },
+          tooltip: '回到当前月份',
         ),
       ],
     );
@@ -159,95 +155,57 @@ class _CalendarScreenState extends State<CalendarScreen> {
     CalendarController calendarController,
     DateTime selectedDate,
   ) {
-    DateTime? _lastLoadTime;
-    double? _lastScrollPosition;
-    bool _isScrollingDown = false;
-    double _lastScrollTime = 0;
-    double _scrollSpeed = 0;
-
-    return Expanded(
+    return SizedBox(
+      height: 360, // 固定高度
       child: Scrollbar(
         controller: _scrollController,
         thumbVisibility: true,
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollUpdateNotification) {
-              final metrics = notification.metrics;
-              final now = DateTime.now().millisecondsSinceEpoch.toDouble();
-              final canLoad =
-                  _lastLoadTime == null ||
-                  DateTime.now().difference(_lastLoadTime!) >
-                      Duration(milliseconds: 500);
-
-              // 精确判断滚动方向
-              if (_lastScrollPosition != null && _lastScrollTime != 0) {
-                final delta = metrics.pixels - _lastScrollPosition!;
-                _isScrollingDown = delta > 2;
-              }
-              _lastScrollPosition = metrics.pixels;
-              _lastScrollTime = now;
-              // 仅保留向前加载逻辑
-              if (metrics.pixels < 50 && // 接近顶部时触发
-                  canLoad &&
-                  !_isScrollingDown) {
-                calendarController.loadMoreMonths(true);
-                _lastLoadTime = now as DateTime?;
-                setState(() => _forceRefresh++);
-              }
-            }
-            return false;
+        child: TableCalendar(
+          firstDay: DateTime(_focusedDay.year, _focusedDay.month, 1),
+          lastDay: DateTime(_focusedDay.year, _focusedDay.month + 1, 0),
+          focusedDay: _focusedDay,
+          headerVisible: true,
+          calendarFormat: CalendarFormat.month,
+          availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+          calendarStyle: CalendarStyle(
+            outsideDaysVisible: true,
+            markersAutoAligned: true,
+          ),
+          selectedDayPredicate: (day) => isSameDay(day, selectedDate),
+          onDaySelected: (selectedDay, focusedDay) {
+            calendarController.selectDate(selectedDay);
+            setState(() => _focusedDay = focusedDay);
           },
-          child: ListView.builder(
-            controller: _scrollController,
-            key: ValueKey(_forceRefresh), // 强制重建ListView
-            itemCount: calendarController.displayMonths.length,
-            itemBuilder: (context, index) {
-              final month = calendarController.displayMonths[index];
-              return TableCalendar(
-                firstDay: DateTime(month.year, month.month, 1),
-                lastDay: DateTime(month.year, month.month + 1, 0),
-                focusedDay: month,
-                headerVisible: true,
-                calendarFormat: CalendarFormat.month,
-                availableCalendarFormats: const {CalendarFormat.month: 'Month'},
-                onFormatChanged: (_) => setState(() {}),
-                calendarStyle: CalendarStyle(
-                  outsideDaysVisible: true,
-                  markersAutoAligned: true,
-                ),
-                selectedDayPredicate: (day) => isSameDay(day, selectedDate),
-                onDaySelected: (selectedDay, focusedDay) {
-                  calendarController.selectDate(selectedDay);
-                  setState(() => _focusedDay = focusedDay);
-                },
-                onHeaderTapped:
-                    (_) => _showDatePicker(context, calendarController),
-                onPageChanged:
-                    calendarController.displayMonths.length > 1
-                        ? (focusedDay) {
-                          setState(() {
-                            _focusedDay = focusedDay;
-                            calendarController.currentMonth = focusedDay;
-                            if (index == 0) {
-                              calendarController.loadMoreMonths(true);
-                              // 强制重建ListView以显示新加载的月份
-                              _forceRefresh++;
-                            }
-                          });
-                        }
-                        : null,
-                headerStyle: HeaderStyle(
-                  formatButtonVisible: false,
-                  leftChevronIcon: Icon(Icons.chevron_left),
-                  rightChevronIcon: Icon(Icons.chevron_right),
-                  titleCentered: true,
-                ),
-                calendarBuilders: CalendarBuilders(
-                  defaultBuilder: _dayCellBuilder,
-                  selectedBuilder: _dayCellBuilder,
-                ),
-              );
-            },
+          onHeaderTapped: (_) => _showDatePicker(context, calendarController),
+          headerStyle: HeaderStyle(
+            formatButtonVisible: false,
+            leftChevronIcon: IconButton(
+              icon: Icon(Icons.chevron_left),
+              onPressed: () {
+                setState(() {
+                  _focusedDay = DateTime(
+                    _focusedDay.year,
+                    _focusedDay.month - 1,
+                  );
+                });
+              },
+            ),
+            rightChevronIcon: IconButton(
+              icon: Icon(Icons.chevron_right),
+              onPressed: () {
+                setState(() {
+                  _focusedDay = DateTime(
+                    _focusedDay.year,
+                    _focusedDay.month + 1,
+                  );
+                });
+              },
+            ),
+            titleCentered: true,
+          ),
+          calendarBuilders: CalendarBuilders(
+            defaultBuilder: _dayCellBuilder,
+            selectedBuilder: _dayCellBuilder,
           ),
         ),
       ),
@@ -370,10 +328,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
       lastDate: DateTime(2030),
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       initialDatePickerMode: DatePickerMode.year,
+      helpText: '选择年月',
+      cancelText: '取消',
+      confirmText: '确定',
     );
     if (selectedDate != null) {
-      setState(() => _focusedDay = selectedDate);
-      calendarController.selectDate(selectedDate);
+      setState(() {
+        _focusedDay = DateTime(selectedDate.year, selectedDate.month);
+      });
+      calendarController.selectDate(
+        DateTime(selectedDate.year, selectedDate.month),
+      );
     }
   }
 }

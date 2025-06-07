@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/calendar_controller.dart';
-import '../../controllers/tag_controller.dart';
 import '../../models/calendar_entry.dart';
 
 class EntryEditorController {
@@ -42,8 +41,6 @@ class EntryEditorController {
       context,
       listen: false,
     );
-    final tagController = Provider.of<TagController>(context, listen: false);
-
     if (titleController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
