@@ -28,7 +28,6 @@ class _TagScreenState extends State<TagScreen> {
   Widget build(BuildContext context) {
     final l10n = CalendarAlbumLocalizations.of(context);
     final tagController = Provider.of<TagController>(context);
-    final calendarController = Provider.of<CalendarController>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.get('tagManagement')),
@@ -101,8 +100,9 @@ class _TagScreenState extends State<TagScreen> {
           const Divider(),
           // Entries with selected tag
           Expanded(
-            child:
-                _selectedTags.isEmpty
+            child: Consumer<CalendarController>(
+              builder: (context, calendarController, child) {
+                return _selectedTags.isEmpty
                     ? Center(child: Text(l10n.get('selectTag')))
                     : EntryList(
                       entries: calendarController.getEntriesByTags(
@@ -178,7 +178,9 @@ class _TagScreenState extends State<TagScreen> {
                               ),
                         );
                       },
-                    ),
+                    );
+              },
+            ),
           ),
         ],
       ),

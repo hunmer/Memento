@@ -75,8 +75,10 @@ class _AlbumScreenState extends State<AlbumScreen> {
     final images = calendarController.getAllImages();
     return Scaffold(
       appBar: AppBar(title: Text(l10n.get('allPhotos'))),
-      body:
-          images.isEmpty
+      body: Consumer<CalendarController>(
+        builder: (context, calendarController, child) {
+          final images = calendarController.getAllImages();
+          return images.isEmpty
               ? Center(child: Text(l10n.get('noPhotos')))
               : GridView.builder(
                 padding: const EdgeInsets.all(8),
@@ -104,7 +106,9 @@ class _AlbumScreenState extends State<AlbumScreen> {
                     child: Hero(tag: imageUrl, child: _buildImage(imageUrl)),
                   );
                 },
-              ),
+              );
+        },
+      ),
     );
   }
 

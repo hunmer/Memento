@@ -11,14 +11,7 @@ import 'entry_detail_screen.dart';
 import '../utils/date_utils.dart';
 
 class CalendarScreen extends StatefulWidget {
-  final CalendarController calendarController;
-  final TagController tagController;
-
-  const CalendarScreen({
-    super.key,
-    required this.calendarController,
-    required this.tagController,
-  });
+  const CalendarScreen({super.key});
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -34,7 +27,7 @@ class _CalendarScreenState extends State<CalendarScreen>
   bool _isInitialized = false;
 
   Widget _dayCellBuilder(BuildContext context, DateTime date, _) {
-    final calendarController = widget.calendarController;
+    final calendarController = Provider.of<CalendarController>(context);
     final entries = calendarController.getEntriesForDate(date);
     final isSelected = isSameDay(date, calendarController.selectedDate);
     final isCurrentMonth = date.month == _focusedDay.month;
@@ -92,7 +85,10 @@ class _CalendarScreenState extends State<CalendarScreen>
       // 只在首次初始化时跳转到当前日期
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
-          widget.calendarController.selectDate(DateTime.now());
+          Provider.of<CalendarController>(
+            context,
+            listen: false,
+          ).selectDate(DateTime.now());
           setState(() => _isInitialized = true);
         }
       });
@@ -102,8 +98,8 @@ class _CalendarScreenState extends State<CalendarScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = CalendarAlbumLocalizations.of(context);
-    final calendarController = widget.calendarController;
-    final tagController = widget.tagController;
+    final calendarController = Provider.of<CalendarController>(context);
+    final tagController = Provider.of<TagController>(context);
     final selectedDate = calendarController.selectedDate;
 
     return MultiProvider(
@@ -148,7 +144,10 @@ class _CalendarScreenState extends State<CalendarScreen>
           onPressed: () {
             setState(() {
               _focusedDay = DateTime.now();
-              widget.calendarController.selectDate(DateTime.now());
+              Provider.of<CalendarController>(
+                context,
+                listen: false,
+              ).selectDate(DateTime.now());
             });
           },
           tooltip: '回到当前月份',
@@ -179,7 +178,10 @@ class _CalendarScreenState extends State<CalendarScreen>
           ),
           selectedDayPredicate: (day) => isSameDay(day, selectedDate),
           onDaySelected: (selectedDay, focusedDay) {
-            calendarController.selectDate(selectedDay);
+            Provider.of<CalendarController>(
+              context,
+              listen: false,
+            ).selectDate(selectedDay);
             setState(() => _focusedDay = focusedDay);
           },
           onHeaderTapped: (_) => _showDatePicker(context, calendarController),
@@ -342,9 +344,10 @@ class _CalendarScreenState extends State<CalendarScreen>
       setState(() {
         _focusedDay = DateTime(selectedDate.year, selectedDate.month);
       });
-      calendarController.selectDate(
-        DateTime(selectedDate.year, selectedDate.month),
-      );
+      Provider.of<CalendarController>(
+        context,
+        listen: false,
+      ).selectDate(DateTime(selectedDate.year, selectedDate.month));
     }
   }
 }

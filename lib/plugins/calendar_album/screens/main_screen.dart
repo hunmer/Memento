@@ -41,47 +41,49 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final l10n = CalendarAlbumLocalizations.of(context);
     final _pages = [
-      CalendarScreen(
-        calendarController: _calendarController,
-        tagController: tagController,
-        key: const PageStorageKey('calendar'),
-      ),
+      CalendarScreen(key: const PageStorageKey('calendar')),
       TagScreen(key: const PageStorageKey('tags')),
       AlbumScreen(key: const PageStorageKey('album')),
     ];
 
-    return Scaffold(
-      body: PageView.builder(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() => _currentIndex = index);
-        },
-        itemBuilder: (context, index) => _pages[index],
-        itemCount: _pages.length,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.calendar_today),
-            label: l10n.get('calendar'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.tag),
-            label: l10n.get('tags'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.photo_library),
-            label: l10n.get('album'),
-          ),
-        ],
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: _calendarController),
+        ChangeNotifierProvider.value(value: tagController),
+      ],
+      child: Scaffold(
+        body: PageView.builder(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() => _currentIndex = index);
+          },
+          itemBuilder: (context, index) => _pages[index],
+          itemCount: _pages.length,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            _pageController.animateToPage(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.calendar_today),
+              label: l10n.get('calendar'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.tag),
+              label: l10n.get('tags'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.photo_library),
+              label: l10n.get('album'),
+            ),
+          ],
+        ),
       ),
     );
   }
