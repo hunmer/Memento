@@ -96,6 +96,15 @@ class _HabitsListState extends State<HabitsList> {
       itemBuilder: (context, index) {
         final habit = habits[index];
         return ListTile(
+          leading:
+              habit.icon != null
+                  ? Icon(
+                    IconData(
+                      int.parse(habit.icon!),
+                      fontFamily: 'MaterialIcons',
+                    ),
+                  )
+                  : null,
           title: Text(habit.title),
           subtitle: Text('${habit.durationMinutes} ${l10n.minutes}'),
           trailing: IconButton(

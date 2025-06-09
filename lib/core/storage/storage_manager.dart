@@ -256,12 +256,19 @@ class StorageManager {
   }
 
   /// 读取JSON
-  Future<dynamic> readJson(String path) async {
-    if (kIsWeb) {
-      return await _storage.loadJson(path);
-    } else {
-      final jsonString = await readString(path);
-      return jsonDecode(jsonString);
+  /// [path] 文件路径
+  /// [defaultValue] 当文件不存在时返回的默认值
+  Future<dynamic> readJson(String path, [dynamic defaultValue]) async {
+    try {
+      if (kIsWeb) {
+        final result = await _storage.loadJson(path);
+        return result ?? defaultValue;
+      } else {
+        final jsonString = await readString(path);
+        return jsonDecode(jsonString);
+      }
+    } catch (e) {
+      return defaultValue;
     }
   }
 

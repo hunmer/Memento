@@ -7,8 +7,10 @@ class HabitController {
   HabitController(this.storage);
 
   Future<List<Habit>> getHabits() async {
-    final data = await storage.readJson('habits');
-    return data.map((e) => Habit.fromMap(e)).toList();
+    final data = await storage.readJson('habits/habits', []);
+    return List<Map<String, dynamic>>.from(
+      data,
+    ).map((e) => Habit.fromMap(e)).toList();
   }
 
   Future<void> saveHabit(Habit habit) async {
@@ -21,7 +23,10 @@ class HabitController {
       habits.add(habit);
     }
 
-    await storage.writeJson('habits', habits.map((h) => h.toMap()).toList());
+    await storage.writeJson(
+      'habits/habits',
+      habits.map((h) => h.toMap()).toList(),
+    );
   }
 
   Future<void> deleteHabit(String id) async {

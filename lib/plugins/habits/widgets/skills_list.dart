@@ -111,6 +111,15 @@ class _SkillsListState extends State<SkillsList> {
             final duration = snapshot.data?[1] ?? 0;
 
             return ListTile(
+              leading:
+                  skill.icon != null
+                      ? Icon(
+                        IconData(
+                          int.parse(skill.icon!),
+                          fontFamily: 'MaterialIcons',
+                        ),
+                      )
+                      : null,
               title: Text(skill.title),
               subtitle: Text(
                 '$count completions • ${HabitsUtils.formatDuration(duration)}',
@@ -148,6 +157,14 @@ class _SkillsListState extends State<SkillsList> {
                     child:
                         skill.image != null
                             ? Image.network(skill.image!)
+                            : skill.icon != null
+                            ? Icon(
+                              IconData(
+                                int.parse(skill.icon!),
+                                fontFamily: 'MaterialIcons',
+                              ),
+                              size: 48,
+                            )
                             : const Icon(Icons.auto_awesome, size: 48),
                   ),
                   Text(skill.title),

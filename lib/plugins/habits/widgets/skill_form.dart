@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
@@ -44,6 +47,117 @@ class _SkillFormState extends State<SkillForm> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  final result = await showDialog<Map<String, dynamic>>(
+                    context: context,
+                    builder:
+                        (context) => ImagePickerDialog(
+                          initialUrl: _image,
+                          saveDirectory: 'skill_images',
+                          enableCrop: true,
+                          cropAspectRatio: 1.0,
+                        ),
+                  );
+                  if (result != null && result['url'] != null) {
+                    setState(() {
+                      _image = result['url'] as String;
+                    });
+                  }
+                },
+                child: SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.5),
+                        width: 2,
+                      ),
+                    ),
+                    child:
+                        _image != null && _image!.isNotEmpty
+                            ? FutureBuilder<String>(
+                              future:
+                                  _image!.startsWith('http')
+                                      ? Future.value(_image!)
+                                      : ImageUtils.getAbsolutePath(_image!),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Center(
+                                    child: AspectRatio(
+                                      aspectRatio: 1.0,
+                                      child: ClipOval(
+                                        child:
+                                            _image!.startsWith('http')
+                                                ? Image.network(
+                                                  snapshot.data!,
+                                                  width: 64,
+                                                  height: 64,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) => const Icon(
+                                                        Icons.broken_image,
+                                                      ),
+                                                )
+                                                : Image.file(
+                                                  File(snapshot.data!),
+                                                  width: 64,
+                                                  height: 64,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) => const Icon(
+                                                        Icons.broken_image,
+                                                      ),
+                                                ),
+                                      ),
+                                    ),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return const Icon(Icons.broken_image);
+                                } else {
+                                  return const CircularProgressIndicator();
+                                }
+                              },
+                            )
+                            : Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.add_photo_alternate_outlined,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '选择图片',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton(onPressed: _saveSkill, child: Text(l10n.save)),
+            ],
+          ),
+          const SizedBox(height: 16),
           TextField(
             controller: _titleController,
             decoration: InputDecoration(labelText: l10n.title),
@@ -68,23 +182,6 @@ class _SkillFormState extends State<SkillForm> {
             ),
             keyboardType: TextInputType.number,
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () async {
-              final result = await showDialog<Map<String, dynamic>>(
-                context: context,
-                builder: (context) => ImagePickerDialog(initialUrl: _image),
-              );
-              if (result != null && result['url'] != null) {
-                setState(() {
-                  _image = result['url'];
-                });
-              }
-            },
-            child: const Text('选择图片'),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(onPressed: _saveSkill, child: Text(l10n.save)),
         ],
       ),
     );

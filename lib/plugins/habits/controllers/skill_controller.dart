@@ -7,8 +7,10 @@ class SkillController {
   SkillController(this.storage);
 
   Future<List<Skill>> getSkills() async {
-    final data = await storage.readJson('skills');
-    return data.map((e) => Skill.fromMap(e)).toList();
+    final data = await storage.readJson('habits/skills', []);
+    return List<Map<String, dynamic>>.from(
+      data,
+    ).map((e) => Skill.fromMap(e)).toList();
   }
 
   Future<void> saveSkill(Skill skill) async {
@@ -21,7 +23,10 @@ class SkillController {
       skills.add(skill);
     }
 
-    await storage.writeJson('skills', skills.map((s) => s.toMap()).toList());
+    await storage.writeJson(
+      'habits/skills',
+      skills.map((s) => s.toMap()).toList(),
+    );
   }
 
   Future<void> deleteSkill(String id) async {

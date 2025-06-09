@@ -25,6 +25,7 @@ class HabitsLocalizations {
   String get startTimer => 'Start Timer';
   String get save => 'Save';
   String get cancel => 'Cancel';
+  String get pleaseEnterTitle => 'please Enter Title';
 
   static HabitsLocalizations of(BuildContext context) {
     return const HabitsLocalizations();
