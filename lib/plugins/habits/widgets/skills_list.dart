@@ -6,6 +6,7 @@ import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/widgets/skill_form.dart';
+import 'package:Memento/plugins/habits/widgets/skill_detail_page.dart';
 
 class SkillsList extends StatefulWidget {
   final SkillController skillController;
@@ -124,7 +125,18 @@ class _SkillsListState extends State<SkillsList> {
               subtitle: Text(
                 '$count completions • ${HabitsUtils.formatDuration(duration)}',
               ),
-              onTap: () => _showSkillDetail(context, skill),
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => SkillDetailPage(
+                            skill: skill,
+                            skillController: widget.skillController,
+                            recordController: widget.recordController,
+                          ),
+                    ),
+                  ),
             );
           },
         );
@@ -156,7 +168,7 @@ class _SkillsListState extends State<SkillsList> {
                   Expanded(
                     child:
                         skill.image != null
-                            ? Image.network(skill.image!)
+                            ? Image.network(skill.image!, fit: BoxFit.cover)
                             : skill.icon != null
                             ? Icon(
                               IconData(
@@ -180,11 +192,70 @@ class _SkillsListState extends State<SkillsList> {
   }
 
   void _showSortMenu() {
-    // TODO: Implement sorting logic
-  }
-
-  void _showSkillDetail(BuildContext context, Skill skill) {
-    // TODO: Implement skill detail view
+    final l10n = HabitsLocalizations.of(context);
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.sort_by_alpha),
+                title: Text(l10n.sortByName),
+                onTap: () {
+                  setState(() {
+                    _skills.sort((a, b) => a.title.compareTo(b.title));
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.format_list_numbered),
+                title: Text(l10n.sortByCompletions),
+                onTap: () async {
+                  final counts = await Future.wait(
+                    _skills.map(
+                      (s) => widget.recordController.getCompletionCount(s.id),
+                    ),
+                  );
+                  final sortedSkills =
+                      _skills
+                          .asMap()
+                          .entries
+                          .map((e) => (e.value, counts[e.key]))
+                          .toList()
+                        ..sort((a, b) => b.$2.compareTo(a.$2));
+                  setState(() {
+                    _skills = sortedSkills.map((e) => e.$1).toList();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.timer),
+                title: Text(l10n.sortByDuration),
+                onTap: () async {
+                  final durations = await Future.wait(
+                    _skills.map(
+                      (s) => widget.recordController.getTotalDuration(s.id),
+                    ),
+                  );
+                  final sortedSkills =
+                      _skills
+                          .asMap()
+                          .entries
+                          .map((e) => (e.value, durations[e.key]))
+                          .toList()
+                        ..sort((a, b) => b.$2.compareTo(a.$2));
+                  setState(() {
+                    _skills = sortedSkills.map((e) => e.$1).toList();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+    );
   }
 
   Future<void> _showSkillForm(BuildContext context, [Skill? skill]) async {

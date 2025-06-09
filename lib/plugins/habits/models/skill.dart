@@ -5,6 +5,7 @@ class Skill {
   final String? group;
   final String? icon;
   final String? image;
+  final String? description;
   final int maxDurationMinutes; // 0 for unlimited
 
   Skill({
@@ -14,6 +15,7 @@ class Skill {
     this.group,
     this.icon,
     this.image,
+    this.description,
     this.maxDurationMinutes = 0,
   });
 
@@ -25,6 +27,7 @@ class Skill {
       'group': group,
       'icon': icon,
       'image': image,
+      'description': description,
       'maxDurationMinutes': maxDurationMinutes,
     };
   }
@@ -37,6 +40,7 @@ class Skill {
       group: map['group'],
       icon: map['icon'],
       image: map['image'],
+      description: map['description'],
       maxDurationMinutes: map['maxDurationMinutes'] ?? 0,
     );
   }
