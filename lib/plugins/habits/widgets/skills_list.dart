@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
@@ -65,6 +66,10 @@ class _SkillsListState extends State<SkillsList> {
   ) {
     return AppBar(
       title: Text(l10n.skills),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () => PluginManager.toHomeScreen(context),
+      ),
       actions: [
         if (groups.isNotEmpty)
           DropdownButton<String>(

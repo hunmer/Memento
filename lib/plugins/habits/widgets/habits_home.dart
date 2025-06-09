@@ -22,44 +22,37 @@ class HabitsHome extends StatefulWidget {
   State<HabitsHome> createState() => _HabitsHomeState();
 }
 
-class _HabitsHomeState extends State<HabitsHome>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
+class _HabitsHomeState extends State<HabitsHome> {
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _screens = [
+      HabitsList(controller: widget.habitController),
+      SkillsList(
+        skillController: widget.skillController,
+        recordController: widget.recordController,
+      ),
+    ];
     final l10n = HabitsLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.habits),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [Tab(text: l10n.habits), Tab(text: l10n.skills)],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          HabitsList(controller: widget.habitController),
-          SkillsList(
-            skillController: widget.skillController,
-            recordController: widget.recordController,
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.check_circle),
+            label: l10n.habits,
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: l10n.skills),
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 }

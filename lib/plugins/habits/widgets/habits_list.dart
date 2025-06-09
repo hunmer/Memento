@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
@@ -59,6 +60,10 @@ class _HabitsListState extends State<HabitsList> {
   ) {
     return AppBar(
       title: Text(l10n.habits),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () => PluginManager.toHomeScreen(context),
+      ),
       actions: [
         if (groups.isNotEmpty)
           DropdownButton<String>(
