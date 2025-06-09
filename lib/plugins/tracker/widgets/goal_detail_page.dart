@@ -63,10 +63,14 @@ class GoalDetailPage extends StatelessWidget {
                   value: progress,
                   minHeight: 8,
                   backgroundColor: Colors.grey[200],
+                  color:
+                      goal.progressColor != null
+                          ? Color(goal.progressColor!)
+                          : Theme.of(context).primaryColor,
                 ),
                 const flutter.SizedBox(height: 8),
                 Text(
-                  '${(progress * 100).toStringAsFixed(1)}% 完成',
+                  '${(progress * 100).toInt()}% 完成',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],

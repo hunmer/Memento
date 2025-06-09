@@ -6,6 +6,7 @@ class Goal {
   final String unitType;
   final String group;
   final String? imagePath;
+  final int? progressColor; // 进度条颜色
   final double targetValue;
   final double currentValue;
   final DateSettings dateSettings;
@@ -29,6 +30,7 @@ class Goal {
     required this.createdAt,
     this.group = '默认',
     this.imagePath,
+    this.progressColor,
   });
 
   factory Goal.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,7 @@ class Goal {
       createdAt: DateTime.parse(json['createdAt']),
       group: json['group'] ?? '默认',
       imagePath: json['imagePath'],
+      progressColor: json['progressColor'],
     );
   }
 
@@ -64,6 +67,7 @@ class Goal {
       'createdAt': createdAt.toIso8601String(),
       'group': group,
       'imagePath': imagePath,
+      'progressColor': progressColor,
     };
   }
 
@@ -81,6 +85,7 @@ class Goal {
     DateTime? createdAt,
     String? group,
     String? imagePath,
+    int? progressColor,
   }) {
     return Goal(
       id: id ?? this.id,
@@ -96,6 +101,7 @@ class Goal {
       createdAt: createdAt ?? this.createdAt,
       group: group ?? this.group,
       imagePath: imagePath ?? this.imagePath,
+      progressColor: progressColor ?? this.progressColor,
     );
   }
 }

@@ -18,6 +18,10 @@ class GoalDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<TrackerController>(
       builder: (context, controller, child) {
+        final currentValue =
+            controller.goals.firstWhere((g) => g.id == goal.id).currentValue;
+        final isCompleted = currentValue >= goal.targetValue;
+
         return Scaffold(
           appBar: AppBar(
             title: Text(goal.name),
@@ -81,12 +85,15 @@ class GoalDetailScreen extends StatelessWidget {
                 LinearProgressIndicator(
                   value: controller.calculateProgress(goal),
                   backgroundColor: Colors.grey[200],
-                  color: Theme.of(context).primaryColor,
+                  color:
+                      isCompleted
+                          ? Colors.green
+                          : goal.progressColor != null
+                          ? Color(goal.progressColor!)
+                          : Theme.of(context).primaryColor,
                 ),
                 const flutter.SizedBox(height: 16),
-                Text(
-                  '当前进度: ${controller.goals.firstWhere((g) => g.id == goal.id).currentValue}/${goal.targetValue}${goal.unitType}',
-                ),
+                Text('当前进度: ${currentValue}/${goal.targetValue}'),
                 const flutter.SizedBox(height: 16),
                 if (goal.reminderTime != null)
                   Text('提醒时间: ${goal.reminderTime}'),
@@ -117,9 +124,13 @@ class GoalDetailScreen extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final record = records[index];
                               return flutter.ListTile(
-                                title: Text('${record.value}${goal.unitType}'),
+                                title: Text('${record.value}'),
                                 subtitle: Text(
-                                  record.recordedAt.toLocal().toString(),
+                                  record.recordedAt
+                                      .toLocal()
+                                      .toString()
+                                      .split('.')
+                                      .first,
                                 ),
                                 trailing: flutter.Row(
                                   mainAxisSize: MainAxisSize.min,

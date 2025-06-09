@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/color_picker_section.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
 import 'package:Memento/utils/image_utils.dart';
@@ -24,6 +25,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
   late String _name;
   late String _icon;
   Color? _iconColor;
+  Color? _progressColor;
   String _group = '默认';
   String? _imagePath;
   late String _unitType;
@@ -59,6 +61,10 @@ class _GoalEditPageState extends State<GoalEditPage> {
           widget.goal!.iconColor != null
               ? Color(widget.goal!.iconColor!)
               : null;
+      _progressColor =
+          widget.goal!.progressColor != null
+              ? Color(widget.goal!.progressColor!)
+              : null;
       _unitType = widget.goal!.unitType;
       _targetValue = widget.goal!.targetValue;
       _dateType =
@@ -77,6 +83,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
       _name = '';
       _icon = '0';
       _iconColor = null;
+      _progressColor = null;
       _unitType = '';
       _targetValue = 0;
       _dateType = 'daily'; // 确保初始值与下拉选项匹配
@@ -96,6 +103,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _iconColor ??= Theme.of(context).colorScheme.primary;
+    _progressColor ??= Theme.of(context).colorScheme.primary;
   }
 
   // 添加新分组
@@ -173,6 +181,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
                     },
                   ),
                 ),
+
                 const SizedBox(width: 16),
                 Expanded(
                   child: GestureDetector(
@@ -265,6 +274,19 @@ class _GoalEditPageState extends State<GoalEditPage> {
                       ),
                     ),
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Column(
+              children: [
+                const SizedBox(height: 8),
+                ColorPickerSection(
+                  selectedColor:
+                      _progressColor ?? Theme.of(context).colorScheme.primary,
+                  onColorChanged: (color) {
+                    setState(() => _progressColor = color);
+                  },
                 ),
               ],
             ),
@@ -479,6 +501,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
         group: _group,
         imagePath: finalImagePath,
         iconColor: _iconColor?.value,
+        progressColor: _progressColor?.value,
         unitType: _unitType,
         targetValue: _targetValue,
         currentValue: widget.goal?.currentValue ?? 0,

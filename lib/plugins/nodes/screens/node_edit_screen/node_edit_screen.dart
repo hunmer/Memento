@@ -4,7 +4,7 @@ import '../../controllers/nodes_controller.dart';
 import '../../models/node.dart';
 import '../../l10n/nodes_localizations.dart';
 import 'components/breadcrumbs.dart';
-import 'components/color_picker_section.dart';
+import '../../../../widgets/color_picker_section.dart';
 import 'components/tags_section.dart';
 import 'components/status_dropdown.dart';
 import 'components/date_section.dart';
@@ -88,7 +88,7 @@ class NodeEditScreenState extends State<NodeEditScreen> {
               controller: controller,
             ),
             const SizedBox(height: 16),
-            
+
             // 标题输入框
             TextField(
               controller: _titleController,
@@ -98,7 +98,7 @@ class NodeEditScreenState extends State<NodeEditScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // 标签部分
             TagsSection(
               tags: _tags,
@@ -112,7 +112,7 @@ class NodeEditScreenState extends State<NodeEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // 颜色选择器
             ColorPickerSection(
               selectedColor: _color,
@@ -121,7 +121,7 @@ class NodeEditScreenState extends State<NodeEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // 状态下拉框
             StatusDropdown(
               value: _status,
@@ -132,7 +132,7 @@ class NodeEditScreenState extends State<NodeEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // 日期部分
             DateSection(
               startDate: _startDate,
@@ -145,7 +145,7 @@ class NodeEditScreenState extends State<NodeEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // 自定义字段部分
             CustomFieldsSection(
               customFields: _customFields,
@@ -165,18 +165,13 @@ class NodeEditScreenState extends State<NodeEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // 笔记输入框
-            Text(
-              l10n.notes,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(l10n.notes, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             TextField(
               controller: _notesController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder()),
               maxLines: 5,
             ),
           ],
@@ -189,7 +184,10 @@ class NodeEditScreenState extends State<NodeEditScreen> {
     // 计算节点的完整路径值
     String pathValue = _titleController.text;
     if (widget.node.parentId.isNotEmpty) {
-      final parentNode = controller.findNodeById(widget.notebookId, widget.node.parentId);
+      final parentNode = controller.findNodeById(
+        widget.notebookId,
+        widget.node.parentId,
+      );
       if (parentNode != null) {
         pathValue = '${parentNode.pathValue}/$pathValue';
       }
