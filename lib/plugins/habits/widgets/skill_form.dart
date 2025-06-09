@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
@@ -22,8 +23,9 @@ class _SkillFormState extends State<SkillForm> {
   late final TextEditingController _notesController;
   late final TextEditingController _groupController;
   late final TextEditingController _maxDurationController;
-  String? _icon;
+  IconData? _icon;
   String? _image;
+  Color _iconColor = Colors.blue;
 
   @override
   void initState() {
@@ -35,7 +37,10 @@ class _SkillFormState extends State<SkillForm> {
     _maxDurationController = TextEditingController(
       text: skill?.maxDurationMinutes.toString() ?? '0',
     );
-    _icon = skill?.icon;
+    _icon =
+        skill?.icon != null
+            ? IconData(int.parse(skill!.icon!), fontFamily: 'MaterialIcons')
+            : null;
     _image = skill?.image;
   }
 
@@ -57,7 +62,7 @@ class _SkillFormState extends State<SkillForm> {
                     builder:
                         (context) => ImagePickerDialog(
                           initialUrl: _image,
-                          saveDirectory: 'skill_images',
+                          saveDirectory: 'habits/skill_images',
                           enableCrop: true,
                           cropAspectRatio: 1.0,
                         ),
@@ -154,10 +159,27 @@ class _SkillFormState extends State<SkillForm> {
                 ),
               ),
               const SizedBox(width: 16),
-              ElevatedButton(onPressed: _saveSkill, child: Text(l10n.save)),
+              SizedBox(
+                width: 64,
+                height: 64,
+                child: CircleIconPicker(
+                  currentIcon: _icon ?? Icons.check_rounded,
+                  backgroundColor: _iconColor,
+                  onIconSelected: (icon) {
+                    setState(() {
+                      _icon = icon;
+                    });
+                  },
+                  onColorSelected: (color) {
+                    setState(() {
+                      _iconColor = color;
+                    });
+                  },
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           TextField(
             controller: _titleController,
             decoration: InputDecoration(labelText: l10n.title),
@@ -182,6 +204,8 @@ class _SkillFormState extends State<SkillForm> {
             ),
             keyboardType: TextInputType.number,
           ),
+          const SizedBox(height: 16),
+          ElevatedButton(onPressed: _saveSkill, child: Text(l10n.save)),
         ],
       ),
     );
@@ -193,7 +217,7 @@ class _SkillFormState extends State<SkillForm> {
       title: _titleController.text,
       notes: _notesController.text.isEmpty ? null : _notesController.text,
       group: _groupController.text.isEmpty ? null : _groupController.text,
-      icon: _icon,
+      icon: _icon?.codePoint.toString(),
       image: _image,
       maxDurationMinutes: int.tryParse(_maxDurationController.text) ?? 0,
     );
