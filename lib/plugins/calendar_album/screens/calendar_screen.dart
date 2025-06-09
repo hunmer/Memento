@@ -24,7 +24,10 @@ class CalendarScreen extends StatefulWidget {
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _CalendarScreenState extends State<CalendarScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   DateTime _focusedDay = DateTime.now();
   var _forceRefresh = 0;
   final ScrollController _scrollController = ScrollController();
