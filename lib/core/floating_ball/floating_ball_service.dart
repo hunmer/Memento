@@ -23,7 +23,6 @@ class FloatingBallService {
   Future<void> initialize(BuildContext context) async {
     if (_isInitialized) return;
 
-    await _manager.initDefaultActions(context);
     _manager.setActionContext(context);
     _isInitialized = true;
   }
@@ -61,13 +60,13 @@ class FloatingBallService {
     _overlayEntry = null;
   }
 
-  /// 注册悬浮球动作
-  void registerAction(
+  /// 设置悬浮球动作
+  void setAction(
     FloatingBallGesture gesture,
     String title,
-    Function callback,
+    Function() callback,
   ) {
-    _manager.registerAction(gesture, title, callback);
+    _manager.setAction(gesture, title, callback);
   }
 
   /// 获取悬浮球管理器

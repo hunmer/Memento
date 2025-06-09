@@ -192,7 +192,7 @@ class _FloatingBallSettingsScreenState
 
                     if (value != null) {
                       // 注册新动作
-                      await _manager.registerAction(
+                      await _manager.setAction(
                         gesture,
                         value,
                         () {}, // 空回调，实际回调将在setActionContext中设置

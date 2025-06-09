@@ -1,5 +1,8 @@
+import 'dart:core';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 import 'floating_ball_service.dart';
 import '../../dialogs/plugin_list_dialog.dart';
 import '../plugin_manager.dart';
@@ -30,24 +33,22 @@ class FloatingBallManager {
   }
 
   final Map<FloatingBallGesture, ActionInfo> _actions = {};
-  final _prefs = SharedPreferences.getInstance();
-
   // 默认位置
   Offset _position = const Offset(20, 100);
   // 默认大小比例 (100%)
   double _sizeScale = 1.0;
   // 默认启用状态
   bool _isEnabled = true;
+  // 存储文件路径
+  File? _storageFile;
 
   // 预定义的动作映射表
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
     '打开上次插件':
         (context) => () {
           if (context.mounted) {
-            // 获取当前打开的插件ID
-            // 使用 Navigator.of(context).context 获取最上层路由的 context
             final navigatorContext = Navigator.of(context).context;
-            String? currentPluginId =
+            final String? currentPluginId =
                 PluginManager.instance.getCurrentPluginId();
             if (currentPluginId == null) return;
 
@@ -68,14 +69,6 @@ class FloatingBallManager {
         (context) => () {
           if (context.mounted) {
             showPluginListDialog(context);
-          }
-        },
-    '显示提示消息':
-        (context) => (String message) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
           }
         },
     '返回上一页':
@@ -100,15 +93,38 @@ class FloatingBallManager {
         },
   };
 
+  // 获取存储文件
+  Future<File> _getStorageFile() async {
+    if (_storageFile != null) return _storageFile!;
+    final directory = await getApplicationDocumentsDirectory();
+    _storageFile = File('${directory.path}/floating_ball_config.json');
+    if (!await _storageFile!.exists()) {
+      await _storageFile!.writeAsString('{}');
+    }
+    return _storageFile!;
+  }
+
+  // 读取数据
+  Future<Map<String, dynamic>> _readData() async {
+    final file = await _getStorageFile();
+    final content = await file.readAsString();
+    return json.decode(content) as Map<String, dynamic>;
+  }
+
+  // 写入数据
+  Future<void> _writeData(Map<String, dynamic> data) async {
+    final file = await _getStorageFile();
+    await file.writeAsString(json.encode(data));
+  }
+
   // 加载保存的动作
   Future<void> _loadActions() async {
-    final prefs = await _prefs;
+    final data = await _readData();
+    final actions = data['actions'] as Map<String, dynamic>? ?? {};
     for (var gesture in FloatingBallGesture.values) {
-      final key = 'floating_ball_action_${gesture.name}';
-      final actionTitle = prefs.getString(key);
+      final actionTitle = actions[gesture.name];
       if (actionTitle != null) {
-        // 暂时不设置回调函数，等到需要时再设置
-        _actions[gesture] = ActionInfo(actionTitle, () {});
+        _actions[gesture] = ActionInfo(actionTitle.toString(), () {});
       }
     }
     debugPrint('Loaded ${_actions.length} saved actions');
@@ -119,26 +135,29 @@ class FloatingBallManager {
     FloatingBallGesture gesture,
     String? actionTitle,
   ) async {
-    final prefs = await _prefs;
-    final key = 'floating_ball_action_${gesture.name}';
+    final data = await _readData();
+    var actions = data['actions'] as Map<String, dynamic>? ?? {};
     if (actionTitle != null) {
-      await prefs.setString(key, actionTitle);
+      actions[gesture.name] = actionTitle;
     } else {
-      await prefs.remove(key);
+      actions.remove(gesture.name);
     }
+    data['actions'] = actions;
+    await _writeData(data);
   }
 
   // 获取悬浮球大小比例
   Future<double> getSizeScale() async {
-    final prefs = await _prefs;
-    return prefs.getDouble('floating_ball_size_scale') ?? 1.0;
+    final data = await _readData();
+    return (data['size_scale'] as num?)?.toDouble() ?? 1.0;
   }
 
   // 保存悬浮球大小比例
   Future<void> saveSizeScale(double scale) async {
     _sizeScale = scale;
-    final prefs = await _prefs;
-    await prefs.setDouble('floating_ball_size_scale', scale);
+    final data = await _readData();
+    data['size_scale'] = scale;
+    await _writeData(data);
 
     // 通知悬浮球大小变化
     FloatingBallService().notifySizeChange(scale);
@@ -146,28 +165,29 @@ class FloatingBallManager {
 
   // 获取悬浮球启用状态
   Future<bool> isEnabled() async {
-    final prefs = await _prefs;
-    return prefs.getBool('floating_ball_enabled') ?? true;
+    final data = await _readData();
+    return (data['enabled'] as bool?) ?? true;
   }
 
   // 保存悬浮球启用状态
   Future<void> setEnabled(bool enabled) async {
     _isEnabled = enabled;
-    final prefs = await _prefs;
-    await prefs.setBool('floating_ball_enabled', enabled);
+    final data = await _readData();
+    data['enabled'] = enabled;
+    await _writeData(data);
 
     // 如果禁用，直接隐藏悬浮球
     if (!enabled) {
       FloatingBallService().hide();
     }
-    // 注意：不在这里调用show()，而是让上层调用者决定是否显示
   }
 
   // 获取保存的位置
   Future<Offset> getPosition() async {
-    final prefs = await _prefs;
-    final double x = prefs.getDouble('floating_ball_x') ?? 20;
-    final double y = prefs.getDouble('floating_ball_y') ?? 100;
+    final data = await _readData();
+    final position = data['position'] as Map<String, dynamic>? ?? {};
+    final double x = (position['x'] as num?)?.toDouble() ?? 20;
+    final double y = (position['y'] as num?)?.toDouble() ?? 100;
     _position = Offset(x, y);
     return _position;
   }
@@ -175,24 +195,24 @@ class FloatingBallManager {
   // 保存位置
   Future<void> savePosition(Offset position) async {
     _position = position;
-    final prefs = await _prefs;
-    await prefs.setDouble('floating_ball_x', position.dx);
-    await prefs.setDouble('floating_ball_y', position.dy);
+    final data = await _readData();
+    data['position'] = {'x': position.dx, 'y': position.dy};
+    await _writeData(data);
   }
 
-  // 注册动作
-  Future<void> registerAction(
+  // 设置动作
+  Future<void> setAction(
     FloatingBallGesture gesture,
     String title,
-    Function callback,
+    final Function() callback,
   ) async {
     _actions[gesture] = ActionInfo(title, callback);
     await _saveAction(gesture, title);
   }
 
   // 获取动作
-  Function? getAction(FloatingBallGesture gesture) {
-    return _actions[gesture]?.callback;
+  Function()? getAction(FloatingBallGesture gesture) {
+    return _actions[gesture]?.callback as Function()?;
   }
 
   // 获取动作标题
@@ -233,94 +253,9 @@ class FloatingBallManager {
       if (actionInfo != null) {
         if (_predefinedActionCreators.containsKey(actionInfo.title)) {
           final creator = _predefinedActionCreators[actionInfo.title]!;
-          if (actionInfo.title == '显示提示消息') {
-            final gestureName = _getGestureName(gesture);
-            _actions[gesture] = ActionInfo(
-              actionInfo.title,
-              () => creator(context)('$gestureName手势'),
-            );
-          } else {
-            _actions[gesture] = ActionInfo(actionInfo.title, creator(context));
-          }
-        } else {
-          // 如果动作不在预定义列表中，设置一个默认的提示动作
-          final gestureName = _getGestureName(gesture);
-          _actions[gesture] = ActionInfo(actionInfo.title, () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('$gestureName手势 - ${actionInfo.title}')),
-            );
-          });
+          _actions[gesture] = ActionInfo(actionInfo.title, creator(context));
         }
       }
     }
-  }
-
-  // 获取手势名称
-  String _getGestureName(FloatingBallGesture gesture) {
-    switch (gesture) {
-      case FloatingBallGesture.tap:
-        return '单击';
-      case FloatingBallGesture.swipeUp:
-        return '上滑';
-      case FloatingBallGesture.swipeDown:
-        return '下滑';
-      case FloatingBallGesture.swipeLeft:
-        return '左滑';
-      case FloatingBallGesture.swipeRight:
-        return '右滑';
-    }
-  }
-
-  // 初始化默认动作 - 只有在没有保存的动作时才设置默认动作
-  Future<void> initDefaultActions(BuildContext context) async {
-    // 等待加载保存的动作完成
-    await _prefs;
-
-    // 检查每个手势是否已有保存的动作，如果没有才设置默认动作
-    for (var gesture in FloatingBallGesture.values) {
-      if (!_actions.containsKey(gesture)) {
-        switch (gesture) {
-          case FloatingBallGesture.swipeUp:
-            registerAction(gesture, '显示上滑提示', () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('上滑')));
-            });
-            break;
-          case FloatingBallGesture.swipeDown:
-            registerAction(gesture, '显示下滑提示', () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('下滑')));
-            });
-            break;
-          case FloatingBallGesture.swipeLeft:
-            registerAction(gesture, '显示左滑提示', () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('左滑')));
-            });
-            break;
-          case FloatingBallGesture.swipeRight:
-            registerAction(gesture, '显示右滑提示', () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('右滑')));
-            });
-            break;
-          case FloatingBallGesture.tap:
-            registerAction(gesture, '显示单击提示', () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('单击')));
-            });
-            break;
-        }
-      }
-    }
-
-    debugPrint(
-      'Initialized default actions for gestures without saved actions',
-    );
   }
 }
