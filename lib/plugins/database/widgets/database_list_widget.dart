@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/database/controllers/database_controller.dart';
 import 'package:Memento/plugins/database/widgets/database_detail_widget.dart';
 import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/database_model.dart';
@@ -30,7 +34,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => PluginManager.toHomeScreen(context),
         ),
         title: const Text('数据库列表'),
       ),
@@ -155,15 +159,24 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   ),
                   child: InkWell(
                     onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder:
-                              (context) => DatabaseDetailWidget(
-                                controller: DatabaseController(widget.service),
-                                databaseId: database.id,
-                              ),
-                        ),
-                      );
+                      Navigator.of(context)
+                          .push(
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => DatabaseDetailWidget(
+                                    controller: DatabaseController(
+                                      widget.service,
+                                    ),
+                                    databaseId: database.id,
+                                  ),
+                            ),
+                          )
+                          .then(
+                            (_) => setState(() {
+                              _databasesFuture =
+                                  widget.service.getAllDatabases();
+                            }),
+                          );
                     },
                     onLongPress: () {
                       _showBottomSheet(context, database);
@@ -174,9 +187,23 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                         Expanded(
                           child:
                               database.coverImage != null
-                                  ? Image.network(
-                                    database.coverImage!,
-                                    fit: BoxFit.cover,
+                                  ? FutureBuilder<String>(
+                                    future: ImageUtils.getAbsolutePath(
+                                      database.coverImage!,
+                                    ),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+                                      if (snapshot.hasError ||
+                                          !snapshot.hasData) {
+                                        return _buildIcon();
+                                      }
+                                      return _buildImageWidget(snapshot.data!);
+                                    },
                                   )
                                   : Container(
                                     color: Colors.grey[200],
@@ -301,6 +328,55 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
               ),
             ],
           ),
+    );
+  }
+
+  Widget _buildImageWidget(String imageUrl) {
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      // 网络图片
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('网络图片加载失败: $error');
+          return _buildIcon();
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value:
+                  loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                      : null,
+            ),
+          );
+        },
+      );
+    } else {
+      // 本地图片
+      try {
+        final file = File(imageUrl);
+        return Image.file(
+          file,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('本地图片加载失败: $error\n路径: $imageUrl');
+            return _buildIcon();
+          },
+        );
+      } catch (e) {
+        debugPrint('创建File对象失败: $e\n路径: $imageUrl');
+        return _buildIcon();
+      }
+    }
+  }
+
+  Widget _buildIcon() {
+    return Container(
+      color: Colors.grey[200],
+      child: const Icon(Icons.broken_image, size: 48),
     );
   }
 }

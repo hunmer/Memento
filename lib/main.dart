@@ -46,7 +46,7 @@ import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 import 'core/services/backup_service.dart'; // 备份服务
 import 'package:flutter/material.dart';
-import 'plugins/database/database.dart';
+import 'plugins/database/database_plugin.dart';
 
 // 全局导航键
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

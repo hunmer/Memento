@@ -28,6 +28,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedDay = DateTime.now();
   var _forceRefresh = 0;
   final ScrollController _scrollController = ScrollController();
+  bool _isInitialized = false;
 
   Widget _dayCellBuilder(BuildContext context, DateTime date, _) {
     final calendarController = widget.calendarController;
@@ -84,13 +85,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    // 增加延迟时间确保组件完全加载
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        widget.calendarController.selectDate(DateTime.now());
-        setState(() {});
-      }
-    });
+    if (!_isInitialized) {
+      // 只在首次初始化时跳转到当前日期
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          widget.calendarController.selectDate(DateTime.now());
+          setState(() => _isInitialized = true);
+        }
+      });
+    }
   }
 
   @override

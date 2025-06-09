@@ -76,4 +76,14 @@ class DatabaseService {
       await createDatabase(defaultDb);
     }
   }
+
+  /// 获取数据库数量
+  Future<int> getDatabaseCount() async {
+    try {
+      final databases = await getAllDatabases();
+      return databases.length;
+    } catch (e) {
+      return 0;
+    }
+  }
 }

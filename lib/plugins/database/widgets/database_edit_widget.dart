@@ -1,4 +1,5 @@
 import 'package:Memento/plugins/database/controllers/field_controller.dart';
+import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/database_controller.dart';
@@ -146,11 +147,16 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder:
+          (context) =>
+              ImagePickerDialog(enableCrop: true, cropAspectRatio: 1.0),
+    );
+
+    if (result != null && result['url'] != null && mounted) {
       setState(() {
-        _editedDatabase = _editedDatabase.copyWith(coverImage: pickedFile.path);
+        _editedDatabase = _editedDatabase.copyWith(coverImage: result['url']);
       });
     }
   }
