@@ -32,28 +32,29 @@ class GoalCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          if (goal.imagePath != null && goal.imagePath!.isNotEmpty)
-            Positioned.fill(
-              child: FutureBuilder<String>(
-                future: ImageUtils.getAbsolutePath(goal.imagePath),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                    return Image.file(
-                      File(snapshot.data!),
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (context, error, stackTrace) =>
-                              _buildBackgroundContainer(context, isCompleted),
-                    );
-                  }
-                  return _buildBackgroundContainer(context, isCompleted);
-                },
-              ),
-            )
-          else
-            Positioned.fill(
-              child: _buildBackgroundContainer(context, isCompleted),
-            ),
+          Positioned.fill(
+            child:
+                goal.imagePath != null && goal.imagePath!.isNotEmpty
+                    ? FutureBuilder<String>(
+                      future: ImageUtils.getAbsolutePath(goal.imagePath),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                          return Image.file(
+                            File(snapshot.data!),
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (context, error, stackTrace) =>
+                                    _buildBackgroundContainer(
+                                      context,
+                                      isCompleted,
+                                    ),
+                          );
+                        }
+                        return _buildBackgroundContainer(context, isCompleted);
+                      },
+                    )
+                    : _buildBackgroundContainer(context, isCompleted),
+          ),
           InkWell(
             onTap: onTap,
             child: Container(
@@ -74,36 +75,7 @@ class GoalCard extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            goal.imagePath != null && goal.imagePath!.isNotEmpty
-                                ? FutureBuilder<String>(
-                                  future: ImageUtils.getAbsolutePath(
-                                    goal.imagePath,
-                                  ),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData &&
-                                        snapshot.data!.isNotEmpty) {
-                                      return ClipOval(
-                                        child: Image.file(
-                                          File(snapshot.data!),
-                                          width: 36,
-                                          height: 36,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  _buildIconContainer(
-                                                    context,
-                                                    isCompleted,
-                                                  ),
-                                        ),
-                                      );
-                                    }
-                                    return _buildIconContainer(
-                                      context,
-                                      isCompleted,
-                                    );
-                                  },
-                                )
-                                : _buildIconContainer(context, isCompleted),
+                            _buildIconContainer(context, isCompleted),
                             const SizedBox(width: 12),
                             Text(
                               goal.name,

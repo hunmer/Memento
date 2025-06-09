@@ -233,7 +233,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
                                             File(snapshot.data!),
                                             width: 64,
                                             height: 64,
-                                            fit: BoxFit.cover,
+                                            fit: BoxFit.contain,
                                             errorBuilder:
                                                 (context, error, stackTrace) =>
                                                     const Icon(
