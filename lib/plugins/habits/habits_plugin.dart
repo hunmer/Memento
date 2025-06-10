@@ -19,7 +19,7 @@ class HabitsPlugin extends PluginBase {
   @override
   String get description => '';
   @override
-  String get id => 'habbits';
+  String get id => 'habits';
   @override
   String get name => '习惯管理';
 
@@ -38,6 +38,9 @@ class HabitsPlugin extends PluginBase {
     _skillController = SkillController(storage);
     _recordController = CompletionRecordController(storage);
   }
+
+  getHabitController() => _habitController;
+  getSkillController() => _skillController;
 
   @override
   Future<void> registerToApp(

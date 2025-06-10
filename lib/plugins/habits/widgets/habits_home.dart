@@ -1,9 +1,9 @@
+import 'package:Memento/plugins/habits/widgets/habits_list/habits_list.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
-import 'package:Memento/plugins/habits/widgets/habits_list.dart';
 import 'package:Memento/plugins/habits/widgets/skills_list.dart';
 
 class HabitsHome extends StatefulWidget {

@@ -33,25 +33,6 @@ class CompletionRecordsTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (skill.image != null)
-                  Center(
-                    child: Image.network(
-                      skill.image!,
-                      height: 150,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                else if (skill.icon != null)
-                  Center(
-                    child: Icon(
-                      IconData(
-                        int.parse(skill.icon!),
-                        fontFamily: 'MaterialIcons',
-                      ),
-                      size: 48,
-                    ),
-                  ),
-                const SizedBox(height: 16),
                 Text(
                   '${l10n.completions}: $count',
                   style: Theme.of(context).textTheme.titleMedium,

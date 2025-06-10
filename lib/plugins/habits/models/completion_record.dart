@@ -1,39 +1,47 @@
+import 'package:flutter/foundation.dart';
+
 class CompletionRecord {
   final String id;
-  final String parentId; // Skill/Habit ID
-  final String? notes;
-  final DateTime createdAt;
-  final DateTime? completedAt;
-  final int durationMinutes;
+  final String parentId;
+  final DateTime date;
+  final Duration duration;
+  final String notes;
 
   CompletionRecord({
     required this.id,
     required this.parentId,
-    this.notes,
-    required this.createdAt,
-    this.completedAt,
-    required this.durationMinutes,
+    required this.date,
+    required this.duration,
+    required this.notes,
   });
+
+  factory CompletionRecord.fromMap(Map<String, dynamic> map) {
+    return CompletionRecord(
+      id: map['id'] as String,
+      parentId: map['parentId'] as String,
+      date: DateTime.parse(map['date'] as String),
+      duration: Duration(seconds: map['duration'] as int),
+      notes: map['notes'] as String,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'parentId': parentId,
+      'date': date.toIso8601String(),
+      'duration': duration.inSeconds,
       'notes': notes,
-      'createdAt': createdAt.toIso8601String(),
-      'completedAt': completedAt?.toIso8601String(),
-      'durationMinutes': durationMinutes,
     };
   }
 
-  factory CompletionRecord.fromMap(Map<String, dynamic> map) {
-    return CompletionRecord(
-      id: map['id'],
-      parentId: map['parentId'],
-      notes: map['notes'],
-      createdAt: DateTime.parse(map['createdAt']),
-      completedAt: map['completedAt'] != null ? DateTime.parse(map['completedAt']) : null,
-      durationMinutes: map['durationMinutes'],
-    );
-  }
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompletionRecord &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

@@ -1,5 +1,10 @@
 import 'dart:io';
 
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
@@ -24,6 +29,8 @@ class _HabitFormState extends State<HabitForm> {
   late final TextEditingController _notesController;
   late final TextEditingController _groupController;
   late final TextEditingController _durationController;
+  late String? _selectedSkillId;
+  List<Skill> _skills = [];
   IconData? _icon;
   String? _image;
   Color _iconColor = Colors.blue;
@@ -40,6 +47,8 @@ class _HabitFormState extends State<HabitForm> {
     _durationController = TextEditingController(
       text: habit?.durationMinutes.toString() ?? '30',
     );
+    _selectedSkillId = habit?.skillId;
+    _loadSkills();
     _icon =
         habit?.icon != null
             ? IconData(int.parse(habit!.icon!), fontFamily: 'MaterialIcons')
@@ -212,6 +221,33 @@ class _HabitFormState extends State<HabitForm> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value:
+                  _skills.any((s) => s.id == _selectedSkillId)
+                      ? _selectedSkillId
+                      : null,
+              decoration: InputDecoration(labelText: '选择技能'),
+              items: [
+                DropdownMenuItem<String>(value: null, child: Text('请选择技能')),
+                ..._skills.map((skill) {
+                  return DropdownMenuItem<String>(
+                    value: skill.id,
+                    child: Text(skill.title),
+                  );
+                }).toList(),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedSkillId = value;
+                });
+              },
+              validator: (value) {
+                if (value == null) {
+                  return '请选择技能';
+                }
+                return null;
+              },
+            ),
             const SizedBox(height: 16),
 
             ElevatedButton(
@@ -237,18 +273,32 @@ class _HabitFormState extends State<HabitForm> {
       icon: _icon?.codePoint.toString(),
       image: _image,
       durationMinutes: int.tryParse(_durationController.text) ?? 30,
+      skillId: _selectedSkillId,
       tags: _tags,
     );
     widget.onSave(habit);
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _notesController.dispose();
-    _groupController.dispose();
-    _durationController.dispose();
-    _tagController.dispose();
-    super.dispose();
+  Future<void> _loadSkills() async {
+    try {
+      final habitsPlugin = PluginManager.instance.getPlugin('habits');
+      if (habitsPlugin != null && habitsPlugin is HabitsPlugin) {
+        final controller = habitsPlugin.getSkillController();
+        final skills = await controller.getSkills();
+        setState(() {
+          _skills = skills;
+        });
+      } else {
+        debugPrint('Habits plugin not found or invalid');
+        setState(() {
+          _skills = [];
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading skills: $e');
+      setState(() {
+        _skills = [];
+      });
+    }
   }
 }

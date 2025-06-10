@@ -1,21 +1,23 @@
 class Skill {
   final String id;
   final String title;
+  final String? description;
   final String? notes;
   final String? group;
   final String? icon;
   final String? image;
-  final String? description;
-  final int maxDurationMinutes; // 0 for unlimited
+  final int targetMinutes;
+  final int maxDurationMinutes;
 
   Skill({
     required this.id,
     required this.title,
+    this.description,
     this.notes,
     this.group,
     this.icon,
     this.image,
-    this.description,
+    this.targetMinutes = 0,
     this.maxDurationMinutes = 0,
   });
 
@@ -23,11 +25,12 @@ class Skill {
     return {
       'id': id,
       'title': title,
+      'description': description,
       'notes': notes,
       'group': group,
       'icon': icon,
       'image': image,
-      'description': description,
+      'targetMinutes': targetMinutes,
       'maxDurationMinutes': maxDurationMinutes,
     };
   }
@@ -36,11 +39,12 @@ class Skill {
     return Skill(
       id: map['id'],
       title: map['title'],
+      description: map['description'],
       notes: map['notes'],
       group: map['group'],
       icon: map['icon'],
       image: map['image'],
-      description: map['description'],
+      targetMinutes: map['targetMinutes'] ?? 0,
       maxDurationMinutes: map['maxDurationMinutes'] ?? 0,
     );
   }

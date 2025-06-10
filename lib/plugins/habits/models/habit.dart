@@ -9,6 +9,7 @@ class Habit {
   final int intervalDays; // 0 for daily
   final int durationMinutes;
   final List<String> tags;
+  final String? skillId;
 
   Habit({
     required this.id,
@@ -21,6 +22,7 @@ class Habit {
     this.intervalDays = 0,
     required this.durationMinutes,
     this.tags = const [],
+    this.skillId,
   });
 
   Map<String, dynamic> toMap() {
@@ -35,6 +37,7 @@ class Habit {
       'intervalDays': intervalDays,
       'durationMinutes': durationMinutes,
       'tags': tags,
+      'skillId': skillId,
     };
   }
 
@@ -50,6 +53,7 @@ class Habit {
       intervalDays: map['intervalDays'] ?? 0,
       durationMinutes: map['durationMinutes'],
       tags: List<String>.from(map['tags'] ?? []),
+      skillId: map['skillId'],
     );
   }
 }

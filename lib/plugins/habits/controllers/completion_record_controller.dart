@@ -59,7 +59,10 @@ class CompletionRecordController {
 
   Future<int> getTotalDuration(String parentId) async {
     final records = await getRecordsByParent(parentId);
-    return records.fold<int>(0, (sum, record) => sum + record.durationMinutes);
+    return records.fold<int>(
+      0,
+      (sum, record) => sum + record.duration.inMinutes,
+    );
   }
 
   Future<int> getCompletionCount(String parentId) async {
