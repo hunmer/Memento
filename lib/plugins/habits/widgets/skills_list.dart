@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
@@ -167,8 +170,60 @@ class _SkillsListState extends State<SkillsList> {
                 children: [
                   Expanded(
                     child:
-                        skill.image != null
-                            ? Image.network(skill.image!, fit: BoxFit.cover)
+                        skill.image != null && skill.image!.isNotEmpty
+                            ? FutureBuilder<String>(
+                              future:
+                                  skill.image!.startsWith('http')
+                                      ? Future.value(skill.image!)
+                                      : ImageUtils.getAbsolutePath(
+                                        skill.image!,
+                                      ),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Center(
+                                    child: AspectRatio(
+                                      aspectRatio: 1.0,
+                                      child: ClipOval(
+                                        child:
+                                            skill.image!.startsWith('http')
+                                                ? Image.network(
+                                                  snapshot.data!,
+                                                  width: 64,
+                                                  height: 64,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) => const Icon(
+                                                        Icons.broken_image,
+                                                      ),
+                                                )
+                                                : Image.file(
+                                                  File(snapshot.data!),
+                                                  width: 64,
+                                                  height: 64,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) => const Icon(
+                                                        Icons.broken_image,
+                                                      ),
+                                                ),
+                                      ),
+                                    ),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return const Icon(Icons.broken_image);
+                                } else {
+                                  return const CircularProgressIndicator();
+                                }
+                              },
+                            )
                             : skill.icon != null
                             ? Icon(
                               IconData(

@@ -32,6 +32,9 @@ class HabitController {
   Future<void> deleteHabit(String id) async {
     final habits = await getHabits();
     habits.removeWhere((h) => h.id == id);
-    await storage.writeJson('habits', habits.map((h) => h.toMap()).toList());
+    await storage.writeJson(
+      'habits/habits',
+      habits.map((h) => h.toMap()).toList(),
+    );
   }
 }
