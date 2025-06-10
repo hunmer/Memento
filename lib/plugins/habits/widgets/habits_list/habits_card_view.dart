@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,7 @@ import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/utils/image_utils.dart';
 
-class HabitsCardView extends StatelessWidget {
+class HabitsCardView extends StatefulWidget {
   final List<Habit> habits;
   final HabitsLocalizations l10n;
   final Function(Habit) onHabitPressed;
@@ -23,6 +24,13 @@ class HabitsCardView extends StatelessWidget {
   });
 
   @override
+  _HabitsCardViewState createState() => _HabitsCardViewState();
+}
+
+class _HabitsCardViewState extends State<HabitsCardView> {
+  final Map<String, bool> _timingStatus = {};
+
+  @override
   Widget build(BuildContext context) {
     final habitsPlugin =
         PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
@@ -32,15 +40,17 @@ class HabitsCardView extends StatelessWidget {
         crossAxisCount: 2,
         childAspectRatio: 0.8,
       ),
-      itemCount: habits.length,
+      itemCount: widget.habits.length,
       itemBuilder: (context, index) {
-        final habit = habits[index];
+        final habit = widget.habits[index];
         final isTiming =
-            habitsPlugin?.timerController.isHabitTiming(habit.id) ?? false;
+            _timingStatus[habit.id] ??
+            (habitsPlugin?.timerController.isHabitTiming(habit.id) ?? false);
+        _timingStatus[habit.id] = isTiming;
 
         return Card(
           child: InkWell(
-            onTap: () => onHabitPressed(habit),
+            onTap: () => widget.onHabitPressed(habit),
             child: Column(
               children: [
                 Expanded(
@@ -100,12 +110,12 @@ class HabitsCardView extends StatelessWidget {
                           : const Icon(Icons.auto_awesome, size: 48),
                 ),
                 Text(habit.title),
-                Text('${habit.durationMinutes} ${l10n.minutes}'),
+                Text('${habit.durationMinutes} ${widget.l10n.minutes}'),
                 IconButton(
                   icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
                   onPressed: () {
                     if (!isTiming) {
-                      onTimerPressed(habit);
+                      widget.onTimerPressed(habit);
                     }
                   },
                 ),

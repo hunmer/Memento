@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 
 typedef TimerUpdateCallback = void Function(int elapsedSeconds);
@@ -118,6 +119,7 @@ class TimerState {
       elapsedSeconds++;
       onUpdate(elapsedSeconds);
     });
+    EventManager.instance.broadcast('habit_timer_started', EventArgs(habit.id));
   }
 
   void stop() {
@@ -125,6 +127,7 @@ class TimerState {
     _isDisposed = true;
     _timer?.cancel();
     _timer = null;
+    EventManager.instance.broadcast('habit_timer_stopped', EventArgs(habit.id));
   }
 
   void dispose() {

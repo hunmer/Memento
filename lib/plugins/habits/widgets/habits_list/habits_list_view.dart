@@ -1,10 +1,11 @@
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 
-class HabitsListView extends StatelessWidget {
+class HabitsListView extends StatefulWidget {
   final List<Habit> habits;
   final HabitsLocalizations l10n;
   final Function(Habit) onHabitPressed;
@@ -19,16 +20,25 @@ class HabitsListView extends StatelessWidget {
   });
 
   @override
+  _HabitsListViewState createState() => _HabitsListViewState();
+}
+
+class _HabitsListViewState extends State<HabitsListView> {
+  final Map<String, bool> _timingStatus = {};
+
+  @override
   Widget build(BuildContext context) {
     final habitsPlugin =
         PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
 
     return ListView.builder(
-      itemCount: habits.length,
+      itemCount: widget.habits.length,
       itemBuilder: (context, index) {
-        final habit = habits[index];
+        final habit = widget.habits[index];
         final isTiming =
-            habitsPlugin?.timerController.isHabitTiming(habit.id) ?? false;
+            _timingStatus[habit.id] ??
+            (habitsPlugin?.timerController.isHabitTiming(habit.id) ?? false);
+        _timingStatus[habit.id] = isTiming;
 
         return ListTile(
           leading:
@@ -41,16 +51,16 @@ class HabitsListView extends StatelessWidget {
                   )
                   : null,
           title: Text(habit.title),
-          subtitle: Text('${habit.durationMinutes} ${l10n.minutes}'),
+          subtitle: Text('${habit.durationMinutes} ${widget.l10n.minutes}'),
           trailing: IconButton(
             icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
             onPressed: () {
               if (!isTiming) {
-                onTimerPressed(habit);
+                widget.onTimerPressed(habit);
               }
             },
           ),
-          onTap: () => onHabitPressed(habit),
+          onTap: () => widget.onHabitPressed(habit),
         );
       },
     );
