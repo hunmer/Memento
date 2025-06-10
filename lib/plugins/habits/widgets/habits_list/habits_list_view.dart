@@ -1,4 +1,6 @@
+import 'package:Memento/core/event/event_args.dart';
 import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
@@ -25,6 +27,36 @@ class HabitsListView extends StatefulWidget {
 
 class _HabitsListViewState extends State<HabitsListView> {
   final Map<String, bool> _timingStatus = {};
+
+  @override
+  void initState() {
+    super.initState();
+    EventManager.instance.subscribe('habit_timer_started', _onTimerStarted);
+    EventManager.instance.subscribe('habit_timer_stopped', _onTimerStopped);
+  }
+
+  @override
+  void dispose() {
+    EventManager.instance.unsubscribe('habit_timer_started', _onTimerStarted);
+    EventManager.instance.unsubscribe('habit_timer_stopped', _onTimerStopped);
+    super.dispose();
+  }
+
+  void _onTimerStarted(EventArgs args) {
+    if (args is HabitTimerEventArgs) {
+      setState(() {
+        _timingStatus[args.habitId] = args.isRunning;
+      });
+    }
+  }
+
+  void _onTimerStopped(EventArgs args) {
+    if (args is HabitTimerEventArgs) {
+      setState(() {
+        _timingStatus[args.habitId] = args.isRunning;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

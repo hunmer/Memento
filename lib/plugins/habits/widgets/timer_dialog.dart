@@ -137,13 +137,16 @@ class _TimerDialogState extends State<TimerDialog> {
           if (_notesController.text != _lastSavedNotes) {
             _lastSavedNotes = _notesController.text;
             widget.controller.timerController.updateTimerData(widget.habit.id, {
-              // 'isCountdown': _isCountdown,
-              // 'elapsedSeconds': elapsed,
-              // 'isRunning': _isRunning,
               'notes': _notesController.text,
             });
           }
         }, initialDuration: _elapsed);
+      } else {
+        widget.controller.timerController.pauseTimer(widget.habit.id);
+        widget.controller.timerController.updateTimerData(widget.habit.id, {
+          'elapsedSeconds': _elapsed.inSeconds,
+          'isRunning': false,
+        });
       }
     });
   }

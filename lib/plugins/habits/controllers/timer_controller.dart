@@ -2,6 +2,20 @@ import 'dart:async';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 
+class HabitTimerEventArgs extends EventArgs {
+  final String habitId;
+  final int elapsedSeconds;
+  final bool isCountdown;
+  final bool isRunning;
+
+  HabitTimerEventArgs({
+    required this.habitId,
+    required this.elapsedSeconds,
+    required this.isCountdown,
+    required this.isRunning,
+  });
+}
+
 typedef TimerUpdateCallback = void Function(int elapsedSeconds);
 
 class TimerController {
@@ -35,6 +49,13 @@ class TimerController {
   void stopTimer(String habitId) {
     _timers[habitId]?.dispose();
     _timers.remove(habitId);
+  }
+
+  void pauseTimer(String habitId) {
+    final state = _timers[habitId];
+    if (state != null) {
+      state.stop();
+    }
   }
 
   void toggleTimer(String habitId, bool isRunning) {
@@ -119,7 +140,15 @@ class TimerState {
       elapsedSeconds++;
       onUpdate(elapsedSeconds);
     });
-    EventManager.instance.broadcast('habit_timer_started', EventArgs(habit.id));
+    EventManager.instance.broadcast(
+      'habit_timer_started',
+      HabitTimerEventArgs(
+        habitId: habit.id,
+        elapsedSeconds: elapsedSeconds,
+        isCountdown: isCountdown,
+        isRunning: true,
+      ),
+    );
   }
 
   void stop() {
@@ -127,7 +156,15 @@ class TimerState {
     _isDisposed = true;
     _timer?.cancel();
     _timer = null;
-    EventManager.instance.broadcast('habit_timer_stopped', EventArgs(habit.id));
+    EventManager.instance.broadcast(
+      'habit_timer_stopped',
+      HabitTimerEventArgs(
+        habitId: habit.id,
+        elapsedSeconds: elapsedSeconds,
+        isCountdown: isCountdown,
+        isRunning: false,
+      ),
+    );
   }
 
   void dispose() {
