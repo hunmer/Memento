@@ -43,29 +43,6 @@ class HabitController {
     );
   }
 
-  Future<void> saveCompletionRecord(
-    String habitId,
-    CompletionRecord record,
-  ) async {
-    final path = 'habits/records/$habitId.json';
-    final existingRecords = await getCompletionRecords(habitId);
-    existingRecords.add(record);
-
-    await storage.writeJson(
-      path,
-      existingRecords.map((r) => r.toMap()).toList(),
-    );
-  }
-
-  Future<List<CompletionRecord>> getCompletionRecords(String habitId) async {
-    final path = 'habits/records/$habitId.json';
-    final data = await storage.readJson(path, []);
-
-    return List<Map<String, dynamic>>.from(
-      data,
-    ).map((e) => CompletionRecord.fromMap(e)).toList();
-  }
-
   void addTimerModeListener(TimerModeListener listener) {
     _timerModeListeners.add(listener);
   }
@@ -78,10 +55,5 @@ class HabitController {
     for (final listener in _timerModeListeners) {
       listener(habitId, isCountdown);
     }
-  }
-
-  @override
-  void dispose() {
-    timerController.dispose();
   }
 }

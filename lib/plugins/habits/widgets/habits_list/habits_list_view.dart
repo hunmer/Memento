@@ -12,6 +12,7 @@ class HabitsListView extends StatefulWidget {
   final HabitsLocalizations l10n;
   final Function(Habit) onHabitPressed;
   final Function(Habit) onTimerPressed;
+  final Function(Habit) onHistoryPressed;
 
   const HabitsListView({
     super.key,
@@ -19,6 +20,7 @@ class HabitsListView extends StatefulWidget {
     required this.l10n,
     required this.onHabitPressed,
     required this.onTimerPressed,
+    required this.onHistoryPressed,
   });
 
   @override
@@ -27,10 +29,14 @@ class HabitsListView extends StatefulWidget {
 
 class _HabitsListViewState extends State<HabitsListView> {
   final Map<String, bool> _timingStatus = {};
-
+  final habitsPlugin =
+      PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
   @override
   void initState() {
     super.initState();
+    // 初始化时从TimerController获取所有正在计时的习惯状态
+    final activeTimers = habitsPlugin!.timerController.getActiveTimers();
+    _timingStatus.addAll(activeTimers);
     EventManager.instance.subscribe('habit_timer_started', _onTimerStarted);
     EventManager.instance.subscribe('habit_timer_stopped', _onTimerStopped);
   }
@@ -60,9 +66,6 @@ class _HabitsListViewState extends State<HabitsListView> {
 
   @override
   Widget build(BuildContext context) {
-    final habitsPlugin =
-        PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
-
     return ListView.builder(
       itemCount: widget.habits.length,
       itemBuilder: (context, index) {
@@ -84,13 +87,20 @@ class _HabitsListViewState extends State<HabitsListView> {
                   : null,
           title: Text(habit.title),
           subtitle: Text('${habit.durationMinutes} ${widget.l10n.minutes}'),
-          trailing: IconButton(
-            icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
-            onPressed: () {
-              if (!isTiming) {
-                widget.onTimerPressed(habit);
-              }
-            },
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.history),
+                onPressed: () => widget.onHistoryPressed(habit),
+              ),
+              IconButton(
+                icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
+                onPressed: () {
+                  widget.onTimerPressed(habit);
+                },
+              ),
+            ],
           ),
           onTap: () => widget.onHabitPressed(habit),
         );

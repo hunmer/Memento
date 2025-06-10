@@ -7,66 +7,53 @@ class CompletionRecordController {
 
   CompletionRecordController(this.storage);
 
-  Future<Map<String, List<CompletionRecord>>> _getAllRecords() async {
-    final data = await storage.read(_recordsKey, {});
-    return data.map(
-      (parentId, records) => MapEntry(
-        parentId,
-        (records as List).map((e) => CompletionRecord.fromMap(e)).toList(),
-      ),
+  Future<void> saveCompletionRecord(
+    String habitId,
+    CompletionRecord record,
+  ) async {
+    final path = 'habits/records/$habitId.json';
+    final existingRecords = await getCompletionRecords(habitId);
+    existingRecords.add(record);
+    await storage.writeJson(
+      path,
+      existingRecords.map((r) => r.toMap()).toList(),
     );
   }
 
-  Future<List<CompletionRecord>> getRecordsByParent(String parentId) async {
-    final allRecords = await _getAllRecords();
-    return allRecords[parentId] ?? [];
+  Future<List<CompletionRecord>> getCompletionRecords(String habitId) async {
+    final path = 'habits/records/$habitId.json';
+    final data = await storage.readJson(path, []);
+    return List<Map<String, dynamic>>.from(
+      data,
+    ).map((e) => CompletionRecord.fromMap(e)).toList();
   }
 
-  Future<void> saveRecord(CompletionRecord record) async {
-    final allRecords = await _getAllRecords();
-    final records = allRecords[record.parentId] ?? [];
-    final index = records.indexWhere((r) => r.id == record.id);
-
-    if (index >= 0) {
-      records[index] = record;
-    } else {
-      records.add(record);
-    }
-
-    allRecords[record.parentId] = records;
-    await storage.write(
-      _recordsKey,
-      allRecords.map((k, v) => MapEntry(k, v.map((r) => r.toMap()).toList())),
-    );
-  }
-
-  Future<void> deleteRecord(String id, String parentId) async {
-    final allRecords = await _getAllRecords();
-    final records = allRecords[parentId] ?? [];
-    records.removeWhere((r) => r.id == id);
-
-    if (records.isEmpty) {
-      allRecords.remove(parentId);
-    } else {
-      allRecords[parentId] = records;
-    }
-
-    await storage.write(
-      _recordsKey,
-      allRecords.map((k, v) => MapEntry(k, v.map((r) => r.toMap()).toList())),
-    );
-  }
-
-  Future<int> getTotalDuration(String parentId) async {
-    final records = await getRecordsByParent(parentId);
+  Future<int> getTotalDuration(String habitId) async {
+    final records = await getCompletionRecords(habitId);
     return records.fold<int>(
       0,
       (sum, record) => sum + record.duration.inMinutes,
     );
   }
 
-  Future<int> getCompletionCount(String parentId) async {
-    final records = await getRecordsByParent(parentId);
+  Future<int> getCompletionCount(String habitId) async {
+    final records = await getCompletionRecords(habitId);
     return records.length;
+  }
+
+  Future<void> deleteCompletionRecord(String recordId) async {
+    final allRecords = await storage.readJson('habits/records/all.json', {});
+    for (final habitId in allRecords.keys) {
+      final records = await getCompletionRecords(habitId);
+      final updatedRecords = records.where((r) => r.id != recordId).toList();
+      await storage.writeJson(
+        'habits/records/$habitId.json',
+        updatedRecords.map((r) => r.toMap()).toList(),
+      );
+    }
+  }
+
+  Future<void> clearAllCompletionRecords(String habitId) async {
+    await storage.writeJson('habits/records/$habitId.json', []);
   }
 }

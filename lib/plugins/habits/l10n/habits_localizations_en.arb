@@ -21,5 +21,12 @@
   "delete": "Delete",
   "startTimer": "Start Timer",
   "save": "Save",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "history": "History",
+  "editRecord": "Edit Record",
+  "editRecordMessage": "Edit completion record details",
+  "deleteRecord": "Delete Record",
+  "deleteRecordMessage": "Are you sure you want to delete this record?",
+  "recordUpdated": "Record updated",
+  "recordDeleted": "Record deleted"
 }

@@ -41,6 +41,14 @@ class HabitsLocalizations {
   String get totalCompletions => 'Total Completions';
   String get statisticsChartsPlaceholder =>
       'Statistics charts will be displayed here';
+  String get history => 'History';
+  String get editRecord => 'Edit Record';
+  String get editRecordMessage => 'Edit completion record details';
+  String get deleteRecord => 'Delete Record';
+  String get deleteRecordMessage =>
+      'Are you sure you want to delete this record?';
+  String get recordUpdated => 'Record updated';
+  String get recordDeleted => 'Record deleted';
 
   static HabitsLocalizations of(BuildContext context) {
     return const HabitsLocalizations();

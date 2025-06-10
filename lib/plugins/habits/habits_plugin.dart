@@ -49,6 +49,7 @@ class HabitsPlugin extends PluginBase {
 
   getHabitController() => _habitController;
   getSkillController() => _skillController;
+  getRecordController() => _recordController;
 
   @override
   Future<void> registerToApp(

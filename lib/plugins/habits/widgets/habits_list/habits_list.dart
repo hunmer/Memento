@@ -1,8 +1,10 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
+import 'package:Memento/plugins/habits/widgets/habits_list/habits_history_list.dart';
 import 'package:Memento/plugins/habits/widgets/timer_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
@@ -51,6 +53,22 @@ class _HabitsListState extends State<HabitsList> {
     }
   }
 
+  Future<void> _showHistory(BuildContext context, Habit habit) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => HabitsHistoryList(
+              habitId: habit.id,
+              controller:
+                  (PluginManager.instance.getPlugin('habits') as HabitsPlugin?)
+                      ?.getRecordController() ??
+                  CompletionRecordController(widget.controller.storage),
+            ),
+      ),
+    );
+  }
+
   Future<void> _startTimer(BuildContext context, Habit habit) async {
     final timerData = _timerController.getTimerData(habit.id);
     final isTiming = timerData != null;
@@ -61,17 +79,13 @@ class _HabitsListState extends State<HabitsList> {
           (context) => TimerDialog(
             habit: habit,
             controller: widget.controller,
+
             initialTimerData: timerData,
           ),
     );
 
-    // 只有在取消时才停止计时器
-    if (result == false && !isTiming) {
+    if (result != null) {
       _timerController.stopTimer(habit.id);
-    } else if (result == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Timer for ${habit.title} completed')),
-      );
     }
   }
 
@@ -112,7 +126,6 @@ class _HabitsListState extends State<HabitsList> {
   @override
   void dispose() {
     widget.controller.removeTimerModeListener(_onTimerModeChanged);
-    _timerController.dispose();
     super.dispose();
   }
 
@@ -151,6 +164,7 @@ class _HabitsListState extends State<HabitsList> {
                     l10n: l10n,
                     onHabitPressed: (habit) => _showHabitForm(context, habit),
                     onTimerPressed: (habit) => _startTimer(context, habit),
+                    onHistoryPressed: (habit) => _showHistory(context, habit),
                   ),
         ),
       ],

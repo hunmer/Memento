@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
@@ -184,7 +187,11 @@ class _TimerDialogState extends State<TimerDialog> {
       notes: _notesController.text,
     );
 
-    await widget.controller.saveCompletionRecord(widget.habit.id, record);
+    final recordController =
+        (PluginManager.instance.getPlugin('habits') as HabitsPlugin?)
+            ?.getRecordController() ??
+        CompletionRecordController(widget.controller.storage);
+    await recordController.saveCompletionRecord(widget.habit.id, record);
 
     Navigator.pop(context, true);
   }

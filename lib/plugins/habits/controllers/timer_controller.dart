@@ -102,9 +102,8 @@ class TimerController {
     }
   }
 
-  void dispose() {
-    _timers.values.forEach((state) => state.dispose());
-    _timers.clear();
+  Map<String, bool> getActiveTimers() {
+    return _timers.map((key, value) => MapEntry(key, value.isRunning));
   }
 }
 
