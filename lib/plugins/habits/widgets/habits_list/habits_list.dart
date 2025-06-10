@@ -71,7 +71,7 @@ class _HabitsListState extends State<HabitsList> {
 
     // 只有在取消时才停止计时器
     if (result == false && !isTiming) {
-      _timerController.stopTimer();
+      _timerController.stopTimer(habit.id);
     } else if (result == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Timer for ${habit.title} completed')),
@@ -116,6 +116,7 @@ class _HabitsListState extends State<HabitsList> {
   @override
   void dispose() {
     widget.controller.removeTimerModeListener(_onTimerModeChanged);
+    _timerController.dispose();
     super.dispose();
   }
 

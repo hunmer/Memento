@@ -1,15 +1,17 @@
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
+import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 
 typedef TimerModeListener = void Function(String habitId, bool isCountdown);
 
 class HabitController {
   final List<TimerModeListener> _timerModeListeners = [];
   final StorageManager storage;
+  final TimerController timerController;
   static const _recordsKey = 'habits_records';
 
-  HabitController(this.storage);
+  HabitController(this.storage) : timerController = TimerController();
 
   Future<List<Habit>> getHabits() async {
     final data = await storage.readJson('habits/habits', []);
@@ -78,5 +80,10 @@ class HabitController {
     for (final listener in _timerModeListeners) {
       listener(habitId, isCountdown);
     }
+  }
+
+  @override
+  void dispose() {
+    timerController.dispose();
   }
 }

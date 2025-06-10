@@ -32,14 +32,15 @@ class _TimerDialogState extends State<TimerDialog> {
   @override
   void initState() {
     super.initState();
+    _duration = Duration(minutes: widget.habit.durationMinutes);
+
     if (widget.initialTimerData != null) {
       _isCountdown = widget.initialTimerData!['isCountdown'] ?? true;
-      _isRunning = widget.initialTimerData!['isRunning'] ?? false;
       _elapsed = Duration(
         seconds: widget.initialTimerData!['elapsedSeconds'] ?? 0,
       );
+      _isRunning = widget.initialTimerData!['isRunning'] ?? false;
     }
-    _duration = Duration(minutes: widget.habit.durationMinutes);
   }
 
   @override
@@ -118,23 +119,12 @@ class _TimerDialogState extends State<TimerDialog> {
     if (!mounted) return;
     setState(() {
       _isRunning = !_isRunning;
-      if (_isRunning) {
-        _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-          if (!mounted) {
-            timer.cancel();
-            return;
-          }
-          setState(() {
-            _elapsed += const Duration(seconds: 1);
-            if (_isCountdown && _elapsed >= _duration) {
-              _timer?.cancel();
-              _isRunning = false;
-              _showTimerComplete();
-            }
-          });
-        });
-      } else {
-        _timer?.cancel();
+      widget.controller.timerController.toggleTimer(
+        widget.habit.id,
+        _isRunning,
+      );
+      if (_isRunning && _elapsed >= _duration) {
+        _showTimerComplete();
       }
     });
   }
@@ -153,10 +143,10 @@ class _TimerDialogState extends State<TimerDialog> {
 
   void _resetTimer() {
     setState(() {
-      _timer?.cancel();
       _elapsed = Duration.zero;
       _isRunning = false;
     });
+    widget.controller.timerController.stopTimer(widget.habit.id);
   }
 
   void _toggleTimerMode() {
