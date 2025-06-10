@@ -62,8 +62,7 @@ class _HabitsListState extends State<HabitsList> {
               habitId: habit.id,
               controller:
                   (PluginManager.instance.getPlugin('habits') as HabitsPlugin?)
-                      ?.getRecordController() ??
-                  CompletionRecordController(widget.controller.storage),
+                      ?.getRecordController(),
             ),
       ),
     );

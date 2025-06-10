@@ -42,7 +42,10 @@ class HabitsPlugin extends PluginBase {
       timerController: _timerController,
     );
     _skillController = SkillController(storage);
-    _recordController = CompletionRecordController(storage);
+    _recordController = CompletionRecordController(
+      storage,
+      habitController: _habitController,
+    );
   }
 
   TimerController get timerController => _timerController;

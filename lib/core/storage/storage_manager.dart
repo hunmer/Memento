@@ -493,4 +493,33 @@ class StorageManager {
   void clearMemoryCache() {
     _cache.clear();
   }
+
+  /// 列出指定目录下的所有文件
+  Future<List<String>> listFiles(String dirPath) async {
+    await _ensureInitialized();
+
+    if (kIsWeb) {
+      // Web平台使用抽象接口
+      return await _storage.getKeysWithPrefix(dirPath);
+    }
+
+    // 非Web平台使用文件系统
+    try {
+      final fullPath = path.join(_basePath, dirPath);
+      final directory = io.Directory(fullPath);
+
+      if (!await directory.exists()) {
+        return [];
+      }
+
+      final files = await directory.list(recursive: false).toList();
+      return files
+          .where((entity) => entity is io.File)
+          .map((file) => path.relative(file.path, from: _basePath))
+          .toList();
+    } catch (e) {
+      debugPrint('列出文件失败: $dirPath - $e');
+      return [];
+    }
+  }
 }

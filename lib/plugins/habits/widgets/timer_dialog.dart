@@ -189,8 +189,7 @@ class _TimerDialogState extends State<TimerDialog> {
 
     final recordController =
         (PluginManager.instance.getPlugin('habits') as HabitsPlugin?)
-            ?.getRecordController() ??
-        CompletionRecordController(widget.controller.storage);
+            ?.getRecordController();
     await recordController.saveCompletionRecord(widget.habit.id, record);
 
     Navigator.pop(context, true);

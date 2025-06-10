@@ -28,7 +28,7 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
   }
 
   Future<void> _loadRecords() async {
-    final records = await widget.controller.getCompletionRecords(
+    final records = await widget.controller.getHabitCompletionRecords(
       widget.habitId,
     );
     if (mounted) {
