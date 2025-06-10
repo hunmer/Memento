@@ -9,9 +9,7 @@ class HabitController {
   final List<TimerModeListener> _timerModeListeners = [];
   final StorageManager storage;
   final TimerController timerController;
-  static const _recordsKey = 'habits_records';
-
-  HabitController(this.storage) : timerController = TimerController();
+  HabitController(this.storage, {required this.timerController});
 
   Future<List<Habit>> getHabits() async {
     final data = await storage.readJson('habits/habits', []);

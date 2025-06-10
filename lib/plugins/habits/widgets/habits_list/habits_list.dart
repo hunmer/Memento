@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
@@ -30,7 +31,9 @@ class _HabitsListState extends State<HabitsList> {
   @override
   void initState() {
     super.initState();
-    _timerController = TimerController();
+    final habitsPlugin =
+        PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+    _timerController = habitsPlugin?.timerController ?? TimerController();
     widget.controller.addTimerModeListener(_onTimerModeChanged);
     _loadHabits();
   }
@@ -49,15 +52,8 @@ class _HabitsListState extends State<HabitsList> {
   }
 
   Future<void> _startTimer(BuildContext context, Habit habit) async {
-    // 获取当前计时器状态
-    final isTiming = _timerController.isHabitTiming(habit.id);
-    final currentTimerData =
-        isTiming ? _timerController.getTimerData(habit.id) : null;
-
-    // 如果当前没有计时器在运行，则启动新计时器
-    if (!isTiming) {
-      _timerController.startTimer(habit);
-    }
+    final timerData = _timerController.getTimerData(habit.id);
+    final isTiming = timerData != null;
 
     final result = await showDialog<bool>(
       context: context,
@@ -65,7 +61,7 @@ class _HabitsListState extends State<HabitsList> {
           (context) => TimerDialog(
             habit: habit,
             controller: widget.controller,
-            initialTimerData: currentTimerData,
+            initialTimerData: timerData,
           ),
     );
 

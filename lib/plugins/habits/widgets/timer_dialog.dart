@@ -26,8 +26,10 @@ class _TimerDialogState extends State<TimerDialog> {
   bool _isRunning = false;
   Duration _duration = const Duration(minutes: 25);
   Duration _elapsed = Duration.zero;
-  Timer? _timer;
   final TextEditingController _notesController = TextEditingController();
+  String _lastSavedNotes = '';
+
+  var _timer;
 
   @override
   void initState() {
@@ -39,7 +41,9 @@ class _TimerDialogState extends State<TimerDialog> {
       _elapsed = Duration(
         seconds: widget.initialTimerData!['elapsedSeconds'] ?? 0,
       );
-      _isRunning = widget.initialTimerData!['isRunning'] ?? false;
+      _notesController.text = widget.initialTimerData!['notes'] ?? '';
+      // 不初始化_isRunning，因为会在_toggleTimer中初始化，此处仅用于判断是否需要启动计时器。
+      if (widget.initialTimerData!['isRunning']) _toggleTimer();
     }
   }
 
@@ -119,26 +123,29 @@ class _TimerDialogState extends State<TimerDialog> {
     if (!mounted) return;
     setState(() {
       _isRunning = !_isRunning;
-      widget.controller.timerController.toggleTimer(
-        widget.habit.id,
-        _isRunning,
-      );
-      if (_isRunning && _elapsed >= _duration) {
-        _showTimerComplete();
+      if (_isRunning) {
+        widget.controller.timerController.startTimer(widget.habit, (elapsed) {
+          if (!mounted) return;
+          setState(() {
+            _elapsed = Duration(seconds: elapsed);
+            if (_isCountdown && _elapsed >= _duration) {
+              _isRunning = false;
+              // TODO 完成提示
+            }
+          });
+          // 只在笔记内容变更时更新
+          if (_notesController.text != _lastSavedNotes) {
+            _lastSavedNotes = _notesController.text;
+            widget.controller.timerController.updateTimerData(widget.habit.id, {
+              // 'isCountdown': _isCountdown,
+              // 'elapsedSeconds': elapsed,
+              // 'isRunning': _isRunning,
+              'notes': _notesController.text,
+            });
+          }
+        }, initialDuration: _elapsed);
       }
     });
-  }
-
-  void _showTimerComplete() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Timer for ${widget.habit.title} completed'),
-        duration: const Duration(seconds: 5),
-      ),
-    );
-    if (_isCountdown) {
-      setState(() => _isCountdown = false);
-    }
   }
 
   void _resetTimer() {
@@ -146,13 +153,19 @@ class _TimerDialogState extends State<TimerDialog> {
       _elapsed = Duration.zero;
       _isRunning = false;
     });
+    // 完全清除计时器状态，确保重新打开对话框时不会恢复
     widget.controller.timerController.stopTimer(widget.habit.id);
+    widget.controller.timerController.clearTimerData(widget.habit.id);
   }
 
   void _toggleTimerMode() {
     if (_isCountdown && _elapsed >= _duration) return;
     setState(() {
       _isCountdown = !_isCountdown;
+      widget.controller.timerController.setCountdownMode(
+        widget.habit.id,
+        _isCountdown,
+      );
       widget.controller.notifyTimerModeChanged(widget.habit.id, _isCountdown);
     });
   }

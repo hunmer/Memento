@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
@@ -22,6 +24,9 @@ class HabitsCardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final habitsPlugin =
+        PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -30,6 +35,9 @@ class HabitsCardView extends StatelessWidget {
       itemCount: habits.length,
       itemBuilder: (context, index) {
         final habit = habits[index];
+        final isTiming =
+            habitsPlugin?.timerController.isHabitTiming(habit.id) ?? false;
+
         return Card(
           child: InkWell(
             onTap: () => onHabitPressed(habit),
@@ -94,13 +102,9 @@ class HabitsCardView extends StatelessWidget {
                 Text(habit.title),
                 Text('${habit.durationMinutes} ${l10n.minutes}'),
                 IconButton(
-                  icon: Icon(
-                    TimerController().isHabitTiming(habit.id)
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                  ),
+                  icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
                   onPressed: () {
-                    if (!TimerController().isHabitTiming(habit.id)) {
+                    if (!isTiming) {
                       onTimerPressed(habit);
                     }
                   },

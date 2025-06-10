@@ -1,5 +1,6 @@
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
@@ -11,6 +12,7 @@ class HabitsPlugin extends PluginBase {
   late final HabitController _habitController;
   late final SkillController _skillController;
   late final CompletionRecordController _recordController;
+  late final TimerController _timerController;
 
   @override
   final String version = '1.0.0';
@@ -34,10 +36,16 @@ class HabitsPlugin extends PluginBase {
 
   @override
   Future<void> initialize() async {
-    _habitController = HabitController(storage);
+    _timerController = TimerController();
+    _habitController = HabitController(
+      storage,
+      timerController: _timerController,
+    );
     _skillController = SkillController(storage);
     _recordController = CompletionRecordController(storage);
   }
+
+  TimerController get timerController => _timerController;
 
   getHabitController() => _habitController;
   getSkillController() => _skillController;

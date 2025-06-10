@@ -1,8 +1,8 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
-import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
-import 'package:http/http.dart' as PluginManager;
 
 class HabitsListView extends StatelessWidget {
   final List<Habit> habits;
@@ -20,10 +20,16 @@ class HabitsListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final habitsPlugin =
+        PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+
     return ListView.builder(
       itemCount: habits.length,
       itemBuilder: (context, index) {
         final habit = habits[index];
+        final isTiming =
+            habitsPlugin?.timerController.isHabitTiming(habit.id) ?? false;
+
         return ListTile(
           leading:
               habit.icon != null
@@ -37,13 +43,9 @@ class HabitsListView extends StatelessWidget {
           title: Text(habit.title),
           subtitle: Text('${habit.durationMinutes} ${l10n.minutes}'),
           trailing: IconButton(
-            icon: Icon(
-              TimerController().isHabitTiming(habit.id)
-                  ? Icons.pause
-                  : Icons.play_arrow,
-            ),
+            icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
             onPressed: () {
-              if (!TimerController().isHabitTiming(habit.id)) {
+              if (!isTiming) {
                 onTimerPressed(habit);
               }
             },
