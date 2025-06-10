@@ -9,6 +9,8 @@ import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_app_bar.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_card_view.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_list_view.dart';
+import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
+import 'package:Memento/plugins/habits/widgets/habits_list/habits_list_view.dart';
 
 class HabitsList extends StatefulWidget {
   final HabitController controller;
@@ -23,10 +25,12 @@ class _HabitsListState extends State<HabitsList> {
   List<Habit> _habits = [];
   String? _selectedGroup;
   bool _isCardView = false;
+  late TimerController _timerController;
 
   @override
   void initState() {
     super.initState();
+    _timerController = TimerController();
     widget.controller.addTimerModeListener(_onTimerModeChanged);
     _loadHabits();
   }
@@ -45,13 +49,30 @@ class _HabitsListState extends State<HabitsList> {
   }
 
   Future<void> _startTimer(BuildContext context, Habit habit) async {
-    final completed = await showDialog<bool>(
+    // 获取当前计时器状态
+    final isTiming = _timerController.isHabitTiming(habit.id);
+    final currentTimerData =
+        isTiming ? _timerController.getTimerData(habit.id) : null;
+
+    // 如果当前没有计时器在运行，则启动新计时器
+    if (!isTiming) {
+      _timerController.startTimer(habit);
+    }
+
+    final result = await showDialog<bool>(
       context: context,
       builder:
-          (context) => TimerDialog(habit: habit, controller: widget.controller),
+          (context) => TimerDialog(
+            habit: habit,
+            controller: widget.controller,
+            initialTimerData: currentTimerData,
+          ),
     );
 
-    if (completed == true) {
+    // 只有在取消时才停止计时器
+    if (result == false && !isTiming) {
+      _timerController.stopTimer();
+    } else if (result == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Timer for ${habit.title} completed')),
       );

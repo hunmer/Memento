@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
+import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/utils/image_utils.dart';
 
 class HabitsCardView extends StatelessWidget {
@@ -36,51 +36,74 @@ class HabitsCardView extends StatelessWidget {
             child: Column(
               children: [
                 Expanded(
-                  child: habit.image != null && habit.image!.isNotEmpty
-                      ? FutureBuilder<String>(
-                          future: habit.image!.startsWith('http')
-                              ? Future.value(habit.image!)
-                              : ImageUtils.getAbsolutePath(habit.image!),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return Center(
-                                child: AspectRatio(
-                                  aspectRatio: 1.0,
-                                  child: ClipOval(
-                                    child: habit.image!.startsWith('http')
-                                        ? Image.network(
-                                            snapshot.data!,
-                                            width: 64,
-                                            height: 64,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) =>
-                                                const Icon(Icons.broken_image),
-                                          )
-                                        : Image.file(
-                                            File(snapshot.data!),
-                                            width: 64,
-                                            height: 64,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) =>
-                                                const Icon(Icons.broken_image),
-                                          ),
+                  child:
+                      habit.image != null && habit.image!.isNotEmpty
+                          ? FutureBuilder<String>(
+                            future:
+                                habit.image!.startsWith('http')
+                                    ? Future.value(habit.image!)
+                                    : ImageUtils.getAbsolutePath(habit.image!),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Center(
+                                  child: AspectRatio(
+                                    aspectRatio: 1.0,
+                                    child: ClipOval(
+                                      child:
+                                          habit.image!.startsWith('http')
+                                              ? Image.network(
+                                                snapshot.data!,
+                                                width: 64,
+                                                height: 64,
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) => const Icon(
+                                                      Icons.broken_image,
+                                                    ),
+                                              )
+                                              : Image.file(
+                                                File(snapshot.data!),
+                                                width: 64,
+                                                height: 64,
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) => const Icon(
+                                                      Icons.broken_image,
+                                                    ),
+                                              ),
+                                    ),
                                   ),
-                                ),
-                              );
-                            } else if (snapshot.hasError) {
-                              return const Icon(Icons.broken_image);
-                            } else {
-                              return const CircularProgressIndicator();
-                            }
-                          },
-                        )
-                      : const Icon(Icons.auto_awesome, size: 48),
+                                );
+                              } else if (snapshot.hasError) {
+                                return const Icon(Icons.broken_image);
+                              } else {
+                                return const CircularProgressIndicator();
+                              }
+                            },
+                          )
+                          : const Icon(Icons.auto_awesome, size: 48),
                 ),
                 Text(habit.title),
                 Text('${habit.durationMinutes} ${l10n.minutes}'),
                 IconButton(
-                  icon: const Icon(Icons.play_arrow),
-                  onPressed: () => onTimerPressed(habit),
+                  icon: Icon(
+                    TimerController().isHabitTiming(habit.id)
+                        ? Icons.pause
+                        : Icons.play_arrow,
+                  ),
+                  onPressed: () {
+                    if (!TimerController().isHabitTiming(habit.id)) {
+                      onTimerPressed(habit);
+                    }
+                  },
                 ),
               ],
             ),

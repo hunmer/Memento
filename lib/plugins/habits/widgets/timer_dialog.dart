@@ -8,8 +8,14 @@ import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 class TimerDialog extends StatefulWidget {
   final Habit habit;
   final HabitController controller;
+  final Map<String, dynamic>? initialTimerData;
 
-  const TimerDialog({super.key, required this.habit, required this.controller});
+  const TimerDialog({
+    super.key,
+    required this.habit,
+    required this.controller,
+    this.initialTimerData,
+  });
 
   @override
   State<TimerDialog> createState() => _TimerDialogState();
@@ -26,6 +32,13 @@ class _TimerDialogState extends State<TimerDialog> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialTimerData != null) {
+      _isCountdown = widget.initialTimerData!['isCountdown'] ?? true;
+      _isRunning = widget.initialTimerData!['isRunning'] ?? false;
+      _elapsed = Duration(
+        seconds: widget.initialTimerData!['elapsedSeconds'] ?? 0,
+      );
+    }
     _duration = Duration(minutes: widget.habit.durationMinutes);
   }
 
@@ -102,10 +115,15 @@ class _TimerDialogState extends State<TimerDialog> {
   }
 
   void _toggleTimer() {
+    if (!mounted) return;
     setState(() {
       _isRunning = !_isRunning;
       if (_isRunning) {
         _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          if (!mounted) {
+            timer.cancel();
+            return;
+          }
           setState(() {
             _elapsed += const Duration(seconds: 1);
             if (_isCountdown && _elapsed >= _duration) {
