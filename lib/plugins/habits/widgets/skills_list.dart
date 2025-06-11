@@ -27,7 +27,6 @@ class SkillsList extends StatefulWidget {
 
 class _SkillsListState extends State<SkillsList> {
   List<Skill> _skills = [];
-  String? _selectedGroup;
   bool _isCardView = false;
 
   @override
@@ -44,30 +43,20 @@ class _SkillsListState extends State<SkillsList> {
   @override
   Widget build(BuildContext context) {
     final l10n = HabitsLocalizations.of(context);
-    final groups = HabitsUtils.getGroups([], _skills);
-    final filteredSkills =
-        _selectedGroup == null
-            ? _skills
-            : _skills.where((s) => s.group == _selectedGroup).toList();
-
     return Column(
       children: [
-        _buildAppBar(context, l10n, groups),
+        _buildAppBar(context, l10n),
         Expanded(
           child:
               _isCardView
-                  ? _buildCardView(filteredSkills, l10n)
-                  : _buildListView(filteredSkills, l10n),
+                  ? _buildCardView(_skills, l10n)
+                  : _buildListView(_skills, l10n),
         ),
       ],
     );
   }
 
-  AppBar _buildAppBar(
-    BuildContext context,
-    HabitsLocalizations l10n,
-    List<String> groups,
-  ) {
+  AppBar _buildAppBar(BuildContext context, HabitsLocalizations l10n) {
     return AppBar(
       title: Text(l10n.skills),
       leading: IconButton(
@@ -75,18 +64,6 @@ class _SkillsListState extends State<SkillsList> {
         onPressed: () => PluginManager.toHomeScreen(context),
       ),
       actions: [
-        if (groups.isNotEmpty)
-          DropdownButton<String>(
-            value: _selectedGroup,
-            hint: Text(l10n.group),
-            items: [
-              const DropdownMenuItem(value: null, child: Text('All')),
-              ...groups.map(
-                (group) => DropdownMenuItem(value: group, child: Text(group)),
-              ),
-            ],
-            onChanged: (group) => setState(() => _selectedGroup = group),
-          ),
         IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
         IconButton(
           icon: Icon(_isCardView ? Icons.list : Icons.grid_view),
@@ -101,175 +78,283 @@ class _SkillsListState extends State<SkillsList> {
   }
 
   Widget _buildListView(List<Skill> skills, HabitsLocalizations l10n) {
-    return ListView.builder(
-      itemCount: skills.length,
-      itemBuilder: (context, index) {
-        final skill = skills[index];
-        return FutureBuilder(
-          future: Future.wait([
-            widget.recordController.getCompletionCount(skill.id),
-            widget.recordController.getTotalDuration(skill.id),
-          ]),
-          builder: (context, snapshot) {
-            final count = snapshot.data?[0] ?? 0;
-            final duration = snapshot.data?[1] ?? 0;
+    // 按group分组
+    final groupedSkills = <String, List<Skill>>{};
+    for (final skill in skills) {
+      final group = skill.group ?? '未分组';
+      groupedSkills.putIfAbsent(group, () => []).add(skill);
+    }
 
-            return ListTile(
-              leading:
-                  skill.icon != null
-                      ? Icon(
-                        IconData(
-                          int.parse(skill.icon!),
-                          fontFamily: 'MaterialIcons',
-                        ),
-                      )
-                      : null,
-              title: Text(skill.title),
-              subtitle: Text(
-                '$count completions • ${HabitsUtils.formatDuration(duration)}',
-              ),
-              onTap:
-                  () => Navigator.push(
+    return ListView(
+      children:
+          groupedSkills.entries.expand((entry) {
+            return [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                child: Text(
+                  entry.key,
+                  style: Theme.of(
                     context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => SkillDetailPage(
-                            skill: skill,
-                            skillController: widget.skillController,
-                            recordController: widget.recordController,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              ...entry.value.map((skill) {
+                return FutureBuilder(
+                  future: Future.wait([
+                    widget.recordController.getCompletionCount(skill.id),
+                    widget.recordController.getTotalDuration(skill.id),
+                  ]),
+                  builder: (context, snapshot) {
+                    final count = snapshot.data?[0] ?? 0;
+                    final duration = snapshot.data?[1] ?? 0;
+
+                    return ListTile(
+                      leading:
+                          skill.icon != null
+                              ? CircleAvatar(
+                                backgroundColor: Theme.of(context).primaryColor,
+                                child: Icon(
+                                  IconData(
+                                    int.parse(skill.icon!),
+                                    fontFamily: 'MaterialIcons',
+                                  ),
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : null,
+                      title: Text(skill.title),
+                      subtitle: Text(
+                        '$count completions • ${HabitsUtils.formatDuration(duration)}',
+                      ),
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => SkillDetailPage(
+                                  skill: skill,
+                                  skillController: widget.skillController,
+                                  recordController: widget.recordController,
+                                ),
                           ),
-                    ),
-                  ),
-            );
-          },
-        );
-      },
+                        );
+                        if (mounted) _loadSkills();
+                      },
+                    );
+                  },
+                );
+              }),
+            ];
+          }).toList(),
     );
   }
 
   Widget _buildCardView(List<Skill> skills, HabitsLocalizations l10n) {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.8,
-      ),
-      itemCount: skills.length,
-      itemBuilder: (context, index) {
-        final skill = skills[index];
-        return FutureBuilder(
-          future: Future.wait([
-            widget.recordController.getCompletionCount(skill.id),
-            widget.recordController.getTotalDuration(skill.id),
-          ]),
-          builder: (context, snapshot) {
-            final count = snapshot.data?[0] ?? 0;
-            final duration = snapshot.data?[1] ?? 0;
+    // 按group分组
+    final groupedSkills = <String, List<Skill>>{};
+    for (final skill in skills) {
+      final group = skill.group ?? '未分组';
+      groupedSkills.putIfAbsent(group, () => []).add(skill);
+    }
 
-            return Card(
-              child: InkWell(
-                onTap:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => SkillDetailPage(
-                              skill: skill,
-                              skillController: widget.skillController,
-                              recordController: widget.recordController,
-                            ),
-                      ),
+    return ListView(
+      children:
+          groupedSkills.entries.map((entry) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: Text(
+                    entry.key,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child:
-                          skill.image != null && skill.image!.isNotEmpty
-                              ? FutureBuilder<String>(
-                                future:
-                                    skill.image!.startsWith('http')
-                                        ? Future.value(skill.image!)
-                                        : ImageUtils.getAbsolutePath(
-                                          skill.image!,
-                                        ),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image:
-                                              skill.image!.startsWith('http')
-                                                  ? NetworkImage(snapshot.data!)
-                                                  : FileImage(
-                                                        File(snapshot.data!),
-                                                      )
-                                                      as ImageProvider,
-                                          fit: BoxFit.cover,
-                                          colorFilter: ColorFilter.mode(
-                                            Colors.black.withOpacity(0.3),
-                                            BlendMode.darken,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              skill.title,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              '$count completions',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            Text(
-                                              HabitsUtils.formatDuration(
-                                                duration,
-                                              ),
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  } else if (snapshot.hasError) {
-                                    return Container(
-                                      color: Colors.grey[200],
-                                      child: const Icon(Icons.broken_image),
-                                    );
-                                  } else {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-                                },
-                              )
-                              : skill.icon != null
-                              ? Icon(
-                                IconData(
-                                  int.parse(skill.icon!),
-                                  fontFamily: 'MaterialIcons',
-                                ),
-                                size: 48,
-                              )
-                              : const Icon(Icons.auto_awesome, size: 48),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: entry.value.length,
+                  itemBuilder: (context, index) {
+                    final skill = entry.value[index];
+                    return FutureBuilder(
+                      future: Future.wait([
+                        widget.recordController.getCompletionCount(skill.id),
+                        widget.recordController.getTotalDuration(skill.id),
+                      ]),
+                      builder: (context, snapshot) {
+                        final count = snapshot.data?[0] ?? 0;
+                        final duration = snapshot.data?[1] ?? 0;
+
+                        return Card(
+                          child: InkWell(
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => SkillDetailPage(
+                                        skill: skill,
+                                        skillController: widget.skillController,
+                                        recordController:
+                                            widget.recordController,
+                                      ),
+                                ),
+                              );
+                              if (mounted) _loadSkills();
+                            },
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child:
+                                      skill.image != null &&
+                                              skill.image!.isNotEmpty
+                                          ? FutureBuilder<String>(
+                                            future:
+                                                skill.image!.startsWith('http')
+                                                    ? Future.value(skill.image!)
+                                                    : ImageUtils.getAbsolutePath(
+                                                      skill.image!,
+                                                    ),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.hasData) {
+                                                return Container(
+                                                  decoration: BoxDecoration(
+                                                    image: DecorationImage(
+                                                      image:
+                                                          skill.image!
+                                                                  .startsWith(
+                                                                    'http',
+                                                                  )
+                                                              ? NetworkImage(
+                                                                snapshot.data!,
+                                                              )
+                                                              : FileImage(
+                                                                    File(
+                                                                      snapshot
+                                                                          .data!,
+                                                                    ),
+                                                                  )
+                                                                  as ImageProvider,
+                                                      fit: BoxFit.cover,
+                                                      colorFilter:
+                                                          ColorFilter.mode(
+                                                            Colors.black
+                                                                .withOpacity(
+                                                                  0.3,
+                                                                ),
+                                                            BlendMode.darken,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                  child: Center(
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Text(
+                                                          skill.title,
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '$count completions',
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          HabitsUtils.formatDuration(
+                                                            duration,
+                                                          ),
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              } else if (snapshot.hasError) {
+                                                return Container(
+                                                  color: Colors.grey[200],
+                                                  child: const Icon(
+                                                    Icons.broken_image,
+                                                  ),
+                                                );
+                                              } else {
+                                                return const Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                );
+                                              }
+                                            },
+                                          )
+                                          : skill.icon != null
+                                          ? CircleAvatar(
+                                            radius: 24,
+                                            backgroundColor:
+                                                Theme.of(context).primaryColor,
+                                            child: Icon(
+                                              IconData(
+                                                int.parse(skill.icon!),
+                                                fontFamily: 'MaterialIcons',
+                                              ),
+                                              size: 24,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                          : const Icon(
+                                            Icons.auto_awesome,
+                                            size: 48,
+                                          ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    skill.title,
+                                    style:
+                                        Theme.of(context).textTheme.titleSmall,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Text(
+                                    '$count completions',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
             );
-          },
-        );
-      },
+          }).toList(),
     );
   }
 

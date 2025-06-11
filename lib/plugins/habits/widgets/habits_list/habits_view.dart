@@ -305,7 +305,6 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                                         },
                                       )
                                       : Container(
-                                        color: Colors.grey[200],
                                         child: const Icon(
                                           Icons.auto_awesome,
                                           size: 48,
