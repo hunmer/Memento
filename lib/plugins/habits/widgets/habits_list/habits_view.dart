@@ -167,14 +167,44 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
     return ListView(
       children:
           groupedHabits.entries.map((entry) {
+            final skill =
+                entry.key != '未分类'
+                    ? skillController?.getSkillByTitle(entry.key)
+                    : null;
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    entry.key,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: Row(
+                    children: [
+                      if (skill?.icon != null)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Theme.of(context).primaryColor,
+                            child: Icon(
+                              IconData(
+                                int.parse(skill.icon!),
+                                fontFamily: 'MaterialIcons',
+                              ),
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        entry.key,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 GridView.builder(
@@ -318,12 +348,42 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
     return ListView(
       children:
           groupedHabits.entries.expand((entry) {
+            final skill =
+                entry.key != '未分类'
+                    ? skillController?.getSkillByTitle(entry.key)
+                    : null;
+
             return [
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  entry.key,
-                  style: Theme.of(context).textTheme.titleLarge,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                child: Row(
+                  children: [
+                    if (skill?.icon != null)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: CircleAvatar(
+                          radius: 12,
+                          backgroundColor: Theme.of(context).primaryColor,
+                          child: Icon(
+                            IconData(
+                              int.parse(skill.icon!),
+                              fontFamily: 'MaterialIcons',
+                            ),
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    Text(
+                      entry.key,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               ...entry.value.map((habit) {

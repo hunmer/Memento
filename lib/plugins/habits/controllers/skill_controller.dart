@@ -66,4 +66,27 @@ class SkillController {
     _skills.removeWhere((s) => s.id == id);
     await storage.writeJson(_skillsKey, _skills.map((s) => s.toMap()).toList());
   }
+
+  /// Gets a skill by its title.
+  /// Returns null if:
+  /// - title is null or empty
+  /// - no skill with matching title is found
+  /// - multiple skills with same title exist (to avoid ambiguity)
+  Skill? getSkillByTitle(String? title) {
+    if (title == null || title.isEmpty) {
+      return null;
+    }
+
+    final matchingSkills = _skills.where((s) => s.title == title).toList();
+
+    if (matchingSkills.isEmpty) {
+      return null;
+    }
+
+    if (matchingSkills.length > 1) {
+      return null; // Avoid returning ambiguous results
+    }
+
+    return matchingSkills.first;
+  }
 }
