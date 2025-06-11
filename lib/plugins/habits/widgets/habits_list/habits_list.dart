@@ -23,7 +23,6 @@ class HabitsList extends StatefulWidget {
 
 class _HabitsListState extends State<HabitsList> {
   List<Habit> _habits = [];
-  String? _selectedGroup;
   bool _isCardView = false;
   late TimerController _timerController;
 
@@ -47,41 +46,6 @@ class _HabitsListState extends State<HabitsList> {
     final habits = await widget.controller.getHabits();
     if (mounted) {
       setState(() => _habits = habits);
-    }
-  }
-
-  Future<void> _showHistory(BuildContext context, Habit habit) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => HabitsHistoryList(
-              habitId: habit.id,
-              controller:
-                  (PluginManager.instance.getPlugin('habits') as HabitsPlugin?)
-                      ?.getRecordController(),
-            ),
-      ),
-    );
-  }
-
-  Future<void> _startTimer(BuildContext context, Habit habit) async {
-    final timerData = _timerController.getTimerData(habit.id);
-    final isTiming = timerData != null;
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => TimerDialog(
-            habit: habit,
-            controller: widget.controller,
-
-            initialTimerData: timerData,
-          ),
-    );
-
-    if (result != null) {
-      _timerController.stopTimer(habit.id);
     }
   }
 
@@ -128,20 +92,13 @@ class _HabitsListState extends State<HabitsList> {
   @override
   Widget build(BuildContext context) {
     final l10n = HabitsLocalizations.of(context);
-    final groups = HabitsUtils.getGroups(_habits, []);
-    final filteredHabits =
-        _selectedGroup == null
-            ? _habits
-            : _habits.where((h) => h.group == _selectedGroup).toList();
+    final filteredHabits = _habits;
 
     return Column(
       children: [
         HabitsAppBar(
           l10n: l10n,
-          groups: groups,
-          selectedGroup: _selectedGroup,
           isCardView: _isCardView,
-          onGroupChanged: (group) => setState(() => _selectedGroup = group),
           onViewChanged: () => setState(() => _isCardView = !_isCardView),
           onAddPressed: () => _showHabitForm(context),
           onBackPressed: () => PluginManager.toHomeScreen(context),

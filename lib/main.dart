@@ -1,13 +1,10 @@
 import 'dart:async';
 
 import 'package:Memento/core/event/event.dart';
-import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
-import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
-import 'package:Memento/screens/settings_screen/controllers/settings_screen_controller.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,13 +36,13 @@ import 'plugins/nodes/nodes_plugin.dart'; // 笔记插件
 import 'plugins/notes/notes_plugin.dart'; // Notes插件
 import 'plugins/goods/goods_plugin.dart'; // 物品插件
 import 'plugins/bill/bill_plugin.dart'; // 账单插件
-import 'plugins/contact/contact_plugin.dart'; // 联系人插件
+// 联系人插件
 import 'plugins/calendar/calendar_plugin.dart'; // 日历插件
 import 'plugins/openai/openai_plugin.dart'; // OpenAI插件
 import 'plugins/store/store_plugin.dart'; // store插件
 import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
-import 'core/services/backup_service.dart'; // 备份服务
+// 备份服务
 import 'plugins/database/database_plugin.dart';
 
 // 全局导航键
@@ -117,12 +114,9 @@ void main() async {
     updateController.initialize();
 
     // 延迟备份服务初始化到Widget构建完成后
-    late final BackupService backupService;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final context = navigatorKey.currentContext;
-      if (context != null) {
-        backupService = BackupService(SettingsScreenController(), context);
-      }
+      if (context != null) {}
       // 插件初始化完成，发布事件
       eventManager.broadcast(
         'plugins_initialized',
@@ -159,7 +153,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     // 设置全局错误处理器
     FlutterError.onError = (details) {
-      print(details);
       _showError(details.exceptionAsString());
     };
 
@@ -209,14 +202,12 @@ class _MyAppState extends State<MyApp> {
     final updateController = AutoUpdateController.instance;
     updateController.context = context;
 
-    try {
-      final hasUpdate = await updateController.checkForUpdates();
-      if (!mounted) return;
+    final hasUpdate = await updateController.checkForUpdates();
+    if (!mounted) return;
 
-      if (hasUpdate) {
-        updateController.showUpdateDialog(skipCheck: true);
-      }
-    } catch (e) {}
+    if (hasUpdate) {
+      updateController.showUpdateDialog(skipCheck: true);
+    }
   }
 
   @override
@@ -269,7 +260,7 @@ class _MyAppState extends State<MyApp> {
       home: const HomeScreen(),
       onGenerateRoute: (settings) {
         if (settings.name?.startsWith('/channel/') ?? false) {
-          final channelId = settings.name!.substring('/channel/'.length);
+          settings.name!.substring('/channel/'.length);
           final args = settings.arguments as Map<String, dynamic>?;
           final channel = args?['channel'];
           final initialMessage = args?['initialMessage'];

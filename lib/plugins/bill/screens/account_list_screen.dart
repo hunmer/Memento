@@ -14,8 +14,6 @@ class AccountListScreen extends StatefulWidget {
 }
 
 class _AccountListScreenState extends State<AccountListScreen> {
-  var PluginManager;
-
   @override
   void initState() {
     super.initState();

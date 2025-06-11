@@ -22,7 +22,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
   @override
   String get id => 'bill';
-  
+
   @override
   String get name => '账单';
 
@@ -42,10 +42,11 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   Color get color => Colors.green;
 
   Account? get selectedAccount => _billController.selectedAccount;
-  set selectedAccount(Account? account) => _billController.selectedAccount = account;
+  set selectedAccount(Account? account) =>
+      _billController.selectedAccount = account;
   String? get selectedAccountId => _billController.selectedAccountId;
   List<Account> get accounts => _billController.accounts;
-  
+
   // 暴露账单控制器
   BillController get controller => _billController;
 
@@ -54,7 +55,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     _promptController.initialize();
   }
 
-  @override
   Future<void> uninstall() async {
     _promptController.unregisterPromptMethods();
     await storage.delete(storageDir);
@@ -99,63 +99,67 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
           // 统计信息卡片
           Column(
-              children: [
-                // 第一行 - 今日财务和本月财务
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // 今日财务
-                    Column(
-                      children: [
-                        Text('今日财务', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '¥${_billController.getTodayFinance().toStringAsFixed(2)}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                _billController.getTodayFinance() >= 0 ? Colors.green : Colors.red,
-                          ),
+            children: [
+              // 第一行 - 今日财务和本月财务
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // 今日财务
+                  Column(
+                    children: [
+                      Text('今日财务', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '¥${_billController.getTodayFinance().toStringAsFixed(2)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color:
+                              _billController.getTodayFinance() >= 0
+                                  ? Colors.green
+                                  : Colors.red,
                         ),
-                      ],
-                    ),
-                    
-                    // 本月财务
-                    Column(
-                      children: [
-                        Text('本月财务', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '¥${_billController.getMonthFinance().toStringAsFixed(2)}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                _billController.getMonthFinance() >= 0 ? Colors.green : Colors.red,
-                          ),
+                      ),
+                    ],
+                  ),
+
+                  // 本月财务
+                  Column(
+                    children: [
+                      Text('本月财务', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '¥${_billController.getMonthFinance().toStringAsFixed(2)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color:
+                              _billController.getMonthFinance() >= 0
+                                  ? Colors.green
+                                  : Colors.red,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                
-                // 第二行 - 本月记账
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Column(
-                      children: [
-                        Text('本月记账', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '${_billController.getMonthBillCount()} 笔',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // 第二行 - 本月记账
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Text('本月记账', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${_billController.getMonthBillCount()} 笔',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -210,8 +214,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
   @override
   Widget buildSettingsView(BuildContext context) {
-    return Column(
-      children: [
+    return Column(children: [
       
       ],
     );
@@ -229,7 +232,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       });
       return const Center(child: CircularProgressIndicator());
     }
-    if(selectedAccountId == null && accounts.isNotEmpty) {
+    if (selectedAccountId == null && accounts.isNotEmpty) {
       selectedAccount = accounts.first;
     }
     return DefaultTabController(
@@ -237,9 +240,9 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => PluginManager.toHomeScreen(context),
+          ),
           title: Text('${selectedAccount?.title}'),
           bottom: const TabBar(tabs: [Tab(text: '账单列表'), Tab(text: '统计分析')]),
           actions: [
@@ -259,9 +262,11 @@ class BillPlugin extends PluginBase with ChangeNotifier {
           children: [
             BillListScreen(billPlugin: this, accountId: selectedAccount!.id),
             BillStatsScreen(
-              billPlugin: this, 
+              billPlugin: this,
               accountId: selectedAccount!.id,
-              startDate: DateTime.now().subtract(const Duration(days: 30)), // 默认显示最近30天
+              startDate: DateTime.now().subtract(
+                const Duration(days: 30),
+              ), // 默认显示最近30天
               endDate: DateTime.now(),
             ),
           ],
@@ -269,21 +274,23 @@ class BillPlugin extends PluginBase with ChangeNotifier {
       ),
     );
   }
-  
+
   // 委托方法到BillController
   Future<void> createAccount(Account account) async {
     await _billController.createAccount(account);
     notifyListeners(); // 添加通知，确保UI更新
   }
-  
+
   // 修改saveAccount方法，在保存账户后通知监听器
   Future<void> saveAccount(Account account) async {
     await _billController.saveAccount(account);
     notifyListeners(); // 添加通知，确保UI更新
   }
-  
-  Future<void> deleteAccount(String accountId) => _billController.deleteAccount(accountId);
-  Future<void> deleteBill(String accountId, String billId) => _billController.deleteBill(accountId, billId);
+
+  Future<void> deleteAccount(String accountId) =>
+      _billController.deleteAccount(accountId);
+  Future<void> deleteBill(String accountId, String billId) =>
+      _billController.deleteBill(accountId, billId);
   BillStatistics getStatistics({
     required List<Bill> bills,
     required StatisticRange range,

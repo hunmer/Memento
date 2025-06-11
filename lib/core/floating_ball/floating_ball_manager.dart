@@ -36,9 +36,7 @@ class FloatingBallManager {
   // 默认位置
   Offset _position = const Offset(20, 100);
   // 默认大小比例 (100%)
-  double _sizeScale = 1.0;
   // 默认启用状态
-  bool _isEnabled = true;
   // 存储文件路径
   File? _storageFile;
 
@@ -47,7 +45,6 @@ class FloatingBallManager {
     '打开上次插件':
         (context) => () {
           if (context.mounted) {
-            final navigatorContext = Navigator.of(context).context;
             final String? currentPluginId =
                 PluginManager.instance.getCurrentPluginId();
             if (currentPluginId == null) return;
@@ -154,7 +151,6 @@ class FloatingBallManager {
 
   // 保存悬浮球大小比例
   Future<void> saveSizeScale(double scale) async {
-    _sizeScale = scale;
     final data = await _readData();
     data['size_scale'] = scale;
     await _writeData(data);
@@ -171,7 +167,6 @@ class FloatingBallManager {
 
   // 保存悬浮球启用状态
   Future<void> setEnabled(bool enabled) async {
-    _isEnabled = enabled;
     final data = await _readData();
     data['enabled'] = enabled;
     await _writeData(data);

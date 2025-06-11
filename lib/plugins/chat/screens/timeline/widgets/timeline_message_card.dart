@@ -34,7 +34,6 @@ class TimelineMessageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final timeFormatter = DateFormatter();
     final cardColor = message.bubbleColor;
 
     // 根据视图模式调整卡片样式

@@ -27,7 +27,6 @@ class CombinedHabitsView extends StatefulWidget {
 
 class _CombinedHabitsViewState extends State<CombinedHabitsView> {
   List<Habit> _habits = [];
-  String? _selectedGroup;
   bool _isCardView = false;
   late TimerController _timerController;
   final Map<String, bool> _timingStatus = {};
@@ -151,25 +150,190 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
   }
 
   Widget _buildCardView(List<Habit> habits, HabitsLocalizations l10n) {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.8,
-      ),
-      itemCount: habits.length,
-      itemBuilder: (context, index) {
-        final habit = habits[index];
-        final isTiming =
-            _timingStatus[habit.id] ?? _timerController.isHabitTiming(habit.id);
-        _timingStatus[habit.id] = isTiming;
+    final habitsPlugin =
+        PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+    final skillController = habitsPlugin?.getSkillController();
 
-        return Card(
-          child: InkWell(
-            onTap: () => _showHabitForm(context, habit),
-            child: Column(
+    // 按技能分组
+    final groupedHabits = <String, List<Habit>>{};
+    for (final habit in habits) {
+      final skillTitle =
+          habit.skillId != null
+              ? skillController?.getSkillById(habit.skillId!)?.title ?? '未分类'
+              : '未分类';
+      groupedHabits.putIfAbsent(skillTitle, () => []).add(habit);
+    }
+
+    return ListView(
+      children:
+          groupedHabits.entries.map((entry) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child:
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    entry.key,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: entry.value.length,
+                  itemBuilder: (context, index) {
+                    final habit = entry.value[index];
+                    final isTiming =
+                        _timingStatus[habit.id] ??
+                        _timerController.isHabitTiming(habit.id);
+                    _timingStatus[habit.id] = isTiming;
+
+                    return Card(
+                      child: InkWell(
+                        onTap: () => _showHabitForm(context, habit),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child:
+                                  habit.image != null && habit.image!.isNotEmpty
+                                      ? FutureBuilder<String>(
+                                        future:
+                                            habit.image!.startsWith('http')
+                                                ? Future.value(habit.image!)
+                                                : ImageUtils.getAbsolutePath(
+                                                  habit.image!,
+                                                ),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.hasData) {
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image:
+                                                      habit.image!.startsWith(
+                                                            'http',
+                                                          )
+                                                          ? NetworkImage(
+                                                            snapshot.data!,
+                                                          )
+                                                          : FileImage(
+                                                                File(
+                                                                  snapshot
+                                                                      .data!,
+                                                                ),
+                                                              )
+                                                              as ImageProvider,
+                                                  fit: BoxFit.cover,
+                                                  colorFilter: ColorFilter.mode(
+                                                    Colors.black.withOpacity(
+                                                      0.3,
+                                                    ),
+                                                    BlendMode.darken,
+                                                  ),
+                                                ),
+                                              ),
+                                              child: Center(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      habit.title,
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '${habit.durationMinutes} ${l10n.minutes}',
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          } else if (snapshot.hasError) {
+                                            return Container(
+                                              color: Colors.grey[200],
+                                              child: const Icon(
+                                                Icons.broken_image,
+                                              ),
+                                            );
+                                          } else {
+                                            return const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            );
+                                          }
+                                        },
+                                      )
+                                      : Container(
+                                        color: Colors.grey[200],
+                                        child: const Icon(
+                                          Icons.auto_awesome,
+                                          size: 48,
+                                        ),
+                                      ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                isTiming ? Icons.pause : Icons.play_arrow,
+                              ),
+                              onPressed: () => _startTimer(context, habit),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            );
+          }).toList(),
+    );
+  }
+
+  Widget _buildListView(List<Habit> habits, HabitsLocalizations l10n) {
+    final habitsPlugin =
+        PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+    final skillController = habitsPlugin?.getSkillController();
+
+    // 按技能分组
+    final groupedHabits = <String, List<Habit>>{};
+    for (final habit in habits) {
+      final skillTitle =
+          habit.skillId != null
+              ? skillController?.getSkillById(habit.skillId!)?.title ?? '未分类'
+              : '未分类';
+      groupedHabits.putIfAbsent(skillTitle, () => []).add(habit);
+    }
+
+    return ListView(
+      children:
+          groupedHabits.entries.expand((entry) {
+            return [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  entry.key,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              ...entry.value.map((habit) {
+                final isTiming =
+                    _timingStatus[habit.id] ??
+                    _timerController.isHabitTiming(habit.id);
+                _timingStatus[habit.id] = isTiming;
+
+                return ListTile(
+                  leading:
                       habit.image != null && habit.image!.isNotEmpty
                           ? FutureBuilder<String>(
                             future:
@@ -178,134 +342,43 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                                     : ImageUtils.getAbsolutePath(habit.image!),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
-                                return Container(
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image:
-                                          habit.image!.startsWith('http')
-                                              ? NetworkImage(snapshot.data!)
-                                              : FileImage(File(snapshot.data!))
-                                                  as ImageProvider,
-                                      fit: BoxFit.cover,
-                                      colorFilter: ColorFilter.mode(
-                                        Colors.black.withOpacity(0.3),
-                                        BlendMode.darken,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          habit.title,
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${habit.durationMinutes} ${l10n.minutes}',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              } else if (snapshot.hasError) {
-                                return Container(
-                                  color: Colors.grey[200],
-                                  child: const Icon(Icons.broken_image),
-                                );
-                              } else {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
+                                return CircleAvatar(
+                                  backgroundImage:
+                                      habit.image!.startsWith('http')
+                                          ? NetworkImage(snapshot.data!)
+                                          : FileImage(File(snapshot.data!))
+                                              as ImageProvider,
                                 );
                               }
+                              return const CircleAvatar(
+                                child: Icon(Icons.auto_awesome),
+                              );
                             },
                           )
-                          : Container(
-                            color: Colors.grey[200],
-                            child: const Icon(Icons.auto_awesome, size: 48),
-                          ),
-                ),
-                IconButton(
-                  icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
-                  onPressed: () => _startTimer(context, habit),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildListView(List<Habit> habits, HabitsLocalizations l10n) {
-    return ListView.builder(
-      itemCount: habits.length,
-      itemBuilder: (context, index) {
-        final habit = habits[index];
-        final isTiming =
-            _timingStatus[habit.id] ?? _timerController.isHabitTiming(habit.id);
-        _timingStatus[habit.id] = isTiming;
-
-        return ListTile(
-          leading:
-              habit.image != null && habit.image!.isNotEmpty
-                  ? FutureBuilder<String>(
-                    future:
-                        habit.image!.startsWith('http')
-                            ? Future.value(habit.image!)
-                            : ImageUtils.getAbsolutePath(habit.image!),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return CircleAvatar(
-                          backgroundImage:
-                              habit.image!.startsWith('http')
-                                  ? NetworkImage(snapshot.data!)
-                                  : FileImage(File(snapshot.data!))
-                                      as ImageProvider,
-                        );
-                      }
-                      return const CircleAvatar(
-                        child: Icon(Icons.auto_awesome),
-                      );
-                    },
-                  )
-                  : const CircleAvatar(child: Icon(Icons.auto_awesome)),
-          title: Text(habit.title),
-          subtitle: Text('${habit.durationMinutes} ${l10n.minutes}'),
-          trailing: IconButton(
-            icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
-            onPressed: () => _startTimer(context, habit),
-          ),
-          onTap: () => _showHabitForm(context, habit),
-          onLongPress: () => _showHistory(context, habit),
-        );
-      },
+                          : const CircleAvatar(child: Icon(Icons.auto_awesome)),
+                  title: Text(habit.title),
+                  subtitle: Text('${habit.durationMinutes} ${l10n.minutes}'),
+                  trailing: IconButton(
+                    icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
+                    onPressed: () => _startTimer(context, habit),
+                  ),
+                  onTap: () => _showHabitForm(context, habit),
+                  onLongPress: () => _showHistory(context, habit),
+                );
+              }).toList(),
+            ];
+          }).toList(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = HabitsLocalizations.of(context);
-    final groups = HabitsUtils.getGroups(_habits, []);
-    final filteredHabits =
-        _selectedGroup == null
-            ? _habits
-            : _habits.where((h) => h.group == _selectedGroup).toList();
-
     return Column(
       children: [
         HabitsAppBar(
           l10n: l10n,
-          groups: groups,
-          selectedGroup: _selectedGroup,
           isCardView: _isCardView,
-          onGroupChanged: (group) => setState(() => _selectedGroup = group),
           onViewChanged: () => setState(() => _isCardView = !_isCardView),
           onAddPressed: () => _showHabitForm(context),
           onBackPressed: () => PluginManager.toHomeScreen(context),
@@ -313,8 +386,8 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
         Expanded(
           child:
               _isCardView
-                  ? _buildCardView(filteredHabits, l10n)
-                  : _buildListView(filteredHabits, l10n),
+                  ? _buildCardView(_habits, l10n)
+                  : _buildListView(_habits, l10n),
         ),
       ],
     );

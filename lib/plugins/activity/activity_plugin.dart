@@ -33,7 +33,6 @@ class ActivityPlugin extends BasePlugin {
   @override
   final String version = '1.0.0';
 
-  @override
   final String pluginDir = 'activity';
 
   @override
@@ -42,7 +41,7 @@ class ActivityPlugin extends BasePlugin {
   @override
   String get author => 'Zhuanz';
 
-    @override
+  @override
   IconData get icon => Icons.timeline;
 
   @override
@@ -66,11 +65,11 @@ class ActivityPlugin extends BasePlugin {
     // 确保活动记录数据目录存在
     await storage.createDirectory(pluginDir);
     _activityService = ActivityService(storage, pluginDir);
-    
+
     // 初始化Prompt控制器
     _promptController = ActivityPromptController(storage, pluginDir);
     _promptController.initialize();
-    
+
     _isInitialized = true;
   }
 
@@ -121,11 +120,7 @@ class ActivityPlugin extends BasePlugin {
                   color: theme.primaryColor.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  size: 24,
-                  color: theme.primaryColor,
-                ),
+                child: Icon(icon, size: 24, color: theme.primaryColor),
               ),
               const SizedBox(width: 12),
               Text(
@@ -139,98 +134,98 @@ class ActivityPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-           FutureBuilder<List<int>>(
-              future: Future.wait([
-                getTodayActivityCount(),
-                getTodayActivityDuration(),
-                Future.value(getTodayRemainingTime()),
-              ]),
-              builder: (context, snapshot) {
-                final data = snapshot.data ?? [0, 0, 0];
-                final activityCount = data[0];
-                final activityDuration = data[1];
-                final remainingTime = data[2];
+          FutureBuilder<List<int>>(
+            future: Future.wait([
+              getTodayActivityCount(),
+              getTodayActivityDuration(),
+              Future.value(getTodayRemainingTime()),
+            ]),
+            builder: (context, snapshot) {
+              final data = snapshot.data ?? [0, 0, 0];
+              final activityCount = data[0];
+              final activityDuration = data[1];
+              final remainingTime = data[2];
 
-                return Column(
-                  children: [
-                    // 第一行 - 两个统计项
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        // 今日活动数
-                        Column(
-                          children: [
-                            Text(
-                              ActivityLocalizations.of(context)!.todayActivities,
-                              style: theme.textTheme.bodyMedium
+              return Column(
+                children: [
+                  // 第一行 - 两个统计项
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // 今日活动数
+                      Column(
+                        children: [
+                          Text(
+                            ActivityLocalizations.of(context)!.todayActivities,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          Text(
+                            '$activityCount',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  activityCount > 0
+                                      ? theme.colorScheme.primary
+                                      : null,
                             ),
-                            Text(
-                              '$activityCount',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    activityCount > 0
-                                        ? theme.colorScheme.primary
-                                        : null,
-                              ),
+                          ),
+                        ],
+                      ),
+
+                      // 今日活动时长
+                      Column(
+                        children: [
+                          Text(
+                            ActivityLocalizations.of(context)!.todayDuration,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          Text(
+                            '${(activityDuration / 60).toStringAsFixed(1)}H',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                        
-                        // 今日活动时长
-                        Column(
-                          children: [
-                            Text(
-                              ActivityLocalizations.of(context)!.todayDuration ,
-                              style: theme.textTheme.bodyMedium
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // 第二行 - 剩余时间
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            ActivityLocalizations.of(context)!.remainingTime,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          Text(
+                            '${(remainingTime / 60).toStringAsFixed(1)}H',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  remainingTime < 120
+                                      ? theme.colorScheme.error
+                                      : null,
                             ),
-                            Text(
-                              '${(activityDuration / 60).toStringAsFixed(1)}H',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    
-                    // 第二行 - 剩余时间
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              ActivityLocalizations.of(context)!.remainingTime,
-                              style: theme.textTheme.bodyMedium
-                            ),
-                            Text(
-                              '${(remainingTime / 60).toStringAsFixed(1)}H',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    remainingTime < 120
-                                        ? theme.colorScheme.error
-                                        : null,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-    @override
+  @override
   Widget buildMainView(BuildContext context) {
     return const ActivityMainView();
   }
@@ -275,16 +270,14 @@ class _ActivityMainViewState extends State<ActivityMainView> {
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.timeline),
-            label: ActivityLocalizations.of(context)?.timeline ?? '时间线'
+            label: ActivityLocalizations.of(context)?.timeline ?? '时间线',
           ),
           NavigationDestination(
             icon: const Icon(Icons.bar_chart),
-            label: ActivityLocalizations.of(context)?.statistics ?? '统计'
+            label: ActivityLocalizations.of(context)?.statistics ?? '统计',
           ),
         ],
       ),
     );
   }
-
-
 }

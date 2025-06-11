@@ -11,10 +11,10 @@ import '../../../core/event/event_manager.dart';
 class BillAddedEventArgs extends EventArgs {
   /// 添加的账单
   final Bill bill;
-  
+
   /// 账户ID
   final String accountId;
-  
+
   /// 创建一个账单添加事件参数实例
   BillAddedEventArgs(this.bill, this.accountId) : super('bill_added');
 }
@@ -23,10 +23,10 @@ class BillAddedEventArgs extends EventArgs {
 class BillDeletedEventArgs extends EventArgs {
   /// 被删除的账单ID
   final String billId;
-  
+
   /// 账户ID
   final String accountId;
-  
+
   /// 创建一个账单删除事件参数实例
   BillDeletedEventArgs(this.billId, this.accountId) : super('bill_deleted');
 }
@@ -35,7 +35,7 @@ class BillDeletedEventArgs extends EventArgs {
 class AccountAddedEventArgs extends EventArgs {
   /// 添加的账户
   final Account account;
-  
+
   /// 创建一个账户添加事件参数实例
   AccountAddedEventArgs(this.account) : super('account_added');
 }
@@ -44,7 +44,7 @@ class AccountAddedEventArgs extends EventArgs {
 class AccountDeletedEventArgs extends EventArgs {
   /// 被删除的账户ID
   final String accountId;
-  
+
   /// 创建一个账户删除事件参数实例
   AccountDeletedEventArgs(this.accountId) : super('account_deleted');
 }
@@ -52,27 +52,27 @@ class AccountDeletedEventArgs extends EventArgs {
 class BillController with ChangeNotifier {
   /// 账单添加事件名称
   static const String billAddedEvent = 'bill_added';
-  
+
   /// 账单删除事件名称
   static const String billDeletedEvent = 'bill_deleted';
-  
+
   /// 账户添加事件名称
   static const String accountAddedEvent = 'account_added';
-  
+
   /// 账户删除事件名称
   static const String accountDeletedEvent = 'account_deleted';
   static final BillController _instance = BillController._internal();
   factory BillController() => _instance;
-  
+
   late final BillPlugin _plugin;
-  
+
   BillController._internal() {
     // 延迟初始化，等待BillPlugin实例化完成后再加载数据
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadAccounts();
     });
   }
-  
+
   // 设置BillPlugin实例
   void setPlugin(BillPlugin plugin) {
     _plugin = plugin;
@@ -86,9 +86,9 @@ class BillController with ChangeNotifier {
   bool _isLoading = false;
 
   List<Account> get accounts => List.unmodifiable(_accounts);
-  
+
   String? get selectedAccountId => _selectedAccountId;
-  
+
   Account? get selectedAccount {
     if (_selectedAccountId == null) return null;
     try {
@@ -99,7 +99,7 @@ class BillController with ChangeNotifier {
       return _accounts.isNotEmpty ? _accounts.first : null;
     }
   }
-  
+
   set selectedAccount(Account? account) {
     _selectedAccountId = account?.id;
     notifyListeners();
@@ -115,7 +115,7 @@ class BillController with ChangeNotifier {
   // 从本地存储加载账户列表
   Future<void> initialize() async {
     if (_initialized || _isLoading) return;
-    
+
     _isLoading = true;
     try {
       await _loadAccounts();
@@ -133,28 +133,29 @@ class BillController with ChangeNotifier {
         debugPrint('BillPlugin尚未设置，无法加载账户');
         return;
       }
-      
+
       final accountsData = await _plugin.storage.read(
         '${_plugin.getPluginStoragePath()}/$_accountsKey.json',
-        {'accounts': []}
+        {'accounts': []},
       );
-      
+
       final accountsJson = List<String>.from(accountsData['accounts'] ?? []);
       _accounts.clear();
-      
+
       if (accountsJson.isNotEmpty) {
         _accounts.addAll(
           accountsJson.map((json) => Account.fromJson(jsonDecode(json))),
         );
       }
-      
+
       notifyListeners();
     } catch (e) {
       debugPrint('加载账户失败: $e');
     }
   }
-  
+
   // 检查BillPlugin是否已设置
+  // ignore: unnecessary_null_comparison
   bool get _hasPlugin => _plugin != null;
 
   // 保存账户列表到插件存储
@@ -164,21 +165,20 @@ class BillController with ChangeNotifier {
       if (!_hasPlugin) {
         throw '保存账户失败: BillPlugin尚未设置';
       }
-      
+
       // 确保所有账户的总金额都是最新的
       for (var i = 0; i < _accounts.length; i++) {
         _accounts[i].calculateTotal();
       }
-      
+
       final accountsJson =
           _accounts.map((account) => jsonEncode(account.toJson())).toList();
-          
+
       // 将数据保存到插件的storage中
       await _plugin.storage.write(
         '${_plugin.getPluginStoragePath()}/$_accountsKey.json',
-        {'accounts': accountsJson}
+        {'accounts': accountsJson},
       );
-      
     } catch (e) {
       debugPrint('保存账户失败: $e');
       throw '保存账户失败: $e';
@@ -194,13 +194,13 @@ class BillController with ChangeNotifier {
     account.calculateTotal();
     _accounts.add(account);
     await _saveAccounts();
-    
+
     // 发布账户添加事件
     EventManager.instance.broadcast(
       accountAddedEvent,
       AccountAddedEventArgs(account),
     );
-    
+
     // 确保在数据保存成功后再通知监听器
     notifyListeners();
   }
@@ -214,15 +214,15 @@ class BillController with ChangeNotifier {
     if (_accounts.any((a) => a.id != account.id && a.title == account.title)) {
       throw '账户名称已存在';
     }
-    
+
     // 确保账户总金额与账单总和一致
     account.calculateTotal();
-    
+
     // 更新账户列表
     _accounts[index] = account;
     // 先保存数据
     await _saveAccounts();
-    
+
     // 再通知监听器，确保数据已经持久化
     notifyListeners();
   }
@@ -231,13 +231,13 @@ class BillController with ChangeNotifier {
   Future<void> deleteAccount(String accountId) async {
     _accounts.removeWhere((account) => account.id == accountId);
     await _saveAccounts();
-    
+
     // 发布账户删除事件
     EventManager.instance.broadcast(
       accountDeletedEvent,
       AccountDeletedEventArgs(accountId),
     );
-    
+
     notifyListeners();
   }
 
@@ -245,23 +245,27 @@ class BillController with ChangeNotifier {
   Future<List<Bill>> getBills({DateTime? startDate, DateTime? endDate}) async {
     await _ensureInitialized();
     List<Bill> allBills = [];
-    
+
     // 从所有账户收集账单
     for (var account in _accounts) {
       allBills.addAll(account.bills);
     }
-    
+
     if (startDate == null && endDate == null) {
       return List.unmodifiable(allBills);
     }
-    
+
     return allBills.where((bill) {
       bool match = true;
       if (startDate != null) {
-        match = match && bill.createdAt.isAfter(startDate.subtract(const Duration(days: 1)));
+        match =
+            match &&
+            bill.createdAt.isAfter(startDate.subtract(const Duration(days: 1)));
       }
       if (endDate != null) {
-        match = match && bill.createdAt.isBefore(endDate.add(const Duration(days: 1)));
+        match =
+            match &&
+            bill.createdAt.isBefore(endDate.add(const Duration(days: 1)));
       }
       return match;
     }).toList();
@@ -274,19 +278,22 @@ class BillController with ChangeNotifier {
   }) async {
     final bills = await getBills(startDate: startDate, endDate: endDate);
     final Map<String, double> result = {};
-    
+
     for (final bill in bills) {
       if (!result.containsKey(bill.category)) {
         result[bill.category] = 0;
       }
       result[bill.category] = (result[bill.category] ?? 0) + bill.amount;
     }
-    
+
     return result;
   }
 
   // 获取日期范围内的总收入
-  Future<double> getTotalIncome({DateTime? startDate, DateTime? endDate}) async {
+  Future<double> getTotalIncome({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     final bills = await getBills(startDate: startDate, endDate: endDate);
     return bills
         .where((bill) => bill.amount > 0)
@@ -294,7 +301,10 @@ class BillController with ChangeNotifier {
   }
 
   // 获取日期范围内的总支出
-  Future<double> getTotalExpense({DateTime? startDate, DateTime? endDate}) async {
+  Future<double> getTotalExpense({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     final bills = await getBills(startDate: startDate, endDate: endDate);
     return bills
         .where((bill) => bill.amount < 0)
@@ -305,17 +315,17 @@ class BillController with ChangeNotifier {
   Future<Map<String, dynamic>> checkBillsStorage() async {
     try {
       await _ensureInitialized();
-      
+
       Map<String, dynamic> storageData = {};
       List<String> storageKeys = [];
-      
+
       if (_hasPlugin) {
         try {
           storageData = await _plugin.storage.read(
             '${_plugin.getPluginStoragePath()}/$_accountsKey.json',
-            {}
+            {},
           );
-          
+
           // 获取插件存储中的所有键
           final pluginPath = _plugin.getPluginStoragePath();
           storageKeys = ['$pluginPath/$_accountsKey.json'];
@@ -323,11 +333,14 @@ class BillController with ChangeNotifier {
           debugPrint('获取存储数据失败: $e');
         }
       }
-      
+
       return {
         'success': true,
         'accountsCount': _accounts.length,
-        'billsCount': _accounts.fold<int>(0, (sum, account) => sum + account.bills.length),
+        'billsCount': _accounts.fold<int>(
+          0,
+          (sum, account) => sum + account.bills.length,
+        ),
         'initialized': _initialized,
         'storageData': storageData,
         'storageKeys': storageKeys,
@@ -426,8 +439,10 @@ class BillController with ChangeNotifier {
     Account updatedAccount;
 
     // 检查是否存在相同ID的账单（编辑模式）
-    final existingBillIndex = currentAccount.bills.indexWhere((b) => b.id == bill.id);
-    
+    final existingBillIndex = currentAccount.bills.indexWhere(
+      (b) => b.id == bill.id,
+    );
+
     if (existingBillIndex == -1) {
       // 创建新账单
       updatedAccount = currentAccount.copyWith(
@@ -442,12 +457,12 @@ class BillController with ChangeNotifier {
 
     // 更新账户总金额
     updatedAccount.calculateTotal();
-    
+
     // 保存更新后的账户
     _accounts[accountIndex] = updatedAccount;
     _plugin.saveAccount(updatedAccount);
 
-        // 发布账单添加/更新事件
+    // 发布账单添加/更新事件
     EventManager.instance.broadcast(
       billAddedEvent,
       BillAddedEventArgs(bill, bill.accountId),
@@ -467,13 +482,13 @@ class BillController with ChangeNotifier {
     updatedAccount.calculateTotal();
     _accounts[accountIndex] = updatedAccount;
     await _plugin.saveAccount(updatedAccount);
-    
+
     // 发布账单删除事件
     EventManager.instance.broadcast(
       billDeletedEvent,
       BillDeletedEventArgs(billId, accountId),
     );
-    
+
     notifyListeners();
   }
 

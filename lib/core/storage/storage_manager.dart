@@ -18,20 +18,6 @@ class StorageManager {
   final Map<String, dynamic> _cache = {};
   late StorageInterface _storage;
 
-  /// 检查文件是否存在
-  Future<bool> _checkFileExists(String filePath) async {
-    // 使用path.join确保路径分隔符在不同平台上兼容
-    final normalizedPath = path.normalize(path.join(_basePath, filePath));
-    final file = io.File(normalizedPath);
-    return await file.exists();
-  }
-
-  /// 读取JSON文件
-  Future<Map<String, dynamic>> _readJsonFile(String path) async {
-    final content = await readString(path);
-    return jsonDecode(content) as Map<String, dynamic>;
-  }
-
   /// 创建存储管理器实例
   /// 注意：使用前需要调用 initialize() 方法确保初始化完成
   StorageManager() {
@@ -514,7 +500,7 @@ class StorageManager {
 
       final files = await directory.list(recursive: false).toList();
       return files
-          .where((entity) => entity is io.File)
+          .whereType<io.File>()
           .map((file) => path.relative(file.path, from: _basePath))
           .toList();
     } catch (e) {
