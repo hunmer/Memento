@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/habits/widgets/habits_list/habits_view.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_list.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
@@ -50,7 +51,7 @@ class _HabitsHomeState extends State<HabitsHome>
         physics: NeverScrollableScrollPhysics(), // 禁止手动滑动切换
         children: [
           KeepAliveWrapper(
-            child: HabitsList(controller: widget.habitController),
+            child: CombinedHabitsView(controller: widget.habitController),
           ),
           KeepAliveWrapper(
             child: SkillsList(

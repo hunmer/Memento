@@ -10,10 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_app_bar.dart';
-import 'package:Memento/plugins/habits/widgets/habits_list/habits_card_view.dart';
-import 'package:Memento/plugins/habits/widgets/habits_list/habits_list_view.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
-import 'package:Memento/plugins/habits/widgets/habits_list/habits_list_view.dart';
 
 class HabitsList extends StatefulWidget {
   final HabitController controller;
@@ -148,23 +145,6 @@ class _HabitsListState extends State<HabitsList> {
           onViewChanged: () => setState(() => _isCardView = !_isCardView),
           onAddPressed: () => _showHabitForm(context),
           onBackPressed: () => PluginManager.toHomeScreen(context),
-        ),
-        Expanded(
-          child:
-              _isCardView
-                  ? HabitsCardView(
-                    habits: filteredHabits,
-                    l10n: l10n,
-                    onHabitPressed: (habit) => _showHabitForm(context, habit),
-                    onTimerPressed: (habit) => _startTimer(context, habit),
-                  )
-                  : HabitsListView(
-                    habits: filteredHabits,
-                    l10n: l10n,
-                    onHabitPressed: (habit) => _showHabitForm(context, habit),
-                    onTimerPressed: (habit) => _startTimer(context, habit),
-                    onHistoryPressed: (habit) => _showHistory(context, habit),
-                  ),
         ),
       ],
     );

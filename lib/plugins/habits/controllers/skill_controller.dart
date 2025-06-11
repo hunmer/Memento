@@ -7,7 +7,9 @@ class SkillController {
   static const _skillsKey = 'habits_skills';
   List<Skill> _skills = [];
 
-  SkillController(this.storage);
+  SkillController(this.storage) {
+    loadSkills();
+  }
 
   Future<void> saveCompletionRecord(
     String skillId,

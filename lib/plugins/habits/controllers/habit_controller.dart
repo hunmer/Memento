@@ -10,7 +10,9 @@ class HabitController {
   final StorageManager storage;
   final TimerController timerController;
   List<Habit> _habits = [];
-  HabitController(this.storage, {required this.timerController});
+  HabitController(this.storage, {required this.timerController}) {
+    loadHabits();
+  }
 
   Future<List<Habit>> loadHabits() async {
     final data = await storage.readJson('habits/habits', []);
