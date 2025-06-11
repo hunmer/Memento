@@ -67,4 +67,75 @@ class HabitsPlugin extends PluginBase {
   Future<void> onDispose() async {
     // Clean up resources if needed
   }
+
+  @override
+  Widget buildCardView(BuildContext context) {
+    final theme = Theme.of(context);
+    final habitCount = _habitController.getHabits().length;
+    final skillCount = _skillController.getSkills().length;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.auto_awesome,
+                  size: 24,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 统计信息
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    '$habitCount',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text('习惯', style: theme.textTheme.bodyMedium),
+                ],
+              ),
+              Column(
+                children: [
+                  Text(
+                    '$skillCount',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text('技能', style: theme.textTheme.bodyMedium),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -5,6 +5,7 @@ import 'package:Memento/plugins/habits/models/skill.dart';
 class SkillController {
   final StorageManager storage;
   static const _skillsKey = 'habits_skills';
+  List<Skill> _skills = [];
 
   SkillController(this.storage);
 
@@ -31,29 +32,32 @@ class SkillController {
     ).map((e) => CompletionRecord.fromMap(e)).toList();
   }
 
-  Future<List<Skill>> getSkills() async {
+  Future<List<Skill>> loadSkills() async {
     final data = await storage.readJson(_skillsKey, []);
-    return List<Map<String, dynamic>>.from(
-      data,
-    ).map((e) => Skill.fromMap(e)).toList();
+    _skills =
+        List<Map<String, dynamic>>.from(
+          data,
+        ).map((e) => Skill.fromMap(e)).toList();
+    return _skills;
+  }
+
+  List<Skill> getSkills() {
+    return _skills;
   }
 
   Future<void> saveSkill(Skill skill) async {
-    final skills = await getSkills();
-    final index = skills.indexWhere((s) => s.id == skill.id);
+    final index = _skills.indexWhere((s) => s.id == skill.id);
 
     if (index >= 0) {
-      skills[index] = skill;
+      _skills[index] = skill;
     } else {
-      skills.add(skill);
+      _skills.add(skill);
     }
-
-    await storage.writeJson(_skillsKey, skills.map((s) => s.toMap()).toList());
+    await storage.writeJson(_skillsKey, _skills.map((s) => s.toMap()).toList());
   }
 
   Future<void> deleteSkill(String id) async {
-    final skills = await getSkills();
-    skills.removeWhere((s) => s.id == id);
-    await storage.writeJson(_skillsKey, skills.map((s) => s.toMap()).toList());
+    _skills.removeWhere((s) => s.id == id);
+    await storage.writeJson(_skillsKey, _skills.map((s) => s.toMap()).toList());
   }
 }

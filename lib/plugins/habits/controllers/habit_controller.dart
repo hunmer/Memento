@@ -9,14 +9,19 @@ class HabitController {
   final List<TimerModeListener> _timerModeListeners = [];
   final StorageManager storage;
   final TimerController timerController;
+  List<Habit> _habits = [];
   HabitController(this.storage, {required this.timerController});
 
-  Future<List<Habit>> getHabits() async {
+  Future<List<Habit>> loadHabits() async {
     final data = await storage.readJson('habits/habits', []);
-    return List<Map<String, dynamic>>.from(
-      data,
-    ).map((e) => Habit.fromMap(e)).toList();
+    _habits =
+        List<Map<String, dynamic>>.from(
+          data,
+        ).map((e) => Habit.fromMap(e)).toList();
+    return _habits;
   }
+
+  List<Habit> getHabits() => _habits;
 
   Future<void> saveHabit(Habit habit) async {
     final habits = await getHabits();
