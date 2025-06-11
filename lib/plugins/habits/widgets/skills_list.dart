@@ -166,78 +166,105 @@ class _SkillsListState extends State<SkillsList> {
             final duration = snapshot.data?[1] ?? 0;
 
             return Card(
-              child: Column(
-                children: [
-                  Expanded(
-                    child:
-                        skill.image != null && skill.image!.isNotEmpty
-                            ? FutureBuilder<String>(
-                              future:
-                                  skill.image!.startsWith('http')
-                                      ? Future.value(skill.image!)
-                                      : ImageUtils.getAbsolutePath(
-                                        skill.image!,
+              child: InkWell(
+                onTap:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => SkillDetailPage(
+                              skill: skill,
+                              skillController: widget.skillController,
+                              recordController: widget.recordController,
+                            ),
+                      ),
+                    ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child:
+                          skill.image != null && skill.image!.isNotEmpty
+                              ? FutureBuilder<String>(
+                                future:
+                                    skill.image!.startsWith('http')
+                                        ? Future.value(skill.image!)
+                                        : ImageUtils.getAbsolutePath(
+                                          skill.image!,
+                                        ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image:
+                                              skill.image!.startsWith('http')
+                                                  ? NetworkImage(snapshot.data!)
+                                                  : FileImage(
+                                                        File(snapshot.data!),
+                                                      )
+                                                      as ImageProvider,
+                                          fit: BoxFit.cover,
+                                          colorFilter: ColorFilter.mode(
+                                            Colors.black.withOpacity(0.3),
+                                            BlendMode.darken,
+                                          ),
+                                        ),
                                       ),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return Center(
-                                    child: AspectRatio(
-                                      aspectRatio: 1.0,
-                                      child: ClipOval(
-                                        child:
-                                            skill.image!.startsWith('http')
-                                                ? Image.network(
-                                                  snapshot.data!,
-                                                  width: 64,
-                                                  height: 64,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder:
-                                                      (
-                                                        context,
-                                                        error,
-                                                        stackTrace,
-                                                      ) => const Icon(
-                                                        Icons.broken_image,
-                                                      ),
-                                                )
-                                                : Image.file(
-                                                  File(snapshot.data!),
-                                                  width: 64,
-                                                  height: 64,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder:
-                                                      (
-                                                        context,
-                                                        error,
-                                                        stackTrace,
-                                                      ) => const Icon(
-                                                        Icons.broken_image,
-                                                      ),
-                                                ),
+                                      child: Center(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              skill.title,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              '$count completions',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            Text(
+                                              HabitsUtils.formatDuration(
+                                                duration,
+                                              ),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  return const Icon(Icons.broken_image);
-                                } else {
-                                  return const CircularProgressIndicator();
-                                }
-                              },
-                            )
-                            : skill.icon != null
-                            ? Icon(
-                              IconData(
-                                int.parse(skill.icon!),
-                                fontFamily: 'MaterialIcons',
-                              ),
-                              size: 48,
-                            )
-                            : const Icon(Icons.auto_awesome, size: 48),
-                  ),
-                  Text(skill.title),
-                  Text('$count completions'),
-                  Text(HabitsUtils.formatDuration(duration)),
-                ],
+                                    );
+                                  } else if (snapshot.hasError) {
+                                    return Container(
+                                      color: Colors.grey[200],
+                                      child: const Icon(Icons.broken_image),
+                                    );
+                                  } else {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                },
+                              )
+                              : skill.icon != null
+                              ? Icon(
+                                IconData(
+                                  int.parse(skill.icon!),
+                                  fontFamily: 'MaterialIcons',
+                                ),
+                                size: 48,
+                              )
+                              : const Icon(Icons.auto_awesome, size: 48),
+                    ),
+                  ],
+                ),
               ),
             );
           },

@@ -44,7 +44,6 @@ class HabitsAppBar extends StatelessWidget {
             ],
             onChanged: onGroupChanged,
           ),
-        IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
         IconButton(
           icon: Icon(isCardView ? Icons.list : Icons.grid_view),
           onPressed: onViewChanged,
@@ -52,12 +51,5 @@ class HabitsAppBar extends StatelessWidget {
         IconButton(icon: const Icon(Icons.add), onPressed: onAddPressed),
       ],
     );
-  }
-
-  void _showSortMenu() {
-    // TODO: Implement sorting menu with options:
-    // - Sort by name (A-Z)
-    // - Sort by duration (shortest first)
-    // - Sort by creation date (newest first)
   }
 }

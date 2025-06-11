@@ -63,54 +63,59 @@ class _HabitsCardViewState extends State<HabitsCardView> {
                                     : ImageUtils.getAbsolutePath(habit.image!),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
-                                return Center(
-                                  child: AspectRatio(
-                                    aspectRatio: 1.0,
-                                    child: ClipOval(
-                                      child:
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image:
                                           habit.image!.startsWith('http')
-                                              ? Image.network(
-                                                snapshot.data!,
-                                                width: 64,
-                                                height: 64,
-                                                fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => const Icon(
-                                                      Icons.broken_image,
-                                                    ),
-                                              )
-                                              : Image.file(
-                                                File(snapshot.data!),
-                                                width: 64,
-                                                height: 64,
-                                                fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => const Icon(
-                                                      Icons.broken_image,
-                                                    ),
-                                              ),
+                                              ? NetworkImage(snapshot.data!)
+                                              : FileImage(File(snapshot.data!))
+                                                  as ImageProvider,
+                                      fit: BoxFit.cover,
+                                      colorFilter: ColorFilter.mode(
+                                        Colors.black.withOpacity(0.3),
+                                        BlendMode.darken,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          habit.title,
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${habit.durationMinutes} ${widget.l10n.minutes}',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 );
                               } else if (snapshot.hasError) {
-                                return const Icon(Icons.broken_image);
+                                return Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.broken_image),
+                                );
                               } else {
-                                return const CircularProgressIndicator();
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
                               }
                             },
                           )
-                          : const Icon(Icons.auto_awesome, size: 48),
+                          : Container(
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.auto_awesome, size: 48),
+                          ),
                 ),
-                Text(habit.title),
-                Text('${habit.durationMinutes} ${widget.l10n.minutes}'),
                 IconButton(
                   icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
                   onPressed: () {
