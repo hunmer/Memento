@@ -47,6 +47,10 @@ class SkillController {
     return _skills;
   }
 
+  getSkillById(String id) {
+    return _skills.firstWhere((s) => s.id == id);
+  }
+
   Future<void> saveSkill(Skill skill) async {
     final index = _skills.indexWhere((s) => s.id == skill.id);
 
