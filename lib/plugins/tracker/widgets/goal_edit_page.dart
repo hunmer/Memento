@@ -191,7 +191,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
                         builder:
                             (context) => ImagePickerDialog(
                               initialUrl: _imagePath,
-                              saveDirectory: 'goal_images',
+                              saveDirectory: 'tracker/goal_images',
                               enableCrop: true,
                               cropAspectRatio: 9 / 16,
                             ),

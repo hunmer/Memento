@@ -29,7 +29,8 @@ class CalendarController extends ChangeNotifier {
   List<CalendarEvent> get events => List.unmodifiable(_events);
 
   // 获取已完成事件
-  List<CalendarEvent> get completedEvents => List.unmodifiable(_completedEvents);
+  List<CalendarEvent> get completedEvents =>
+      List.unmodifiable(_completedEvents);
 
   // 获取选中的日期
   DateTime get selectedDate => _selectedDate;
@@ -75,9 +76,7 @@ class CalendarController extends ChangeNotifier {
 
   // 完成事件
   void completeEvent(CalendarEvent event) {
-    final completedEvent = event.copyWith(
-      completedTime: DateTime.now(),
-    );
+    final completedEvent = event.copyWith(completedTime: DateTime.now());
     _events.removeWhere((e) => e.id == event.id);
     _completedEvents.add(completedEvent);
     _saveEvents();
@@ -87,7 +86,7 @@ class CalendarController extends ChangeNotifier {
   // 加载事件
   Future<void> _loadEvents() async {
     try {
-      final data = await _storage.read('calendar_events');
+      final data = await _storage.read('calendar/calendar_events');
       if (data.isNotEmpty) {
         final List<dynamic> eventsData = data['events'] ?? [];
         final List<dynamic> completedEventsData = data['completedEvents'] ?? [];
@@ -96,7 +95,9 @@ class CalendarController extends ChangeNotifier {
         _completedEvents.clear();
 
         _events.addAll(eventsData.map((e) => CalendarEvent.fromJson(e)));
-        _completedEvents.addAll(completedEventsData.map((e) => CalendarEvent.fromJson(e)));
+        _completedEvents.addAll(
+          completedEventsData.map((e) => CalendarEvent.fromJson(e)),
+        );
       }
     } catch (e) {
       debugPrint('Error loading calendar events: $e');
@@ -107,7 +108,7 @@ class CalendarController extends ChangeNotifier {
   // 保存事件
   Future<void> _saveEvents() async {
     try {
-      await _storage.write('calendar_events', {
+      await _storage.write('calendar/calendar_events', {
         'events': _events.map((e) => e.toJson()).toList(),
         'completedEvents': _completedEvents.map((e) => e.toJson()).toList(),
       });

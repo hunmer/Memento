@@ -28,7 +28,7 @@ class CalendarPlugin extends BasePlugin {
     syncfusion.CalendarView.month,
     syncfusion.CalendarView.schedule,
   ];
-  
+
   @override
   String get id => 'calendar';
 
@@ -44,7 +44,7 @@ class CalendarPlugin extends BasePlugin {
   @override
   String get author => 'Memento';
 
-   @override
+  @override
   IconData get icon => Icons.calendar_month;
 
   @override
@@ -52,9 +52,9 @@ class CalendarPlugin extends BasePlugin {
     // 初始化总控制器
     _controller = app.CalendarController(storageManager);
     _sfController = syncfusion.CalendarController();
-    
+
     // 从存储中读取上次使用的视图
-    final viewData = await storageManager.read('calendar_last_view');
+    final viewData = await storageManager.read('calendar/calendar_last_view');
     final String? lastView = viewData?['view'] as String?;
     if (lastView != null) {
       _sfController.view = _getCalendarViewFromString(lastView);
@@ -111,10 +111,9 @@ class CalendarPlugin extends BasePlugin {
 
   void _onViewChanged(syncfusion.ViewChangedDetails details) async {
     // 保存最后使用的视图
-    await storageManager.write(
-      'calendar_last_view',
-      {'view': _getStringFromCalendarView(_sfController.view!)},
-    );
+    await storageManager.write('calendar/calendar_last_view', {
+      'view': _getStringFromCalendarView(_sfController.view!),
+    });
   }
 
   @override
@@ -123,7 +122,7 @@ class CalendarPlugin extends BasePlugin {
     ConfigManager configManager,
   ) async {
     await initialize();
-    
+
     // 获取Todo插件的TaskController实例
     final todoPlugin = pluginManager.getPlugin('todo') as TodoPlugin?;
     if (todoPlugin != null) {
@@ -132,7 +131,7 @@ class CalendarPlugin extends BasePlugin {
         // 创建TodoEventService并设置到总控制器
         final todoEventService = TodoEventService(taskController);
         _controller.setTodoEventService(todoEventService);
-        
+
         // 监听任务变化
         taskController.addListener(() {
           _controller.notifyListeners();
@@ -144,40 +143,42 @@ class CalendarPlugin extends BasePlugin {
   void _showEventDetails(BuildContext context, CalendarEvent event) {
     showDialog(
       context: context,
-      builder: (context) => EventDetailCard(
-        event: event,
-        onEdit: () {
-          Navigator.pop(context);
-          _showEventEditPage(context, event);
-        },
-        onComplete: () {
-          Navigator.pop(context);
-          _controller.completeEvent(event);
-        },
-        onDelete: () {
-          Navigator.pop(context);
-          _controller.deleteEvent(event);
-        },
-      ),
+      builder:
+          (context) => EventDetailCard(
+            event: event,
+            onEdit: () {
+              Navigator.pop(context);
+              _showEventEditPage(context, event);
+            },
+            onComplete: () {
+              Navigator.pop(context);
+              _controller.completeEvent(event);
+            },
+            onDelete: () {
+              Navigator.pop(context);
+              _controller.deleteEvent(event);
+            },
+          ),
     );
   }
 
   void _showEventEditPage(BuildContext context, [CalendarEvent? event]) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => EventEditPage(
-          event: event,
-          initialDate: event?.startTime ?? _controller.selectedDate,
-          onSave: (updatedEvent) {
-            if (event != null) {
-              _controller.updateEvent(updatedEvent);
-            } else {
-              _controller.addEvent(updatedEvent);
-            }
-            // 强制重建界面
-            _controller.notifyListeners();
-          },
-        ),
+        builder:
+            (context) => EventEditPage(
+              event: event,
+              initialDate: event?.startTime ?? _controller.selectedDate,
+              onSave: (updatedEvent) {
+                if (event != null) {
+                  _controller.updateEvent(updatedEvent);
+                } else {
+                  _controller.addEvent(updatedEvent);
+                }
+                // 强制重建界面
+                _controller.notifyListeners();
+              },
+            ),
       ),
     );
   }
@@ -185,18 +186,19 @@ class CalendarPlugin extends BasePlugin {
   void _showAllEvents(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => EventListPage(
-          events: _controller.events,
-          onEventUpdated: (event) {
-            _showEventEditPage(context, event);
-          },
-          onEventCompleted: (event) {
-            _controller.completeEvent(event);
-          },
-          onEventDeleted: (event) {
-            _controller.deleteEvent(event);
-          },
-        ),
+        builder:
+            (context) => EventListPage(
+              events: _controller.events,
+              onEventUpdated: (event) {
+                _showEventEditPage(context, event);
+              },
+              onEventCompleted: (event) {
+                _controller.completeEvent(event);
+              },
+              onEventDeleted: (event) {
+                _controller.deleteEvent(event);
+              },
+            ),
       ),
     );
   }
@@ -204,9 +206,10 @@ class CalendarPlugin extends BasePlugin {
   void _showCompletedEvents(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => CompletedEventsPage(
-          completedEvents: _controller.completedEvents,
-        ),
+        builder:
+            (context) => CompletedEventsPage(
+              completedEvents: _controller.completedEvents,
+            ),
       ),
     );
   }
@@ -215,25 +218,34 @@ class CalendarPlugin extends BasePlugin {
   List<syncfusion.Appointment> _getUserAppointments() {
     // 使用总控制器获取所有事件（包括普通事件和Todo任务事件）
     final List<CalendarEvent> allEvents = _controller.getAllEvents();
-    
-    return allEvents.map((event) => syncfusion.Appointment(
-      startTime: event.startTime,
-      endTime: event.endTime ?? event.startTime.add(const Duration(hours: 1)),
-      subject: event.title,
-      notes: event.description,
-      color: event.color,
-      isAllDay: false, // 设置为false，确保显示为横条而不是圆点
-      id: event.id,
-    )).toList();
+
+    return allEvents
+        .map(
+          (event) => syncfusion.Appointment(
+            startTime: event.startTime,
+            endTime:
+                event.endTime ?? event.startTime.add(const Duration(hours: 1)),
+            subject: event.title,
+            notes: event.description,
+            color: event.color,
+            isAllDay: false, // 设置为false，确保显示为横条而不是圆点
+            id: event.id,
+          ),
+        )
+        .toList();
   }
 
   // 处理日历点击事件
-  void _handleCalendarTap(BuildContext context, syncfusion.CalendarTapDetails details) {
+  void _handleCalendarTap(
+    BuildContext context,
+    syncfusion.CalendarTapDetails details,
+  ) {
     if (details.targetElement == syncfusion.CalendarElement.calendarCell) {
       _controller.selectDate(details.date!);
-    } else if (details.targetElement == syncfusion.CalendarElement.appointment) {
+    } else if (details.targetElement ==
+        syncfusion.CalendarElement.appointment) {
       final String eventId = details.appointments?.first.id as String;
-      
+
       // 检查是否为Todo任务事件
       if (eventId.startsWith('todo_')) {
         // Todo任务事件只显示，不允许编辑
@@ -307,7 +319,8 @@ class CalendarPlugin extends BasePlugin {
                   monthViewSettings: const syncfusion.MonthViewSettings(
                     showAgenda: true,
                     agendaViewHeight: 200,
-                    appointmentDisplayMode: syncfusion.MonthAppointmentDisplayMode.appointment,
+                    appointmentDisplayMode:
+                        syncfusion.MonthAppointmentDisplayMode.appointment,
                   ),
                   timeSlotViewSettings: const syncfusion.TimeSlotViewSettings(
                     startHour: 6,
@@ -344,8 +357,8 @@ class CalendarPlugin extends BasePlugin {
     final now = DateTime.now();
     final sevenDaysLater = now.add(const Duration(days: 7));
     return _controller.getAllEvents().where((event) {
-      return event.startTime.isAfter(now) && 
-             event.startTime.isBefore(sevenDaysLater);
+      return event.startTime.isAfter(now) &&
+          event.startTime.isBefore(sevenDaysLater);
     }).length;
   }
 
@@ -379,7 +392,11 @@ class CalendarPlugin extends BasePlugin {
                       color: Colors.blue.withAlpha(30),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.calendar_month, size: 24, color: Colors.blue),
+                    child: const Icon(
+                      Icons.calendar_month,
+                      size: 24,
+                      color: Colors.blue,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Text(
@@ -411,7 +428,7 @@ class CalendarPlugin extends BasePlugin {
                           ),
                         ],
                       ),
-                      
+
                       // 7天活动
                       Column(
                         children: [
@@ -428,7 +445,7 @@ class CalendarPlugin extends BasePlugin {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // 第二行 - 过期活动
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -458,8 +475,8 @@ class CalendarPlugin extends BasePlugin {
 
   @override
   Future<void> uninstall() async {
-    await storageManager.delete('calendar_events');
-    await storageManager.delete('calendar_last_view');
+    await storageManager.delete('calendar/calendar_events');
+    await storageManager.delete('calendar/calendar_last_view');
   }
 }
 
