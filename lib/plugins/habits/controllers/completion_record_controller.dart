@@ -1,13 +1,19 @@
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
+import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 
 class CompletionRecordController {
   final StorageManager storage;
   final HabitController habitController;
+  final SkillController skillControlle;
   static const _recordsKey = 'habits_records';
 
-  CompletionRecordController(this.storage, {required this.habitController});
+  CompletionRecordController(
+    this.storage, {
+    required this.habitController,
+    required this.skillControlle,
+  });
 
   Future<void> saveCompletionRecord(
     String habitId,
@@ -23,18 +29,26 @@ class CompletionRecordController {
     await storage.writeJson(path, records.map((r) => r.toMap()).toList());
   }
 
+  getSkillHabitIds(skillId) async {
+    final habits = await habitController.getHabits();
+    return habits
+        .where((habit) => habit.skillId == skillId)
+        .map((habit) => habit.id)
+        .toList();
+  }
+
+  getHabitIds() {
+    final habits = habitController.getHabits();
+    return habits.map((habit) => habit.id).toList();
+  }
+
   Future<List<CompletionRecord>> getSkillCompletionRecords(
     String skillId,
   ) async {
     final matchingRecords = <CompletionRecord>[];
 
     // 1. 获取所有属于指定skillId的habitIds
-    final habits = await habitController.getHabits();
-    final skillHabitIds =
-        habits
-            .where((habit) => habit.skillId == skillId)
-            .map((habit) => habit.id)
-            .toList();
+    final skillHabitIds = await getSkillHabitIds(skillId);
 
     // 2. 获取这些habitIds对应的records
     for (final habitId in skillHabitIds) {
@@ -66,13 +80,12 @@ class CompletionRecordController {
   }
 
   Future<void> deleteCompletionRecord(String recordId) async {
-    final allRecords = await storage.readJson('habits/records/all.json', {});
-    for (final habitId in allRecords.keys) {
-      final records = await getSkillCompletionRecords(habitId);
-      final updatedRecords = records.where((r) => r.id != recordId).toList();
+    for (final habitId in getHabitIds()) {
+      final records = await getHabitCompletionRecords(habitId);
+      records.removeWhere((record) => record.id == recordId);
       await storage.writeJson(
         'habits/records/$habitId.json',
-        updatedRecords.map((r) => r.toMap()).toList(),
+        records.map((r) => r.toMap()).toList(),
       );
     }
   }

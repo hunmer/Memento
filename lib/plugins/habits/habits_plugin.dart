@@ -45,6 +45,7 @@ class HabitsPlugin extends PluginBase {
     _recordController = CompletionRecordController(
       storage,
       habitController: _habitController,
+      skillControlle: _skillController,
     );
   }
 

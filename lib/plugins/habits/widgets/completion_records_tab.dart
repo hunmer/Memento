@@ -4,6 +4,7 @@ import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
+import 'package:Memento/plugins/habits/widgets/common_record_list.dart';
 
 class SkillRecordHistoryList extends StatefulWidget {
   final String habitId;
@@ -41,40 +42,14 @@ class _SkillRecordHistoryListState extends State<SkillRecordHistoryList> {
   Widget build(BuildContext context) {
     final l10n = HabitsLocalizations.of(context);
 
-    return ListView.separated(
-      itemCount: _records.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final record = _records[index];
-        return Dismissible(
-          key: Key(record.id),
-          background: Container(
-            color: Colors.red,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            child: const Icon(Icons.delete, color: Colors.white),
-          ),
-          direction: DismissDirection.endToStart,
-          confirmDismiss: (direction) async {
-            return await _showDeleteDialog(context, record);
-          },
-          onDismissed: (direction) async {
-            await widget.controller.deleteCompletionRecord(record.id);
-            if (mounted) {
-              setState(() {
-                _records.removeAt(index);
-              });
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(l10n.recordDeleted)));
-            }
-          },
-          child: ListTile(
-            title: Text(record.date.toString()),
-            subtitle: Text(record.notes),
-          ),
-        );
-      },
+    return CommonRecordList<CompletionRecord>(
+      records: _records,
+      confirmDismiss: (context, record) => _showDeleteDialog(context, record),
+      onDelete: widget.controller.deleteCompletionRecord,
+      getDate: (record) => record.date.toString(),
+      getNotes: (record) => record.notes,
+      getDeleteMessage: () => l10n.recordDeleted,
+      itemKey: (record) => Key(record.id),
     );
   }
 

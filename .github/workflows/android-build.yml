@@ -27,15 +27,11 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
       
-    - name: Build APK
-      run: flutter build apk --release --no-tree-shake-icons
-      
     - name: Set up signing
       run: |
-        echo "${{ secrets.ANDROID_KEYSTORE }}" > android/app/upload-keystore.jks
         cat > android/key.properties << EOF
-        storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}
-        keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+        storePassword=android
+        keyPassword=android
         keyAlias=upload
         storeFile=upload-keystore.jks
         EOF
