@@ -5,6 +5,7 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
@@ -67,7 +68,5 @@ app.*.map.json
 !macos/**
 !linux/
 !linux/**
-!build/
-!build/**
 !analysis_options.yaml
 !README.md
