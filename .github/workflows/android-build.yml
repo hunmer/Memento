@@ -27,6 +27,10 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
       
+    - name: Generate signing key
+      run: |
+        keytool -genkey -v -keystore android/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload -storepass android -keypass android -dname "CN=, OU=, O=, L=, S=, C="
+        
     - name: Set up signing
       run: |
         cat > android/key.properties << EOF
