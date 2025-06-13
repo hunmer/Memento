@@ -68,9 +68,7 @@ app.*.map.json
 !macos/**
 !linux/
 !linux/**
-!test/
-!test/**
-!integration_test/
-!integration_test/**
+!auto_build/
+!auto_build/**
 !analysis_options.yaml
 !README.md

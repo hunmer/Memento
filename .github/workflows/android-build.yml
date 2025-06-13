@@ -41,7 +41,7 @@ jobs:
         EOF
         
     - name: Build signed APK
-      run: flutter build apk --release --no-tree-shake-icons
+      run: flutter build apk --release --no-tree-shake-icons --split-per-abi
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
