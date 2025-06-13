@@ -13,21 +13,21 @@ import 'models/diary_entry.dart';
 /// 日记创建事件参数
 class DiaryEntryCreatedEventArgs extends EventArgs {
   final DiaryEntry entry;
-  
+
   DiaryEntryCreatedEventArgs(this.entry) : super('diary_entry_created');
 }
 
 /// 日记更新事件参数
 class DiaryEntryUpdatedEventArgs extends EventArgs {
   final DiaryEntry entry;
-  
+
   DiaryEntryUpdatedEventArgs(this.entry) : super('diary_entry_updated');
 }
 
 /// 日记删除事件参数
 class DiaryEntryDeletedEventArgs extends EventArgs {
   final DateTime date;
-  
+
   DiaryEntryDeletedEventArgs(this.date) : super('diary_entry_deleted');
 }
 
@@ -52,8 +52,8 @@ class DiaryPlugin extends BasePlugin {
   @override
   String get author => 'Zhuanz';
 
-    @override
-  IconData get icon =>  Icons.book;
+  @override
+  IconData get icon => Icons.book;
 
   // 获取今日文字数
   Future<int> getTodayWordCount() async {
@@ -129,16 +129,12 @@ class DiaryPlugin extends BasePlugin {
   Future<void> initialize() async {
     // 确保日记数据目录存在
     await storage.createDirectory(pluginDir);
-    
+
     // 初始化 prompt 控制器
     _promptController.initialize();
 
     // 初始化默认配置
-    await loadSettings({
-      'theme': 'light',
-      'version': version,
-      'enabled': true,
-    });
+    await loadSettings({'theme': 'light', 'version': version, 'enabled': true});
   }
 
   @override
@@ -216,87 +212,78 @@ class DiaryPlugin extends BasePlugin {
 
               // 统计信息卡片
               Column(
-                  children: [
-                    // 第一行
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              DiaryLocalizations.of(context)!.todayWordCount,
-                               style: theme.textTheme.bodyMedium,
+                children: [
+                  // 第一行
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            DiaryLocalizations.of(context)!.todayWordCount,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          Text(
+                            '$todayCount',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  todayCount > 0
+                                      ? theme.colorScheme.primary
+                                      : null,
                             ),
-                            Text(
-                              '$todayCount',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    todayCount > 0
-                                        ? theme.colorScheme.primary
-                                        : null,
-                              ),
+                          ),
+                        ],
+                      ),
+                      const VerticalDivider(),
+                      Column(
+                        children: [
+                          Text(
+                            DiaryLocalizations.of(context)!.monthWordCount,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          Text(
+                            '$monthCount',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                        const VerticalDivider(),
-                        Column(
-                          children: [
-                            Text(
-                              DiaryLocalizations.of(context)!.monthWordCount,
-                              style: theme.textTheme.bodyMedium
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 第二行
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            DiaryLocalizations.of(context)!.monthProgress,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          Text(
+                            '$completedDays/$totalDays',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  completedDays > 0
+                                      ? theme.colorScheme.primary
+                                      : null,
                             ),
-                            Text(
-                              '$monthCount',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    
-                    // 第二行
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              DiaryLocalizations.of(context)!.monthProgress,
-                              style: theme.textTheme.bodyMedium
-                            ),
-                            Text(
-                              '$completedDays/$totalDays',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    completedDays > 0
-                                        ? theme.colorScheme.primary
-                                        : null,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
         );
       },
-    );
-  }
-
-  @override
-  Widget buildSettingsView(BuildContext context) {
-    return Column(
-      children: [
-        // TODO 插件设置项
-      ],
     );
   }
 }

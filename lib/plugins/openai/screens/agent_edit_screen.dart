@@ -91,10 +91,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             orElse: () => _providers.first,
           );
           _selectedProviderId = provider.id;
-          
+
           // 如果是新建智能体，或者是编辑但字段为空，则使用服务商的默认配置
-          if (widget.agent == null || 
-              _baseUrlController.text.isEmpty || 
+          if (widget.agent == null ||
+              _baseUrlController.text.isEmpty ||
               _headersController.text.isEmpty) {
             _updateProviderFields(provider);
           }
@@ -108,7 +108,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
           baseUrl: '',
           headers: {},
         );
-        if (_baseUrlController.text.isEmpty || _headersController.text.isEmpty) {
+        if (_baseUrlController.text.isEmpty ||
+            _headersController.text.isEmpty) {
           _updateProviderFields(defaultProvider);
         }
       }
@@ -144,7 +145,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               setState(() {
                 if (widget.agent != null) {
                   _baseUrlController.text = widget.agent!.baseUrl;
-                  _headersController.text = _formatHeaders(widget.agent!.headers);
+                  _headersController.text = _formatHeaders(
+                    widget.agent!.headers,
+                  );
                 }
               });
             },
@@ -158,9 +161,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     final selectedModel = await Navigator.push<LLMModel>(
       context,
       MaterialPageRoute(
-        builder: (context) => ModelSearchScreen(
-          initialModelId: _modelController.text,
-        ),
+        builder:
+            (context) =>
+                ModelSearchScreen(initialModelId: _modelController.text),
       ),
     );
 
@@ -262,20 +265,24 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     // 确认删除对话框
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(OpenAILocalizations.of(context).deleteAgentConfirm),
-        content: Text(OpenAILocalizations.of(context).deleteAgentMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(OpenAILocalizations.of(context).cancel),
+      builder:
+          (context) => AlertDialog(
+            title: Text(OpenAILocalizations.of(context).deleteAgentConfirm),
+            content: Text(OpenAILocalizations.of(context).deleteAgentMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(OpenAILocalizations.of(context).cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  OpenAILocalizations.of(context).delete,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(OpenAILocalizations.of(context).delete, style: const TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
     );
 
     if (confirmed != true || widget.agent == null) return;
@@ -294,7 +301,11 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${OpenAILocalizations.of(context).deleteFailed}: $e')),
+          SnackBar(
+            content: Text(
+              '${OpenAILocalizations.of(context).deleteFailed}: $e',
+            ),
+          ),
         );
       }
     }
@@ -302,7 +313,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
 
   Future<void> _cloneAgent() async {
     if (widget.agent == null) return;
-    
+
     // 创建一个新的智能体，复制当前智能体的所有属性，但生成新ID并更新名称
     final clonedAgent = AIAgent(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -312,7 +323,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       baseUrl: _baseUrlController.text,
       headers: _parseHeaders(_headersController.text),
       systemPrompt: _promptController.text,
-      model: _modelController.text.isEmpty ? 'gpt-3.5-turbo' : _modelController.text,
+      model:
+          _modelController.text.isEmpty
+              ? 'gpt-3.5-turbo'
+              : _modelController.text,
       tags: List.from(_tags),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -335,7 +349,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${OpenAILocalizations.of(context).cloneFailed}: $e')),
+          SnackBar(
+            content: Text('${OpenAILocalizations.of(context).cloneFailed}: $e'),
+          ),
         );
       }
     }
@@ -345,7 +361,11 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.agent == null ? OpenAILocalizations.of(context).createAgent : OpenAILocalizations.of(context).editAgent),
+        title: Text(
+          widget.agent == null
+              ? OpenAILocalizations.of(context).createAgent
+              : OpenAILocalizations.of(context).editAgent,
+        ),
         actions: [
           // 只有在编辑现有智能体时才显示删除和克隆按钮
           if (widget.agent != null) ...[
@@ -393,12 +413,13 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                     onTap: () async {
                       final result = await showDialog<Map<String, dynamic>>(
                         context: context,
-                        builder: (context) => ImagePickerDialog(
-                          initialUrl: _avatarUrl,
-                          saveDirectory: 'agent_avatars',
-                          enableCrop: true,
-                          cropAspectRatio: 1.0,
-                        ),
+                        builder:
+                            (context) => ImagePickerDialog(
+                              initialUrl: _avatarUrl,
+                              saveDirectory: 'openai/agent_avatars',
+                              enableCrop: true,
+                              cropAspectRatio: 1.0,
+                            ),
                       );
                       if (result != null && result['url'] != null) {
                         setState(() {
@@ -413,65 +434,87 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.5),
                             width: 2,
                           ),
                         ),
-                      child: _avatarUrl != null && _avatarUrl!.isNotEmpty
-                          ? FutureBuilder<String>(
-                              future: _avatarUrl!.startsWith('http')
-                                  ? Future.value(_avatarUrl!)
-                                  : ImageUtils.getAbsolutePath(_avatarUrl),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return Center(
-                                    child: AspectRatio(
-                                      aspectRatio: 1.0,
-                                      child: ClipOval(
-                                        child: _avatarUrl!.startsWith('http')
-                                            ? Image.network(
-                                                snapshot.data!,
-                                                width: 64,
-                                                height: 64,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) =>
-                                                    const Icon(Icons.broken_image),
-                                              )
-                                            : Image.file(
-                                                File(snapshot.data!),
-                                                width: 64,
-                                                height: 64,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) =>
-                                                    const Icon(Icons.broken_image),
-                                              ),
+                        child:
+                            _avatarUrl != null && _avatarUrl!.isNotEmpty
+                                ? FutureBuilder<String>(
+                                  future:
+                                      _avatarUrl!.startsWith('http')
+                                          ? Future.value(_avatarUrl!)
+                                          : ImageUtils.getAbsolutePath(
+                                            _avatarUrl,
+                                          ),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return Center(
+                                        child: AspectRatio(
+                                          aspectRatio: 1.0,
+                                          child: ClipOval(
+                                            child:
+                                                _avatarUrl!.startsWith('http')
+                                                    ? Image.network(
+                                                      snapshot.data!,
+                                                      width: 64,
+                                                      height: 64,
+                                                      fit: BoxFit.cover,
+                                                      errorBuilder:
+                                                          (
+                                                            context,
+                                                            error,
+                                                            stackTrace,
+                                                          ) => const Icon(
+                                                            Icons.broken_image,
+                                                          ),
+                                                    )
+                                                    : Image.file(
+                                                      File(snapshot.data!),
+                                                      width: 64,
+                                                      height: 64,
+                                                      fit: BoxFit.cover,
+                                                      errorBuilder:
+                                                          (
+                                                            context,
+                                                            error,
+                                                            stackTrace,
+                                                          ) => const Icon(
+                                                            Icons.broken_image,
+                                                          ),
+                                                    ),
+                                          ),
+                                        ),
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return const Icon(Icons.broken_image);
+                                    } else {
+                                      return const CircularProgressIndicator();
+                                    }
+                                  },
+                                )
+                                : Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.add_photo_alternate_outlined,
+                                        size: 24,
                                       ),
-                                    ),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  return const Icon(Icons.broken_image);
-                                } else {
-                                  return const CircularProgressIndicator();
-                                }
-                              },
-                            )
-                          : Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.add_photo_alternate_outlined, size: 24),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    OpenAILocalizations.of(context).avatar,
-                                    style: const TextStyle(fontSize: 12),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        OpenAILocalizations.of(context).avatar,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
+                                ),
+                      ),
                     ),
                   ),
                 ),
-                )
               ],
             ),
             const SizedBox(height: 16),
@@ -490,13 +533,17 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             ),
             const SizedBox(height: 16),
             _isLoadingProviders
-                ? Center(child: Text(OpenAILocalizations.of(context).loadingProviders))
+                ? Center(
+                  child: Text(OpenAILocalizations.of(context).loadingProviders),
+                )
                 : DropdownButtonFormField<String>(
                   value:
                       _selectedProviderId.isEmpty && _providers.isNotEmpty
                           ? _providers.first.id
                           : _selectedProviderId,
-                  decoration: InputDecoration(labelText: OpenAILocalizations.of(context).serviceProvider),
+                  decoration: InputDecoration(
+                    labelText: OpenAILocalizations.of(context).serviceProvider,
+                  ),
                   items:
                       _providers.map((provider) {
                         return DropdownMenuItem(
@@ -509,36 +556,51 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                       final provider = _providers.firstWhere(
                         (p) => p.id == value,
                       );
-                      
+
                       // 如果是编辑现有智能体，先询问用户是否要更新配置
                       if (widget.agent != null) {
                         showDialog(
                           context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(OpenAILocalizations.of(context).updateConfig),
-                            content: Text(OpenAILocalizations.of(context).updateConfigConfirm),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  setState(() {
-                                    _selectedProviderId = value;
-                                  });
-                                },
-                                child: Text(OpenAILocalizations.of(context).keepCurrentConfig),
+                          builder:
+                              (context) => AlertDialog(
+                                title: Text(
+                                  OpenAILocalizations.of(context).updateConfig,
+                                ),
+                                content: Text(
+                                  OpenAILocalizations.of(
+                                    context,
+                                  ).updateConfigConfirm,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      setState(() {
+                                        _selectedProviderId = value;
+                                      });
+                                    },
+                                    child: Text(
+                                      OpenAILocalizations.of(
+                                        context,
+                                      ).keepCurrentConfig,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      setState(() {
+                                        _selectedProviderId = value;
+                                        _updateProviderFields(provider);
+                                      });
+                                    },
+                                    child: Text(
+                                      OpenAILocalizations.of(
+                                        context,
+                                      ).useDefaultConfig,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  setState(() {
-                                    _selectedProviderId = value;
-                                    _updateProviderFields(provider);
-                                  });
-                                },
-                                child: Text(OpenAILocalizations.of(context).useDefaultConfig),
-                              ),
-                            ],
-                          ),
                         );
                       } else {
                         // 如果是新建智能体，直接更新配置
@@ -551,7 +613,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return OpenAILocalizations.of(context).pleaseSelectProvider;
+                      return OpenAILocalizations.of(
+                        context,
+                      ).pleaseSelectProvider;
                     }
                     return null;
                   },
@@ -581,7 +645,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               maxLines: 5,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return OpenAILocalizations.of(context).pleaseEnterSystemPrompt;
+                  return OpenAILocalizations.of(
+                    context,
+                  ).pleaseEnterSystemPrompt;
                 }
                 return null;
               },
@@ -684,7 +750,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     // 创建临时agent用于测试，使用表单中的最新配置
     final headers = _parseHeaders(_headersController.text);
     final apiKey = headers['Authorization']?.replaceFirst('Bearer ', '') ?? '';
-    
+
     final testAgent = AIAgent(
       id: 'test',
       // 如果模型为空，使用 gpt-4-vision-preview 作为默认模型
@@ -712,7 +778,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     // 使用 TestService 的对话框
     final result = await TestService.showLongTextInputDialog(
       context,
-      title: '${OpenAILocalizations.of(context).testAgentTitle}${testAgent.name}',
+      title:
+          '${OpenAILocalizations.of(context).testAgentTitle}${testAgent.name}',
       hintText: OpenAILocalizations.of(context).enterTestText,
       enableImagePicker: true,
     );

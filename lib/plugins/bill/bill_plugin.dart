@@ -212,14 +212,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     return storage.getPluginStoragePath(id);
   }
 
-  @override
-  Widget buildSettingsView(BuildContext context) {
-    return Column(children: [
-      
-      ],
-    );
-  }
-
   Widget buildPluginEntryWidget(BuildContext context) {
     // 如果没有账户，跳转到账户列表页面
     if (accounts.isEmpty) {

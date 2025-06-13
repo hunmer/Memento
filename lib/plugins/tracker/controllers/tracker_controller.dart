@@ -14,7 +14,7 @@ class TrackerController with ChangeNotifier {
   Future<void> loadInitialData() async {
     final plugin = TrackerPlugin.instance;
     try {
-      final savedGoals = await plugin.storage?.read('goals.json') ?? {};
+      final savedGoals = await plugin.storage?.read('tracker/goals.json') ?? {};
       if (savedGoals.containsKey('goals')) {
         _goals =
             (savedGoals['goals'] as List).map((g) => Goal.fromJson(g)).toList();
@@ -24,7 +24,8 @@ class TrackerController with ChangeNotifier {
     }
 
     try {
-      final savedRecords = await plugin.storage?.read('records.json') ?? {};
+      final savedRecords =
+          await plugin.storage?.read('tracker/records.json') ?? {};
       if (savedRecords.containsKey('records')) {
         _records =
             (savedRecords['records'] as List)
@@ -39,7 +40,7 @@ class TrackerController with ChangeNotifier {
   Future<void> _saveGoals() async {
     final plugin = TrackerPlugin.instance;
     try {
-      await plugin.storage?.write('goals.json', {
+      await plugin.storage?.write('tracker/goals.json', {
         'goals': _goals.map((g) => g.toJson()).toList(),
         'lastUpdated': DateTime.now().toIso8601String(),
       });
@@ -51,7 +52,7 @@ class TrackerController with ChangeNotifier {
   Future<void> _saveRecords() async {
     final plugin = TrackerPlugin.instance;
     try {
-      await plugin.storage?.write('records.json', {
+      await plugin.storage?.write('tracker/records.json', {
         'records': _records.map((r) => r.toJson()).toList(),
         'lastUpdated': DateTime.now().toIso8601String(),
       });

@@ -29,7 +29,7 @@ jobs:
       
     - name: Generate signing key
       run: |
-        keytool -genkey -v -keystore android/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload -storepass android -keypass android -dname "CN=, OU=, O=, L=, S=, C="
+        keytool -genkey -v -keystore android/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload -storepass android -keypass android -dname "CN=hunmer, OU=Your Organization, O=Your Company, L=Your City, S=Your State, C=Your Country"
         
     - name: Set up signing
       run: |
