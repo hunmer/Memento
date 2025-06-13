@@ -5,13 +5,13 @@
     <key>method</key>
     <string>development</string>
     <key>teamID</key>
-    <string>${APPLE_DEVELOPMENT_TEAM_ID}</string>
+    <string>memento_team</string>
     <key>signingStyle</key>
     <string>manual</string>
     <key>provisioningProfiles</key>
     <dict>
         <key>com.hunmer.memento</key>
-        <string>${PROVISIONING_PROFILE_NAME}</string>
+        <string>hunmer</string>
     </dict>
 </dict>
 </plist>
