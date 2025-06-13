@@ -11,21 +11,9 @@ class SkillController {
     loadSkills();
   }
 
-  Future<void> saveCompletionRecord(
+  Future<List<CompletionRecord>> getSkillCompletionRecords(
     String skillId,
-    CompletionRecord record,
   ) async {
-    final path = 'habits/records/$skillId.json';
-    final existingRecords = await getCompletionRecords(skillId);
-    existingRecords.add(record);
-
-    await storage.writeJson(
-      path,
-      existingRecords.map((r) => r.toMap()).toList(),
-    );
-  }
-
-  Future<List<CompletionRecord>> getCompletionRecords(String skillId) async {
     final path = 'habits/records/$skillId.json';
     final data = await storage.readJson(path, []);
 
