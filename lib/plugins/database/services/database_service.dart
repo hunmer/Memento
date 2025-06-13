@@ -3,13 +3,13 @@ import '../../base_plugin.dart';
 
 class DatabaseService {
   final BasePlugin plugin;
-
+  final storekey = 'databases/databases';
   DatabaseService(this.plugin);
 
   /// 获取所有数据库
   Future<List<DatabaseModel>> getAllDatabases() async {
     try {
-      final databases = await plugin.storage.readJson('databases') ?? [];
+      final databases = await plugin.storage.readJson(storekey) ?? [];
       if (databases is List) {
         return databases.map((db) => DatabaseModel.fromMap(db)).toList();
       }
@@ -24,7 +24,7 @@ class DatabaseService {
     final databases = await getAllDatabases();
     databases.add(database);
     await plugin.storage.writeJson(
-      'databases',
+      storekey,
       databases.map((db) => db.toMap()).toList(),
     );
   }
@@ -36,7 +36,7 @@ class DatabaseService {
     if (index != -1) {
       databases[index] = database;
       await plugin.storage.writeJson(
-        'databases',
+        storekey,
         databases.map((db) => db.toMap()).toList(),
       );
     }
@@ -47,7 +47,7 @@ class DatabaseService {
     final databases = await getAllDatabases();
     databases.removeWhere((db) => db.id == databaseId);
     await plugin.storage.writeJson(
-      'databases',
+      storekey,
       databases.map((db) => db.toMap()).toList(),
     );
   }
