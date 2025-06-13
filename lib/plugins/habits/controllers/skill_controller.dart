@@ -4,7 +4,7 @@ import 'package:Memento/plugins/habits/models/skill.dart';
 
 class SkillController {
   final StorageManager storage;
-  static const _skillsKey = 'habits_skills';
+  static const _skillsKey = 'habits/skills';
   List<Skill> _skills = [];
 
   SkillController(this.storage) {

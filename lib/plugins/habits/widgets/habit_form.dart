@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:path/path.dart' as path;
 
 class HabitForm extends StatefulWidget {
   final Habit? initialHabit;
@@ -77,7 +78,8 @@ class _HabitFormState extends State<HabitForm> {
                       builder:
                           (context) => ImagePickerDialog(
                             initialUrl: _image,
-                            saveDirectory: 'habit_images',
+                            saveDirectory:
+                                'habits${path.separator}habit_images',
                             enableCrop: true,
                             cropAspectRatio: 1.0,
                           ),
