@@ -409,12 +409,21 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                                               as ImageProvider,
                                 );
                               }
-                              return const CircleAvatar(
-                                child: Icon(Icons.auto_awesome),
+                              return CircleAvatar(
+                                child: Icon(
+                                  IconData(int.parse(habit.icon!)),
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
                               );
                             },
                           )
-                          : const CircleAvatar(child: Icon(Icons.auto_awesome)),
+                          : CircleAvatar(
+                            child:
+                                habit.icon == null
+                                    ? Icon(Icons.auto_awesome)
+                                    : Icon(IconData(int.parse(habit.icon!))),
+                          ),
                   title: Text(habit.title),
                   subtitle: Text('${habit.durationMinutes} ${l10n.minutes}'),
                   trailing: IconButton(

@@ -14,12 +14,13 @@ class CompletionRecordController {
     CompletionRecord record,
   ) async {
     final path = 'habits/records/$habitId.json';
-    final existingRecords = await getSkillCompletionRecords(habitId);
-    existingRecords.add(record);
-    await storage.writeJson(
-      path,
-      existingRecords.map((r) => r.toMap()).toList(),
-    );
+    final data = await storage.readJson(path, []);
+    final records =
+        List<Map<String, dynamic>>.from(
+          data,
+        ).map((e) => CompletionRecord.fromMap(e)).toList();
+    records.add(record);
+    await storage.writeJson(path, records.map((r) => r.toMap()).toList());
   }
 
   Future<List<CompletionRecord>> getSkillCompletionRecords(
