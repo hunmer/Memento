@@ -120,23 +120,147 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
     if (selectedPaths.isEmpty) return;
 
-    final targetDir = await FilePicker.platform.getDirectoryPath(
-      initialDirectory: currentDirectory?.path,
+    final appDir = await getApplicationDocumentsDirectory();
+    final targetDir = await showDialog<Directory>(
+      context: context,
+      builder:
+          (context) => FolderPickerDialog(
+            rootDirectory: appDir,
+            initialDirectory: currentDirectory ?? appDir,
+          ),
     );
 
     if (targetDir != null) {
-      for (var sourcePath in selectedPaths) {
-        final fileName = path.basename(sourcePath);
-        final targetPath = path.join(targetDir, fileName);
-        await File(sourcePath).rename(targetPath);
+      try {
+        for (var sourcePath in selectedPaths) {
+          final fileName = path.basename(sourcePath);
+          final targetPath = path.join(targetDir.path, fileName);
+          await File(sourcePath).rename(targetPath);
+        }
+        setState(() {
+          selectedItems.clear();
+          _refreshFiles();
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('移动成功')));
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('移动失败: ${e.toString()}')));
       }
-      setState(() {
-        selectedItems.clear();
+    }
+  }
+
+  Future<void> _renameItem(String oldPath, bool isDirectory) async {
+    final nameController = TextEditingController(text: path.basename(oldPath));
+    final result = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('重命名'),
+            content: TextField(
+              controller: nameController,
+              decoration: const InputDecoration(hintText: '输入新名称'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, nameController.text),
+                child: const Text('确定'),
+              ),
+            ],
+          ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      final newPath = path.join(path.dirname(oldPath), result);
+      try {
+        if (isDirectory) {
+          await Directory(oldPath).rename(newPath);
+        } else {
+          await File(oldPath).rename(newPath);
+        }
         _refreshFiles();
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('移动成功')));
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('重命名失败: ${e.toString()}')));
+      }
+    }
+  }
+
+  void _showContextMenu(String itemPath, bool isDirectory) {
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!isDirectory)
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('编辑'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // 这里可以添加编辑文件的逻辑
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('编辑功能待实现')));
+                  },
+                ),
+              ListTile(
+                leading: const Icon(Icons.drive_file_rename_outline),
+                title: const Text('重命名'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _renameItem(itemPath, isDirectory);
+                },
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _importFiles() async {
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.any,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      int successCount = 0;
+      int failCount = 0;
+
+      for (var platformFile in result.files) {
+        try {
+          final file = File(platformFile.path!);
+          final targetPath = path.join(
+            currentDirectory!.path,
+            path.basename(platformFile.name),
+          );
+
+          // 覆盖已存在的文件
+          if (await File(targetPath).exists()) {
+            await File(targetPath).delete();
+          }
+
+          await file.copy(targetPath);
+          successCount++;
+        } catch (e) {
+          failCount++;
+          debugPrint('导入文件失败: ${e.toString()}');
+        }
+      }
+
+      _refreshFiles();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('导入完成: 成功 $successCount 个, 失败 $failCount 个')),
+      );
     }
   }
 
@@ -220,6 +344,68 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     }
   }
 
+  Future<void> _createNewFile() async {
+    final nameController = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('新建文件'),
+            content: TextField(
+              controller: nameController,
+              decoration: const InputDecoration(hintText: '输入文件名'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, nameController.text),
+                child: const Text('创建'),
+              ),
+            ],
+          ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      final filePath = path.join(currentDirectory!.path, result);
+      await File(filePath).create();
+      _refreshFiles();
+    }
+  }
+
+  Future<void> _createNewFolder() async {
+    final nameController = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('新建文件夹'),
+            content: TextField(
+              controller: nameController,
+              decoration: const InputDecoration(hintText: '输入文件夹名'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, nameController.text),
+                child: const Text('创建'),
+              ),
+            ],
+          ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      final dirPath = path.join(currentDirectory!.path, result);
+      await Directory(dirPath).create();
+      _refreshFiles();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -234,25 +420,42 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 : null,
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: _deleteSelected,
-            tooltip: '删除选中项',
+            icon: const Icon(Icons.create_new_folder),
+            onPressed: _createNewFolder,
+            tooltip: '新建文件夹',
           ),
           IconButton(
-            icon: const Icon(Icons.drive_file_move),
-            onPressed: _moveSelected,
-            tooltip: '移动选中项',
-          ),
-          IconButton(
-            icon: const Icon(Icons.ios_share),
-            onPressed: _exportSelected,
-            tooltip: '导出选中项',
+            icon: const Icon(Icons.note_add),
+            onPressed: _createNewFile,
+            tooltip: '新建文件',
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshFiles,
             tooltip: '刷新',
           ),
+          IconButton(
+            icon: const Icon(Icons.file_upload),
+            onPressed: _importFiles,
+            tooltip: '导入文件',
+          ),
+          if (selectedItems.isNotEmpty) ...[
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _deleteSelected,
+              tooltip: '删除选中项',
+            ),
+            IconButton(
+              icon: const Icon(Icons.drive_file_move),
+              onPressed: _moveSelected,
+              tooltip: '移动选中项',
+            ),
+            IconButton(
+              icon: const Icon(Icons.ios_share),
+              onPressed: _exportSelected,
+              tooltip: '导出选中项',
+            ),
+          ],
         ],
       ),
       body:
@@ -283,9 +486,112 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                         _navigateToDirectory(file as Directory);
                       }
                     },
+                    onLongPress: () {
+                      _showContextMenu(file.path, isDirectory);
+                    },
                   );
                 },
               ),
+    );
+  }
+}
+
+class FolderPickerDialog extends StatefulWidget {
+  final Directory rootDirectory;
+  final Directory initialDirectory;
+
+  const FolderPickerDialog({
+    super.key,
+    required this.rootDirectory,
+    required this.initialDirectory,
+  });
+
+  @override
+  State<FolderPickerDialog> createState() => _FolderPickerDialogState();
+}
+
+class _FolderPickerDialogState extends State<FolderPickerDialog> {
+  late Directory currentDirectory;
+  List<FileSystemEntity> folders = [];
+  final Stack<Directory> directoryStack = Stack<Directory>();
+
+  @override
+  void initState() {
+    super.initState();
+    currentDirectory = widget.initialDirectory;
+    _loadFolders();
+  }
+
+  Future<void> _loadFolders() async {
+    final items = currentDirectory.listSync();
+    setState(() {
+      folders = items.where((item) => item is Directory).toList();
+      folders.sort((a, b) => a.path.compareTo(b.path));
+      directoryStack.push(currentDirectory);
+    });
+  }
+
+  void _navigateTo(Directory dir) {
+    setState(() {
+      currentDirectory = dir;
+      _loadFolders();
+    });
+  }
+
+  void _navigateUp() {
+    if (directoryStack.length > 1) {
+      setState(() {
+        directoryStack.pop();
+        currentDirectory = directoryStack.peek();
+        _loadFolders();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          if (directoryStack.length > 1)
+            IconButton(
+              icon: const Icon(Icons.arrow_upward),
+              onPressed: _navigateUp,
+              tooltip: '上一级',
+            ),
+          Expanded(
+            child: Text(
+              path.basename(currentDirectory.path),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: folders.length,
+          itemBuilder: (context, index) {
+            final folder = folders[index] as Directory;
+            return ListTile(
+              leading: const Icon(Icons.folder, color: Colors.amber),
+              title: Text(path.basename(folder.path)),
+              onTap: () => _navigateTo(folder),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, currentDirectory),
+          child: const Text('选择'),
+        ),
+      ],
     );
   }
 }
