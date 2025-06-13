@@ -22,7 +22,7 @@ jobs:
       run: flutter pub get
       
     - name: Build macOS
-      run: flutter build macos --release
+      run: flutter build macos --release --no-tree-shake-icons
       
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
