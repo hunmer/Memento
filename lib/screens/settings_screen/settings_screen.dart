@@ -9,6 +9,7 @@ import '../../core/floating_ball/settings_screen.dart';
 import '../../core/floating_ball/floating_ball_manager.dart';
 import '../../widgets/backup_time_picker.dart';
 import '../../core/utils/logger_util.dart';
+import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -27,7 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     _controller = SettingsScreenController();
     _webdavController = WebDAVController();
-    
+
     _controller.addListener(() {
       if (mounted) {
         setState(() {});
@@ -90,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!_controller.isInitialized() || _backupService == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     return Scaffold(
       appBar: AppBar(title: const Text('设置')),
       body: ListView(
@@ -125,6 +126,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (mounted) {
                 _controller.exportData(context);
               }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.storage),
+            title: const Text('数据文件管理'),
+            subtitle: const Text('管理应用数据目录中的文件'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => DataManagementScreen()),
+              );
             },
           ),
           ListTile(
@@ -245,64 +257,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _showLogHistory(BuildContext context) async {
     final logger = LoggerUtil();
     final logFiles = await logger.getLogFiles();
-    
+
     if (!context.mounted) return;
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('历史日志'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: logFiles.length,
-            itemBuilder: (context, index) {
-              final fileName = logFiles[index].split('/').last;
-              return ListTile(
-                title: Text(fileName),
-                onTap: () async {
-                  final content = await logger.readLogFile(logFiles[index]);
-                  if (!context.mounted) return;
-                  
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(fileName),
-                      content: SingleChildScrollView(
-                        child: Text(content),
-                      ),
-                      actions: [
-                        TextButton(
-                          child: const Text('关闭'),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ],
-                    ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('历史日志'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: logFiles.length,
+                itemBuilder: (context, index) {
+                  final fileName = logFiles[index].split('/').last;
+                  return ListTile(
+                    title: Text(fileName),
+                    onTap: () async {
+                      final content = await logger.readLogFile(logFiles[index]);
+                      if (!context.mounted) return;
+
+                      showDialog(
+                        context: context,
+                        builder:
+                            (context) => AlertDialog(
+                              title: Text(fileName),
+                              content: SingleChildScrollView(
+                                child: Text(content),
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: const Text('关闭'),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            ),
+                      );
+                    },
                   );
                 },
-              );
-            },
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: const Text('清除日志'),
+                onPressed: () async {
+                  await logger.clearLogs();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('日志已清除')));
+                  Navigator.pop(context);
+                },
+              ),
+              TextButton(
+                child: const Text('关闭'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            child: const Text('清除日志'),
-            onPressed: () async {
-              await logger.clearLogs();
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('日志已清除')),
-              );
-              Navigator.pop(context);
-            },
-          ),
-          TextButton(
-            child: const Text('关闭'),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
     );
   }
 }
