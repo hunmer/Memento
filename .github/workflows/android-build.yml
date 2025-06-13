@@ -28,7 +28,7 @@ jobs:
       run: flutter pub get
       
     - name: Build APK
-      run: flutter build apk --release
+      run: flutter build apk --release --no-tree-shake-icons
       
     - name: Set up signing
       run: |
