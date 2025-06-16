@@ -5,76 +5,17 @@
 <h1 align="center">Memento</h1>
 
 <p align="center">
-  <a href="https://github.com/hunmer/Memento/stargazers">
-    <img src="https://img.shields.io/github/stars/hunmer/Memento?style=flat-square" alt="Stars">
-  </a>
-  <a href="https://github.com/hunmer/Memento/releases">
-    <img src="https://img.shields.io/github/downloads/hunmer/Memento/total?style=flat-square" alt="Downloads">
-  </a>
-  <br>
-  <a href="#platforms">
-    <img src="https://img.shields.io/badge/android-supported-success.svg?style=flat-square" alt="Android">
-  </a>
-  <a href="#platforms">
-    <img src="https://img.shields.io/badge/ios-supported-success.svg?style=flat-square" alt="iOS">
-  </a>
-  <a href="#platforms">
-    <img src="https://img.shields.io/badge/web-supported-success.svg?style=flat-square" alt="Web">
-  </a>
-  <a href="#platforms">
-    <img src="https://img.shields.io/badge/windows-supported-success.svg?style=flat-square" alt="Windows">
-  </a>
-  <a href="#platforms">
-    <img src="https://img.shields.io/badge/macos-supported-success.svg?style=flat-square" alt="macOS">
-  </a>
-  <a href="#platforms">
-    <img src="https://img.shields.io/badge/linux-supported-success.svg?style=flat-square" alt="Linux">
-  </a>
-</p>
-
 Memento is a cross-platform personal assistant application built with Flutter, integrating chat, diary, and activity tracking features.
+</p>
 
 [简体中文](README_zh.md)
 
-## Features
-
-- 💬 **Chat**: Multi-user chat and message management
-- 📝 **Diary**: Record daily moods and life moments
-- 📅 **Activity Tracking**: Monitor and manage personal activities
-- 🔌 **Plugin System**: Support for feature extensions
-- 💾 **Local Storage**: Ensure data security
-- 🌐 **Cross-Platform**: Support for Android, iOS, Web, Windows, macOS, and Linux
-
-## Project Structure
-
-```
-lib/
-├── core/          # Core functionality
-├── models/        # Data models
-├── plugins/       # Plugin system
-├── screens/       # Pages
-├── utils/         # Utilities
-└── widgets/       # Common components
-```
-
-## Development Requirements
-
-- Flutter SDK: Latest stable version
-- Dart SDK: Latest stable version
-- Supported IDEs: Android Studio, VS Code
+## Introduction
+A multi-functional recording app collection developed with Flutter, aiming to reduce the cost of switching between different apps. The vision is to enable lifelong use, improvement and collection of personal data, using AI for data analysis and decision-making to improve life.
 
 ## Quick Start
 
-1. Configure GitHub Release Settings
-```bash
-# Copy the example config file
-cp scripts/release_config.example.json scripts/release_config.json
-
-# Edit the config file with your GitHub token and details
-# DO NOT commit this file to git!
-```
-
-2. Clone the project
+1. Clone the project
 ```bash
 git clone https://github.com/hunmer/Memento.git
 cd Memento
@@ -120,25 +61,141 @@ flutter build macos --release
 flutter build linux --release
 ```
 
-## Plugin Development
 
-Memento supports a plugin system. Follow these steps to develop a new plugin:
+## build and release
 
-1. Create a new plugin directory in `lib/plugins`
-2. Implement the `BasePlugin` interface
-3. Configure plugin information in `plugin.json`
-4. Restart the application to load the new plugin
+```bash
+# Copy the example config file and edit it
 
-## Contributing
+cp scripts/release_config.example.json scripts/release_config.json
 
-Pull requests and issues are welcome!
+# run build script
+chmod +x scripts/build.sh
+./scripts/build.sh
+
+# run release script
+chmod +x scripts/release.sh
+./scripts/release.sh
+
+```
+
+## Feature Plugins
+
+### Channel Chat Plugin
+- Create multiple channels for self-chatting/recording like WeChat File Assistant
+- Support adding markdown/images/videos/voice recordings
+- @AI for contextual conversations
+- Timeline view and search functionality
+
+### AI Assistant Plugin
+- Add AI assistants from different service providers for other plugins to call
+- Built-in data analysis application that can analyze specified data based on prompts
+- Future support for AI plugin commands and voice input to let AI assist in adding tasks/creating goals
+
+### Diary Plugin
+- Simple calendar view diary
+- Support markdown format input
+
+### Activity Recording Plugin
+- Record time-based activities
+- Add fields like name/tags/mood/description
+- Timeline/grid display
+- Data statistics
+
+## Notes Plugin
+- Infinite hierarchy note system
+- Markdown support
+
+### Item Management Plugin
+- Categorized personal item management
+- Upload images/prices/quantities/custom fields/sub-items/usage records
+- Show last used time to avoid idle items
+
+### Bill Plugin
+- Manage multiple accounts
+- Record income/expense bills
+- Statistical analysis
+
+### Calendar Plugin (To be improved)
+- Display all plugin events
+- Support custom events
+- Multiple view modes
+
+### Check-in Plugin
+- Create multiple check-in items in different groups
+
+### Contacts Plugin
+- Manage contact info (name/phone/address/tags/custom fields)
+- Record contact history
+- Maintain relationships
+
+### Timer Plugin (To be improved)
+- Create multiple timers
+- Support various timing methods
+
+### Tasks Plugin
+- Manage tasks/subtasks
+- Support priorities/date ranges/execution timing
+
+### Anniversary Plugin
+- Record multiple anniversaries (count-up/countdown)
+- Set covers/add event notes
+
+### Goal Tracking Plugin
+- Track quantifiable goals (like running distance/water intake)
+
+### Item Exchange Plugin
+- Create item exchange system
+- Set points earned by completing different plugin tasks
+
+### Node Plugin
+- Create notebook system
+- Organize content with node/subnode tree structure
+
+### Diary Album Plugin
+- Record daily small things by date
+- Upload photos with tags
+
+### Habit Management Plugin
+- Manage multiple habits and skills
+- Associate habits with skills to accumulate "10,000 hours" mastery
+
+### Database Plugin
+- Create custom databases
+- Flexibly define field types
+- Freely manage data
+
+## Notes
+- This software is entirely AI-written, developer only provided ideas and framework
+- First attempt at Flutter app, may contain many bugs
+- Developers are welcome to contribute!
+- Currently in early testing phase, updates may cause data loss - please backup!
+- All suggestions/ideas are welcome, reasonable ones will be added to development plan
+- Constructive criticism is appreciated!
+
 
 ## Screenshots
 
-| Chat | Diary | Activity Tracking |
-|:----:|:-----:|:-----------------:|
-| ![Chat](screenshots/chat.jpg) | ![Diary](screenshots/diary.jpg) | ![Activity](screenshots/activity.jpg) |
+| Chat | Diary | Activity |
+|:----:|:-----:|:-----:|
+| ![Chat](screenshots/chat_plugin.jpg) | ![Diary](screenshots/diary_plugin.jpg) | ![Activity](screenshots/activity_plugin.jpg) |
 
-## License
+| AI | Bill | Album |
+|:----:|:-----:|:-----:|
+| ![AI](screenshots/ai_plugin.jpg) | ![Bill](screenshots/bill_plugin.jpg) | ![Album](screenshots/calendar_album.jpg) |
 
-This project is licensed under the MIT License
+| Calendar | Checkin | Contact |
+|:----:|:-----:|:-----:|
+| ![Calendar](screenshots/calendar_plugin.jpg) | ![Checkin](screenshots/checkin_plugin.jpg) | ![Contact](screenshots/contact_plugin.jpg) |
+
+| Database | Day | Diary |
+|:----:|:-----:|:-----:|
+| ![Database](screenshots/database_plugin.jpg) | ![Day](screenshots/day_plugin.jpg) | ![Diary](screenshots/diary_plugin.jpg) |
+
+| Goods | Habits | Notes |
+|:----:|:-----:|:-----:|
+| ![Goods](screenshots/goods_plugin.jpg) | ![Habits](screenshots/habits_plugin.jpg) | ![Notes](screenshots/notes_plugin.jpg) |
+
+| Store | Timer | Todo | Tracker |
+|:----:|:-----:|:-----:|:-----:|
+| ![Store](screenshots/store_plugin.jpg) | ![Timer](screenshots/timer_plugin.jpg) | ![Todo](screenshots/todo_plugin.jpg) | ![Tracker](screenshots/tracker_plugin.jpg) |
