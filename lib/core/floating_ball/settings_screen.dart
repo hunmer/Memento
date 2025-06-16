@@ -152,6 +152,34 @@ class _FloatingBallSettingsScreenState
               ),
             ),
           ),
+
+          const SizedBox(height: 16),
+
+          // 重置位置按钮
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '位置重置',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      _manager.resetPosition();
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('悬浮球位置已重置')));
+                    },
+                    child: const Text('重置悬浮球位置'),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

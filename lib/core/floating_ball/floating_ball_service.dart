@@ -14,10 +14,13 @@ class FloatingBallService {
   bool _isInitialized = false;
   BuildContext? lastContext;
 
-  // 添加一个流控制器用于通知悬浮球大小变化
+  // 添加流控制器用于通知悬浮球变化
   final StreamController<double> _sizeChangeController =
       StreamController<double>.broadcast();
+  final StreamController<Offset> _positionChangeController =
+      StreamController<Offset>.broadcast();
   Stream<double> get sizeChangeStream => _sizeChangeController.stream;
+  Stream<Offset> get positionChangeStream => _positionChangeController.stream;
 
   /// 初始化悬浮球
   Future<void> initialize(BuildContext context) async {
@@ -77,8 +80,17 @@ class FloatingBallService {
     _sizeChangeController.add(scale);
   }
 
+  /// 更新悬浮球位置
+  void updatePosition(Offset newPosition) {
+    if (_overlayEntry != null) {
+      _overlayEntry!.markNeedsBuild();
+      _positionChangeController.add(newPosition);
+    }
+  }
+
   /// 释放资源
   void dispose() {
     _sizeChangeController.close();
+    _positionChangeController.close();
   }
 }
