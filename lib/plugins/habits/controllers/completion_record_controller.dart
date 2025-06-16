@@ -20,11 +20,17 @@ class CompletionRecordController {
     CompletionRecord record,
   ) async {
     final path = 'habits/records/$habitId.json';
-    final data = await storage.readJson(path, []);
-    final records =
+    final data = await storage.readJson(path);
+    final records = <CompletionRecord>[];
+
+    if (data != null) {
+      records.addAll(
         List<Map<String, dynamic>>.from(
-          data,
-        ).map((e) => CompletionRecord.fromMap(e)).toList();
+          data as Iterable,
+        ).map((e) => CompletionRecord.fromMap(e)),
+      );
+    }
+
     records.add(record);
     await storage.writeJson(path, records.map((r) => r.toMap()).toList());
   }
@@ -54,12 +60,14 @@ class CompletionRecordController {
     for (final habitId in skillHabitIds) {
       final path = 'habits/records/$habitId.json';
       if (await storage.fileExists(path)) {
-        final data = await storage.readJson(path, []);
-        final records =
+        final data = await storage.readJson(path);
+        if (data != null) {
+          matchingRecords.addAll(
             List<Map<String, dynamic>>.from(
-              data,
-            ).map((e) => CompletionRecord.fromMap(e)).toList();
-        matchingRecords.addAll(records);
+              data as Iterable,
+            ).map((e) => CompletionRecord.fromMap(e)),
+          );
+        }
       }
     }
 
@@ -97,8 +105,11 @@ class CompletionRecordController {
   Future<List<CompletionRecord>> getHabitCompletionRecords(
     String habitId,
   ) async {
+    final data = await storage.readJson('habits/records/$habitId.json');
+    if (data == null) return [];
+
     return List<Map<String, dynamic>>.from(
-      await storage.readJson('habits/records/$habitId.json', []),
+      data as Iterable,
     ).map((e) => CompletionRecord.fromMap(e)).toList();
   }
 }

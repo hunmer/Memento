@@ -124,6 +124,10 @@ class WebDAVController {
     try {
       final StorageManager storageManager = StorageManager();
       final config = await storageManager.readJson('webdav_config.json');
+      if (config == null || !config.containsKey('dataPath')) {
+        debugPrint('WebDAV配置无效或缺少dataPath');
+        return false;
+      }
       final remotePath = config['dataPath'] as String;
 
       // 获取本地应用数据目录
@@ -294,6 +298,10 @@ class WebDAVController {
     try {
       final StorageManager storageManager = StorageManager();
       final config = await storageManager.readJson('webdav_config.json');
+      if (config == null || !config.containsKey('dataPath')) {
+        debugPrint('WebDAV配置无效或缺少dataPath');
+        return false;
+      }
       final remotePath = config['dataPath'] as String;
 
       // 获取本地应用数据目录

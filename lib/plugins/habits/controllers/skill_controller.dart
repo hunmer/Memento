@@ -15,19 +15,23 @@ class SkillController {
     String skillId,
   ) async {
     final path = 'habits/records/$skillId.json';
-    final data = await storage.readJson(path, []);
+    final data = await storage.readJson(path);
+    if (data == null) return [];
 
     return List<Map<String, dynamic>>.from(
-      data,
+      data as Iterable,
     ).map((e) => CompletionRecord.fromMap(e)).toList();
   }
 
   Future<List<Skill>> loadSkills() async {
-    final data = await storage.readJson(_skillsKey, []);
+    final data = await storage.readJson(_skillsKey);
+    if (data == null) return _skills = [];
+
     _skills =
         List<Map<String, dynamic>>.from(
-          data,
+          data as Iterable,
         ).map((e) => Skill.fromMap(e)).toList();
+
     return _skills;
   }
 

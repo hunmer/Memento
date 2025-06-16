@@ -55,30 +55,3 @@ class JsonStorageEngine implements StorageEngine {
     }
   }
 }
-
-/// 数据库存储引擎实现（TODO）
-class DbStorageEngine implements StorageEngine {
-  @override
-  Future<Map<String, dynamic>> read(String path) async {
-    // TODO: 实现数据库读取逻辑
-    throw UnimplementedError('Database storage engine not implemented yet');
-  }
-
-  @override
-  Future<void> write(String path, Map<String, dynamic> data) async {
-    // TODO: 实现数据库写入逻辑
-    throw UnimplementedError('Database storage engine not implemented yet');
-  }
-
-  @override
-  Future<bool> exists(String path) async {
-    // TODO: 实现数据库表检查逻辑
-    throw UnimplementedError('Database storage engine not implemented yet');
-  }
-
-  @override
-  Future<void> createDirectory(String path) async {
-    // TODO: 实现数据库表创建逻辑
-    throw UnimplementedError('Database storage engine not implemented yet');
-  }
-}

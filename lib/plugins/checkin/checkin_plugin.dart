@@ -102,7 +102,7 @@ class CheckinPlugin extends BasePlugin {
   @override
   String get author => 'Memento Team';
 
-    @override
+  @override
   IconData get icon => Icons.checklist;
 
   List<CheckinItem> _checkinItems = [];
@@ -141,15 +141,15 @@ class CheckinPlugin extends BasePlugin {
       // 从存储中加载保存的打卡项目
       final pluginPath = 'checkin/$_storageKey';
       if (await storage.fileExists(pluginPath)) {
-        final Map<String, dynamic> storedData = await storage.readJson(
+        final Map<String, dynamic>? storedData = await storage.readJson(
           pluginPath,
         );
-        if (storedData.containsKey('items')) {
+        if (storedData != null && storedData.containsKey('items')) {
           _checkinItems = List.from(
-        (storedData['items'] as List).map(
-          (item) => CheckinItem.fromJson(item as Map<String, dynamic>),
-        ),
-      );
+            (storedData['items'] as List).map(
+              (item) => CheckinItem.fromJson(item as Map<String, dynamic>),
+            ),
+          );
         }
       }
     } catch (e) {
@@ -231,11 +231,7 @@ class CheckinPlugin extends BasePlugin {
                   color: theme.primaryColor.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  size: 24,
-                  color: color ?? theme.primaryColor,
-                ),
+                child: Icon(icon, size: 24, color: color ?? theme.primaryColor),
               ),
               const SizedBox(width: 12),
               Text(
@@ -249,42 +245,42 @@ class CheckinPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-         Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // 今日打卡数
-                Column(
-                  children: [
-                    Text(
-                      CheckinLocalizations.of(context)!.todayCheckin,
-                      style: theme.textTheme.bodyMedium
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // 今日打卡数
+              Column(
+                children: [
+                  Text(
+                    CheckinLocalizations.of(context)!.todayCheckin,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  Text(
+                    '${getTodayCheckins()}/${_checkinItems.length}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                    Text(
-                      '${getTodayCheckins()}/${_checkinItems.length}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  ),
+                ],
+              ),
+
+              // 总打卡数
+              Column(
+                children: [
+                  Text(
+                    CheckinLocalizations.of(context)!.totalCheckinCount,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  Text(
+                    '${getTotalCheckins()}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-                
-                // 总打卡数
-                Column(
-                  children: [
-                    Text(
-                      CheckinLocalizations.of(context)!.totalCheckinCount,
-                      style: theme.textTheme.bodyMedium
-                    ),
-                    Text(
-                      '${getTotalCheckins()}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );
