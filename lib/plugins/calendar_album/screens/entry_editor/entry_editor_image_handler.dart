@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../widgets/image_picker_dialog.dart';
 import '../../../../utils/image_utils.dart';
 import 'dart:io';
+import 'package:collection/collection.dart';
 
 class EntryEditorImageHandler extends StatefulWidget {
   final List<String> imageUrls;
@@ -29,7 +30,7 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
     );
   }
 
-  Widget _buildImage(String url) {
+  Widget _buildImage(String url, {bool showDelete = true}) {
     if (url.isEmpty) return _buildDefaultCover();
 
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -88,7 +89,7 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
                   padding: const EdgeInsets.only(right: 8),
                   child: Stack(
                     children: [
-                      _buildImage(url),
+                      _buildImage(url, showDelete: widget.imageUrls.length > 1),
                       Positioned(
                         top: 0,
                         right: 0,
@@ -107,16 +108,21 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
               ),
               GestureDetector(
                 onTap: () async {
-                  final result = await showDialog<Map<String, dynamic>>(
+                  final results = await showDialog<List<Map<String, dynamic>>>(
                     context: context,
                     builder:
-                        (context) => const ImagePickerDialog(
+                        (context) => ImagePickerDialog(
                           saveDirectory: 'calendar_album/images',
+                          multiple: true,
                         ),
                   );
-                  if (result != null && result['url'] != null) {
+                  if (results != null && results.isNotEmpty) {
                     setState(() {
-                      widget.onImageAdded(result['url'] as String);
+                      for (final result in results) {
+                        if (result['url'] != null) {
+                          widget.onImageAdded(result['url'] as String);
+                        }
+                      }
                     });
                   }
                 },

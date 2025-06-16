@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:crop_your_image/crop_your_image.dart';
@@ -17,12 +19,16 @@ class ImagePickerDialog extends StatefulWidget {
   /// 裁剪比例，仅在 enableCrop 为 true 时生效
   final double? cropAspectRatio;
 
+  /// 是否允许多图片选择
+  final bool multiple;
+
   const ImagePickerDialog({
     super.key,
     this.initialUrl,
     this.saveDirectory = 'app_images',
     this.enableCrop = false,
     this.cropAspectRatio,
+    this.multiple = false,
   });
 
   @override
@@ -58,7 +64,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('选择图片'),
+      title: Text(widget.multiple ? '选择多张图片' : '选择图片'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -83,44 +89,58 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                   label: const Text('从相册选择'),
                   onPressed: () async {
                     try {
-                      final XFile? image = await _picker.pickImage(
-                        source: ImageSource.gallery,
-                      );
-                      if (image != null) {
-                        // 保存图片并获取相对路径
-                        final relativePath =
-                            await ImageUtils.saveImage(
-                              File(image.path),
-                              widget.saveDirectory,
-                            );
+                      final List<XFile> images =
+                          widget.multiple
+                              ? (await _picker.pickMultiImage())
+                              : [
+                                await _picker.pickImage(
+                                  source: ImageSource.gallery,
+                                ),
+                              ].whereType<XFile>().toList();
 
-                        // 获取保存后的文件路径
-                        final savedImagePath = await ImageUtils.getAbsolutePath(
-                          relativePath,
-                        );
-                        final savedImage = File(savedImagePath);
+                      if (images.isNotEmpty) {
+                        final results = <Map<String, dynamic>>[];
 
-                        // 确认文件是否成功保存
-                        final fileExists = await savedImage.exists();
-                        debugPrint(
-                          '图片保存路径: $savedImagePath, 文件是否存在: $fileExists',
-                        );
-
-                        // 读取图片字节数据
-                        final bytes = await File(image.path).readAsBytes();
-
-                        // 如果启用了裁剪功能，显示裁剪对话框
-                        if (widget.enableCrop && context.mounted) {
-                          await _showCropDialog(
-                            context,
-                            bytes,
-                            savedImage.path,
+                        for (final image in images) {
+                          // 保存图片并获取相对路径
+                          final relativePath = await ImageUtils.saveImage(
+                            File(image.path),
+                            widget.saveDirectory,
                           );
-                        } else {
-                          // 返回相对路径和字节数据
+
+                          // 获取保存后的文件路径
+                          final savedImagePath =
+                              await ImageUtils.getAbsolutePath(relativePath);
+                          final savedImage = File(savedImagePath);
+
+                          // 确认文件是否成功保存
+                          final fileExists = await savedImage.exists();
+                          debugPrint(
+                            '图片保存路径: $savedImagePath, 文件是否存在: $fileExists',
+                          );
+
+                          // 读取图片字节数据
+                          final bytes = await File(image.path).readAsBytes();
+
+                          // 如果启用了裁剪功能，显示裁剪对话框
+                          if (widget.enableCrop && context.mounted) {
+                            final result = await _showCropDialog(
+                              context,
+                              bytes,
+                              savedImage.path,
+                            );
+                            if (result != null) {
+                              results.add(result);
+                            }
+                          } else {
+                            results.add({'url': relativePath, 'bytes': bytes});
+                          }
+                        }
+
+                        if (results.isNotEmpty && context.mounted) {
                           Navigator.of(
                             context,
-                          ).pop({'url': relativePath, 'bytes': bytes});
+                          ).pop(widget.multiple ? results : results.first);
                         }
                       }
                     } catch (e) {
@@ -145,11 +165,10 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                       );
                       if (photo != null) {
                         // 保存图片并获取相对路径
-                        final relativePath =
-                            await ImageUtils.saveImage(
-                              File(photo.path),
-                              widget.saveDirectory,
-                            );
+                        final relativePath = await ImageUtils.saveImage(
+                          File(photo.path),
+                          widget.saveDirectory,
+                        );
 
                         // 获取保存后的文件路径
                         final savedImagePath = await ImageUtils.getAbsolutePath(
@@ -212,12 +231,17 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
     );
   }
 
-  Future<void> _showCropDialog(
+  Future<Map<String, dynamic>?> _showCropDialog(
     BuildContext context,
     Uint8List imageBytes,
     String originalImagePath,
   ) async {
     final cropController = CropController();
+    final completer = Completer<Map<String, dynamic>?>();
+
+    if (!context.mounted) {
+      return null;
+    }
 
     await showDialog(
       context: context,
@@ -254,23 +278,20 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                           switch (result) {
                             case CropSuccess(:final croppedImage):
                               try {
-                                // 删除原始图片
                                 final originalFile = File(originalImagePath);
                                 if (await originalFile.exists()) {
                                   await originalFile.delete();
                                 }
 
-                                // 保存裁剪后的图片并获取相对路径
                                 final relativePath =
                                     await ImageUtils.saveBytesToAppDirectory(
                                       croppedImage,
                                       widget.saveDirectory,
                                     );
 
-                                // 返回新的文件路径和字节数据
                                 if (context.mounted) {
                                   Navigator.of(context).pop();
-                                  Navigator.of(context).pop({
+                                  completer.complete({
                                     'url': relativePath,
                                     'bytes': croppedImage,
                                   });
@@ -281,6 +302,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                     SnackBar(content: Text('保存裁剪图片失败: $e')),
                                   );
                                 }
+                                completer.complete(null);
                               }
                             case CropFailure(:final cause):
                               if (context.mounted) {
@@ -288,6 +310,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                   SnackBar(content: Text('裁剪失败: $cause')),
                                 );
                               }
+                              completer.complete(null);
                           }
                         },
                       ),
@@ -299,13 +322,17 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                         children: [
                           TextButton(
                             onPressed: () async {
-                              Navigator.of(context).pop();
-                              // 获取原始图片的相对路径
-                              final relativePath = await ImageUtils.getAbsolutePath(originalImagePath);
-
-                              Navigator.of(
-                                context,
-                              ).pop({'url': relativePath, 'bytes': imageBytes});
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                              final relativePath =
+                                  await ImageUtils.getAbsolutePath(
+                                    originalImagePath,
+                                  );
+                              completer.complete({
+                                'url': relativePath,
+                                'bytes': imageBytes,
+                              });
                             },
                             child: const Text('取消'),
                           ),
@@ -322,5 +349,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
             ),
           ),
     );
+
+    return completer.future;
   }
 }
