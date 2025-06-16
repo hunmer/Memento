@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,7 +17,7 @@ class SaveFileResult {
 
 class FileService {
   Future<Directory> get _appFilesDir async {
-    final appDir = await getApplicationDocumentsDirectory();
+    final appDir = await StorageManager.getApplicationDocumentsDirectory();
     // 确保使用正确的路径分隔符
     final filesDir = Directory(path.join('app_data', 'chat', 'chat_files'));
     final absoluteFilesDir = Directory(path.join(appDir.path, filesDir.path));

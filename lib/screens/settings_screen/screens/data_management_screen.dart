@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -26,7 +27,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
   }
 
   Future<void> _loadDocumentsDirectory() async {
-    final dir = await getApplicationDocumentsDirectory();
+    final dir = await StorageManager.getApplicationDocumentsDirectory();
     setState(() {
       currentDirectory = dir;
       directoryStack.push(dir);
@@ -120,7 +121,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
     if (selectedPaths.isEmpty) return;
 
-    final appDir = await getApplicationDocumentsDirectory();
+    final appDir = await StorageManager.getApplicationDocumentsDirectory();
     final targetDir = await showDialog<Directory>(
       context: context,
       builder:

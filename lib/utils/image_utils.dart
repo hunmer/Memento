@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -12,7 +13,7 @@ class ImageUtils {
   static Future<String> saveImage(File imageFile, String saveDirectory) async {
     try {
       // 获取应用文档目录
-      final appDir = await getApplicationDocumentsDirectory();
+      final appDir = await StorageManager.getApplicationDocumentsDirectory();
       final imagesDir = Directory(
         path.join(appDir.path, 'app_data', saveDirectory),
       );
@@ -48,7 +49,7 @@ class ImageUtils {
   }) async {
     try {
       // 获取应用文档目录
-      final appDir = await getApplicationDocumentsDirectory();
+      final appDir = await StorageManager.getApplicationDocumentsDirectory();
       final imagesDir = Directory(
         path.join(appDir.path, 'app_data', saveDirectory),
       );
@@ -86,13 +87,13 @@ class ImageUtils {
 
     if (!relativePath.startsWith('./')) {
       // 不是相对路径格式，可能是旧数据，尝试处理
-      final appDir = await getApplicationDocumentsDirectory();
+      final appDir = await StorageManager.getApplicationDocumentsDirectory();
       // 确保使用正确的路径分隔符
       final normalizedPath = relativePath.replaceAll('/', path.separator);
       return path.join(appDir.path, normalizedPath);
     }
 
-    final appDir = await getApplicationDocumentsDirectory();
+    final appDir = await StorageManager.getApplicationDocumentsDirectory();
     // 移除 './' 前缀并规范化路径分隔符
     final pathWithoutPrefix = relativePath
         .substring(2)
@@ -169,7 +170,7 @@ class ImageUtils {
   }
 
   static Future<String> toRelativePath(String absolutePath) async {
-    final appDir = await getApplicationDocumentsDirectory();
+    final appDir = await StorageManager.getApplicationDocumentsDirectory();
     final appDataPath = path.join(appDir.path, 'app_data');
 
     if (absolutePath.startsWith(appDataPath)) {

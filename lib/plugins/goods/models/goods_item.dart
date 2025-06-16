@@ -1,3 +1,4 @@
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'usage_record.dart';
@@ -13,7 +14,7 @@ class GoodsItem {
   // 获取图片URL，如果是相对路径则转换为绝对路径
   Future<String?> getImageUrl() async {
     if (_imageUrl == null || _imageUrl == "") return null;
-    final appDir = await getApplicationDocumentsDirectory();
+    final appDir = await StorageManager.getApplicationDocumentsDirectory();
     // 使用清理路径方法确保没有多余斜杠
     return GoodsPathConstants.cleanPath(
       GoodsPathConstants.toAbsolutePath(appDir.path, _imageUrl),

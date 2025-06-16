@@ -1,4 +1,4 @@
-import 'package:path_provider/path_provider.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
 
 /// 文件路径转换工具类
 /// 用于处理文件路径在相对路径和绝对路径之间的转换
@@ -14,11 +14,12 @@ class FilePathConverter {
       return _normalizeRelativePath(absolutePath);
     }
 
-    final appDir = await getApplicationDocumentsDirectory();
-    final appDataPath = appDir.path;
-    if (absolutePath.startsWith(appDataPath)) {
+    final appDataPath = await StorageManager.getApplicationDocumentsDirectory();
+    final appDataPathStr = appDataPath.path;
+    if (absolutePath.startsWith(appDataPathStr)) {
       // 生成相对路径并规范化
-      String relativePath = './${absolutePath.substring(appDataPath.length)}';
+      String relativePath =
+          './${absolutePath.substring(appDataPathStr.length)}';
       return _normalizeRelativePath(relativePath);
     }
     return absolutePath;
@@ -53,8 +54,8 @@ class FilePathConverter {
   /// 返回绝对路径
   static Future<String> toAbsolutePath(String relativePath) async {
     if (relativePath.startsWith('./')) {
-      final appDir = await getApplicationDocumentsDirectory();
-      final appDataPath = appDir.path;
+      final appDataPath =
+          await StorageManager.getApplicationDocumentsDirectory();
       return '$appDataPath/app_data/${relativePath.substring(2)}';
     }
     return relativePath;
