@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:location/location.dart';
 
 // 定义Position类
 class Position {
@@ -51,18 +52,47 @@ class _LocationPickerState extends State<LocationPicker> {
   }
 
   Future<Position> _getCurrentPosition() async {
-    // 实际项目中需要实现geolocator插件的定位逻辑
-    // 这里返回一个模拟位置
-    return Position(
-      latitude: 36.673222113716,
-      longitude: 117.130967881945,
-      timestamp: DateTime.now(),
-      accuracy: 10,
-      altitude: 0,
-      heading: 0,
-      speed: 0,
-      speedAccuracy: 0,
-    );
+    final location = Location();
+
+    // 检查服务是否可用
+    bool serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        debugPrint('Location services are disabled');
+        throw Exception('Location services are disabled');
+      }
+    }
+
+    // 检查权限状态
+    PermissionStatus permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        debugPrint('Location permissions are denied');
+        throw Exception('Location permissions are denied');
+      }
+    }
+
+    // 获取当前位置
+    try {
+      final locationData = await location.getLocation();
+      return Position(
+        latitude: locationData.latitude ?? 0,
+        longitude: locationData.longitude ?? 0,
+        timestamp: DateTime.fromMillisecondsSinceEpoch(
+          locationData.time?.toInt() ?? 0,
+        ),
+        accuracy: locationData.accuracy ?? 0,
+        altitude: locationData.altitude ?? 0,
+        heading: locationData.heading ?? 0,
+        speed: locationData.speed ?? 0,
+        speedAccuracy: locationData.speedAccuracy ?? 0,
+      );
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+      rethrow;
+    }
   }
 
   Future<void> _getCurrentLocation() async {
