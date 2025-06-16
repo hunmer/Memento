@@ -103,9 +103,39 @@ class FloatingBallManager {
 
   // 读取数据
   Future<Map<String, dynamic>> _readData() async {
-    final file = await _getStorageFile();
-    final content = await file.readAsString();
-    return json.decode(content) as Map<String, dynamic>;
+    try {
+      final file = await _getStorageFile();
+      if (!await file.exists()) {
+        return {
+          'actions': {},
+          'size_scale': 0.6,
+          'position': {'x': 21.0, 'y': 99.0},
+          'enabled': true,
+        };
+      }
+
+      final content = await file.readAsString();
+      if (content.trim().isEmpty) {
+        return {
+          'actions': {},
+          'size_scale': 0.6,
+          'position': {'x': 21.0, 'y': 99.0},
+          'enabled': true,
+        };
+      }
+
+      final decoded = json.decode(content) as Map<String, dynamic>;
+      return decoded;
+    } catch (e) {
+      debugPrint('Error reading floating ball data: $e');
+      // 返回默认配置
+      return {
+        'actions': {},
+        'size_scale': 0.6,
+        'position': {'x': 21.0, 'y': 99.0},
+        'enabled': true,
+      };
+    }
   }
 
   // 写入数据
