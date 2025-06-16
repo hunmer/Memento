@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum NodeStatus {
-  todo,
-  doing,
-  done,
-}
+enum NodeStatus { todo, doing, done, none }
 
 class CustomField {
   final String key;
@@ -12,15 +8,10 @@ class CustomField {
 
   CustomField({required this.key, required this.value});
 
-  Map<String, dynamic> toJson() => {
-    'key': key,
-    'value': value,
-  };
+  Map<String, dynamic> toJson() => {'key': key, 'value': value};
 
-  factory CustomField.fromJson(Map<String, dynamic> json) => CustomField(
-    key: json['key'] as String,
-    value: json['value'] as String,
-  );
+  factory CustomField.fromJson(Map<String, dynamic> json) =>
+      CustomField(key: json['key'] as String, value: json['value'] as String);
 }
 
 class Node {
@@ -54,10 +45,9 @@ class Node {
     this.isExpanded = true,
     this.pathValue = '',
     this.color = Colors.grey,
-  }) : 
-    tags = tags ?? [],
-    customFields = customFields ?? [],
-    children = children ?? [];
+  }) : tags = tags ?? [],
+       customFields = customFields ?? [],
+       children = children ?? [];
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -76,22 +66,31 @@ class Node {
   };
 
   factory Node.fromJson(Map<String, dynamic> json) {
-    final tagsList = (json['tags'] as List<dynamic>).map((e) => e as String).toList();
-    final customFieldsList = (json['customFields'] as List<dynamic>)
-        .map((e) => CustomField.fromJson(e as Map<String, dynamic>))
-        .toList();
-    final childrenList = (json['children'] as List<dynamic>)
-        .map((e) => Node.fromJson(e as Map<String, dynamic>))
-        .toList();
-        
+    final tagsList =
+        (json['tags'] as List<dynamic>).map((e) => e as String).toList();
+    final customFieldsList =
+        (json['customFields'] as List<dynamic>)
+            .map((e) => CustomField.fromJson(e as Map<String, dynamic>))
+            .toList();
+    final childrenList =
+        (json['children'] as List<dynamic>)
+            .map((e) => Node.fromJson(e as Map<String, dynamic>))
+            .toList();
+
     return Node(
       id: json['id'] as String,
       title: json['title'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       tags: tagsList,
       status: NodeStatus.values[json['status'] as int],
-      startDate: json['startDate'] != null ? DateTime.parse(json['startDate'] as String) : null,
-      endDate: json['endDate'] != null ? DateTime.parse(json['endDate'] as String) : null,
+      startDate:
+          json['startDate'] != null
+              ? DateTime.parse(json['startDate'] as String)
+              : null,
+      endDate:
+          json['endDate'] != null
+              ? DateTime.parse(json['endDate'] as String)
+              : null,
       customFields: customFieldsList,
       notes: json['notes'] as String,
       parentId: json['parentId'] as String,

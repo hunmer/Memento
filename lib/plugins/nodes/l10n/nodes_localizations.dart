@@ -6,7 +6,7 @@ class NodesLocalizations {
   NodesLocalizations(this.locale);
 
   static NodesLocalizations of(BuildContext context) {
-    return Localizations.of<NodesLocalizations>(context, NodesLocalizations) ?? 
+    return Localizations.of<NodesLocalizations>(context, NodesLocalizations) ??
         NodesLocalizations(Locale('en'));
   }
 
@@ -35,6 +35,7 @@ class NodesLocalizations {
       'todo': 'To Do',
       'doing': 'Doing',
       'done': 'Done',
+      'none': 'None',
       'key': 'Key',
       'value': 'Value',
       'addCustomField': 'Add Custom Field',
@@ -42,7 +43,8 @@ class NodesLocalizations {
       'copyToText': 'Copy to Text',
       'clearNodes': 'Clear Nodes',
       'clearNodesTitle': 'Clear All Nodes',
-      'clearNodesConfirm': 'Are you sure you want to clear all nodes? This action cannot be undone.',
+      'clearNodesConfirm':
+          'Are you sure you want to clear all nodes? This action cannot be undone.',
       'clear': 'Clear',
       'copiedToClipboard': 'Copied to clipboard',
       'nodesCleared': 'All nodes cleared',
@@ -71,6 +73,7 @@ class NodesLocalizations {
       'todo': '待办',
       'doing': '进行中',
       'done': '已完成',
+      'none': '无',
       'key': '键',
       'value': '值',
       'addCustomField': '添加自定义属性',
@@ -85,46 +88,88 @@ class NodesLocalizations {
     },
   };
 
-  String get notebooks => _localizedValues[locale.languageCode]?['notebooks'] ?? 'Notebooks';
-  String get nodes => _localizedValues[locale.languageCode]?['nodes'] ?? 'Nodes';
-  String get addNotebook => _localizedValues[locale.languageCode]?['addNotebook'] ?? 'Add Notebook';
-  String get editNotebook => _localizedValues[locale.languageCode]?['editNotebook'] ?? 'Edit Notebook';
-  String get deleteNotebook => _localizedValues[locale.languageCode]?['deleteNotebook'] ?? 'Delete Notebook';
-  String get notebookTitle => _localizedValues[locale.languageCode]?['notebookTitle'] ?? 'Notebook Title';
-  String get addNode => _localizedValues[locale.languageCode]?['addNode'] ?? 'Add Node';
-  String get editNode => _localizedValues[locale.languageCode]?['editNode'] ?? 'Edit Node';
-  String get deleteNode => _localizedValues[locale.languageCode]?['deleteNode'] ?? 'Delete Node';
-  String get nodeTitle => _localizedValues[locale.languageCode]?['nodeTitle'] ?? 'Node Title';
+  String get none => _localizedValues[locale.languageCode]?['none'] ?? 'None';
+  String get notebooks =>
+      _localizedValues[locale.languageCode]?['notebooks'] ?? 'Notebooks';
+  String get nodes =>
+      _localizedValues[locale.languageCode]?['nodes'] ?? 'Nodes';
+  String get addNotebook =>
+      _localizedValues[locale.languageCode]?['addNotebook'] ?? 'Add Notebook';
+  String get editNotebook =>
+      _localizedValues[locale.languageCode]?['editNotebook'] ?? 'Edit Notebook';
+  String get deleteNotebook =>
+      _localizedValues[locale.languageCode]?['deleteNotebook'] ??
+      'Delete Notebook';
+  String get notebookTitle =>
+      _localizedValues[locale.languageCode]?['notebookTitle'] ??
+      'Notebook Title';
+  String get addNode =>
+      _localizedValues[locale.languageCode]?['addNode'] ?? 'Add Node';
+  String get editNode =>
+      _localizedValues[locale.languageCode]?['editNode'] ?? 'Edit Node';
+  String get deleteNode =>
+      _localizedValues[locale.languageCode]?['deleteNode'] ?? 'Delete Node';
+  String get nodeTitle =>
+      _localizedValues[locale.languageCode]?['nodeTitle'] ?? 'Node Title';
   String get tags => _localizedValues[locale.languageCode]?['tags'] ?? 'Tags';
-  String get status => _localizedValues[locale.languageCode]?['status'] ?? 'Status';
-  String get startDate => _localizedValues[locale.languageCode]?['startDate'] ?? 'Start Date';
-  String get endDate => _localizedValues[locale.languageCode]?['endDate'] ?? 'End Date';
-  String get customFields => _localizedValues[locale.languageCode]?['customFields'] ?? 'Custom Fields';
-  String get notes => _localizedValues[locale.languageCode]?['notes'] ?? 'Notes';
+  String get status =>
+      _localizedValues[locale.languageCode]?['status'] ?? 'Status';
+  String get startDate =>
+      _localizedValues[locale.languageCode]?['startDate'] ?? 'Start Date';
+  String get endDate =>
+      _localizedValues[locale.languageCode]?['endDate'] ?? 'End Date';
+  String get customFields =>
+      _localizedValues[locale.languageCode]?['customFields'] ?? 'Custom Fields';
+  String get notes =>
+      _localizedValues[locale.languageCode]?['notes'] ?? 'Notes';
   String get save => _localizedValues[locale.languageCode]?['save'] ?? 'Save';
-  String get cancel => _localizedValues[locale.languageCode]?['cancel'] ?? 'Cancel';
-  String get addChildNode => _localizedValues[locale.languageCode]?['addChildNode'] ?? 'Add Child Node';
-  String get addSiblingNode => _localizedValues[locale.languageCode]?['addSiblingNode'] ?? 'Add Sibling Node';
+  String get cancel =>
+      _localizedValues[locale.languageCode]?['cancel'] ?? 'Cancel';
+  String get addChildNode =>
+      _localizedValues[locale.languageCode]?['addChildNode'] ??
+      'Add Child Node';
+  String get addSiblingNode =>
+      _localizedValues[locale.languageCode]?['addSiblingNode'] ??
+      'Add Sibling Node';
   String get todo => _localizedValues[locale.languageCode]?['todo'] ?? 'To Do';
-  String get doing => _localizedValues[locale.languageCode]?['doing'] ?? 'Doing';
+  String get doing =>
+      _localizedValues[locale.languageCode]?['doing'] ?? 'Doing';
   String get done => _localizedValues[locale.languageCode]?['done'] ?? 'Done';
   String get key => _localizedValues[locale.languageCode]?['key'] ?? 'Key';
-  String get value => _localizedValues[locale.languageCode]?['value'] ?? 'Value';
-  String get addCustomField => _localizedValues[locale.languageCode]?['addCustomField'] ?? 'Add Custom Field';
-  String get noNodesYet => _localizedValues[locale.languageCode]?['noNodesYet'] ?? 'No nodes yet. Tap + to add one.';
-  String get copyToText => _localizedValues[locale.languageCode]?['copyToText'] ?? 'Copy to Text';
-  String get clearNodes => _localizedValues[locale.languageCode]?['clearNodes'] ?? 'Clear Nodes';
-  String get clearNodesTitle => _localizedValues[locale.languageCode]?['clearNodesTitle'] ?? 'Clear All Nodes';
-  String get clearNodesConfirm => _localizedValues[locale.languageCode]?['clearNodesConfirm'] ?? 'Are you sure you want to clear all nodes? This action cannot be undone.';
-  String get clear => _localizedValues[locale.languageCode]?['clear'] ?? 'Clear';
-  String get copiedToClipboard => _localizedValues[locale.languageCode]?['copiedToClipboard'] ?? 'Copied to clipboard';
-  String get nodesCleared => _localizedValues[locale.languageCode]?['nodesCleared'] ?? 'All nodes cleared';
+  String get value =>
+      _localizedValues[locale.languageCode]?['value'] ?? 'Value';
+  String get addCustomField =>
+      _localizedValues[locale.languageCode]?['addCustomField'] ??
+      'Add Custom Field';
+  String get noNodesYet =>
+      _localizedValues[locale.languageCode]?['noNodesYet'] ??
+      'No nodes yet. Tap + to add one.';
+  String get copyToText =>
+      _localizedValues[locale.languageCode]?['copyToText'] ?? 'Copy to Text';
+  String get clearNodes =>
+      _localizedValues[locale.languageCode]?['clearNodes'] ?? 'Clear Nodes';
+  String get clearNodesTitle =>
+      _localizedValues[locale.languageCode]?['clearNodesTitle'] ??
+      'Clear All Nodes';
+  String get clearNodesConfirm =>
+      _localizedValues[locale.languageCode]?['clearNodesConfirm'] ??
+      'Are you sure you want to clear all nodes? This action cannot be undone.';
+  String get clear =>
+      _localizedValues[locale.languageCode]?['clear'] ?? 'Clear';
+  String get copiedToClipboard =>
+      _localizedValues[locale.languageCode]?['copiedToClipboard'] ??
+      'Copied to clipboard';
+  String get nodesCleared =>
+      _localizedValues[locale.languageCode]?['nodesCleared'] ??
+      'All nodes cleared';
 }
 
-class NodesLocalizationsDelegate extends LocalizationsDelegate<NodesLocalizations> {
+class NodesLocalizationsDelegate
+    extends LocalizationsDelegate<NodesLocalizations> {
   const NodesLocalizationsDelegate();
 
-  static const NodesLocalizationsDelegate delegate = NodesLocalizationsDelegate();
+  static const NodesLocalizationsDelegate delegate =
+      NodesLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) {
