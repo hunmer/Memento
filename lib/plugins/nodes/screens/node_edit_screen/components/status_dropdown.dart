@@ -26,6 +26,9 @@ class StatusDropdown extends StatelessWidget {
           NodeStatus.values.map((status) {
             String label;
             switch (status) {
+              case NodeStatus.none:
+                label = l10n.none;
+                break;
               case NodeStatus.todo:
                 label = l10n.todo;
                 break;

@@ -157,6 +157,7 @@ class NodesScreen extends StatelessWidget {
     final newNode = Node(
       id: const Uuid().v4(),
       title: '',
+      status: NodeStatus.none,
       createdAt: DateTime.now(),
     );
 

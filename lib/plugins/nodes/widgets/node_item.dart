@@ -82,7 +82,7 @@ class NodeItem extends StatelessWidget {
     final Map<NodeStatus, _StatusInfo> statusInfo = {
       NodeStatus.todo: _StatusInfo(
         color: Colors.grey.shade200,
-        textColor: Colors.grey.shade700,
+        textColor: Colors.yellow.shade700,
         label: 'TODO',
       ),
       NodeStatus.doing: _StatusInfo(
@@ -189,7 +189,8 @@ class NodeItem extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              _buildStatusBadge(context, node.status),
+                              if (node.status != NodeStatus.none)
+                                _buildStatusBadge(context, node.status),
                             ],
                           ),
                           if (node.tags.isNotEmpty)
