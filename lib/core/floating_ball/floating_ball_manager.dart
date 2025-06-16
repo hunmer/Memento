@@ -253,4 +253,16 @@ class FloatingBallManager {
       }
     }
   }
+
+  // 重置悬浮球位置到默认值
+  Future<void> resetPosition() async {
+    const defaultPosition = Offset(20, 100);
+    _position = defaultPosition;
+    final data = await _readData();
+    data['position'] = {'x': defaultPosition.dx, 'y': defaultPosition.dy};
+    await _writeData(data);
+
+    // 通知悬浮球服务更新位置
+    FloatingBallService().updatePosition(defaultPosition);
+  }
 }

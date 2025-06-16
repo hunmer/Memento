@@ -39,6 +39,9 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
   bool _pointerDown = false;
   final GlobalKey _ballKey = GlobalKey();
   StreamSubscription<double>? _sizeSubscription;
+  final StreamController<Offset> _positionChangeController =
+      StreamController<Offset>.broadcast();
+  StreamSubscription<Offset>? _positionSubscription;
 
   @override
   void initState() {
@@ -52,6 +55,17 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
       if (mounted) {
         setState(() {
           _sizeScale = scale;
+        });
+      }
+    });
+
+    // 监听位置更新
+    _positionSubscription = FloatingBallService().positionChangeStream.listen((
+      position,
+    ) {
+      if (mounted) {
+        setState(() {
+          _position = position;
         });
       }
     });
@@ -116,6 +130,7 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
   void dispose() {
     _longPressTimer?.cancel();
     _sizeSubscription?.cancel();
+    _positionSubscription?.cancel();
     super.dispose();
   }
 
