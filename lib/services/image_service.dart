@@ -6,6 +6,8 @@ import 'package:universal_platform/universal_platform.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
+import '../core/storage/storage_manager.dart';
+
 class ImageService {
   static final ImageService _instance = ImageService._internal();
 
@@ -57,7 +59,7 @@ class ImageService {
 
   // 保存图片到应用目录
   Future<String> saveImage(File imageFile) async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await StorageManager.getApplicationDocumentsDirectory();
     final imagesDir = Directory('${directory.path}/chat_images');
 
     // 确保目录存在
@@ -78,7 +80,7 @@ class ImageService {
 
   // 获取图片的完整路径
   Future<String> getImageFullPath(String relativePath) async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await StorageManager.getApplicationDocumentsDirectory();
     return '${directory.path}/$relativePath';
   }
 

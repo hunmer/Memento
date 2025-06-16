@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async'; // 添加 StreamController 和 TimeoutException 的导入
 import 'dart:typed_data'; // 添加 Uint8List 的导入
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
@@ -70,7 +71,7 @@ class FullBackupController {
     try {
       _progressController.add(0.0); // 初始进度
       // 获取应用文档目录
-      final appDir = await getApplicationDocumentsDirectory();
+      final appDir = await StorageManager.getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
 
       // 创建一个临时目录来存储压缩文件
@@ -297,7 +298,7 @@ class FullBackupController {
         }
 
         // 获取应用文档目录
-        final appDir = await getApplicationDocumentsDirectory();
+        final appDir = await StorageManager.getApplicationDocumentsDirectory();
 
         // 清空现有数据
         await appDir.delete(recursive: true);

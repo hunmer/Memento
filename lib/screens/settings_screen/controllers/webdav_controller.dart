@@ -131,7 +131,7 @@ class WebDAVController {
       final remotePath = config['dataPath'] as String;
 
       // 获取本地应用数据目录
-      final directory = await getApplicationDocumentsDirectory();
+      final directory = await StorageManager.getApplicationDocumentsDirectory();
       final localPath = '${directory.path}/app_data';
       final localDir = Directory(localPath);
 
@@ -305,7 +305,7 @@ class WebDAVController {
       final remotePath = config['dataPath'] as String;
 
       // 获取本地应用数据目录
-      final directory = await getApplicationDocumentsDirectory();
+      final directory = await StorageManager.getApplicationDocumentsDirectory();
       final localPath = '${directory.path}/app_data';
 
       // 显示进度对话框
@@ -485,7 +485,7 @@ class WebDAVController {
 
     try {
       // 获取本地应用数据目录
-      final directory = await getApplicationDocumentsDirectory();
+      final directory = await StorageManager.getApplicationDocumentsDirectory();
       final localPath = '${directory.path}/app_data';
       final localDir = Directory(localPath);
 
@@ -635,7 +635,8 @@ class WebDAVController {
         if (config == null || !config['isConnected']) return;
 
         final remotePath = config['dataPath'];
-        final directory = await getApplicationDocumentsDirectory();
+        final directory =
+            await StorageManager.getApplicationDocumentsDirectory();
         final localBasePath = '${directory.path}/app_data';
 
         // 计算相对路径
@@ -724,7 +725,8 @@ class WebDAVController {
         if (config == null || !config['isConnected']) return;
 
         final remotePath = config['dataPath'];
-        final directory = await getApplicationDocumentsDirectory();
+        final directory =
+            await StorageManager.getApplicationDocumentsDirectory();
         final localBasePath = '${directory.path}/app_data';
 
         // 计算相对路径

@@ -1,24 +1,25 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 class StorageService {
   Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await StorageManager.getApplicationDocumentsDirectory();
     return directory.path;
   }
 
   Future<File> _getFile(String filePath) async {
     final basePath = await _localPath;
     final fullPath = path.join(basePath, filePath);
-    
+
     // 确保目录存在
     final dir = Directory(path.dirname(fullPath));
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
-    
+
     return File(fullPath);
   }
 
@@ -30,7 +31,9 @@ class StorageService {
         return {};
       }
       final contents = await file.readAsString();
-      return contents.isEmpty ? {} : json.decode(contents) as Map<String, dynamic>;
+      return contents.isEmpty
+          ? {}
+          : json.decode(contents) as Map<String, dynamic>;
     } catch (e) {
       print('Error reading file: $e');
       return {};
@@ -47,7 +50,7 @@ class StorageService {
   Future<void> delete(String filePath) async {
     final basePath = await _localPath;
     final fullPath = path.join(basePath, filePath);
-    
+
     try {
       final entity = await FileSystemEntity.type(fullPath);
       if (entity == FileSystemEntityType.directory) {

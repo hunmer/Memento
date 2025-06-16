@@ -1,3 +1,4 @@
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
@@ -56,7 +57,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
         // 如果是相对路径，转换为绝对路径
         if (widget.audioPath.startsWith('./')) {
-          final appDir = await getApplicationDocumentsDirectory();
+          final appDir =
+              await StorageManager.getApplicationDocumentsDirectory();
           filePath = path.join(appDir.path, widget.audioPath.substring(2));
         }
 

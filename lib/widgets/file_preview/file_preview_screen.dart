@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:share_plus/share_plus.dart';
@@ -48,26 +49,30 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
     try {
       // 解码 URI 编码的路径
       String resolvedPath = Uri.decodeFull(widget.filePath);
-      
+
       // 统一路径分隔符为系统分隔符
-      resolvedPath = resolvedPath.replaceAll('/', path.separator).replaceAll(r'\\', path.separator);
+      resolvedPath = resolvedPath
+          .replaceAll('/', path.separator)
+          .replaceAll(r'\\', path.separator);
 
       // 如果是相对路径（不是以系统分隔符开头），则转换为绝对路径
       if (!path.isAbsolute(resolvedPath)) {
         // 移除可能的 './' 前缀
-        if (resolvedPath.startsWith('./') || resolvedPath.startsWith('.${path.separator}')) {
+        if (resolvedPath.startsWith('./') ||
+            resolvedPath.startsWith('.${path.separator}')) {
           resolvedPath = resolvedPath.substring(2);
         }
 
         // 获取应用文档目录作为基础路径
-        final appDocDir = await getApplicationDocumentsDirectory();
+        final appDocDir =
+            await StorageManager.getApplicationDocumentsDirectory();
         String appDirPath = appDocDir.path;
-        
+
         // 如果路径包含 app_data，确保正确处理
         if (!resolvedPath.contains('app_data')) {
           appDirPath = path.join(appDirPath, 'app_data');
         }
-        
+
         resolvedPath = path.join(appDirPath, resolvedPath);
       }
 

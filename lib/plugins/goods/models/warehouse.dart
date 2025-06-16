@@ -1,3 +1,4 @@
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'goods_item.dart';
@@ -13,7 +14,7 @@ class Warehouse {
   // 获取图片URL，如果是相对路径则转换为绝对路径
   Future<String?> getImageUrl() async {
     if (_imageUrl == null) return null;
-    final appDir = await getApplicationDocumentsDirectory();
+    final appDir = await StorageManager.getApplicationDocumentsDirectory();
     return GoodsPathConstants.toAbsolutePath(appDir.path, _imageUrl);
   }
 

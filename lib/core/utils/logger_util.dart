@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
@@ -21,7 +22,7 @@ class LoggerUtil {
   }
 
   Future<void> _init() async {
-    final appDocDir = await getApplicationDocumentsDirectory();
+    final appDocDir = await StorageManager.getApplicationDocumentsDirectory();
     _logDirectory = Directory(p.join(appDocDir.path, 'app_data', 'logs'));
     if (!await _logDirectory.exists()) {
       await _logDirectory.create(recursive: true);

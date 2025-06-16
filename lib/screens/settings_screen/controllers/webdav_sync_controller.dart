@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
@@ -312,7 +313,7 @@ class WebDAVSyncController {
 
     try {
       // 获取应用文档目录
-      final appDir = await getApplicationDocumentsDirectory();
+      final appDir = await StorageManager.getApplicationDocumentsDirectory();
 
       // 获取所有文件
       final files = await _getAllFiles(appDir);
@@ -431,7 +432,7 @@ class WebDAVSyncController {
 
     try {
       // 获取应用文档目录
-      final appDir = await getApplicationDocumentsDirectory();
+      final appDir = await StorageManager.getApplicationDocumentsDirectory();
 
       // 获取远程文件列表
       _updateProgress(currentOperation: '获取远程文件列表...');

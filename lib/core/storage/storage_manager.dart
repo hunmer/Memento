@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'storage_interface.dart';
 import 'mobile_storage.dart';
 import 'web_storage.dart' as web_storage;
@@ -109,8 +111,13 @@ class StorageManager {
   String getPluginStoragePath(String id) => getPluginPath(id);
 
   /// 获取应用文档目录
-  Future<String> getApplicationDocumentsDirectory() async {
-    return await _storage.getApplicationDocumentsDirectory();
+  /// 如果是浏览器环境返回'memento_app'，其他环境返回正常的应用文档目录
+  static Future<Directory> getApplicationDocumentsDirectory() async {
+    if (kIsWeb) {
+      // 在web环境中创建虚拟目录对象
+      return Directory('memento_app');
+    }
+    return await path_provider.getApplicationDocumentsDirectory();
   }
 
   /// 创建目录
