@@ -97,7 +97,8 @@ class StorageManager {
   /// 读取文件内容
   Future<String> readFile(String path, [String defaultValue = '']) async {
     try {
-      return await readString(path);
+      final String str = await readString(path);
+      return str.isEmpty ? defaultValue : str;
     } catch (e) {
       return defaultValue;
     }

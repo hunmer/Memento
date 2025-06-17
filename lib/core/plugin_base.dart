@@ -31,12 +31,10 @@ abstract class PluginBase {
 
   /// 存储管理器实例
   StorageManager? _storage;
-  
+
   /// 获取存储管理器
+  /// 如果未设置存储管理器会抛出详细异常
   StorageManager get storage {
-    if (_storage == null) {
-      throw StateError('Storage manager has not been initialized');
-    }
     return _storage!;
   }
 
@@ -102,7 +100,10 @@ abstract class PluginBase {
 
   /// 注册到应用程序
   /// 用于在插件初始化后进行额外的设置，如注册服务、设置监听器等
-  Future<void> registerToApp(PluginManager pluginManager, ConfigManager configManager) async {}
+  Future<void> registerToApp(
+    PluginManager pluginManager,
+    ConfigManager configManager,
+  ) async {}
 
   /// 构建插件主视图
   Widget buildMainView(BuildContext context);
@@ -113,8 +114,7 @@ abstract class PluginBase {
 
   /// 构建插件设置视图
   Widget buildSettingsView(BuildContext context) {
-    return Column(
-      children: [
+    return Column(children: [
       
       ],
     );

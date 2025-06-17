@@ -27,10 +27,10 @@ class Contact {
     Map<String, String>? customFields,
     DateTime? createdTime,
     DateTime? lastContactTime,
-  })  : tags = tags ?? [],
-        customFields = customFields ?? {},
-        createdTime = createdTime ?? DateTime.now(),
-        lastContactTime = lastContactTime ?? DateTime.now();
+  }) : tags = tags ?? [],
+       customFields = customFields ?? {},
+       createdTime = createdTime ?? DateTime.now(),
+       lastContactTime = lastContactTime ?? DateTime.now();
 
   Map<String, dynamic> toJson() {
     return {
@@ -63,6 +63,16 @@ class Contact {
       customFields: Map<String, String>.from(json['customFields'] as Map),
       createdTime: DateTime.parse(json['createdTime'] as String),
       lastContactTime: DateTime.parse(json['lastContactTime'] as String),
+    );
+  }
+
+  factory Contact.empty() {
+    return Contact(
+      id: '',
+      name: '',
+      icon: IconData(Icons.person.codePoint, fontFamily: 'MaterialIcons'),
+      iconColor: Colors.grey,
+      phone: '',
     );
   }
 

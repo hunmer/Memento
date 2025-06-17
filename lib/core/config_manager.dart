@@ -124,14 +124,23 @@ class ConfigManager {
   /// 获取插件配置
   Future<Map<String, dynamic>?> getPluginConfig(String pluginId) async {
     if (_configs.containsKey(pluginId)) {
-      return _configs[pluginId];
+      return _configs[pluginId] as Map<String, dynamic>?;
     }
 
     try {
-      final configStr = await _storage.readString('configs/$pluginId.json');
-      final config = jsonDecode(configStr) as Map<String, dynamic>;
-      _configs[pluginId] = config;
-      return config;
+      final config = await _storage.readJson('configs/$pluginId.json');
+      if (config is! Map) return null;
+
+      // 确保所有键都是String类型
+      final result = <String, dynamic>{};
+      for (final key in config.keys) {
+        if (key is String) {
+          result[key] = config[key];
+        }
+      }
+
+      _configs[pluginId] = result;
+      return result;
     } catch (e) {
       return null;
     }

@@ -13,6 +13,16 @@ class InteractionRecord {
     List<String>? participants,
   }) : participants = participants ?? [];
 
+  factory InteractionRecord.empty() {
+    return InteractionRecord(
+      id: '',
+      contactId: '',
+      date: DateTime.now(),
+      notes: '',
+      participants: [],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

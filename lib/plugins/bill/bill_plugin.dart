@@ -16,7 +16,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   late final PromptController _promptController;
 
   BillPlugin() {
-    _billController = BillController()..setPlugin(this);
+    _billController = BillController();
     _promptController = PromptController();
   }
 
