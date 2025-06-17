@@ -26,44 +26,39 @@ class FilterConfig {
   factory FilterConfig.fromJson(Map<String, dynamic> json) {
     return FilterConfig(
       nameKeyword: json['nameKeyword'] as String?,
-      startDate: json['startDate'] != null
-          ? DateTime.parse(json['startDate'] as String)
-          : null,
+      startDate:
+          json['startDate'] != null
+              ? DateTime.tryParse(json['startDate'] as String? ?? '')
+              : null,
       endDate:
-          json['endDate'] != null ? DateTime.parse(json['endDate'] as String) : null,
+          json['endDate'] != null
+              ? DateTime.tryParse(json['endDate'] as String? ?? '')
+              : null,
       uncontactedDays: json['uncontactedDays'] as int?,
       selectedTags: List<String>.from(json['selectedTags'] as List? ?? []),
     );
   }
 }
 
-enum SortType {
-  name,
-  createdTime,
-  lastContactTime,
-  contactCount,
-}
+enum SortType { name, createdTime, lastContactTime, contactCount }
 
 class SortConfig {
   final SortType type;
   final bool isReverse;
 
-  const SortConfig({
-    this.type = SortType.name,
-    this.isReverse = false,
-  });
+  const SortConfig({this.type = SortType.name, this.isReverse = false});
 
   Map<String, dynamic> toJson() {
-    return {
-      'type': type.index,
-      'isReverse': isReverse,
-    };
+    return {'type': type.index, 'isReverse': isReverse};
   }
 
   factory SortConfig.fromJson(Map<String, dynamic> json) {
     return SortConfig(
-      type: SortType.values[json['type'] as int],
-      isReverse: json['isReverse'] as bool,
+      type:
+          json['type'] != null
+              ? SortType.values[json['type'] as int]
+              : SortType.name,
+      isReverse: json['isReverse'] as bool? ?? false,
     );
   }
 }

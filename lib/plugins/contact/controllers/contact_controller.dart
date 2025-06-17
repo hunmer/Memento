@@ -9,38 +9,11 @@ import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
 
 class ContactController {
-  static ContactController? _instance;
   final BasePlugin plugin;
   late final String contactsKey;
   late final String interactionsKey;
   late final String filterConfigKey;
   late final String sortConfigKey;
-
-  // 获取单例实例
-  static ContactController getInstance(BasePlugin plugin) {
-    _instance ??= ContactController._internal(plugin);
-    return _instance!;
-  }
-
-  // 私有构造函数
-  ContactController._internal(this.plugin) {
-    // 初始化时规范化所有路径
-    contactsKey = _normalizePath('contacts${path.separator}contacts.json');
-    interactionsKey = _normalizePath('interactions');
-    filterConfigKey = _normalizePath('filter_config');
-    sortConfigKey = _normalizePath('sort_config');
-  }
-
-  @Deprecated('Use getInstance() instead')
-  // 内存缓存
-  List<Contact>? _contactsCache;
-  List<InteractionRecord>? _interactionsCache;
-  FilterConfig? _filterConfigCache;
-  SortConfig? _sortConfigCache;
-
-  // 是否有未保存的更改
-  bool _hasContactsChanges = false;
-  bool _hasInteractionsChanges = false;
 
   // 使用平台特定的路径分隔符
   String _normalizePath(String filePath) {
@@ -55,66 +28,62 @@ class ContactController {
     sortConfigKey = _normalizePath('contacts${path.separator}sort_config');
   }
 
-  // 用于测试的清理方法
-  @visibleForTesting
-  static void reset() {
-    _instance = null;
-  }
-
-  // 从存储加载联系人数据到缓存
-  Future<void> _loadContactsToCache() async {
-    if (_contactsCache != null) return; // 如果已经有缓存，直接返回
-
+  // 获取所有联系人
+  Future<List<Contact>> getAllContacts() async {
     final storage = plugin.storage;
     try {
       final dynamic rawData = await storage.readJson(contactsKey);
-      if (rawData == null) {
-        _contactsCache = [];
-        return;
-      }
 
-      if (rawData is! List) {
-        throw FormatException('Contacts data must be a List');
-      }
+      // 处理数据不存在或为空的情况
+      if (rawData == null) return [];
 
-      _contactsCache = List<Contact>.from(
-        rawData.map(
-          (json) => Contact.fromJson(Map<String, dynamic>.from(json as Map)),
-        ),
-      );
+      // 处理不同数据格式
+      if (rawData is List) {
+        // 列表格式处理
+        return rawData.map<Contact>((json) {
+          if (json is! Map) return Contact.empty();
+          return _parseContactFromMap(json);
+        }).toList();
+      } else if (rawData is Map) {
+        // Map格式处理 - 转换为List
+        return rawData.values.map<Contact>((json) {
+          if (json is! Map) return Contact.empty();
+          return _parseContactFromMap(json);
+        }).toList();
+      } else {
+        // 其他格式返回空列表
+        return [];
+      }
     } catch (e) {
-      if (e.toString().contains('FileSystemException: 文件不存在')) {
-        // 如果文件不存在，创建默认联系人
-        await createDefaultContacts();
-        // 默认联系人已经设置到缓存中
-        return;
-      }
-      rethrow;
+      // 所有异常情况都返回空列表
+      return [];
     }
   }
 
-  // 将缓存的联系人数据保存到存储
-  Future<void> _saveContactsToStorage() async {
-    if (!_hasContactsChanges || _contactsCache == null) return;
+  // 从Map解析联系人数据
+  Contact _parseContactFromMap(Map json) {
+    try {
+      return Contact(
+        id: json['id']?.toString() ?? '',
+        name: json['name']?.toString() ?? '',
+        icon: IconData(
+          json['icon'] as int? ?? Icons.person.codePoint,
+          fontFamily: 'MaterialIcons',
+        ),
+        iconColor: Color(json['iconColor'] as int? ?? Colors.blue.value),
+        phone: json['phone']?.toString() ?? '',
+      );
+    } catch (e) {
+      return Contact.empty();
+    }
+  }
 
+  // 保存所有联系人
+  Future<void> saveAllContacts(List<Contact> contacts) async {
     final storage = plugin.storage;
     final List<Map<String, dynamic>> jsonData =
-        _contactsCache!.map((c) => c.toJson()).toList();
+        contacts.map((c) => c.toJson()).toList();
     await storage.writeJson(contactsKey, jsonData);
-    _hasContactsChanges = false;
-  }
-
-  // 获取所有联系人（使用缓存）
-  Future<List<Contact>> getAllContacts() async {
-    await _loadContactsToCache();
-    return List<Contact>.from(_contactsCache!);
-  }
-
-  // 保存所有联系人（更新缓存）
-  Future<void> saveAllContacts(List<Contact> contacts) async {
-    _contactsCache = List<Contact>.from(contacts);
-    _hasContactsChanges = true;
-    await _saveContactsToStorage();
   }
 
   // 添加联系人
@@ -156,62 +125,53 @@ class ContactController {
     );
   }
 
-  // 从存储加载交互记录到缓存
-  Future<void> _loadInteractionsToCache() async {
-    if (_interactionsCache != null) return;
-
+  // 获取所有交互记录
+  Future<List<InteractionRecord>> getAllInteractions() async {
     final storage = plugin.storage;
     try {
       final dynamic rawData = await storage.readJson(interactionsKey);
       if (rawData == null) {
-        _interactionsCache = [];
-        return;
+        return [];
       }
 
-      if (rawData is! List) {
-        throw FormatException('Interactions data must be a List');
+      // 处理不同数据格式
+      List<dynamic> interactionsList;
+      if (rawData is List) {
+        interactionsList = rawData;
+      } else if (rawData is Map) {
+        // 如果是Map格式，转换为List
+        interactionsList = rawData.values.toList();
+      } else {
+        // 其他格式返回空列表
+        return [];
       }
 
-      _interactionsCache = List<InteractionRecord>.from(
-        rawData.map(
-          (json) => InteractionRecord.fromJson(
-            Map<String, dynamic>.from(json as Map),
-          ),
-        ),
-      );
+      // 验证并转换数据
+      return interactionsList.map<InteractionRecord>((item) {
+        try {
+          if (item is Map) {
+            return InteractionRecord.fromJson(Map<String, dynamic>.from(item));
+          }
+          return InteractionRecord.empty();
+        } catch (_) {
+          return InteractionRecord.empty();
+        }
+      }).toList();
     } catch (e) {
       if (e.toString().contains('FileSystemException: 文件不存在')) {
-        _interactionsCache = [];
-        await _saveInteractionsToStorage();
-      } else {
-        rethrow;
+        return [];
       }
+      return []; // 其他异常也返回空列表而不是抛出异常
     }
   }
 
-  // 将缓存的交互记录保存到存储
-  Future<void> _saveInteractionsToStorage() async {
-    if (!_hasInteractionsChanges || _interactionsCache == null) return;
-
+  // 保存所有交互记录
+  Future<void> saveAllInteractions(List<InteractionRecord> interactions) async {
     final storage = plugin.storage;
     await storage.writeJson(
       interactionsKey,
-      _interactionsCache!.map((i) => i.toJson()).toList(),
+      interactions.map((i) => i.toJson()).toList(),
     );
-    _hasInteractionsChanges = false;
-  }
-
-  // 获取所有交互记录（使用缓存）
-  Future<List<InteractionRecord>> getAllInteractions() async {
-    await _loadInteractionsToCache();
-    return List<InteractionRecord>.from(_interactionsCache!);
-  }
-
-  // 保存所有交互记录（更新缓存）
-  Future<void> saveAllInteractions(List<InteractionRecord> interactions) async {
-    _interactionsCache = List<InteractionRecord>.from(interactions);
-    _hasInteractionsChanges = true;
-    await _saveInteractionsToStorage();
   }
 
   // 添加交互记录
@@ -258,32 +218,24 @@ class ContactController {
 
   // 保存筛选配置
   Future<void> saveFilterConfig(FilterConfig config) async {
-    _filterConfigCache = config;
     final storage = plugin.storage;
     await storage.writeJson(filterConfigKey, config.toJson());
   }
 
   // 获取筛选配置
   Future<FilterConfig> getFilterConfig() async {
-    if (_filterConfigCache != null) {
-      return _filterConfigCache!;
-    }
-
     final storage = plugin.storage;
     try {
       final configJson = await storage.readJson(filterConfigKey);
       if (configJson == null) {
         final defaultConfig = FilterConfig();
-        _filterConfigCache = defaultConfig;
         await storage.writeJson(filterConfigKey, defaultConfig.toJson());
         return defaultConfig;
       }
-      _filterConfigCache = FilterConfig.fromJson(configJson);
-      return _filterConfigCache!;
+      return FilterConfig.fromJson(Map<String, dynamic>.from(configJson));
     } catch (e) {
       if (e.toString().contains('FileSystemException: 文件不存在')) {
         final defaultConfig = FilterConfig();
-        _filterConfigCache = defaultConfig;
         await storage.writeJson(filterConfigKey, defaultConfig.toJson());
         return defaultConfig;
       }
@@ -293,32 +245,24 @@ class ContactController {
 
   // 保存排序配置
   Future<void> saveSortConfig(SortConfig config) async {
-    _sortConfigCache = config;
     final storage = plugin.storage;
     await storage.writeJson(sortConfigKey, config.toJson());
   }
 
   // 获取排序配置
   Future<SortConfig> getSortConfig() async {
-    if (_sortConfigCache != null) {
-      return _sortConfigCache!;
-    }
-
     final storage = plugin.storage;
     try {
       final configJson = await storage.readJson(sortConfigKey);
       if (configJson == null) {
         final defaultConfig = const SortConfig();
-        _sortConfigCache = defaultConfig;
         await storage.writeJson(sortConfigKey, defaultConfig.toJson());
         return defaultConfig;
       }
-      _sortConfigCache = SortConfig.fromJson(configJson);
-      return _sortConfigCache!;
+      return SortConfig.fromJson(Map<String, dynamic>.from(configJson));
     } catch (e) {
       if (e.toString().contains('FileSystemException: 文件不存在')) {
         final defaultConfig = const SortConfig();
-        _sortConfigCache = defaultConfig;
         await storage.writeJson(sortConfigKey, defaultConfig.toJson());
         return defaultConfig;
       }
@@ -433,8 +377,16 @@ class ContactController {
 
   // 创建默认联系人数据
   Future<void> createDefaultContacts() async {
-    if (_contactsCache != null && _contactsCache!.isNotEmpty) return;
+    final storage = plugin.storage;
     final uuid = const Uuid();
+
+    // 检查是否已有联系人数据
+    final existingContacts = await storage.readJson(contactsKey);
+    if (existingContacts != null &&
+        existingContacts is List &&
+        existingContacts.isNotEmpty) {
+      return;
+    }
 
     // 添加一些默认联系人
     final defaultContacts = [
@@ -460,9 +412,11 @@ class ContactController {
       ),
     ];
 
-    _contactsCache = defaultContacts;
-    _hasContactsChanges = true;
-    await _saveContactsToStorage();
+    // 保存默认联系人
+    await storage.writeJson(
+      contactsKey,
+      defaultContacts.map((c) => c.toJson()).toList(),
+    );
 
     // 创建一些默认交互记录
     final defaultInteractions = [
@@ -482,14 +436,16 @@ class ContactController {
       ),
     ];
 
-    _interactionsCache = defaultInteractions;
-    _hasInteractionsChanges = true;
-    await _saveInteractionsToStorage();
+    // 保存默认交互记录
+    await storage.writeJson(
+      interactionsKey,
+      defaultInteractions.map((i) => i.toJson()).toList(),
+    );
   }
 
   // 在应用退出前保存所有更改
   Future<void> saveAllChanges() async {
-    await _saveContactsToStorage();
-    await _saveInteractionsToStorage();
+    // 由于现在每次修改都直接保存，此方法可以保留为空
+    // 或者可以添加其他需要在退出时执行的操作
   }
 }

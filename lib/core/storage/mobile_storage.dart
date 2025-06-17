@@ -185,11 +185,11 @@ class MobileStorage implements StorageInterface {
 
   /// 读取字符串内容
   @override
-  Future<String> readString(String targetPath) async {
+  Future<String> readString(String targetPath, [String? defaultValue]) async {
     final fullPath = path.join(_basePath, targetPath);
     final file = io.File(fullPath);
     if (!await file.exists()) {
-      throw Exception('文件不存在: $targetPath');
+      return defaultValue ?? '';
     }
     return await file.readAsString();
   }

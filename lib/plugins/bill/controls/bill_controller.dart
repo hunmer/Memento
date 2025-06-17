@@ -66,18 +66,12 @@ class BillController with ChangeNotifier {
 
   late final BillPlugin _plugin;
 
-  BillController._internal() {
-    // 延迟初始化，等待BillPlugin实例化完成后再加载数据
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadAccounts();
-    });
-  }
-
-  // 设置BillPlugin实例
+  /// 设置BillPlugin实例
   void setPlugin(BillPlugin plugin) {
     _plugin = plugin;
-    _loadAccounts();
   }
+
+  BillController._internal();
 
   static const String _accountsKey = 'accounts';
   final List<Account> _accounts = [];
@@ -155,8 +149,15 @@ class BillController with ChangeNotifier {
   }
 
   // 检查BillPlugin是否已设置
-  // ignore: unnecessary_null_comparison
-  bool get _hasPlugin => _plugin != null;
+  bool get _hasPlugin {
+    try {
+      // 检查late变量是否已初始化
+      _plugin;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   // 保存账户列表到插件存储
   Future<void> _saveAccounts() async {
