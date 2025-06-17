@@ -51,6 +51,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 late final StorageManager globalStorage;
 late final ConfigManager globalConfigManager;
 late final PluginManager globalPluginManager;
+LoggerUtil? logger;
 
 void main() async {
   // 确保Flutter绑定初始化
@@ -77,6 +78,12 @@ void main() async {
     // 获取插件管理器单例实例并初始化
     globalPluginManager = PluginManager();
     await globalPluginManager.setStorageManager(globalStorage);
+
+    logger = LoggerUtil();
+    // 设置全局错误处理器
+    FlutterError.onError = (details) {
+      logger?.log(details.exceptionAsString(), level: 'ERROR');
+    };
 
     // 注册内置插件
     final plugins = [
@@ -106,7 +113,7 @@ void main() async {
       try {
         await globalPluginManager.registerPlugin(plugin);
       } catch (e) {
-        _showError('插件注册失败: ${plugin.name} - $e');
+        logger?.log('插件注册失败: ${plugin.name} - $e', level: 'ERROR');
       }
     }
 
@@ -124,7 +131,8 @@ void main() async {
       );
     });
   } catch (e) {
-    _showError('初始化失败: $e');
+    logger?.log('初始化失败: $e', level: 'ERROR');
+    debugPrint('初始化失败: $e');
   }
 
   runApp(const MyApp());
@@ -134,7 +142,7 @@ void main() async {
 void _showError(String message) {
   debugPrint(message);
   // 使用LoggerUtil记录错误
-  LoggerUtil().log(message, level: 'ERROR');
+  logger?.log(message, level: 'ERROR');
 }
 
 class MyApp extends StatefulWidget {
@@ -151,10 +159,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // 设置全局错误处理器
-    FlutterError.onError = (details) {
-      _showError(details.exceptionAsString());
-    };
+    // 全局错误处理器已在main()中设置
 
     // 延迟执行以确保context可用
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -164,7 +169,7 @@ class _MyAppState extends State<MyApp> {
 
   void _showError(String message) {
     // 使用LoggerUtil记录错误
-    LoggerUtil().log(message, level: 'ERROR');
+    logger?.log(message, level: 'ERROR');
 
     if (!mounted) return;
 

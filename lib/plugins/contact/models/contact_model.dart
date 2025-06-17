@@ -49,7 +49,7 @@ class Contact {
     };
   }
 
-  factory Contact.fromJson(Map<String, dynamic> json) {
+  factory Contact.fromJson(Map json) {
     return Contact(
       id: json['id'] as String,
       name: json['name'] as String,
