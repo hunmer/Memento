@@ -392,38 +392,17 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                 _timingStatus[habit.id] = isTiming;
 
                 return ListTile(
-                  leading:
-                      habit.image != null && habit.image!.isNotEmpty
-                          ? FutureBuilder<String>(
-                            future:
-                                habit.image!.startsWith('http')
-                                    ? Future.value(habit.image!)
-                                    : ImageUtils.getAbsolutePath(habit.image!),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return CircleAvatar(
-                                  backgroundImage:
-                                      habit.image!.startsWith('http')
-                                          ? NetworkImage(snapshot.data!)
-                                          : FileImage(File(snapshot.data!))
-                                              as ImageProvider,
-                                );
-                              }
-                              return CircleAvatar(
-                                child: Icon(
-                                  IconData(int.parse(habit.icon!)),
-                                  size: 16,
-                                  color: Colors.white,
-                                ),
-                              );
-                            },
-                          )
-                          : CircleAvatar(
-                            child:
-                                habit.icon == null
-                                    ? Icon(Icons.auto_awesome)
-                                    : Icon(IconData(int.parse(habit.icon!))),
-                          ),
+                  leading: CircleAvatar(
+                    child:
+                        habit.icon == null
+                            ? Icon(Icons.auto_awesome)
+                            : Icon(
+                              IconData(
+                                int.parse(habit.icon!),
+                                fontFamily: 'MaterialIcons',
+                              ),
+                            ),
+                  ),
                   title: Text(habit.title),
                   subtitle: Text('${habit.durationMinutes} ${l10n.minutes}'),
                   trailing: IconButton(

@@ -9,7 +9,6 @@ import 'storage_interface.dart';
 /// 移动平台的持久化存储实现
 class MobileStorage implements StorageInterface {
   String _basePath = '';
-  final Map<String, dynamic> _cache = {};
 
   /// 私有构造函数，防止实例化
   MobileStorage._() {
@@ -24,18 +23,13 @@ class MobileStorage implements StorageInterface {
 
   /// 初始化基础路径
   Future<void> _initBasePath() async {
-    try {
-      final directory = await path_provider.getApplicationDocumentsDirectory();
-      _basePath = path.join(directory.path, 'app_data');
+    final directory = await path_provider.getApplicationDocumentsDirectory();
+    _basePath = path.join(directory.path, 'app_data');
 
-      // 确保基础目录存在
-      final baseDir = io.Directory(_basePath);
-      if (!await baseDir.exists()) {
-        await baseDir.create(recursive: true);
-      }
-    } catch (e) {
-      debugPrint('初始化存储路径失败: $e');
-      _basePath = 'fallback_storage';
+    // 确保基础目录存在
+    final baseDir = io.Directory(_basePath);
+    if (!await baseDir.exists()) {
+      await baseDir.create(recursive: true);
     }
   }
 
@@ -49,9 +43,6 @@ class MobileStorage implements StorageInterface {
   /// 保存数据
   @override
   Future<void> saveData(String key, String value) async {
-    await _ensureInitialized();
-    _cache[key] = value;
-
     final fullPath = path.join(_basePath, key);
     final file = io.File(fullPath);
 
@@ -61,7 +52,6 @@ class MobileStorage implements StorageInterface {
       try {
         await directory.create(recursive: true);
       } catch (e) {
-        debugPrint('创建目录失败: ${directory.path} - $e');
         throw Exception('创建目录失败: ${directory.path} - $e');
       }
     }
@@ -69,7 +59,6 @@ class MobileStorage implements StorageInterface {
     try {
       await file.writeAsString(value);
     } catch (e) {
-      debugPrint('写入文件失败: $fullPath - $e');
       throw Exception('写入文件失败: $fullPath - $e');
     }
   }
@@ -77,13 +66,6 @@ class MobileStorage implements StorageInterface {
   /// 读取数据
   @override
   Future<String?> loadData(String key) async {
-    await _ensureInitialized();
-
-    // 先检查缓存
-    if (_cache.containsKey(key)) {
-      return _cache[key] as String;
-    }
-
     try {
       final fullPath = path.join(_basePath, key);
       final file = io.File(fullPath);
@@ -93,7 +75,6 @@ class MobileStorage implements StorageInterface {
       }
 
       final content = await file.readAsString();
-      _cache[key] = content;
       return content;
     } catch (e) {
       debugPrint('读取文件失败: $key - $e');
@@ -104,9 +85,6 @@ class MobileStorage implements StorageInterface {
   /// 删除数据
   @override
   Future<void> removeData(String key) async {
-    await _ensureInitialized();
-    _cache.remove(key);
-
     try {
       final fullPath = path.join(_basePath, key);
       final file = io.File(fullPath);
@@ -122,12 +100,6 @@ class MobileStorage implements StorageInterface {
   /// 检查数据是否存在
   @override
   Future<bool> hasData(String key) async {
-    await _ensureInitialized();
-
-    if (_cache.containsKey(key)) {
-      return true;
-    }
-
     try {
       final fullPath = path.join(_basePath, key);
       final file = io.File(fullPath);
@@ -141,7 +113,6 @@ class MobileStorage implements StorageInterface {
   /// 保存JSON对象到SharedPreferences
   @override
   Future<void> saveJson(String key, dynamic data) async {
-    debugPrint('saveJson: $key, $data');
     try {
       final jsonString = jsonEncode(data);
       await saveData(key, jsonString);
@@ -152,25 +123,22 @@ class MobileStorage implements StorageInterface {
 
   /// 从SharedPreferences读取JSON对象
   @override
-  Future<dynamic> loadJson(String key) async {
-    debugPrint('loadJson: $key');
+  Future<dynamic> loadJson(String key, [dynamic defaultValue]) async {
     try {
       final jsonString = await loadData(key);
       if (jsonString == null || jsonString.isEmpty) {
-        return null;
+        return defaultValue ?? {};
       }
       return jsonDecode(jsonString);
     } catch (e) {
       debugPrint('移动存储读取JSON失败: $key - $e');
-      return null;
+      return defaultValue ?? {};
     }
   }
 
   /// 获取所有以指定前缀开头的键
   @override
   Future<List<String>> getKeysWithPrefix(String prefix) async {
-    await _ensureInitialized();
-
     try {
       final fullPath = path.join(_basePath, prefix);
       final directory = io.Directory(fullPath);
@@ -218,7 +186,6 @@ class MobileStorage implements StorageInterface {
   /// 读取字符串内容
   @override
   Future<String> readString(String targetPath) async {
-    await _ensureInitialized();
     final fullPath = path.join(_basePath, targetPath);
     final file = io.File(fullPath);
     if (!await file.exists()) {
@@ -230,7 +197,6 @@ class MobileStorage implements StorageInterface {
   /// 写入字符串内容
   @override
   Future<void> writeString(String targetPath, String content) async {
-    await _ensureInitialized();
     final fullPath = path.join(_basePath, targetPath);
     final file = io.File(fullPath);
 
@@ -246,19 +212,10 @@ class MobileStorage implements StorageInterface {
   /// 删除文件
   @override
   Future<void> deleteFile(String targetPath) async {
-    await _ensureInitialized();
     final fullPath = path.join(_basePath, targetPath);
     final file = io.File(fullPath);
     if (await file.exists()) {
       await file.delete();
     }
-  }
-
-  /// 获取应用文档目录
-  @override
-  Future<String> getApplicationDocumentsDirectory() async {
-    await _ensureInitialized();
-    final directory = await path_provider.getApplicationDocumentsDirectory();
-    return directory.path;
   }
 }

@@ -88,13 +88,13 @@ class WebStorage implements StorageInterface {
 
   /// 从文件系统读取JSON对象
   @override
-  Future<dynamic> loadJson(String key) async {
+  Future<dynamic> loadJson(String key, [dynamic defaultValue]) async {
     final file = fs.file(join(_rootDir, key));
     if (await file.exists()) {
       final content = await file.readAsString();
       return jsonDecode(content);
     }
-    return null;
+    return defaultValue ?? {};
   }
 
   /// 获取所有以指定前缀开头的键
@@ -165,11 +165,5 @@ class WebStorage implements StorageInterface {
     if (await file.exists()) {
       await file.delete();
     }
-  }
-
-  /// 获取应用文档目录 (Web端返回根目录路径)
-  @override
-  Future<String> getApplicationDocumentsDirectory() async {
-    return _rootDir;
   }
 }

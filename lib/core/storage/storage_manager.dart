@@ -89,7 +89,7 @@ class StorageManager {
 
   /// 读取数据 (别名方法)
   Future<dynamic> read(String key, [dynamic defaultValue]) =>
-      load(key, defaultValue);
+      readJson(key, defaultValue);
 
   /// 写入数据 (别名方法)
   Future<void> write(String key, dynamic value) => save(key, value);
@@ -170,8 +170,8 @@ class StorageManager {
   }
 
   /// 读取JSON数据
-  Future<Map<String, dynamic>?> readJson(String path) async {
-    return await _storage.loadJson(path);
+  Future<dynamic> readJson(String path, [dynamic defaultValue]) async {
+    return await _storage.loadJson(path, defaultValue);
   }
 
   /// 确保插件目录存在
