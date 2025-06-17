@@ -34,7 +34,8 @@ class StorageManager {
 
   /// 获取WebDAV配置
   Future<Map<String, dynamic>?> getWebDAVConfig() async {
-    return await _storage.loadJson('webdav_config.json');
+    final config = await _storage.loadJson('webdav_config.json');
+    return Map<String, dynamic>.from(config);
   }
 
   /// 保存数据

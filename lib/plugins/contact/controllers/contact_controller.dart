@@ -42,13 +42,13 @@ class ContactController {
         // 列表格式处理
         return rawData.map<Contact>((json) {
           if (json is! Map) return Contact.empty();
-          return _parseContactFromMap(json);
+          return Contact.fromJson(json);
         }).toList();
       } else if (rawData is Map) {
         // Map格式处理 - 转换为List
         return rawData.values.map<Contact>((json) {
           if (json is! Map) return Contact.empty();
-          return _parseContactFromMap(json);
+          return Contact.fromJson(json);
         }).toList();
       } else {
         // 其他格式返回空列表
@@ -57,24 +57,6 @@ class ContactController {
     } catch (e) {
       // 所有异常情况都返回空列表
       return [];
-    }
-  }
-
-  // 从Map解析联系人数据
-  Contact _parseContactFromMap(Map json) {
-    try {
-      return Contact(
-        id: json['id']?.toString() ?? '',
-        name: json['name']?.toString() ?? '',
-        icon: IconData(
-          json['icon'] as int? ?? Icons.person.codePoint,
-          fontFamily: 'MaterialIcons',
-        ),
-        iconColor: Color(json['iconColor'] as int? ?? Colors.blue.value),
-        phone: json['phone']?.toString() ?? '',
-      );
-    } catch (e) {
-      return Contact.empty();
     }
   }
 

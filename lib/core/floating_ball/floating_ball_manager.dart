@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'dart:convert';
 import 'dart:io';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'floating_ball_service.dart';
@@ -93,7 +94,7 @@ class FloatingBallManager {
   // 获取存储文件
   Future<File> _getStorageFile() async {
     if (_storageFile != null) return _storageFile!;
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await StorageManager.getApplicationDocumentsDirectory();
     _storageFile = File('${directory.path}/floating_ball_config.json');
     if (!await _storageFile!.exists()) {
       await _storageFile!.writeAsString('{}');
