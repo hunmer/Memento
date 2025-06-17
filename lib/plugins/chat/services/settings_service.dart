@@ -73,7 +73,7 @@ class SettingsService {
   bool shouldPlayMessageSound() {
     return _playSoundOnSend;
   }
-  
+
   // 设置时间线视图模式
   Future<void> setTimelineIsGridView(bool value) async {
     _timelineIsGridView = value;

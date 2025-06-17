@@ -4,7 +4,7 @@ abstract class StorageInterface {
   Future<void> removeData(String key);
   Future<bool> hasData(String key);
   Future<void> saveJson(String key, dynamic data);
-  Future<dynamic> loadJson(String key);
+  Future<dynamic> loadJson(String key, [dynamic defaultValue]);
   Future<List<String>> getKeysWithPrefix(String prefix);
   Future<void> clearWithPrefix(String prefix);
 
@@ -12,9 +12,4 @@ abstract class StorageInterface {
   Future<String> readString(String path);
   Future<void> writeString(String path, String content);
   Future<void> deleteFile(String path);
-
-  /// 获取应用文档目录
-  /// 在移动端返回应用文档目录路径
-  /// 在Web端返回根目录路径
-  Future<String> getApplicationDocumentsDirectory();
 }
