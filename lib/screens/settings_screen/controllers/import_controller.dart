@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
 import '../../../main.dart';
-import '../utils/file_utils.dart';
+import '../../../core/utils/file_utils.dart';
 import '../widgets/folder_selection_dialog.dart';
 import 'permission_controller.dart';
 
