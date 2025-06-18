@@ -70,7 +70,7 @@ class StorageManager {
   }
 
   /// 获取插件存储路径
-  String getPluginPath(String pluginId) => '$pluginId';
+  String getPluginPath(String pluginId) => pluginId;
 
   /// 插件数据操作
   Future<void> savePluginData(String pluginId, String key, dynamic value) =>
@@ -174,6 +174,20 @@ class StorageManager {
   /// 读取JSON数据
   Future<dynamic> readJson(String path, [dynamic defaultValue]) async {
     return await _storage.loadJson(path, defaultValue);
+  }
+
+  /// 安全读取JSON数据，确保返回Map<String, dynamic>
+  Future<Map<String, dynamic>> readSafeJson(String path) async {
+    final dynamic jsonData = await _storage.loadJson(path);
+    if (jsonData == null) return {};
+
+    final Map<String, dynamic> data = {};
+    if (jsonData is Map) {
+      jsonData.forEach((key, value) {
+        data[key.toString()] = value;
+      });
+    }
+    return data;
   }
 
   /// 确保插件目录存在

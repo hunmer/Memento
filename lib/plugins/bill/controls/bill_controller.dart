@@ -128,10 +128,12 @@ class BillController with ChangeNotifier {
         return;
       }
 
-      final accountsData = await _plugin.storage.read(
-        '${_plugin.getPluginStoragePath()}/$_accountsKey.json',
+      final accountsData = await _plugin.storage.readJson(
+        'bill/$_accountsKey.json',
         {'accounts': []},
       );
+
+      print(accountsData);
 
       final accountsJson = List<String>.from(accountsData['accounts'] ?? []);
       _accounts.clear();
@@ -176,10 +178,9 @@ class BillController with ChangeNotifier {
           _accounts.map((account) => jsonEncode(account.toJson())).toList();
 
       // 将数据保存到插件的storage中
-      await _plugin.storage.write(
-        '${_plugin.getPluginStoragePath()}/$_accountsKey.json',
-        {'accounts': accountsJson},
-      );
+      await _plugin.storage.write('bill/$_accountsKey.json', {
+        'accounts': accountsJson,
+      });
     } catch (e) {
       debugPrint('保存账户失败: $e');
       throw '保存账户失败: $e';
@@ -310,58 +311,6 @@ class BillController with ChangeNotifier {
     return bills
         .where((bill) => bill.amount < 0)
         .fold<double>(0, (sum, bill) => sum + bill.amount.abs());
-  }
-
-  // 检查账单数据存储状态
-  Future<Map<String, dynamic>> checkBillsStorage() async {
-    try {
-      await _ensureInitialized();
-
-      Map<String, dynamic> storageData = {};
-      List<String> storageKeys = [];
-
-      if (_hasPlugin) {
-        try {
-          storageData = await _plugin.storage.read(
-            '${_plugin.getPluginStoragePath()}/$_accountsKey.json',
-            {},
-          );
-
-          // 获取插件存储中的所有键
-          final pluginPath = _plugin.getPluginStoragePath();
-          storageKeys = ['$pluginPath/$_accountsKey.json'];
-        } catch (e) {
-          debugPrint('获取存储数据失败: $e');
-        }
-      }
-
-      return {
-        'success': true,
-        'accountsCount': _accounts.length,
-        'billsCount': _accounts.fold<int>(
-          0,
-          (sum, account) => sum + account.bills.length,
-        ),
-        'initialized': _initialized,
-        'storageData': storageData,
-        'storageKeys': storageKeys,
-        'hasPlugin': _hasPlugin,
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'error': e.toString(),
-        'accountsCount': _accounts.length,
-        'initialized': _initialized,
-      };
-    }
-  }
-
-  // 强制重新加载账单数据
-  Future<int> forceReloadBills() async {
-    _initialized = false;
-    await initialize();
-    return _accounts.fold<int>(0, (sum, account) => sum + account.bills.length);
   }
 
   // 获取账单统计信息
