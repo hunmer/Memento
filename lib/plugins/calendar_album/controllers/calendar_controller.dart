@@ -116,19 +116,19 @@ class CalendarController extends ChangeNotifier {
   }
 
   Future<void> _loadEntries() async {
-    final String? data = await _storage.getString(_storageKey);
-    if (data != null) {
-      final Map<String, dynamic> jsonData = json.decode(data);
-      jsonData.forEach((key, value) {
-        final date = DateTime.parse(key);
-        final entries =
-            (value as List)
-                .map((e) => CalendarEntry.fromJson(e as Map<String, dynamic>))
-                .toList();
-        _entries[date] = entries;
-      });
+    final data = await _storage.readSafeJson(_storageKey);
+    data.forEach((key, value) {
+      final date = DateTime.parse(key);
+      final entries =
+          (value as List)
+              .map(
+                (e) =>
+                    CalendarEntry.fromJson(Map<String, dynamic>.from(e as Map)),
+              )
+              .toList();
+      _entries[date] = entries;
       notifyListeners();
-    }
+    });
   }
 
   Future<void> _saveEntries() async {

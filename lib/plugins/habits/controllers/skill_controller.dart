@@ -14,25 +14,43 @@ class SkillController {
   Future<List<CompletionRecord>> getSkillCompletionRecords(
     String skillId,
   ) async {
-    final path = 'habits/records/$skillId.json';
-    final data = await storage.readJson(path);
-    if (data == null) return [];
-
-    return List<Map<String, dynamic>>.from(
-      data as Iterable,
-    ).map((e) => CompletionRecord.fromMap(e)).toList();
+    try {
+      final data = await storage.readJson('habits/records/$skillId.json', []);
+      List<Map<String, dynamic>> recordMaps = [];
+      if (data is List) {
+        recordMaps = List<Map<String, dynamic>>.from(
+          data.whereType<Map>().where((m) => m.isNotEmpty),
+        );
+      }
+      return recordMaps
+          .map((e) => CompletionRecord.fromMap(e))
+          .where((r) => r != null)
+          .toList();
+    } catch (e) {
+      print('Error loading completion records: $e');
+      return [];
+    }
   }
 
   Future<List<Skill>> loadSkills() async {
-    final data = await storage.readJson(_skillsKey);
-    if (data == null) return _skills = [];
-
-    _skills =
-        List<Map<String, dynamic>>.from(
-          data as Iterable,
-        ).map((e) => Skill.fromMap(e)).toList();
-
-    return _skills;
+    try {
+      final data = await storage.readJson(_skillsKey, []);
+      List<Map<String, dynamic>> skillMaps = [];
+      if (data is List) {
+        skillMaps = List<Map<String, dynamic>>.from(
+          data.whereType<Map>().where((m) => m.isNotEmpty),
+        );
+      }
+      _skills =
+          skillMaps
+              .map((e) => Skill.fromMap(e))
+              .where((s) => s != null)
+              .toList();
+      return _skills;
+    } catch (e) {
+      print('Error loading skills: $e');
+      return _skills = [];
+    }
   }
 
   List<Skill> getSkills() {

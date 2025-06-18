@@ -1,3 +1,4 @@
+import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
@@ -52,12 +53,22 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
   @override
   Future<void> initialize() async {
+    _billController.setPlugin(this);
+    _billController.initialize();
     _promptController.initialize();
+  }
+
+  @override
+  Future<void> registerToApp(
+    PluginManager pluginManager,
+    ConfigManager configManager,
+  ) async {
+    // 初始化插件
+    await initialize();
   }
 
   Future<void> uninstall() async {
     _promptController.unregisterPromptMethods();
-    await storage.delete(storageDir);
   }
 
   @override
@@ -173,9 +184,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   @override
   Future<void> loadSettings(Map<String, dynamic> defaultSettings) async {
     try {
-      final storedSettings = await storage.read(
-        '${getPluginStoragePath()}/settings.json',
-      );
+      final storedSettings = await storage.read('bill/settings.json');
       if (storedSettings.isNotEmpty) {
         _settings = Map<String, dynamic>.from(storedSettings);
       } else {
@@ -195,7 +204,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   @override
   Future<void> saveSettings() async {
     try {
-      await storage.write('${getPluginStoragePath()}/settings.json', _settings);
+      await storage.write('bill/settings.json', _settings);
     } catch (e) {
       debugPrint('Warning: Failed to save plugin settings: $e');
     }
@@ -205,11 +214,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   Future<void> updateSettings(Map<String, dynamic> newSettings) async {
     _settings.addAll(newSettings);
     await saveSettings();
-  }
-
-  @override
-  String getPluginStoragePath() {
-    return storage.getPluginStoragePath(id);
   }
 
   Widget buildPluginEntryWidget(BuildContext context) {

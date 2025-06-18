@@ -15,15 +15,24 @@ class HabitController {
   }
 
   Future<List<Habit>> loadHabits() async {
-    final data = await storage.readJson('habits/habits');
-    if (data == null) return _habits = [];
-
-    _habits =
-        List<Map<String, dynamic>>.from(
-          data as Iterable,
-        ).map((e) => Habit.fromMap(e)).toList();
-
-    return _habits;
+    try {
+      final data = await storage.readJson('habits/habits', []);
+      List<Map<String, dynamic>> habitMaps = [];
+      if (data is List) {
+        habitMaps = List<Map<String, dynamic>>.from(
+          data.whereType<Map>().where((m) => m.isNotEmpty),
+        );
+      }
+      _habits =
+          habitMaps
+              .map((e) => Habit.fromMap(e))
+              .where((h) => h != null)
+              .toList();
+      return _habits;
+    } catch (e) {
+      print('Error loading habits: $e');
+      return [];
+    }
   }
 
   List<Habit> getHabits() => _habits;
