@@ -48,7 +48,6 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
     final task = widget.task;
     final activeTimer = task.activeTimer;
     final isRunning = task.isRunning;
-
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -124,22 +123,23 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
                             children: [
                               _buildTimerTypeChip(timer),
                               const SizedBox(height: 2),
-                              // 为正在运行的计时器添加单独的进度条
-                              SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width *
-                                    0.35, // 使用屏幕宽度的比例，更好地适应不同设备
-                                child: ClipRRect(
+                              // 使用背景颜色显示进度
+                              Container(
+                                height: 4,
+                                decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(2),
-                                  child: LinearProgressIndicator(
-                                    value:
-                                        timer.completedDuration.inSeconds /
-                                        timer.duration.inSeconds,
-                                    backgroundColor: Colors.grey[300],
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      task.color,
+                                  color: Colors.grey[300],
+                                ),
+                                child: FractionallySizedBox(
+                                  alignment: Alignment.centerLeft,
+                                  widthFactor:
+                                      timer.completedDuration.inSeconds /
+                                      timer.duration.inSeconds,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      color: task.color,
                                     ),
-                                    minHeight: 2,
                                   ),
                                 ),
                               ),
@@ -189,19 +189,20 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       avatar: Icon(icon, size: 16, color: Colors.white),
       label: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.max,
         children: [
           Text(
             timer.name,
             style: const TextStyle(fontSize: 12, color: Colors.white),
           ),
-          if (timer.isRunning) ...[
-            const SizedBox(width: 4),
-            Text(
-              timer.formattedRemainingTime,
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              _formatTimerDisplay(timer),
               style: const TextStyle(fontSize: 12, color: Colors.white),
+              textAlign: TextAlign.end,
             ),
-          ],
+          ),
         ],
       ),
       backgroundColor: color,
@@ -301,6 +302,16 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
       return '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     } else {
       return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+  }
+
+  String _formatTimerDisplay(TimerItem timer) {
+    if (timer.type == TimerType.countDown) {
+      return _formatDuration(timer.remainingDuration);
+    } else if (timer.isRunning) {
+      return '${_formatDuration(timer.completedDuration)}/${_formatDuration(timer.duration)}';
+    } else {
+      return _formatDuration(timer.duration);
     }
   }
 }

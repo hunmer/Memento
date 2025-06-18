@@ -118,12 +118,14 @@ class _GroupManagementDialogState extends State<GroupManagementDialog> {
                           (!isEditing || newGroupName != group)) {
                         if (isEditing) {
                           widget.onGroupRenamed(group, newGroupName);
+                          setState(() {});
                         } else {
                           widget.onGroupCreated(
                             newGroupName,
                             selectedIcon,
                             selectedColor,
                           );
+                          setState(() {});
                         }
                         Navigator.pop(context);
                       }
@@ -189,6 +191,7 @@ class _GroupManagementDialogState extends State<GroupManagementDialog> {
                               icon: const Icon(Icons.delete_outline),
                               tooltip: '删除空分组',
                               onPressed: () {
+                                setState(() {});
                                 Navigator.pop(context);
                               },
                             ),

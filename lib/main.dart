@@ -4,6 +4,7 @@ import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -51,6 +52,7 @@ late final StorageManager globalStorage;
 late final ConfigManager globalConfigManager;
 late final PluginManager globalPluginManager;
 LoggerUtil? logger;
+late PermissionController _permissionController;
 
 void main() async {
   // 确保Flutter绑定初始化
@@ -121,9 +123,13 @@ void main() async {
     updateController.initialize();
 
     // 延迟备份服务初始化到Widget构建完成后
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final context = navigatorKey.currentContext;
-      if (context != null) {}
+      if (context != null) {
+        _permissionController = PermissionController(context);
+        // 检查权限
+        await _permissionController.checkAndRequestPermissions();
+      }
       // 插件初始化完成，发布事件
       eventManager.broadcast(
         'plugins_initialized',
