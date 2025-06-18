@@ -133,8 +133,6 @@ class BillController with ChangeNotifier {
         {'accounts': []},
       );
 
-      print(accountsData);
-
       final accountsJson = List<String>.from(accountsData['accounts'] ?? []);
       _accounts.clear();
 

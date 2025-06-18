@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'timer_item.dart';
 import '../timer_plugin.dart';
 
+enum RepeatingPattern { daily, weekly, monthly }
+
 /// 计时器任务，一个任务可以包含多个计时器
 class TimerTask {
   final String id;
@@ -12,6 +14,9 @@ class TimerTask {
   final DateTime createdAt;
   bool isRunning;
   String group;
+  final DateTime? reminderTime;
+  final bool? isRepeating;
+  final RepeatingPattern? repeatingPattern;
   Duration _elapsedDuration = Duration.zero;
 
   TimerTask({
@@ -23,6 +28,9 @@ class TimerTask {
     required this.createdAt,
     this.isRunning = false,
     required this.group,
+    this.reminderTime,
+    this.isRepeating,
+    this.repeatingPattern,
   });
 
   // 从JSON构造
@@ -55,6 +63,15 @@ class TimerTask {
       createdAt: DateTime.parse(json['createdAt'] as String),
       isRunning: json['isRunning'] as bool,
       group: json['group'] as String? ?? '默认',
+      reminderTime:
+          json['reminderTime'] != null
+              ? DateTime.parse(json['reminderTime'] as String)
+              : null,
+      isRepeating: json['isRepeating'] as bool?,
+      repeatingPattern:
+          json['repeatingPattern'] != null
+              ? RepeatingPattern.values[json['repeatingPattern'] as int]
+              : null,
     );
   }
 
@@ -69,6 +86,9 @@ class TimerTask {
       'createdAt': createdAt.toIso8601String(),
       'isRunning': isRunning,
       'group': group,
+      'reminderTime': reminderTime?.toIso8601String(),
+      'isRepeating': isRepeating,
+      'repeatingPattern': repeatingPattern?.index,
     };
   }
 
@@ -79,6 +99,9 @@ class TimerTask {
     required IconData icon,
     required List<TimerItem> timerItems,
     String? group,
+    DateTime? reminderTime,
+    bool? isRepeating,
+    RepeatingPattern? repeatingPattern,
   }) {
     return TimerTask(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -88,6 +111,9 @@ class TimerTask {
       timerItems: timerItems,
       createdAt: DateTime.now(),
       group: group ?? '默认',
+      reminderTime: reminderTime,
+      isRepeating: isRepeating,
+      repeatingPattern: repeatingPattern,
     );
   }
 
@@ -240,6 +266,9 @@ class TimerTask {
     List<TimerItem>? timerItems,
     bool? isRunning,
     String? group,
+    DateTime? reminderTime,
+    bool? isRepeating,
+    RepeatingPattern? repeatingPattern,
   }) {
     return TimerTask(
       id: id,
@@ -250,6 +279,9 @@ class TimerTask {
       createdAt: createdAt,
       isRunning: isRunning ?? this.isRunning,
       group: group ?? this.group,
+      reminderTime: reminderTime ?? this.reminderTime,
+      isRepeating: isRepeating ?? this.isRepeating,
+      repeatingPattern: repeatingPattern ?? this.repeatingPattern,
     );
   }
 }

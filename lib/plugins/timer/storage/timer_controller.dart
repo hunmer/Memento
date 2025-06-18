@@ -1,49 +1,65 @@
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
-
 import '../models/timer_task.dart';
 
-class TimerStorage {
-  final String pluginId;
+class TimerController {
   final StorageManager storage;
+  List<TimerTask> _tasks = [];
 
-  TimerStorage(this.pluginId, this.storage);
+  TimerController(this.storage);
+
+  List<TimerTask> getTasks() => _tasks;
 
   // 从存储加载任务
   Future<Map<String, dynamic>> loadTasks() async {
     try {
-      final data = await storage.read('$pluginId.tasks');
-      return {
-        'tasks':
-            data['tasks'] != null
-                ? (data['tasks'] as List)
-                    .map(
-                      (data) =>
-                          TimerTask.fromJson(data as Map<String, dynamic>),
-                    )
-                    .toList()
-                : <TimerTask>[],
-        'expandedGroups':
-            data['expandedGroups'] != null
-                ? Map<String, bool>.from(data['expandedGroups'])
-                : <String, bool>{},
-      };
+      final data = await storage.read('timer/tasks');
+      _tasks =
+          data['tasks'] != null
+              ? (data['tasks'] as List)
+                  .map(
+                    (data) => TimerTask.fromJson(data as Map<String, dynamic>),
+                  )
+                  .toList()
+              : <TimerTask>[];
+      return {'tasks': _tasks};
     } catch (e) {
-      return {'tasks': <TimerTask>[], 'expandedGroups': <String, bool>{}};
+      _tasks = <TimerTask>[];
+      return {'tasks': _tasks};
     }
   }
 
   // 保存任务到存储
-  Future<void> saveTasks(
-    List<TimerTask> tasks,
-    Map<String, bool> expandedGroups,
-  ) async {
+  Future<void> saveTasks(List<TimerTask> tasks) async {
     final tasksData = tasks.map((task) => task.toJson()).toList();
-    await storage.write('$pluginId.tasks', {
-      'tasks': tasksData,
-      'expandedGroups': expandedGroups,
-    });
+    await storage.write('timer/tasks', {'tasks': tasksData});
+  }
+
+  // 获取所有任务的分组名称（去重）
+  List<String> getGroups() {
+    final groups = _tasks.map((task) => task.group).toSet().toList();
+    return groups;
+  }
+
+  // 更新所有任务的分组名称
+  void updateTaskGroups(String oldName, String newName) {
+    for (var task in _tasks) {
+      if (task.group == oldName) {
+        task.group = newName;
+      }
+    }
+    saveTasks(_tasks);
+  }
+
+  // 删除分组并将相关任务移动到默认分组
+  void deleteGroup(String groupName) {
+    for (var task in _tasks) {
+      if (task.group == groupName) {
+        task.group = '默认';
+      }
+    }
+    saveTasks(_tasks);
   }
 
   // 创建默认的计时器任务
@@ -57,8 +73,8 @@ class TimerStorage {
         group: '测试',
         timerItems: [
           TimerItem.countUp(
-            name: '正计时1分钟',
-            targetDuration: const Duration(minutes: 1),
+            name: '正计时',
+            targetDuration: const Duration(seconds: 10),
           ),
         ],
       ),
@@ -70,8 +86,8 @@ class TimerStorage {
         group: '测试',
         timerItems: [
           TimerItem.countDown(
-            name: '倒计时1分钟',
-            duration: const Duration(minutes: 1),
+            name: '倒计时',
+            duration: const Duration(seconds: 10),
           ),
         ],
       ),

@@ -20,7 +20,6 @@ class TimerMainViewState extends State<TimerMainView> {
   List<TimerTask> _tasks = [];
   int _tasksPerRow = 2;
   Map<String, List<TimerTask>> _groupedTasks = {};
-  Map<String, bool> _expandedGroups = {};
 
   @override
   void initState() {
@@ -32,7 +31,6 @@ class TimerMainViewState extends State<TimerMainView> {
   void _updateTasksAndGroups() {
     _tasks = widget.plugin.getTasks();
     _groupedTasks = groupBy(_tasks, (TimerTask task) => task.group);
-    _expandedGroups = widget.plugin.expandedGroups;
   }
 
   Future<void> _loadConfig() async {
@@ -64,10 +62,6 @@ class TimerMainViewState extends State<TimerMainView> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.folder),
-              onPressed: () => widget.plugin.showGroupManagementDialog(context),
-            ),
-            IconButton(
               icon: const Icon(Icons.add),
               onPressed: _showAddTaskDialog,
             ),
@@ -77,27 +71,22 @@ class TimerMainViewState extends State<TimerMainView> {
           children:
               groups.map((group) {
                 final tasksInGroup = _groupedTasks[group]!;
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                return GridView.count(
+                  crossAxisCount: 1,
+                  childAspectRatio: 1.5,
                   padding: const EdgeInsets.all(8),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 1,
-                    childAspectRatio: 1,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemCount: tasksInGroup.length,
-                  itemBuilder: (context, taskIndex) {
-                    final task = tasksInGroup[taskIndex];
-                    return TimerTaskCard(
-                      task: task,
-                      onTap: _showTaskDetails,
-                      onEdit: _editTask,
-                      onReset: _resetTask,
-                      onDelete: _deleteTask,
-                    );
-                  },
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  children:
+                      tasksInGroup.map((task) {
+                        return TimerTaskCard(
+                          task: task,
+                          onTap: _showTaskDetails,
+                          onEdit: _editTask,
+                          onReset: _resetTask,
+                          onDelete: _deleteTask,
+                        );
+                      }).toList(),
                 );
               }).toList(),
         ),
@@ -106,9 +95,10 @@ class TimerMainViewState extends State<TimerMainView> {
   }
 
   void _showAddTaskDialog() async {
+    final groups = await widget.plugin.timerController.getGroups();
     final newTask = await showDialog<TimerTask>(
       context: context,
-      builder: (context) => AddTimerTaskDialog(groups: widget.plugin.groups),
+      builder: (context) => AddTimerTaskDialog(groups: groups),
     );
 
     if (newTask != null) {
@@ -116,7 +106,6 @@ class TimerMainViewState extends State<TimerMainView> {
       setState(() {
         _tasks = widget.plugin.getTasks();
         _groupedTasks = groupBy(_tasks, (TimerTask task) => task.group);
-        _expandedGroups = widget.plugin.expandedGroups;
       });
     }
   }
@@ -138,7 +127,7 @@ class TimerMainViewState extends State<TimerMainView> {
       context: context,
       builder:
           (context) => AddTimerTaskDialog(
-            groups: widget.plugin.groups,
+            groups: widget.plugin.timerController.getGroups(),
             initialTask: task,
           ),
     );
