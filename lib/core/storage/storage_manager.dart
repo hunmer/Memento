@@ -70,7 +70,7 @@ class StorageManager {
   }
 
   /// 获取插件存储路径
-  String getPluginPath(String pluginId) => 'plugins/$pluginId';
+  String getPluginPath(String pluginId) => '$pluginId';
 
   /// 插件数据操作
   Future<void> savePluginData(String pluginId, String key, dynamic value) =>
