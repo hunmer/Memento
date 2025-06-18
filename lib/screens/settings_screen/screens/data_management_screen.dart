@@ -27,24 +27,39 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
   }
 
   Future<void> _loadDocumentsDirectory() async {
-    final dir = await StorageManager.getApplicationDocumentsDirectory();
-    setState(() {
-      currentDirectory = dir;
-      directoryStack.push(dir);
-      _refreshFiles();
-    });
+    try {
+      final dir = await StorageManager.getApplicationDocumentsDirectory();
+      setState(() {
+        currentDirectory = dir;
+        directoryStack.push(dir);
+      });
+      await _refreshFiles();
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('无法加载文档目录: ${e.toString()}')));
+      debugPrint('Documents directory load error: ${e.toString()}');
+    }
   }
 
   Future<void> _refreshFiles() async {
-    if (currentDirectory != null) {
+    if (currentDirectory == null) return;
+
+    try {
+      final items = await currentDirectory!.list().toList();
       setState(() {
-        files = currentDirectory!.listSync();
+        files = items;
         files.sort((a, b) {
           if (a is Directory && b is! Directory) return -1;
           if (a is! Directory && b is Directory) return 1;
           return a.path.compareTo(b.path);
         });
       });
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('无法访问目录: ${e.toString()}')));
+      debugPrint('Directory access error: ${e.toString()}');
     }
   }
 
@@ -274,56 +289,82 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
     if (selectedPaths.isEmpty) return;
 
-    final archive = Archive();
-    for (var filePath in selectedPaths) {
-      if (FileSystemEntity.isDirectorySync(filePath)) {
-        _addDirectoryToArchive(archive, Directory(filePath));
-      } else {
-        final file = File(filePath);
-        final data = await file.readAsBytes();
-        archive.addFile(
-          ArchiveFile(path.basename(filePath), data.length, data),
+    try {
+      final archive = Archive();
+      for (var filePath in selectedPaths) {
+        if (FileSystemEntity.isDirectorySync(filePath)) {
+          _addDirectoryToArchive(archive, Directory(filePath));
+        } else {
+          final file = File(filePath);
+          final data = await file.readAsBytes();
+          archive.addFile(
+            ArchiveFile(path.basename(filePath), data.length, data),
+          );
+        }
+      }
+
+      final encoder = ZipEncoder();
+      final zipData = encoder.encode(archive);
+      if (zipData != null) {
+        final tempDir = await getTemporaryDirectory();
+        final zipFile = File(
+          path.join(
+            tempDir.path,
+            'export_${DateTime.now().millisecondsSinceEpoch}.zip',
+          ),
         );
+        await zipFile.writeAsBytes(zipData);
+
+        final savePath = await FilePicker.platform.saveFile(
+          fileName: 'data_export.zip',
+          dialogTitle: '选择导出位置',
+        );
+
+        if (savePath != null) {
+          await zipFile.copy(savePath);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('导出成功')));
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('导出已取消')));
+        }
       }
-    }
-
-    final encoder = ZipEncoder();
-    final zipData = encoder.encode(archive);
-    if (zipData != null) {
-      final tempDir = await getTemporaryDirectory();
-      final zipFile = File(
-        path.join(
-          tempDir.path,
-          'export_${DateTime.now().millisecondsSinceEpoch}.zip',
-        ),
-      );
-      await zipFile.writeAsBytes(zipData);
-
-      final savePath = await FilePicker.platform.saveFile(
-        fileName: 'data_export.zip',
-        dialogTitle: '保存导出文件',
-      );
-
-      if (savePath != null) {
-        await zipFile.copy(savePath);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('导出成功')));
-      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('导出失败: ${e.toString()}')));
     }
   }
 
-  void _addDirectoryToArchive(Archive archive, Directory directory) {
-    final files = directory.listSync(recursive: true);
-    for (var file in files) {
-      if (file is File) {
-        final relativePath = path.relative(
-          file.path,
-          from: directory.parent.path,
-        );
-        final data = file.readAsBytesSync();
-        archive.addFile(ArchiveFile(relativePath, data.length, data));
+  Future<void> _addDirectoryToArchive(
+    Archive archive,
+    Directory directory,
+  ) async {
+    try {
+      final files = await directory.list(recursive: true).toList();
+      for (var file in files) {
+        if (file is File) {
+          try {
+            final relativePath = path.relative(
+              file.path,
+              from: directory.parent.path,
+            );
+            final data = await file.readAsBytes();
+            archive.addFile(ArchiveFile(relativePath, data.length, data));
+          } catch (e) {
+            debugPrint(
+              'Failed to add file to archive: ${file.path}, error: ${e.toString()}',
+            );
+          }
+        }
       }
+    } catch (e) {
+      debugPrint(
+        'Failed to list directory: ${directory.path}, error: ${e.toString()}',
+      );
+      rethrow;
     }
   }
 
@@ -407,6 +448,14 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     }
   }
 
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    if (bytes < 1024 * 1024 * 1024)
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -421,22 +470,12 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 : null,
         actions: [
           IconButton(
-            icon: const Icon(Icons.create_new_folder),
-            onPressed: _createNewFolder,
-            tooltip: '新建文件夹',
-          ),
-          IconButton(
-            icon: const Icon(Icons.note_add),
-            onPressed: _createNewFile,
-            tooltip: '新建文件',
-          ),
-          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshFiles,
             tooltip: '刷新',
           ),
           IconButton(
-            icon: const Icon(Icons.file_upload),
+            icon: const Icon(Icons.upload_file),
             onPressed: _importFiles,
             tooltip: '导入文件',
           ),
@@ -452,47 +491,84 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
               tooltip: '移动选中项',
             ),
             IconButton(
-              icon: const Icon(Icons.ios_share),
+              icon: const Icon(Icons.download),
               onPressed: _exportSelected,
               tooltip: '导出选中项',
             ),
           ],
         ],
       ),
-      body:
-          currentDirectory == null
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                itemCount: files.length,
-                itemBuilder: (context, index) {
-                  final file = files[index];
-                  final isDirectory = file is Directory;
-                  return ListTile(
-                    leading:
-                        isDirectory
-                            ? const Icon(Icons.folder, color: Colors.amber)
-                            : const Icon(Icons.insert_drive_file),
-                    title: Text(path.basename(file.path)),
-                    subtitle:
-                        isDirectory
-                            ? null
-                            : Text('${(file as File).lengthSync()} bytes'),
-                    trailing: Checkbox(
-                      value: selectedItems[file.path] ?? false,
-                      onChanged:
-                          (value) => _toggleSelection(file.path, isDirectory),
+      body: Column(
+        children: [
+          Expanded(
+            child:
+                currentDirectory == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                      itemCount: files.length,
+                      itemBuilder: (context, index) {
+                        final file = files[index];
+                        final isDirectory = file is Directory;
+                        return ListTile(
+                          leading:
+                              isDirectory
+                                  ? const Icon(
+                                    Icons.folder,
+                                    color: Colors.amber,
+                                  )
+                                  : const Icon(Icons.insert_drive_file),
+                          title: Text(path.basename(file.path)),
+                          subtitle:
+                              isDirectory
+                                  ? null
+                                  : Text(
+                                    _formatFileSize(
+                                      (file as File).lengthSync(),
+                                    ),
+                                  ),
+                          trailing: Checkbox(
+                            value: selectedItems[file.path] ?? false,
+                            onChanged:
+                                (value) =>
+                                    _toggleSelection(file.path, isDirectory),
+                          ),
+                          onTap: () {
+                            if (isDirectory) {
+                              _navigateToDirectory(file as Directory);
+                            }
+                          },
+                          onLongPress: () {
+                            _showContextMenu(file.path, isDirectory);
+                          },
+                        );
+                      },
                     ),
-                    onTap: () {
-                      if (isDirectory) {
-                        _navigateToDirectory(file as Directory);
-                      }
-                    },
-                    onLongPress: () {
-                      _showContextMenu(file.path, isDirectory);
-                    },
-                  );
-                },
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.create_new_folder),
+                    label: const Text('新建文件夹'),
+                    onPressed: _createNewFolder,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.note_add),
+                    label: const Text('新建文件'),
+                    onPressed: _createNewFile,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -514,38 +590,61 @@ class FolderPickerDialog extends StatefulWidget {
 class _FolderPickerDialogState extends State<FolderPickerDialog> {
   late Directory currentDirectory;
   List<FileSystemEntity> folders = [];
+  bool isLoading = false;
+  String? errorMessage;
   final Stack<Directory> directoryStack = Stack<Directory>();
 
   @override
   void initState() {
     super.initState();
     currentDirectory = widget.initialDirectory;
+    directoryStack.push(currentDirectory);
     _loadFolders();
   }
 
   Future<void> _loadFolders() async {
-    final items = currentDirectory.listSync();
     setState(() {
-      folders = items.where((item) => item is Directory).toList();
-      folders.sort((a, b) => a.path.compareTo(b.path));
-      directoryStack.push(currentDirectory);
+      isLoading = true;
+      errorMessage = null;
     });
+
+    try {
+      final items = await currentDirectory.list().toList();
+      final dirs = items.where((item) => item is Directory).toList();
+      dirs.sort((a, b) => a.path.compareTo(b.path));
+
+      setState(() {
+        folders = [
+          Directory('..'), // 特殊项表示跳到上级目录
+          ...dirs,
+        ];
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = '无法加载目录: ${e.toString()}';
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
-  void _navigateTo(Directory dir) {
+  Future<void> _navigateTo(Directory dir) async {
     setState(() {
       currentDirectory = dir;
-      _loadFolders();
     });
+    await _loadFolders();
+    directoryStack.push(dir);
   }
 
-  void _navigateUp() {
+  Future<void> _navigateUp() async {
     if (directoryStack.length > 1) {
+      directoryStack.pop();
       setState(() {
-        directoryStack.pop();
         currentDirectory = directoryStack.peek();
-        _loadFolders();
       });
+      await _loadFolders();
     }
   }
 
@@ -554,12 +653,6 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          if (directoryStack.length > 1)
-            IconButton(
-              icon: const Icon(Icons.arrow_upward),
-              onPressed: _navigateUp,
-              tooltip: '上一级',
-            ),
           Expanded(
             child: Text(
               path.basename(currentDirectory.path),
@@ -570,18 +663,34 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: folders.length,
-          itemBuilder: (context, index) {
-            final folder = folders[index] as Directory;
-            return ListTile(
-              leading: const Icon(Icons.folder, color: Colors.amber),
-              title: Text(path.basename(folder.path)),
-              onTap: () => _navigateTo(folder),
-            );
-          },
-        ),
+        child:
+            isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : errorMessage != null
+                ? Center(child: Text(errorMessage!))
+                : folders.isEmpty
+                ? const Center(child: Text('没有子目录'))
+                : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: folders.length,
+                  itemBuilder: (context, index) {
+                    final folder = folders[index] as Directory;
+                    return ListTile(
+                      leading:
+                          folder.path == '..'
+                              ? const Icon(Icons.arrow_upward)
+                              : const Icon(Icons.folder, color: Colors.amber),
+                      title:
+                          folder.path == '..'
+                              ? const Text('跳到上级目录')
+                              : Text(path.basename(folder.path)),
+                      onTap:
+                          folder.path == '..'
+                              ? () => _navigateUp()
+                              : () => _navigateTo(folder),
+                    );
+                  },
+                ),
       ),
       actions: [
         TextButton(

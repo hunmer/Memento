@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
@@ -83,6 +82,7 @@ void main() async {
     // 设置全局错误处理器
     FlutterError.onError = (details) {
       logger?.log(details.exceptionAsString(), level: 'ERROR');
+      debugPrint(details.toString());
     };
 
     // 注册内置插件
