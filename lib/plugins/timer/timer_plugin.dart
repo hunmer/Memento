@@ -7,17 +7,15 @@ import 'models/timer_task.dart';
 import 'models/timer_item.dart';
 import 'views/timer_main_view.dart';
 import 'services/timer_service.dart';
-import 'managers/timer_group_manager.dart';
-import 'storage/timer_storage.dart';
+import 'storage/timer_controller.dart';
 
 class TimerPlugin extends BasePlugin {
   static final TimerPlugin instance = TimerPlugin._internal();
-  late final TimerGroupManager _groupManager;
-  late final TimerStorage _storage;
+  late final TimerController timerController;
 
   TimerPlugin._internal() {
-    _groupManager = TimerGroupManager(_tasks, _expandedGroups);
-    _storage = TimerStorage(_id, storage);
+    timerController = TimerController(storage);
+    timerController.loadTasks();
   }
 
   static const String _id = 'timer';
@@ -28,8 +26,6 @@ class TimerPlugin extends BasePlugin {
   static const String _pluginDir = 'timer';
 
   List<TimerTask> _tasks = [];
-  Map<String, bool> _expandedGroups = {};
-
   @override
   String get id => _id;
 
@@ -104,40 +100,28 @@ class TimerPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // 总计时器数
-              Column(
-                children: [
-                  Text('总计时器', style: theme.textTheme.bodyMedium),
-                  Text(
-                    '${_tasks.length}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // 总计时器数
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Column(
+                    children: [
+                      Text('总计时器', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${_tasks.length}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-
-              // 当前运行中的计时器
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text('当前运行', style: theme.textTheme.bodyMedium),
-                  Text(
-                    runningTasks.isEmpty ? '无' : runningTaskNames,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color:
-                          runningTasks.isNotEmpty
-                              ? theme.colorScheme.primary
-                              : null,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -146,17 +130,6 @@ class TimerPlugin extends BasePlugin {
 
   // 获取所有计时器任务
   List<TimerTask> getTasks() => _tasks;
-
-  // 获取分组列表
-  List<String> get groups => _groupManager.groups;
-
-  // 获取分组展开状态
-  Map<String, bool> get expandedGroups => _groupManager.expandedGroups;
-
-  // 切换分组展开状态
-  void toggleGroupExpansion(String group) {
-    _groupManager.toggleGroupExpansion(group);
-  }
 
   // 添加新任务
   Future<void> addTask(TimerTask task) async {
@@ -205,25 +178,17 @@ class TimerPlugin extends BasePlugin {
 
   // 从存储加载任务
   Future<void> _loadTasks() async {
-    final data = await _storage.loadTasks();
+    final data = await timerController.loadTasks();
     _tasks = data['tasks'] as List<TimerTask>;
-    _expandedGroups = data['expandedGroups'] as Map<String, bool>;
-
     // 如果没有任何任务，添加默认示例任务
     if (_tasks.isEmpty) {
-      _tasks.addAll(TimerStorage.createDefaultTasks());
+      _tasks.addAll(TimerController.createDefaultTasks());
       await _saveTasks();
     }
   }
 
   // 保存任务到存储
   Future<void> _saveTasks() async {
-    await _storage.saveTasks(_tasks, _expandedGroups);
-  }
-
-  // 显示分组管理对话框
-  void showGroupManagementDialog(BuildContext context) {
-    _groupManager.showGroupManagementDialog(context);
-    _saveTasks();
+    await timerController.saveTasks(_tasks);
   }
 }

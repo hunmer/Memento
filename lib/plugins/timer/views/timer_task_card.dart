@@ -80,85 +80,89 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
         child: InkWell(
           onTap: () => widget.onTap(task),
           onLongPress: () => _showContextMenu(context, task),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 任务图标和名称
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: task.color,
-                        shape: BoxShape.circle,
+          child: Container(
+            constraints: BoxConstraints(minHeight: 100), // 添加最小高度约束
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min, // 确保Column只占用最小空间
+                children: [
+                  // 任务图标和名称
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: task.color,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(task.icon, color: Colors.white, size: 24),
                       ),
-                      child: Icon(task.icon, color: Colors.white, size: 24),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        task.name,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          task.name,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
 
-                // 计时器类型标签和状态
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 8,
-                  children:
-                      task.timerItems.map((timer) {
-                        if (timer.isRunning) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildTimerTypeChip(timer),
-                              const SizedBox(height: 2),
-                              // 使用背景颜色显示进度
-                              Container(
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(2),
-                                  color: Colors.grey[300],
-                                ),
-                                child: FractionallySizedBox(
-                                  alignment: Alignment.centerLeft,
-                                  widthFactor:
-                                      timer.completedDuration.inSeconds /
-                                      timer.duration.inSeconds,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(2),
-                                      color: task.color,
+                  // 计时器类型标签和状态
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 8,
+                    children:
+                        task.timerItems.map((timer) {
+                          if (timer.isRunning) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildTimerTypeChip(timer),
+                                const SizedBox(height: 2),
+                                // 使用背景颜色显示进度
+                                Container(
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(2),
+                                    color: Colors.grey[300],
+                                  ),
+                                  child: FractionallySizedBox(
+                                    alignment: Alignment.centerLeft,
+                                    widthFactor:
+                                        timer.completedDuration.inSeconds /
+                                        timer.duration.inSeconds,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(2),
+                                        color: task.color,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          );
-                        } else {
-                          return _buildTimerTypeChip(timer);
-                        }
-                      }).toList(),
-                ),
+                              ],
+                            );
+                          } else {
+                            return _buildTimerTypeChip(timer);
+                          }
+                        }).toList(),
+                  ),
 
-                const Spacer(),
+                  const Spacer(),
 
-                // 控制按钮
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [_buildControlButton(task)],
-                ),
-              ],
+                  // 控制按钮
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [_buildControlButton(task)],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -1,5 +1,6 @@
+import 'package:Memento/widgets/group_selector_dialog.dart';
 import 'package:flutter/material.dart';
-import '../models/timer_task.dart';
+import '../models/timer_task.dart' show TimerTask, RepeatingPattern;
 import '../models/timer_item.dart';
 import '../../../widgets/circle_icon_picker.dart';
 
@@ -20,6 +21,10 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
   late Color _selectedColor;
   late IconData _selectedIcon;
   late String? _selectedGroup;
+  late bool _hasReminder;
+  late DateTime? _reminderTime;
+  late bool _isRepeating;
+  late RepeatingPattern _repeatingPattern;
 
   @override
   void initState() {
@@ -37,6 +42,10 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
       _selectedColor = Colors.blue;
       _selectedIcon = Icons.timer;
       _selectedGroup = null;
+      _hasReminder = false;
+      _reminderTime = null;
+      _isRepeating = false;
+      _repeatingPattern = RepeatingPattern.daily;
     }
   }
 
@@ -100,25 +109,137 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
               const SizedBox(height: 16),
 
               // 分组选择
-              DropdownButtonFormField<String>(
-                value: _selectedGroup,
+              InputDecorator(
                 decoration: const InputDecoration(
                   labelText: '选择分组',
                   border: OutlineInputBorder(),
                 ),
-                items: [
-                  ...widget.groups.map(
-                    (group) =>
-                        DropdownMenuItem(value: group, child: Text(group)),
+                child: InkWell(
+                  onTap: () async {
+                    final selectedGroup = await showDialog<String>(
+                      context: context,
+                      builder:
+                          (context) => GroupSelectorDialog(
+                            groups: widget.groups,
+                            initialSelectedGroup: _selectedGroup,
+                            onGroupRenamed: (oldName, newName) {
+                              setState(() {
+                                if (_selectedGroup == oldName) {
+                                  _selectedGroup = newName;
+                                }
+                              });
+                              // TODO: 这里需要添加更新所有相关任务分组的逻辑
+                            },
+                            onGroupDeleted: (groupName) {
+                              setState(() {
+                                if (_selectedGroup == groupName) {
+                                  _selectedGroup = null;
+                                }
+                              });
+                              // TODO: 这里需要添加删除分组后更新所有相关任务分组的逻辑
+                            },
+                          ),
+                    );
+                    if (selectedGroup != null) {
+                      setState(() {
+                        _selectedGroup = selectedGroup;
+                      });
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _selectedGroup ?? '未选择分组',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                        const Icon(Icons.arrow_drop_down),
+                      ],
+                    ),
                   ),
-                ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 提醒设置
+              SwitchListTile(
+                title: const Text('设置提醒'),
+                value: _hasReminder,
                 onChanged: (value) {
                   setState(() {
-                    _selectedGroup = value == '' ? null : value;
+                    _hasReminder = value;
+                    if (value && _reminderTime == null) {
+                      _reminderTime = DateTime.now().add(
+                        const Duration(hours: 1),
+                      );
+                    }
                   });
                 },
               ),
+              if (_hasReminder) ...[
+                ListTile(
+                  title: Text('提醒时间: ${_formatDateTime(_reminderTime!)}'),
+                  trailing: const Icon(Icons.edit),
+                  onTap: () async {
+                    final selectedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(_reminderTime!),
+                    );
+                    if (selectedTime != null) {
+                      setState(() {
+                        _reminderTime = DateTime(
+                          _reminderTime!.year,
+                          _reminderTime!.month,
+                          _reminderTime!.day,
+                          selectedTime.hour,
+                          selectedTime.minute,
+                        );
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
               const SizedBox(height: 16),
+
+              // 重复设置
+              SwitchListTile(
+                title: const Text('重复任务'),
+                value: _isRepeating,
+                onChanged: (value) {
+                  setState(() => _isRepeating = value);
+                },
+              ),
+              if (_isRepeating) ...[
+                DropdownButtonFormField<RepeatingPattern>(
+                  value: _repeatingPattern,
+                  decoration: const InputDecoration(
+                    labelText: '重复模式',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: RepeatingPattern.daily,
+                      child: Text('每天'),
+                    ),
+                    DropdownMenuItem(
+                      value: RepeatingPattern.weekly,
+                      child: Text('每周'),
+                    ),
+                    DropdownMenuItem(
+                      value: RepeatingPattern.monthly,
+                      child: Text('每月'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _repeatingPattern = value!);
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
 
               // 计时器列表
               ..._timerItems.map((timer) => _buildTimerItemTile(timer)),
@@ -205,12 +326,20 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
         icon: _selectedIcon,
         timerItems: _timerItems,
         group: _selectedGroup,
+        reminderTime: _reminderTime,
+        isRepeating: _isRepeating,
+        repeatingPattern: _repeatingPattern,
       );
       Navigator.of(context).pop(task);
     }
   }
 
   // 删除 _showIconSelectionDialog 方法，因为我们现在使用 CircleIconPicker
+
+  String _formatDateTime(DateTime dateTime) {
+    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
 
   String _formatDuration(Duration duration) {
     final hours = duration.inHours;
