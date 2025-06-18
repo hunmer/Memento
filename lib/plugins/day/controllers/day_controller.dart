@@ -5,9 +5,9 @@ import '../models/memorial_day.dart';
 import '../day_plugin.dart';
 
 enum SortMode {
-  upcoming,  // 即将发生
-  recent,    // 最近添加
-  manual     // 手动排序
+  upcoming, // 即将发生
+  recent, // 最近添加
+  manual, // 手动排序
 }
 
 class DayController extends ChangeNotifier {
@@ -17,7 +17,7 @@ class DayController extends ChangeNotifier {
 
   List<MemorialDay> get memorialDays => _memorialDays;
   bool get isCardView => _isCardView;
-  
+
   // 判断是否允许拖拽排序
   bool get isDraggable => _sortMode == SortMode.manual;
 
@@ -50,10 +50,10 @@ class DayController extends ChangeNotifier {
         '${_plugin.pluginDir}/view_preference.json',
         defaultConfig,
       );
-      
+
       final config = jsonDecode(configStr);
       _isCardView = config['isCardView'] ?? true;
-      
+
       // 解析排序模式
       if (config['sortMode'] != null) {
         final sortModeStr = config['sortMode'].toString();
@@ -103,7 +103,7 @@ class DayController extends ChangeNotifier {
       '${_plugin.pluginDir}/memorial_days.json',
       defaultContent,
     );
-    
+
     try {
       final List<dynamic> jsonList = jsonDecode(content);
       _memorialDays.clear();
@@ -111,7 +111,7 @@ class DayController extends ChangeNotifier {
       _memorialDays.addAll(
         jsonList.map((json) => MemorialDay.fromJson(json)).toList(),
       );
-      
+
       // 检查是否所有项目都有有效的sortIndex
       var hasInvalidIndex = _memorialDays.any((day) => day.sortIndex < 0);
       if (hasInvalidIndex) {
@@ -148,7 +148,10 @@ class DayController extends ChangeNotifier {
     // 在手动排序模式下，新项目添加到末尾
     if (_sortMode == SortMode.manual) {
       final newMemorialDay = memorialDay.copyWith(
-        sortIndex: _memorialDays.isEmpty ? 0 : _memorialDays.map((d) => d.sortIndex).reduce(max) + 1
+        sortIndex:
+            _memorialDays.isEmpty
+                ? 0
+                : _memorialDays.map((d) => d.sortIndex).reduce(max) + 1,
       );
       _memorialDays.add(newMemorialDay);
     } else {
@@ -181,7 +184,9 @@ class DayController extends ChangeNotifier {
   void _sortMemorialDays() {
     switch (_sortMode) {
       case SortMode.upcoming:
-        _memorialDays.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+        _memorialDays.sort(
+          (a, b) => a.daysRemaining.compareTo(b.daysRemaining),
+        );
         break;
       case SortMode.recent:
         _memorialDays.sort((a, b) => b.creationDate.compareTo(a.creationDate));
@@ -217,8 +222,10 @@ class DayController extends ChangeNotifier {
       newSortIndex = _memorialDays[newIndex - 1].sortIndex + 1.0;
     } else {
       // 移动到中间，取前后两项sortIndex的平均值
-      newSortIndex = (_memorialDays[newIndex - 1].sortIndex + 
-                      _memorialDays[newIndex + 1].sortIndex) / 2.0;
+      newSortIndex =
+          (_memorialDays[newIndex - 1].sortIndex +
+              _memorialDays[newIndex + 1].sortIndex) /
+          2.0;
     }
 
     // 更新移动项目的sortIndex
@@ -228,7 +235,7 @@ class DayController extends ChangeNotifier {
 
     // 保存更改
     await _saveMemorialDays();
-    
+
     // 通知监听器
     notifyListeners();
   }

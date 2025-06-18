@@ -26,10 +26,8 @@ class ConfigManager {
   /// 加载应用级配置
   Future<void> _loadAppConfig() async {
     try {
-      final configStr = await _storage.readString(
-        'configs/$_appConfigKey.json',
-      );
-      _appConfig.addAll(jsonDecode(configStr) as Map<String, dynamic>);
+      final config = await _storage.readJson('configs/$_appConfigKey.json');
+      _appConfig.addAll(config as Map<String, dynamic>);
     } catch (e) {
       // 如果没有找到配置文件或解析失败，使用默认配置并创建配置文件
       debugPrint('未找到应用配置或解析失败，将创建默认配置: $e');
