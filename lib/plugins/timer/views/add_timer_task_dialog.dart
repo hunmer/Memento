@@ -107,7 +107,6 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                   border: OutlineInputBorder(),
                 ),
                 items: [
-                  const DropdownMenuItem(value: null, child: Text('默认')),
                   ...widget.groups.map(
                     (group) =>
                         DropdownMenuItem(value: group, child: Text(group)),
@@ -115,7 +114,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                 ],
                 onChanged: (value) {
                   setState(() {
-                    _selectedGroup = value;
+                    _selectedGroup = value == '' ? null : value;
                   });
                 },
               ),

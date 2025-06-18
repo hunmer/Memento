@@ -14,7 +14,6 @@ import 'permission_controller.dart';
 class ExportController {
   BuildContext? _context;
   bool _mounted = true;
-  late PermissionController _permissionController;
 
   ExportController(BuildContext context) {
     initialize(context);
@@ -22,20 +21,12 @@ class ExportController {
 
   void initialize(BuildContext context) {
     _context = context;
-    _permissionController = PermissionController(context);
   }
 
   Future<void> exportData([BuildContext? context]) async {
     final currentContext = context ?? _context;
     if (currentContext == null || !_mounted) return;
     try {
-      // 检查权限
-      final hasPermission =
-          await _permissionController.checkAndRequestPermissions();
-      if (!hasPermission) {
-        return;
-      }
-
       // 获取所有插件
       final plugins = globalPluginManager.allPlugins;
 

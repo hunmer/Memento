@@ -40,11 +40,6 @@ class TimerMainViewState extends State<TimerMainView> {
       final config = await widget.plugin.storage.read(
         'configs/${widget.plugin.id}.json',
       );
-      if (config.isNotEmpty) {
-        setState(() {
-          _tasksPerRow = config['maxTasksPerRow'] ?? 2;
-        });
-      }
     } catch (e) {
       // 如果配置不存在，使用默认值
     }
@@ -52,53 +47,42 @@ class TimerMainViewState extends State<TimerMainView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
-        title: Text(widget.plugin.name),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.folder),
-            onPressed: () => widget.plugin.showGroupManagementDialog(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _showAddTaskDialog,
-          ),
-        ],
-      ),
-      body: ListView.builder(
-        itemCount: _groupedTasks.length,
-        itemBuilder: (context, index) {
-          final group = _groupedTasks.keys.elementAt(index);
-          final tasksInGroup = _groupedTasks[group]!;
-          final isExpanded = _expandedGroups[group] ?? true;
+    final groups = _groupedTasks.keys.toList();
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                title: Text(group),
-                trailing: Icon(
-                  isExpanded ? Icons.expand_less : Icons.expand_more,
-                ),
-                onTap: () {
-                  setState(() {
-                    widget.plugin.toggleGroupExpansion(group);
-                    _expandedGroups = widget.plugin.expandedGroups;
-                  });
-                },
-              ),
-              if (isExpanded)
-                GridView.builder(
+    return DefaultTabController(
+      length: groups.length,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => PluginManager.toHomeScreen(context),
+          ),
+          title: Text(widget.plugin.name),
+          bottom: TabBar(
+            isScrollable: true,
+            tabs: groups.map((group) => Tab(text: group)).toList(),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.folder),
+              onPressed: () => widget.plugin.showGroupManagementDialog(context),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _showAddTaskDialog,
+            ),
+          ],
+        ),
+        body: TabBarView(
+          children:
+              groups.map((group) {
+                final tasksInGroup = _groupedTasks[group]!;
+                return GridView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: _tasksPerRow,
+                    crossAxisCount: 1,
                     childAspectRatio: 1,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
@@ -114,10 +98,9 @@ class TimerMainViewState extends State<TimerMainView> {
                       onDelete: _deleteTask,
                     );
                   },
-                ),
-            ],
-          );
-        },
+                );
+              }).toList(),
+        ),
       ),
     );
   }

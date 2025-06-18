@@ -14,7 +14,12 @@ class PermissionController {
     if (!UniversalPlatform.isAndroid) {
       return [];
     }
-    return [Permission.photos, Permission.videos, Permission.audio];
+    return [
+      Permission.photos,
+      Permission.videos,
+      Permission.audio,
+      Permission.notification,
+    ];
   }
 
   // 检查单个权限的状态
@@ -72,6 +77,8 @@ class PermissionController {
         return '音频';
       case Permission.storage:
         return '存储';
+      case Permission.notification:
+        return '通知';
       default:
         return '未知';
     }
@@ -147,8 +154,6 @@ class PermissionController {
       }
     }
 
-    // iOS 的文件访问权限通过 file_picker 自动处理
-    return true;
     // iOS 的文件访问权限通过 file_picker 自动处理
     return true;
   }

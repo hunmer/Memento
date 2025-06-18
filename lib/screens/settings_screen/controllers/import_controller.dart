@@ -10,10 +10,8 @@ import 'permission_controller.dart';
 class ImportController {
   final BuildContext context;
   bool _mounted = true;
-  final PermissionController _permissionController;
 
-  ImportController(this.context)
-    : _permissionController = PermissionController(context);
+  ImportController(this.context);
 
   void dispose() {
     _mounted = false;
@@ -22,13 +20,6 @@ class ImportController {
   Future<void> importData() async {
     if (!_mounted) return;
     try {
-      // 检查权限
-      final hasPermission =
-          await _permissionController.checkAndRequestPermissions();
-      if (!hasPermission || !_mounted) {
-        return;
-      }
-
       // 选择要导入的ZIP文件
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
