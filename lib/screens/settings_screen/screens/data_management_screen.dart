@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/utils/file_utils.dart';
+import 'package:Memento/core/utils/zip.dart';
+import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -290,81 +293,67 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     if (selectedPaths.isEmpty) return;
 
     try {
-      final archive = Archive();
+      // 创建一个临时目录来存储要压缩的文件
+      final tempDir = await Directory.systemTemp.createTemp('memento_temp_');
+
+      // 复制选中的文件/目录到临时目录
       for (var filePath in selectedPaths) {
+        final fileName = path.basename(filePath);
+        final targetPath = path.join(tempDir.path, fileName);
+
         if (FileSystemEntity.isDirectorySync(filePath)) {
-          _addDirectoryToArchive(archive, Directory(filePath));
-        } else {
-          final file = File(filePath);
-          final data = await file.readAsBytes();
-          archive.addFile(
-            ArchiveFile(path.basename(filePath), data.length, data),
+          await FileUtils.copyDirectory(
+            Directory(filePath),
+            Directory(targetPath),
           );
+        } else {
+          await File(filePath).copy(targetPath);
         }
       }
 
-      final encoder = ZipEncoder();
-      final zipData = encoder.encode(archive);
-      if (zipData != null) {
-        final tempDir = await getTemporaryDirectory();
-        final zipFile = File(
-          path.join(
-            tempDir.path,
-            'export_${DateTime.now().millisecondsSinceEpoch}.zip',
+      // 创建临时 ZIP 文件
+      final tempZipPath = '${tempDir.path}/memento_export.zip';
+      final zipFile = ZipFileEncoder();
+      zipFile.create(tempZipPath);
+
+      // 添加所有文件到ZIP
+      await for (final entity in tempDir.list(recursive: true)) {
+        if (entity is File) {
+          final relativePath = path.relative(entity.path, from: tempDir.path);
+          await zipFile.addFile(entity, relativePath);
+        }
+      }
+
+      zipFile.close();
+      final savePath = await exportZIP(
+        tempZipPath,
+        'memento_export_${DateTime.now().millisecondsSinceEpoch}.zip',
+      );
+
+      if (savePath != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('导出成功到: $savePath'),
+            duration: const Duration(seconds: 5),
           ),
         );
-        await zipFile.writeAsBytes(zipData);
-
-        final savePath = await FilePicker.platform.saveFile(
-          fileName: 'data_export.zip',
-          dialogTitle: '选择导出位置',
-        );
-
-        if (savePath != null) {
-          await zipFile.copy(savePath);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('导出成功')));
-        } else {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('导出已取消')));
-        }
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('导出已取消')));
       }
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('导出失败: ${e.toString()}')));
-    }
-  }
 
-  Future<void> _addDirectoryToArchive(
-    Archive archive,
-    Directory directory,
-  ) async {
-    try {
-      final files = await directory.list(recursive: true).toList();
-      for (var file in files) {
-        if (file is File) {
-          try {
-            final relativePath = path.relative(
-              file.path,
-              from: directory.parent.path,
-            );
-            final data = await file.readAsBytes();
-            archive.addFile(ArchiveFile(relativePath, data.length, data));
-          } catch (e) {
-            debugPrint(
-              'Failed to add file to archive: ${file.path}, error: ${e.toString()}',
-            );
-          }
-        }
-      }
+      // 删除临时目录
+      await tempDir.delete(recursive: true);
     } catch (e) {
-      debugPrint(
-        'Failed to list directory: ${directory.path}, error: ${e.toString()}',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('导出失败: ${e.toString()}'),
+          duration: const Duration(seconds: 5),
+        ),
       );
-      rethrow;
+      debugPrint('Export error: ${e.toString()}');
+      debugPrintStack();
     }
   }
 
