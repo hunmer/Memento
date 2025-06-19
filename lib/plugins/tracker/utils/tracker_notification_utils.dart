@@ -1,4 +1,5 @@
 import '../../../core/notification_manager.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:logging/logging.dart';
 
 class TrackerNotificationUtils {
@@ -14,9 +15,16 @@ class TrackerNotificationUtils {
       onSelectNotification: onSelectNotification,
       appName: '目标跟踪提醒',
       appId: 'com.example.memento.tracker',
+    );
+
+    // 创建目标跟踪插件专用的通知通道
+    await NotificationManager.createNotificationChannel(
       channelId: _channelId,
       channelName: _channelName,
       channelDescription: _channelDescription,
+      importance: Importance.high,
+      enableVibration: true,
+      enableSound: true,
     );
   }
 
@@ -44,8 +52,6 @@ class TrackerNotificationUtils {
         body: body,
         scheduledDate: scheduledDate,
         channelId: _channelId,
-        channelName: _channelName,
-        channelDescription: _channelDescription,
         isDaily: true,
         payload: payload,
       );
@@ -98,8 +104,6 @@ class TrackerNotificationUtils {
       title: title,
       body: body,
       channelId: _channelId,
-      channelName: _channelName,
-      channelDescription: _channelDescription,
       payload: payload,
     );
   }

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:Memento/core/notification_manager.dart';
+
 /// 计时器类型枚举
 enum TimerType {
   /// 正计时 - 从0开始向上计时
@@ -36,8 +38,9 @@ class TimerItem {
   final int? cycles; // 循环次数
   int? currentCycle; // 当前循环
   bool? isWorkPhase; // 是否处于工作阶段
-  final int repeatCount; // 配置的重复次数
+  late int repeatCount; // 配置的重复次数
   int _currentRepeatCount; // 当前剩余的重复次数
+  late bool enableNotification; // 是否启用消息提醒
 
   TimerItem({
     required this.id,
@@ -55,6 +58,7 @@ class TimerItem {
     this.intervalAlertDuration,
     this.onIntervalAlert,
     this.repeatCount = 1,
+    this.enableNotification = false, // 默认关闭消息提醒
   }) : _currentRepeatCount = repeatCount;
 
   // 从JSON构造
@@ -82,6 +86,7 @@ class TimerItem {
           json['intervalAlertDuration'] != null
               ? Duration(seconds: json['intervalAlertDuration'] as int)
               : null,
+      enableNotification: json['enableNotification'] as bool? ?? false,
     );
   }
 
@@ -100,6 +105,7 @@ class TimerItem {
       'isWorkPhase': isWorkPhase,
       'repeatCount': repeatCount, // 序列化时只保存配置值
       'intervalAlertDuration': intervalAlertDuration?.inSeconds,
+      'enableNotification': enableNotification,
     };
   }
 
@@ -108,6 +114,7 @@ class TimerItem {
     required String name,
     Duration? targetDuration,
     Duration? intervalAlertDuration,
+    bool enableNotification = false,
   }) {
     return TimerItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -116,6 +123,7 @@ class TimerItem {
       duration: targetDuration ?? const Duration(hours: 1), // 默认目标1小时
       completedDuration: Duration.zero,
       intervalAlertDuration: intervalAlertDuration,
+      enableNotification: enableNotification,
     );
   }
 
@@ -124,6 +132,7 @@ class TimerItem {
     required String name,
     required Duration duration,
     Duration? intervalAlertDuration,
+    bool enableNotification = false,
   }) {
     return TimerItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -132,6 +141,7 @@ class TimerItem {
       duration: duration,
       completedDuration: Duration.zero,
       intervalAlertDuration: intervalAlertDuration,
+      enableNotification: enableNotification,
     );
   }
 
@@ -142,6 +152,7 @@ class TimerItem {
     Duration breakDuration = const Duration(minutes: 5),
     int cycles = 4,
     Duration? intervalAlertDuration,
+    bool enableNotification = false,
   }) {
     // 计算总时长 = 工作时长 * 循环次数 + 休息时长 * (循环次数 - 1)
     final totalDuration = workDuration * cycles + breakDuration * (cycles - 1);
@@ -258,6 +269,13 @@ class TimerItem {
         decrementRepeatCount();
         start(); // 重新启动计时器
       } else {
+        // 发送完成通知
+        if (enableNotification) {
+          NotificationManager.showInstantNotification(
+            title: '正时器完成',
+            body: '正时器"$name"已完成',
+          );
+        }
         onComplete?.call();
       }
       // 强制UI更新
@@ -286,6 +304,12 @@ class TimerItem {
         decrementRepeatCount();
         start(); // 重新启动计时器
       } else {
+        if (enableNotification) {
+          NotificationManager.showInstantNotification(
+            title: '倒计时器完成',
+            body: '倒计时器"$name"已完成',
+          );
+        }
         onComplete?.call();
       }
     }
@@ -356,6 +380,12 @@ class TimerItem {
           decrementRepeatCount();
           start(); // 重新启动计时器
         } else {
+          if (enableNotification) {
+            NotificationManager.showInstantNotification(
+              title: '番茄钟计时器完成',
+              body: '番茄钟计时器"$name"已完成',
+            );
+          }
           onComplete?.call();
         }
         return;
