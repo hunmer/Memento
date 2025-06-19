@@ -126,7 +126,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '重复 ${widget.task.repeatCount} 次',
+                            '重复 ${widget.task.remainingRepeatCount}/${widget.task.repeatCount} 次',
                             style: Theme.of(
                               context,
                             ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -226,8 +226,8 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
             Padding(
               padding: const EdgeInsets.only(right: 4),
               child: Text(
-                '×${timer.repeatCount}',
-                style: const TextStyle(
+                '×${timer.getCurrentRepeatCount()}',
+                style: TextStyle(
                   fontSize: 10,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

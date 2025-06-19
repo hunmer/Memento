@@ -587,7 +587,7 @@ class _AddTimerItemDialogState extends State<_AddTimerItemDialog> {
               minutes: _minutes,
               seconds: _seconds,
             ),
-          )..repeatCount = _repeatCount.clamp(1, 100);
+          );
           break;
 
         case TimerType.countDown:
@@ -598,7 +598,7 @@ class _AddTimerItemDialogState extends State<_AddTimerItemDialog> {
               minutes: _minutes,
               seconds: _seconds,
             ),
-          )..repeatCount = _repeatCount.clamp(1, 100);
+          );
           break;
 
         case TimerType.pomodoro:
@@ -607,7 +607,7 @@ class _AddTimerItemDialogState extends State<_AddTimerItemDialog> {
             workDuration: Duration(minutes: _workMinutes),
             breakDuration: Duration(minutes: _breakMinutes),
             cycles: _cycles,
-          )..repeatCount = _repeatCount.clamp(1, 100);
+          );
           break;
       }
 

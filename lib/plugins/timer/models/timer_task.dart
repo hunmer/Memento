@@ -14,7 +14,8 @@ class TimerTask {
   final IconData icon;
   final List<TimerItem> timerItems;
   final DateTime createdAt;
-  int repeatCount;
+  final int repeatCount; // 配置的重复次数
+  int _currentRepeatCount; // 当前剩余的重复次数
   bool isRunning;
   String group;
   Duration _elapsedDuration = Duration.zero;
@@ -29,7 +30,7 @@ class TimerTask {
     this.isRunning = false,
     required this.group,
     this.repeatCount = 1,
-  });
+  }) : _currentRepeatCount = repeatCount;
 
   // 从JSON构造
   factory TimerTask.fromJson(Map<String, dynamic> json) {
@@ -154,6 +155,19 @@ class TimerTask {
 
     final currentIndex = timerItems.indexWhere((timer) => !timer.isCompleted);
     if (currentIndex == -1) {
+      // 检查是否有剩余重复次数
+      if (_currentRepeatCount > 1) {
+        _currentRepeatCount--;
+        // 重置所有计时器
+        for (var timer in timerItems) {
+          timer.reset();
+          timer.resetRepeatCount();
+        }
+        // 重新开始第一个计时器
+        _startNextTimer();
+        return;
+      }
+
       // 所有计时器都完成了
       isRunning = false;
       TimerPlugin.instance.stopNotificationService();
@@ -168,6 +182,8 @@ class TimerTask {
     };
     nextTimer.onUpdate = (elapsed) {
       updateElapsedDuration(elapsed);
+      // 强制UI更新
+      TimerPlugin.instance.updateTask(this);
     };
     nextTimer.start();
   }
@@ -208,8 +224,10 @@ class TimerTask {
     for (var timer in timerItems) {
       timer.onComplete = null;
       timer.reset();
+      timer.resetRepeatCount();
     }
     _elapsedDuration = Duration.zero;
+    _currentRepeatCount = repeatCount; // 重置当前重复次数为配置值
     TimerPlugin.instance.stopNotificationService();
   }
 
@@ -230,6 +248,12 @@ class TimerTask {
     }
     return true;
   }
+
+  // 获取当前活动的计时器的重复次数
+  int? get activeTimerRepeatCount => activeTimer?.repeatCount;
+
+  // 获取当前剩余重复次数
+  int get remainingRepeatCount => _currentRepeatCount;
 
   // 复制并修改任务
   TimerTask copyWith({

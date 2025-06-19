@@ -36,7 +36,8 @@ class TimerItem {
   final int? cycles; // 循环次数
   int? currentCycle; // 当前循环
   bool? isWorkPhase; // 是否处于工作阶段
-  int repeatCount; // 重复次数
+  final int repeatCount; // 配置的重复次数
+  int _currentRepeatCount; // 当前剩余的重复次数
 
   TimerItem({
     required this.id,
@@ -54,7 +55,7 @@ class TimerItem {
     this.intervalAlertDuration,
     this.onIntervalAlert,
     this.repeatCount = 1,
-  });
+  }) : _currentRepeatCount = repeatCount;
 
   // 从JSON构造
   factory TimerItem.fromJson(Map<String, dynamic> json) {
@@ -97,7 +98,7 @@ class TimerItem {
       'cycles': cycles,
       'currentCycle': currentCycle,
       'isWorkPhase': isWorkPhase,
-      'repeatCount': repeatCount,
+      'repeatCount': repeatCount, // 序列化时只保存配置值
       'intervalAlertDuration': intervalAlertDuration?.inSeconds,
     };
   }
@@ -198,15 +199,25 @@ class TimerItem {
     }
   }
 
+  void resetRepeatCount() {
+    _currentRepeatCount = repeatCount;
+  }
+
   // 检查是否还有剩余重复次数
-  bool get hasRemainingRepeats => repeatCount > 1;
+  bool get hasRemainingRepeats => _currentRepeatCount > 1;
 
   // 减少重复次数并重置计时器
   void decrementRepeatCount() {
-    if (repeatCount > 1) {
-      repeatCount--;
+    if (hasRemainingRepeats) {
+      _currentRepeatCount--;
       reset();
+      // 通知父级任务更新
+      onUpdate?.call(completedDuration);
     }
+  }
+
+  int getCurrentRepeatCount() {
+    return _currentRepeatCount;
   }
 
   // 定时器回调
@@ -249,6 +260,8 @@ class TimerItem {
       } else {
         onComplete?.call();
       }
+      // 强制UI更新
+      onUpdate?.call(completedDuration);
     }
   }
 
