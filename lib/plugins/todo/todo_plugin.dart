@@ -8,7 +8,7 @@ import 'widgets/todo_main_view.dart';
 class TodoPlugin extends BasePlugin {
   // 单例实例
   static final TodoPlugin instance = TodoPlugin._();
-  
+
   // 私有构造函数
   TodoPlugin._();
 
@@ -20,9 +20,6 @@ class TodoPlugin extends BasePlugin {
 
   @override
   String get name => 'Todo';
-
-  @override
-  String get version => '1.0.0';
 
   @override
   String get description => 'A comprehensive todo management plugin';
@@ -72,70 +69,64 @@ class TodoPlugin extends BasePlugin {
     final totalTasks = taskController.getTotalTaskCount();
     final weeklyTasks = taskController.getWeeklyTaskCount();
 
-    return  Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部图标和标题
+          Row(
             children: [
-                  // 顶部图标和标题
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: color.withAlpha(30),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(icon, size: 24, color: color),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 24, color: color),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        '总任务数',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      Text(
-                        '$totalTasks',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  Text('总任务数', style: theme.textTheme.bodyMedium),
+                  Text(
+                    '$totalTasks',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        '七日任务数',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      Text(
-                        '$weeklyTasks',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('七日任务数', style: theme.textTheme.bodyMedium),
+                  Text(
+                    '$weeklyTasks',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
             ],
           ),
+        ],
+      ),
     );
   }
 
@@ -144,5 +135,4 @@ class TodoPlugin extends BasePlugin {
     // 清理插件数据
     await storageManager.delete(storageDir);
   }
-  
 }

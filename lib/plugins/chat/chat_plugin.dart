@@ -45,15 +45,12 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
   String get name => _name;
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => _description;
 
   @override
   String get author => 'Zhuanz';
 
-    @override
+  @override
   IconData get icon => Icons.chat_bubble;
 
   @override

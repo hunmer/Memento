@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../base_plugin.dart';
@@ -18,31 +20,18 @@ class TimerPlugin extends BasePlugin {
     timerController.loadTasks();
   }
 
-  static const String _id = 'timer';
-  static const String _name = '计时器';
-  static const String _version = '1.0.0';
-  static const String _description = '支持多种计时类型的任务管理器';
-  static const String _author = 'Zulu';
-  static const String _pluginDir = 'timer';
-
   List<TimerTask> _tasks = [];
   @override
-  String get id => _id;
+  String get id => 'timer';
 
   @override
-  String get name => _name;
+  String get name => '计时器';
 
   @override
-  String get version => _version;
+  String get description => '支持多种计时类型的任务管理器';
 
   @override
-  String get description => _description;
-
-  @override
-  String get author => _author;
-
-  @override
-  String get pluginDir => _pluginDir;
+  String get author => 'Zulu';
 
   @override
   IconData get icon => Icons.timer;
@@ -68,9 +57,6 @@ class TimerPlugin extends BasePlugin {
   @override
   Widget? buildCardView(BuildContext context) {
     final theme = Theme.of(context);
-    final runningTasks = _tasks.where((task) => task.isRunning).toList();
-    final runningTaskNames = runningTasks.map((task) => task.name).join('、');
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -151,12 +137,14 @@ class TimerPlugin extends BasePlugin {
       _tasks[index] = task;
       await _saveTasks();
 
-      if (!oldTask.isRunning && task.isRunning) {
-        await startNotificationService(task);
-      } else if (oldTask.isRunning && !task.isRunning) {
-        await stopNotificationService(task.id);
-      } else if (task.isRunning) {
-        await _updateNotification(task);
+      if (Platform.isAndroid || Platform.isIOS) {
+        if (!oldTask.isRunning && task.isRunning) {
+          await startNotificationService(task);
+        } else if (oldTask.isRunning && !task.isRunning) {
+          await stopNotificationService(task.id);
+        } else if (task.isRunning) {
+          await _updateNotification(task);
+        }
       }
     }
   }

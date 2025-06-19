@@ -74,7 +74,7 @@ class TimerController {
         timerItems: [
           TimerItem.countUp(
             name: '正计时',
-            targetDuration: const Duration(seconds: 10),
+            targetDuration: const Duration(seconds: 3),
           ),
         ],
       ),
@@ -87,7 +87,7 @@ class TimerController {
         timerItems: [
           TimerItem.countDown(
             name: '倒计时',
-            duration: const Duration(seconds: 10),
+            duration: const Duration(seconds: 3),
           ),
         ],
       ),
@@ -100,7 +100,7 @@ class TimerController {
         timerItems: [
           TimerItem.pomodoro(
             name: '番茄工作法',
-            workDuration: const Duration(seconds: 25),
+            workDuration: const Duration(seconds: 5),
             breakDuration: const Duration(seconds: 5),
             cycles: 4,
           ),
@@ -115,11 +115,11 @@ class TimerController {
         timerItems: [
           TimerItem.countUp(
             name: '正计时10秒',
-            targetDuration: const Duration(seconds: 10),
+            targetDuration: const Duration(seconds: 3),
           ),
           TimerItem.countDown(
             name: '倒计时10秒',
-            duration: const Duration(seconds: 10),
+            duration: const Duration(seconds: 3),
           ),
         ],
       ),

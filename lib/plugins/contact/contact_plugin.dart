@@ -22,9 +22,6 @@ class ContactPlugin extends BasePlugin {
   String get name => ContactStrings.pluginName;
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => ContactStrings.pluginDescription;
 
   @override

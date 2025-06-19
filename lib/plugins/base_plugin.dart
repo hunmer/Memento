@@ -39,10 +39,6 @@ abstract class BasePlugin extends PluginBase {
   @override
   String get name;
 
-  /// 插件版本
-  @override
-  String get version;
-
   /// 插件描述
   @override
   String get description;

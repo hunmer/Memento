@@ -18,9 +18,6 @@ class CalendarAlbumPlugin extends BasePlugin {
   String get name => '日记相册';
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => 'A calendar-based photo album and diary plugin';
 
   @override

@@ -165,38 +165,33 @@ class TimerTask {
 
   // 启动下一个计时器
   void _startNextTimer() {
-    if (isRunning && timerItems.isNotEmpty) {
-      final currentIndex = timerItems.indexWhere((timer) => timer.isRunning);
-      if (currentIndex == -1) {
-        // 没有正在运行的计时器，启动第一个
-        final firstTimer = timerItems.first;
-        firstTimer.onComplete = () {
-          if (isRunning) {
-            _startNextTimer();
-          }
-        };
-        firstTimer.onUpdate = (elapsed) {
-          updateElapsedDuration(elapsed);
-        };
-        firstTimer.start();
-      } else if (currentIndex < timerItems.length - 1) {
-        // 当前计时器完成，启动下一个
-        final nextTimer = timerItems[currentIndex + 1];
-        nextTimer.onComplete = () {
-          if (isRunning) {
-            _startNextTimer();
-          }
-        };
-        nextTimer.onUpdate = (elapsed) {
-          updateElapsedDuration(elapsed);
-        };
-        nextTimer.start();
-      } else {
-        // 所有计时器都完成了
-        isRunning = false;
-        TimerPlugin.instance.stopNotificationService();
+    if (!isRunning || timerItems.isEmpty) return;
+
+    // 确保所有计时器都停止
+    for (var timer in timerItems) {
+      if (timer.isRunning) {
+        timer.pause();
       }
     }
+
+    final currentIndex = timerItems.indexWhere((timer) => !timer.isCompleted);
+    if (currentIndex == -1) {
+      // 所有计时器都完成了
+      isRunning = false;
+      TimerPlugin.instance.stopNotificationService();
+      return;
+    }
+
+    final nextTimer = timerItems[currentIndex];
+    nextTimer.onComplete = () {
+      if (isRunning) {
+        _startNextTimer();
+      }
+    };
+    nextTimer.onUpdate = (elapsed) {
+      updateElapsedDuration(elapsed);
+    };
+    nextTimer.start();
   }
 
   // 计时器完成时的回调

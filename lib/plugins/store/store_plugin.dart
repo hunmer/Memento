@@ -6,6 +6,7 @@ import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/events/point_award_event.dart';
 import 'package:Memento/plugins/store/widgets/store_view.dart';
 import 'package:Memento/plugins/store/widgets/point_settings_view.dart';
+
 /// 物品兑换插件
 class StorePlugin extends BasePlugin {
   @override
@@ -15,15 +16,12 @@ class StorePlugin extends BasePlugin {
   String get name => '物品兑换';
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => '提供物品兑换和管理功能';
 
   @override
   String get author => '系统团队';
 
-   @override
+  @override
   IconData get icon => Icons.store;
 
   @override
@@ -40,30 +38,33 @@ class StorePlugin extends BasePlugin {
 
   /// 获取商店控制器
   StoreController get controller {
-    assert(_isInitialized, 'StorePlugin must be initialized before accessing controller');
+    assert(
+      _isInitialized,
+      'StorePlugin must be initialized before accessing controller',
+    );
     return _controller!;
   }
 
   /// 默认积分配置
   static const Map<String, dynamic> defaultPointSettings = {
     'point_awards': {
-      'activity_added': 3,      // 添加活动奖励
-      'checkin_completed': 10,  // 签到完成奖励
-      'task_completed': 20,     // 完成任务奖励
-      'note_added': 10,         // 添加笔记奖励
-      'goods_added': 5,         // 添加物品奖励
-      'onMessageSent': 1,       // 发送消息奖励
-      'onRecordAdded': 2,       // 添加记录奖励
-      'onDiaryAdded': 5,        // 添加日记奖励
-      'bill_added': 10,         // 添加账单奖励
-    }
+      'activity_added': 3, // 添加活动奖励
+      'checkin_completed': 10, // 签到完成奖励
+      'task_completed': 20, // 完成任务奖励
+      'note_added': 10, // 添加笔记奖励
+      'goods_added': 5, // 添加物品奖励
+      'onMessageSent': 1, // 发送消息奖励
+      'onRecordAdded': 2, // 添加记录奖励
+      'onDiaryAdded': 5, // 添加日记奖励
+      'bill_added': 10, // 添加账单奖励
+    },
   };
 
   /// 获取事件积分配置
-  Map<String, int> get pointAwardSettings => 
-    (settings['point_awards'] as Map<String, dynamic>).map(
-      (key, value) => MapEntry(key, value as int)
-    );
+  Map<String, int> get pointAwardSettings =>
+      (settings['point_awards'] as Map<String, dynamic>).map(
+        (key, value) => MapEntry(key, value as int),
+      );
 
   @override
   Future<void> initialize() async {
@@ -71,14 +72,13 @@ class StorePlugin extends BasePlugin {
       await loadSettings(defaultPointSettings);
       _controller = StoreController(this);
       await _controller!.loadFromStorage();
-      
+
       // 初始化积分奖励事件处理器
       _pointAwardEvent = PointAwardEvent(this);
-      
+
       _isInitialized = true;
     }
   }
-  
 
   @override
   Widget buildMainView(BuildContext context) {
@@ -137,7 +137,7 @@ class StorePlugin extends BasePlugin {
                       ),
                     ],
                   ),
-                  
+
                   // 物品数量
                   Column(
                     children: [
@@ -153,7 +153,7 @@ class StorePlugin extends BasePlugin {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // 第二行 - 我的积分和七天到期
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -171,7 +171,7 @@ class StorePlugin extends BasePlugin {
                       ),
                     ],
                   ),
-                  
+
                   // 七天到期
                   Column(
                     children: [

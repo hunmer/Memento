@@ -16,9 +16,6 @@ class DatabasePlugin extends BasePlugin {
   String get name => DatabaseLocalizations.pluginName;
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => DatabaseLocalizations.pluginDescription;
 
   @override

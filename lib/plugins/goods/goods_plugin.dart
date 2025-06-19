@@ -135,9 +135,6 @@ class GoodsPlugin extends BasePlugin {
   String get name => '物品管理';
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => '管理各种物品的存储位置和使用记录';
 
   @override

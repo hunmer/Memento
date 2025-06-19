@@ -14,16 +14,13 @@ class NotesPlugin extends BasePlugin {
   String get id => 'notes';
 
   @override
-  String get name =>  'Notes';
+  String get name => 'Notes';
 
   @override
   String get author => 'Memento Team';
 
   @override
   String get description => 'A simple note-taking plugin for Memento';
-
-  @override
-  String get version => '1.0.0';
 
   @override
   IconData get icon => Icons.note_alt_outlined;
@@ -97,43 +94,44 @@ class NotesPlugin extends BasePlugin {
 
           // 统计信息卡片
           Column(
-              children: [
-                // 第一行 - 总笔记数和七日笔记数
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // 总笔记数
-                    Column(
-                      children: [
-                        Text(
-                          NotesLocalizations.of(context)?.totalNotes ?? 'Total Notes',
-                          style: theme.textTheme.bodyMedium
+            children: [
+              // 第一行 - 总笔记数和七日笔记数
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // 总笔记数
+                  Column(
+                    children: [
+                      Text(
+                        NotesLocalizations.of(context)?.totalNotes ??
+                            'Total Notes',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '$totalNotes',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                        Text(
-                          '$totalNotes',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                    ],
+                  ),
+
+                  // 七日笔记数
+                  Column(
+                    children: [
+                      Text('七日笔记数', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '$recentNotes',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    
-                    // 七日笔记数
-                    Column(
-                      children: [
-                        Text('七日笔记数', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '$recentNotes',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );

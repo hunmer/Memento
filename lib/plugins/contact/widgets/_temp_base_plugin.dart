@@ -14,9 +14,6 @@ class _TempBasePlugin extends BasePlugin {
   String get name => 'Temporary Contact Plugin';
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => 'Temporary plugin for contact functionality';
 
   @override

@@ -1,4 +1,3 @@
-
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +22,12 @@ export 'l10n/tracker_localizations.dart';
 
 class TrackerPlugin extends PluginBase with ChangeNotifier {
   static TrackerPlugin? _instance;
-  
+
   // 构造函数中初始化实例
   TrackerPlugin() {
     _instance = this;
   }
-  
+
   // 获取插件实例的静态方法
   static TrackerPlugin get instance {
     _instance ??= TrackerPlugin();
@@ -46,9 +45,6 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
   String get name => '目标跟踪';
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => '用于跟踪和管理个人目标的插件';
 
   @override
@@ -62,7 +58,6 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
     await TrackerNotificationUtils.initialize();
     await _controller.loadInitialData();
   }
-
 
   @override
   Future<void> registerToApp(
@@ -84,10 +79,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
   void openGoalDetail(BuildContext context, Goal goal) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ChangeNotifierProvider.value(
-          value: _controller,
-          child: GoalDetailScreen(goal: goal),
-        ),
+        builder:
+            (context) => ChangeNotifierProvider.value(
+              value: _controller,
+              child: GoalDetailScreen(goal: goal),
+            ),
       ),
     );
   }
@@ -145,7 +141,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                       ),
                     ],
                   ),
-                  
+
                   // 本月完成
                   Column(
                     children: [
@@ -162,7 +158,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // 第二行 - 本月新增
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
