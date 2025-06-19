@@ -144,12 +144,6 @@ class DiaryPlugin extends BasePlugin {
   ) async {
     // 初始化插件
     await initialize();
-    // 保存插件配置
-    await configManager.savePluginConfig(id, {
-      'version': version,
-      'enabled': true,
-      'settings': settings,
-    });
   }
 
   Future<void> dispose() async {

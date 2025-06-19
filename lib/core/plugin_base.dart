@@ -49,10 +49,12 @@ abstract class PluginBase {
     _storage = storageManager;
   }
 
+  String getPluginSettingPath() => ConfigManager.getPluginConfigPath(id);
+
   /// 加载插件配置
   Future<void> loadSettings(Map<String, dynamic> defaultSettings) async {
     try {
-      final storedSettings = await storage.read('$storageDir/settings.json');
+      final storedSettings = await storage.read(getPluginSettingPath());
       if (storedSettings.isNotEmpty) {
         _settings = Map<String, dynamic>.from(storedSettings);
         // 确保所有默认配置项都存在
@@ -83,7 +85,7 @@ abstract class PluginBase {
   /// 保存插件配置
   Future<void> saveSettings() async {
     try {
-      await storage.write('$storageDir/settings.json', _settings);
+      await storage.write(getPluginSettingPath(), _settings);
     } catch (e) {
       print('Warning: Failed to save plugin settings: $e');
     }

@@ -29,52 +29,6 @@ class ExportController {
     try {
       // 获取所有插件
       final plugins = globalPluginManager.allPlugins;
-
-      // 验证所有插件的数据完整性
-      final invalidPlugins = <String>[];
-      for (final plugin in plugins) {
-        try {
-          final settingsPath = '${plugin.getPluginStoragePath()}/settings.json';
-          if (await File(settingsPath).exists()) {
-            final settings = await File(settingsPath).readAsString();
-            // 尝试解析JSON以验证格式
-            json.decode(settings);
-          }
-        } catch (e) {
-          invalidPlugins.add(plugin.name);
-          debugPrint('插件 ${plugin.name} 数据验证失败: $e');
-        }
-      }
-
-      if (invalidPlugins.isNotEmpty) {
-        if (!_mounted) return;
-        final proceed = await showDialog<bool>(
-          context: currentContext,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('数据完整性警告'),
-                content: Text(
-                  '以下插件的数据可能不完整或已损坏：\n${invalidPlugins.join('\n')}\n\n是否仍要继续导出？',
-                ),
-                actions: [
-                  TextButton(
-                    child: const Text('取消'),
-                    onPressed: () => Navigator.of(context).pop(false),
-                  ),
-                  TextButton(
-                    child: const Text('继续'),
-                    onPressed: () => Navigator.of(context).pop(true),
-                  ),
-                ],
-              ),
-        );
-
-        if (proceed != true) {
-          return;
-        }
-      }
-
-      if (!_mounted) return;
       // 显示插件选择对话框
       final selectedPlugins = await showDialog<List<String>>(
         context: currentContext,
@@ -98,16 +52,12 @@ class ExportController {
 
         // 复制插件数据到临时目录
         final sourceDir = Directory(plugin.getPluginStoragePath());
-        debugPrint(sourceDir.path);
         // 检查插件数据文件夹是否存在
         if (await sourceDir.exists()) {
           await FileUtils.copyDirectory(sourceDir, pluginDir);
-        } else {
-          // 如果插件数据文件夹不存在，创建一个空文件夹
-          debugPrint('插件 ${plugin.id} 的数据文件夹不存在，将创建空文件夹');
-          // 确保目标目录存在
-          await pluginDir.create(recursive: true);
         }
+
+        // TODO 导出插件配置文件
       }
 
       // 创建临时 ZIP 文件
