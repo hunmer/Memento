@@ -23,6 +23,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
   late Color _selectedColor;
   late IconData _selectedIcon;
   late String? _selectedGroup;
+  late int _repeatCount;
   @override
   void initState() {
     super.initState();
@@ -34,6 +35,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
       _selectedColor = initialTask.color;
       _selectedIcon = initialTask.icon;
       _selectedGroup = initialTask.group;
+      _repeatCount = initialTask.repeatCount;
     } else {
       _id = Uuid().v4();
       _nameController = TextEditingController();
@@ -41,6 +43,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
       _selectedColor = Colors.blue;
       _selectedIcon = Icons.timer;
       _selectedGroup = null;
+      _repeatCount = 1;
     }
   }
 
@@ -99,6 +102,35 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                     return '请输入任务名称';
                   }
                   return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 重复次数设置
+              TextFormField(
+                initialValue: '1',
+                decoration: const InputDecoration(
+                  labelText: '重复次数',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '请输入重复次数';
+                  }
+                  final count = int.tryParse(value);
+                  if (count == null || count < 1) {
+                    return '重复次数必须大于0';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    final count = int.tryParse(value) ?? 1;
+                    setState(() {
+                      _repeatCount = count.clamp(1, 100);
+                    });
+                  }
                 },
               ),
               const SizedBox(height: 16),
@@ -269,6 +301,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
         icon: _selectedIcon,
         timerItems: _timerItems,
         group: _selectedGroup,
+        repeatCount: _repeatCount,
       );
       Navigator.of(context).pop(task);
     }

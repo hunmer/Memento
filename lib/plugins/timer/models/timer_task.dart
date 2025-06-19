@@ -14,7 +14,7 @@ class TimerTask {
   final IconData icon;
   final List<TimerItem> timerItems;
   final DateTime createdAt;
-  int repeatCount = 0;
+  int repeatCount;
   bool isRunning;
   String group;
   Duration _elapsedDuration = Duration.zero;
@@ -28,6 +28,7 @@ class TimerTask {
     required this.createdAt,
     this.isRunning = false,
     required this.group,
+    this.repeatCount = 1,
   });
 
   // 从JSON构造
@@ -50,6 +51,7 @@ class TimerTask {
       createdAt: DateTime.parse(json['createdAt'] as String),
       isRunning: json['isRunning'] as bool,
       group: json['group'] as String? ?? '默认',
+      repeatCount: json['repeatCount'] as int? ?? 1,
     );
   }
 
@@ -64,6 +66,7 @@ class TimerTask {
       'createdAt': createdAt.toIso8601String(),
       'isRunning': isRunning,
       'group': group,
+      'repeatCount': repeatCount,
     };
   }
 
@@ -78,6 +81,7 @@ class TimerTask {
     DateTime? reminderTime,
     bool? isRepeating,
     RepeatingPattern? repeatingPattern,
+    int? repeatCount,
   }) {
     return TimerTask(
       id: id,
@@ -87,6 +91,7 @@ class TimerTask {
       timerItems: timerItems,
       createdAt: DateTime.now(),
       group: group ?? '默认',
+      repeatCount: repeatCount ?? 1,
     );
   }
 
@@ -237,6 +242,7 @@ class TimerTask {
     DateTime? reminderTime,
     bool? isRepeating,
     RepeatingPattern? repeatingPattern,
+    int? repeatCount,
   }) {
     return TimerTask(
       id: id,
@@ -247,6 +253,7 @@ class TimerTask {
       createdAt: createdAt,
       isRunning: isRunning ?? this.isRunning,
       group: group ?? this.group,
+      repeatCount: repeatCount ?? this.repeatCount,
     );
   }
 }

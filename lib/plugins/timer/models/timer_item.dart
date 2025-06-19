@@ -242,7 +242,13 @@ class TimerItem {
     if (duration.inSeconds > 0 && completedDuration >= duration) {
       completedDuration = duration;
       pause();
-      onComplete?.call();
+      // 检查是否有剩余重复次数
+      if (hasRemainingRepeats) {
+        decrementRepeatCount();
+        start(); // 重新启动计时器
+      } else {
+        onComplete?.call();
+      }
     }
   }
 
@@ -262,7 +268,13 @@ class TimerItem {
     if (completedDuration >= duration) {
       completedDuration = duration;
       pause();
-      onComplete?.call();
+      // 检查是否有剩余重复次数
+      if (hasRemainingRepeats) {
+        decrementRepeatCount();
+        start(); // 重新启动计时器
+      } else {
+        onComplete?.call();
+      }
     }
   }
 
@@ -325,7 +337,14 @@ class TimerItem {
       // 如果已完成所有循环，停止计时
       if (currentCycle! > cycles!) {
         pause();
-        onComplete?.call();
+
+        // 检查是否有剩余重复次数
+        if (hasRemainingRepeats) {
+          decrementRepeatCount();
+          start(); // 重新启动计时器
+        } else {
+          onComplete?.call();
+        }
         return;
       }
     }
