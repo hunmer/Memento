@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
-import 'package:uuid/v4.dart';
 import 'timer_item.dart';
 import '../timer_plugin.dart';
 import '../../../../core/notification_manager.dart';
+import '../../../../core/event/event_manager.dart';
+
+class TimerTaskEventArgs extends EventArgs {
+  final TimerTask task;
+  TimerTaskEventArgs(this.task, [String eventName = 'timer_task_changed'])
+    : super(eventName);
+}
 
 enum RepeatingPattern { daily, weekly, monthly }
 
@@ -88,6 +93,7 @@ class TimerTask {
     bool? isRepeating,
     RepeatingPattern? repeatingPattern,
     int? repeatCount,
+    List<String>? steps,
     bool enableNotification = false,
   }) {
     return TimerTask(
@@ -122,23 +128,8 @@ class TimerTask {
     return total;
   }
 
-  // 获取已完成时长
-  Duration get completedDuration {
-    Duration completed = Duration.zero;
-    for (var timer in timerItems) {
-      completed += timer.completedDuration;
-    }
-    return completed;
-  }
-
   // 获取已经过去的时长
   Duration get elapsedDuration => _elapsedDuration;
-
-  // 获取进度（0.0 - 1.0）
-  double get progress {
-    if (totalDuration.inSeconds == 0) return 0.0;
-    return completedDuration.inSeconds / totalDuration.inSeconds;
-  }
 
   // 启动任务
   void start() {
@@ -146,7 +137,15 @@ class TimerTask {
       isRunning = true;
       _startNextTimer();
       TimerPlugin.instance.startNotificationService(this);
+      EventManager.instance.broadcast(
+        'timer_task_changed',
+        TimerTaskEventArgs(this),
+      );
     }
+  }
+
+  int getCurrentIndex() {
+    return timerItems.indexWhere((timer) => !timer.isCompleted);
   }
 
   // 启动下一个计时器
@@ -160,7 +159,7 @@ class TimerTask {
       }
     }
 
-    final currentIndex = timerItems.indexWhere((timer) => !timer.isCompleted);
+    final currentIndex = getCurrentIndex();
     if (currentIndex == -1) {
       // 检查是否有剩余重复次数
       if (_currentRepeatCount > 1) {
@@ -221,6 +220,10 @@ class TimerTask {
         active.pause();
       }
       TimerPlugin.instance.stopNotificationService();
+      EventManager.instance.broadcast(
+        'timer_task_changed',
+        TimerTaskEventArgs(this),
+      );
     }
   }
 
@@ -244,6 +247,18 @@ class TimerTask {
     _elapsedDuration = Duration.zero;
     _currentRepeatCount = repeatCount; // 重置当前重复次数为配置值
     TimerPlugin.instance.stopNotificationService();
+    EventManager.instance.broadcast(
+      'timer_task_changed',
+      TimerTaskEventArgs(this),
+    );
+  }
+
+  void toggle() {
+    if (isRunning) {
+      pause();
+    } else {
+      resume();
+    }
   }
 
   // 更新已经过去的时长

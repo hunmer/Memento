@@ -1,6 +1,14 @@
 import 'dart:async';
 
 import 'package:Memento/core/notification_manager.dart';
+import '../../../../core/event/event_manager.dart';
+import '../../../../core/event/event_args.dart';
+
+class TimerItemEventArgs extends EventArgs {
+  final TimerItem timer;
+  TimerItemEventArgs(this.timer, [String eventName = 'timer_item_changed'])
+    : super(eventName);
+}
 
 /// 计时器类型枚举
 enum TimerType {
@@ -18,6 +26,7 @@ enum TimerType {
 class TimerItem {
   final String id;
   final String name;
+  late String? description; // 计时器描述
   final TimerType type;
   final Duration duration; // 设定的时长
   Duration completedDuration; // 已完成的时长
@@ -45,6 +54,7 @@ class TimerItem {
   TimerItem({
     required this.id,
     required this.name,
+    this.description,
     required this.type,
     required this.duration,
     this.completedDuration = Duration.zero,
@@ -66,6 +76,7 @@ class TimerItem {
     return TimerItem(
       id: json['id'] as String,
       name: json['name'] as String,
+      description: json['description'] as String?,
       type: TimerType.values[json['type'] as int],
       duration: Duration(seconds: json['duration'] as int),
       completedDuration: Duration(seconds: json['completedDuration'] as int),
@@ -95,6 +106,7 @@ class TimerItem {
     return {
       'id': id,
       'name': name,
+      'description': description,
       'type': type.index,
       'duration': duration.inSeconds,
       'completedDuration': completedDuration.inSeconds,
@@ -112,6 +124,7 @@ class TimerItem {
   // 创建正计时器
   factory TimerItem.countUp({
     required String name,
+    String? description,
     Duration? targetDuration,
     Duration? intervalAlertDuration,
     bool enableNotification = false,
@@ -119,6 +132,7 @@ class TimerItem {
     return TimerItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
+      description: description,
       type: TimerType.countUp,
       duration: targetDuration ?? const Duration(hours: 1), // 默认目标1小时
       completedDuration: Duration.zero,
@@ -130,6 +144,7 @@ class TimerItem {
   // 创建倒计时器
   factory TimerItem.countDown({
     required String name,
+    String? description,
     required Duration duration,
     Duration? intervalAlertDuration,
     bool enableNotification = false,
@@ -148,6 +163,7 @@ class TimerItem {
   // 创建番茄钟
   factory TimerItem.pomodoro({
     required String name,
+    String? description,
     Duration workDuration = const Duration(minutes: 25),
     Duration breakDuration = const Duration(minutes: 5),
     int cycles = 4,
@@ -186,6 +202,10 @@ class TimerItem {
 
     // 创建定时器，每秒更新一次
     _timer = Timer.periodic(const Duration(seconds: 1), _onTick);
+    EventManager.instance.broadcast(
+      'timer_item_changed',
+      TimerItemEventArgs(this),
+    );
   }
 
   // 暂停计时器
@@ -196,6 +216,10 @@ class TimerItem {
     startTime = null;
     _timer?.cancel();
     _timer = null;
+    EventManager.instance.broadcast(
+      'timer_item_changed',
+      TimerItemEventArgs(this),
+    );
   }
 
   // 重置计时器
@@ -208,6 +232,10 @@ class TimerItem {
       currentCycle = 1;
       isWorkPhase = true;
     }
+    EventManager.instance.broadcast(
+      'timer_item_changed',
+      TimerItemEventArgs(this),
+    );
   }
 
   void resetRepeatCount() {
@@ -246,6 +274,11 @@ class TimerItem {
     }
     // 通知父级任务更新通知
     onUpdate?.call(completedDuration);
+    // 广播计时器进度更新
+    EventManager.instance.broadcast(
+      'timer_item_progress',
+      TimerItemEventArgs(this),
+    );
   }
 
   // 处理正计时逻辑

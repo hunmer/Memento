@@ -1,4 +1,6 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+
 import 'package:flutter/material.dart';
 import '../timer_plugin.dart';
 import '../models/timer_task.dart';
@@ -18,7 +20,6 @@ class TimerMainView extends StatefulWidget {
 
 class TimerMainViewState extends State<TimerMainView> {
   List<TimerTask> _tasks = [];
-  int _tasksPerRow = 2;
   Map<String, List<TimerTask>> _groupedTasks = {};
 
   @override
@@ -71,22 +72,27 @@ class TimerMainViewState extends State<TimerMainView> {
           children:
               groups.map((group) {
                 final tasksInGroup = _groupedTasks[group]!;
-                return GridView.count(
+                return MasonryGridView.count(
+                  shrinkWrap: true,
+                  physics: const ClampingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 12,
+                  ),
                   crossAxisCount: 1,
-                  childAspectRatio: 1.5,
-                  padding: const EdgeInsets.all(8),
-                  mainAxisSpacing: 8,
+                  mainAxisSpacing: 12,
                   crossAxisSpacing: 8,
-                  children:
-                      tasksInGroup.map((task) {
-                        return TimerTaskCard(
-                          task: task,
-                          onTap: _showTaskDetails,
-                          onEdit: _editTask,
-                          onReset: _resetTask,
-                          onDelete: _deleteTask,
-                        );
-                      }).toList(),
+                  itemCount: tasksInGroup.length,
+                  itemBuilder: (context, index) {
+                    final task = tasksInGroup[index];
+                    return TimerTaskCard(
+                      task: task,
+                      onTap: _showTaskDetails,
+                      onEdit: _editTask,
+                      onReset: _resetTask,
+                      onDelete: _deleteTask,
+                    );
+                  },
                 );
               }).toList(),
         ),
@@ -114,7 +120,20 @@ class TimerMainViewState extends State<TimerMainView> {
     // 导航到任务详情页面
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => TimerTaskDetailsPage(task: task)),
+      MaterialPageRoute(
+        builder:
+            (context) => TimerTaskDetailsPage(
+              task: task,
+              onReset: () {
+                task.reset();
+                setState(() {});
+              },
+              onResume: () {
+                task.toggle();
+                setState(() {});
+              },
+            ),
+      ),
     );
     // 返回后刷新状态
     setState(() {

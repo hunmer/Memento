@@ -78,7 +78,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
           ),
         ),
         child: InkWell(
-          onTap: () => widget.onEdit(task),
+          onTap: () => widget.onTap(task),
           onLongPress: () => _showContextMenu(context, task),
           child: Container(
             constraints: BoxConstraints(minHeight: 100), // 添加最小高度约束
@@ -175,13 +175,11 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
                           }
                         }).toList(),
                   ),
-
-                  const Spacer(),
-
+                  const SizedBox(height: 12),
                   // 控制按钮
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [_buildControlButton(task)],
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: _buildControlButton(task),
                   ),
                 ],
               ),
