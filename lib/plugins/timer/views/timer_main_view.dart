@@ -133,18 +133,8 @@ class TimerMainViewState extends State<TimerMainView> {
     );
 
     if (editedTask != null) {
-      // 保持原有的 ID，创建一个完整的任务对象
-      final updatedTask = TimerTask(
-        id: task.id,
-        name: editedTask.name,
-        color: editedTask.color,
-        icon: editedTask.icon,
-        timerItems: editedTask.timerItems,
-        createdAt: editedTask.createdAt,
-        isRunning: editedTask.isRunning,
-        group: editedTask.group,
-      );
-      await widget.plugin.updateTask(updatedTask);
+      await widget.plugin.updateTask(editedTask);
+      await widget.plugin.saveTasks();
       setState(() {
         _updateTasksAndGroups();
       });

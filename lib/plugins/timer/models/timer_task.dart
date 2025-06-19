@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+import 'package:uuid/v4.dart';
 import 'timer_item.dart';
 import '../timer_plugin.dart';
 
@@ -12,11 +14,9 @@ class TimerTask {
   final IconData icon;
   final List<TimerItem> timerItems;
   final DateTime createdAt;
+  int repeatCount = 0;
   bool isRunning;
   String group;
-  final DateTime? reminderTime;
-  final bool? isRepeating;
-  final RepeatingPattern? repeatingPattern;
   Duration _elapsedDuration = Duration.zero;
 
   TimerTask({
@@ -28,28 +28,15 @@ class TimerTask {
     required this.createdAt,
     this.isRunning = false,
     required this.group,
-    this.reminderTime,
-    this.isRepeating,
-    this.repeatingPattern,
   });
 
   // 从JSON构造
   factory TimerTask.fromJson(Map<String, dynamic> json) {
-    // 预定义常用Material图标常量
-    const materialIcons = {
-      0xe3a9: Icons.check, // check图标
-      0xe5ca: Icons.arrow_back, // arrow_back图标
-      0xe5cd: Icons.arrow_forward, // arrow_forward图标
-      0xe7fd: Icons.person, // person图标
-      0xe0be: Icons.home, // home图标
-      0xe425: Icons.timer, // timer图标
-    };
-
     // 使用预定义的MaterialIcons常量
     final icon =
         json['icon'] != null
-            ? materialIcons[json['icon'] as int] ?? Icons.timer
-            : Icons.timer;
+            ? IconData(json['icon'] as int, fontFamily: 'MaterialIcons')
+            : Icons.timer_rounded;
 
     return TimerTask(
       id: json['id'] as String,
@@ -63,15 +50,6 @@ class TimerTask {
       createdAt: DateTime.parse(json['createdAt'] as String),
       isRunning: json['isRunning'] as bool,
       group: json['group'] as String? ?? '默认',
-      reminderTime:
-          json['reminderTime'] != null
-              ? DateTime.parse(json['reminderTime'] as String)
-              : null,
-      isRepeating: json['isRepeating'] as bool?,
-      repeatingPattern:
-          json['repeatingPattern'] != null
-              ? RepeatingPattern.values[json['repeatingPattern'] as int]
-              : null,
     );
   }
 
@@ -86,14 +64,12 @@ class TimerTask {
       'createdAt': createdAt.toIso8601String(),
       'isRunning': isRunning,
       'group': group,
-      'reminderTime': reminderTime?.toIso8601String(),
-      'isRepeating': isRepeating,
-      'repeatingPattern': repeatingPattern?.index,
     };
   }
 
   // 创建新任务
   factory TimerTask.create({
+    required String id,
     required String name,
     required Color color,
     required IconData icon,
@@ -104,16 +80,13 @@ class TimerTask {
     RepeatingPattern? repeatingPattern,
   }) {
     return TimerTask(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: id,
       name: name,
       color: color,
       icon: icon,
       timerItems: timerItems,
       createdAt: DateTime.now(),
       group: group ?? '默认',
-      reminderTime: reminderTime,
-      isRepeating: isRepeating,
-      repeatingPattern: repeatingPattern,
     );
   }
 
@@ -274,9 +247,6 @@ class TimerTask {
       createdAt: createdAt,
       isRunning: isRunning ?? this.isRunning,
       group: group ?? this.group,
-      reminderTime: reminderTime ?? this.reminderTime,
-      isRepeating: isRepeating ?? this.isRepeating,
-      repeatingPattern: repeatingPattern ?? this.repeatingPattern,
     );
   }
 }

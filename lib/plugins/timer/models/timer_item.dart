@@ -36,6 +36,7 @@ class TimerItem {
   final int? cycles; // 循环次数
   int? currentCycle; // 当前循环
   bool? isWorkPhase; // 是否处于工作阶段
+  int repeatCount; // 重复次数
 
   TimerItem({
     required this.id,
@@ -52,6 +53,7 @@ class TimerItem {
     this.isWorkPhase,
     this.intervalAlertDuration,
     this.onIntervalAlert,
+    this.repeatCount = 1,
   });
 
   // 从JSON构造
@@ -74,6 +76,7 @@ class TimerItem {
       cycles: json['cycles'] as int?,
       currentCycle: json['currentCycle'] as int?,
       isWorkPhase: json['isWorkPhase'] as bool?,
+      repeatCount: json['repeatCount'] as int? ?? 1,
       intervalAlertDuration:
           json['intervalAlertDuration'] != null
               ? Duration(seconds: json['intervalAlertDuration'] as int)
@@ -94,6 +97,7 @@ class TimerItem {
       'cycles': cycles,
       'currentCycle': currentCycle,
       'isWorkPhase': isWorkPhase,
+      'repeatCount': repeatCount,
       'intervalAlertDuration': intervalAlertDuration?.inSeconds,
     };
   }
@@ -191,6 +195,17 @@ class TimerItem {
     if (type == TimerType.pomodoro) {
       currentCycle = 1;
       isWorkPhase = true;
+    }
+  }
+
+  // 检查是否还有剩余重复次数
+  bool get hasRemainingRepeats => repeatCount > 1;
+
+  // 减少重复次数并重置计时器
+  void decrementRepeatCount() {
+    if (repeatCount > 1) {
+      repeatCount--;
+      reset();
     }
   }
 

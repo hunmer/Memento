@@ -78,7 +78,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
           ),
         ),
         child: InkWell(
-          onTap: () => widget.onTap(task),
+          onTap: () => widget.onEdit(task),
           onLongPress: () => _showContextMenu(context, task),
           child: Container(
             constraints: BoxConstraints(minHeight: 100), // 添加最小高度约束
@@ -112,6 +112,28 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
                     ],
                   ),
                   const SizedBox(height: 12),
+
+                  // 重复次数显示
+                  if (widget.task.repeatCount > 1)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.repeat,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '重复 ${widget.task.repeatCount} 次',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
 
                   // 计时器类型标签和状态
                   Wrap(
@@ -250,50 +272,41 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
   }
 
   void _showContextMenu(BuildContext context, TimerTask task) {
-    final RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final position = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
-
-    showMenu(
+    showModalBottomSheet(
       context: context,
-      position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy + size.height,
-        position.dx + size.width,
-        position.dy + size.height + 100,
-      ),
-      items: [
-        PopupMenuItem(
-          child: ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('编辑'),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onEdit(task);
-            },
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('编辑'),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onEdit(task);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.refresh),
+                title: const Text('重置'),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onReset(task);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('删除'),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onDelete(task);
+                },
+              ),
+            ],
           ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            leading: const Icon(Icons.refresh),
-            title: const Text('重置'),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onReset(task);
-            },
-          ),
-        ),
-        PopupMenuItem(
-          child: ListTile(
-            leading: const Icon(Icons.delete),
-            title: const Text('删除'),
-            onTap: () {
-              Navigator.pop(context);
-              widget.onDelete(task);
-            },
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 
