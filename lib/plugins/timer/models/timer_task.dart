@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import 'package:uuid/v4.dart';
 import 'timer_item.dart';
 import '../timer_plugin.dart';
+import '../../../../core/notification_manager.dart';
 
 enum RepeatingPattern { daily, weekly, monthly }
 
@@ -19,6 +20,7 @@ class TimerTask {
   bool isRunning;
   String group;
   Duration _elapsedDuration = Duration.zero;
+  final bool enableNotification; // 是否启用消息提醒
 
   TimerTask({
     required this.id,
@@ -30,6 +32,7 @@ class TimerTask {
     this.isRunning = false,
     required this.group,
     this.repeatCount = 1,
+    this.enableNotification = false, // 默认关闭消息提醒
   }) : _currentRepeatCount = repeatCount;
 
   // 从JSON构造
@@ -53,6 +56,7 @@ class TimerTask {
       isRunning: json['isRunning'] as bool,
       group: json['group'] as String? ?? '默认',
       repeatCount: json['repeatCount'] as int? ?? 1,
+      enableNotification: json['enableNotification'] as bool? ?? false,
     );
   }
 
@@ -68,6 +72,7 @@ class TimerTask {
       'isRunning': isRunning,
       'group': group,
       'repeatCount': repeatCount,
+      'enableNotification': enableNotification,
     };
   }
 
@@ -83,6 +88,7 @@ class TimerTask {
     bool? isRepeating,
     RepeatingPattern? repeatingPattern,
     int? repeatCount,
+    bool enableNotification = false,
   }) {
     return TimerTask(
       id: id,
@@ -93,6 +99,7 @@ class TimerTask {
       createdAt: DateTime.now(),
       group: group ?? '默认',
       repeatCount: repeatCount ?? 1,
+      enableNotification: enableNotification,
     );
   }
 
@@ -171,6 +178,14 @@ class TimerTask {
       // 所有计时器都完成了
       isRunning = false;
       TimerPlugin.instance.stopNotificationService();
+
+      // 发送完成通知
+      if (enableNotification) {
+        NotificationManager.showInstantNotification(
+          title: '计时任务完成',
+          body: '计时任务"$name"已完成',
+        );
+      }
       return;
     }
 
@@ -267,6 +282,7 @@ class TimerTask {
     bool? isRepeating,
     RepeatingPattern? repeatingPattern,
     int? repeatCount,
+    bool enableNotification = false,
   }) {
     return TimerTask(
       id: id,
@@ -278,6 +294,7 @@ class TimerTask {
       isRunning: isRunning ?? this.isRunning,
       group: group ?? this.group,
       repeatCount: repeatCount ?? this.repeatCount,
+      enableNotification: enableNotification,
     );
   }
 }

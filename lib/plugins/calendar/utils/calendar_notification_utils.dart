@@ -1,3 +1,4 @@
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../../core/notification_manager.dart';
 import 'package:logging/logging.dart';
 
@@ -14,9 +15,16 @@ class CalendarNotificationUtils {
       onSelectNotification: onSelectNotification,
       appName: '日历事件提醒',
       appId: 'com.example.memento.calendar',
+    );
+
+    // 创建日历插件专用的通知通道
+    await NotificationManager.createNotificationChannel(
       channelId: _channelId,
       channelName: _channelName,
       channelDescription: _channelDescription,
+      importance: Importance.max,
+      enableVibration: true,
+      enableSound: true,
     );
   }
 
@@ -34,8 +42,6 @@ class CalendarNotificationUtils {
         body: body,
         scheduledDate: scheduledDateTime,
         channelId: _channelId,
-        channelName: _channelName,
-        channelDescription: _channelDescription,
         isDaily: false,
         payload: payload,
       );
@@ -78,8 +84,6 @@ class CalendarNotificationUtils {
       title: title,
       body: body,
       channelId: _channelId,
-      channelName: _channelName,
-      channelDescription: _channelDescription,
       payload: payload,
     );
   }

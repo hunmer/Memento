@@ -14,11 +14,13 @@ class NotificationManager {
   static Future<void> initialize({
     Function(String?)? onSelectNotification,
     String appName = 'Memento',
-    String appId = 'com.example.memento',
+    String appId = 'github.hunmer.memento',
     String channelId = 'memento_channel',
     String channelName = '提醒通知',
     String channelDescription = '用于应用的提醒通知',
   }) async {
+    // 初始化时区
+    tz.initializeTimeZones();
     // 设置点击回调
     onNotificationClicked = onSelectNotification;
 
@@ -73,24 +75,32 @@ class NotificationManager {
       },
     );
 
-    // 创建通知渠道(Android 8.0+需要)
-    await _createNotificationChannel(
+    // 创建默认通知渠道(Android 8.0+需要)
+    await createNotificationChannel(
       channelId: channelId,
       channelName: channelName,
       channelDescription: channelDescription,
     );
   }
 
-  static Future<void> _createNotificationChannel({
+  /// 创建通知通道(公开给插件使用)
+  static Future<void> createNotificationChannel({
     required String channelId,
     required String channelName,
     required String channelDescription,
+    Importance importance = Importance.max,
+    bool enableVibration = true,
+    bool enableSound = true,
+    String? sound,
   }) async {
     final AndroidNotificationChannel channel = AndroidNotificationChannel(
       channelId,
       channelName,
       description: channelDescription,
-      importance: Importance.max,
+      importance: importance,
+      enableVibration: enableVibration,
+      playSound: enableSound,
+      sound: sound != null ? RawResourceAndroidNotificationSound(sound) : null,
     );
 
     await _notificationsPlugin
@@ -98,6 +108,66 @@ class NotificationManager {
           AndroidFlutterLocalNotificationsPlugin
         >()
         ?.createNotificationChannel(channel);
+  }
+
+  /// 更新通知通道(公开给插件使用)
+  static Future<void> updateNotificationChannel({
+    required String channelId,
+    String? newChannelName,
+    String? newChannelDescription,
+    Importance? newImportance,
+    bool? enableVibration,
+    bool? enableSound,
+    String? newSound,
+  }) async {
+    final existingChannels =
+        await _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.getNotificationChannels();
+
+    if (existingChannels == null) return;
+
+    final existingChannel = existingChannels.firstWhere(
+      (c) => c.id == channelId,
+      orElse:
+          () => const AndroidNotificationChannel(
+            '',
+            '',
+            importance: Importance.min,
+          ),
+    );
+
+    if (existingChannel.id.isEmpty) return;
+
+    final channel = AndroidNotificationChannel(
+      channelId,
+      newChannelName ?? existingChannel.name,
+      description: newChannelDescription ?? existingChannel.description,
+      importance: newImportance ?? existingChannel.importance,
+      enableVibration: enableVibration ?? existingChannel.enableVibration,
+      playSound: enableSound ?? existingChannel.playSound,
+      sound:
+          newSound != null
+              ? RawResourceAndroidNotificationSound(newSound)
+              : existingChannel.sound,
+    );
+
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(channel);
+  }
+
+  /// 删除通知通道(公开给插件使用)
+  static Future<void> deleteNotificationChannel(String channelId) async {
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.deleteNotificationChannel(channelId);
   }
 
   static Future<void> scheduleNotification({
