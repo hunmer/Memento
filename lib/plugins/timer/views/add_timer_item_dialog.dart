@@ -13,6 +13,7 @@ class AddTimerItemDialog extends StatefulWidget {
 class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
   late TimerType _selectedType;
   late int _hours;
   late int _minutes;
@@ -21,7 +22,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
   late int _breakMinutes;
   late int _cycles;
   late int _repeatCount;
-  late bool _enableNotification;
+  late bool _enableNotification = false;
 
   @override
   void initState() {
@@ -29,6 +30,9 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
     final initialItem = widget.initialItem;
     if (initialItem != null) {
       _nameController = TextEditingController(text: initialItem.name);
+      _descriptionController = TextEditingController(
+        text: initialItem.description,
+      );
       _selectedType = initialItem.type;
       _repeatCount = initialItem.repeatCount;
       _enableNotification = initialItem.enableNotification;
@@ -50,6 +54,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
       _nameController = TextEditingController(
         text: _getTimerTypeName(_selectedType),
       );
+      _descriptionController = TextEditingController();
       _hours = 0;
       _minutes = 25;
       _seconds = 0;
@@ -63,6 +68,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
   @override
   void dispose() {
     _nameController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -97,6 +103,17 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+
+              // 计时器名称
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: '计时器描述',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
               ),
               const SizedBox(height: 16),
 
@@ -303,6 +320,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
           );
           break;
       }
+      timer.description = _descriptionController.text;
       timer.repeatCount = _repeatCount;
       timer.enableNotification = _enableNotification;
       Navigator.of(context).pop(timer);
