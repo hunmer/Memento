@@ -11,9 +11,6 @@ abstract class PluginBase {
   /// 插件名称
   String get name;
 
-  /// 插件版本
-  String get version;
-
   /// 插件存储目录
   String get storageDir => getPluginStoragePath();
 

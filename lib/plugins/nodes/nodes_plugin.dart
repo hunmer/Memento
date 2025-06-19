@@ -26,9 +26,6 @@ class NodesPlugin extends PluginBase {
   String get name => 'Nodes';
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => 'A plugin for managing hierarchical notes';
 
   @override
@@ -38,12 +35,12 @@ class NodesPlugin extends PluginBase {
   Future<void> initialize() async {
     _controller = NodesController(storage);
     _promptReplacements.initialize();
-    
+
     // 延迟注册 prompt 替换方法，等待 OpenAI 插件初始化完成
     Future.delayed(const Duration(seconds: 1), () {
       _registerPromptMethods();
     });
-    
+
     _isInitialized = true;
   }
 
@@ -59,11 +56,9 @@ class NodesPlugin extends PluginBase {
   Widget buildMainView(BuildContext context) {
     // 确保controller已经初始化
     if (!_isInitialized) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
-    
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<NodesController>.value(value: _controller),
@@ -93,7 +88,8 @@ class NodesPlugin extends PluginBase {
   /// 注册 prompt 替换方法
   void _registerPromptMethods() {
     try {
-      final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      final openaiPlugin =
+          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
       if (openaiPlugin != null) {
         openaiPlugin.registerPromptReplacementMethod(
           'nodes_getNodePaths',
@@ -189,60 +185,60 @@ class NodesPlugin extends PluginBase {
               ),
               const SizedBox(height: 16),
 
-            Column(
-                  children: [
-                    // 第一行 - 笔记本数量和节点数量
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        // 笔记本数量
-                        Column(
-                          children: [
-                            Text('笔记本数量', style: theme.textTheme.bodyMedium),
-                            Text(
-                              '$notebookCount',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+              Column(
+                children: [
+                  // 第一行 - 笔记本数量和节点数量
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // 笔记本数量
+                      Column(
+                        children: [
+                          Text('笔记本数量', style: theme.textTheme.bodyMedium),
+                          Text(
+                            '$notebookCount',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                        
-                        // 节点数量
-                        Column(
-                          children: [
-                            Text('节点数量', style: theme.textTheme.bodyMedium),
-                            Text(
-                              '$nodeCount',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          ),
+                        ],
+                      ),
+
+                      // 节点数量
+                      Column(
+                        children: [
+                          Text('节点数量', style: theme.textTheme.bodyMedium),
+                          Text(
+                            '$nodeCount',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    
-                    // 第二行 - 待办节点数
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Column(
-                          children: [
-                            Text('待办节点数', style: theme.textTheme.bodyMedium),
-                            Text(
-                              '$todoCount',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 第二行 - 待办节点数
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Text('待办节点数', style: theme.textTheme.bodyMedium),
+                          Text(
+                            '$todoCount',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
         );

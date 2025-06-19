@@ -92,11 +92,6 @@ class CheckinPlugin extends BasePlugin {
   String get name => '打卡';
 
   @override
-  String get version => '1.0.0';
-
-  String get pluginDir => 'checkin';
-
-  @override
   String get description => '管理日常打卡项目';
 
   @override

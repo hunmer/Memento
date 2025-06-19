@@ -36,9 +36,6 @@ class CalendarPlugin extends BasePlugin {
   String get name => '日历';
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => '日历和事件管理插件';
 
   @override

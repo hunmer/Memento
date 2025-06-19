@@ -11,7 +11,7 @@ import 'controllers/agent_controller.dart';
 
 class OpenAIPlugin extends BasePlugin {
   static OpenAIPlugin? _instance;
-  
+
   // 获取插件实例的静态方法
   static OpenAIPlugin get instance {
     if (_instance == null) {
@@ -23,7 +23,8 @@ class OpenAIPlugin extends BasePlugin {
     return _instance!;
   }
 
-  final PromptReplacementController _promptReplacementController = PromptReplacementController();
+  final PromptReplacementController _promptReplacementController =
+      PromptReplacementController();
   final ChatEventHandler _chatEventHandler = ChatEventHandler();
   @override
   final String storageDir = 'openai';
@@ -35,10 +36,8 @@ class OpenAIPlugin extends BasePlugin {
   String get name => 'AI Assistant'; // 保持英文ID不变
 
   @override
-  String get version => '1.0.0';
-
-  @override
-  String get description => 'AI assistant plugin supporting multiple LLM providers'; // 保持英文描述作为默认值
+  String get description =>
+      'AI assistant plugin supporting multiple LLM providers'; // 保持英文描述作为默认值
 
   @override
   String get author => 'Comate';
@@ -75,9 +74,7 @@ class OpenAIPlugin extends BasePlugin {
         },
       ];
 
-      await storage.write('$storageDir/agents.json', {
-        'agents': defaultAgents,
-      });
+      await storage.write('$storageDir/agents.json', {'agents': defaultAgents});
       debugPrint('已初始化默认智能体');
     }
   }
@@ -124,13 +121,16 @@ class OpenAIPlugin extends BasePlugin {
 
     // 清理事件处理器
     _chatEventHandler.dispose();
-    
+
     // 清理prompt替换控制器
     _promptReplacementController.dispose();
   }
 
   /// 注册prompt替换方法
-  void registerPromptReplacementMethod(String methodName, PromptReplacementCallback callback) {
+  void registerPromptReplacementMethod(
+    String methodName,
+    PromptReplacementCallback callback,
+  ) {
     _promptReplacementController.registerMethod(methodName, callback);
   }
 
@@ -195,33 +195,34 @@ class OpenAIPlugin extends BasePlugin {
 
               // 统计信息卡片
               Column(
-                  children: [
-                    // 第一行 - 智能体总数和活跃智能体
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        // 智能体总数
-                        Column(
-                          children: [
-                            Text(OpenAILocalizations.of(context).totalAgents, style: theme.textTheme.bodyMedium),
-                            Text(
-                              '$agentsCount',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    agentsCount > 0
-                                        ? theme.colorScheme.primary
-                                        : null,
-                              ),
+                children: [
+                  // 第一行 - 智能体总数和活跃智能体
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // 智能体总数
+                      Column(
+                        children: [
+                          Text(
+                            OpenAILocalizations.of(context).totalAgents,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          Text(
+                            '$agentsCount',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  agentsCount > 0
+                                      ? theme.colorScheme.primary
+                                      : null,
                             ),
-                          ],
-                        ),
-                        
-                      ],
-                    ),
-            
-                  ],
-                ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
         );

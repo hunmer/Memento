@@ -28,9 +28,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   String get name => '账单';
 
   @override
-  String get version => '1.0.0';
-
-  @override
   String get description => '管理个人账单和财务统计';
 
   @override
