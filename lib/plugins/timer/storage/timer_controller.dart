@@ -1,6 +1,7 @@
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../models/timer_task.dart';
 
 class TimerController {
@@ -67,6 +68,7 @@ class TimerController {
     return [
       // 1. 测试正计时器: 正计时1分钟
       TimerTask.create(
+        id: Uuid().v4(),
         name: '测试正计时器',
         color: Colors.blue,
         icon: Icons.timer,
@@ -80,6 +82,7 @@ class TimerController {
       ),
       // 2. 测试倒计时器: 倒计时1分钟
       TimerTask.create(
+        id: Uuid().v4(),
         name: '测试倒计时器',
         color: Colors.red,
         icon: Icons.hourglass_empty,
@@ -93,6 +96,7 @@ class TimerController {
       ),
       // 3. 测试番茄钟：25秒专注 5秒休息
       TimerTask.create(
+        id: Uuid().v4(),
         name: '测试番茄钟',
         color: Colors.green,
         icon: Icons.local_cafe,
@@ -108,6 +112,7 @@ class TimerController {
       ),
       // 4. 测试多计时器：正计时10秒 倒计时10秒
       TimerTask.create(
+        id: Uuid().v4(),
         name: '测试多计时器',
         color: Colors.purple,
         icon: Icons.timer_outlined,

@@ -120,13 +120,13 @@ class TimerPlugin extends BasePlugin {
   // 添加新任务
   Future<void> addTask(TimerTask task) async {
     _tasks.add(task);
-    await _saveTasks();
+    await saveTasks();
   }
 
   // 删除任务
   Future<void> removeTask(String taskId) async {
     _tasks.removeWhere((task) => task.id == taskId);
-    await _saveTasks();
+    await saveTasks();
   }
 
   // 更新任务
@@ -135,33 +135,36 @@ class TimerPlugin extends BasePlugin {
     if (index != -1) {
       final oldTask = _tasks[index];
       _tasks[index] = task;
-      await _saveTasks();
 
-      if (Platform.isAndroid || Platform.isIOS) {
-        if (!oldTask.isRunning && task.isRunning) {
-          await startNotificationService(task);
-        } else if (oldTask.isRunning && !task.isRunning) {
-          await stopNotificationService(task.id);
-        } else if (task.isRunning) {
-          await _updateNotification(task);
-        }
+      if (!oldTask.isRunning && task.isRunning) {
+        await startNotificationService(task);
+      } else if (oldTask.isRunning && !task.isRunning) {
+        await stopNotificationService(task.id);
+      } else if (task.isRunning) {
+        await _updateNotification(task);
       }
     }
   }
 
   // 启动前台通知服务
   Future<void> startNotificationService(TimerTask task) async {
-    await TimerService.startNotificationService(task);
+    if (Platform.isAndroid || Platform.isIOS) {
+      await TimerService.startNotificationService(task);
+    }
   }
 
   // 更新前台通知
   Future<void> _updateNotification(TimerTask task) async {
-    await TimerService.updateNotification(task);
+    if (Platform.isAndroid || Platform.isIOS) {
+      await TimerService.updateNotification(task);
+    }
   }
 
   // 停止前台通知服务
   Future<void> stopNotificationService([String? taskId]) async {
-    await TimerService.stopNotificationService(taskId);
+    if (Platform.isAndroid || Platform.isIOS) {
+      await TimerService.stopNotificationService(taskId);
+    }
   }
 
   // 从存储加载任务
@@ -171,12 +174,12 @@ class TimerPlugin extends BasePlugin {
     // 如果没有任何任务，添加默认示例任务
     if (_tasks.isEmpty) {
       _tasks.addAll(TimerController.createDefaultTasks());
-      await _saveTasks();
+      await saveTasks();
     }
   }
 
   // 保存任务到存储
-  Future<void> _saveTasks() async {
+  Future<void> saveTasks() async {
     await timerController.saveTasks(_tasks);
   }
 }
