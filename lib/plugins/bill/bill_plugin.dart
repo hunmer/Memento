@@ -184,7 +184,9 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   @override
   Future<void> loadSettings(Map<String, dynamic> defaultSettings) async {
     try {
-      final storedSettings = await storage.read('bill/settings.json');
+      final storedSettings = await storage.read(
+        ConfigManager.getPluginConfigPath(id),
+      );
       if (storedSettings.isNotEmpty) {
         _settings = Map<String, dynamic>.from(storedSettings);
       } else {
@@ -204,7 +206,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   @override
   Future<void> saveSettings() async {
     try {
-      await storage.write('bill/settings.json', _settings);
+      await storage.write(ConfigManager.getPluginConfigPath(id), _settings);
     } catch (e) {
       debugPrint('Warning: Failed to save plugin settings: $e');
     }

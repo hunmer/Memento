@@ -19,8 +19,8 @@ abstract class GoodsEventArgs extends EventArgs {
 class GoodsItemAddedEventArgs extends GoodsEventArgs {
   final GoodsItem item;
 
-  GoodsItemAddedEventArgs(this.item, String warehouseId) 
-      : super('goods_item_added', warehouseId);
+  GoodsItemAddedEventArgs(this.item, String warehouseId)
+    : super('goods_item_added', warehouseId);
 }
 
 /// 物品删除事件参数
@@ -28,7 +28,7 @@ class GoodsItemDeletedEventArgs extends GoodsEventArgs {
   final String itemId;
 
   GoodsItemDeletedEventArgs(this.itemId, String warehouseId)
-      : super('goods_item_deleted', warehouseId);
+    : super('goods_item_deleted', warehouseId);
 }
 
 /// 用于递归查找物品及其父物品的结果类
@@ -57,7 +57,7 @@ class GoodsPlugin extends BasePlugin {
   }
 
   /// 在所有仓库中查找指定ID的物品
-  /// 
+  ///
   /// 如果找到物品，返回包含物品和所属仓库ID的结果
   /// 如果未找到，返回null
   FindItemResult? findGoodsItemById(String itemId) {
@@ -65,26 +65,31 @@ class GoodsPlugin extends BasePlugin {
       // 首先在仓库的顶级物品中查找
       final item = _findItemRecursively(warehouse.items, itemId);
       if (item != null) {
-        return FindItemResult(
-          item: item,
-          warehouseId: warehouse.id,
-        );
+        return FindItemResult(item: item, warehouseId: warehouse.id);
       }
     }
     return null;
   }
 
   /// 递归查找物品及其子物品，同时返回父物品（如果存在）
-  _ItemSearchResult _findItemAndParentRecursively(List<GoodsItem> items, String itemId, [GoodsItem? parent]) {
+  _ItemSearchResult _findItemAndParentRecursively(
+    List<GoodsItem> items,
+    String itemId, [
+    GoodsItem? parent,
+  ]) {
     // 在当前层级查找
     for (final item in items) {
       if (item.id == itemId) {
         return _ItemSearchResult(item, parent);
       }
-      
+
       // 递归查找子物品
       if (item.subItems.isNotEmpty) {
-        final result = _findItemAndParentRecursively(item.subItems, itemId, item);
+        final result = _findItemAndParentRecursively(
+          item.subItems,
+          itemId,
+          item,
+        );
         if (result.item != null) {
           return result;
         }
@@ -103,10 +108,7 @@ class GoodsPlugin extends BasePlugin {
     for (final warehouse in _warehouses) {
       final result = _findItemAndParentRecursively(warehouse.items, itemId);
       if (result.parent != null) {
-        return FindItemResult(
-          item: result.parent!,
-          warehouseId: warehouse.id,
-        );
+        return FindItemResult(item: result.parent!, warehouseId: warehouse.id);
       }
     }
     return null;
@@ -156,7 +158,7 @@ class GoodsPlugin extends BasePlugin {
   Future<void> saveSortPreference(String warehouseId, String sortBy) async {
     _warehouseSortPreferences[warehouseId] = sortBy;
     await storage.write('goods/preferences', {
-      'warehouseSortPreferences': _warehouseSortPreferences
+      'warehouseSortPreferences': _warehouseSortPreferences,
     });
   }
 
@@ -167,7 +169,7 @@ class GoodsPlugin extends BasePlugin {
 
     // 加载仓库数据
     await _loadWarehouses();
-    
+
     // 加载排序偏好
     await _loadSortPreferences();
   }
@@ -175,11 +177,12 @@ class GoodsPlugin extends BasePlugin {
   Future<void> _loadSortPreferences() async {
     try {
       final preferencesData = await storage.read('goods/preferences');
-      if (preferencesData.isNotEmpty && 
+      if (preferencesData.isNotEmpty &&
           preferencesData.containsKey('warehouseSortPreferences')) {
-        final Map<String, dynamic> sortPrefs = 
-            Map<String, dynamic>.from(preferencesData['warehouseSortPreferences']);
-        
+        final Map<String, dynamic> sortPrefs = Map<String, dynamic>.from(
+          preferencesData['warehouseSortPreferences'],
+        );
+
         _warehouseSortPreferences.clear();
         sortPrefs.forEach((key, value) {
           _warehouseSortPreferences[key] = value.toString();
@@ -267,15 +270,16 @@ class GoodsPlugin extends BasePlugin {
   Future<void> saveGoodsItem(String warehouseId, GoodsItem item) async {
     try {
       final warehouse = _warehouses.firstWhere((w) => w.id == warehouseId);
-      
+
       // 递归更新物品或其子物品
       bool updated = _updateItemRecursively(warehouse.items, item);
-      
+
       // 如果没有找到要更新的物品，则作为新物品添加到仓库
       if (!updated) {
         warehouse.items.add(item);
         // 广播物品添加事件
-        EventManager.instance.broadcast('goods_item_added', 
+        EventManager.instance.broadcast(
+          'goods_item_added',
           GoodsItemAddedEventArgs(item, warehouseId),
         );
       }
@@ -295,7 +299,7 @@ class GoodsPlugin extends BasePlugin {
         items[i] = updatedItem;
         return true;
       }
-      
+
       // 递归查找子物品
       if (items[i].subItems.isNotEmpty) {
         if (_updateItemRecursively(items[i].subItems, updatedItem)) {
@@ -309,27 +313,28 @@ class GoodsPlugin extends BasePlugin {
   Future<void> deleteGoodsItem(String warehouseId, String itemId) async {
     try {
       final warehouse = _warehouses.firstWhere((w) => w.id == warehouseId);
-      
+
       // 尝试递归删除物品
       bool deleted = _deleteItemRecursively(warehouse.items, itemId);
-      
+
       if (!deleted) {
         // 如果递归删除失败，尝试直接从顶级物品中删除
         warehouse.items.removeWhere((item) => item.id == itemId);
       }
 
       // 广播物品删除事件
-      EventManager.instance.broadcast('goods_item_deleted', 
+      EventManager.instance.broadcast(
+        'goods_item_deleted',
         GoodsItemDeletedEventArgs(itemId, warehouseId),
       );
-      
+
       await saveWarehouse(warehouse);
     } catch (e) {
       debugPrint('Error deleting goods item: $e');
       rethrow;
     }
   }
-  
+
   /// 递归删除物品及其子物品
   /// 返回是否找到并删除了物品
   bool _deleteItemRecursively(List<GoodsItem> items, String itemId) {
@@ -339,7 +344,7 @@ class GoodsPlugin extends BasePlugin {
     if (items.length < initialLength) {
       return true;
     }
-    
+
     // 递归查找子物品
     for (var item in items) {
       if (item.subItems.isNotEmpty) {
@@ -406,11 +411,6 @@ class GoodsPlugin extends BasePlugin {
     ConfigManager configManager,
   ) async {
     await initialize();
-    await configManager.savePluginConfig(id, {
-      'version': version,
-      'enabled': true,
-      'settings': {'theme': 'light'},
-    });
   }
 
   @override
@@ -455,65 +455,65 @@ class GoodsPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           // 统计信息卡片
-         Column(
-              children: [
-                // 第一行 - 物品总数量和总价值
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // 物品总数量
-                    Column(
-                      children: [
-                        Text('总数量', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '${getTotalItemsCount()}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+          Column(
+            children: [
+              // 第一行 - 物品总数量和总价值
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // 物品总数量
+                  Column(
+                    children: [
+                      Text('总数量', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${getTotalItemsCount()}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    
-                    // 物品总价值
-                    Column(
-                      children: [
-                        Text('总价值', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '¥${getTotalItemsValue().toStringAsFixed(2)}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                    ],
+                  ),
+
+                  // 物品总价值
+                  Column(
+                    children: [
+                      Text('总价值', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '¥${getTotalItemsValue().toStringAsFixed(2)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 12),
-                
-                // 第二行 - 一个月未使用
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Column(
-                      children: [
-                        Text('一个月未使用', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '${getUnusedItemsCount()}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                getUnusedItemsCount() > 0
-                                    ? theme.colorScheme.error
-                                    : null,
-                          ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // 第二行 - 一个月未使用
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Text('一个月未使用', style: theme.textTheme.bodyMedium),
+                      Text(
+                        '${getUnusedItemsCount()}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color:
+                              getUnusedItemsCount() > 0
+                                  ? theme.colorScheme.error
+                                  : null,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );

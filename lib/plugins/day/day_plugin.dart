@@ -32,7 +32,7 @@ class DayPlugin extends BasePlugin {
   @override
   String get author => 'Zhuanz';
 
-   @override
+  @override
   IconData get icon => Icons.event_outlined;
 
   @override
@@ -42,13 +42,6 @@ class DayPlugin extends BasePlugin {
   ) async {
     // 初始化插件
     await initialize();
-
-    // 保存插件配置
-    await configManager.savePluginConfig(id, {
-      'version': version,
-      'enabled': true,
-      'settings': {'defaultView': 'card'},
-    });
   }
 
   @override
@@ -57,11 +50,11 @@ class DayPlugin extends BasePlugin {
     await storage.createDirectory(pluginDir);
     _controller = DayController();
     await _controller.initialize();
-    
+
     // 初始化prompt控制器
     _promptController = PromptController();
     _promptController.initialize();
-    
+
     _isInitialized = true;
   }
 
@@ -107,11 +100,7 @@ class DayPlugin extends BasePlugin {
                   color: theme.primaryColor.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  size: 24,
-                  color: theme.primaryColor,
-                ),
+                child: Icon(icon, size: 24, color: theme.primaryColor),
               ),
               const SizedBox(width: 12),
               Text(
@@ -125,39 +114,39 @@ class DayPlugin extends BasePlugin {
           const SizedBox(height: 16),
 
           Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // 纪念日数
-                Column(
-                  children: [
-                    Text('纪念日数', style: theme.textTheme.bodyMedium),
-                    Text(
-                      '$totalCount',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // 纪念日数
+              Column(
+                children: [
+                  Text('纪念日数', style: theme.textTheme.bodyMedium),
+                  Text(
+                    '$totalCount',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-                
-                // 即将到来
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('即将到来', style: theme.textTheme.bodyMedium),
-                    Text(
-                      upcomingDays.isNotEmpty ? upcomingDays.join('，') : '无',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                  ),
+                ],
+              ),
+
+              // 即将到来
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('即将到来', style: theme.textTheme.bodyMedium),
+                  Text(
+                    upcomingDays.isNotEmpty ? upcomingDays.join('，') : '无',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-              ],
-            ),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -167,7 +156,7 @@ class DayPlugin extends BasePlugin {
   Widget buildMainView(BuildContext context) {
     return const DayHomeScreen();
   }
-  
+
   void dispose() {
     // 注销prompt替换方法
     _promptController.unregisterPromptMethods();

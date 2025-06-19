@@ -29,8 +29,6 @@ class ConfigManager {
       final config = await _storage.readJson('configs/$_appConfigKey.json');
       _appConfig.addAll(config as Map<String, dynamic>);
     } catch (e) {
-      // 如果没有找到配置文件或解析失败，使用默认配置并创建配置文件
-      debugPrint('未找到应用配置或解析失败，将创建默认配置: $e');
       _appConfig.addAll(_getDefaultConfig());
       await saveAppConfig(); // 保存默认配置到文件
     }
@@ -110,13 +108,23 @@ class ConfigManager {
     await saveAppConfig();
   }
 
+  static String getPluginConfigPath(
+    String pluginId, [
+    String? fileName = 'settings',
+  ]) {
+    return 'configs/$pluginId/$fileName.json';
+  }
+
   /// 保存插件配置
   Future<void> savePluginConfig(
     String pluginId,
     Map<String, dynamic> config,
   ) async {
     _configs[pluginId] = config;
-    await _storage.writeString('configs/$pluginId.json', jsonEncode(config));
+    await _storage.writeString(
+      getPluginConfigPath(pluginId),
+      jsonEncode(config),
+    );
   }
 
   /// 获取插件配置
@@ -126,7 +134,7 @@ class ConfigManager {
     }
 
     try {
-      final config = await _storage.readJson('configs/$pluginId.json');
+      final config = await _storage.readJson(getPluginConfigPath(pluginId));
       if (config is! Map) return null;
 
       // 确保所有键都是String类型
@@ -147,6 +155,6 @@ class ConfigManager {
   /// 删除插件配置
   Future<void> deletePluginConfig(String pluginId) async {
     _configs.remove(pluginId);
-    await _storage.deleteFile('configs/$pluginId.json');
+    await _storage.deleteFile(getPluginConfigPath(pluginId));
   }
 }
