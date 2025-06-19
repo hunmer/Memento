@@ -222,6 +222,18 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
             style: const TextStyle(fontSize: 12, color: Colors.white),
           ),
           const SizedBox(width: 4),
+          if (timer.repeatCount > 1)
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Text(
+                '×${timer.repeatCount}',
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           Expanded(
             child: Text(
               _formatTimerDisplay(timer),
