@@ -6,7 +6,9 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import androidx.core.content.ContextCompat
 
 class TimerForegroundService : Service() {
     private val CHANNEL_ID = "timer_service_channel"
@@ -62,6 +64,25 @@ class TimerForegroundService : Service() {
     }
 
     private fun startTimer(taskId: String, taskName: String, totalSeconds: Int, currentSeconds: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val hasAlarmPermission = ContextCompat.checkSelfPermission(
+                this,
+                "android.permission.SCHEDULE_EXACT_ALARM"
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!hasAlarmPermission) {
+                // 如果没有权限，创建特殊通知提醒用户
+                val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setContentTitle("Permission Required")
+                    .setContentText("Please grant alarm permission in app settings")
+                    .setSmallIcon(android.R.drawable.ic_dialog_alert)
+                    .build()
+                
+                startForeground(NOTIFICATION_ID_BASE + activeTimers.size, notification)
+                return
+            }
+        }
+
         val notificationId = NOTIFICATION_ID_BASE + activeTimers.size
         activeTimers[taskId] = notificationId
         val notification = createNotification(taskName, totalSeconds, currentSeconds)

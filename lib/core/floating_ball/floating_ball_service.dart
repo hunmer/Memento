@@ -37,30 +37,44 @@ class FloatingBallService {
 
   /// 显示悬浮球
   Future<void> show(BuildContext? context) async {
-    if (_overlayEntry != null || context == null) return;
+    try {
+      if (_overlayEntry != null || context == null) return;
+      if (!context.mounted) return; // 检查上下文是否有效
 
-    // 检查悬浮球是否启用
-    final isEnabled = await _manager.isEnabled();
-    if (!isEnabled) return;
+      // 检查悬浮球是否启用
+      final isEnabled = await _manager.isEnabled();
+      if (!isEnabled) return;
 
-    lastContext = context;
-    initialize(context);
+      lastContext = context;
+      initialize(context);
 
-    _overlayEntry = OverlayEntry(
-      builder:
-          (context) => const FloatingBallWidget(
-            baseSize: 60,
-            iconPath: 'assets/icon/icon.png',
-          ),
-    );
+      _overlayEntry = OverlayEntry(
+        builder:
+            (context) => const FloatingBallWidget(
+              baseSize: 60,
+              iconPath: 'assets/icon/icon.png',
+            ),
+      );
 
-    Overlay.of(context).insert(_overlayEntry!);
+      final overlayState = Overlay.of(context);
+      if (overlayState != null && overlayState.mounted) {
+        overlayState.insert(_overlayEntry!);
+      }
+    } catch (e) {
+      debugPrint('Error showing floating ball: $e');
+    }
   }
 
   /// 隐藏悬浮球
   void hide() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
+    try {
+      if (_overlayEntry != null) {
+        _overlayEntry?.remove();
+        _overlayEntry = null;
+      }
+    } catch (e) {
+      debugPrint('Error hiding floating ball: $e');
+    }
   }
 
   /// 设置悬浮球动作

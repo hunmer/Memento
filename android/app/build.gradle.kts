@@ -77,6 +77,4 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.google.android.play:core:1.10.3")
     implementation("com.google.android.play:core-ktx:1.8.1")
-    
-    // Flutter Gradle插件会自动添加所需的embedding依赖
 }

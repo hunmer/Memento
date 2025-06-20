@@ -1,14 +1,12 @@
-import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/backup_service.dart';
 import 'package:Memento/screens/settings_screen/log_settings_screen.dart';
+import 'package:Memento/test/test_foreground_task_screen.dart';
 import 'package:flutter/material.dart';
 import './controllers/settings_screen_controller.dart';
 import './widgets/webdav_settings_dialog.dart';
 import './controllers/webdav_controller.dart';
 import '../../core/floating_ball/settings_screen.dart';
 import '../../core/floating_ball/floating_ball_manager.dart';
-import '../../widgets/backup_time_picker.dart';
-import '../../core/utils/logger_util.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -249,74 +247,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.update),
+            title: const Text('测试前台服务'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TestForegroundTaskScreen(),
+                ),
+              );
+            },
+          ),
         ],
       ),
-    );
-  }
-
-  Future<void> _showLogHistory(BuildContext context) async {
-    final logger = LoggerUtil();
-    final logFiles = await logger.getLogFiles();
-
-    if (!context.mounted) return;
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('历史日志'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: logFiles.length,
-                itemBuilder: (context, index) {
-                  final fileName = logFiles[index].split('/').last;
-                  return ListTile(
-                    title: Text(fileName),
-                    onTap: () async {
-                      final content = await logger.readLogFile(logFiles[index]);
-                      if (!context.mounted) return;
-
-                      showDialog(
-                        context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              title: Text(fileName),
-                              content: SingleChildScrollView(
-                                child: Text(content),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('关闭'),
-                                  onPressed: () => Navigator.pop(context),
-                                ),
-                              ],
-                            ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            actions: [
-              TextButton(
-                child: const Text('清除日志'),
-                onPressed: () async {
-                  await logger.clearLogs();
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('日志已清除')));
-                  Navigator.pop(context);
-                },
-              ),
-              TextButton(
-                child: const Text('关闭'),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
     );
   }
 }
