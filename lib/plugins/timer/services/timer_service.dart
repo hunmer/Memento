@@ -14,6 +14,17 @@ class TimerService {
         'taskName': task.name,
         'totalSeconds': task.totalDuration.inSeconds,
         'currentSeconds': task.elapsedDuration.inSeconds,
+        'subTimers':
+            task.timerItems
+                ?.map(
+                  (st) => {
+                    'name': st.name,
+                    'duration': st.duration.inSeconds,
+                    'completed': st.isCompleted,
+                  },
+                )
+                .toList(),
+        'currentSubTimerIndex': task.getCurrentIndex(),
       });
     } catch (e) {
       print('Error starting notification service: $e');
@@ -28,6 +39,17 @@ class TimerService {
         'taskName': task.name,
         'totalSeconds': task.totalDuration.inSeconds,
         'currentSeconds': task.elapsedDuration.inSeconds,
+        'subTimers':
+            task.timerItems
+                ?.map(
+                  (st) => {
+                    'name': st.name,
+                    'duration': st.duration.inSeconds,
+                    'completed': st.isCompleted,
+                  },
+                )
+                .toList(),
+        'currentSubTimerIndex': task.getCurrentIndex(),
       });
     } catch (e) {
       print('Error updating notification: $e');
@@ -36,10 +58,10 @@ class TimerService {
 
   // 停止前台通知服务
   static Future<void> stopNotificationService([String? taskId]) async {
-    try {
-      await _channel.invokeMethod('stopTimerService', {'taskId': taskId ?? ''});
-    } catch (e) {
-      print('Error stopping notification service: $e');
-    }
+    // try {
+    //   await _channel.invokeMethod('stopTimerService', {'taskId': taskId ?? ''});
+    // } catch (e) {
+    //   print('Error stopping notification service: $e');
+    // }
   }
 }

@@ -18,6 +18,10 @@
     <!-- 日历权限 -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <!-- 闹钟权限 -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
     <application
         android:label="Memento"
         android:name="${applicationName}"
@@ -39,9 +43,18 @@
             android:name="flutterEmbedding"
             android:value="2" />
         <service
-            android:name=".TimerForegroundService"
+            android:name="github.hunmer.memento.TimerForegroundService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+        
+        <!-- Warning: Do not change service name. -->
+        <service 
+            android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
+            android:foregroundServiceType="dataSync|remoteMessaging"
+            android:exported="false" />
+        <meta-data
+        android:name="github.hunmer.memento.service.APP_ICON"
+        android:resource="@drawable/launcher_icon" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
