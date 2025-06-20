@@ -12,13 +12,12 @@ class TimerService {
       await _channel.invokeMethod('startTimerService', {
         'taskId': task.id,
         'taskName': task.name,
-        'totalSeconds': task.totalDuration.inSeconds,
-        'currentSeconds': task.elapsedDuration.inSeconds,
         'subTimers':
             task.timerItems
                 ?.map(
                   (st) => {
                     'name': st.name,
+                    'current': st.completedDuration.inSeconds,
                     'duration': st.duration.inSeconds,
                     'completed': st.isCompleted,
                   },
@@ -37,13 +36,12 @@ class TimerService {
       await _channel.invokeMethod('updateTimerService', {
         'taskId': task.id,
         'taskName': task.name,
-        'totalSeconds': task.totalDuration.inSeconds,
-        'currentSeconds': task.elapsedDuration.inSeconds,
         'subTimers':
             task.timerItems
                 ?.map(
                   (st) => {
                     'name': st.name,
+                    'current': st.completedDuration.inSeconds,
                     'duration': st.duration.inSeconds,
                     'completed': st.isCompleted,
                   },
@@ -58,10 +56,10 @@ class TimerService {
 
   // 停止前台通知服务
   static Future<void> stopNotificationService([String? taskId]) async {
-    // try {
-    //   await _channel.invokeMethod('stopTimerService', {'taskId': taskId ?? ''});
-    // } catch (e) {
-    //   print('Error stopping notification service: $e');
-    // }
+    try {
+      await _channel.invokeMethod('stopTimerService', {'taskId': taskId ?? ''});
+    } catch (e) {
+      print('Error stopping notification service: $e');
+    }
   }
 }

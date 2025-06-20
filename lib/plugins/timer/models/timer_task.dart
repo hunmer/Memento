@@ -119,15 +119,6 @@ class TimerTask {
     return null;
   }
 
-  // 获取总时长（所有计时器项的总和）
-  Duration get totalDuration {
-    Duration total = Duration.zero;
-    for (var timer in timerItems) {
-      total += timer.duration;
-    }
-    return total;
-  }
-
   // 获取已经过去的时长
   Duration get elapsedDuration => _elapsedDuration;
 

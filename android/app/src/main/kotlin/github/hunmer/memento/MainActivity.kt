@@ -1,5 +1,6 @@
 package github.hunmer.memento
 
+import android.util.Log
 import android.content.Intent
 import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
@@ -26,8 +27,8 @@ class MainActivity: FlutterActivity() {
                         args?.let {
                             putExtra("taskId", it["taskId"] as? String)
                             putExtra("taskName", it["taskName"] as? String)
-                            putExtra("totalSeconds", it["totalSeconds"] as? Int ?: 0)
-                            putExtra("currentSeconds", it["currentSeconds"] as? Int ?: 0)
+                            putExtra("subTimers", it["subTimers"] as? ArrayList<*>)
+                            putExtra("currentSubTimerIndex", it["currentSubTimerIndex"] as? Int ?: -1)
                         }
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -44,8 +45,8 @@ class MainActivity: FlutterActivity() {
                         args?.let {
                             putExtra("taskId", it["taskId"] as? String)
                             putExtra("taskName", it["taskName"] as? String)
-                            putExtra("totalSeconds", it["totalSeconds"] as? Int ?: 0)
-                            putExtra("currentSeconds", it["currentSeconds"] as? Int ?: 0)
+                            putExtra("subTimers", it["subTimers"] as? ArrayList<*>)
+                            putExtra("currentSubTimerIndex", it["currentSubTimerIndex"] as? Int ?: -1)
                         }
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -56,6 +57,7 @@ class MainActivity: FlutterActivity() {
                     result.success(null)
                 }
                 "stopTimerService" -> {
+                    Log.w("stopTimerService", "Stopping timer service")
                     val intent = Intent(this, TimerForegroundService::class.java)
                     stopService(intent)
                     result.success(null)
