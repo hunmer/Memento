@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/services/shortcut_manager.dart';
 import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
@@ -51,6 +52,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 late final StorageManager globalStorage;
 late final ConfigManager globalConfigManager;
 late final PluginManager globalPluginManager;
+late final AppShortcutManager globalShortcutManager;
 LoggerUtil? logger;
 late PermissionController _permissionController;
 
@@ -86,6 +88,9 @@ void main() async {
       logger?.log(details.exceptionAsString(), level: 'ERROR');
       debugPrint(details.toString());
     };
+
+    globalShortcutManager = AppShortcutManager();
+    globalShortcutManager.initialize();
 
     // 注册内置插件
     final plugins = [
