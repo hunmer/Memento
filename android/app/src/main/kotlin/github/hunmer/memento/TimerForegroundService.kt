@@ -135,14 +135,23 @@ class TimerForegroundService : Service() {
         val current = currentSubTimer?.get("current") as? Int ?: 0
         val progress = if (duration > 0) (current.toFloat() / duration.toFloat() * 100).toInt() else 0
 
+        fun formatTime(seconds: Int): String {
+            val minutes = seconds / 60
+            val secs = seconds % 60
+            return String.format("%d:%02d", minutes, secs)
+        }
+
+        val currentFormatted = formatTime(current)
+        val durationFormatted = formatTime(duration)
+        
         val progressStyle = NotificationCompat.BigTextStyle()
             .bigText(buildSubTimersText(params.subTimers, params.currentSubTimerIndex))
             .setBigContentTitle(params.taskName ?: "Memento Timer")
-            .setSummaryText("$currentName: $current/$duration")
+            .setSummaryText("$currentName: $currentFormatted/$durationFormatted")
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(params.taskName ?: "Memento Timer")
-            .setContentText("$currentName: $current/$duration")
+            .setContentText("$currentName: $currentFormatted/$durationFormatted")
             .setSmallIcon(R.drawable.launcher_icon)
             .setStyle(progressStyle)
             .setProgress(100, progress, false)

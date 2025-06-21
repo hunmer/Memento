@@ -122,11 +122,11 @@ class _ChatScreenState extends State<ChatScreen> {
   // 处理消息更新事件
   void _handleMessageUpdated(EventArgs args) {
     if (args is! ValuesEventArgs<Message, String>) return;
-    
+
     // 检查更新的消息是否属于当前频道
     final message = args.value1;
     if (message.channelId != widget.channel.id) return;
-    
+
     // 重新加载消息列表
     _controller.reloadMessages();
   }
@@ -135,8 +135,11 @@ class _ChatScreenState extends State<ChatScreen> {
   void _handleChatPluginUpdate() {
     // 检查当前频道是否更新
     final updatedChannel = ChatPlugin.instance.channelService.channels
-        .firstWhere((c) => c.id == widget.channel.id, orElse: () => widget.channel);
-    
+        .firstWhere(
+          (c) => c.id == widget.channel.id,
+          orElse: () => widget.channel,
+        );
+
     // 如果背景路径发生变化，重新加载背景
     if (updatedChannel.backgroundPath != widget.channel.backgroundPath) {
       debugPrint('背景图片已更新，重新加载: ${updatedChannel.backgroundPath}');
@@ -144,12 +147,13 @@ class _ChatScreenState extends State<ChatScreen> {
         _isLoadingBackground = true;
       });
       _loadBackgroundPath();
-      
+
       // 强制重建背景图片
       if (_backgroundPath != null) {
         setState(() {
           // 添加一个随机参数，确保Image.file重新加载
-          _backgroundPath = "$_backgroundPath?t=${DateTime.now().millisecondsSinceEpoch}";
+          _backgroundPath =
+              "$_backgroundPath?t=${DateTime.now().millisecondsSinceEpoch}";
         });
       }
     }
@@ -322,12 +326,16 @@ class _ChatScreenState extends State<ChatScreen> {
       _updateMessages(); // 更新消息列表
     }
   }
+
   // 加载背景图片路径
   Future<void> _loadBackgroundPath() async {
     // 获取最新的频道数据
     final currentChannel = ChatPlugin.instance.channelService.channels
-        .firstWhere((c) => c.id == widget.channel.id, orElse: () => widget.channel);
-    
+        .firstWhere(
+          (c) => c.id == widget.channel.id,
+          orElse: () => widget.channel,
+        );
+
     if (currentChannel.backgroundPath == null) {
       setState(() {
         _backgroundPath = null;
@@ -344,7 +352,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         final file = File(absolutePath);
         final exists = await file.exists(); // 检查文件是否存在
-        
+
         if (exists) {
           setState(() {
             _backgroundPath = absolutePath;
@@ -547,46 +555,68 @@ class _ChatScreenState extends State<ChatScreen> {
                             child: MessageList(
                               items: messageItems,
                               isMultiSelectMode: _controller.isMultiSelectMode,
-                              selectedMessageIds: _controller.selectedMessageIds,
+                              selectedMessageIds:
+                                  _controller.selectedMessageIds,
                               onMessageEdit: _showEditDialog,
                               onMessageDelete: _controller.deleteMessage,
-                              onMessageCopy: (message) => _messageOperations.copyMessage(message),
-                              onSetFixedSymbol: (message, symbol) =>
-                                  _messageOperations.setFixedSymbol(message, symbol),
-                              onSetBubbleColor: (message, color) =>
-                                  _messageOperations.setBubbleColor(message, color),
+                              onMessageCopy:
+                                  (message) =>
+                                      _messageOperations.copyMessage(message),
+                              onSetFixedSymbol:
+                                  (message, symbol) => _messageOperations
+                                      .setFixedSymbol(message, symbol),
+                              onSetBubbleColor:
+                                  (message, color) => _messageOperations
+                                      .setBubbleColor(message, color),
                               onReply: _handleReply,
                               onToggleFavorite: _handleToggleFavorite,
-                              onToggleMessageSelection: _controller.toggleMessageSelection,
+                              onToggleMessageSelection:
+                                  _controller.toggleMessageSelection,
                               onReplyTap: _handleReplyTap,
                               scrollController: _controller.scrollController,
-                              currentUserId: ChatPlugin.instance.userService.currentUser.id,
+                              currentUserId:
+                                  ChatPlugin
+                                      .instance
+                                      .userService
+                                      .currentUser
+                                      .id,
                               highlightedMessage: widget.highlightMessage,
                               shouldHighlight: widget.highlightMessage != null,
                               onAvatarTap: (message) async {
                                 // 检查是否为AI消息
                                 final metadata = message.metadata;
-                                if (metadata != null && 
-                                    metadata.containsKey('isAI') && 
-                                    metadata['isAI'] == true && 
+                                if (metadata != null &&
+                                    metadata.containsKey('isAI') &&
+                                    metadata['isAI'] == true &&
                                     metadata.containsKey('agentId')) {
                                   final agentId = metadata['agentId'] as String;
-                                  
+
                                   if (mounted) {
                                     try {
                                       // 获取OpenAI插件并转换类型
-                                      final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+                                      final openaiPlugin =
+                                          PluginManager.instance.getPlugin(
+                                                'openai',
+                                              )
+                                              as OpenAIPlugin;
                                       // 获取agent
-                                      final agent = await openaiPlugin.controller.getAgent(agentId);
+                                      final agent = await openaiPlugin
+                                          .controller
+                                          .getAgent(agentId);
                                       if (agent != null) {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => AgentEditScreen(agent: agent),
+                                            builder:
+                                                (context) => AgentEditScreen(
+                                                  agent: agent,
+                                                ),
                                           ),
                                         );
                                       } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           const SnackBar(
                                             content: Text('找不到对应的AI助手'),
                                           ),
@@ -594,9 +624,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                       }
                                     } catch (e) {
                                       // 插件不可用或类型转换失败时显示提示
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         const SnackBar(
-                                          content: Text('无法访问AI编辑界面，OpenAI插件可能未加载'),
+                                          content: Text(
+                                            '无法访问AI编辑界面，OpenAI插件可能未加载',
+                                          ),
                                         ),
                                       );
                                     }
@@ -604,33 +638,44 @@ class _ChatScreenState extends State<ChatScreen> {
                                 } else {
                                   // 如果不是AI消息，显示用户资料编辑对话框
                                   final chatPlugin = ChatPlugin.instance;
-                                  final users = chatPlugin.userService.getAllUsers();
+                                  final users =
+                                      chatPlugin.userService.getAllUsers();
                                   final targetUser = users.firstWhere(
                                     (user) => user.id == message.user.id,
                                     orElse: () => message.user,
                                   );
-                                  
+
                                   final updatedUser = await showDialog<User>(
                                     context: context,
-                                    builder: (context) => ProfileEditDialog(
-                                      user: targetUser,
-                                      chatPlugin: chatPlugin,
-                                    ),
+                                    builder:
+                                        (context) => ProfileEditDialog(
+                                          user: targetUser,
+                                          chatPlugin: chatPlugin,
+                                        ),
                                   );
-                                  
+
                                   if (updatedUser != null && mounted) {
                                     // 如果是当前用户，则更新当前用户信息
-                                    if (targetUser.id == chatPlugin.userService.currentUser.id) {
-                                      chatPlugin.userService.setCurrentUser(updatedUser);
+                                    if (targetUser.id ==
+                                        chatPlugin.userService.currentUser.id) {
+                                      chatPlugin.userService.setCurrentUser(
+                                        updatedUser,
+                                      );
                                     }
                                     // 否则只更新用户列表中的用户信息
                                     else {
-                                      await chatPlugin.userService.updateUser(updatedUser);
+                                      await chatPlugin.userService.updateUser(
+                                        updatedUser,
+                                      );
                                     }
                                   }
                                 }
                               },
-                              showAvatar: ChatPlugin.instance.settingsService.showAvatarInChat,
+                              showAvatar:
+                                  ChatPlugin
+                                      .instance
+                                      .settingsService
+                                      .showAvatarInChat,
                             ),
                           ),
                           MessageInput(

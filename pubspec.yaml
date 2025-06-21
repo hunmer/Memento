@@ -79,6 +79,7 @@ dependencies:
   location: ^8.0.0
   fs_shim: ^2.4.0
   flutter_foreground_task: ^9.1.0
+  flutter_shortcut_plus: ^1.0.1
 
 dev_dependencies:
   flutter_test:

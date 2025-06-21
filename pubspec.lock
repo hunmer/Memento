@@ -404,6 +404,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.28"
+  flutter_shortcut_plus:
+    dependency: "direct main"
+    description:
+      name: flutter_shortcut_plus
+      sha256: "804bf45cfe39060fc00cb357f44db0185d42c98727de0b057f467af11a15ecae"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   flutter_staggered_grid_view:
     dependency: "direct main"
     description:
