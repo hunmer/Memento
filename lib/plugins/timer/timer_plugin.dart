@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import 'models/timer_task.dart';
-import 'models/timer_item.dart';
 import 'views/timer_main_view.dart';
 import 'services/timer_service.dart';
 import 'storage/timer_controller.dart';
 
 class TimerPlugin extends BasePlugin {
+  late final TimerController timerController;
+
+  List<TimerTask> _tasks = [];
   static TimerPlugin? _instance;
   static TimerPlugin get instance {
     if (_instance == null) {
@@ -23,9 +24,6 @@ class TimerPlugin extends BasePlugin {
     return _instance!;
   }
 
-  late final TimerController timerController;
-
-  List<TimerTask> _tasks = [];
   @override
   String get id => 'timer';
 
@@ -40,6 +38,7 @@ class TimerPlugin extends BasePlugin {
 
   @override
   Future<void> initialize() async {
+    timerController = TimerController(this.storage);
     await _loadTasks();
   }
 

@@ -155,7 +155,6 @@ class FloatingBallManager {
         _actions[gesture] = ActionInfo(actionTitle.toString(), () {});
       }
     }
-    debugPrint('Loaded ${_actions.length} saved actions');
   }
 
   // 保存动作

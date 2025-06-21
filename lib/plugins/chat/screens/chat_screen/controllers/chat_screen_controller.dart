@@ -9,7 +9,9 @@ import '../../../../../../utils/audio_service.dart';
 class ChatScreenController extends ChangeNotifier {
   // 重新加载消息列表
   void reloadMessages() async {
-    final channelMessages = await chatPlugin.channelService.getChannelMessages(channel.id);
+    final channelMessages = await chatPlugin.channelService.getChannelMessages(
+      channel.id,
+    );
     if (channelMessages != null) {
       messages = List<Message>.from(channelMessages)
         ..sort((a, b) => b.date.compareTo(a.date));
@@ -65,7 +67,7 @@ class ChatScreenController extends ChangeNotifier {
       debugPrint('Channel not found: ${channel.id}');
       return;
     }
-    
+
     // 加载第一页消息
     await _loadMessages();
 
@@ -100,27 +102,7 @@ class ChatScreenController extends ChangeNotifier {
   }
 
   void _initializeCurrentUser() {
-    try {
-      // 检查 ChatPlugin 是否已初始化
-      if (chatPlugin.isInitialized) {
-        currentUser = chatPlugin.userService.currentUser;
-      } else {
-        // 如果 ChatPlugin 尚未初始化，使用一个默认用户并稍后重试
-        currentUser = User(id: 'current_user', username: 'Current User');
-
-        // 延迟重试获取当前用户
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (chatPlugin.isInitialized) {
-            currentUser = chatPlugin.userService.currentUser;
-            notifyListeners();
-          }
-        });
-      }
-    } catch (e) {
-      debugPrint('Error initializing current user: $e');
-      // 使用默认用户作为备选
-      currentUser = User(id: 'current_user', username: 'Current User');
-    }
+    currentUser = chatPlugin.userService.currentUser;
   }
 
   void _setupScrollListener() {
@@ -140,9 +122,10 @@ class ChatScreenController extends ChangeNotifier {
     try {
       // 从ChatPlugin加载最新的消息
       debugPrint('Loading messages for channel: ${channel.id}');
-      
+
       // 获取频道消息
-      final channelMessages = await chatPlugin.channelService.getChannelMessages(channel.id);
+      final channelMessages = await chatPlugin.channelService
+          .getChannelMessages(channel.id);
       if (channelMessages == null) {
         debugPrint('Channel not found in ChatPlugin');
         return;
@@ -198,7 +181,9 @@ class ChatScreenController extends ChangeNotifier {
     if (isLoading) return;
 
     // 获取频道消息
-    final channelMessages = await chatPlugin.channelService.getChannelMessages(channel.id);
+    final channelMessages = await chatPlugin.channelService.getChannelMessages(
+      channel.id,
+    );
     if (channelMessages == null) return;
 
     final totalMessages = channelMessages.length;
@@ -361,10 +346,10 @@ class ChatScreenController extends ChangeNotifier {
         metadata: metadata,
         replyTo: replyTo,
       );
-      
+
       // 将新消息添加到本地消息列表
       messages.insert(0, newMessage);
-      
+
       // 确保消息被添加到频道
       await chatPlugin.channelService.addMessage(channel.id, newMessage);
 
@@ -409,7 +394,7 @@ class ChatScreenController extends ChangeNotifier {
       // 保存空消息列表到存储
       await chatPlugin.channelService.saveMessages(channel.id, messages);
 
-          // 消息发送完成后，确保在主线程中更新UI
+      // 消息发送完成后，确保在主线程中更新UI
       WidgetsBinding.instance.addPostFrameCallback((_) {
         notifyListeners();
       });
@@ -422,12 +407,13 @@ class ChatScreenController extends ChangeNotifier {
     }
   }
 
-
   Future<void> _loadUntilMessageFound() async {
     if (initialMessage == null) return;
 
     // 获取频道消息
-    final channelMessages = await chatPlugin.channelService.getChannelMessages(channel.id);
+    final channelMessages = await chatPlugin.channelService.getChannelMessages(
+      channel.id,
+    );
     if (channelMessages == null) return;
 
     final targetMessageIndex = channelMessages.indexWhere(

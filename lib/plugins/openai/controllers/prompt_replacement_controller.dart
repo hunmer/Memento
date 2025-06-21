@@ -10,12 +10,14 @@ class ProcessedMethodReplacement {
 }
 
 /// 用于替换prompt中特定方法的回调函数类型
-typedef PromptReplacementCallback = Future<String> Function(Map<String, dynamic> params);
+typedef PromptReplacementCallback =
+    Future<String> Function(Map<String, dynamic> params);
 
 /// Prompt替换控制器
 /// 用于管理和执行prompt中的方法替换
 class PromptReplacementController {
-  static final PromptReplacementController _instance = PromptReplacementController._internal();
+  static final PromptReplacementController _instance =
+      PromptReplacementController._internal();
   factory PromptReplacementController() => _instance;
   PromptReplacementController._internal();
 
@@ -25,13 +27,11 @@ class PromptReplacementController {
   /// 注册一个新的prompt替换方法
   void registerMethod(String methodName, PromptReplacementCallback callback) {
     _methods[methodName] = callback;
-    debugPrint('注册prompt替换方法: $methodName');
   }
 
   /// 注销一个prompt替换方法
   void unregisterMethod(String methodName) {
     _methods.remove(methodName);
-    debugPrint('注销prompt替换方法: $methodName');
   }
 
   /// 处理prompt中的替换
@@ -48,7 +48,7 @@ class PromptReplacementController {
 
         try {
           final Map<String, dynamic> params = json.decode(jsonStr);
-          
+
           // 检查是否包含method字段
           if (params.containsKey('method')) {
             final methodName = params['method'];
@@ -80,22 +80,24 @@ class PromptReplacementController {
     _methods.clear();
     debugPrint('清理所有prompt替换方法');
   }
-  
+
   /// 获取已注册方法的名称列表
   List<String> getRegisteredMethodNames() {
     return _methods.keys.toList();
   }
-  
+
   /// 检查方法是否已注册
   bool hasMethod(String methodName) {
     return _methods.containsKey(methodName);
   }
-  
+
   /// 预处理prompt中的所有方法替换
   /// 返回一个包含所有需要替换的模式及其结果的列表
-  Future<List<ProcessedMethodReplacement>> preprocessPromptReplacements(String prompt) async {
+  Future<List<ProcessedMethodReplacement>> preprocessPromptReplacements(
+    String prompt,
+  ) async {
     final List<ProcessedMethodReplacement> replacements = [];
-    
+
     try {
       // 使用正则表达式查找所有 {...} 格式的内容
       final regex = RegExp(r'{[^}]+}');
@@ -106,7 +108,7 @@ class PromptReplacementController {
 
         try {
           final Map<String, dynamic> params = json.decode(jsonStr);
-          
+
           // 检查是否包含method字段
           if (params.containsKey('method')) {
             final methodName = params['method'];
@@ -125,21 +127,24 @@ class PromptReplacementController {
           continue;
         }
       }
-      
+
       return replacements;
     } catch (e) {
       debugPrint('预处理prompt替换时出错: $e');
       return [];
     }
   }
-  
+
   /// 应用预处理的替换结果到prompt
-  static String applyProcessedReplacements(String prompt, List<ProcessedMethodReplacement> replacements) {
+  static String applyProcessedReplacements(
+    String prompt,
+    List<ProcessedMethodReplacement> replacements,
+  ) {
     String processedPrompt = prompt;
     for (final replacement in replacements) {
       processedPrompt = processedPrompt.replaceFirst(
-        replacement.originalPattern, 
-        replacement.replacementResult
+        replacement.originalPattern,
+        replacement.replacementResult,
       );
     }
     return processedPrompt;

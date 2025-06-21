@@ -81,30 +81,21 @@ class _ChatScreenState extends State<ChatScreen> {
     if (!mounted) return;
 
     // 检查插件是否已初始化
-    if (chatPlugin.isInitialized) {
-      try {
-        final draft = await chatPlugin.channelService.loadDraft(
-          widget.channel.id,
-        );
-        if (draft != null && draft.isNotEmpty && mounted) {
-          setState(() {
-            // 检查控制器是否可用
-            if (_controller.draftController.text != draft) {
-              _controller.draftController.text = draft;
-            }
-          });
-        }
-      } catch (e) {
-        debugPrint('Error loading draft: $e');
-        // 可以在这里添加用户提示
+    try {
+      final draft = await chatPlugin.channelService.loadDraft(
+        widget.channel.id,
+      );
+      if (draft != null && draft.isNotEmpty && mounted) {
+        setState(() {
+          // 检查控制器是否可用
+          if (_controller.draftController.text != draft) {
+            _controller.draftController.text = draft;
+          }
+        });
       }
-    } else {
-      // 如果插件尚未初始化，则延迟加载草稿
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          _loadChannelDraft();
-        }
-      });
+    } catch (e) {
+      debugPrint('Error loading draft: $e');
+      // 可以在这里添加用户提示
     }
   }
 
