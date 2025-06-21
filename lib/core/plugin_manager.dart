@@ -233,46 +233,21 @@ class PluginManager {
 
   /// 打开插件界面
   void openPlugin(BuildContext context, PluginBase plugin) {
-    _currentPlugin = plugin; // 记录当前打开的插件
-    _lastOpenedPluginId = plugin.id; // 记录最后打开的插件ID
-    _saveLastOpenedPlugin(); // 保存最后打开的插件ID
-    // 检查当前路由栈中是否已经存在相同的插件
-    bool isPluginAlreadyOpen = false;
-    Navigator.popUntil(context, (route) {
-      if (route.settings.arguments is Map) {
-        final args = route.settings.arguments as Map;
-        if (args['pluginId'] == plugin.id) {
-          isPluginAlreadyOpen = true;
-          return true;
-        }
-      }
-      return false;
-    });
-
-    // 如果插件已经打开，就不再重复打开
+    // 检查当前路由是否已经是该插件
+    bool isPluginAlreadyOpen =
+        ModalRoute.of(context)?.settings.name == '/${plugin.id}';
     if (isPluginAlreadyOpen) {
       return;
     }
-
-    // 更新访问时间并打开新的插件页面
+    _currentPlugin = plugin; // 记录当前打开的插件
+    _lastOpenedPluginId = plugin.id; // 记录最后打开的插件ID
+    _saveLastOpenedPlugin(); // 保存最后打开的插件ID
     _updatePluginAccessTime(plugin.id);
     Navigator.pushNamed(context, '/${plugin.id}');
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     settings: RouteSettings(arguments: {'pluginId': plugin.id}),
-    //     builder:
-    //         (context) => Scaffold(
-    //           // 不需要appBar，因为插件界面通常有自己的头部布局
-    //           body: plugin.buildMainView(context),
-    //         ),
-    //   ),
-    // );
   }
 
   static toHomeScreen(BuildContext context) {
     PluginManager.instance._currentPlugin = null; // 清除当前插件记录
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
-    );
+    Navigator.pushNamed(context, '/');
   }
 }

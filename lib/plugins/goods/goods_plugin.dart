@@ -54,8 +54,16 @@ class _GoodsMainViewState extends State<GoodsMainView> {
 }
 
 class GoodsPlugin extends BasePlugin {
-  static final GoodsPlugin instance = GoodsPlugin._internal();
-  GoodsPlugin._internal();
+  static GoodsPlugin? _instance;
+  static GoodsPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('goods') as GoodsPlugin?;
+      if (_instance == null) {
+        throw StateError('GoodsPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
 
   final List<Warehouse> _warehouses = [];
   final List<Function()> _listeners = [];
@@ -150,9 +158,6 @@ class GoodsPlugin extends BasePlugin {
 
   @override
   String get description => '管理各种物品的存储位置和使用记录';
-
-  @override
-  String get author => 'Zhuanz';
 
   @override
   IconData get icon => Icons.inventory_2;

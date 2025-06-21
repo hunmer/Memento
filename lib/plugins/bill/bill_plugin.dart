@@ -13,6 +13,17 @@ import 'models/bill_statistics.dart';
 import 'models/statistic_range.dart';
 
 class BillPlugin extends PluginBase with ChangeNotifier {
+  static BillPlugin? _instance;
+  static BillPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('bill') as BillPlugin?;
+      if (_instance == null) {
+        throw StateError('BillPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
+
   late final BillController _billController;
   late final PromptController _promptController;
 
@@ -29,9 +40,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
   @override
   String get description => '管理个人账单和财务统计';
-
-  @override
-  String get author => 'Memento Team';
 
   @override
   IconData get icon => Icons.account_balance_wallet;

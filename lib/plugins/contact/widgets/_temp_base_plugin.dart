@@ -17,9 +17,6 @@ class _TempBasePlugin extends BasePlugin {
   String get description => 'Temporary plugin for contact functionality';
 
   @override
-  String get author => 'System';
-
-  @override
   Widget buildMainView(BuildContext context) {
     return const Center(child: Text('Temporary Plugin'));
   }

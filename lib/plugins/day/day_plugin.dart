@@ -21,30 +21,29 @@ class _DayMainViewState extends State<DayMainView> {
 }
 
 class DayPlugin extends BasePlugin {
-  static final DayPlugin instance = DayPlugin._internal();
-  DayPlugin._internal();
+  static DayPlugin? _instance;
+  static DayPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('day') as DayPlugin?;
+      if (_instance == null) {
+        throw StateError('DayPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
 
   late DayController _controller;
   late PromptController _promptController;
   bool _isInitialized = false;
 
   @override
-  final String id = 'day_plugin';
+  final String id = 'day';
 
   @override
   final String name = 'Day';
 
   @override
-  final String version = '1.0.0';
-
-  @override
-  final String pluginDir = 'day';
-
-  @override
   String get description => '纪念日管理插件';
-
-  @override
-  String get author => 'Zhuanz';
 
   @override
   IconData get icon => Icons.event_outlined;
@@ -61,7 +60,7 @@ class DayPlugin extends BasePlugin {
   @override
   Future<void> initialize() async {
     // 确保纪念日数据目录存在
-    await storage.createDirectory(pluginDir);
+    await storage.createDirectory('day');
     _controller = DayController();
     await _controller.initialize();
 

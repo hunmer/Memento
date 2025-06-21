@@ -17,9 +17,6 @@ abstract class PluginBase {
   /// 插件描述
   String get description;
 
-  /// 插件作者
-  String get author;
-
   /// 插件图标
   IconData? get icon => Icons.extension;
 

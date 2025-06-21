@@ -10,7 +10,43 @@ import 'screens/notebooks_screen.dart';
 import 'l10n/nodes_localizations.dart';
 import 'models/node.dart';
 
+class NodesMainView extends StatefulWidget {
+  const NodesMainView({super.key});
+
+  @override
+  State<NodesMainView> createState() => _NodesMainViewState();
+}
+
+class _NodesMainViewState extends State<NodesMainView> {
+  late NodesPlugin _plugin;
+
+  @override
+  void initState() {
+    super.initState();
+    _plugin = NodesPlugin.instance;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: _plugin.controller,
+      child: const NotebooksScreen(),
+    );
+  }
+}
+
 class NodesPlugin extends PluginBase {
+  static NodesPlugin? _instance;
+  static NodesPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('nodes') as NodesPlugin?;
+      if (_instance == null) {
+        throw StateError('NodesPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
+
   late NodesController _controller;
   final NodesPromptReplacements _promptReplacements = NodesPromptReplacements();
   bool _isInitialized = false;
@@ -27,9 +63,6 @@ class NodesPlugin extends PluginBase {
 
   @override
   String get description => 'A plugin for managing hierarchical notes';
-
-  @override
-  String get author => 'Memento Team';
 
   @override
   Future<void> initialize() async {
@@ -63,7 +96,7 @@ class NodesPlugin extends PluginBase {
       providers: [
         ChangeNotifierProvider<NodesController>.value(value: _controller),
       ],
-      child: const NotebooksScreen(),
+      child: const NodesMainView(),
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import 'controllers/notes_controller.dart';
@@ -6,7 +7,18 @@ import 'l10n/notes_localizations.dart';
 import 'controls/prompt_controller.dart';
 
 class NotesPlugin extends BasePlugin {
-  late NotesController _controller;
+  static NotesPlugin? _instance;
+  static NotesPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('notes') as NotesPlugin?;
+      if (_instance == null) {
+        throw StateError('NotesPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
+
+  late NotesController controller;
   late NotesPromptController _promptController;
   bool _isInitialized = false;
 
@@ -17,9 +29,6 @@ class NotesPlugin extends BasePlugin {
   String get name => 'Notes';
 
   @override
-  String get author => 'Memento Team';
-
-  @override
   String get description => 'A simple note-taking plugin for Memento';
 
   @override
@@ -27,22 +36,17 @@ class NotesPlugin extends BasePlugin {
 
   @override
   Future<void> initialize() async {
-    try {
-      _controller = NotesController(storage);
-      _promptController = NotesPromptController();
-      await _controller.initialize();
-      _promptController.initialize(_controller);
-      _isInitialized = true;
-    } catch (e) {
-      debugPrint('Failed to initialize NotesPlugin: $e');
-      rethrow;
-    }
+    controller = NotesController(storage);
+    _promptController = NotesPromptController();
+    await controller.initialize();
+    _promptController.initialize(controller);
+    _isInitialized = true;
   }
 
   // 获取总笔记数
   int getTotalNotesCount() {
     if (!_isInitialized) return 0;
-    return _controller.searchNotes(query: '').length;
+    return controller.searchNotes(query: '').length;
   }
 
   // 获取最近7天的笔记数
@@ -51,7 +55,7 @@ class NotesPlugin extends BasePlugin {
     final now = DateTime.now();
     final sevenDaysAgo = now.subtract(const Duration(days: 7));
 
-    return _controller
+    return controller
         .searchNotes(query: '', startDate: sevenDaysAgo, endDate: now)
         .length;
   }
@@ -139,7 +143,7 @@ class NotesPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return NotesScreen(controller: _controller);
+    return NotesMainView();
   }
 
   @override

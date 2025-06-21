@@ -38,7 +38,7 @@ class DayController extends ChangeNotifier {
   Future<void> _loadViewPreference() async {
     try {
       // 确保目录存在
-      await _plugin.storage.createDirectory(_plugin.pluginDir);
+      await _plugin.storage.createDirectory('day');
 
       // 设置默认的配置JSON字符串
       final defaultConfig = jsonEncode({
@@ -47,7 +47,7 @@ class DayController extends ChangeNotifier {
       });
 
       final configStr = await _plugin.storage.readFile(
-        '${_plugin.pluginDir}/view_preference.json',
+        '${'day'}/view_preference.json',
         defaultConfig,
       );
 
@@ -80,7 +80,7 @@ class DayController extends ChangeNotifier {
   Future<void> _saveViewPreference() async {
     try {
       await _plugin.storage.writeFile(
-        '${_plugin.pluginDir}/view_preference.json',
+        '${'day'}/view_preference.json',
         jsonEncode({
           'isCardView': _isCardView,
           'sortMode': _sortMode.toString(),
@@ -94,13 +94,13 @@ class DayController extends ChangeNotifier {
   // 加载纪念日数据
   Future<void> _loadMemorialDays() async {
     // 确保目录存在
-    await _plugin.storage.createDirectory(_plugin.pluginDir);
+    await _plugin.storage.createDirectory('day');
 
     // 设置默认的空数组JSON字符串
     final defaultContent = '[]';
 
     final content = await _plugin.storage.readFile(
-      '${_plugin.pluginDir}/memorial_days.json',
+      '${'day'}/memorial_days.json',
       defaultContent,
     );
 
@@ -135,7 +135,7 @@ class DayController extends ChangeNotifier {
     try {
       final jsonList = _memorialDays.map((day) => day.toJson()).toList();
       await _plugin.storage.writeFile(
-        '${_plugin.pluginDir}/memorial_days.json',
+        '${'day'}/memorial_days.json',
         jsonEncode(jsonList),
       );
     } catch (e) {

@@ -39,9 +39,7 @@ class HabitsPlugin extends PluginBase {
   late final SkillController _skillController;
   late final CompletionRecordController _recordController;
   late final TimerController _timerController;
-
   static HabitsPlugin? _instance;
-  // 获取插件实例的静态方法
   static HabitsPlugin get instance {
     if (_instance == null) {
       _instance = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;

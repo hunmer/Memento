@@ -17,7 +17,7 @@ class _DatabaseMainViewState extends State<DatabaseMainView> {
   late DatabasePlugin _plugin;
   @override
   Widget build(BuildContext context) {
-    _plugin = PluginManager().getPlugin('database_plugin') as DatabasePlugin;
+    _plugin = DatabasePlugin.instance;
     return DatabaseListWidget(service: _plugin.service);
   }
 }
@@ -26,7 +26,7 @@ class DatabasePlugin extends BasePlugin {
   late final DatabaseService service = DatabaseService(this);
 
   @override
-  String get id => 'database_plugin';
+  String get id => 'database';
 
   @override
   String get name => DatabaseLocalizations.pluginName;
@@ -34,8 +34,17 @@ class DatabasePlugin extends BasePlugin {
   @override
   String get description => DatabaseLocalizations.pluginDescription;
 
-  @override
-  String get author => 'Your Name';
+  static DatabasePlugin? _instance;
+  static DatabasePlugin get instance {
+    if (_instance == null) {
+      _instance =
+          PluginManager.instance.getPlugin('database') as DatabasePlugin?;
+      if (_instance == null) {
+        throw StateError('DatabasePlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
 
   @override
   Future<void> initialize() async {

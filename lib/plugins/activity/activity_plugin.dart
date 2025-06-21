@@ -9,8 +9,17 @@ import 'services/activity_service.dart';
 import 'controls/prompt_controller.dart';
 
 class ActivityPlugin extends BasePlugin {
-  static final ActivityPlugin instance = ActivityPlugin._internal();
-  ActivityPlugin._internal();
+  static ActivityPlugin? _instance;
+  static ActivityPlugin get instance {
+    if (_instance == null) {
+      _instance =
+          PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+      if (_instance == null) {
+        throw StateError('ActivityPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
 
   late ActivityService _activityService;
   late ActivityPromptController _promptController;
@@ -32,9 +41,6 @@ class ActivityPlugin extends BasePlugin {
 
   @override
   String get description => '活动记录插件';
-
-  @override
-  String get author => 'Zhuanz';
 
   @override
   IconData get icon => Icons.timeline;

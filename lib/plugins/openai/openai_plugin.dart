@@ -11,8 +11,6 @@ import 'controllers/agent_controller.dart';
 
 class OpenAIPlugin extends BasePlugin {
   static OpenAIPlugin? _instance;
-
-  // 获取插件实例的静态方法
   static OpenAIPlugin get instance {
     if (_instance == null) {
       _instance = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
@@ -38,9 +36,6 @@ class OpenAIPlugin extends BasePlugin {
   @override
   String get description =>
       'AI assistant plugin supporting multiple LLM providers'; // 保持英文描述作为默认值
-
-  @override
-  String get author => 'Comate';
 
   @override
   Future<void> initialize() async {

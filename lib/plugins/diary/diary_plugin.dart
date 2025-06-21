@@ -56,9 +56,16 @@ class _DiaryMainViewState extends State<DiaryMainView> {
 
 class DiaryPlugin extends BasePlugin {
   final DiaryPromptController _promptController = DiaryPromptController();
-  final String pluginDir = 'diary';
-  static final DiaryPlugin instance = DiaryPlugin._internal();
-  DiaryPlugin._internal();
+  static DiaryPlugin? _instance;
+  static DiaryPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
+      if (_instance == null) {
+        throw StateError('DiaryPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
 
   @override
   String get id => 'diary';
@@ -68,9 +75,6 @@ class DiaryPlugin extends BasePlugin {
 
   @override
   String get description => 'Diary management plugin';
-
-  @override
-  String get author => 'Zhuanz';
 
   @override
   IconData get icon => Icons.book;
@@ -148,7 +152,7 @@ class DiaryPlugin extends BasePlugin {
   @override
   Future<void> initialize() async {
     // 确保日记数据目录存在
-    await storage.createDirectory(pluginDir);
+    await storage.createDirectory('diary');
 
     // 初始化 prompt 控制器
     _promptController.initialize();

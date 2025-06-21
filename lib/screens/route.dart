@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';
@@ -17,11 +18,9 @@ import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
-import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
-import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/timer/views/timer_main_view.dart';
-import 'package:Memento/plugins/todo/todo_plugin.dart';
+import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 
 class AppRoutes extends NavigatorObserver {
@@ -36,7 +35,7 @@ class AppRoutes extends NavigatorObserver {
   // 插件路由路径
   static const String bill = '/bill';
   static const String calendar = '/calendar';
-  static const String calendarAlbum = '/calendar-album';
+  static const String calendarAlbum = '/calendar_album';
   static const String contact = '/contact';
   static const String database = '/database';
   static const String day = '/day';
@@ -67,7 +66,7 @@ class AppRoutes extends NavigatorObserver {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case 'home':
+      case '/':
         return _createRoute(const HomeScreen());
       case 'chat':
         final args = settings.arguments as Map<String, dynamic>?;
@@ -89,34 +88,34 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const SettingsScreen());
       case 'bill':
         return _createRoute(const BillMainView());
-      // case 'calendar':
-      //   return _createRoute(const CalendarMainView());
-      // case 'calendarAlbum':
-      //   return _createRoute(const CalendarAlbumMainView());
+      case 'calendar':
+        return _createRoute(const CalendarMainView());
+      case 'calendar_album':
+        return _createRoute(const CalendarAlbumMainView());
       case 'contact':
         return _createRoute(const ContactMainView());
-      // case 'database':
-      //   return _createRoute(const DatabaseMainView());
-      // case 'day':
-      //   return _createRoute(const DayMainView());
-      // case 'goods':
-      //   return _createRoute(const GoodsMainView());
+      case 'database':
+        return _createRoute(const DatabaseMainView());
+      case 'day':
+        return _createRoute(const DayMainView());
+      case 'goods':
+        return _createRoute(const GoodsMainView());
       case 'habits':
         return _createRoute(const HabitsMainView());
-      // case 'nodes':
-      //   return _createRoute(const NodesScreen());
-      // case 'notes':
-      //   return _createRoute(const NotesScreen());
+      case 'nodes':
+        return _createRoute(const NodesMainView());
+      case 'notes':
+        return _createRoute(const NotesMainView());
       case 'openai':
         return _createRoute(const OpenAIMainView());
       case 'store':
         return _createRoute(const StoreMainView());
       case 'timer':
         return _createRoute(const TimerMainView());
-      // case 'todo':
-      //   return _createRoute(const TodoScreen());
-      // case 'tracker':
-      //   return _createRoute(const TrackerScreen());
+      case 'todo':
+        return _createRoute(const TodoMainView());
+      case 'tracker':
+        return _createRoute(const TrackerMainView());
       default:
         return _createRoute(
           Scaffold(
@@ -132,22 +131,21 @@ class AppRoutes extends NavigatorObserver {
     activity: (context) => const ActivityMainView(),
     checkin: (context) => const CheckinMainView(),
     settings: (context) => const SettingsScreen(),
-    // 插件路由映射
-    // bill: (context) => const BillScreen(),
-    // calendar: (context) => const CalendarScreen(),
-    // calendarAlbum: (context) => const CalendarAlbumScreen(),
+    bill: (context) => const BillMainView(),
+    calendar: (context) => const CalendarMainView(),
+    calendarAlbum: (context) => const CalendarAlbumMainView(),
     contact: (context) => const ContactMainView(),
-    // database: (context) => const DatabaseScreen(),
-    // day: (context) => const DayScreen(),
-    // goods: (context) => const GoodsScreen(),
+    database: (context) => const DatabaseMainView(),
+    day: (context) => const DayMainView(),
+    goods: (context) => const GoodsMainView(),
     habits: (context) => const HabitsMainView(),
-    // nodes: (context) => const NodesScreen(),
-    // notes: (context) => const NotesScreen(),
+    nodes: (context) => const NodesMainView(),
+    notes: (context) => const NotesMainView(),
     openai: (context) => const OpenAIMainView(),
     store: (context) => const StoreMainView(),
     timer: (context) => const TimerMainView(),
-    // todo: (context) => const TodoScreen(),
-    // tracker: (context) => const TrackerScreen(),
+    todo: (context) => const TodoMainView(),
+    tracker: (context) => const TrackerMainView(),
   };
 
   static String get initialRoute => home;
