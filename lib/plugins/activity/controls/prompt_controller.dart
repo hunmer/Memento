@@ -5,16 +5,17 @@ import '../../openai/openai_plugin.dart';
 import '../../../core/storage/storage_manager.dart';
 
 class ActivityPromptController {
-  final ActivityPromptReplacements _promptReplacements = ActivityPromptReplacements();
+  final ActivityPromptReplacements _promptReplacements =
+      ActivityPromptReplacements();
   final String _pluginDir;
   final StorageManager _storage;
-  
+
   ActivityPromptController(this._storage, this._pluginDir);
-  
+
   void initialize() {
     // 初始化prompt替换服务
     _promptReplacements.initialize(_storage, _pluginDir);
-    
+
     // 延迟注册prompt替换方法，等待OpenAI插件初始化完成
     Future.delayed(const Duration(seconds: 1), () {
       _registerPromptMethods();
@@ -24,7 +25,8 @@ class ActivityPromptController {
   /// 注册prompt替换方法
   void _registerPromptMethods() {
     try {
-      final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      final openaiPlugin =
+          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
       if (openaiPlugin != null) {
         openaiPlugin.registerPromptReplacementMethod(
           'activity_getActivitys',
@@ -41,15 +43,16 @@ class ActivityPromptController {
       Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
     }
   }
-  
+
   void unregisterPromptMethods() {
     // 注销prompt替换方法
-    final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+    final openaiPlugin =
+        PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
     if (openaiPlugin != null) {
       openaiPlugin.unregisterPromptReplacementMethod('activity_getActivitys');
       debugPrint('成功注销activity_getActivitys方法');
     }
-    
+
     // 清理prompt替换服务
     _promptReplacements.dispose();
   }

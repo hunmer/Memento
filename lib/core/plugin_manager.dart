@@ -52,6 +52,7 @@ class PluginManager {
       await plugin.registerToApp(this, ConfigManager(_storageManager!));
     }
   }
+
   /// 获取所有已注册的插件
   /// [sortByRecentlyOpened] 是否按最近打开时间排序
   List<PluginBase> getAllPlugins({bool sortByRecentlyOpened = false}) {
@@ -255,16 +256,17 @@ class PluginManager {
 
     // 更新访问时间并打开新的插件页面
     _updatePluginAccessTime(plugin.id);
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        settings: RouteSettings(arguments: {'pluginId': plugin.id}),
-        builder:
-            (context) => Scaffold(
-              // 不需要appBar，因为插件界面通常有自己的头部布局
-              body: plugin.buildMainView(context),
-            ),
-      ),
-    );
+    Navigator.pushNamed(context, '/${plugin.id}');
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(
+    //     settings: RouteSettings(arguments: {'pluginId': plugin.id}),
+    //     builder:
+    //         (context) => Scaffold(
+    //           // 不需要appBar，因为插件界面通常有自己的头部布局
+    //           body: plugin.buildMainView(context),
+    //         ),
+    //   ),
+    // );
   }
 
   static toHomeScreen(BuildContext context) {

@@ -1,3 +1,4 @@
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -31,6 +32,28 @@ class DiaryEntryDeletedEventArgs extends EventArgs {
   DiaryEntryDeletedEventArgs(this.date) : super('diary_entry_deleted');
 }
 
+/// 日记插件主视图
+class DiaryMainView extends StatefulWidget {
+  const DiaryMainView();
+  @override
+  State<DiaryMainView> createState() => _DiaryMainViewState();
+}
+
+class _DiaryMainViewState extends State<DiaryMainView> {
+  late DiaryPlugin _plugin;
+
+  @override
+  void initState() {
+    super.initState();
+    _plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DiaryCalendarScreen(storage: _plugin.storage);
+  }
+}
+
 class DiaryPlugin extends BasePlugin {
   final DiaryPromptController _promptController = DiaryPromptController();
   final String pluginDir = 'diary';
@@ -38,13 +61,10 @@ class DiaryPlugin extends BasePlugin {
   DiaryPlugin._internal();
 
   @override
-  String get id => 'diary_plugin';
+  String get id => 'diary';
 
   @override
   String get name => 'Diary';
-
-  @override
-  final String version = '1.0.0';
 
   @override
   String get description => 'Diary management plugin';
@@ -132,9 +152,6 @@ class DiaryPlugin extends BasePlugin {
 
     // 初始化 prompt 控制器
     _promptController.initialize();
-
-    // 初始化默认配置
-    await loadSettings({'theme': 'light', 'version': version, 'enabled': true});
   }
 
   @override
@@ -152,7 +169,7 @@ class DiaryPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return DiaryCalendarScreen(storage: storage);
+    return DiaryMainView();
   }
 
   @override

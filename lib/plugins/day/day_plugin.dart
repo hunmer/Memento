@@ -6,6 +6,20 @@ import 'screens/day_home_screen.dart';
 import 'controllers/day_controller.dart';
 import 'controls/prompt_controller.dart';
 
+/// 纪念日插件主视图
+class DayMainView extends StatefulWidget {
+  const DayMainView();
+  @override
+  State<DayMainView> createState() => _DayMainViewState();
+}
+
+class _DayMainViewState extends State<DayMainView> {
+  @override
+  Widget build(BuildContext context) {
+    return const DayHomeScreen();
+  }
+}
+
 class DayPlugin extends BasePlugin {
   static final DayPlugin instance = DayPlugin._internal();
   DayPlugin._internal();
@@ -154,7 +168,7 @@ class DayPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return const DayHomeScreen();
+    return DayMainView();
   }
 
   void dispose() {

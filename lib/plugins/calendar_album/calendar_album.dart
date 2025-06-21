@@ -7,6 +7,34 @@ import 'screens/main_screen.dart';
 import 'controllers/calendar_controller.dart';
 import 'controllers/tag_controller.dart';
 
+/// 日历相册插件主视图
+class CalendarAlbumMainView extends StatefulWidget {
+  final CalendarController calendarController;
+  final TagController tagController;
+
+  const CalendarAlbumMainView({
+    super.key,
+    required this.calendarController,
+    required this.tagController,
+  });
+
+  @override
+  State<CalendarAlbumMainView> createState() => _CalendarAlbumMainViewState();
+}
+
+class _CalendarAlbumMainViewState extends State<CalendarAlbumMainView> {
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: widget.calendarController),
+        ChangeNotifierProvider.value(value: widget.tagController),
+      ],
+      child: const MainScreen(),
+    );
+  }
+}
+
 class CalendarAlbumPlugin extends BasePlugin {
   late final CalendarController _calendarController;
   late final TagController tagController;
@@ -47,12 +75,9 @@ class CalendarAlbumPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: _calendarController),
-        ChangeNotifierProvider.value(value: tagController),
-      ],
-      child: const MainScreen(),
+    return CalendarAlbumMainView(
+      calendarController: _calendarController,
+      tagController: tagController,
     );
   }
 

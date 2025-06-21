@@ -51,7 +51,7 @@ class TimerPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return TimerMainView(plugin: this);
+    return TimerMainView();
   }
 
   @override

@@ -45,7 +45,7 @@ class ContactPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return _ContactHomePage(plugin: this);
+    return ContactMainView();
   }
 
   @override
@@ -146,23 +146,23 @@ class ContactPlugin extends BasePlugin {
   }
 }
 
-class _ContactHomePage extends StatefulWidget {
-  final ContactPlugin plugin;
-
-  const _ContactHomePage({required this.plugin});
+class ContactMainView extends StatefulWidget {
+  const ContactMainView();
 
   @override
-  State<_ContactHomePage> createState() => _ContactHomePageState();
+  State<ContactMainView> createState() => ContactMainViewState();
 }
 
-class _ContactHomePageState extends State<_ContactHomePage> {
+class ContactMainViewState extends State<ContactMainView> {
+  late ContactPlugin _plugin;
   late ContactController _controller;
   bool _isListView = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.plugin._controller;
+    _plugin = PluginManager().getPlugin('contact') as ContactPlugin;
+    _controller = _plugin._controller;
   }
 
   Future<void> _showFilterDialog() async {

@@ -10,35 +10,32 @@ import 'timer_task_details_page.dart';
 import 'package:collection/collection.dart';
 
 class TimerMainView extends StatefulWidget {
-  final TimerPlugin plugin;
-
-  const TimerMainView({super.key, required this.plugin});
-
+  const TimerMainView({super.key});
   @override
-  State<TimerMainView> createState() => TimerMainViewState();
+  State<TimerMainView> createState() => _TimerMainViewState();
 }
 
-class TimerMainViewState extends State<TimerMainView> {
+class _TimerMainViewState extends State<TimerMainView> {
   List<TimerTask> _tasks = [];
+  late TimerPlugin _plugin;
   Map<String, List<TimerTask>> _groupedTasks = {};
 
   @override
   void initState() {
     super.initState();
+    _plugin = PluginManager().getPlugin('timer') as TimerPlugin;
     _updateTasksAndGroups();
     _loadConfig();
   }
 
   void _updateTasksAndGroups() {
-    _tasks = widget.plugin.getTasks();
+    _tasks = _plugin.getTasks();
     _groupedTasks = groupBy(_tasks, (TimerTask task) => task.group);
   }
 
   Future<void> _loadConfig() async {
     try {
-      final config = await widget.plugin.storage.read(
-        'configs/${widget.plugin.id}.json',
-      );
+      final config = await _plugin.storage.read('configs/${_plugin.id}.json');
     } catch (e) {
       // 如果配置不存在，使用默认值
     }
@@ -56,7 +53,7 @@ class TimerMainViewState extends State<TimerMainView> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => PluginManager.toHomeScreen(context),
           ),
-          title: Text(widget.plugin.name),
+          title: Text(_plugin.name),
           bottom: TabBar(
             isScrollable: true,
             tabs: groups.map((group) => Tab(text: group)).toList(),
@@ -101,16 +98,16 @@ class TimerMainViewState extends State<TimerMainView> {
   }
 
   void _showAddTaskDialog() async {
-    final groups = await widget.plugin.timerController.getGroups();
+    final groups = await _plugin.timerController.getGroups();
     final newTask = await showDialog<TimerTask>(
       context: context,
       builder: (context) => AddTimerTaskDialog(groups: groups),
     );
 
     if (newTask != null) {
-      await widget.plugin.addTask(newTask);
+      await _plugin.addTask(newTask);
       setState(() {
-        _tasks = widget.plugin.getTasks();
+        _tasks = _plugin.getTasks();
         _groupedTasks = groupBy(_tasks, (TimerTask task) => task.group);
       });
     }
@@ -146,14 +143,14 @@ class TimerMainViewState extends State<TimerMainView> {
       context: context,
       builder:
           (context) => AddTimerTaskDialog(
-            groups: widget.plugin.timerController.getGroups(),
+            groups: _plugin.timerController.getGroups(),
             initialTask: task,
           ),
     );
 
     if (editedTask != null) {
-      await widget.plugin.updateTask(editedTask);
-      await widget.plugin.saveTasks();
+      await _plugin.updateTask(editedTask);
+      await _plugin.saveTasks();
       setState(() {
         _updateTasksAndGroups();
       });
@@ -186,7 +183,7 @@ class TimerMainViewState extends State<TimerMainView> {
     );
 
     if (confirm == true) {
-      await widget.plugin.removeTask(task.id);
+      await _plugin.removeTask(task.id);
       setState(() {
         _updateTasksAndGroups();
       });

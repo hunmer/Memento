@@ -104,7 +104,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
             );
           },
           onDismissed: (direction) {
-            widget.billPlugin.deleteAccount(account.id);
+            widget.billPlugin.controller.deleteAccount(account.id);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('账户"${account.title}"已删除'),
@@ -112,7 +112,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
                   label: '撤销',
                   onPressed: () {
                     // 重新创建账户
-                    widget.billPlugin.createAccount(account);
+                    widget.billPlugin.controller.createAccount(account);
                   },
                 ),
               ),
@@ -172,7 +172,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => widget.billPlugin.buildPluginEntryWidget(context),
+        builder: (context) => widget.billPlugin.buildMainView(context),
       ),
     );
   }

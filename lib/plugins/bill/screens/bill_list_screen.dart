@@ -411,7 +411,7 @@ class _BillListScreenState extends State<BillListScreen>
       },
       onDismissed: (direction) {
         // 删除账单
-        widget.billPlugin.deleteBill(widget.accountId, bill.id);
+        widget.billPlugin.controller.deleteBill(widget.accountId, bill.id);
 
         // 更新UI
         setState(() {

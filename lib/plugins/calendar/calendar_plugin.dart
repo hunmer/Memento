@@ -268,79 +268,16 @@ class CalendarPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _controller,
-      builder: (context, child) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => PluginManager.toHomeScreen(context),
-            ),
-            title: const Text('日历'),
-            actions: [
-              // 跳转到今天按钮
-              IconButton(
-                icon: const Icon(Icons.today),
-                tooltip: '回到今天',
-                onPressed: () {
-                  _sfController.displayDate = DateTime.now();
-                },
-              ),
-              // 查看所有事件按钮
-              IconButton(
-                icon: const Icon(Icons.list_alt),
-                tooltip: '所有事件',
-                onPressed: () => _showAllEvents(context),
-              ),
-              // 查看已完成事件按钮
-              IconButton(
-                icon: const Icon(Icons.done_all),
-                tooltip: '已完成事件',
-                onPressed: () => _showCompletedEvents(context),
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: syncfusion.SfCalendar(
-                  view: _sfController.view ?? syncfusion.CalendarView.month,
-                  controller: _sfController,
-                  allowedViews: _allowedViews,
-                  allowViewNavigation: true,
-                  dataSource: _AppointmentDataSource(_getUserAppointments()),
-                  initialDisplayDate: _controller.focusedMonth,
-                  onViewChanged: _onViewChanged,
-                  onTap: (details) => _handleCalendarTap(context, details),
-                  monthViewSettings: const syncfusion.MonthViewSettings(
-                    showAgenda: true,
-                    agendaViewHeight: 200,
-                    appointmentDisplayMode:
-                        syncfusion.MonthAppointmentDisplayMode.appointment,
-                  ),
-                  timeSlotViewSettings: const syncfusion.TimeSlotViewSettings(
-                    startHour: 6,
-                    endHour: 23,
-                    timeInterval: Duration(minutes: 30),
-                  ),
-                  todayHighlightColor: Theme.of(context).primaryColor,
-                  selectionDecoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showEventEditPage(context),
-            child: const Icon(Icons.add),
-          ),
-        );
-      },
+    return CalendarMainView(
+      controller: _controller,
+      sfController: _sfController,
+      allowedViews: _allowedViews,
+      onViewChanged: _onViewChanged,
+      handleCalendarTap: _handleCalendarTap,
+      showAllEvents: _showAllEvents,
+      showCompletedEvents: _showCompletedEvents,
+      showEventEditPage: _showEventEditPage,
+      getUserAppointments: _getUserAppointments,
     );
   }
 
@@ -474,6 +411,119 @@ class CalendarPlugin extends BasePlugin {
   Future<void> uninstall() async {
     await storageManager.delete('calendar/calendar_events');
     await storageManager.delete('calendar/calendar_last_view');
+  }
+}
+
+/// 日历插件主视图
+class CalendarMainView extends StatefulWidget {
+  final app.CalendarController controller;
+  final syncfusion.CalendarController sfController;
+  final List<syncfusion.CalendarView> allowedViews;
+  final Function(syncfusion.ViewChangedDetails) onViewChanged;
+  final Function(BuildContext, syncfusion.CalendarTapDetails) handleCalendarTap;
+  final Function(BuildContext) showAllEvents;
+  final Function(BuildContext) showCompletedEvents;
+  final Function(BuildContext, [CalendarEvent?]) showEventEditPage;
+  final List<syncfusion.Appointment> Function() getUserAppointments;
+
+  const CalendarMainView({
+    super.key,
+    required this.controller,
+    required this.sfController,
+    required this.allowedViews,
+    required this.onViewChanged,
+    required this.handleCalendarTap,
+    required this.showAllEvents,
+    required this.showCompletedEvents,
+    required this.showEventEditPage,
+    required this.getUserAppointments,
+  });
+
+  @override
+  State<CalendarMainView> createState() => _CalendarMainViewState();
+}
+
+class _CalendarMainViewState extends State<CalendarMainView> {
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.controller,
+      builder: (context, child) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => PluginManager.toHomeScreen(context),
+            ),
+            title: const Text('日历'),
+            actions: [
+              // 跳转到今天按钮
+              IconButton(
+                icon: const Icon(Icons.today),
+                tooltip: '回到今天',
+                onPressed: () {
+                  widget.sfController.displayDate = DateTime.now();
+                },
+              ),
+              // 查看所有事件按钮
+              IconButton(
+                icon: const Icon(Icons.list_alt),
+                tooltip: '所有事件',
+                onPressed: () => widget.showAllEvents(context),
+              ),
+              // 查看已完成事件按钮
+              IconButton(
+                icon: const Icon(Icons.done_all),
+                tooltip: '已完成事件',
+                onPressed: () => widget.showCompletedEvents(context),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: syncfusion.SfCalendar(
+                  view:
+                      widget.sfController.view ?? syncfusion.CalendarView.month,
+                  controller: widget.sfController,
+                  allowedViews: widget.allowedViews,
+                  allowViewNavigation: true,
+                  dataSource: _AppointmentDataSource(
+                    widget.getUserAppointments(),
+                  ),
+                  initialDisplayDate: widget.controller.focusedMonth,
+                  onViewChanged: widget.onViewChanged,
+                  onTap:
+                      (details) => widget.handleCalendarTap(context, details),
+                  monthViewSettings: const syncfusion.MonthViewSettings(
+                    showAgenda: true,
+                    agendaViewHeight: 200,
+                    appointmentDisplayMode:
+                        syncfusion.MonthAppointmentDisplayMode.appointment,
+                  ),
+                  timeSlotViewSettings: const syncfusion.TimeSlotViewSettings(
+                    startHour: 6,
+                    endHour: 23,
+                    timeInterval: Duration(minutes: 30),
+                  ),
+                  todayHighlightColor: Theme.of(context).primaryColor,
+                  selectionDecoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => widget.showEventEditPage(context),
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
+    );
   }
 }
 

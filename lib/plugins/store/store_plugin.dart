@@ -1,16 +1,16 @@
+import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/events/point_award_event.dart';
-import 'package:Memento/plugins/store/widgets/store_view.dart';
 import 'package:Memento/plugins/store/widgets/point_settings_view.dart';
 
 /// 物品兑换插件
 class StorePlugin extends BasePlugin {
   @override
-  String get id => 'store_plugin';
+  String get id => 'store';
 
   @override
   String get name => '物品兑换';
@@ -82,8 +82,7 @@ class StorePlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    assert(_controller != null, 'StoreController must be initialized first');
-    return StoreView(controller: _controller!);
+    return StoreMainView();
   }
 
   @override

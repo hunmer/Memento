@@ -8,9 +8,6 @@ import 'card_size_manager.dart';
 import 'plugin_order_manager.dart';
 import 'plugin_grid.dart';
 
-// 全局路由观察者
-final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -137,20 +134,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         }
       }
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // 订阅路由事件
-    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
-  }
-
-  @override
-  void dispose() {
-    // 取消订阅路由事件
-    routeObserver.unsubscribe(this);
-    super.dispose();
   }
 
   // 打开最后使用的插件

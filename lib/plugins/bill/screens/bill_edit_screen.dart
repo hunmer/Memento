@@ -102,7 +102,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
 
                       // 创建账单对象
                       final bill = Bill(
-                        id: widget.bill?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+                        id:
+                            widget.bill?.id ??
+                            DateTime.now().millisecondsSinceEpoch.toString(),
                         title: _titleController.text,
                         amount: _isExpense ? -amount : amount,
                         accountId: widget.accountId,
@@ -117,11 +119,14 @@ class _BillEditScreenState extends State<BillEditScreen> {
 
                       // 使用 controller 保存账单
                       await widget.billPlugin.controller.saveBill(bill);
-                      
+
                       // 显示成功提示
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('保存成功'), backgroundColor: Colors.green),
+                        const SnackBar(
+                          content: Text('保存成功'),
+                          backgroundColor: Colors.green,
+                        ),
                       );
 
                       // 返回上一页
@@ -131,14 +136,15 @@ class _BillEditScreenState extends State<BillEditScreen> {
                     } catch (e) {
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('保存失败: $e'), backgroundColor: Colors.red),
+                        SnackBar(
+                          content: Text('保存失败: $e'),
+                          backgroundColor: Colors.red,
+                        ),
                       );
                     }
                   }
                 },
-                child: Text(
-                  widget.bill == null ? '添加' : '保存',
-                ),
+                child: Text(widget.bill == null ? '添加' : '保存'),
               ),
             ],
           ),
@@ -367,14 +373,16 @@ class _BillEditScreenState extends State<BillEditScreen> {
           try {
             // 显示保存中提示
             if (!mounted) return;
-    
-    // 解析金额
-    final amount = double.parse(_amountController.text);
+
+            // 解析金额
+            final amount = double.parse(_amountController.text);
 
             // 创建账单对象
             final bill = Bill(
               // 如果是编辑现有账单，使用原有ID；如果是新建账单，生成新ID
-              id: widget.bill?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+              id:
+                  widget.bill?.id ??
+                  DateTime.now().millisecondsSinceEpoch.toString(),
               title: _titleController.text,
               amount: _isExpense ? -amount : amount,
               accountId: widget.accountId,
@@ -416,12 +424,15 @@ class _BillEditScreenState extends State<BillEditScreen> {
             updatedAccount.calculateTotal();
 
             // 调用插件的保存账户方法
-            await widget.billPlugin.saveAccount(updatedAccount);
-            
+            await widget.billPlugin.controller.saveAccount(updatedAccount);
+
             // 显示成功提示
             if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('保存成功'), backgroundColor: Colors.green),
+              const SnackBar(
+                content: Text('保存成功'),
+                backgroundColor: Colors.green,
+              ),
             );
 
             // 返回上一页

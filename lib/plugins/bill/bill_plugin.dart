@@ -70,7 +70,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return buildPluginEntryWidget(context);
+    return BillMainView();
   }
 
   @override
@@ -214,21 +214,34 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     _settings.addAll(newSettings);
     await saveSettings();
   }
+}
 
-  Widget buildPluginEntryWidget(BuildContext context) {
+/// 账单插件主视图
+class BillMainView extends StatefulWidget {
+  const BillMainView();
+  @override
+  State<BillMainView> createState() => _BillMainViewState();
+}
+
+class _BillMainViewState extends State<BillMainView> {
+  final BillPlugin billPlugin = PluginManager().getPlugin('bill') as BillPlugin;
+
+  @override
+  Widget build(BuildContext context) {
     // 如果没有账户，跳转到账户列表页面
-    if (accounts.isEmpty) {
+    if (billPlugin.accounts.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => AccountListScreen(billPlugin: this),
+            builder: (context) => AccountListScreen(billPlugin: billPlugin),
           ),
         );
       });
       return const Center(child: CircularProgressIndicator());
     }
-    if (selectedAccountId == null && accounts.isNotEmpty) {
-      selectedAccount = accounts.first;
+    if (billPlugin.selectedAccountId == null &&
+        billPlugin.accounts.isNotEmpty) {
+      billPlugin.selectedAccount = billPlugin.accounts.first;
     }
     return DefaultTabController(
       length: 2,
@@ -238,7 +251,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => PluginManager.toHomeScreen(context),
           ),
-          title: Text('${selectedAccount?.title}'),
+          title: Text('${billPlugin.selectedAccount?.title}'),
           bottom: const TabBar(tabs: [Tab(text: '账单列表'), Tab(text: '统计分析')]),
           actions: [
             IconButton(
@@ -246,7 +259,8 @@ class BillPlugin extends PluginBase with ChangeNotifier {
               onPressed: () {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (context) => AccountListScreen(billPlugin: this),
+                    builder:
+                        (context) => AccountListScreen(billPlugin: billPlugin),
                   ),
                 );
               },
@@ -255,10 +269,13 @@ class BillPlugin extends PluginBase with ChangeNotifier {
         ),
         body: TabBarView(
           children: [
-            BillListScreen(billPlugin: this, accountId: selectedAccount!.id),
+            BillListScreen(
+              billPlugin: billPlugin,
+              accountId: billPlugin.selectedAccount!.id,
+            ),
             BillStatsScreen(
-              billPlugin: this,
-              accountId: selectedAccount!.id,
+              billPlugin: billPlugin,
+              accountId: billPlugin.selectedAccount!.id,
               startDate: DateTime.now().subtract(
                 const Duration(days: 30),
               ), // 默认显示最近30天
@@ -272,26 +289,26 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
   // 委托方法到BillController
   Future<void> createAccount(Account account) async {
-    await _billController.createAccount(account);
-    notifyListeners(); // 添加通知，确保UI更新
+    await billPlugin.controller.createAccount(account);
+    setState(() {}); // 更新UI
   }
 
   // 修改saveAccount方法，在保存账户后通知监听器
   Future<void> saveAccount(Account account) async {
-    await _billController.saveAccount(account);
-    notifyListeners(); // 添加通知，确保UI更新
+    await billPlugin.controller.saveAccount(account);
+    setState(() {}); // 更新UI
   }
 
   Future<void> deleteAccount(String accountId) =>
-      _billController.deleteAccount(accountId);
+      billPlugin.controller.deleteAccount(accountId);
   Future<void> deleteBill(String accountId, String billId) =>
-      _billController.deleteBill(accountId, billId);
+      billPlugin.controller.deleteBill(accountId, billId);
   BillStatistics getStatistics({
     required List<Bill> bills,
     required StatisticRange range,
     DateTime? startDate,
     DateTime? endDate,
-  }) => _billController.getStatistics(
+  }) => billPlugin.controller.getStatistics(
     bills: bills,
     range: range,
     startDate: startDate,
