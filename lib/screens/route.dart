@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,13 @@ import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 
 class AppRoutes extends NavigatorObserver {
+  // 判断是否可以返回上一级路由
+  static bool canPop(BuildContext context) {
+    final navigator = Navigator.of(context);
+    // 如果当前路由是根路由(/)或者没有上一级路由，则不能返回
+    return ModalRoute.of(context)?.settings.name != home && navigator.canPop();
+  }
+
   // 路由路径常量
   static const String home = '/';
   static const String chat = '/chat';
@@ -55,11 +63,15 @@ class AppRoutes extends NavigatorObserver {
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const curve = Curves.easeInOut;
+        const begin = Offset(0.0, 0.1);
+        const end = Offset.zero;
+        final curveTween = CurveTween(curve: curve);
 
-        return FadeTransition(
-          opacity: CurvedAnimation(parent: animation, curve: curve),
-          child: child,
+        var slideAnimation = animation.drive(
+          Tween(begin: begin, end: end).chain(curveTween),
         );
+
+        return SlideTransition(position: slideAnimation, child: child);
       },
     );
   }
@@ -67,17 +79,16 @@ class AppRoutes extends NavigatorObserver {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
-        return _createRoute(const HomeScreen());
-      case 'chat':
-        final args = settings.arguments as Map<String, dynamic>?;
-        return _createRoute(
-          ChatScreen(
-            channel: args?['channel'],
-            initialMessage: args?['initialMessage'],
-            highlightMessage: args?['highlightMessage'],
-            autoScroll: args?['autoScroll'] ?? false,
-          ),
+        // 根路由特殊处理，不允许返回
+        return PageRouteBuilder(
+          pageBuilder:
+              (context, animation, secondaryAnimation) => const HomeScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return child;
+          },
         );
+      case 'chat':
+        return _createRoute(const ChatMainView());
       case 'diary':
         return _createRoute(const DiaryMainView());
       case 'activity':
@@ -127,6 +138,7 @@ class AppRoutes extends NavigatorObserver {
 
   static Map<String, WidgetBuilder> get routes => {
     home: (context) => const HomeScreen(),
+    chat: (context) => const ChatMainView(),
     diary: (context) => const DiaryMainView(),
     activity: (context) => const ActivityMainView(),
     checkin: (context) => const CheckinMainView(),
@@ -149,16 +161,4 @@ class AppRoutes extends NavigatorObserver {
   };
 
   static String get initialRoute => home;
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    super.didPush(route, previousRoute);
-    debugPrint('路由已推入: ${route.settings.name}');
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    super.didPop(route, previousRoute);
-    debugPrint('路由已弹出: ${route.settings.name}');
-  }
 }

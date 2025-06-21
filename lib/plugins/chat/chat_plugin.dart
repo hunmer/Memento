@@ -10,10 +10,36 @@ import 'services/ui_service.dart';
 import 'services/user_service.dart';
 import 'l10n/chat_localizations.dart';
 
+class ChatMainView extends StatefulWidget {
+  const ChatMainView();
+  @override
+  State<ChatMainView> createState() => _ChatMainViewState();
+}
+
+class _ChatMainViewState extends State<ChatMainView> {
+  late ChatPlugin _plugin;
+
+  @override
+  void initState() {
+    super.initState();
+    _plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _plugin.uiService.buildMainView(context);
+  }
+}
+
 class ChatPlugin extends BasePlugin with ChangeNotifier {
   static ChatPlugin? _instance;
   static ChatPlugin get instance {
-    _instance ??= ChatPlugin();
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
+      if (_instance == null) {
+        throw StateError('ChatPlugin has not been initialized');
+      }
+    }
     return _instance!;
   }
 
@@ -23,29 +49,14 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
   late final SettingsService settingsService;
   late final UIService uiService;
   late final UserService userService;
-
-  // 检查插件是否已完全初始化
-  bool get isInitialized {
-    try {
-      storage;
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  // Plugin metadata
-  late String _name = 'Chat';
-  late String _description = 'A plugin for chatting with other users';
-
   @override
   String get id => 'chat';
 
   @override
-  String get name => _name;
+  String get name => 'Chat';
 
   @override
-  String get description => _description;
+  String get description => 'A plugin for chatting with other users';
 
   @override
   IconData get icon => Icons.chat_bubble;
@@ -92,19 +103,9 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
     );
   }
 
-  // 更新本地化文本
-  void updateLocalizedStrings(BuildContext context) {
-    final l10n = ChatLocalizations.of(context);
-    if (l10n != null) {
-      _name = l10n.chatPluginName;
-      _description = l10n.chatPluginDescription;
-    }
-  }
-
   @override
   Widget buildMainView(BuildContext context) {
-    // 返回聊天插件的主视图
-    return uiService.buildMainView(context);
+    return ChatMainView();
   }
 
   @override

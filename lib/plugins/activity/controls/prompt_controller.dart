@@ -33,13 +33,10 @@ class ActivityPromptController {
           _promptReplacements.getActivities,
         );
       } else {
-        debugPrint('注册activity_getActivitys方法失败：未找到OpenAI插件，将在5秒后重试');
         // 如果OpenAI插件还未准备好，5秒后重试
         Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
       }
     } catch (e) {
-      debugPrint('注册prompt替换方法时出错: $e，将在5秒后重试');
-      // 发生错误时，5秒后重试
       Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
     }
   }
