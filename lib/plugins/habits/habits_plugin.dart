@@ -8,14 +8,50 @@ import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/widgets/habits_home.dart';
 
+class HabitsMainView extends StatefulWidget {
+  const HabitsMainView({super.key});
+
+  @override
+  State<HabitsMainView> createState() => _HabitsMainViewState();
+}
+
+class _HabitsMainViewState extends State<HabitsMainView> {
+  late HabitsPlugin _plugin;
+
+  @override
+  void initState() {
+    super.initState();
+    _plugin = HabitsPlugin.instance;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return HabitsHome(
+      habitController: _plugin._habitController,
+      skillController: _plugin._skillController,
+      recordController: _plugin._recordController,
+    );
+  }
+}
+
 class HabitsPlugin extends PluginBase {
   late final HabitController _habitController;
   late final SkillController _skillController;
   late final CompletionRecordController _recordController;
   late final TimerController _timerController;
 
-  @override
-  final String version = '1.0.0';
+  static HabitsPlugin? _instance;
+  // 获取插件实例的静态方法
+  static HabitsPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+      if (_instance == null) {
+        throw StateError('HabitsPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
+
   @override
   final String author = 'Memento Team';
   @override
@@ -27,11 +63,7 @@ class HabitsPlugin extends PluginBase {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return HabitsHome(
-      habitController: _habitController,
-      skillController: _skillController,
-      recordController: _recordController,
-    );
+    return HabitsMainView();
   }
 
   @override

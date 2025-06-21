@@ -6,8 +6,24 @@ import './l10n/database_localizations.dart';
 import './services/database_service.dart';
 import './widgets/database_list_widget.dart';
 
+/// 数据库插件主视图
+class DatabaseMainView extends StatefulWidget {
+  const DatabaseMainView();
+  @override
+  State<DatabaseMainView> createState() => _DatabaseMainViewState();
+}
+
+class _DatabaseMainViewState extends State<DatabaseMainView> {
+  late DatabasePlugin _plugin;
+  @override
+  Widget build(BuildContext context) {
+    _plugin = PluginManager().getPlugin('database_plugin') as DatabasePlugin;
+    return DatabaseListWidget(service: _plugin.service);
+  }
+}
+
 class DatabasePlugin extends BasePlugin {
-  late final DatabaseService _service = DatabaseService(this);
+  late final DatabaseService service = DatabaseService(this);
 
   @override
   String get id => 'database_plugin';
@@ -23,12 +39,12 @@ class DatabasePlugin extends BasePlugin {
 
   @override
   Future<void> initialize() async {
-    await _service.initializeDefaultData();
+    await service.initializeDefaultData();
   }
 
   @override
   Widget buildMainView(BuildContext context) {
-    return DatabaseListWidget(service: _service);
+    return DatabaseMainView();
   }
 
   @override
@@ -46,7 +62,7 @@ class DatabasePlugin extends BasePlugin {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: FutureBuilder<int>(
-        future: _service.getDatabaseCount(),
+        future: service.getDatabaseCount(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

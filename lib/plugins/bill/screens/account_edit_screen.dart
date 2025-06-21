@@ -7,11 +7,7 @@ class AccountEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
   final Account? account;
 
-  const AccountEditScreen({
-    super.key,
-    required this.billPlugin,
-    this.account,
-  });
+  const AccountEditScreen({super.key, required this.billPlugin, this.account});
 
   @override
   State<AccountEditScreen> createState() => _AccountEditScreenState();
@@ -46,10 +42,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _saveAccount,
-          ),
+          IconButton(icon: const Icon(Icons.check), onPressed: _saveAccount),
         ],
       ),
       body: SingleChildScrollView(
@@ -99,9 +92,9 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
   void _saveAccount() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入账户名称')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请输入账户名称')));
       return;
     }
 
@@ -113,17 +106,18 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
           icon: _selectedIcon,
           backgroundColor: _selectedColor,
         );
-        await widget.billPlugin.createAccount(newAccount);
-        
+        await widget.billPlugin.controller.createAccount(newAccount);
+
         if (mounted) {
           // 检查是否是第一个账户
           if (widget.billPlugin.accounts.length == 1) {
             // 如果是第一个账户，自动设置为选中账户并进入
-            widget.billPlugin.selectedAccount = widget.billPlugin.accounts.first;
+            widget.billPlugin.selectedAccount =
+                widget.billPlugin.accounts.first;
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => widget.billPlugin.buildPluginEntryWidget(context),
+                builder: (context) => widget.billPlugin.buildMainView(context),
               ),
             );
             return;
@@ -137,16 +131,16 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
           icon: _selectedIcon,
           backgroundColor: _selectedColor,
         );
-        await widget.billPlugin.saveAccount(updatedAccount);
+        await widget.billPlugin.controller.saveAccount(updatedAccount);
         if (mounted) {
           Navigator.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
       }
     }
   }
@@ -154,34 +148,35 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
   void _deleteAccount() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: const Text('删除账户将同时删除所有账单记录，确定要删除吗？'),
-        actions: [
-          TextButton(
-            child: const Text('取消'),
-            onPressed: () => Navigator.pop(context, false),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('确认删除'),
+            content: const Text('删除账户将同时删除所有账单记录，确定要删除吗？'),
+            actions: [
+              TextButton(
+                child: const Text('取消'),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              TextButton(
+                child: const Text('删除'),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
           ),
-          TextButton(
-            child: const Text('删除'),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
-      ),
     );
 
     if (confirmed != true || !mounted) return;
 
     try {
-      await widget.billPlugin.deleteAccount(widget.account!.id);
+      await widget.billPlugin.controller.deleteAccount(widget.account!.id);
       if (mounted) {
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('删除失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('删除失败: $e')));
       }
     }
   }

@@ -21,11 +21,12 @@ import 'plugins/openai/l10n/openai_localizations.dart';
 import 'plugins/notes/l10n/notes_localizations.dart';
 import 'plugins/calendar_album/calendar_album.dart';
 import 'plugins/calendar_album/l10n/calendar_album_localizations.dart';
-// 移除未使用的导入
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
 import 'screens/home_screen/home_screen.dart';
+import 'screens/route.dart';
+
 import 'plugins/chat/chat_plugin.dart'; // 聊天插件
 import 'plugins/diary/diary_plugin.dart'; // 日记插件
 import 'plugins/activity/activity_plugin.dart'; // 活动插件
@@ -37,13 +38,11 @@ import 'plugins/nodes/nodes_plugin.dart'; // 笔记插件
 import 'plugins/notes/notes_plugin.dart'; // Notes插件
 import 'plugins/goods/goods_plugin.dart'; // 物品插件
 import 'plugins/bill/bill_plugin.dart'; // 账单插件
-// 联系人插件
 import 'plugins/calendar/calendar_plugin.dart'; // 日历插件
 import 'plugins/openai/openai_plugin.dart'; // OpenAI插件
 import 'plugins/store/store_plugin.dart'; // store插件
 import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
-// 备份服务
 import 'plugins/database/database_plugin.dart';
 
 // 全局导航键
@@ -149,13 +148,6 @@ void main() async {
   runApp(const MyApp());
 }
 
-// 临时错误处理桥接，直到MyApp初始化完成
-void _showError(String message) {
-  debugPrint(message);
-  // 使用LoggerUtil记录错误
-  logger?.log(message, level: 'ERROR');
-}
-
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -170,48 +162,18 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // 全局错误处理器已在main()中设置
-
     // 延迟执行以确保context可用
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupAutoUpdate();
     });
   }
 
-  void _showError(String message) {
-    // 使用LoggerUtil记录错误
-    logger?.log(message, level: 'ERROR');
-
-    if (!mounted) return;
-
-    // 使用runZonedGuarded捕获可能的异步错误
-    runZonedGuarded(
-      () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          // scaffoldMessengerKey.currentState?.showSnackBar(
-          //   SnackBar(
-          //     content: Text(message),
-          //     duration: const Duration(seconds: 5),
-          //   ),
-          // );
-        });
-      },
-      (error, stack) {
-        debugPrint('Failed to show error: $error\nOriginal error: $message');
-      },
-    );
-  }
-
   void _setupAutoUpdate() {
     if (!mounted) return;
     final updateController = AutoUpdateController.instance;
-
-    // 设置context，这样更新控制器就可以显示UI了
     updateController.context = context;
   }
 
-  // 手动检查更新的方法，可以在需要时调用
   Future<void> checkForUpdates() async {
     if (!mounted) return;
 
@@ -238,12 +200,12 @@ class _MyAppState extends State<MyApp> {
         DiaryLocalizations.delegate,
         CheckinLocalizations.delegate,
         ActivityLocalizations.delegate,
-        ChatLocalizations.delegate, // 添加聊天插件的本地化代理
-        DayLocalizationsDelegate.delegate, // 添加纪念日插件的本地化代理
-        OpenAILocalizationsDelegate.delegate, // 添加OpenAI插件的本地化代理
-        NotesLocalizations.delegate, // 添加Notes插件的本地化代理
-        NodesPlugin().localizationsDelegate, // 添加笔记插件的本地化代理
-        const CalendarAlbumLocalizationsDelegate(), // 添加日历相册插件的本地化代理
+        ChatLocalizations.delegate,
+        DayLocalizationsDelegate.delegate,
+        OpenAILocalizationsDelegate.delegate,
+        NotesLocalizations.delegate,
+        NodesPlugin().localizationsDelegate,
+        const CalendarAlbumLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -255,7 +217,7 @@ class _MyAppState extends State<MyApp> {
       locale:
           globalConfigManager.getLocale() ??
           const Locale('en', ''), // 使用保存的语言设置，默认英文
-      navigatorObservers: [routeObserver], // 添加路由观察者
+
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -273,30 +235,9 @@ class _MyAppState extends State<MyApp> {
           child: child!,
         );
       },
-      home: const HomeScreen(),
-      onGenerateRoute: (settings) {
-        if (settings.name?.startsWith('/channel/') ?? false) {
-          settings.name!.substring('/channel/'.length);
-          final args = settings.arguments as Map<String, dynamic>?;
-          final channel = args?['channel'];
-          final initialMessage = args?['initialMessage'];
-          final highlightMessage = args?['highlightMessage'];
-          final autoScroll = args?['autoScroll'] as bool? ?? false;
-
-          if (channel != null) {
-            return MaterialPageRoute(
-              builder:
-                  (context) => ChatScreen(
-                    channel: channel,
-                    initialMessage: initialMessage,
-                    highlightMessage: highlightMessage,
-                    autoScroll: autoScroll,
-                  ),
-            );
-          }
-        }
-        return null;
-      },
+      initialRoute: AppRoutes.initialRoute,
+      routes: AppRoutes.routes,
+      onGenerateRoute: AppRoutes.generateRoute,
       onGenerateTitle:
           (BuildContext context) => AppLocalizations.of(context)!.appTitle,
     );

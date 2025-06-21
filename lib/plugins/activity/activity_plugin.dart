@@ -25,15 +25,10 @@ class ActivityPlugin extends BasePlugin {
   }
 
   @override
-  final String id = 'activity_plugin';
+  final String id = 'activity';
 
   @override
   String get name => 'Activity';
-
-  @override
-  final String version = '1.0.0';
-
-  final String pluginDir = 'activity';
 
   @override
   String get description => '活动记录插件';
@@ -56,11 +51,11 @@ class ActivityPlugin extends BasePlugin {
   @override
   Future<void> initialize() async {
     // 确保活动记录数据目录存在
-    await storage.createDirectory(pluginDir);
-    _activityService = ActivityService(storage, pluginDir);
+    await storage.createDirectory('activity');
+    _activityService = ActivityService(storage, 'activity');
 
     // 初始化Prompt控制器
-    _promptController = ActivityPromptController(storage, pluginDir);
+    _promptController = ActivityPromptController(storage, 'activity');
     _promptController.initialize();
 
     _isInitialized = true;

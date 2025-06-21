@@ -83,7 +83,7 @@ class OpenAIPlugin extends BasePlugin {
   Widget buildMainView(BuildContext context) {
     return Localizations.override(
       context: context,
-      child: const AgentListScreen(),
+      child: const OpenAIMainView(),
     );
   }
 
@@ -228,5 +228,19 @@ class OpenAIPlugin extends BasePlugin {
         );
       },
     );
+  }
+}
+
+class OpenAIMainView extends StatefulWidget {
+  const OpenAIMainView({super.key});
+
+  @override
+  State<OpenAIMainView> createState() => _OpenAIMainViewState();
+}
+
+class _OpenAIMainViewState extends State<OpenAIMainView> {
+  @override
+  Widget build(BuildContext context) {
+    return const AgentListScreen();
   }
 }

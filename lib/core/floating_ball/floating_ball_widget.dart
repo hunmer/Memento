@@ -104,7 +104,6 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
         _manager.savePosition(safePosition);
       }
     } catch (e) {
-      debugPrint('Error loading position: $e');
       if (mounted) {
         // 如果加载失败，使用默认位置
         setState(() {
@@ -261,9 +260,6 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
     // 如果滑动距离太小，不触发任何动作
     if (velocity.distance < 5) return;
 
-    // 打印滑动信息，便于调试
-    debugPrint('Swipe detected: $velocity, distance: ${velocity.distance}');
-
     // 判断滑动方向
     final absX = velocity.dx.abs();
     final absY = velocity.dy.abs();
@@ -301,21 +297,14 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
 
     final action = _manager.getAction(gesture);
     if (action != null) {
-      debugPrint('Executing action for gesture: $gesture');
       action();
-    } else {
-      debugPrint('No action registered for gesture: $gesture');
     }
   }
 
   void _handleTap() {
-    debugPrint('Tap detected');
     final action = _manager.getAction(FloatingBallGesture.tap);
     if (action != null) {
-      debugPrint('Executing tap action');
       action();
-    } else {
-      debugPrint('No tap action registered');
     }
   }
 

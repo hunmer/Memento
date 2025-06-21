@@ -39,6 +39,20 @@ class _ItemSearchResult {
   _ItemSearchResult(this.item, this.parent);
 }
 
+/// 物品管理插件主视图
+class GoodsMainView extends StatefulWidget {
+  const GoodsMainView();
+  @override
+  State<GoodsMainView> createState() => _GoodsMainViewState();
+}
+
+class _GoodsMainViewState extends State<GoodsMainView> {
+  @override
+  Widget build(BuildContext context) {
+    return const GoodsMainScreen();
+  }
+}
+
 class GoodsPlugin extends BasePlugin {
   static final GoodsPlugin instance = GoodsPlugin._internal();
   GoodsPlugin._internal();
@@ -412,7 +426,7 @@ class GoodsPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return const GoodsMainScreen();
+    return GoodsMainView();
   }
 
   @override

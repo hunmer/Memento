@@ -408,7 +408,7 @@ class BillController with ChangeNotifier {
 
     // 保存更新后的账户
     _accounts[accountIndex] = updatedAccount;
-    _plugin.saveAccount(updatedAccount);
+    _plugin.controller.saveAccount(updatedAccount);
 
     // 发布账单添加/更新事件
     EventManager.instance.broadcast(
@@ -429,7 +429,7 @@ class BillController with ChangeNotifier {
     final updatedAccount = account.copyWith(bills: updatedBills);
     updatedAccount.calculateTotal();
     _accounts[accountIndex] = updatedAccount;
-    await _plugin.saveAccount(updatedAccount);
+    await _plugin.controller.saveAccount(updatedAccount);
 
     // 发布账单删除事件
     EventManager.instance.broadcast(
