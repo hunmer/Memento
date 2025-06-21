@@ -25,9 +25,6 @@ class ContactPlugin extends BasePlugin {
   String get description => ContactStrings.pluginDescription;
 
   @override
-  String get author => 'Memento Team';
-
-  @override
   IconData get icon => Icons.contacts;
 
   @override

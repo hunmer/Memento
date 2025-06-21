@@ -12,13 +12,18 @@ import 'services/timer_service.dart';
 import 'storage/timer_controller.dart';
 
 class TimerPlugin extends BasePlugin {
-  static final TimerPlugin instance = TimerPlugin._internal();
-  late final TimerController timerController;
-
-  TimerPlugin._internal() {
-    timerController = TimerController(storage);
-    timerController.loadTasks();
+  static TimerPlugin? _instance;
+  static TimerPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('timer') as TimerPlugin?;
+      if (_instance == null) {
+        throw StateError('TimerPlugin has not been initialized');
+      }
+    }
+    return _instance!;
   }
+
+  late final TimerController timerController;
 
   List<TimerTask> _tasks = [];
   @override
@@ -29,9 +34,6 @@ class TimerPlugin extends BasePlugin {
 
   @override
   String get description => '支持多种计时类型的任务管理器';
-
-  @override
-  String get author => 'Zulu';
 
   @override
   IconData get icon => Icons.timer;

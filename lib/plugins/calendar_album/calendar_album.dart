@@ -9,26 +9,26 @@ import 'controllers/tag_controller.dart';
 
 /// 日历相册插件主视图
 class CalendarAlbumMainView extends StatefulWidget {
-  final CalendarController calendarController;
-  final TagController tagController;
-
-  const CalendarAlbumMainView({
-    super.key,
-    required this.calendarController,
-    required this.tagController,
-  });
+  const CalendarAlbumMainView({super.key});
 
   @override
   State<CalendarAlbumMainView> createState() => _CalendarAlbumMainViewState();
 }
 
 class _CalendarAlbumMainViewState extends State<CalendarAlbumMainView> {
+  late CalendarAlbumPlugin _plugin;
+  @override
+  void initState() {
+    super.initState();
+    _plugin = CalendarAlbumPlugin.instance;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: widget.calendarController),
-        ChangeNotifierProvider.value(value: widget.tagController),
+        ChangeNotifierProvider.value(value: _plugin.calendarController),
+        ChangeNotifierProvider.value(value: _plugin.tagController),
       ],
       child: const MainScreen(),
     );
@@ -36,11 +36,24 @@ class _CalendarAlbumMainViewState extends State<CalendarAlbumMainView> {
 }
 
 class CalendarAlbumPlugin extends BasePlugin {
-  late final CalendarController _calendarController;
+  static CalendarAlbumPlugin? _instance;
+  static CalendarAlbumPlugin get instance {
+    if (_instance == null) {
+      _instance =
+          PluginManager.instance.getPlugin('calendar_album')
+              as CalendarAlbumPlugin?;
+      if (_instance == null) {
+        throw StateError('CalendarAlbumPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
+
+  late final CalendarController calendarController;
   late final TagController tagController;
 
   @override
-  String get id => 'calendar_album_plugin';
+  String get id => 'calendar_album';
 
   @override
   String get name => '日记相册';
@@ -49,14 +62,11 @@ class CalendarAlbumPlugin extends BasePlugin {
   String get description => 'A calendar-based photo album and diary plugin';
 
   @override
-  String get author => 'Zulu';
-
-  @override
   IconData get icon => Icons.notes_rounded;
 
   @override
   Future<void> initialize() async {
-    _calendarController = CalendarController();
+    calendarController = CalendarController();
     tagController = TagController(
       onTagsChanged: () {
         tagController.notifyListeners();
@@ -75,10 +85,7 @@ class CalendarAlbumPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return CalendarAlbumMainView(
-      calendarController: _calendarController,
-      tagController: tagController,
-    );
+    return CalendarAlbumMainView();
   }
 
   @override
@@ -125,7 +132,7 @@ class CalendarAlbumPlugin extends BasePlugin {
                     children: [
                       Text('今日日记', style: theme.textTheme.bodyMedium),
                       Text(
-                        '${_calendarController.getTodayEntriesCount()} 篇',
+                        '${calendarController.getTodayEntriesCount()} 篇',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -138,7 +145,7 @@ class CalendarAlbumPlugin extends BasePlugin {
                     children: [
                       Text('七日日记', style: theme.textTheme.bodyMedium),
                       Text(
-                        '${_calendarController.getLast7DaysEntriesCount()} 篇',
+                        '${calendarController.getLast7DaysEntriesCount()} 篇',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -158,7 +165,7 @@ class CalendarAlbumPlugin extends BasePlugin {
                     children: [
                       Text('所有日记', style: theme.textTheme.bodyMedium),
                       Text(
-                        '${_calendarController.getAllEntriesCount()} 篇',
+                        '${calendarController.getAllEntriesCount()} 篇',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

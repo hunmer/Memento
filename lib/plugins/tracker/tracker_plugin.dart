@@ -20,6 +20,23 @@ export 'utils/date_utils.dart';
 export 'utils/tracker_notification_utils.dart';
 export 'l10n/tracker_localizations.dart';
 
+class TrackerMainView extends StatefulWidget {
+  const TrackerMainView({super.key});
+
+  @override
+  State<TrackerMainView> createState() => _TrackerMainViewState();
+}
+
+class _TrackerMainViewState extends State<TrackerMainView> {
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: TrackerPlugin.instance.controller,
+      child: const HomeScreen(),
+    );
+  }
+}
+
 class TrackerPlugin extends PluginBase with ChangeNotifier {
   static TrackerPlugin? _instance;
 
@@ -35,20 +52,15 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
   }
 
   late final TrackerController _controller = TrackerController();
-  Map<String, dynamic> _settings = {};
-
   TrackerController get controller => _controller;
   @override
-  String get id => 'tracker_plugin';
+  String get id => 'tracker';
 
   @override
   String get name => '目标跟踪';
 
   @override
   String get description => '用于跟踪和管理个人目标的插件';
-
-  @override
-  String get author => 'Memento团队';
 
   @override
   IconData get icon => Icons.track_changes;
@@ -71,7 +83,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
   Widget buildMainView(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _controller,
-      child: const HomeScreen(),
+      child: const TrackerMainView(),
     );
   }
 

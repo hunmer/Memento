@@ -1,9 +1,10 @@
+import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:flutter/material.dart';
 import '../../models/folder.dart';
 import '../../models/note.dart';
 import '../notes_screen.dart';
 
-class NotesScreenState extends State<NotesScreen> {
+class NotesMainViewState extends State<NotesMainView> {
   @protected
   String currentFolderId = 'root';
   @protected
@@ -17,18 +18,20 @@ class NotesScreenState extends State<NotesScreen> {
   @protected
   final TextEditingController searchController = TextEditingController();
 
+  late NotesPlugin plugin;
   @override
   void initState() {
     super.initState();
+    plugin = NotesPlugin.instance;
     loadCurrentFolder();
   }
 
   @protected
   void loadCurrentFolder() {
     setState(() {
-      currentFolder = widget.controller.getFolder(currentFolderId);
-      subFolders = widget.controller.getFolderChildren(currentFolderId);
-      notes = widget.controller.getFolderNotes(currentFolderId);
+      currentFolder = plugin.controller.getFolder(currentFolderId);
+      subFolders = plugin.controller.getFolderChildren(currentFolderId);
+      notes = plugin.controller.getFolderNotes(currentFolderId);
     });
   }
 
@@ -55,7 +58,7 @@ class NotesScreenState extends State<NotesScreen> {
     if (query.isEmpty) {
       loadCurrentFolder();
     } else {
-      final searchResults = widget.controller.searchNotes(query: query);
+      final searchResults = plugin.controller.searchNotes(query: query);
       setState(() {
         notes = searchResults;
         subFolders = [];
@@ -68,7 +71,7 @@ class NotesScreenState extends State<NotesScreen> {
     searchController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build

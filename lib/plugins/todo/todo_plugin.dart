@@ -3,17 +3,21 @@ import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../base_plugin.dart';
 import 'controllers/controllers.dart';
-import 'widgets/todo_main_view.dart';
+import 'views/todo_main_view.dart';
 
 class TodoPlugin extends BasePlugin {
-  // 单例实例
-  static final TodoPlugin instance = TodoPlugin._();
-
-  // 私有构造函数
-  TodoPlugin._();
-
   late TaskController taskController;
-  late ReminderController _reminderController;
+  late ReminderController reminderController;
+  static TodoPlugin? _instance;
+  static TodoPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('todo') as TodoPlugin?;
+      if (_instance == null) {
+        throw StateError('TodoPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
 
   @override
   String get id => 'todo';
@@ -25,9 +29,6 @@ class TodoPlugin extends BasePlugin {
   String get description => 'A comprehensive todo management plugin';
 
   @override
-  String get author => 'Memento Team';
-
-  @override
   IconData get icon => Icons.check_box;
 
   @override
@@ -36,7 +37,7 @@ class TodoPlugin extends BasePlugin {
   @override
   Future<void> initialize() async {
     taskController = TaskController(storageManager, storageDir);
-    _reminderController = ReminderController();
+    reminderController = ReminderController();
 
     // 加载默认设置
     await loadSettings({
@@ -57,10 +58,7 @@ class TodoPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return TodoMainView(
-      taskController: taskController,
-      reminderController: _reminderController,
-    );
+    return TodoMainView();
   }
 
   @override

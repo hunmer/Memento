@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:flutter/material.dart';
 import '../controllers/notes_controller.dart';
 import '../l10n/notes_localizations.dart';
@@ -9,36 +10,45 @@ import 'notes_screen/note_item.dart';
 import 'notes_screen/note_operations.dart';
 import 'notes_screen/notes_screen_state.dart';
 
-class NotesScreen extends StatefulWidget {
-  final NotesController controller;
-
-  const NotesScreen({super.key, required this.controller});
+class NotesMainView extends StatefulWidget {
+  const NotesMainView({super.key});
 
   @override
-  State<NotesScreen> createState() => _NotesScreenState();
+  State<NotesMainView> createState() => _NotesMainViewState();
 }
 
-class _NotesScreenState extends NotesScreenState
-    with FolderOperations, NoteOperations, FolderSelectionDialog, FolderItem, NoteItem {
+class _NotesMainViewState extends NotesMainViewState
+    with
+        FolderOperations,
+        NoteOperations,
+        FolderSelectionDialog,
+        FolderItem,
+        NoteItem {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading:  IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () =>  currentFolder?.parentId != null ? navigateBack() : PluginManager.toHomeScreen(context),
-              ),
-        title: isSearching
-            ? TextField(
-                controller: searchController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: NotesLocalizations.of(context)?.search ?? 'Search',
-                  border: InputBorder.none,
-                ),
-                onChanged: handleSearch,
-              )
-            : Text(currentFolder?.name ?? 'Root'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed:
+              () =>
+                  currentFolder?.parentId != null
+                      ? navigateBack()
+                      : PluginManager.toHomeScreen(context),
+        ),
+        title:
+            isSearching
+                ? TextField(
+                  controller: searchController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText:
+                        NotesLocalizations.of(context)?.search ?? 'Search',
+                    border: InputBorder.none,
+                  ),
+                  onChanged: handleSearch,
+                )
+                : Text(currentFolder?.name ?? 'Root'),
         actions: [
           IconButton(
             icon: Icon(isSearching ? Icons.close : Icons.search),
@@ -53,26 +63,28 @@ class _NotesScreenState extends NotesScreenState
             },
           ),
           PopupMenuButton(
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'new_folder',
-                child: ListTile(
-                  leading: const Icon(Icons.create_new_folder),
-                  title: Text(
-                    NotesLocalizations.of(context)?.newFolder ?? 'New Folder',
+            itemBuilder:
+                (context) => [
+                  PopupMenuItem(
+                    value: 'new_folder',
+                    child: ListTile(
+                      leading: const Icon(Icons.create_new_folder),
+                      title: Text(
+                        NotesLocalizations.of(context)?.newFolder ??
+                            'New Folder',
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              PopupMenuItem(
-                value: 'new_note',
-                child: ListTile(
-                  leading: const Icon(Icons.note_add),
-                  title: Text(
-                    NotesLocalizations.of(context)?.newNote ?? 'New Note',
+                  PopupMenuItem(
+                    value: 'new_note',
+                    child: ListTile(
+                      leading: const Icon(Icons.note_add),
+                      title: Text(
+                        NotesLocalizations.of(context)?.newNote ?? 'New Note',
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
+                ],
             onSelected: (value) {
               switch (value) {
                 case 'new_folder':
@@ -109,7 +121,8 @@ class _NotesScreenState extends NotesScreenState
             shrinkWrap: true,
             physics: const ClampingScrollPhysics(),
             itemCount: subFolders.length,
-            itemBuilder: (context, index) => buildFolderItem(subFolders[index], index),
+            itemBuilder:
+                (context, index) => buildFolderItem(subFolders[index], index),
           ),
         ],
         if (notes.isNotEmpty) ...[
@@ -133,8 +146,10 @@ class _NotesScreenState extends NotesScreenState
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 isSearching
-                    ? NotesLocalizations.of(context)?.noSearchResults ?? 'No search results'
-                    : NotesLocalizations.of(context)?.emptyFolder ?? 'Empty folder',
+                    ? NotesLocalizations.of(context)?.noSearchResults ??
+                        'No search results'
+                    : NotesLocalizations.of(context)?.emptyFolder ??
+                        'Empty folder',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),

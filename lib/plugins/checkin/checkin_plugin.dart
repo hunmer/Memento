@@ -95,9 +95,6 @@ class CheckinPlugin extends BasePlugin {
   String get description => '管理日常打卡项目';
 
   @override
-  String get author => 'Memento Team';
-
-  @override
   IconData get icon => Icons.checklist;
 
   List<CheckinItem> _checkinItems = [];

@@ -19,9 +19,6 @@ class StorePlugin extends BasePlugin {
   String get description => '提供物品兑换和管理功能';
 
   @override
-  String get author => '系统团队';
-
-  @override
   IconData get icon => Icons.store;
 
   @override

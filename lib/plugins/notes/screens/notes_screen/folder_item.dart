@@ -3,7 +3,7 @@ import '../../models/folder.dart';
 import 'folder_operations.dart';
 import 'notes_screen_state.dart';
 
-mixin FolderItem on NotesScreenState, FolderOperations {
+mixin FolderItem on NotesMainViewState, FolderOperations {
   Widget buildFolderItem(Folder folder, int index) {
     return ListTile(
       key: Key('folder_${folder.id}'),
@@ -15,33 +15,31 @@ mixin FolderItem on NotesScreenState, FolderOperations {
         onPressed: () {
           showModalBottomSheet(
             context: context,
-            builder: (context) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: const Text('重命名'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    renameFolder(folder);
-                  },
+            builder:
+                (context) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.edit),
+                      title: const Text('重命名'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        renameFolder(folder);
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.delete, color: Colors.red),
+                      title: const Text(
+                        '删除',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        deleteFolder(folder);
+                      },
+                    ),
+                  ],
                 ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.delete,
-                    color: Colors.red,
-                  ),
-                  title: const Text(
-                    '删除',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    deleteFolder(folder);
-                  },
-                ),
-              ],
-            ),
           );
         },
       ),
