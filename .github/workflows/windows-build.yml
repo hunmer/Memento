@@ -23,6 +23,10 @@ jobs:
       
     - name: Build Windows
       run: flutter build windows --release --no-tree-shake-icons
+
+    - name: Create ZIP package
+      run: cd build/windows/x64/runner/Release/ && zip -r Memento-windows.zip Memento-windows
+    
       
     - name: Get current date
       id: date
@@ -37,7 +41,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.SECERT }}
       with:
-        files: build/windows/x64/runner/Release/windows-release.zip
+        files: build/windows/x64/runner/Release/Memento-windows.zip
         tag_name: release-${{ steps.date.outputs.date }}-${{ steps.commit_sha.outputs.sha }}
         generate_release_notes: false
         
