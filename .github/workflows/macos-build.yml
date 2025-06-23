@@ -31,14 +31,18 @@ jobs:
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
       
+    - name: Get commit SHA
+      id: commit_sha
+      run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.SECERT }}
       with:
-        tag_name: release-${{ steps.date.outputs.date }}
-        release_name: Release ${{ steps.date.outputs.date }}
+        tag_name: release-${{ steps.date.outputs.date }}-${{ steps.commit_sha.outputs.sha }}
+        release_name: Release ${{ steps.date.outputs.date }} (${{ steps.commit_sha.outputs.sha }})
         draft: false
         prerelease: false
         
