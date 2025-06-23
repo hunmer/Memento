@@ -615,12 +615,13 @@ packages:
     source: hosted
     version: "6.0.1"
   location_web:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: location_web
-      sha256: "744bdff53dc455a2dc9a34474c49cde364d4fbef2aee009f8b0b4b68570c27a1"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/location_web"
+      ref: "location-v8.0.1"
+      resolved-ref: cd1a398e94fe5c1bdfbeadca1f29714e897711dd
+      url: "https://github.com/Lyokone/flutterlocation"
+    source: git
     version: "6.0.0"
   logging:
     dependency: "direct main"
