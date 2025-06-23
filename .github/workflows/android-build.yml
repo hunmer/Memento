@@ -56,9 +56,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.SECERT }}
       with:
-        files: build/app/outputs/flutter-apk/app-android-release.apk
+        files: build/macos/Build/Products/Release/app-android-release.apk
         tag_name: release-${{ steps.date.outputs.date }}-${{ steps.commit_sha.outputs.sha }}
-        generate_release_notes: true
+        generate_release_notes: false
         
     - name: Upload APK as Artifact
       uses: actions/upload-artifact@v4
