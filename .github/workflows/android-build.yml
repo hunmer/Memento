@@ -51,26 +51,14 @@ jobs:
       id: commit_sha
       run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Upload Release Asset
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.SECERT }}
       with:
+        files: build/app/outputs/flutter-apk/app-release.apk
         tag_name: release-${{ steps.date.outputs.date }}-${{ steps.commit_sha.outputs.sha }}
-        release_name: Release ${{ steps.date.outputs.date }} (${{ steps.commit_sha.outputs.sha }})
-        draft: false
-        prerelease: false
-        
-    - name: Upload APK to Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.SECERT }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/app/outputs/flutter-apk/app-release.apk
-        asset_name: Memento-${{ steps.date.outputs.date }}.apk
-        asset_content_type: application/vnd.android.package-archive
+        generate_release_notes: true
         
     - name: Upload APK as Artifact
       uses: actions/upload-artifact@v4
