@@ -43,7 +43,32 @@ jobs:
     - name: Build signed APK
       run: flutter build apk --release --no-tree-shake-icons --split-per-abi
       
-    - name: Upload APK
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: release-${{ steps.date.outputs.date }}
+        release_name: Release ${{ steps.date.outputs.date }}
+        draft: false
+        prerelease: false
+        
+    - name: Upload APK to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-release.apk
+        asset_name: app-${{ steps.date.outputs.date }}.apk
+        asset_content_type: application/vnd.android.package-archive
+        
+    - name: Upload APK as Artifact
       uses: actions/upload-artifact@v4
       with:
         name: release-apk
