@@ -6,7 +6,6 @@ import '../l10n/calendar_album_localizations.dart';
 import 'calendar_screen.dart';
 import 'tag_screen.dart';
 import 'album_screen.dart';
-import '../../../core/storage/storage_manager.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

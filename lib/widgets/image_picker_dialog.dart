@@ -164,6 +164,8 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                         source: ImageSource.camera,
                       );
                       if (photo != null) {
+                        final results = <Map<String, dynamic>>[];
+
                         // 保存图片并获取相对路径
                         final relativePath = await ImageUtils.saveImage(
                           File(photo.path),
@@ -187,16 +189,20 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
 
                         // 如果启用了裁剪功能，显示裁剪对话框
                         if (widget.enableCrop && context.mounted) {
-                          await _showCropDialog(
+                          final result = await _showCropDialog(
                             context,
                             bytes,
                             savedImage.path,
                           );
+                          if (result != null) {
+                            results.add(result);
+                          }
                         } else {
-                          // 返回相对路径和字节数据
-                          Navigator.of(
-                            context,
-                          ).pop({'url': relativePath, 'bytes': bytes});
+                          results.add({'url': relativePath, 'bytes': bytes});
+                        }
+
+                        if (results.isNotEmpty && context.mounted) {
+                          Navigator.of(context).pop(results);
                         }
                       }
                     } catch (e) {
