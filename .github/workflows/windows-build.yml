@@ -26,12 +26,30 @@ jobs:
       
     - name: Create ZIP package
       run: |
-        if (Test-Path build/windows/runner/Release) {
-          Compress-Archive -Path build/windows/runner/Release/* -DestinationPath build/windows/runner/Release/Memento.zip -Force
-        } else {
-          Write-Error "Release directory not found at build/windows/runner/Release"
+        $releaseDir = "build/windows/runner/Release"
+        Write-Output "Checking for release directory at $releaseDir"
+        
+        if (-not (Test-Path $releaseDir)) {
+          Write-Error "Release directory not found at $releaseDir"
+          Write-Output "Contents of build/windows/runner:"
+          Get-ChildItem -Path build/windows/runner -Recurse | Format-Table -AutoSize
           exit 1
         }
+        
+        Write-Output "Found release directory, contents:"
+        Get-ChildItem -Path $releaseDir | Format-Table -AutoSize
+        
+        $zipPath = "$releaseDir/Memento-windows.zip"
+        Write-Output "Creating ZIP package at $zipPath"
+        Compress-Archive -Path "$releaseDir/*" -DestinationPath $zipPath -Force
+        
+        if (-not (Test-Path $zipPath)) {
+          Write-Error "Failed to create ZIP package at $zipPath"
+          exit 1
+        }
+        
+        Write-Output "Successfully created ZIP package:"
+        Get-Item -Path $zipPath | Format-Table -AutoSize
       
     - name: Get current date
       id: date
@@ -46,7 +64,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.SECERT }}
       with:
-        files: build/windows/runner/Release/Memento.zip
+        files: build/windows/runner/Release/Memento-windows.zip
         tag_name: release-${{ steps.date.outputs.date }}-${{ steps.commit_sha.outputs.sha }}
         generate_release_notes: false
         
