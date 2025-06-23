@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../controllers/calendar_controller.dart';
-import '../controllers/tag_controller.dart';
 import '../models/calendar_entry.dart';
-import '../l10n/calendar_album_localizations.dart';
 import 'entry_editor/entry_editor_controller.dart';
 import 'entry_editor/entry_editor_ui.dart';
 

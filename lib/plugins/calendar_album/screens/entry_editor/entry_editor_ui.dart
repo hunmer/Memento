@@ -1,7 +1,6 @@
+import 'package:Memento/plugins/calendar_album/calendar_album.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:path/path.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../widgets/location_picker.dart';
 import '../../controllers/tag_controller.dart';
@@ -40,9 +39,6 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
   @override
   Widget build(BuildContext context) {
     final l10n = CalendarAlbumLocalizations.of(context);
-    final plugin = PluginManager.instance.getPlugin('calendar_album_plugin');
-    final tagController = (plugin as dynamic).tagController;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? l10n.get('edit') : l10n.get('newEntry')),
@@ -58,15 +54,11 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
           ),
         ],
       ),
-      body: _buildBody(context, l10n, tagController),
+      body: _buildBody(context, l10n),
     );
   }
 
-  Widget _buildBody(
-    BuildContext context,
-    CalendarAlbumLocalizations l10n,
-    TagController tagController,
-  ) {
+  Widget _buildBody(BuildContext context, CalendarAlbumLocalizations l10n) {
     if (controller.isPreview) {
       return SingleChildScrollView(
         padding: const EdgeInsets.all(16),
