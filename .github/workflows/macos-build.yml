@@ -35,7 +35,7 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
+        GITHUB_TOKEN: ${{ secrets.SECERT }}
       with:
         tag_name: release-${{ steps.date.outputs.date }}
         release_name: Release ${{ steps.date.outputs.date }}
@@ -45,7 +45,7 @@ jobs:
     - name: Upload macOS App to Release
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
+        GITHUB_TOKEN: ${{ secrets.SECERT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: build/macos/Build/Products/Release/Memento.app.zip
