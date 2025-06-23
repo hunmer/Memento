@@ -25,7 +25,9 @@ jobs:
       run: flutter build windows --release --no-tree-shake-icons
 
     - name: Create ZIP package
-      run: cd build/windows/x64/runner/Release/ && zip -r Memento-windows.zip Memento-windows
+      run: |
+        $releaseDir = "build/windows/x64/runner/Release"
+        Compress-Archive -Path "$releaseDir/Memento-windows" -DestinationPath "$releaseDir/Memento-windows.zip" -Force
     
       
     - name: Get current date
