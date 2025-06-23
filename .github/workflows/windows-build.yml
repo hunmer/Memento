@@ -1,4 +1,4 @@
-name: Windows Build
+name: Windows
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
     - name: Create ZIP package
       run: |
         $releaseDir = "build/windows/x64/runner/Release"
-        Compress-Archive -Path "$releaseDir/Memento-windows" -DestinationPath "$releaseDir/Memento-windows.zip" -Force
+        Compress-Archive -Path "$releaseDir" -DestinationPath "$releaseDir/Memento-windows.zip" -Force
     
       
     - name: Get current date
