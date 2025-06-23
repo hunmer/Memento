@@ -25,7 +25,13 @@ jobs:
       run: flutter build windows --release --no-tree-shake-icons
       
     - name: Create ZIP package
-      run: cd build/windows/runner/Release && zip -r Memento.zip ./*
+      run: |
+        if (Test-Path build/windows/runner/Release) {
+          Compress-Archive -Path build/windows/runner/Release/* -DestinationPath build/windows/runner/Release/Memento.zip -Force
+        } else {
+          Write-Error "Release directory not found at build/windows/runner/Release"
+          exit 1
+        }
       
     - name: Get current date
       id: date
@@ -35,26 +41,14 @@ jobs:
       id: commit_sha
       run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Upload Release Asset
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.SECERT }}
       with:
+        files: build/windows/runner/Release/Memento.zip
         tag_name: release-${{ steps.date.outputs.date }}-${{ steps.commit_sha.outputs.sha }}
-        release_name: Release ${{ steps.date.outputs.date }} (${{ steps.commit_sha.outputs.sha }})
-        draft: false
-        prerelease: false
-        
-    - name: Upload Windows App to Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.SECERT }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/windows/runner/Release/Memento.zip
-        asset_name: Memento-${{ steps.date.outputs.date }}.zip
-        asset_content_type: application/zip
+        generate_release_notes: false
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
