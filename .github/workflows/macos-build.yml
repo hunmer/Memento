@@ -24,6 +24,9 @@ jobs:
     - name: Build macOS
       run: flutter build macos --release --no-tree-shake-icons
       
+    - name: Create ZIP package
+      run: cd build/macos/Build/Products/Release && zip -r Memento.app.zip Memento.app
+      
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
@@ -32,7 +35,7 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.SECERT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
       with:
         tag_name: release-${{ steps.date.outputs.date }}
         release_name: Release ${{ steps.date.outputs.date }}
@@ -42,7 +45,7 @@ jobs:
     - name: Upload macOS App to Release
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.SECERT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: build/macos/Build/Products/Release/Memento.app.zip
