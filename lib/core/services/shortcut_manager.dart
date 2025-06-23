@@ -27,23 +27,23 @@ class AppShortcutManager {
           ShortcutEventArgs(action: action),
         );
       });
-      FlutterShortcut.setShortcutItems(
-        shortcutItems: <ShortcutItem>[
-          const ShortcutItem(
-            id: "1",
-            action: 'shortcut.scan',
-            shortLabel: 'Scan code',
-            icon: 'assets/icon/icon.png',
-          ),
-          const ShortcutItem(
-            id: "2",
-            action: 'shortcut.messages',
-            shortLabel: 'Messages',
-            icon: "messages",
-            shortcutIconAsset: ShortcutIconAsset.nativeAsset,
-          ),
-        ],
-      );
+      // FlutterShortcut.setShortcutItems(
+      //   shortcutItems: <ShortcutItem>[
+      //     const ShortcutItem(
+      //       id: "1",
+      //       action: 'shortcut.scan',
+      //       shortLabel: 'Scan code',
+      //       icon: 'assets/icon/icon.png',
+      //     ),
+      //     const ShortcutItem(
+      //       id: "2",
+      //       action: 'shortcut.messages',
+      //       shortLabel: 'Messages',
+      //       icon: "messages",
+      //       shortcutIconAsset: ShortcutIconAsset.nativeAsset,
+      //     ),
+      //   ],
+      // );
       eventManager.subscribe('shortcut_action', _handleAction);
     } catch (e) {
       _logger?.log(
