@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/group_sort_service.dart';
+import '../l10n/checkin_localizations.dart';
 
 class GroupSortDialog extends StatefulWidget {
   final GroupSortType currentSortType;
@@ -30,26 +31,29 @@ class _GroupSortDialogState extends State<GroupSortDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = CheckinLocalizations.of(context);
     return AlertDialog(
-      title: const Text('分组排序方式'),
+      title: Text(l10n!.groupSortTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ...GroupSortType.values.map((type) => RadioListTile<GroupSortType>(
-                title: Text(GroupSortService.getSortTypeName(type)),
-                value: type,
-                groupValue: _selectedSortType,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedSortType = value;
-                    });
-                  }
-                },
-              )),
+          ...GroupSortType.values.map(
+            (type) => RadioListTile<GroupSortType>(
+              title: Text(GroupSortService.getSortTypeName(type)),
+              value: type,
+              groupValue: _selectedSortType,
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedSortType = value;
+                  });
+                }
+              },
+            ),
+          ),
           const Divider(),
           SwitchListTile(
-            title: const Text('反向排序'),
+            title: Text(l10n.reverseSort),
             value: _isReversed,
             onChanged: (value) {
               setState(() {
@@ -62,14 +66,14 @@ class _GroupSortDialogState extends State<GroupSortDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
         TextButton(
           onPressed: () {
             widget.onSortChanged(_selectedSortType, _isReversed);
             Navigator.of(context).pop();
           },
-          child: const Text('确定'),
+          child: Text(l10n.confirm),
         ),
       ],
     );

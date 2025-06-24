@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
@@ -30,7 +31,11 @@ class _RecordDialogState extends State<RecordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('记录 ${widget.goal.name}'),
+      title: Text(
+        TrackerLocalizations.of(
+          context,
+        )!.recordTitle.replaceFirst('{goalName}', widget.goal.name),
+      ),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -39,7 +44,7 @@ class _RecordDialogState extends State<RecordDialog> {
             children: [
               ListTile(
                 leading: const Icon(Icons.access_time),
-                title: const Text('记录时间'),
+                title: Text(TrackerLocalizations.of(context)!.recordTitle),
                 subtitle: Text(_formatDateTime(_recordedAt)),
                 trailing: const Icon(Icons.edit),
                 onTap: () => _pickDateTime(),
@@ -74,7 +79,9 @@ class _RecordDialogState extends State<RecordDialog> {
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _calculateDifference,
-                    child: const Text('计算差值'),
+                    child: Text(
+                      TrackerLocalizations.of(context)!.calculateDifference,
+                    ),
                   ),
                 ],
               ),
@@ -94,9 +101,12 @@ class _RecordDialogState extends State<RecordDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(TrackerLocalizations.of(context)!.cancel),
         ),
-        ElevatedButton(onPressed: _submit, child: const Text('确认')),
+        ElevatedButton(
+          onPressed: _submit,
+          child: Text(TrackerLocalizations.of(context)!.confirm),
+        ),
       ],
     );
   }
@@ -137,7 +147,7 @@ class _RecordDialogState extends State<RecordDialog> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('计算差值'),
+          title: Text(TrackerLocalizations.of(context)!.calculateDifference),
           content: TextFormField(
             controller: textController,
             keyboardType: TextInputType.number,
@@ -146,7 +156,7 @@ class _RecordDialogState extends State<RecordDialog> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: Text(TrackerLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -155,7 +165,7 @@ class _RecordDialogState extends State<RecordDialog> {
                   Navigator.pop(context, value);
                 }
               },
-              child: const Text('确定'),
+              child: Text(TrackerLocalizations.of(context)!.confirm),
             ),
           ],
         );

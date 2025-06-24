@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
@@ -11,7 +12,8 @@ class NotesListView extends StatelessWidget {
   final NotesController controller;
   final Function(Folder) onNavigateToFolder;
   final VoidCallback onReload;
-  final Future<Folder?> Function(Note?, {Folder? parentFolder}) onShowFolderSelectionDialog;
+  final Future<Folder?> Function(Note?, {Folder? parentFolder})
+  onShowFolderSelectionDialog;
 
   const NotesListView({
     super.key,
@@ -26,7 +28,7 @@ class NotesListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (subFolders.isEmpty && notes.isEmpty) {
-      return const Center(child: Text('此文件夹为空'));
+      return Center(child: Text(NotesLocalizations.of(context)!.emptyFolder));
     }
 
     return ReorderableListView.builder(
@@ -39,7 +41,8 @@ class NotesListView extends StatelessWidget {
           // 文件夹之间的排序
           final item = subFolders.removeAt(oldIndex);
           subFolders.insert(newIndex, item);
-        } else if (oldIndex >= subFolders.length && newIndex >= subFolders.length) {
+        } else if (oldIndex >= subFolders.length &&
+            newIndex >= subFolders.length) {
           // 笔记之间的排序
           final noteOldIndex = oldIndex - subFolders.length;
           final noteNewIndex = newIndex - subFolders.length;

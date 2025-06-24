@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/message.dart';
 import '../utils/message_options_handler.dart';
+import '../l10n/chat_localizations.dart';
 
 /// 消息选项对话框组件
 class MessageOptionsDialog extends StatelessWidget {
@@ -46,18 +47,19 @@ class MessageOptionsDialog extends StatelessWidget {
   }) {
     return showDialog(
       context: context,
-      builder: (context) => MessageOptionsDialog(
-        message: message,
-        onMessageEdit: onMessageEdit,
-        onMessageDelete: onMessageDelete,
-        onMessageCopy: onMessageCopy,
-        onSetFixedSymbol: onSetFixedSymbol,
-        onSetBubbleColor: onSetBubbleColor,
-        onReply: onReply,
-        onToggleFavorite: onToggleFavorite,
-        useRecentSymbols: useRecentSymbols,
-        initiallyShowFixedSymbolDialog: initiallyShowFixedSymbolDialog,
-      ),
+      builder:
+          (context) => MessageOptionsDialog(
+            message: message,
+            onMessageEdit: onMessageEdit,
+            onMessageDelete: onMessageDelete,
+            onMessageCopy: onMessageCopy,
+            onSetFixedSymbol: onSetFixedSymbol,
+            onSetBubbleColor: onSetBubbleColor,
+            onReply: onReply,
+            onToggleFavorite: onToggleFavorite,
+            useRecentSymbols: useRecentSymbols,
+            initiallyShowFixedSymbolDialog: initiallyShowFixedSymbolDialog,
+          ),
     );
   }
 
@@ -70,9 +72,9 @@ class MessageOptionsDialog extends StatelessWidget {
         _showFixedSymbolDialog(context);
       });
     }
-    
+
     return AlertDialog(
-      title: const Text('消息选项'),
+      title: Text(ChatLocalizations.of(context)!.messageOptions),
       contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -115,7 +117,7 @@ class MessageOptionsDialog extends StatelessWidget {
                     ),
                   ),
                   // 颜色选项
-                  ...[ 
+                  ...[
                     const Color(0xFFD6E4FF), // 默认蓝色
                     Colors.pink[100]!,
                     Colors.purple[100]!,
@@ -159,86 +161,79 @@ class MessageOptionsDialog extends StatelessWidget {
               alignment: WrapAlignment.center,
               spacing: 12.0, // 水平间距
               runSpacing: 12.0, // 垂直间距
-              children: [
-                // 设置固定标记
-                _buildIconButton(
-                  context,
-                  Icons.push_pin,
-                  Colors.blue,
-                  () {
-                    Navigator.pop(context);
-                    _showFixedSymbolDialog(context);
-                  },
-                ),
-                // 编辑
-                _buildIconButton(
-                  context,
-                  Icons.edit,
-                  Colors.green,
-                  () {
-                    Navigator.pop(context);
-                    onMessageEdit(message);
-                  },
-                ),
-                // 复制
-                _buildIconButton(
-                  context,
-                  Icons.copy,
-                  Colors.amber,
-                  () {
-                    Navigator.pop(context);
-                    onMessageCopy(message);
-                  },
-                ),
-                // 删除
-                _buildIconButton(
-                  context,
-                  Icons.delete,
-                  Colors.red,
-                  () {
-                    Navigator.pop(context);
-                    onMessageDelete(message);
-                  },
-                ),
-                // 分享
-                _buildIconButton(
-                  context,
-                  Icons.share,
-                  Colors.purple,
-                  () {
-                    Navigator.pop(context);
-                    MessageOptionsHandler.shareMessage(context, message);
-                  },
-                ),
-                // 回复
-                if (onReply != null)
-                  _buildIconButton(
-                    context,
-                    Icons.reply,
-                    Colors.indigo,
-                    () {
-                      Navigator.pop(context);
-                      onReply!(message);
-                    },
-                  ),
-                // 收藏
-                if (onToggleFavorite != null)
-                  _buildIconButton(
-                    context,
-                    // 根据消息是否已收藏显示不同图标
-                    (message.metadata?['isFavorite'] as bool?) == true 
-                        ? Icons.star 
-                        : Icons.star_border,
-                    Colors.amber,
-                    () {
-                      Navigator.pop(context);
-                      onToggleFavorite!(message);
-                    },
-                  ),
-              ].map((button) => SizedBox(
-                width: 50, // 固定宽度，确保每行最多5个
-                child: button,
-              )).toList(),
+              children:
+                  [
+                        // 设置固定标记
+                        _buildIconButton(
+                          context,
+                          Icons.push_pin,
+                          Colors.blue,
+                          () {
+                            Navigator.pop(context);
+                            _showFixedSymbolDialog(context);
+                          },
+                        ),
+                        // 编辑
+                        _buildIconButton(context, Icons.edit, Colors.green, () {
+                          Navigator.pop(context);
+                          onMessageEdit(message);
+                        }),
+                        // 复制
+                        _buildIconButton(context, Icons.copy, Colors.amber, () {
+                          Navigator.pop(context);
+                          onMessageCopy(message);
+                        }),
+                        // 删除
+                        _buildIconButton(context, Icons.delete, Colors.red, () {
+                          Navigator.pop(context);
+                          onMessageDelete(message);
+                        }),
+                        // 分享
+                        _buildIconButton(
+                          context,
+                          Icons.share,
+                          Colors.purple,
+                          () {
+                            Navigator.pop(context);
+                            MessageOptionsHandler.shareMessage(
+                              context,
+                              message,
+                            );
+                          },
+                        ),
+                        // 回复
+                        if (onReply != null)
+                          _buildIconButton(
+                            context,
+                            Icons.reply,
+                            Colors.indigo,
+                            () {
+                              Navigator.pop(context);
+                              onReply!(message);
+                            },
+                          ),
+                        // 收藏
+                        if (onToggleFavorite != null)
+                          _buildIconButton(
+                            context,
+                            // 根据消息是否已收藏显示不同图标
+                            (message.metadata?['isFavorite'] as bool?) == true
+                                ? Icons.star
+                                : Icons.star_border,
+                            Colors.amber,
+                            () {
+                              Navigator.pop(context);
+                              onToggleFavorite!(message);
+                            },
+                          ),
+                      ]
+                      .map(
+                        (button) => SizedBox(
+                          width: 50, // 固定宽度，确保每行最多5个
+                          child: button,
+                        ),
+                      )
+                      .toList(),
             ),
           ),
         ],
@@ -258,7 +253,7 @@ class MessageOptionsDialog extends StatelessWidget {
     if (!useRecentSymbols) return;
     final prefs = await SharedPreferences.getInstance();
     List<String> recentSymbols = prefs.getStringList('recentSymbols') ?? [];
-    
+
     // 如果符号已存在，先移除旧的
     recentSymbols.remove(symbol);
     // 将新符号添加到列表开头
@@ -267,7 +262,7 @@ class MessageOptionsDialog extends StatelessWidget {
     if (recentSymbols.length > 20) {
       recentSymbols = recentSymbols.sublist(0, 20);
     }
-    
+
     await prefs.setStringList('recentSymbols', recentSymbols);
   }
 
@@ -277,69 +272,75 @@ class MessageOptionsDialog extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('添加表情'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: symbolController,
-              decoration: const InputDecoration(
-                labelText: '标记',
-                hintText: '输入标记或留空以清除',
-              ),
-              maxLength: 1, // 限制只能输入一个字符
-            ),
-            if (useRecentSymbols && recentSymbols.isNotEmpty) ...[ 
-              const SizedBox(height: 8),
-              const Text(
-                '最近使用',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
+      builder:
+          (context) => AlertDialog(
+            title: Text(ChatLocalizations.of(context)!.addEmoji),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: symbolController,
+                  decoration: const InputDecoration(
+                    labelText: '标记',
+                    hintText: '输入标记或留空以清除',
+                  ),
+                  maxLength: 1, // 限制只能输入一个字符
                 ),
+                if (useRecentSymbols && recentSymbols.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  const Text(
+                    '最近使用',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children:
+                        recentSymbols
+                            .map(
+                              (symbol) => ActionChip(
+                                label: Text(symbol),
+                                onPressed: () {
+                                  symbolController.text = symbol;
+                                },
+                              ),
+                            )
+                            .toList(),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(ChatLocalizations.of(context)!.cancel),
               ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: recentSymbols.map((symbol) => ActionChip(
-                  label: Text(symbol),
-                  onPressed: () {
-                    symbolController.text = symbol;
-                  },
-                )).toList(),
+              TextButton(
+                onPressed: () async {
+                  final symbol =
+                      symbolController.text.isEmpty
+                          ? null
+                          : symbolController.text;
+                  if (symbol != null) {
+                    await _addRecentSymbol(symbol);
+                  }
+                  onSetFixedSymbol(message, symbol);
+                  Navigator.pop(context);
+                },
+                child: Text(ChatLocalizations.of(context)!.settings),
               ),
             ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
           ),
-          TextButton(
-            onPressed: () async {
-              final symbol = symbolController.text.isEmpty ? null : symbolController.text;
-              if (symbol != null) {
-                await _addRecentSymbol(symbol);
-              }
-              onSetFixedSymbol(message, symbol);
-              Navigator.pop(context);
-            },
-            child: const Text('设置'),
-          ),
-        ],
-      ),
     );
   }
 
   // 构建图标按钮
   Widget _buildIconButton(
-    BuildContext context, 
-    IconData icon, 
-    Color color, 
-    VoidCallback onPressed
+    BuildContext context,
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
   ) {
     return InkWell(
       onTap: onPressed,
@@ -351,11 +352,7 @@ class MessageOptionsDialog extends StatelessWidget {
           color: color.withOpacity(0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: color,
-          size: 24,
-        ),
+        child: Icon(icon, color: color, size: 24),
       ),
     );
   }

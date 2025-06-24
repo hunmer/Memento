@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 
 class ClearMessagesDialog extends StatelessWidget {
@@ -13,16 +14,16 @@ class ClearMessagesDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('清空消息'),
-      content: const Text('确定要清空所有消息吗？此操作不可撤销。'),
+      title: Text(ChatLocalizations.of(context)!.clearAllMessages),
+      content: Text(ChatLocalizations.of(context)!.confirmClearAllMessages),
       actions: [
         TextButton(
           onPressed: onCancel,
-          child: const Text('取消'),
+          child: Text(ChatLocalizations.of(context)!.cancel),
         ),
         TextButton(
           onPressed: onConfirm,
-          child: const Text('确定'),
+          child: Text(ChatLocalizations.of(context)!.save),
         ),
       ],
     );

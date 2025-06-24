@@ -34,6 +34,13 @@ abstract class OpenAILocalizations {
   String get output;
   String get noResponseYet;
 
+  String get systemRole;
+  String get userRole;
+  String get assistantRole;
+  String get addPrompt;
+  String get promptTypeLabel;
+  String get contentLabel;
+
   // Agent Edit Screen
   String get createAgent;
   String get editAgent;
@@ -493,6 +500,22 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
 
   @override
   String get serviceEndpoint => '服务端点是否可访问';
+
+  @override
+  String get systemRole => '系统';
+
+  @override
+  String get userRole => '用户';
+
+  @override
+  String get assistantRole => 'AI';
+
+  @override
+  String get addPrompt => '添加Prompt';
+  @override
+  String get promptTypeLabel => 'Prompt类型';
+  @override
+  String get contentLabel => '内容';
 }
 
 /// 英文实现
@@ -847,6 +870,22 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
 
   @override
   String get serviceEndpoint => 'If the service endpoint is accessible';
+
+  @override
+  String get systemRole => 'System';
+
+  @override
+  String get userRole => 'User';
+
+  @override
+  String get assistantRole => 'Assistant';
+
+  @override
+  String get addPrompt => 'Add Prompt';
+  @override
+  String get promptTypeLabel => 'Prompt Type';
+  @override
+  String get contentLabel => 'Content';
 }
 
 /// 本地化代理

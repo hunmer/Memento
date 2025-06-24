@@ -96,10 +96,14 @@ class _EventListPageState extends State<EventListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('所有事件')),
+      appBar: AppBar(
+        title: Text(CalendarLocalizations.getText(context, 'allEvents')),
+      ),
       body:
           _events.isEmpty
-              ? const Center(child: Text('没有事件'))
+              ? Center(
+                child: Text(CalendarLocalizations.getText(context, 'noEvents')),
+              )
               : ListView.builder(
                 itemCount: _events.length,
                 itemBuilder: (context, index) {

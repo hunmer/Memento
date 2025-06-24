@@ -78,4 +78,31 @@ class NotesLocalizationsZh extends NotesLocalizations {
 
   @override
   String get folderNameHint => '文件夹名称';
+
+  @override
+  String get createNew => '新建';
+
+  @override
+  String get movedTo => '已移动到 {folderName}';
+
+  @override
+  String get filter => '筛选';
+
+  @override
+  String get tags => '标签';
+
+  @override
+  String get dateRange => '日期范围';
+
+  @override
+  String get clearAll => '清除全部';
+
+  @override
+  String get apply => '应用';
+
+  @override
+  String get typeToSearch => '输入搜索内容';
+
+  @override
+  String get noResultsFound => '未找到结果';
 }

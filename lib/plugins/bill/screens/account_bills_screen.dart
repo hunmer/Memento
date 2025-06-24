@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/bill.dart';
 import 'bill_edit_screen.dart' as bill_edit;
@@ -48,23 +49,23 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
               return [
                 const PopupMenuItem(
                   value: StatisticRange.week,
-                  child: Text('本周'),
+                  child: Text(BillLocalizations.getText(context, 'thisWeek')),
                 ),
                 const PopupMenuItem(
                   value: StatisticRange.month,
-                  child: Text('本月'),
+                  child: Text(BillLocalizations.getText(context, 'thisMonth')),
                 ),
                 const PopupMenuItem(
                   value: StatisticRange.year,
-                  child: Text('本年'),
+                  child: Text(BillLocalizations.getText(context, 'thisYear')),
                 ),
                 const PopupMenuItem(
                   value: StatisticRange.all,
-                  child: Text('全部'),
+                  child: Text(BillLocalizations.getText(context, 'all')),
                 ),
                 const PopupMenuItem(
                   value: StatisticRange.custom,
-                  child: Text('自定义'),
+                  child: Text(BillLocalizations.getText(context, 'custom')),
                 ),
               ];
             },
@@ -138,7 +139,9 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
 
   Widget _buildBillsList(List<Bill> bills) {
     if (bills.isEmpty) {
-      return const Center(child: Text('暂无账单记录'));
+      return Center(
+        child: Text(BillLocalizations.getText(context, 'noBillsRecord')),
+      );
     }
 
     // 对账单按日期排序
@@ -172,15 +175,19 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: const Text('确认删除'),
-                content: const Text('确定要删除这条账单记录吗？'),
+                title: Text(
+                  BillLocalizations.getText(context, 'confirmDelete'),
+                ),
+                content: Text(
+                  BillLocalizations.getText(context, 'confirmDeleteBill'),
+                ),
                 actions: [
                   TextButton(
-                    child: const Text('取消'),
+                    child: Text(BillLocalizations.getText(context, 'cancel')),
                     onPressed: () => Navigator.pop(context, false),
                   ),
                   TextButton(
-                    child: const Text('删除'),
+                    child: Text(BillLocalizations.getText(context, 'delete')),
                     onPressed: () => Navigator.pop(context, true),
                   ),
                 ],

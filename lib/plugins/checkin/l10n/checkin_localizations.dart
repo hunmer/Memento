@@ -14,17 +14,22 @@ abstract class CheckinLocalizations {
   final String localeName;
 
   static CheckinLocalizations? of(BuildContext context) {
-    return Localizations.of<CheckinLocalizations>(context, CheckinLocalizations);
+    return Localizations.of<CheckinLocalizations>(
+      context,
+      CheckinLocalizations,
+    );
   }
 
-  static const LocalizationsDelegate<CheckinLocalizations> delegate = _CheckinLocalizationsDelegate();
+  static const LocalizationsDelegate<CheckinLocalizations> delegate =
+      _CheckinLocalizationsDelegate();
 
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
@@ -47,23 +52,32 @@ abstract class CheckinLocalizations {
   String get deleteConfirmMessage;
   String get checkinRecords;
   String get noRecords;
-  
+
   // 默认打卡项目名称
   String get wakeUpEarly;
   String get sleepEarly;
   String get exercise;
+
+  // 分组排序对话框
+  String get groupSortTitle;
+  String get reverseSort;
+  String get confirm;
 }
 
-class _CheckinLocalizationsDelegate extends LocalizationsDelegate<CheckinLocalizations> {
+class _CheckinLocalizationsDelegate
+    extends LocalizationsDelegate<CheckinLocalizations> {
   const _CheckinLocalizationsDelegate();
 
   @override
   Future<CheckinLocalizations> load(Locale locale) {
-    return SynchronousFuture<CheckinLocalizations>(lookupCheckinLocalizations(locale));
+    return SynchronousFuture<CheckinLocalizations>(
+      lookupCheckinLocalizations(locale),
+    );
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_CheckinLocalizationsDelegate old) => false;
@@ -72,12 +86,14 @@ class _CheckinLocalizationsDelegate extends LocalizationsDelegate<CheckinLocaliz
 CheckinLocalizations lookupCheckinLocalizations(Locale locale) {
   // 支持的语言代码
   switch (locale.languageCode) {
-    case 'en': return CheckinLocalizationsEn();
-    case 'zh': return CheckinLocalizationsZh();
+    case 'en':
+      return CheckinLocalizationsEn();
+    case 'zh':
+      return CheckinLocalizationsZh();
   }
 
   throw FlutterError(
     'CheckinLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localization\'s implementation.'
+    'an issue with the localization\'s implementation.',
   );
 }

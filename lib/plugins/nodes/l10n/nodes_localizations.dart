@@ -48,6 +48,10 @@ class NodesLocalizations {
       'clear': 'Clear',
       'copiedToClipboard': 'Copied to clipboard',
       'nodesCleared': 'All nodes cleared',
+      'confirmDeleteNotebook':
+          'Are you sure you want to delete \"{notebookTitle}\"?',
+      'confirmDeleteNode': 'Are you sure you want to delete \"{nodeTitle}\"?',
+      'nodeCount': '{count} nodes',
     },
     'zh': {
       'notebooks': '笔记本',
@@ -85,6 +89,9 @@ class NodesLocalizations {
       'clear': '清空',
       'copiedToClipboard': '已复制到剪贴板',
       'nodesCleared': '所有节点已清空',
+      'confirmDeleteNotebook': '确定要删除\"{notebookTitle}\"吗？',
+      'confirmDeleteNode': '确定要删除\"{nodeTitle}\"吗？',
+      'nodeCount': '{count}个节点',
     },
   };
 
@@ -162,6 +169,17 @@ class NodesLocalizations {
   String get nodesCleared =>
       _localizedValues[locale.languageCode]?['nodesCleared'] ??
       'All nodes cleared';
+
+  String get confirmDeleteNotebook =>
+      _localizedValues[locale.languageCode]?['confirmDeleteNotebook'] ??
+      'Are you sure you want to delete \"{notebookTitle}\"?';
+
+  String get confirmDeleteNode =>
+      _localizedValues[locale.languageCode]?['confirmDeleteNode'] ??
+      'Are you sure you want to delete \"{nodeTitle}\"?';
+
+  String get nodeCount =>
+      _localizedValues[locale.languageCode]?['nodeCount'] ?? '{count} nodes';
 }
 
 class NodesLocalizationsDelegate

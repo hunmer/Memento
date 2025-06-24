@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/usage_record.dart';
@@ -34,23 +35,26 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              '使用记录',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              GoodsLocalizations.of(context)!.usageRecords,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               icon: const Icon(Icons.add),
-              label: const Text('添加记录'),
+              label: Text(GoodsLocalizations.of(context)!.addUsageRecord),
               onPressed: _addNewRecord,
             ),
           ],
         ),
         const SizedBox(height: 8),
         if (_records.isEmpty)
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('暂无使用记录', style: TextStyle(color: Colors.grey)),
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                GoodsLocalizations.of(context)!.noUsageRecords,
+                style: const TextStyle(color: Colors.grey),
+              ),
             ),
           )
         else
@@ -97,23 +101,23 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('添加使用记录'),
+            title: Text(GoodsLocalizations.of(context)!.addUsageRecordTitle),
             content: TextField(
               controller: noteController,
-              decoration: const InputDecoration(
-                labelText: '备注（可选）',
-                hintText: '输入使用备注',
+              decoration: InputDecoration(
+                labelText: GoodsLocalizations.of(context)!.optionalNote,
+                hintText: GoodsLocalizations.of(context)!.enterUsageNote,
               ),
               maxLines: 2,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('取消'),
+                child: Text(GoodsLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('确认'),
+                child: Text(GoodsLocalizations.of(context)!.confirm),
               ),
             ],
           );
@@ -154,23 +158,23 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('编辑使用记录'),
+            title: Text(GoodsLocalizations.of(context)!.editUsageRecordTitle),
             content: TextField(
               controller: noteController,
-              decoration: const InputDecoration(
-                labelText: '备注（可选）',
-                hintText: '输入使用备注',
+              decoration: InputDecoration(
+                labelText: GoodsLocalizations.of(context)!.optionalNote,
+                hintText: GoodsLocalizations.of(context)!.enterUsageNote,
               ),
               maxLines: 2,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('取消'),
+                child: Text(GoodsLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('确认'),
+                child: Text(GoodsLocalizations.of(context)!.confirm),
               ),
             ],
           );

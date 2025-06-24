@@ -1,56 +1,91 @@
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations_en.dart';
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations_zh.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-class TrackerLocalizations {
+abstract class TrackerLocalizations {
+  TrackerLocalizations(String locale) : localeName = locale;
+
+  final String localeName;
+
   static const LocalizationsDelegate<TrackerLocalizations> delegate =
       _TrackerLocalizationsDelegate();
 
-  static TrackerLocalizations of(BuildContext context) {
+  static TrackerLocalizations? of(BuildContext context) {
     return Localizations.of<TrackerLocalizations>(
       context,
       TrackerLocalizations,
-    )!;
+    );
   }
 
-  String get goalsTitle => '目标';
-  String get recordsTitle => '记录';
-  String get createGoal => '创建目标';
-  String get editGoal => '编辑目标';
-  String get goalName => '目标名称';
-  String get goalNameHint => '输入目标名称';
-  String get unitType => '单位';
-  String get unitTypeHint => '如 ml, 页, 分钟';
-  String get targetValue => '目标总量';
-  String get dateSettings => '日期设置';
-  String get reminder => '提醒';
-  String get dailyReset => '每日重置';
-  String get save => '保存';
-  String get cancel => '取消';
-  String get addRecord => '添加记录';
-  String get recordValue => '记录值';
-  String get note => '备注';
-  String get noteHint => '可选备注';
-  String get daily => '每日';
-  String get weekly => '每周';
-  String get monthly => '每月';
-  String get dateRange => '日期范围';
-  String get selectDays => '选择日期';
-  String get selectDate => '选择日期';
-  String get startDate => '开始日期';
-  String get endDate => '结束日期';
-  String get progress => '进度';
-  String get history => '历史记录';
-  String get todayRecords => '今日记录';
-  String get totalGoals => '目标总数';
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
-  // New translations
-  String get goalTracking => '目标跟踪';
-  String get all => '全部';
-  String get inProgress => '进行中';
-  String get completed => '已完成';
-  String get recent => '最近';
-  String get thisWeek => '本周';
-  String get thisMonth => '本月';
-  String get confirmDeletion => '确认删除';
+  static const List<Locale> supportedLocales = [Locale('en'), Locale('zh')];
+
+  // Goals
+  String get goalsTitle;
+  String get recordsTitle;
+  String get createGoal;
+  String get editGoal;
+  String get goalName;
+  String get goalNameHint;
+  String get unitType;
+  String get unitTypeHint;
+  String get targetValue;
+  String get dateSettings;
+  String get reminder;
+  String get dailyReset;
+  String get save;
+  String get cancel;
+  String get addRecord;
+  String get recordValue;
+  String get note;
+  String get noteHint;
+  String get daily;
+  String get weekly;
+  String get monthly;
+  String get dateRange;
+  String get selectDays;
+  String get selectDate;
+  String get startDate;
+  String get endDate;
+  String get progress;
+  String get history;
+  String get todayRecords;
+  String get totalGoals;
+  String get goalTracking;
+  String get all;
+  String get inProgress;
+  String get completed;
+  String get recent;
+  String get thisWeek;
+  String get thisMonth;
+  String get confirmDeletion;
+  String get goalDeleted;
+  String get totalTimer;
+  String get timerTitle;
+  String get quickRecordTitle;
+  String get recordTitle;
+  String get calculateDifference;
+  String get confirm;
+  String get confirmClear;
+  String get confirmClearMessage;
+  String get recordsCleared;
+  String get currentProgress;
+  String get reminderTime;
+  String get recordHistory;
+  String get noRecords;
+  String get confirmDelete;
+  String get recordDeleted;
+  String get todayComplete;
+  String get thisMonthComplete;
+  String get thisMonthNew;
 }
 
 class _TrackerLocalizationsDelegate
@@ -58,13 +93,29 @@ class _TrackerLocalizationsDelegate
   const _TrackerLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => true;
+  bool isSupported(Locale locale) => ['en', 'zh'].contains(locale.languageCode);
 
   @override
-  Future<TrackerLocalizations> load(Locale locale) async {
-    return TrackerLocalizations();
+  Future<TrackerLocalizations> load(Locale locale) {
+    return SynchronousFuture<TrackerLocalizations>(
+      lookupTrackerLocalizations(locale),
+    );
   }
 
   @override
   bool shouldReload(_TrackerLocalizationsDelegate old) => false;
+}
+
+TrackerLocalizations lookupTrackerLocalizations(Locale locale) {
+  switch (locale.languageCode) {
+    case 'en':
+      return TrackerLocalizationsEn(locale.languageCode);
+    case 'zh':
+      return TrackerLocalizationsZh(locale.languageCode);
+  }
+
+  throw FlutterError(
+    'TrackerLocalizations.delegate failed to load unsupported locale "$locale". '
+    'This is likely an issue with the localizations setup.',
+  );
 }

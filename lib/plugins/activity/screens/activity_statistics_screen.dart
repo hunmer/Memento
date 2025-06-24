@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -8,20 +9,18 @@ import '../models/activity_record.dart';
 class ActivityStatisticsScreen extends StatefulWidget {
   final ActivityService activityService;
 
-  const ActivityStatisticsScreen({
-    super.key,
-    required this.activityService,
-  });
+  const ActivityStatisticsScreen({super.key, required this.activityService});
 
   @override
-  State<ActivityStatisticsScreen> createState() => _ActivityStatisticsScreenState();
+  State<ActivityStatisticsScreen> createState() =>
+      _ActivityStatisticsScreenState();
 }
 
 class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   // 时间范围选择
   String _selectedRange = '本日';
   final List<String> _timeRanges = ['本日', '本周', '本月', '本年', '自定义范围'];
-  
+
   // 日期范围
   DateTime? _startDate;
   DateTime? _endDate;
@@ -81,16 +80,16 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
           start = _startDate!;
           end = _endDate!;
         }
-        
+
         setState(() {
           _selectedRange = range;
           _startDate = start;
           _endDate = end;
         });
-        
+
         await _showDateRangePicker();
         return; // 在日期选择器回调中会更新数据
-        
+
       default:
         start = today;
         end = todayEnd;
@@ -109,20 +108,17 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   Future<void> _showDateRangePicker() async {
     final now = DateTime.now();
     final lastDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
-    
+
     // 确保初始日期范围不超过今天
     final initialStart = _startDate ?? now;
     final initialEnd = _endDate ?? now;
     final validEnd = initialEnd.isAfter(lastDate) ? lastDate : initialEnd;
-    
+
     final picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
       lastDate: lastDate,
-      initialDateRange: DateTimeRange(
-        start: initialStart,
-        end: validEnd,
-      ),
+      initialDateRange: DateTimeRange(start: initialStart, end: validEnd),
     );
     if (picked != null) {
       setState(() {
@@ -150,12 +146,15 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
 
     try {
       final activities = <ActivityRecord>[];
-      
+
       // 遍历日期范围内的每一天
-      for (var date = _startDate!;
-          date.isBefore(_endDate!.add(const Duration(days: 1)));
-          date = date.add(const Duration(days: 1))) {
-        final dailyActivities = await widget.activityService.getActivitiesForDate(date);
+      for (
+        var date = _startDate!;
+        date.isBefore(_endDate!.add(const Duration(days: 1)));
+        date = date.add(const Duration(days: 1))
+      ) {
+        final dailyActivities = await widget.activityService
+            .getActivitiesForDate(date);
         activities.addAll(dailyActivities);
       }
 
@@ -169,7 +168,11 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载数据失败：$e')),
+          SnackBar(
+            content: Text(
+              '${ActivityLocalizations.of(context)!.loadingFailed}: $e',
+            ),
+          ),
         );
       }
     }
@@ -178,7 +181,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   // 计算活动时间分布数据（24小时）
   List<int> _calculateHourlyDistribution() {
     final hourlyMinutes = List<int>.filled(24, 0);
-    
+
     if (_selectedRange != '本日') return hourlyMinutes;
 
     for (var activity in _activities) {
@@ -194,12 +197,12 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
         // 活动跨越多个小时
         // 第一个小时的分钟数
         hourlyMinutes[startHour] += 60 - startMinute;
-        
+
         // 中间的完整小时
         for (var hour = startHour + 1; hour < endHour; hour++) {
           hourlyMinutes[hour] += 60;
         }
-        
+
         // 最后一个小时的分钟数
         if (endHour < 24) {
           hourlyMinutes[endHour] += endMinute;
@@ -213,10 +216,10 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   // 计算活动类型占比数据
   List<MapEntry<String, int>> _calculateActivityDistribution() {
     final Map<String, int> tagMinutes = {};
-    
+
     for (var activity in _activities) {
       final duration = activity.durationInMinutes;
-      
+
       if (activity.tags.isEmpty) {
         // 无标签的活动归类为"其他"
         tagMinutes['其他'] = (tagMinutes['其他'] ?? 0) + duration;
@@ -230,8 +233,8 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     }
 
     // 转换为列表并排序
-    final sortedEntries = tagMinutes.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final sortedEntries =
+        tagMinutes.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
     // 如果超过5个类别，将剩余的合并为"其他"
     if (sortedEntries.length > 5) {
@@ -253,7 +256,9 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
       return _activities.where((activity) => activity.tags.isEmpty).toList();
     } else {
       // 查找包含指定标签的活动
-      return _activities.where((activity) => activity.tags.contains(tag)).toList();
+      return _activities
+          .where((activity) => activity.tags.contains(tag))
+          .toList();
     }
   }
 
@@ -286,18 +291,19 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: _timeRanges.map((range) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(range),
-                      selected: _selectedRange == range,
-                      onSelected: (selected) {
-                        if (selected) _updateDateRange(range);
-                      },
-                    ),
-                  );
-                }).toList(),
+                children:
+                    _timeRanges.map((range) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(range),
+                          selected: _selectedRange == range,
+                          onSelected: (selected) {
+                            if (selected) _updateDateRange(range);
+                          },
+                        ),
+                      );
+                    }).toList(),
               ),
             ),
           ),
@@ -356,10 +362,9 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
                         ),
                       ],
                     ),
-                    
+
                     // 选中标签的活动列表
-                    if (_selectedTag != null) 
-                      _buildActivityList(),
+                    if (_selectedTag != null) _buildActivityList(),
                   ],
                 ),
               ),
@@ -374,10 +379,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -432,17 +434,15 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                return Text('${value.toInt()}分');
+                return Text(
+                  '${value.toInt()}${ActivityLocalizations.of(context)!.minutesFormat(1).replaceAll('1 ', '')}',
+                );
               },
               reservedSize: 40,
             ),
           ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         gridData: FlGridData(show: false),
         borderData: FlBorderData(show: false),
@@ -466,21 +466,28 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   Widget _buildActivityPieChart() {
     final activityData = _calculateActivityDistribution();
     if (activityData.isEmpty) {
-      return const Center(child: Text('暂无数据'));
+      return Center(child: Text(ActivityLocalizations.of(context)!.noData));
     }
 
-    final totalMinutes = activityData.fold(0, (sum, entry) => sum + entry.value);
+    final totalMinutes = activityData.fold(
+      0,
+      (sum, entry) => sum + entry.value,
+    );
     if (totalMinutes <= 0) {
-      return const Center(child: Text('暂无活动时间数据'));
+      return Center(
+        child: Text(ActivityLocalizations.of(context)!.noActivityTimeData),
+      );
     }
-    
+
     return PieChart(
       PieChartData(
         sections: List.generate(activityData.length, (index) {
           final entry = activityData[index];
-          final percentage = (entry.value / totalMinutes * 100).toStringAsFixed(1);
+          final percentage = (entry.value / totalMinutes * 100).toStringAsFixed(
+            1,
+          );
           final isSelected = _selectedTag == entry.key;
-          
+
           return PieChartSectionData(
             value: entry.value.toDouble(),
             title: '$percentage%',
@@ -491,9 +498,14 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
             ),
             color: _chartColors[index % _chartColors.length],
             radius: isSelected ? 90 : 80, // 选中时略大一些
-            badgeWidget: isSelected 
-              ? const Icon(Icons.check_circle, color: Colors.white, size: 18)
-              : null,
+            badgeWidget:
+                isSelected
+                    ? const Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
+                      size: 18,
+                    )
+                    : null,
             badgePositionPercentageOffset: 0.98,
           );
         }),
@@ -502,10 +514,12 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
         pieTouchData: PieTouchData(
           enabled: true,
           touchCallback: (FlTouchEvent event, pieTouchResponse) {
-            if (mounted && event is FlTapUpEvent && 
-                pieTouchResponse != null && 
+            if (mounted &&
+                event is FlTapUpEvent &&
+                pieTouchResponse != null &&
                 pieTouchResponse.touchedSection != null) {
-              final sectionIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+              final sectionIndex =
+                  pieTouchResponse.touchedSection!.touchedSectionIndex;
               if (sectionIndex >= 0 && sectionIndex < activityData.length) {
                 setState(() {
                   _selectTag(activityData[sectionIndex].key);
@@ -522,11 +536,14 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   Widget _buildPieChartLegend() {
     final activityData = _calculateActivityDistribution();
     if (activityData.isEmpty) {
-      return const Center(child: Text('暂无数据'));
+      return Center(child: Text(ActivityLocalizations.of(context)!.noData));
     }
 
-    final totalMinutes = activityData.fold(0, (sum, entry) => sum + entry.value);
-    
+    final totalMinutes = activityData.fold(
+      0,
+      (sum, entry) => sum + entry.value,
+    );
+
     return Padding(
       padding: const EdgeInsets.only(left: 16.0),
       child: Column(
@@ -551,10 +568,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
               children: [
                 const Text(
                   '总时长',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -568,88 +582,95 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // 图例列表
           Expanded(
-            child: activityData.isEmpty 
-              ? const Center(child: Text('暂无数据')) 
-              : ListView.builder(
-                  itemCount: activityData.length,
-                  itemBuilder: (context, index) {
-                    final entry = activityData[index];
-                    final color = _chartColors[index % _chartColors.length];
-                    final isSelected = _selectedTag == entry.key;
-                    
-                    return Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => _selectTag(entry.key),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 4.0),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 6.0,
-                            horizontal: 8.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected 
-                                ? color.withOpacity(0.2) 
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(4.0),
-                            border: isSelected
-                                ? Border.all(color: color)
-                                : null,
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 16,
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                ),
+            child:
+                activityData.isEmpty
+                    ? Center(
+                      child: Text(ActivityLocalizations.of(context)!.noData),
+                    )
+                    : ListView.builder(
+                      itemCount: activityData.length,
+                      itemBuilder: (context, index) {
+                        final entry = activityData[index];
+                        final color = _chartColors[index % _chartColors.length];
+                        final isSelected = _selectedTag == entry.key;
+
+                        return Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => _selectTag(entry.key),
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 4.0),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6.0,
+                                horizontal: 8.0,
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  entry.key,
-                                  style: TextStyle(
-                                    fontWeight: isSelected 
-                                        ? FontWeight.bold 
-                                        : FontWeight.normal,
+                              decoration: BoxDecoration(
+                                color:
+                                    isSelected
+                                        ? color.withOpacity(0.2)
+                                        : Colors.transparent,
+                                borderRadius: BorderRadius.circular(4.0),
+                                border:
+                                    isSelected
+                                        ? Border.all(color: color)
+                                        : null,
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 16,
+                                    height: 16,
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      shape: BoxShape.circle,
+                                    ),
                                   ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      entry.key,
+                                      style: TextStyle(
+                                        fontWeight:
+                                            isSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _formatDuration(entry.value),
+                                    style: TextStyle(
+                                      fontWeight:
+                                          isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                _formatDuration(entry.value),
-                                style: TextStyle(
-                                  fontWeight: isSelected 
-                                      ? FontWeight.bold 
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                        );
+                      },
+                    ),
           ),
         ],
       ),
     );
   }
-  
+
   // 格式化时长（分钟转为小时和分钟）
   String _formatDuration(int minutes) {
     final hours = minutes ~/ 60;
     final mins = minutes % 60;
-    
+
     if (hours > 0) {
       return '$hours小时${mins > 0 ? ' $mins分钟' : ''}';
     } else {
@@ -667,7 +688,9 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
       return Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
-          child: Text('没有找到与"$_selectedTag"相关的活动记录'),
+          child: Text(
+            '${ActivityLocalizations.of(context)!.loadingFailed.replaceAll('数据', '活动记录')} "$_selectedTag"',
+          ),
         ),
       );
     }
@@ -691,7 +714,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
               ),
               TextButton.icon(
                 icon: const Icon(Icons.close),
-                label: const Text('关闭'),
+                label: Text(ActivityLocalizations.of(context)!.close),
                 onPressed: () {
                   setState(() {
                     _selectedTag = null;
@@ -712,10 +735,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: ListTile(
-                  title: Text(
-                    activity.title,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  title: Text(activity.title, overflow: TextOverflow.ellipsis),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -726,17 +746,21 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
                       if (activity.tags.isNotEmpty)
                         Wrap(
                           spacing: 4,
-                          children: activity.tags
-                              .map((tag) => Chip(
-                                    label: Text(
-                                      tag,
-                                      style: const TextStyle(fontSize: 10),
+                          children:
+                              activity.tags
+                                  .map(
+                                    (tag) => Chip(
+                                      label: Text(
+                                        tag,
+                                        style: const TextStyle(fontSize: 10),
+                                      ),
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      visualDensity: VisualDensity.compact,
+                                      padding: EdgeInsets.zero,
                                     ),
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                  ))
-                              .toList(),
+                                  )
+                                  .toList(),
                         ),
                     ],
                   ),

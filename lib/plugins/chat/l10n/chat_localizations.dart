@@ -79,6 +79,49 @@ abstract class ChatLocalizations {
   String get apply;
   String get setBackground;
 
+  // Message options dialog
+  String get messageOptions;
+  String get addEmoji;
+  String get settings;
+  String get editMessage;
+  String get save;
+  String get deleteMessage;
+  String get deleteMessageConfirmation;
+  String get copiedToClipboard;
+  String get createChannelFailed;
+  String get noMessagesYet;
+  String get noMessagesFound;
+
+  // New strings for chat functionality
+  String get copiedSelectedMessages;
+  String get aiAssistantNotFound;
+  String get aiMessages;
+  String get filterAiMessages;
+  String get favoriteMessages;
+  String get showOnlyFavorites;
+
+  String get recordingFailed;
+  String get gotIt;
+  String get recordingStopError;
+  String get selectDate;
+  String get invalidAudioMessage;
+  String get fileNotAccessible;
+  String get fileProcessingFailed;
+  String get fileSelectionFailed;
+  String get fileSelected;
+  String get imageNotExist;
+  String get imageProcessingFailed;
+  String get imageSelectionFailed;
+  String get clearAllMessages;
+  String get confirmClearAllMessages;
+  String get videoNotSupportedOnWeb;
+  String get videoNotExist;
+  String get videoProcessingFailed;
+  String get videoSelectionFailed;
+  String get videoSent;
+  String get videoRecordingFailed;
+  String get channelCreationFailed;
+
   // New localization keys for UI service
   String get channelCount;
   String get totalMessages;

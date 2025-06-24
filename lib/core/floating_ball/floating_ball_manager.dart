@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'dart:convert';
 import 'dart:io';
+import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'floating_ball_service.dart';
@@ -56,9 +57,16 @@ class FloatingBallManager {
             if (lastPlugin != null) {
               PluginManager.instance.openPlugin(context, lastPlugin);
             } else {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('没有找到最近打开的插件')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    FloatingBallLocalizations.getText(
+                      context,
+                      'noRecentPlugin',
+                    ),
+                  ),
+                ),
+              );
             }
           }
         },
@@ -83,9 +91,13 @@ class FloatingBallManager {
     '刷新页面':
         (context) => () {
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('页面已刷新')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  FloatingBallLocalizations.getText(context, 'pageRefreshed'),
+                ),
+              ),
+            );
           }
         },
   };

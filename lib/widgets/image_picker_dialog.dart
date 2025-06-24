@@ -1,3 +1,4 @@
+import '../l10n/image_picker_localizations.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -64,7 +65,11 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.multiple ? '选择多张图片' : '选择图片'),
+      title: Text(
+        widget.multiple
+            ? ImagePickerLocalizations.getSelectMultipleImages(context)
+            : ImagePickerLocalizations.getSelectImage(context),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -86,7 +91,9 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
               Expanded(
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.photo_library),
-                  label: const Text('从相册选择'),
+                  label: Text(
+                    ImagePickerLocalizations.getSelectFromGallery(context),
+                  ),
                   onPressed: () async {
                     try {
                       final List<XFile> images =
@@ -145,9 +152,16 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('选择图片失败: $e')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              ImagePickerLocalizations.getSelectImageFailed(
+                                context,
+                                e.toString(),
+                              ),
+                            ),
+                          ),
+                        );
                       }
                     }
                   },
@@ -157,7 +171,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
               Expanded(
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.camera_alt),
-                  label: const Text('拍摄照片'),
+                  label: Text(ImagePickerLocalizations.getTakePhoto(context)),
                   onPressed: () async {
                     try {
                       final XFile? photo = await _picker.pickImage(
@@ -207,9 +221,16 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('拍摄照片失败: $e')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              ImagePickerLocalizations.getTakePhotoFailed(
+                                context,
+                                e.toString(),
+                              ),
+                            ),
+                          ),
+                        );
                       }
                     }
                   },
@@ -222,7 +243,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(ImagePickerLocalizations.getCancel(context)),
         ),
         TextButton(
           onPressed:
@@ -231,7 +252,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                     context,
                   ).pop({'url': _urlController.text, 'bytes': null})
                   : null,
-          child: const Text('确定'),
+          child: Text(ImagePickerLocalizations.getConfirm(context)),
         ),
       ],
     );
@@ -266,8 +287,8 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                     const Padding(
                       padding: EdgeInsets.all(16.0),
                       child: Text(
-                        '裁剪图片',
-                        style: TextStyle(
+                        ImagePickerLocalizations.getCropImage(context),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -305,7 +326,14 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                               } catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('保存裁剪图片失败: $e')),
+                                    SnackBar(
+                                      content: Text(
+                                        ImagePickerLocalizations.getSaveCroppedImageFailed(
+                                          context,
+                                          e.toString(),
+                                        ),
+                                      ),
+                                    ),
                                   );
                                 }
                                 completer.complete(null);
@@ -313,7 +341,14 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                             case CropFailure(:final cause):
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('裁剪失败: $cause')),
+                                  SnackBar(
+                                    content: Text(
+                                      ImagePickerLocalizations.getCropFailed(
+                                        context,
+                                        cause,
+                                      ),
+                                    ),
+                                  ),
                                 );
                               }
                               completer.complete(null);
@@ -340,11 +375,15 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                 'bytes': imageBytes,
                               });
                             },
-                            child: const Text('取消'),
+                            child: Text(
+                              ImagePickerLocalizations.getCancel(context),
+                            ),
                           ),
                           ElevatedButton(
                             onPressed: () => cropController.crop(),
-                            child: const Text('确定'),
+                            child: Text(
+                              ImagePickerLocalizations.getConfirm(context),
+                            ),
                           ),
                         ],
                       ),

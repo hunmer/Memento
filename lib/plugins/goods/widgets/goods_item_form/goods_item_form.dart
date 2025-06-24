@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../models/goods_item.dart';
 import 'controllers/form_controller.dart';
@@ -60,20 +61,27 @@ class _GoodsItemFormState extends State<GoodsItemForm>
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text('编辑物品'),
+          title: Text(
+            widget.initialData == null
+                ? GoodsLocalizations.of(context)!.addItem
+                : GoodsLocalizations.of(context)!.editItem,
+          ),
           centerTitle: true,
           leading: TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(GoodsLocalizations.of(context)!.cancel),
           ),
           actions: [
-            TextButton(onPressed: _submitForm, child: const Text('保存')),
+            TextButton(
+              onPressed: _submitForm,
+              child: Text(GoodsLocalizations.of(context)!.save),
+            ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(text: '基本信息'),
-              Tab(text: '使用记录'),
-              Tab(text: '子物品'),
+              Tab(text: GoodsLocalizations.of(context)!.basicInfo),
+              Tab(text: GoodsLocalizations.of(context)!.usageRecords),
+              Tab(text: GoodsLocalizations.of(context)!.subItems),
             ],
           ),
         ),

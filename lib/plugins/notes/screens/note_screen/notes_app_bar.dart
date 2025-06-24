@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../models/folder.dart';
 
@@ -26,22 +27,24 @@ class NotesAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: currentFolder?.parentId != null
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: onNavigateBack,
-            )
-          : null,
-      title: isSearching
-          ? TextField(
-              controller: searchController,
-              decoration: const InputDecoration(
-                hintText: '搜索笔记...',
-                border: InputBorder.none,
-              ),
-              onChanged: onSearch,
-            )
-          : Text(currentFolder?.name ?? 'Notes'),
+      leading:
+          currentFolder?.parentId != null
+              ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: onNavigateBack,
+              )
+              : null,
+      title:
+          isSearching
+              ? TextField(
+                controller: searchController,
+                decoration: const InputDecoration(
+                  hintText: '搜索笔记...',
+                  border: InputBorder.none,
+                ),
+                onChanged: onSearch,
+              )
+              : Text(currentFolder?.name ?? 'Notes'),
       actions: [
         IconButton(
           icon: Icon(isSearching ? Icons.close : Icons.search),
@@ -58,22 +61,23 @@ class NotesAppBar extends StatelessWidget implements PreferredSizeWidget {
                 break;
             }
           },
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'new_note',
-              child: ListTile(
-                leading: Icon(Icons.note_add),
-                title: Text('新建笔记'),
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'new_folder',
-              child: ListTile(
-                leading: Icon(Icons.create_new_folder),
-                title: Text('新建文件夹'),
-              ),
-            ),
-          ],
+          itemBuilder:
+              (context) => [
+                PopupMenuItem(
+                  value: 'new_note',
+                  child: ListTile(
+                    leading: const Icon(Icons.note_add),
+                    title: Text(NotesLocalizations.of(context)!.newNote),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'new_folder',
+                  child: ListTile(
+                    leading: const Icon(Icons.create_new_folder),
+                    title: Text(NotesLocalizations.of(context)!.newFolder),
+                  ),
+                ),
+              ],
         ),
       ],
     );

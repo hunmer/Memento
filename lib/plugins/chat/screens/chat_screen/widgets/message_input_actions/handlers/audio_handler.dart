@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'package:path/path.dart' as path;
@@ -61,7 +62,8 @@ Future<void> handleAudioRecording({
                       'path': fileMessage.filePath,
                       'size': fileMessage.fileSize,
                       'extension': fileMessage.extension,
-                      'mimeType': 'audio/${fileMessage.extension.replaceAll('.', '')}',
+                      'mimeType':
+                          'audio/${fileMessage.extension.replaceAll('.', '')}',
                       'type': 'audio',
                       'isAudio': true,
                       'duration': duration.inSeconds,
@@ -70,7 +72,7 @@ Future<void> handleAudioRecording({
                     'senderInfo': {
                       'userId': 'current_user_id',
                       'timestamp': DateTime.now().millisecondsSinceEpoch,
-                    }
+                    },
                   };
 
                   // 调用回调函数
@@ -80,7 +82,9 @@ Future<void> handleAudioRecording({
                   if (scaffoldMessenger.mounted) {
                     scaffoldMessenger.showSnackBar(
                       SnackBar(
-                        content: Text('已发送语音消息: ${formatDuration(duration)}'),
+                        content: Text(
+                          '${ChatLocalizations.of(context)!.audioRecording}: ${formatDuration(duration)}',
+                        ),
                         duration: const Duration(seconds: 2),
                         behavior: SnackBarBehavior.floating,
                       ),
@@ -91,7 +95,9 @@ Future<void> handleAudioRecording({
                   if (scaffoldMessenger.mounted) {
                     scaffoldMessenger.showSnackBar(
                       SnackBar(
-                        content: Text('处理音频失败: $e'),
+                        content: Text(
+                          '${ChatLocalizations.of(context)!.recordingFailed}: $e',
+                        ),
                         backgroundColor: Colors.red,
                         behavior: SnackBarBehavior.floating,
                       ),
@@ -104,8 +110,8 @@ Future<void> handleAudioRecording({
     }
   } else {
     scaffoldMessenger.showSnackBar(
-      const SnackBar(
-        content: Text('没有录音权限'),
+      SnackBar(
+        content: Text(ChatLocalizations.of(context)!.recordingFailed),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
       ),

@@ -120,7 +120,9 @@ class _EventEditPageState extends State<EventEditPage> {
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
-          title: const Text('选择提醒时间'),
+          title: Text(
+            CalendarLocalizations.getText(context, 'selectReminderTime'),
+          ),
           children:
               items
                   .map(
@@ -145,9 +147,13 @@ class _EventEditPageState extends State<EventEditPage> {
 
   Future<void> _selectEndTime() async {
     if (_endDate == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请先选择日期范围')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            CalendarLocalizations.getText(context, 'selectDateRangeFirst'),
+          ),
+        ),
+      );
       return;
     }
 
@@ -168,9 +174,13 @@ class _EventEditPageState extends State<EventEditPage> {
 
   Future<void> _saveEvent() async {
     if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请输入事件标题')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            CalendarLocalizations.getText(context, 'enterEventTitle'),
+          ),
+        ),
+      );
       return;
     }
 
@@ -188,9 +198,13 @@ class _EventEditPageState extends State<EventEditPage> {
     }
 
     if (endDateTime.isBefore(startDateTime)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('结束时间不能早于开始时间')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            CalendarLocalizations.getText(context, 'endTimeCannotBeEarlier'),
+          ),
+        ),
+      );
       return;
     }
 
@@ -266,7 +280,7 @@ class _EventEditPageState extends State<EventEditPage> {
             ),
             const SizedBox(height: 16),
             ListTile(
-              title: const Text('日期范围'),
+              title: Text(CalendarLocalizations.getText(context, 'dateRange')),
               subtitle: Text(
                 _endDate != null
                     ? '${_startDate.year}-${_startDate.month}-${_startDate.day} 至 ${_endDate!.year}-${_endDate!.month}-${_endDate!.day}'
@@ -275,7 +289,9 @@ class _EventEditPageState extends State<EventEditPage> {
               onTap: _selectDateRange,
             ),
             ListTile(
-              title: const Text('提醒设置'),
+              title: Text(
+                CalendarLocalizations.getText(context, 'reminderSettings'),
+              ),
               subtitle: Text(
                 _reminderMinutes != null
                     ? _getReminderText(_reminderMinutes!)
@@ -296,14 +312,18 @@ class _EventEditPageState extends State<EventEditPage> {
               children: [
                 Expanded(
                   child: ListTile(
-                    title: const Text('开始时间'),
+                    title: Text(
+                      CalendarLocalizations.getText(context, 'startTime'),
+                    ),
                     subtitle: Text(_startTime.format(context)),
                     onTap: _selectStartTime,
                   ),
                 ),
                 Expanded(
                   child: ListTile(
-                    title: const Text('结束时间'),
+                    title: Text(
+                      CalendarLocalizations.getText(context, 'endTime'),
+                    ),
                     subtitle: Text(_endTime?.format(context) ?? '无'),
                     onTap: _selectEndTime,
                   ),

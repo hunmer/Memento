@@ -58,4 +58,14 @@ class CheckinLocalizationsZh extends CheckinLocalizations {
 
   @override
   String get exercise => '运动';
+
+  // 分组排序对话框
+  @override
+  String get groupSortTitle => '分组排序方式';
+
+  @override
+  String get reverseSort => '反向排序';
+
+  @override
+  String get confirm => '确定';
 }

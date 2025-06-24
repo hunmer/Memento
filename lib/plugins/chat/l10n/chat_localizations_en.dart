@@ -201,4 +201,90 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String get smartAgent => 'Smart Agent';
+
+  // Message options dialog
+  @override
+  String get messageOptions => 'Message Options';
+  @override
+  String get addEmoji => 'Add Emoji';
+  @override
+  String get settings => 'Settings';
+  @override
+  String get editMessage => 'Edit Message';
+  @override
+  String get save => 'Save';
+  @override
+  String get deleteMessage => 'Delete Message';
+  @override
+  String get deleteMessageConfirmation =>
+      'Are you sure you want to delete this message? This action cannot be undone.';
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+  @override
+  String get createChannelFailed => 'Failed to create channel: \$e';
+  @override
+  String get noMessagesYet => 'No messages yet';
+  @override
+  String get noMessagesFound => 'No messages found for';
+
+  // New strings implementations
+  @override
+  String get copiedSelectedMessages => 'Selected messages copied';
+  @override
+  String get aiAssistantNotFound => 'Corresponding AI assistant not found';
+  @override
+  String get aiMessages => 'AI Messages';
+  @override
+  String get filterAiMessages => 'Filter messages created by AI';
+  @override
+  String get favoriteMessages => 'Favorite Messages';
+  @override
+  String get showOnlyFavorites => 'Show only favorited messages';
+  @override
+  String get recordingFailed => 'Recording failed';
+  @override
+  String get gotIt => 'Got it';
+  @override
+  String get recordingStopError =>
+      'An error occurred while stopping recording. The recording may not have been saved.';
+  @override
+  String get selectDate => 'Select Date';
+  @override
+  String get invalidAudioMessage => 'Invalid audio message';
+  @override
+  String get fileNotAccessible => 'File does not exist or is not accessible';
+  @override
+  String get fileProcessingFailed =>
+      'File processing failed: \$processingError';
+  @override
+  String get fileSelectionFailed => 'File selection failed: \$e';
+  @override
+  String get fileSelected => 'File selected: \${fileMessage.originalFileName}';
+  @override
+  String get imageNotExist => 'Image file does not exist';
+  @override
+  String get imageProcessingFailed => 'Image processing failed: \$e';
+  @override
+  String get imageSelectionFailed => 'Image selection failed: \$e';
+  @override
+  String get clearAllMessages => 'Clear All Messages';
+  @override
+  String get confirmClearAllMessages =>
+      'Are you sure you want to clear all messages? This action cannot be undone.';
+  @override
+  String get videoNotSupportedOnWeb =>
+      'Video recording is not supported on Web platform';
+  @override
+  String get videoNotExist => 'Video file does not exist';
+  @override
+  String get videoProcessingFailed =>
+      'Video processing failed: \$processingError';
+  @override
+  String get videoSelectionFailed => 'Video selection failed: \$e';
+  @override
+  String get videoSent => 'Video sent: \${path.basename(video.path)}';
+  @override
+  String get videoRecordingFailed => 'Video recording failed: \$e';
+  @override
+  String get channelCreationFailed => 'Failed to create channel: \$e';
 }

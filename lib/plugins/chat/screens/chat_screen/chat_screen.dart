@@ -1,6 +1,7 @@
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/event.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
@@ -266,9 +267,11 @@ class _ChatScreenState extends State<ChatScreen> {
         .join('\n\n');
 
     Clipboard.setData(ClipboardData(text: textToCopy));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('已复制所选消息')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ChatLocalizations.of(context)!.copiedSelectedMessages),
+      ),
+    );
 
     _controller.toggleMultiSelectMode();
   }
@@ -587,8 +590,12 @@ class _ChatScreenState extends State<ChatScreen> {
                                         ScaffoldMessenger.of(
                                           context,
                                         ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('找不到对应的AI助手'),
+                                          SnackBar(
+                                            content: Text(
+                                              ChatLocalizations.of(
+                                                context,
+                                              )!.aiAssistantNotFound,
+                                            ),
                                           ),
                                         );
                                       }

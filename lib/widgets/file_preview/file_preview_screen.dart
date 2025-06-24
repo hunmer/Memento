@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as FilePreviewLocalizations;
 import 'package:photo_view/photo_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as path;
@@ -84,9 +85,13 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
       debugPrint('文件路径: $_absoluteFilePath');
       if (!fileExists) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('文件不存在或无法访问')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                FilePreviewLocalizations.get(context, 'fileNotExist'),
+              ),
+            ),
+          );
           // 清空文件路径，这样 _buildPreviewContent 会显示错误界面
           setState(() {
             _absoluteFilePath = '';
@@ -100,9 +105,14 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('文件路径解析错误: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              FilePreviewLocalizations.get(context, 'filePathError') +
+                  e.toString(),
+            ),
+          ),
+        );
         // 出错时也清空文件路径
         setState(() {
           _absoluteFilePath = '';
@@ -136,16 +146,25 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
         ], text: '分享文件：${widget.fileName}');
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('文件不存在')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                FilePreviewLocalizations.get(context, 'fileNotExist'),
+              ),
+            ),
+          );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('分享失败：$e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              FilePreviewLocalizations.get(context, 'shareFailed') +
+                  e.toString(),
+            ),
+          ),
+        );
       }
     }
   }
@@ -160,21 +179,37 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
             context: context,
             builder:
                 (context) => AlertDialog(
-                  title: const Text('文件信息'),
+                  title: Text(
+                    FilePreviewLocalizations.get(context, 'fileInfo'),
+                  ),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('文件名：${widget.fileName}'),
-                      Text('路径：$_absoluteFilePath'),
-                      Text('大小：${_formatFileSize(widget.fileSize)}'),
-                      Text('类型：${widget.mimeType}'),
+                      Text(
+                        FilePreviewLocalizations.get(context, 'fileName') +
+                            widget.fileName,
+                      ),
+                      Text(
+                        FilePreviewLocalizations.get(context, 'filePath') +
+                            _absoluteFilePath,
+                      ),
+                      Text(
+                        FilePreviewLocalizations.get(context, 'fileSize') +
+                            _formatFileSize(widget.fileSize),
+                      ),
+                      Text(
+                        FilePreviewLocalizations.get(context, 'fileType') +
+                            widget.mimeType,
+                      ),
                     ],
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('确定'),
+                      child: Text(
+                        FilePreviewLocalizations.get(context, 'confirm'),
+                      ),
                     ),
                   ],
                 ),
@@ -184,16 +219,25 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('文件不存在')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                FilePreviewLocalizations.get(context, 'fileNotExist'),
+              ),
+            ),
+          );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('操作失败：$e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              FilePreviewLocalizations.get(context, 'operationFailed') +
+                  e.toString(),
+            ),
+          ),
+        );
       }
     }
   }
@@ -214,10 +258,13 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: 16),
-            Text('无法加载文件', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              FilePreviewLocalizations.get(context, 'cannotLoadFile'),
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 8),
             Text(
-              '文件路径解析失败或文件不存在',
+              FilePreviewLocalizations.get(context, 'fileNotExist'),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -260,7 +307,9 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
                     color: Theme.of(context).colorScheme.error,
                   ),
                   const SizedBox(height: 16),
-                  Text('图片加载失败'),
+                  Text(
+                    FilePreviewLocalizations.get(context, 'imageLoadFailed'),
+                  ),
                 ],
               ),
             ),
@@ -279,17 +328,22 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
                 color: Theme.of(context).colorScheme.error,
               ),
               const SizedBox(height: 16),
-              Text('视频加载失败', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                FilePreviewLocalizations.get(context, 'videoLoadFailed'),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 8),
               Text(
-                '无法播放此视频，可能是格式不支持或文件损坏',
+                FilePreviewLocalizations.get(context, 'videoPlayFailed'),
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _shareFile,
-                child: const Text('尝试使用其他应用打开'),
+                child: Text(
+                  FilePreviewLocalizations.get(context, 'tryOpenWithOtherApp'),
+                ),
               ),
             ],
           ),

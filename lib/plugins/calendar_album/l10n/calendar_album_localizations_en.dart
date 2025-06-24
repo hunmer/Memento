@@ -38,5 +38,8 @@ class CalendarAlbumLocalizationsEn {
     'tagColor': 'Tag Color',
     'noTags': 'No tags available',
     'noPhotos': 'No photos available',
+    'calendarDiary': 'Calendar Diary',
+    'tagManagement': 'Tag Management',
+    'confirm': 'Confirm',
   };
 }

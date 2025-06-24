@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/tag_manager_localizations.dart';
 
 class DialogActions extends StatelessWidget {
   final int selectedCount;
@@ -24,18 +25,20 @@ class DialogActions extends StatelessWidget {
         TextButton.icon(
           onPressed: enableClear ? onClear : null,
           icon: const Icon(Icons.clear_all),
-          label: Text('清空 $selectedCount 选中'),
+          label: Text(
+            '${TagManagerLocalizations.of(context, 'clearSelected').replaceFirst('\$selectedCount', selectedCount as String)}',
+          ),
         ),
         Row(
           children: [
             TextButton(
               onPressed: onCancel,
-              child: const Text('取消'),
+              child: Text(TagManagerLocalizations.of(context, 'cancel')),
             ),
             const SizedBox(width: 8),
             ElevatedButton(
               onPressed: onConfirm,
-              child: const Text('确认'),
+              child: Text(TagManagerLocalizations.of(context, 'confirm')),
             ),
           ],
         ),

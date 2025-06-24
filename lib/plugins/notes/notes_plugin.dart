@@ -120,7 +120,10 @@ class NotesPlugin extends BasePlugin {
                   // 七日笔记数
                   Column(
                     children: [
-                      Text('七日笔记数', style: theme.textTheme.bodyMedium),
+                      Text(
+                        NotesLocalizations.of(context)!.recentNotes,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '$recentNotes',
                         style: theme.textTheme.bodyMedium?.copyWith(

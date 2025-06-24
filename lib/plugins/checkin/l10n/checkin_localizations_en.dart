@@ -41,7 +41,8 @@ class CheckinLocalizationsEn extends CheckinLocalizations {
   String get confirmDelete => 'Confirm Delete';
 
   @override
-  String get deleteConfirmMessage => 'Are you sure you want to delete this check-in item?';
+  String get deleteConfirmMessage =>
+      'Are you sure you want to delete this check-in item?';
 
   @override
   String get checkinRecords => 'Check-in Records';
@@ -58,4 +59,14 @@ class CheckinLocalizationsEn extends CheckinLocalizations {
 
   @override
   String get exercise => 'Exercise';
+
+  // 分组排序对话框
+  @override
+  String get groupSortTitle => 'Group Sorting';
+
+  @override
+  String get reverseSort => 'Reverse Sort';
+
+  @override
+  String get confirm => 'Confirm';
 }

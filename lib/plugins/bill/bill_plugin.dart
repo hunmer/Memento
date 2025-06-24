@@ -1,4 +1,5 @@
 import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
@@ -120,7 +121,10 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                   // 今日财务
                   Column(
                     children: [
-                      Text('今日财务', style: theme.textTheme.bodyMedium),
+                      Text(
+                        BillLocalizations.getText(context, 'todayFinance'),
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '¥${_billController.getTodayFinance().toStringAsFixed(2)}',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -137,7 +141,10 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                   // 本月财务
                   Column(
                     children: [
-                      Text('本月财务', style: theme.textTheme.bodyMedium),
+                      Text(
+                        BillLocalizations.getText(context, 'monthFinance'),
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '¥${_billController.getMonthFinance().toStringAsFixed(2)}',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -160,7 +167,10 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                 children: [
                   Column(
                     children: [
-                      Text('本月记账', style: theme.textTheme.bodyMedium),
+                      Text(
+                        BillLocalizations.getText(context, 'monthBills'),
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${_billController.getMonthBillCount()} 笔',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -256,7 +266,9 @@ class _BillMainViewState extends State<BillMainView> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => PluginManager.toHomeScreen(context),
           ),
-          title: Text('${billPlugin.selectedAccount?.title}'),
+          title: Text(
+            '${billPlugin.selectedAccount?.title ?? BillLocalizations.getText(context, 'accountTitle')}',
+          ),
           bottom: const TabBar(tabs: [Tab(text: '账单列表'), Tab(text: '统计分析')]),
           actions: [
             IconButton(

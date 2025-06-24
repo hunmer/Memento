@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/ai_agent.dart';
+import '../l10n/openai_localizations.dart';
 
 class PromptEditor extends StatefulWidget {
   final List<Prompt> prompts;
@@ -54,6 +55,7 @@ class _PromptEditorState extends State<PromptEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final i10n = OpenAILocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -72,22 +74,22 @@ class _PromptEditorState extends State<PromptEditor> {
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: prompt.type,
-                          decoration: const InputDecoration(
-                            labelText: 'Prompt Type',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: i10n.promptTypeLabel,
+                            border: const OutlineInputBorder(),
                           ),
                           items: const [
                             DropdownMenuItem(
                               value: 'system',
-                              child: Text('System'),
+                              child: Text(i10n.systemRole),
                             ),
                             DropdownMenuItem(
                               value: 'user',
-                              child: Text('User'),
+                              child: Text(i10n.userRole),
                             ),
                             DropdownMenuItem(
                               value: 'assistant',
-                              child: Text('Assistant'),
+                              child: Text(i10n.assistantRole),
                             ),
                           ],
                           onChanged: (value) {
@@ -107,9 +109,9 @@ class _PromptEditorState extends State<PromptEditor> {
                   const SizedBox(height: 8),
                   TextFormField(
                     initialValue: prompt.content,
-                    decoration: const InputDecoration(
-                      labelText: 'Content',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: i10n.contentLabel,
+                      border: const OutlineInputBorder(),
                     ),
                     maxLines: 3,
                     onChanged: (value) => _updatePromptContent(index, value),
@@ -123,7 +125,7 @@ class _PromptEditorState extends State<PromptEditor> {
         OutlinedButton.icon(
           onPressed: _addPrompt,
           icon: const Icon(Icons.add),
-          label: const Text('Add Prompt'),
+          label: Text(i10n.addPrompt),
         ),
       ],
     );

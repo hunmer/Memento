@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
@@ -79,7 +80,9 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
                   foregroundColor: Colors.white,
                 ),
                 icon: const Icon(Icons.delete),
-                label: const Text('删除账户'),
+                label: Text(
+                  BillLocalizations.getText(context, 'deleteAccount'),
+                ),
                 onPressed: _deleteAccount,
               ),
             ],
@@ -92,9 +95,11 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
   void _saveAccount() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请输入账户名称')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(BillLocalizations.getText(context, 'enterAccountName')),
+        ),
+      );
       return;
     }
 
@@ -150,15 +155,20 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认删除'),
-            content: const Text('删除账户将同时删除所有账单记录，确定要删除吗？'),
+            title: Text(BillLocalizations.getText(context, 'confirmDelete')),
+            content: Text(
+              BillLocalizations.getText(
+                context,
+                'confirmDeleteAccountWithBills',
+              ),
+            ),
             actions: [
               TextButton(
-                child: const Text('取消'),
+                child: Text(BillLocalizations.getText(context, 'cancel')),
                 onPressed: () => Navigator.pop(context, false),
               ),
               TextButton(
-                child: const Text('删除'),
+                child: Text(BillLocalizations.getText(context, 'delete')),
                 onPressed: () => Navigator.pop(context, true),
               ),
             ],

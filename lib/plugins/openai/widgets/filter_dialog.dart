@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import '../openai_plugin.dart';
 import '../controllers/provider_controller.dart';
@@ -48,14 +49,17 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Filter Agents'),
+      title: Text(OpenAILocalizations.of(context).filterAgents),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('服务商', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              OpenAILocalizations.of(context).serviceProvider,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -78,7 +82,10 @@ class _FilterDialogState extends State<FilterDialog> {
                   }).toList(),
             ),
             const SizedBox(height: 16),
-            const Text('Tags', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              OpenAILocalizations.of(context).tags,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -106,14 +113,14 @@ class _FilterDialogState extends State<FilterDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(OpenAILocalizations.of(context).cancel),
         ),
         TextButton(
           onPressed: () {
             widget.onApply(_selectedProviders, _selectedTags);
             Navigator.pop(context);
           },
-          child: const Text('Apply'),
+          child: Text(OpenAILocalizations.of(context).apply),
         ),
       ],
     );

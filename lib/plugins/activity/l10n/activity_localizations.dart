@@ -14,17 +14,22 @@ abstract class ActivityLocalizations {
   final String localeName;
 
   static ActivityLocalizations? of(BuildContext context) {
-    return Localizations.of<ActivityLocalizations>(context, ActivityLocalizations);
+    return Localizations.of<ActivityLocalizations>(
+      context,
+      ActivityLocalizations,
+    );
   }
 
-  static const LocalizationsDelegate<ActivityLocalizations> delegate = _ActivityLocalizationsDelegate();
+  static const LocalizationsDelegate<ActivityLocalizations> delegate =
+      _ActivityLocalizationsDelegate();
 
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
@@ -34,16 +39,16 @@ abstract class ActivityLocalizations {
   // Plugin information
   String get activityPluginName;
   String get activityPluginDescription;
-  
+
   // Navigation and titles
   String get timeline;
   String get statistics;
-  
+
   // Card view labels
   String get todayActivities;
   String get todayDuration;
   String get remainingTime;
-  
+
   // Activity form
   String get startTime;
   String get endTime;
@@ -55,31 +60,43 @@ abstract class ActivityLocalizations {
   String get save;
   String get mood;
   String get cancel;
-  
+
   // Timeline screen
   String get addActivity;
   String get editActivity;
   String get deleteActivity;
   String get confirmDelete;
   String get noActivities;
-  
+
   // Time formatting
   String get today;
   String get yesterday;
   String hoursFormat(double hours);
   String minutesFormat(int minutes);
+
+  // New translations
+  String get loadingFailed;
+  String get noData;
+  String get noActivityTimeData;
+  String get close;
+  String get inputMood;
+  String get confirm;
 }
 
-class _ActivityLocalizationsDelegate extends LocalizationsDelegate<ActivityLocalizations> {
+class _ActivityLocalizationsDelegate
+    extends LocalizationsDelegate<ActivityLocalizations> {
   const _ActivityLocalizationsDelegate();
 
   @override
   Future<ActivityLocalizations> load(Locale locale) {
-    return SynchronousFuture<ActivityLocalizations>(lookupActivityLocalizations(locale));
+    return SynchronousFuture<ActivityLocalizations>(
+      lookupActivityLocalizations(locale),
+    );
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_ActivityLocalizationsDelegate old) => false;
@@ -87,12 +104,14 @@ class _ActivityLocalizationsDelegate extends LocalizationsDelegate<ActivityLocal
 
 ActivityLocalizations lookupActivityLocalizations(Locale locale) {
   switch (locale.languageCode) {
-    case 'en': return ActivityLocalizationsEn();
-    case 'zh': return ActivityLocalizationsZh();
+    case 'en':
+      return ActivityLocalizationsEn();
+    case 'zh':
+      return ActivityLocalizationsZh();
   }
 
   throw FlutterError(
     'ActivityLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localization\'s implementation.'
+    'an issue with the localization\'s implementation.',
   );
 }

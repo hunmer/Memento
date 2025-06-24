@@ -201,4 +201,84 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String get smartAgent => '智能体';
+
+  // 消息选项对话框
+  @override
+  String get messageOptions => '消息选项';
+  @override
+  String get addEmoji => '添加表情';
+  @override
+  String get settings => '设置';
+  @override
+  String get editMessage => '编辑消息';
+  @override
+  String get save => '保存';
+  @override
+  String get deleteMessage => '删除消息';
+  @override
+  String get deleteMessageConfirmation => '确定要删除这条消息吗？此操作不可撤销。';
+  @override
+  String get copiedToClipboard => '已复制到剪贴板';
+  @override
+  String get createChannelFailed => '创建频道失败: \$e';
+  @override
+  String get noMessagesYet => '暂无消息';
+  @override
+  String get noMessagesFound => '没有找到匹配的消息';
+
+  // 新增字符串实现
+  @override
+  String get copiedSelectedMessages => '已复制所选消息';
+  @override
+  String get aiAssistantNotFound => '找不到对应的AI助手';
+  @override
+  String get aiMessages => 'AI消息';
+  @override
+  String get filterAiMessages => '筛选AI创建的消息';
+  @override
+  String get favoriteMessages => '收藏的消息';
+  @override
+  String get showOnlyFavorites => '仅显示收藏的消息';
+  @override
+  String get recordingFailed => '录音失败';
+  @override
+  String get gotIt => '知道了';
+  @override
+  String get recordingStopError => '停止录音时出现错误，录音可能未能保存。';
+  @override
+  String get selectDate => '选择日期';
+  @override
+  String get invalidAudioMessage => '无效的音频消息';
+  @override
+  String get fileNotAccessible => '文件不存在或无法访问';
+  @override
+  String get fileProcessingFailed => '处理文件失败: \$processingError';
+  @override
+  String get fileSelectionFailed => '选择文件失败: \$e';
+  @override
+  String get fileSelected => '已选择文件: \${fileMessage.originalFileName}';
+  @override
+  String get imageNotExist => '图片文件不存在';
+  @override
+  String get imageProcessingFailed => '处理图片失败: \$e';
+  @override
+  String get imageSelectionFailed => '选择图片失败: \$e';
+  @override
+  String get clearAllMessages => '清空消息';
+  @override
+  String get confirmClearAllMessages => '确定要清空所有消息吗？此操作不可撤销。';
+  @override
+  String get videoNotSupportedOnWeb => 'Web平台不支持视频拍摄功能';
+  @override
+  String get videoNotExist => '视频文件不存在';
+  @override
+  String get videoProcessingFailed => '处理视频失败: \$processingError';
+  @override
+  String get videoSelectionFailed => '选择视频失败: \$e';
+  @override
+  String get videoSent => '已发送视频: \${path.basename(video.path)}';
+  @override
+  String get videoRecordingFailed => '拍摄视频失败: \$e';
+  @override
+  String get channelCreationFailed => '创建频道失败: \$e';
 }

@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import '../bill_plugin.dart';
 import '../models/bill.dart';
@@ -123,7 +124,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('保存成功'),
+                          content: Text(
+                            BillLocalizations.getText(context, 'saveSuccess'),
+                          ),
                           backgroundColor: Colors.green,
                         ),
                       );
@@ -136,7 +139,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('保存失败: $e'),
+                          content: Text(
+                            '${BillLocalizations.getText(context, 'saveFailed')}: $e',
+                          ),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -186,12 +191,12 @@ class _BillEditScreenState extends State<BillEditScreen> {
             segments: const [
               ButtonSegment<bool>(
                 value: true,
-                label: Text('支出'),
+                label: Text(BillLocalizations.getText(context, 'expense')),
                 icon: Icon(Icons.arrow_upward),
               ),
               ButtonSegment<bool>(
                 value: false,
-                label: Text('收入'),
+                label: Text(BillLocalizations.getText(context, 'income')),
                 icon: Icon(Icons.arrow_downward),
               ),
             ],

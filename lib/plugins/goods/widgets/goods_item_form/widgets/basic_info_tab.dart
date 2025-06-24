@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import '../../../../../widgets/circle_icon_picker.dart';
@@ -52,14 +53,14 @@ class BasicInfoTab extends StatelessWidget {
             const SizedBox(height: 16),
             TextFormField(
               controller: controller.nameController,
-              decoration: const InputDecoration(
-                labelText: '商品名称',
-                hintText: '输入商品名称',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: GoodsLocalizations.of(context)!.productName,
+                hintText: GoodsLocalizations.of(context)!.enterProductName,
+                border: const OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return '请输入商品名称';
+                  return GoodsLocalizations.of(context)!.pleaseEnterProductName;
                 }
                 return null;
               },
@@ -67,10 +68,11 @@ class BasicInfoTab extends StatelessWidget {
             const SizedBox(height: 16),
             TextFormField(
               controller: controller.descriptionController,
-              decoration: const InputDecoration(
-                labelText: '商品描述',
-                hintText: '输入商品描述',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: GoodsLocalizations.of(context)!.productDescription,
+                hintText:
+                    GoodsLocalizations.of(context)!.enterProductDescription,
+                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
@@ -228,17 +230,19 @@ class BasicInfoTab extends StatelessWidget {
           barrierDismissible: false,
           builder:
               (context) => AlertDialog(
-                title: const Text('确认删除'),
-                content: const Text('确定要删除这个物品吗？此操作不可恢复。'),
+                title: Text(GoodsLocalizations.of(context)!.confirmDelete),
+                content: Text(
+                  GoodsLocalizations.of(context)!.confirmDeleteItem,
+                ),
                 actions: [
                   TextButton(
-                    child: const Text('取消'),
+                    child: Text(GoodsLocalizations.of(context)!.cancel),
                     onPressed: () => Navigator.pop(context),
                   ),
                   TextButton(
-                    child: const Text(
-                      '删除',
-                      style: TextStyle(color: Colors.red),
+                    child: Text(
+                      GoodsLocalizations.of(context)!.delete,
+                      style: const TextStyle(color: Colors.red),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
@@ -254,7 +258,7 @@ class BasicInfoTab extends StatelessWidget {
         foregroundColor: Colors.red,
         side: const BorderSide(color: Colors.red),
       ),
-      child: const Text('删除商品'),
+      child: Text(GoodsLocalizations.of(context)!.deleteProduct),
     );
   }
 
@@ -322,7 +326,9 @@ class BasicInfoTab extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('选择图片失败: ${e.toString()}'),
+            content: Text(
+              GoodsLocalizations.of(context)!.selectImageFailed(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
