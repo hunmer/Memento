@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/services/shortcut_manager.dart';
 import 'package:Memento/core/utils/logger_util.dart';
-import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
@@ -24,7 +23,6 @@ import 'plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
-import 'screens/home_screen/home_screen.dart';
 import 'screens/route.dart';
 
 import 'plugins/chat/chat_plugin.dart'; // 聊天插件
@@ -94,7 +92,7 @@ void main() async {
     // 注册内置插件
     final plugins = [
       ChatPlugin(),
-      OpenAIPlugin(), // 添加OpenAI插件
+      OpenAIPlugin(),
       DiaryPlugin(),
       ActivityPlugin(),
       CheckinPlugin(),
@@ -179,10 +177,7 @@ class _MyAppState extends State<MyApp> {
 
     final updateController = AutoUpdateController.instance;
     updateController.context = context;
-
     final hasUpdate = await updateController.checkForUpdates();
-    if (!mounted) return;
-
     if (hasUpdate) {
       updateController.showUpdateDialog(skipCheck: true);
     }
@@ -214,10 +209,7 @@ class _MyAppState extends State<MyApp> {
         Locale('zh', ''), // 中文
         Locale('en', ''), // 英文
       ],
-      locale:
-          globalConfigManager.getLocale() ??
-          const Locale('en', ''), // 使用保存的语言设置，默认英文
-
+      locale: globalConfigManager.getLocale() ?? const Locale('zh', ''),
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
