@@ -8,11 +8,11 @@ class FilterDialog extends StatefulWidget {
   final Function(FilterConfig) onApply;
 
   const FilterDialog({
-    Key? key,
+    super.key,
     required this.initialFilter,
     required this.availableTags,
     required this.onApply,
-  }) : super(key: key);
+  });
 
   @override
   State<FilterDialog> createState() => _FilterDialogState();
@@ -28,7 +28,9 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.initialFilter.nameKeyword);
+    _nameController = TextEditingController(
+      text: widget.initialFilter.nameKeyword,
+    );
     _startDate = widget.initialFilter.startDate;
     _endDate = widget.initialFilter.endDate;
     _uncontactedDays = widget.initialFilter.uncontactedDays;
@@ -125,9 +127,11 @@ class _FilterDialogState extends State<FilterDialog> {
                   child: TextButton.icon(
                     onPressed: _selectStartDate,
                     icon: const Icon(Icons.calendar_today),
-                    label: Text(_startDate == null
-                        ? '开始日期'
-                        : '${_startDate!.year}-${_startDate!.month}-${_startDate!.day}'),
+                    label: Text(
+                      _startDate == null
+                          ? '开始日期'
+                          : '${_startDate!.year}-${_startDate!.month}-${_startDate!.day}',
+                    ),
                   ),
                 ),
                 const Text(' - '),
@@ -135,9 +139,11 @@ class _FilterDialogState extends State<FilterDialog> {
                   child: TextButton.icon(
                     onPressed: _selectEndDate,
                     icon: const Icon(Icons.calendar_today),
-                    label: Text(_endDate == null
-                        ? '结束日期'
-                        : '${_endDate!.year}-${_endDate!.month}-${_endDate!.day}'),
+                    label: Text(
+                      _endDate == null
+                          ? '结束日期'
+                          : '${_endDate!.year}-${_endDate!.month}-${_endDate!.day}',
+                    ),
                   ),
                 ),
               ],
@@ -149,9 +155,10 @@ class _FilterDialogState extends State<FilterDialog> {
               min: 0,
               max: 365,
               divisions: 73,
-              label: _uncontactedDays == null || _uncontactedDays == 0
-                  ? '不限'
-                  : '$_uncontactedDays 天',
+              label:
+                  _uncontactedDays == null || _uncontactedDays == 0
+                      ? '不限'
+                      : '$_uncontactedDays 天',
               onChanged: (value) {
                 setState(() {
                   _uncontactedDays = value == 0 ? null : value.toInt();
@@ -163,22 +170,20 @@ class _FilterDialogState extends State<FilterDialog> {
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
-              children: widget.availableTags.map((tag) {
-                return FilterChip(
-                  label: Text(tag),
-                  selected: _selectedTags.contains(tag),
-                  onSelected: (selected) => _toggleTag(tag),
-                );
-              }).toList(),
+              children:
+                  widget.availableTags.map((tag) {
+                    return FilterChip(
+                      label: Text(tag),
+                      selected: _selectedTags.contains(tag),
+                      onSelected: (selected) => _toggleTag(tag),
+                    );
+                  }).toList(),
             ),
           ],
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: _resetFilters,
-          child: const Text('重置'),
-        ),
+        TextButton(onPressed: _resetFilters, child: const Text('重置')),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(ContactStrings.cancel),

@@ -8,7 +8,7 @@ import 'controls/prompt_controller.dart';
 
 /// 纪念日插件主视图
 class DayMainView extends StatefulWidget {
-  const DayMainView();
+  const DayMainView({super.key});
   @override
   State<DayMainView> createState() => _DayMainViewState();
 }
@@ -80,7 +80,6 @@ class DayPlugin extends BasePlugin {
   // 获取即将到来的纪念日（7天内）
   List<String> getUpcomingMemorialDays() {
     if (!_isInitialized) return [];
-    final now = DateTime.now();
     return _controller.memorialDays
         .where((day) {
           final daysRemaining = day.daysRemaining;

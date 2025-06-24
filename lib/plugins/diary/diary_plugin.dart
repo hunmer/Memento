@@ -1,4 +1,3 @@
-import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -34,7 +33,7 @@ class DiaryEntryDeletedEventArgs extends EventArgs {
 
 /// 日记插件主视图
 class DiaryMainView extends StatefulWidget {
-  const DiaryMainView();
+  const DiaryMainView({super.key});
   @override
   State<DiaryMainView> createState() => _DiaryMainViewState();
 }

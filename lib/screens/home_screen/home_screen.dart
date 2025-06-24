@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   late Future<List<PluginBase>> _pluginsFuture;
   final CardSizeManager _cardSizeManager = CardSizeManager();
   final PluginOrderManager _pluginOrderManager = PluginOrderManager();
-  bool _isReorderMode = false;
+  final bool _isReorderMode = false;
 
   // 是否是首次加载，使用静态变量确保在热重载时保持状态
   static bool _hasInitialized = false;

@@ -12,12 +12,12 @@ class InteractionForm extends StatefulWidget {
   final ContactController controller;
 
   const InteractionForm({
-    Key? key,
+    super.key,
     required this.contactId,
     this.interaction,
     required this.onSave,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   State<InteractionForm> createState() => _InteractionFormState();
@@ -34,7 +34,9 @@ class _InteractionFormState extends State<InteractionForm> {
   void initState() {
     super.initState();
     _selectedDate = widget.interaction?.date ?? DateTime.now();
-    _notesController = TextEditingController(text: widget.interaction?.notes ?? '');
+    _notesController = TextEditingController(
+      text: widget.interaction?.notes ?? '',
+    );
     _selectedParticipantIds = widget.interaction?.participants ?? [];
     _loadParticipants();
   }
@@ -47,7 +49,7 @@ class _InteractionFormState extends State<InteractionForm> {
 
   Future<void> _loadParticipants() async {
     if (_selectedParticipantIds.isEmpty) return;
-    
+
     final List<Contact> participants = [];
     for (final id in _selectedParticipantIds) {
       final contact = await widget.controller.getContact(id);
@@ -55,7 +57,7 @@ class _InteractionFormState extends State<InteractionForm> {
         participants.add(contact);
       }
     }
-    
+
     setState(() {
       _participants = participants;
     });
@@ -68,7 +70,7 @@ class _InteractionFormState extends State<InteractionForm> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    
+
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = DateTime(
@@ -87,7 +89,7 @@ class _InteractionFormState extends State<InteractionForm> {
       context: context,
       initialTime: TimeOfDay.fromDateTime(_selectedDate),
     );
-    
+
     if (picked != null) {
       setState(() {
         _selectedDate = DateTime(
@@ -104,17 +106,18 @@ class _InteractionFormState extends State<InteractionForm> {
   void _showContactSelector() async {
     await showDialog(
       context: context,
-      builder: (context) => ContactSelector(
-        controller: widget.controller,
-        selectedContactIds: _selectedParticipantIds,
-        onContactsSelected: (selectedIds) {
-          setState(() {
-            _selectedParticipantIds = selectedIds;
-            _loadParticipants();
-          });
-        },
-        excludeContactId: widget.contactId,
-      ),
+      builder:
+          (context) => ContactSelector(
+            controller: widget.controller,
+            selectedContactIds: _selectedParticipantIds,
+            onContactsSelected: (selectedIds) {
+              setState(() {
+                _selectedParticipantIds = selectedIds;
+                _loadParticipants();
+              });
+            },
+            excludeContactId: widget.contactId,
+          ),
     );
   }
 
@@ -134,7 +137,7 @@ class _InteractionFormState extends State<InteractionForm> {
         notes: _notesController.text,
         participants: _selectedParticipantIds,
       );
-      
+
       widget.onSave(interaction);
       Navigator.of(context).pop();
     }
@@ -157,7 +160,7 @@ class _InteractionFormState extends State<InteractionForm> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              
+
               // 日期和时间选择
               Row(
                 children: [
@@ -195,7 +198,7 @@ class _InteractionFormState extends State<InteractionForm> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // 备注输入
               TextFormField(
                 controller: _notesController,
@@ -207,15 +210,12 @@ class _InteractionFormState extends State<InteractionForm> {
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
-              
+
               // 其他参与者
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '其他参与者',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text('其他参与者', style: Theme.of(context).textTheme.titleMedium),
                   IconButton(
                     icon: const Icon(Icons.person_add),
                     onPressed: _showContactSelector,
@@ -224,15 +224,15 @@ class _InteractionFormState extends State<InteractionForm> {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               if (_participants.isNotEmpty)
                 ContactChips(
                   contacts: _participants,
                   onDelete: _removeParticipant,
                 ),
-              
+
               const SizedBox(height: 24),
-              
+
               // 按钮
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

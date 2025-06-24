@@ -3,7 +3,6 @@ import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';
-import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
 
 // 插件路由导入

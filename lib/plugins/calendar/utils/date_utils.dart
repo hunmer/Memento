@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../models/event.dart';
 
 class CalendarDateUtils {
@@ -7,13 +6,10 @@ class CalendarDateUtils {
     final first = DateTime(month.year, month.month, 1);
     final daysBefore = first.weekday % 7;
     final firstToDisplay = first.subtract(Duration(days: daysBefore));
-    
-    // 获取当月的天数
-    final lastDay = DateTime(month.year, month.month + 1, 0).day;
-    
+
     // 总共显示6周，确保日历网格填满
     final daysToGenerate = 42; // 6行 x 7列
-    
+
     return List.generate(daysToGenerate, (index) {
       return firstToDisplay.add(Duration(days: index));
     });
@@ -30,21 +26,24 @@ class CalendarDateUtils {
   }
 
   /// 获取指定日期的所有事件
-  static List<CalendarEvent> getEventsForDay(List<CalendarEvent> events, DateTime day) {
+  static List<CalendarEvent> getEventsForDay(
+    List<CalendarEvent> events,
+    DateTime day,
+  ) {
     return events.where((event) {
       // 检查是否是同一天
       final isSameStartDay = isSameDay(event.startTime, day);
-      
+
       // 处理跨天事件
-      final bool isMultiDayEvent = event.endTime != null && 
-          !isSameDay(event.startTime, event.endTime!);
-      
+      final bool isMultiDayEvent =
+          event.endTime != null && !isSameDay(event.startTime, event.endTime!);
+
       if (isMultiDayEvent) {
         // 检查day是否在事件的开始和结束日期之间
-        return day.isAfter(event.startTime.subtract(const Duration(days: 1))) && 
-               day.isBefore(event.endTime!.add(const Duration(days: 1)));
+        return day.isAfter(event.startTime.subtract(const Duration(days: 1))) &&
+            day.isBefore(event.endTime!.add(const Duration(days: 1)));
       }
-      
+
       return isSameStartDay;
     }).toList();
   }
@@ -52,15 +51,15 @@ class CalendarDateUtils {
   /// 格式化时间显示
   static String formatTimeRange(DateTime start, DateTime? end) {
     final startFormat = '${_formatDate(start)} ${_formatTime(start)}';
-    
+
     if (end == null) {
       return startFormat;
     }
-    
+
     if (isSameDay(start, end)) {
       return '$startFormat - ${_formatTime(end)}';
     }
-    
+
     return '$startFormat - ${_formatDate(end)} ${_formatTime(end)}';
   }
 

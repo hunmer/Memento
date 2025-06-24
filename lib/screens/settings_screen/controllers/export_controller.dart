@@ -1,19 +1,15 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:Memento/core/utils/zip.dart';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
-import 'package:universal_platform/universal_platform.dart';
 import '../../../main.dart';
 import '../../../core/utils/file_utils.dart';
 import '../widgets/plugin_selection_dialog.dart';
-import 'permission_controller.dart';
 
 class ExportController {
   BuildContext? _context;
-  bool _mounted = true;
+  final bool _mounted = true;
 
   ExportController(BuildContext context) {
     initialize(context);

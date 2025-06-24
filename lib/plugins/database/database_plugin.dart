@@ -8,7 +8,7 @@ import './widgets/database_list_widget.dart';
 
 /// 数据库插件主视图
 class DatabaseMainView extends StatefulWidget {
-  const DatabaseMainView();
+  const DatabaseMainView({super.key});
   @override
   State<DatabaseMainView> createState() => _DatabaseMainViewState();
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../models/plugin_analysis_method.dart';
-import '../services/plugin_analysis_service.dart';
 import '../l10n/openai_localizations.dart';
 
 class PluginAnalysisForm extends StatefulWidget {
@@ -20,7 +19,6 @@ class PluginAnalysisForm extends StatefulWidget {
 
 class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
   final Map<String, TextEditingController> _controllers = {};
-  final PluginAnalysisService _service = PluginAnalysisService();
   late Map<String, dynamic> _currentTemplate;
 
   @override
@@ -28,7 +26,7 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
     super.initState();
     // 创建模板的副本
     _currentTemplate = Map<String, dynamic>.from(widget.method.template);
-    
+
     // 为每个字段创建控制器并添加监听器
     _currentTemplate.forEach((key, value) {
       final controller = TextEditingController(text: value.toString());
@@ -38,7 +36,7 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
       _controllers[key] = controller;
     });
   }
-  
+
   // 更新模板值
   void _updateTemplateValue(String key, String value) {
     setState(() {
@@ -89,7 +87,7 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
               ],
             ),
             const Divider(),
-            
+
             // 表单字段
             Flexible(
               child: SingleChildScrollView(
@@ -109,33 +107,32 @@ class _PluginAnalysisFormState extends State<PluginAnalysisForm> {
                         ),
                       );
                     }),
-                    
-                    
+
                     // 底部按钮
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(OpenAILocalizations.of(context).cancel),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(OpenAILocalizations.of(context).cancel),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            widget.onConfirm(_getJsonString());
+                          },
+                          child: Text(OpenAILocalizations.of(context).confirm),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    widget.onConfirm(_getJsonString());
-                  },
-                  child: Text(OpenAILocalizations.of(context).confirm),
-                ),
-              ],
+              ),
             ),
           ],
         ),
-      )
-            ),
-          ]
-        ),
-      )
+      ),
     );
   }
 }

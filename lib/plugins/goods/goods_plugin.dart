@@ -12,7 +12,7 @@ import 'models/find_item_result.dart';
 abstract class GoodsEventArgs extends EventArgs {
   final String warehouseId;
 
-  GoodsEventArgs(String eventName, this.warehouseId) : super(eventName);
+  GoodsEventArgs(super.eventName, this.warehouseId);
 }
 
 /// 物品添加事件参数
@@ -41,7 +41,7 @@ class _ItemSearchResult {
 
 /// 物品管理插件主视图
 class GoodsMainView extends StatefulWidget {
-  const GoodsMainView();
+  const GoodsMainView({super.key});
   @override
   State<GoodsMainView> createState() => _GoodsMainViewState();
 }
@@ -453,11 +453,7 @@ class GoodsPlugin extends BasePlugin {
                   color: theme.primaryColor.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon ?? Icons.inventory_2,
-                  size: 24,
-                  color: color ?? theme.primaryColor,
-                ),
+                child: Icon(icon, size: 24, color: color ?? theme.primaryColor),
               ),
               const SizedBox(width: 12),
               Text(

@@ -50,7 +50,6 @@ class HabitsPlugin extends PluginBase {
     return _instance!;
   }
 
-  @override
   final String author = 'Memento Team';
   @override
   String get description => '';
@@ -94,7 +93,6 @@ class HabitsPlugin extends PluginBase {
     await initialize();
   }
 
-  @override
   Future<void> onDispose() async {
     // Clean up resources if needed
   }

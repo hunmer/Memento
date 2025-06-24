@@ -104,9 +104,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
 
   Widget _buildListView(DatabaseModel database) {
     return FutureBuilder<List<record_model.Record>>(
-      future:
-          widget.controller.getRecords(database.id)
-              as Future<List<record_model.Record>>,
+      future: widget.controller.getRecords(database.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -158,9 +156,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
 
   Widget _buildGridView(DatabaseModel database) {
     return FutureBuilder<List<record_model.Record>>(
-      future:
-          widget.controller.getRecords(database.id)
-              as Future<List<record_model.Record>>,
+      future: widget.controller.getRecords(database.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

@@ -50,12 +50,13 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       if (_existingGroups.isEmpty) {
         _existingGroups.add('默认分组');
       }
-      
+
       // 加载名称，排除当前编辑项
-      _existingNames = items
-          .where((item) => item.id != widget.initialItem?.id)
-          .map((item) => item.name)
-          .toSet();
+      _existingNames =
+          items
+              .where((item) => item.id != widget.initialItem?.id)
+              .map((item) => item.name)
+              .toSet();
     } else {
       _existingGroups = {'默认分组'};
       _existingNames = {};
@@ -63,43 +64,6 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   }
 
   // 显示分组选择对话框
-  Future<void> _showGroupSelectionDialog(BuildContext context) async {
-    final selectedGroup = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('选择分组'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _existingGroups.length,
-              itemBuilder: (context, index) {
-                final group = _existingGroups.elementAt(index);
-                return ListTile(
-                  title: Text(group),
-                  onTap: () => Navigator.of(context).pop(group),
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (selectedGroup != null) {
-      setState(() {
-        _group = selectedGroup;
-        _groupController.text = selectedGroup;
-      });
-    }
-  }
 
   @override
   void dispose() {
@@ -207,20 +171,15 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       ),
       value: _reminderSettings?.type,
       items: [
-        const DropdownMenuItem(
-          value: null,
-          child: Text('不设置提醒'),
-        ),
+        const DropdownMenuItem(value: null, child: Text('不设置提醒')),
         ...ReminderType.values.map(
           (type) => DropdownMenuItem(
             value: type,
-            child: Text(
-              switch (type) {
-                ReminderType.weekly => '每周提醒',
-                ReminderType.monthly => '每月提醒',
-                ReminderType.specific => '特定日期提醒',
-              },
-            ),
+            child: Text(switch (type) {
+              ReminderType.weekly => '每周提醒',
+              ReminderType.monthly => '每月提醒',
+              ReminderType.specific => '特定日期提醒',
+            }),
           ),
         ),
       ],
@@ -247,15 +206,15 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       spacing: 8,
       runSpacing: 8,
       children: List.generate(7, (index) {
-        final isSelected =
-            _reminderSettings?.weekdays.contains(index) ?? false;
+        final isSelected = _reminderSettings?.weekdays.contains(index) ?? false;
         return FilterChip(
           label: Text(weekdays[index]),
           selected: isSelected,
           onSelected: (selected) {
             setState(() {
-              final List<int> newWeekdays =
-                  List.from(_reminderSettings?.weekdays ?? []);
+              final List<int> newWeekdays = List.from(
+                _reminderSettings?.weekdays ?? [],
+              );
               if (selected) {
                 newWeekdays.add(index);
               } else {
@@ -282,10 +241,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       ),
       value: _reminderSettings?.dayOfMonth,
       items: List.generate(31, (index) {
-        return DropdownMenuItem(
-          value: index + 1,
-          child: Text('${index + 1}日'),
-        );
+        return DropdownMenuItem(value: index + 1, child: Text('${index + 1}日'));
       }),
       onChanged: (value) {
         setState(() {

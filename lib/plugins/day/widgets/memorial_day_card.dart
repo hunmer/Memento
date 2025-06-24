@@ -22,7 +22,6 @@ class MemorialDayCard extends StatefulWidget {
 
 class _MemorialDayCardState extends State<MemorialDayCard> {
   ImageProvider? _imageProvider;
-  bool _isLoading = true;
 
   @override
   void initState() {
@@ -33,7 +32,8 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
   @override
   void didUpdateWidget(covariant MemorialDayCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.memorialDay.backgroundImageUrl != widget.memorialDay.backgroundImageUrl) {
+    if (oldWidget.memorialDay.backgroundImageUrl !=
+        widget.memorialDay.backgroundImageUrl) {
       _loadImage();
     }
   }
@@ -42,7 +42,6 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
     if (widget.memorialDay.backgroundImageUrl == null) {
       setState(() {
         _imageProvider = null;
-        _isLoading = false;
       });
       return;
     }
@@ -51,18 +50,16 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       setState(() {
         _imageProvider = NetworkImage(url);
-        _isLoading = false;
       });
     } else {
       try {
-        setState(() => _isLoading = true);
-        _imageProvider = FileImage(File(await ImageUtils.getAbsolutePath(url))); // 相对路径加载图片
-        setState(() => _isLoading = false);
+        _imageProvider = FileImage(
+          File(await ImageUtils.getAbsolutePath(url)),
+        ); // 相对路径加载图片
       } catch (e) {
         debugPrint('Error loading image: $e');
         setState(() {
           _imageProvider = null;
-          _isLoading = false;
         });
       }
     }
@@ -81,12 +78,10 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
         child: Container(
           decoration: BoxDecoration(
             color: widget.memorialDay.backgroundColor,
-            image: _imageProvider != null
-                ? DecorationImage(
-                    image: _imageProvider!,
-                    fit: BoxFit.cover,
-                  )
-                : null,
+            image:
+                _imageProvider != null
+                    ? DecorationImage(image: _imageProvider!, fit: BoxFit.cover)
+                    : null,
           ),
           child: Stack(
             children: [
@@ -95,77 +90,81 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(
-                  widget.memorialDay.title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    shadows: [
-                      const Shadow(
-                        offset: Offset(1, 1),
-                        blurRadius: 3.0,
-                        color: Colors.black45,
+                    Text(
+                      widget.memorialDay.title,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        shadows: [
+                          const Shadow(
+                            offset: Offset(1, 1),
+                            blurRadius: 3.0,
+                            color: Colors.black45,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Spacer(),
-                Text(
-                  widget.memorialDay.formattedTargetDate,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
-                    shadows: [
-                      const Shadow(
-                        offset: Offset(1, 1),
-                        blurRadius: 3.0,
-                        color: Colors.black45,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.memorialDay.isExpired
-                      ? localizations.daysPassed(widget.memorialDay.daysPassed)
-                      : localizations.daysRemaining(widget.memorialDay.daysRemaining),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      const Shadow(
-                        offset: Offset(1, 1),
-                        blurRadius: 3.0,
-                        color: Colors.black45,
-                      ),
-                    ],
-                  ),
-                ),
-                if (widget.memorialDay.notes.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.memorialDay.notes.first,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.white,
-                      shadows: [
-                        const Shadow(
-                          offset: Offset(1, 1),
-                          blurRadius: 3.0,
-                          color: Colors.black45,
-                        ),
-                      ],
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
-            ),
+                    const Spacer(),
+                    Text(
+                      widget.memorialDay.formattedTargetDate,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white,
+                        shadows: [
+                          const Shadow(
+                            offset: Offset(1, 1),
+                            blurRadius: 3.0,
+                            color: Colors.black45,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.memorialDay.isExpired
+                          ? localizations.daysPassed(
+                            widget.memorialDay.daysPassed,
+                          )
+                          : localizations.daysRemaining(
+                            widget.memorialDay.daysRemaining,
+                          ),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          const Shadow(
+                            offset: Offset(1, 1),
+                            blurRadius: 3.0,
+                            color: Colors.black45,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (widget.memorialDay.notes.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.memorialDay.notes.first,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white,
+                          shadows: [
+                            const Shadow(
+                              offset: Offset(1, 1),
+                              blurRadius: 3.0,
+                              color: Colors.black45,
+                            ),
+                          ],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
-            ]
         ),
       ),
-      )
     );
   }
 }

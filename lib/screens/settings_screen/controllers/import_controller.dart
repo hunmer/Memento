@@ -5,7 +5,6 @@ import 'package:archive/archive.dart';
 import '../../../main.dart';
 import '../../../core/utils/file_utils.dart';
 import '../widgets/folder_selection_dialog.dart';
-import 'permission_controller.dart';
 
 class ImportController {
   final BuildContext context;

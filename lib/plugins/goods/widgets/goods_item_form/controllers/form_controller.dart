@@ -12,16 +12,16 @@ class GoodsItemFormController {
   final descriptionController = TextEditingController();
   final priceController = TextEditingController();
   final stockController = TextEditingController();
-  
+
   // 发送事件通知
   void _notifyEvent(String action, GoodsItem item) {
     final eventArgs = ItemEventArgs(
-      eventName: 'goods_${action}',
+      eventName: 'goods_$action',
       itemId: item.id,
       title: item.title,
       action: action,
     );
-    EventManager.instance.broadcast('goods_${action}', eventArgs);
+    EventManager.instance.broadcast('goods_$action', eventArgs);
   }
 
   IconData? icon;
@@ -31,10 +31,10 @@ class GoodsItemFormController {
   List<UsageRecord> usageRecords = [];
   List<CustomField> customFields = [];
   List<GoodsItem> _subItems = [];
-  
+
   // 获取子物品列表
   List<GoodsItem> get subItems => _subItems;
-  
+
   // 初始数据引用，用于排除选择自身
   final GoodsItem? initialData;
 
@@ -63,7 +63,7 @@ class GoodsItemFormController {
     priceController.dispose();
     stockController.dispose();
   }
-  
+
   // 添加子物品并从原仓库中删除
   Future<void> addSubItem(GoodsItem item) async {
     // 检查是否已存在相同ID的子物品
@@ -71,7 +71,7 @@ class GoodsItemFormController {
       // 如果已存在，先删除旧的
       _subItems.removeWhere((element) => element.id == item.id);
     }
-    
+
     // 添加新的子物品（保留必要字段）
     final cleanedItem = GoodsItem(
       id: item.id,
@@ -87,7 +87,7 @@ class GoodsItemFormController {
       customFields: [], // 清空自定义字段
       subItems: [], // 清空子物品的子物品
     );
-    
+
     _subItems.add(cleanedItem);
     // 发送添加事件
     _notifyEvent('added', cleanedItem);
@@ -106,14 +106,14 @@ class GoodsItemFormController {
       debugPrint('Error removing item from warehouse: $e');
     }
   }
-  
+
   // 移除子物品
   void removeSubItem(GoodsItem item) {
     _subItems.removeWhere((element) => element.id == item.id);
     // 发送删除事件
     _notifyEvent('deleted', item);
   }
-  
+
   // 更新子物品
   void updateSubItem(GoodsItem updatedItem) {
     final index = _subItems.indexWhere((item) => item.id == updatedItem.id);

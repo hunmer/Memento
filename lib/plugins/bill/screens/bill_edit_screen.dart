@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../bill_plugin.dart';
-import '../models/account.dart';
 import '../models/bill.dart';
 import 'package:flutter/services.dart';
 import '../../../widgets/circle_icon_picker.dart';
@@ -359,97 +358,6 @@ class _BillEditScreenState extends State<BillEditScreen> {
           _selectedColor = color;
         });
       },
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-        minimumSize: const Size(200, 50),
-      ),
-      onPressed: () async {
-        if (_formKey.currentState!.validate()) {
-          try {
-            // 显示保存中提示
-            if (!mounted) return;
-
-            // 解析金额
-            final amount = double.parse(_amountController.text);
-
-            // 创建账单对象
-            final bill = Bill(
-              // 如果是编辑现有账单，使用原有ID；如果是新建账单，生成新ID
-              id:
-                  widget.bill?.id ??
-                  DateTime.now().millisecondsSinceEpoch.toString(),
-              title: _titleController.text,
-              amount: _isExpense ? -amount : amount,
-              accountId: widget.accountId,
-              category: _tag ?? '未分类', // 使用tag作为category
-              date: _selectedDate,
-              tag: _tag,
-              note: _noteController.text,
-              icon: _selectedIcon,
-              iconColor: _selectedColor,
-              createdAt: widget.bill?.createdAt ?? _selectedDate,
-            );
-
-            // 获取当前账户的最新数据
-            final currentAccount = widget.billPlugin.accounts.firstWhere(
-              (a) => a.id == widget.accountId,
-            );
-
-            // 准备更新后的账户数据
-            Account updatedAccount;
-            if (widget.bill == null) {
-              // 创建新账单
-              updatedAccount = currentAccount.copyWith(
-                bills: [...currentAccount.bills, bill],
-              );
-            } else {
-              // 更新现有账单 - 替换相同ID的账单
-              final updatedBills =
-                  currentAccount.bills.map((existingBill) {
-                    if (existingBill.id == bill.id) {
-                      return bill;
-                    }
-                    return existingBill;
-                  }).toList();
-
-              updatedAccount = currentAccount.copyWith(bills: updatedBills);
-            }
-
-            // 更新账户总金额
-            updatedAccount.calculateTotal();
-
-            // 调用插件的保存账户方法
-            await widget.billPlugin.controller.saveAccount(updatedAccount);
-
-            // 显示成功提示
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('保存成功'),
-                backgroundColor: Colors.green,
-              ),
-            );
-
-            // 返回上一页
-            if (!mounted) return;
-
-            // 调用保存回调并返回
-            Navigator.of(context).pop();
-            widget.onSaved?.call();
-          } catch (e) {
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('保存失败: $e'), backgroundColor: Colors.red),
-            );
-          }
-        }
-      },
-      child: Text(widget.bill == null ? '添加' : '保存'),
     );
   }
 }

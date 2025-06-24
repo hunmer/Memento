@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../../../models/message.dart';
 import '../../../models/channel.dart';
@@ -228,7 +227,7 @@ class TimelineMessageCard extends StatelessWidget {
                                 ),
                                 child: AudioPlayerWidget(
                                   audioPath: fileInfo.filePath,
-                                  durationInSeconds: message.audioDuration ?? 0,
+                                  durationInSeconds: message.audioDuration,
                                   isLocalFile: true,
                                   primaryColor: theme.colorScheme.primary,
                                   backgroundColor: theme.colorScheme.surface,

@@ -1,4 +1,3 @@
-import 'package:Memento/core/event/event.dart';
 import 'package:flutter/material.dart';
 import '../../../models/channel.dart';
 import '../../../models/user.dart';

@@ -1,5 +1,3 @@
-import 'package:Memento/plugins/store/models/user_item.dart';
-
 class UsedItem {
   final String id;
   final String productId;

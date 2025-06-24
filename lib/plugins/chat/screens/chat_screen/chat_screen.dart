@@ -297,27 +297,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _copyMessageToClipboard(Message message) {
-    // 使用MessageOperations处理消息复制
-    _messageOperations.copyMessage(message);
-  }
-
-  Future<void> _setFixedSymbol(Message message, String? symbol) async {
-    // 使用MessageOperations设置固定符号
-    await _messageOperations.setFixedSymbol(message, symbol);
-    if (mounted) {
-      _updateMessages(); // 更新消息列表
-    }
-  }
-
-  Future<void> _setBubbleColor(Message message, Color? color) async {
-    // 使用MessageOperations设置气泡颜色
-    await _messageOperations.setBubbleColor(message, color);
-    if (mounted) {
-      _updateMessages(); // 更新消息列表
-    }
-  }
-
   // 加载背景图片路径
   Future<void> _loadBackgroundPath() async {
     // 获取最新的频道数据

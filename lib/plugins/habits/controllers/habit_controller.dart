@@ -1,6 +1,5 @@
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
-import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 
 typedef TimerModeListener = void Function(String habitId, bool isCountdown);
@@ -38,7 +37,7 @@ class HabitController {
   List<Habit> getHabits() => _habits;
 
   Future<void> saveHabit(Habit habit) async {
-    final habits = await getHabits();
+    final habits = getHabits();
     final index = habits.indexWhere((h) => h.id == habit.id);
 
     if (index >= 0) {
@@ -54,7 +53,7 @@ class HabitController {
   }
 
   Future<void> deleteHabit(String id) async {
-    final habits = await getHabits();
+    final habits = getHabits();
     habits.removeWhere((h) => h.id == id);
     await storage.writeJson(
       'habits/habits',

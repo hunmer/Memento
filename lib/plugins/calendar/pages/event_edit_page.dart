@@ -47,7 +47,9 @@ class _EventEditPageState extends State<EventEditPage> {
     super.initState();
     final event = widget.event;
     _titleController = TextEditingController(text: event?.title ?? '');
-    _descriptionController = TextEditingController(text: event?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: event?.description ?? '',
+    );
     _startDate = event?.startTime ?? widget.initialDate;
     _startTime = TimeOfDay.fromDateTime(event?.startTime ?? widget.initialDate);
     if (event?.endTime != null) {
@@ -69,13 +71,14 @@ class _EventEditPageState extends State<EventEditPage> {
   Future<void> _selectDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      initialDateRange: _endDate != null 
-          ? DateTimeRange(start: _startDate, end: _endDate!)
-          : DateTimeRange(start: _startDate, end: _startDate),
+      initialDateRange:
+          _endDate != null
+              ? DateTimeRange(start: _startDate, end: _endDate!)
+              : DateTimeRange(start: _startDate, end: _startDate),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    
+
     if (picked != null) {
       setState(() {
         _startDate = picked.start;
@@ -93,12 +96,10 @@ class _EventEditPageState extends State<EventEditPage> {
       setState(() {
         _startTime = picked;
         // 如果结束时间未设置，默认设置为开始时间后1小时
-        if (_endTime == null) {
-          _endTime = TimeOfDay(
-            hour: (picked.hour + 1) % 24,
-            minute: picked.minute,
-          );
-        }
+        _endTime ??= TimeOfDay(
+          hour: (picked.hour + 1) % 24,
+          minute: picked.minute,
+        );
       });
     }
   }
@@ -120,14 +121,19 @@ class _EventEditPageState extends State<EventEditPage> {
       builder: (BuildContext context) {
         return SimpleDialog(
           title: const Text('选择提醒时间'),
-          children: items.map((item) => SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context, item['value'] as int?);
-            },
-            child: Text(item['label'] as String),
-          )).toList(),
+          children:
+              items
+                  .map(
+                    (item) => SimpleDialogOption(
+                      onPressed: () {
+                        Navigator.pop(context, item['value'] as int?);
+                      },
+                      child: Text(item['label'] as String),
+                    ),
+                  )
+                  .toList(),
         );
-      }
+      },
     );
 
     if (result != null) {
@@ -139,12 +145,12 @@ class _EventEditPageState extends State<EventEditPage> {
 
   Future<void> _selectEndTime() async {
     if (_endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先选择日期范围')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请先选择日期范围')));
       return;
     }
-    
+
     final picked = await showTimePicker(
       context: context,
       initialTime: _endTime ?? TimeOfDay.now(),
@@ -157,25 +163,19 @@ class _EventEditPageState extends State<EventEditPage> {
   }
 
   DateTime _combineDateAndTime(DateTime date, TimeOfDay time) {
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
   Future<void> _saveEvent() async {
     if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入事件标题')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请输入事件标题')));
       return;
     }
 
     final startDateTime = _combineDateAndTime(_startDate, _startTime);
-    
+
     // 确保总是有结束时间
     DateTime endDateTime;
     if (_endDate != null) {
@@ -186,11 +186,11 @@ class _EventEditPageState extends State<EventEditPage> {
       // 如果没有设置结束日期，默认为开始日期加1小时
       endDateTime = startDateTime.add(const Duration(hours: 1));
     }
-    
+
     if (endDateTime.isBefore(startDateTime)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('结束时间不能早于开始时间')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('结束时间不能早于开始时间')));
       return;
     }
 
@@ -208,7 +208,9 @@ class _EventEditPageState extends State<EventEditPage> {
 
     // 设置提醒
     if (_reminderMinutes != null) {
-      final reminderTime = startDateTime.subtract(Duration(minutes: _reminderMinutes!));
+      final reminderTime = startDateTime.subtract(
+        Duration(minutes: _reminderMinutes!),
+      );
       if (reminderTime.isAfter(DateTime.now())) {
         await CalendarNotificationUtils.scheduleEventNotification(
           id: int.parse(event.id), // 确保ID是整数
@@ -219,7 +221,7 @@ class _EventEditPageState extends State<EventEditPage> {
         );
       }
     }
-    
+
     widget.onSave(event);
     Navigator.of(context).pop();
   }
@@ -230,10 +232,7 @@ class _EventEditPageState extends State<EventEditPage> {
       appBar: AppBar(
         title: Text(widget.event == null ? '新建事件' : '编辑事件'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _saveEvent,
-          ),
+          IconButton(icon: const Icon(Icons.check), onPressed: _saveEvent),
         ],
       ),
       body: SingleChildScrollView(
@@ -245,7 +244,8 @@ class _EventEditPageState extends State<EventEditPage> {
               currentIcon: _selectedIcon,
               backgroundColor: _selectedColor,
               onIconSelected: (icon) => setState(() => _selectedIcon = icon),
-              onColorSelected: (color) => setState(() => _selectedColor = color),
+              onColorSelected:
+                  (color) => setState(() => _selectedColor = color),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -279,14 +279,16 @@ class _EventEditPageState extends State<EventEditPage> {
               subtitle: Text(
                 _reminderMinutes != null
                     ? _getReminderText(_reminderMinutes!)
-                    : '不提醒'
+                    : '不提醒',
               ),
-              trailing: _reminderMinutes != null
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () => setState(() => _reminderMinutes = null),
-                    )
-                  : null,
+              trailing:
+                  _reminderMinutes != null
+                      ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed:
+                            () => setState(() => _reminderMinutes = null),
+                      )
+                      : null,
               onTap: _selectReminderMinutes,
             ),
             const SizedBox(height: 16),

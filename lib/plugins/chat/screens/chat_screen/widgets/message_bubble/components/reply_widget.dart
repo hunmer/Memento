@@ -18,7 +18,7 @@ class ReplyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -28,11 +28,13 @@ class ReplyWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: highlightColor?.withOpacity(0.1) ?? 
-                  theme.colorScheme.surfaceVariant.withOpacity(0.3),
+            color:
+                highlightColor?.withOpacity(0.1) ??
+                theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
             border: Border.all(
-              color: highlightColor?.withOpacity(0.3) ?? 
-                    theme.colorScheme.surfaceVariant.withOpacity(0.5),
+              color:
+                  highlightColor?.withOpacity(0.3) ??
+                  theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
               width: 1,
             ),
           ),
@@ -41,21 +43,21 @@ class ReplyWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (isLoading)
-                const LinearProgressIndicator(
-                  minHeight: 2,
-                )
+                const LinearProgressIndicator(minHeight: 2)
               else
                 Row(
                   children: [
                     Icon(
                       Icons.reply,
                       size: 12,
-                      color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                      color: theme.colorScheme.onSurfaceVariant.withOpacity(
+                        0.7,
+                      ),
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        "${replyMessage.user.username}",
+                        replyMessage.user.username,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,

@@ -8,10 +8,9 @@ import 'services/message_service.dart';
 import 'services/settings_service.dart';
 import 'services/ui_service.dart';
 import 'services/user_service.dart';
-import 'l10n/chat_localizations.dart';
 
 class ChatMainView extends StatefulWidget {
-  const ChatMainView();
+  const ChatMainView({super.key});
   @override
   State<ChatMainView> createState() => _ChatMainViewState();
 }
@@ -90,10 +89,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
       builder: (BuildContext context, StateSetter setState) {
         return Column(
           children: [
-            // User profile card managed by UIService
             uiService.buildUserProfileCard(context, setState),
             const SizedBox(height: 16),
-            // Chat settings card managed by UIService
             uiService.buildChatSettingsCard(context, setState),
             const Divider(),
             super.buildSettingsView(context),
@@ -110,7 +107,6 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
 
   @override
   Widget? buildCardView(BuildContext context) {
-    // 返回聊天插件的卡片视图
     return uiService.buildCardView(context);
   }
 
@@ -119,8 +115,6 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
-    // 在这里注册插件到应用
-    // 例如：注册路由、初始化必要的配置等
     await initialize();
   }
 }

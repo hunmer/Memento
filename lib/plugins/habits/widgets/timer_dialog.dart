@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';

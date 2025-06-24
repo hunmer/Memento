@@ -14,12 +14,7 @@ import 'components/reply_widget.dart';
 final chatPlugin = ChatPlugin.instance;
 
 // 定义回复消息加载状态
-enum ReplyLoadingState {
-  initial,
-  loading,
-  loaded,
-  error
-}
+enum ReplyLoadingState { initial, loading, loaded, error }
 
 class MessageBubble extends StatefulWidget {
   final Message message;
@@ -67,8 +62,7 @@ class _MessageBubbleState extends State<MessageBubble> {
   // 保存当前消息的副本，以便在更新时替换
   late Message _currentMessage;
   String? _currentReplyToId;
-  ReplyLoadingState _replyLoadingState = ReplyLoadingState.initial;
-  
+
   @override
   void initState() {
     super.initState();
@@ -86,13 +80,14 @@ class _MessageBubbleState extends State<MessageBubble> {
   void didUpdateWidget(MessageBubble oldWidget) {
     super.didUpdateWidget(oldWidget);
     // 当widget更新时，检查消息是否发生变化
-    if (widget.message != oldWidget.message || 
+    if (widget.message != oldWidget.message ||
         widget.message.replyToId != _currentReplyToId) {
       _currentMessage = widget.message;
       _currentReplyToId = widget.message.replyToId;
       _loadReplyMessage(); // 重新加载回复消息
     }
   }
+
   @override
   void dispose() {
     eventManager.unsubscribeById(_messageUpdateSubscriptionId);
@@ -104,7 +99,7 @@ class _MessageBubbleState extends State<MessageBubble> {
       return;
     }
     final updatedMessage = args.value1;
-    
+
     if (!mounted) return;
 
     if (updatedMessage.id == _currentMessage.id) {
@@ -113,15 +108,15 @@ class _MessageBubbleState extends State<MessageBubble> {
         final oldReplyToId = _currentMessage.replyToId;
         _currentMessage = updatedMessage;
         _currentReplyToId = updatedMessage.replyToId;
-        
+
         // 只有当replyToId发生变化时才重新加载回复消息
         if (oldReplyToId != updatedMessage.replyToId) {
           _loadReplyMessage();
         }
       });
-    } else if (_currentReplyToId != null && 
-               updatedMessage.id == _currentReplyToId &&
-               replyMessage?.id == updatedMessage.id) {
+    } else if (_currentReplyToId != null &&
+        updatedMessage.id == _currentReplyToId &&
+        replyMessage?.id == updatedMessage.id) {
       // 只更新当前正在显示的回复消息
       setState(() {
         replyMessage = updatedMessage;
@@ -136,21 +131,18 @@ class _MessageBubbleState extends State<MessageBubble> {
     if (_currentMessage.replyToId == null) {
       setState(() {
         replyMessage = null;
-        _replyLoadingState = ReplyLoadingState.initial;
         _currentReplyToId = null;
       });
       return;
     }
 
     // 设置加载状态
-    setState(() {
-      _replyLoadingState = ReplyLoadingState.loading;
-    });
+    setState(() {});
 
     try {
       final replyToId = _currentMessage.replyToId!;
       final reply = await chatPlugin.getMessage(replyToId);
-      
+
       // 确保在异步操作完成后组件仍然挂载且消息ID匹配
       if (!mounted || _currentMessage.replyToId != replyToId) {
         return;
@@ -160,30 +152,29 @@ class _MessageBubbleState extends State<MessageBubble> {
         if (reply != null) {
           replyMessage = reply;
           _currentReplyToId = replyToId;
-          _replyLoadingState = ReplyLoadingState.loaded;
         } else {
           replyMessage = null;
-          _replyLoadingState = ReplyLoadingState.error;
         }
       });
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         replyMessage = null;
-        _replyLoadingState = ReplyLoadingState.error;
       });
     }
   }
 
   bool get _isCurrentUser => _currentMessage.user.id == widget.currentUserId;
-  
+
   bool _isImageMessage() {
     final metadata = _currentMessage.metadata;
-    if (metadata == null || !metadata.containsKey(Message.metadataKeyFileInfo)) {
+    if (metadata == null ||
+        !metadata.containsKey(Message.metadataKeyFileInfo)) {
       return false;
     }
-    final fileInfo = metadata[Message.metadataKeyFileInfo] as Map<String, dynamic>;
+    final fileInfo =
+        metadata[Message.metadataKeyFileInfo] as Map<String, dynamic>;
     return fileInfo['type'] == 'image';
   }
 
@@ -192,7 +183,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     if (_currentMessage.bubbleColor != null) {
       return _currentMessage.bubbleColor!;
     }
-    
+
     // 如果没有自定义颜色，则使用默认主题颜色
     if (widget.isSelected) {
       return Theme.of(context).colorScheme.primaryContainer;
@@ -242,14 +233,21 @@ class _MessageBubbleState extends State<MessageBubble> {
             const SizedBox(width: 8),
             Flexible(
               child: Column(
-                crossAxisAlignment: _isCurrentUser
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    _isCurrentUser
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: _isImageMessage() ? EdgeInsets.zero : const EdgeInsets.all(8.0),
+                    padding:
+                        _isImageMessage()
+                            ? EdgeInsets.zero
+                            : const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
-                      color: _isImageMessage() ? Colors.transparent : backgroundColor,
+                      color:
+                          _isImageMessage()
+                              ? Colors.transparent
+                              : backgroundColor,
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Column(
@@ -290,14 +288,17 @@ class _MessageBubbleState extends State<MessageBubble> {
                         ),
                       if (_currentMessage.fixedSymbol != null)
                         FixedSymbolWidget(symbol: _currentMessage.fixedSymbol!),
-                      if (widget.onToggleFavorite != null && _currentMessage.metadata?['isFavorite'] == true)
+                      if (widget.onToggleFavorite != null &&
+                          _currentMessage.metadata?['isFavorite'] == true)
                         FavoriteIcon(
                           isFavorite: true,
                           onTap: widget.onToggleFavorite!,
                         ),
                       const SizedBox(width: 5),
                       MessageTimestamp(
-                        date: _currentMessage.updatedAt ?? _currentMessage.createdAt,
+                        date:
+                            _currentMessage.updatedAt ??
+                            _currentMessage.createdAt,
                         isEdited: _currentMessage.updatedAt != null,
                       ),
                     ],

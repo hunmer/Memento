@@ -14,7 +14,7 @@ class TimerService {
         'taskName': task.name,
         'subTimers':
             task.timerItems
-                ?.map(
+                .map(
                   (st) => {
                     'name': st.name,
                     'current': st.completedDuration.inSeconds,
@@ -38,7 +38,7 @@ class TimerService {
         'taskName': task.name,
         'subTimers':
             task.timerItems
-                ?.map(
+                .map(
                   (st) => {
                     'name': st.name,
                     'current': st.completedDuration.inSeconds,

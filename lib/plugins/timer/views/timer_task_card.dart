@@ -46,7 +46,6 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
   @override
   Widget build(BuildContext context) {
     final task = widget.task;
-    final activeTimer = task.activeTimer;
     final isRunning = task.isRunning;
     return Container(
       decoration: BoxDecoration(

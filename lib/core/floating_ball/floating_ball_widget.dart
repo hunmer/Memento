@@ -39,8 +39,6 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget>
   bool _pointerDown = false;
   final GlobalKey _ballKey = GlobalKey();
   StreamSubscription<double>? _sizeSubscription;
-  final StreamController<Offset> _positionChangeController =
-      StreamController<Offset>.broadcast();
   StreamSubscription<Offset>? _positionSubscription;
 
   @override

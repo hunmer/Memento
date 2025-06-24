@@ -38,7 +38,7 @@ class TimerPlugin extends BasePlugin {
 
   @override
   Future<void> initialize() async {
-    timerController = TimerController(this.storage);
+    timerController = TimerController(storage);
     await _loadTasks();
   }
 

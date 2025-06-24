@@ -1,11 +1,6 @@
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
-import 'package:Memento/plugins/tracker/models/goal.dart';
-import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
-import 'package:Memento/plugins/tracker/widgets/goal_card.dart';
-import 'package:Memento/plugins/tracker/widgets/goal_edit_page.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,7 +12,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _filterStatus = '全部';
-  String _filterDate = '最近';
   String _currentGroup = '全部';
   bool _isGridView = false;
 
@@ -46,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.filter_list),
           ),
           PopupMenuButton<String>(
-            onSelected: (value) => setState(() => _filterDate = value),
+            onSelected: (value) => setState(() => {}),
             itemBuilder:
                 (context) => [
                   const PopupMenuItem(value: '最近', child: Text('最近')),
@@ -104,8 +98,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final controller = Provider.of<TrackerController>(context);
     final filteredGoals =
         controller.goals.where((goal) {
-          if (_currentGroup != '全部' && goal.group != _currentGroup)
+          if (_currentGroup != '全部' && goal.group != _currentGroup) {
             return false;
+          }
 
           // 根据状态过滤
           if (_filterStatus == '进行中' && goal.isCompleted) return false;

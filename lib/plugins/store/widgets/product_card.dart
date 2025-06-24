@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
@@ -9,18 +8,16 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onExchange;
 
   const ProductCard({
-    Key? key,
+    super.key,
     required this.product,
     required this.onExchange,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Stack(
         children: [
           Column(
@@ -28,34 +25,38 @@ class ProductCard extends StatelessWidget {
             children: [
               // 商品图片
               AspectRatio(
-                aspectRatio: 1/1,
-                child: product.image.isEmpty 
-                    ? _buildErrorImage()
-                    : FutureBuilder<String>(
-                        future: ImageUtils.getAbsolutePath(product.image),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done) {
-                            if (snapshot.hasData) {
-                              final imagePath = snapshot.data!;
-                              return isNetworkImage(imagePath)
-                                  ? Image.network(
+                aspectRatio: 1 / 1,
+                child:
+                    product.image.isEmpty
+                        ? _buildErrorImage()
+                        : FutureBuilder<String>(
+                          future: ImageUtils.getAbsolutePath(product.image),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              if (snapshot.hasData) {
+                                final imagePath = snapshot.data!;
+                                return isNetworkImage(imagePath)
+                                    ? Image.network(
                                       imagePath,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          _buildErrorImage(),
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              _buildErrorImage(),
                                     )
-                                  : Image.file(
+                                    : Image.file(
                                       File(imagePath),
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          _buildErrorImage(),
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              _buildErrorImage(),
                                     );
+                              }
+                              return _buildErrorImage();
                             }
-                            return _buildErrorImage();
-                          }
-                          return _buildLoadingIndicator();
-                        },
-                      ),
+                            return _buildLoadingIndicator();
+                          },
+                        ),
               ),
               // 商品信息
               Padding(
@@ -65,7 +66,11 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.shopping_bag, size: 16, color: Theme.of(context).primaryColor),
+                        Icon(
+                          Icons.shopping_bag,
+                          size: 16,
+                          color: Theme.of(context).primaryColor,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -76,14 +81,21 @@ class ProductCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '库存: ${product.stock}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).primaryColor,
                             ),
                           ),
@@ -93,20 +105,30 @@ class ProductCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.monetization_on, size: 16, color: Theme.of(context).primaryColor),
+                        Icon(
+                          Icons.monetization_on,
+                          size: 16,
+                          color: Theme.of(context).primaryColor,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           '${product.price}积分',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 16, color: Theme.of(context).primaryColor),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: Theme.of(context).primaryColor,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           '${_formatDate(product.exchangeStart)} - ${_formatDate(product.exchangeEnd)}',
@@ -127,23 +149,26 @@ class ProductCard extends StatelessWidget {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('兑换确认'),
-                    content: Text('确定要兑换 ${product.name} 吗？\n需要消耗 ${product.price} 积分'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
+                  builder:
+                      (context) => AlertDialog(
+                        title: const Text('兑换确认'),
+                        content: Text(
+                          '确定要兑换 ${product.name} 吗？\n需要消耗 ${product.price} 积分',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('取消'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              onExchange();
+                            },
+                            child: const Text('确定'),
+                          ),
+                        ],
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          onExchange();
-                        },
-                        child: const Text('确定'),
-                      ),
-                    ],
-                  ),
                 );
               },
               child: const Icon(Icons.shopping_bag, size: 20),
@@ -155,9 +180,7 @@ class ProductCard extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.year.toString().substring(2)}/'+
-           '${date.month.toString().padLeft(2, '0')}/'+
-           '${date.day.toString().padLeft(2, '0')}';
+    return '${date.year.toString().substring(2)}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
   }
 
   bool isNetworkImage(String path) {

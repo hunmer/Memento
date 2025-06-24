@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:async';
-import 'package:Memento/core/utils/logger_util.dart';
 import 'package:flutter/material.dart';
 
 class FileUtils {

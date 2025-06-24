@@ -12,8 +12,6 @@ class TagController extends ChangeNotifier {
   List<String> selectedTags = [];
   List<String> recentTags = [];
 
-  static const String _tagGroupsKey = 'calendar_tag_groups';
-  static const String _recentTagsKey = 'calendar_recent_tags';
   final String _tagGroupsFile = 'data/calendar_tag_groups.json';
   final String _recentTagsFile = 'data/calendar_recent_tags.json';
 

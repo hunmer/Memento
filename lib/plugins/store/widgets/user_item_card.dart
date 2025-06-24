@@ -1,9 +1,7 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import '../models/user_item.dart';
-import '../models/product.dart';
 
 class UserItemCard extends StatelessWidget {
   final UserItem item;
@@ -11,19 +9,17 @@ class UserItemCard extends StatelessWidget {
   final VoidCallback onUse;
 
   const UserItemCard({
-    Key? key,
+    super.key,
     required this.item,
     required this.count,
     required this.onUse,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Stack(
         children: [
           Column(
@@ -32,33 +28,37 @@ class UserItemCard extends StatelessWidget {
               // 物品图片
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: item.productImage.isEmpty 
-                    ? _buildErrorImage()
-                    : FutureBuilder<String>(
-                        future: ImageUtils.getAbsolutePath(item.productImage),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done) {
-                            if (snapshot.hasData) {
-                              final imagePath = snapshot.data!;
-                              return isNetworkImage(imagePath)
-                                  ? Image.network(
+                child:
+                    item.productImage.isEmpty
+                        ? _buildErrorImage()
+                        : FutureBuilder<String>(
+                          future: ImageUtils.getAbsolutePath(item.productImage),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              if (snapshot.hasData) {
+                                final imagePath = snapshot.data!;
+                                return isNetworkImage(imagePath)
+                                    ? Image.network(
                                       imagePath,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          _buildErrorImage(),
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              _buildErrorImage(),
                                     )
-                                  : Image.file(
+                                    : Image.file(
                                       File(imagePath),
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          _buildErrorImage(),
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              _buildErrorImage(),
                                     );
+                              }
+                              return _buildErrorImage();
                             }
-                            return _buildErrorImage();
-                          }
-                          return _buildLoadingIndicator();
-                        },
-                      ),
+                            return _buildLoadingIndicator();
+                          },
+                        ),
               ),
               // 物品信息
               Padding(
@@ -68,7 +68,11 @@ class UserItemCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.shopping_bag, size: 16, color: Theme.of(context).primaryColor),
+                        Icon(
+                          Icons.shopping_bag,
+                          size: 16,
+                          color: Theme.of(context).primaryColor,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           item.productName,
@@ -79,20 +83,30 @@ class UserItemCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.inventory, size: 16, color: Theme.of(context).primaryColor),
+                        Icon(
+                          Icons.inventory,
+                          size: 16,
+                          color: Theme.of(context).primaryColor,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           '数量: $count',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 16, color: Theme.of(context).primaryColor),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: Theme.of(context).primaryColor,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           '有效期至: ${_formatDate(item.expireDate)}',
@@ -113,23 +127,24 @@ class UserItemCard extends StatelessWidget {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('使用确认'),
-                    content: Text('确定要使用 ${item.productName} 吗？'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
+                  builder:
+                      (context) => AlertDialog(
+                        title: const Text('使用确认'),
+                        content: Text('确定要使用 ${item.productName} 吗？'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('取消'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              onUse();
+                            },
+                            child: const Text('确定'),
+                          ),
+                        ],
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          onUse();
-                        },
-                        child: const Text('确定'),
-                      ),
-                    ],
-                  ),
                 );
               },
               child: const Icon(Icons.redeem, size: 20),

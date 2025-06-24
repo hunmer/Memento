@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../chat_plugin.dart';
 import '../models/message.dart';
-import '../models/channel.dart';
-import '../../../core/event/event.dart';
 
 /// 统一管理消息操作的处理器
 class MessageOperations {
@@ -19,52 +17,53 @@ class MessageOperations {
     // 显示编辑对话框
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('编辑消息'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller,
-              autofocus: true,
-              maxLines: null,
-              decoration: const InputDecoration(hintText: '输入新的消息内容...'),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('编辑消息'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.format_bold),
-                  onPressed: () => _insertMarkdownStyle(controller, '**'),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  maxLines: null,
+                  decoration: const InputDecoration(hintText: '输入新的消息内容...'),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.format_italic),
-                  onPressed: () => _insertMarkdownStyle(controller, '*'),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.format_strikethrough),
-                  onPressed: () => _insertMarkdownStyle(controller, '~~'),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.format_underline),
-                  onPressed: () => _insertMarkdownStyle(controller, '__'),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.format_bold),
+                      onPressed: () => _insertMarkdownStyle(controller, '**'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.format_italic),
+                      onPressed: () => _insertMarkdownStyle(controller, '*'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.format_strikethrough),
+                      onPressed: () => _insertMarkdownStyle(controller, '~~'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.format_underline),
+                      onPressed: () => _insertMarkdownStyle(controller, '__'),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('保存'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('保存'),
-          ),
-        ],
-      ),
     );
 
     if (result == true && controller.text.isNotEmpty) {
@@ -72,7 +71,7 @@ class MessageOperations {
         content: controller.text,
         editedAt: DateTime.now(),
       );
-      
+
       // 直接调用 updateMessage 方法更新消息
       await _chatPlugin.channelService.updateMessage(updatedMessage);
     }
@@ -85,20 +84,21 @@ class MessageOperations {
     // 显示确认对话框
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('删除消息'),
-        content: const Text('确定要删除这条消息吗？此操作不可撤销。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('删除消息'),
+            content: const Text('确定要删除这条消息吗？此操作不可撤销。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('删除'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -108,19 +108,20 @@ class MessageOperations {
         if (channelId == null) {
           throw Exception('消息没有关联的频道ID');
         }
-        
+
         // 获取频道
-        final channel = _chatPlugin.channelService.channels
-            .firstWhere((c) => c.id == channelId);
-        
+        final channel = _chatPlugin.channelService.channels.firstWhere(
+          (c) => c.id == channelId,
+        );
+
         // 从频道的消息列表中删除消息
         final updatedMessages = List<Message>.from(channel.messages)
           ..removeWhere((m) => m.id == message.id);
-        
+
         // 更新频道的消息列表
         channel.messages.clear();
         channel.messages.addAll(updatedMessages);
-        
+
         // 保存更新后的消息列表
         await _chatPlugin.channelService.saveMessages(
           channelId,
@@ -128,9 +129,9 @@ class MessageOperations {
         );
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('删除消息失败: ${e.toString()}')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('删除消息失败: ${e.toString()}')));
         }
       }
     }
@@ -141,9 +142,9 @@ class MessageOperations {
     if (message.type == MessageType.received ||
         message.type == MessageType.sent) {
       Clipboard.setData(ClipboardData(text: message.content));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已复制到剪贴板')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
     }
   }
 
@@ -165,11 +166,11 @@ class MessageOperations {
   Future<void> toggleFavorite(Message message) async {
     // 获取当前消息的metadata，如果不存在则创建一个新的
     final metadata = Map<String, dynamic>.from(message.metadata ?? {});
-    
+
     // 切换收藏状态
     final isFavorite = metadata['isFavorite'] as bool? ?? false;
     metadata['isFavorite'] = !isFavorite;
-    
+
     // 如果收藏，添加收藏时间
     if (metadata['isFavorite'] == true) {
       metadata['favoritedAt'] = DateTime.now().toIso8601String();
@@ -180,10 +181,10 @@ class MessageOperations {
 
     // 更新消息
     final updatedMessage = await message.copyWith(metadata: metadata);
-    
+
     // 直接调用 updateMessage 方法更新消息
     await _chatPlugin.channelService.updateMessage(updatedMessage);
-    
+
     // 显示操作结果
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -193,33 +194,6 @@ class MessageOperations {
         ),
       );
     }
-  }
-
-  /// 根据消息找到对应的频道
-  Channel? _findMessageChannel(Message message) {
-    // 如果消息中包含频道信息（时间线视图），则直接使用
-    final channelId = message.channelId;
-    if (channelId != null) {
-      try {
-        return _chatPlugin.channelService.channels
-            .firstWhere((c) => c.id == channelId);
-      } catch (_) {
-        // 如果找不到频道，继续尝试其他方法
-      }
-    }
-
-    // 遍历所有频道查找消息
-    for (final channel in _chatPlugin.channelService.channels) {
-      if (channel.messages.any((m) => m.id == message.id)) {
-        return channel;
-      }
-    }
-
-    // 如果找不到对应的频道，显示错误提示
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('无法找到消息所属的频道')),
-    );
-    return null;
   }
 
   /// 插入 Markdown 样式
@@ -234,7 +208,8 @@ class MessageOperations {
     controller.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(
-        offset: selection.baseOffset +
+        offset:
+            selection.baseOffset +
             style.length * 2 +
             selection.textInside(text).length,
       ),

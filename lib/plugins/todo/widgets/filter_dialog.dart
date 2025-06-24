@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import '../models/models.dart';
 
 class FilterDialog extends StatefulWidget {
@@ -56,15 +54,14 @@ class _FilterDialogState extends State<FilterDialog> {
               // 优先级选择
               DropdownButtonFormField<TaskPriority>(
                 value: _selectedPriority,
-                decoration: const InputDecoration(
-                  labelText: 'Priority',
-                ),
-                items: TaskPriority.values.map((priority) {
-                  return DropdownMenuItem(
-                    value: priority,
-                    child: Text(priority.toString().split('.').last),
-                  );
-                }).toList(),
+                decoration: const InputDecoration(labelText: 'Priority'),
+                items:
+                    TaskPriority.values.map((priority) {
+                      return DropdownMenuItem(
+                        value: priority,
+                        child: Text(priority.toString().split('.').last),
+                      );
+                    }).toList(),
                 onChanged: (value) {
                   setState(() {
                     _selectedPriority = value;
@@ -82,14 +79,19 @@ class _FilterDialogState extends State<FilterDialog> {
               const SizedBox(height: 8),
               Wrap(
                 spacing: 4,
-                children: _selectedTags.map((tag) => Chip(
-                  label: Text(tag),
-                  onDeleted: () {
-                    setState(() {
-                      _selectedTags.remove(tag);
-                    });
-                  },
-                )).toList(),
+                children:
+                    _selectedTags
+                        .map(
+                          (tag) => Chip(
+                            label: Text(tag),
+                            onDeleted: () {
+                              setState(() {
+                                _selectedTags.remove(tag);
+                              });
+                            },
+                          ),
+                        )
+                        .toList(),
               ),
               const SizedBox(height: 16),
 
@@ -98,9 +100,11 @@ class _FilterDialogState extends State<FilterDialog> {
                 children: [
                   Expanded(
                     child: ListTile(
-                      title: Text(_startDate == null 
-                          ? 'Start Date' 
-                          : 'Start: ${_startDate!.toLocal()}'),
+                      title: Text(
+                        _startDate == null
+                            ? 'Start Date'
+                            : 'Start: ${_startDate!.toLocal()}',
+                      ),
                       onTap: () async {
                         final date = await showDatePicker(
                           context: context,
@@ -118,9 +122,11 @@ class _FilterDialogState extends State<FilterDialog> {
                   ),
                   Expanded(
                     child: ListTile(
-                      title: Text(_endDate == null 
-                          ? 'End Date' 
-                          : 'End: ${_endDate!.toLocal()}'),
+                      title: Text(
+                        _endDate == null
+                            ? 'End Date'
+                            : 'End: ${_endDate!.toLocal()}',
+                      ),
                       onTap: () async {
                         final date = await showDatePicker(
                           context: context,
@@ -195,10 +201,11 @@ class _FilterDialogState extends State<FilterDialog> {
   Future<void> _showTagSelector(BuildContext context) async {
     final selected = await showDialog<List<String>>(
       context: context,
-      builder: (context) => MultiSelectDialog(
-        items: widget.availableTags,
-        initialSelected: _selectedTags,
-      ),
+      builder:
+          (context) => MultiSelectDialog(
+            items: widget.availableTags,
+            initialSelected: _selectedTags,
+          ),
     );
     if (selected != null) {
       setState(() {
@@ -237,21 +244,22 @@ class _MultiSelectDialogState extends State<MultiSelectDialog> {
       title: const Text('Select Tags'),
       content: SingleChildScrollView(
         child: Column(
-          children: widget.items.map((item) {
-            return CheckboxListTile(
-              title: Text(item),
-              value: _selectedItems.contains(item),
-              onChanged: (bool? value) {
-                setState(() {
-                  if (value == true) {
-                    _selectedItems.add(item);
-                  } else {
-                    _selectedItems.remove(item);
-                  }
-                });
-              },
-            );
-          }).toList(),
+          children:
+              widget.items.map((item) {
+                return CheckboxListTile(
+                  title: Text(item),
+                  value: _selectedItems.contains(item),
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        _selectedItems.add(item);
+                      } else {
+                        _selectedItems.remove(item);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
         ),
       ),
       actions: [

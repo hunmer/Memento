@@ -14,14 +14,14 @@ class AppShortcutManager {
   factory AppShortcutManager() => _instance;
   AppShortcutManager._internal();
 
-  final LoggerUtil? _logger = LoggerUtil();
+  final LoggerUtil _logger = LoggerUtil();
 
   /// 初始化快捷方式监听
   void initialize() {
     try {
       FlutterShortcut.initialize(debug: true);
       FlutterShortcut.listenAction((action) {
-        _logger?.log('Shortcut action received: $action', level: 'DEBUG');
+        _logger.log('Shortcut action received: $action', level: 'DEBUG');
         eventManager.broadcast(
           'shortcut_action',
           ShortcutEventArgs(action: action),
@@ -46,10 +46,7 @@ class AppShortcutManager {
       // );
       eventManager.subscribe('shortcut_action', _handleAction);
     } catch (e) {
-      _logger?.log(
-        'Failed to initialize shortcut listener: $e',
-        level: 'ERROR',
-      );
+      _logger.log('Failed to initialize shortcut listener: $e', level: 'ERROR');
       rethrow;
     }
   }
@@ -67,7 +64,7 @@ class AppShortcutManager {
         // 处理消息快捷方式
         break;
       default:
-        _logger?.log('Unknown shortcut action: $action', level: 'WARNING');
+        _logger.log('Unknown shortcut action: $action', level: 'WARNING');
     }
   }
 
@@ -89,9 +86,9 @@ class AppShortcutManager {
           shortcutIconAsset: iconAsset,
         ),
       );
-      _logger?.log('Added shortcut: $id ($action)', level: 'DEBUG');
+      _logger.log('Added shortcut: $id ($action)', level: 'DEBUG');
     } catch (e) {
-      _logger?.log('Failed to add shortcut: $e', level: 'ERROR');
+      _logger.log('Failed to add shortcut: $e', level: 'ERROR');
       rethrow;
     }
   }
@@ -114,9 +111,9 @@ class AppShortcutManager {
           shortcutIconAsset: iconAsset ?? ShortcutIconAsset.flutterAsset,
         ),
       );
-      _logger?.log('Updated shortcut: $id', level: 'DEBUG');
+      _logger.log('Updated shortcut: $id', level: 'DEBUG');
     } catch (e) {
-      _logger?.log('Failed to update shortcut: $e', level: 'ERROR');
+      _logger.log('Failed to update shortcut: $e', level: 'ERROR');
       rethrow;
     }
   }
@@ -125,9 +122,9 @@ class AppShortcutManager {
   void setShortcuts(List<ShortcutItem> items) {
     try {
       FlutterShortcut.setShortcutItems(shortcutItems: items);
-      _logger?.log('Set ${items.length} shortcuts', level: 'DEBUG');
+      _logger.log('Set ${items.length} shortcuts', level: 'DEBUG');
     } catch (e) {
-      _logger?.log('Failed to set shortcuts: $e', level: 'ERROR');
+      _logger.log('Failed to set shortcuts: $e', level: 'ERROR');
       rethrow;
     }
   }
@@ -136,9 +133,9 @@ class AppShortcutManager {
   void clearShortcuts() {
     try {
       FlutterShortcut.clearShortcutItems();
-      _logger?.log('Cleared all shortcuts', level: 'DEBUG');
+      _logger.log('Cleared all shortcuts', level: 'DEBUG');
     } catch (e) {
-      _logger?.log('Failed to clear shortcuts: $e', level: 'ERROR');
+      _logger.log('Failed to clear shortcuts: $e', level: 'ERROR');
       rethrow;
     }
   }

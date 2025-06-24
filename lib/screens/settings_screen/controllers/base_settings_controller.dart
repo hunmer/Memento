@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../main.dart';
-import 'rebuild_controller.dart';
 
 class BaseSettingsController extends ChangeNotifier {
   final bool _mounted = true;

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 
 class LoggerUtil {

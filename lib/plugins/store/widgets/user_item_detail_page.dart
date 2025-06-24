@@ -11,11 +11,11 @@ class UserItemDetailPage extends StatefulWidget {
   final int initialIndex;
 
   const UserItemDetailPage({
-    Key? key,
+    super.key,
     required this.controller,
     required this.items,
     this.initialIndex = 0,
-  }) : super(key: key);
+  });
 
   @override
   _UserItemDetailPageState createState() => _UserItemDetailPageState();
@@ -50,23 +50,24 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
               final currentItem = widget.items[_currentIndex];
               showDialog(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('使用确认'),
-                  content: Text('确定要使用 ${currentItem.productName} 吗？'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('取消'),
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('使用确认'),
+                      content: Text('确定要使用 ${currentItem.productName} 吗？'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('取消'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _useCurrentItem();
+                          },
+                          child: const Text('确定'),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _useCurrentItem();
-                      },
-                      child: const Text('确定'),
-                    ),
-                  ],
-                ),
               );
             },
           ),
@@ -95,13 +96,15 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
                       height: 24,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _currentIndex == i 
-                            ? Theme.of(context).primaryColor 
-                            : Colors.grey.withOpacity(0.3),
+                        color:
+                            _currentIndex == i
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.withOpacity(0.3),
                         border: Border.all(
-                          color: _currentIndex == i 
-                              ? Theme.of(context).primaryColor 
-                              : Colors.grey,
+                          color:
+                              _currentIndex == i
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey,
                           width: 1,
                         ),
                       ),
@@ -109,7 +112,10 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
                         child: Text(
                           '${i + 1}',
                           style: TextStyle(
-                            color: _currentIndex == i ? Colors.white : Colors.grey[700],
+                            color:
+                                _currentIndex == i
+                                    ? Colors.white
+                                    : Colors.grey[700],
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -148,32 +154,41 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
           // 物品图片
           AspectRatio(
             aspectRatio: 16 / 9,
-            child: item.productImage.isEmpty 
-                ? const Icon(Icons.broken_image, size: 48)
-                : FutureBuilder<String>(
-                    future: ImageUtils.getAbsolutePath(item.productImage),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done) {
-                        if (snapshot.hasData) {
-                          final imagePath = snapshot.data!;
-                          return isNetworkImage(imagePath)
-                              ? Image.network(
+            child:
+                item.productImage.isEmpty
+                    ? const Icon(Icons.broken_image, size: 48)
+                    : FutureBuilder<String>(
+                      future: ImageUtils.getAbsolutePath(item.productImage),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.hasData) {
+                            final imagePath = snapshot.data!;
+                            return isNetworkImage(imagePath)
+                                ? Image.network(
                                   imagePath,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.broken_image, size: 48),
+                                  errorBuilder:
+                                      (context, error, stackTrace) =>
+                                          const Icon(
+                                            Icons.broken_image,
+                                            size: 48,
+                                          ),
                                 )
-                              : Image.file(
+                                : Image.file(
                                   File(imagePath),
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.broken_image, size: 48),
+                                  errorBuilder:
+                                      (context, error, stackTrace) =>
+                                          const Icon(
+                                            Icons.broken_image,
+                                            size: 48,
+                                          ),
                                 );
+                          }
                         }
-                      }
-                      return const Center(child: CircularProgressIndicator());
-                    },
-                  ),
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    ),
           ),
           const SizedBox(height: 20),
           // 物品信息
@@ -232,10 +247,7 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
         children: [
           Icon(icon, size: 20, color: Theme.of(context).primaryColor),
           const SizedBox(width: 12),
-          Text(
-            '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
           Text(value),
         ],
       ),
@@ -246,13 +258,13 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
     final item = widget.items[_currentIndex];
     if (await widget.controller.useItem(item)) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('使用成功')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('使用成功')));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('物品已过期')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('物品已过期')));
     }
   }
 

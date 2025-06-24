@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:Memento/core/notification_manager.dart';
 import '../../../../core/event/event_manager.dart';
-import '../../../../core/event/event_args.dart';
 
 class TimerItemEventArgs extends EventArgs {
   final TimerItem timer;

@@ -1,13 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/utils/file_utils.dart';
 import 'package:Memento/core/utils/zip.dart';
 import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
-import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
 
 class DataManagementScreen extends StatefulWidget {
@@ -440,8 +437,9 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
   String _formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024)
+    if (bytes < 1024 * 1024 * 1024) {
       return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
@@ -523,7 +521,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                           ),
                           onTap: () {
                             if (isDirectory) {
-                              _navigateToDirectory(file as Directory);
+                              _navigateToDirectory(file);
                             }
                           },
                           onLongPress: () {
@@ -599,7 +597,7 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
 
     try {
       final items = await currentDirectory.list().toList();
-      final dirs = items.where((item) => item is Directory).toList();
+      final dirs = items.whereType<Directory>().toList();
       dirs.sort((a, b) => a.path.compareTo(b.path));
 
       setState(() {

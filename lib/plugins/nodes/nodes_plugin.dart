@@ -111,10 +111,8 @@ class NodesPlugin extends PluginBase {
   @override
   IconData get icon => Icons.account_tree;
 
-  @override
   List<Locale> get supportedLocales => const [Locale('en'), Locale('zh')];
 
-  @override
   LocalizationsDelegate<NodesLocalizations> get localizationsDelegate =>
       NodesLocalizationsDelegate.delegate;
 

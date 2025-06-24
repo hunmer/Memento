@@ -4,26 +4,22 @@ import 'package:flutter/material.dart';
 import '../models/channel.dart';
 import '../models/message.dart';
 import '../chat_plugin.dart';
-import 'user_service.dart';
 import '../../../core/event/event.dart';
 
 /// 负责管理频道相关的功能
 class ChannelService {
   final ChatPlugin _plugin;
   final List<Channel> _channels = [];
-  
-  // 获取 UserService 实例
-  UserService get _userService => _plugin.userService;
-  
+
   // 当前活跃频道
   Channel? _currentChannel;
-  
+
   // 获取频道列表的getter
   List<Channel> get channels => _channels;
-  
+
   // 获取当前活跃频道的getter
   Channel? get currentChannel => _currentChannel;
-  
+
   // 设置当前活跃频道
   void setCurrentChannel(Channel? channel) {
     _currentChannel = channel;
@@ -84,7 +80,9 @@ class ChannelService {
             messages = await Future.wait(
               messagesJson.map((m) async {
                 // 创建基础消息对象
-                Message message = await Message.fromJson(m as Map<String, dynamic>);
+                Message message = await Message.fromJson(
+                  m as Map<String, dynamic>,
+                );
                 // 如果消息没有channelId，则设置当前频道的ID
                 if (message.channelId == null) {
                   message = await message.copyWith(channelId: channelId);
@@ -95,10 +93,7 @@ class ChannelService {
           }
 
           // 创建频道对象（草稿信息已包含在channelJson中）
-          final channel = Channel.fromJson(
-            channelJson,
-            messages: messages,
-          );
+          final channel = Channel.fromJson(channelJson, messages: messages);
 
           // 添加到频道列表
           _channels.add(channel);
@@ -133,7 +128,7 @@ class ChannelService {
 
     // 重新排序频道列表
     _channels.sort(Channel.compare);
-    
+
     // 通知监听器数据已更新，确保UI刷新
     _plugin.notifyListeners();
   }
@@ -152,27 +147,27 @@ class ChannelService {
   ) async {
     // 找到并更新频道
     final channel = _channels.firstWhere((c) => c.id == channelId);
-    
+
     // 合并现有元数据和新元数据
     Map<String, dynamic> updatedMetadata = {};
     if (channel.metadata != null) {
       updatedMetadata.addAll(channel.metadata!);
     }
     updatedMetadata.addAll(metadata);
-    
+
     final updatedChannel = channel.copyWith(metadata: updatedMetadata);
-    
+
     // 如果是当前活跃频道，更新 _currentChannel
     if (_currentChannel?.id == channelId) {
       _currentChannel = updatedChannel;
     }
-    
+
     // 保存更新后的频道
     await saveChannel(updatedChannel);
-    
+
     // 确保 UI 得到更新
     _plugin.notifyListeners();
-    
+
     return updatedChannel;
   }
 
@@ -187,22 +182,22 @@ class ChannelService {
       List<String> components = pathWithoutPrefix.split(RegExp(r'[/\\\\]'));
       normalizedPath = './${components.join('/')}';
     }
-    
+
     // 找到并更新频道
     final channel = _channels.firstWhere((c) => c.id == channelId);
     final updatedChannel = channel.copyWith(backgroundPath: normalizedPath);
-    
+
     // 如果是当前活跃频道，更新 _currentChannel
     if (_currentChannel?.id == channelId) {
       _currentChannel = updatedChannel;
     }
-    
+
     // 保存更新后的频道
     await saveChannel(updatedChannel);
-    
+
     // 确保 UI 得到更新
     _plugin.notifyListeners();
-    
+
     return updatedChannel;
   }
 
@@ -220,7 +215,7 @@ class ChannelService {
   Future<void> saveMessages(String channelId, List<Message> messages) async {
     // 立即通知UI更新，确保消息显示
     _plugin.notifyListeners();
-    
+
     try {
       // 保存消息
       final messageJsonList = await Future.wait(
@@ -251,10 +246,10 @@ class ChannelService {
   }
 
   /// 保存单条消息
-  /// 
+  ///
   /// 此方法可以保存单条消息而不需要传入整个消息列表。
   /// 使用消息的channelId属性来定位频道，更新消息，然后保存整个频道的消息列表。
-  /// 
+  ///
   /// [message] 要保存的消息对象
   /// 返回 `true` 表示保存成功，`false` 表示未找到消息所属的频道
   Future<bool> saveMessage(Message message) async {
@@ -271,7 +266,7 @@ class ChannelService {
 
     // 查找消息在频道中的索引
     final messageIndex = _channels[channelIndex].messages.indexWhere(
-      (m) => m.id == message.id
+      (m) => m.id == message.id,
     );
 
     // 更新或添加消息
@@ -282,7 +277,7 @@ class ChannelService {
     }
 
     // 检查是否需要更新最后一条消息
-    if (_channels[channelIndex].lastMessage == null || 
+    if (_channels[channelIndex].lastMessage == null ||
         message.date.isAfter(_channels[channelIndex].lastMessage!.date) ||
         message.id == _channels[channelIndex].lastMessage!.id) {
       _channels[channelIndex].lastMessage = message;
@@ -293,7 +288,7 @@ class ChannelService {
 
     // 异步保存消息列表
     await saveMessages(message.channelId!, _channels[channelIndex].messages);
-    
+
     // 再次通知以确保存储同步后的状态更新
     _plugin.notifyListeners();
     return true;
@@ -322,11 +317,11 @@ class ChannelService {
 
   // 加载草稿
   Future<String?> loadDraft(String channelId) async {
-      final index = _channels.indexWhere((c) => c.id == channelId);
-      if (index != -1) {
-        return _channels[index].draft;
-      }
-      return '';
+    final index = _channels.indexWhere((c) => c.id == channelId);
+    if (index != -1) {
+      return _channels[index].draft;
+    }
+    return '';
   }
 
   // 保存所有频道信息
@@ -387,20 +382,17 @@ class ChannelService {
   }
 
   // 添加新消息
-  Future<void> addMessage(
-    String channelId,
-    Message messageFuture,
-  ) async {
+  Future<void> addMessage(String channelId, Message messageFuture) async {
     try {
       // 获取消息对象
-      Message message = await messageFuture;
-      
+      Message message = messageFuture;
+
       // 如果消息没有channelId，则设置当前频道ID
       if (message.channelId == null) {
         // 创建一个包含channelId的新消息
         message = await message.copyWith(channelId: channelId);
       }
-      
+
       // 找到对应频道
       final channelIndex = _channels.indexWhere((c) => c.id == channelId);
       if (channelIndex == -1) return;
@@ -410,23 +402,21 @@ class ChannelService {
 
       // 更新频道的最后一条消息
       _channels[channelIndex].lastMessage = message;
-      
-     
+
       // 异步保存到存储
       await Future.wait([
         saveMessages(channelId, _channels[channelIndex].messages),
         saveDraft(channelId, ''),
       ]);
-      
+
       // 发送消息更新事件
       eventManager.broadcast(
         'onMessageUpdated',
         Value<Message>(message, 'onMessageUpdated'),
       );
-      
-       // 立即通知UI更新，确保消息显示
+
+      // 立即通知UI更新，确保消息显示
       _plugin.notifyListeners();
-      
     } catch (e) {
       debugPrint('Error adding message: $e');
       // 确保即使出错也通知UI更新
@@ -489,7 +479,7 @@ class ChannelService {
 
   // 更新消息
   /// 更新指定消息的内容
-  /// 
+  ///
   /// 此方法会更新频道中指定ID的消息内容，并触发UI刷新
   Future<void> updateMessage(Message message, {bool persist = true}) async {
     if (message.channelId == null) {
@@ -505,7 +495,7 @@ class ChannelService {
 
     // 查找消息在频道中的索引
     final messageIndex = _channels[channelIndex].messages.indexWhere(
-      (m) => m.id == message.id
+      (m) => m.id == message.id,
     );
 
     // 如果找到消息则更新
@@ -519,7 +509,10 @@ class ChannelService {
 
       // 根据persist参数决定是否保存到存储
       if (persist) {
-        await saveMessages(message.channelId!, _channels[channelIndex].messages);
+        await saveMessages(
+          message.channelId!,
+          _channels[channelIndex].messages,
+        );
       }
 
       // 通过事件系统广播消息更新
@@ -562,9 +555,9 @@ class ChannelService {
     }
     return count;
   }
-  
+
   /// 获取指定频道的所有消息
-  /// 
+  ///
   /// [channelId] 频道ID
   /// 返回频道的消息列表，如果频道不存在则返回null
   Future<List<Message>?> getChannelMessages(String channelId) async {
@@ -574,7 +567,7 @@ class ChannelService {
         debugPrint('Channel not found: $channelId');
         return null;
       }
-      
+
       return List<Message>.from(_channels[channelIndex].messages);
     } catch (e) {
       debugPrint('Error getting channel messages: $e');
@@ -586,9 +579,7 @@ class ChannelService {
   Message? getMessageById(String messageId) {
     for (var channel in _channels) {
       try {
-        return channel.messages.firstWhere(
-          (msg) => msg.id == messageId,
-        );
+        return channel.messages.firstWhere((msg) => msg.id == messageId);
       } catch (e) {
         // 在当前频道中没有找到消息，继续查找下一个频道
         continue;
@@ -602,23 +593,31 @@ class ChannelService {
   /// [count] 获取的消息数量
   /// [channelId] 频道ID，如果提供则只在指定频道中查找
   /// 返回消息列表，按时间从旧到新排序
-  List<Message> getMessagesBefore(String messageId, int count, {String? channelId}) {
+  List<Message> getMessagesBefore(
+    String messageId,
+    int count, {
+    String? channelId,
+  }) {
     // 如果提供了频道ID，只在指定频道中查找
     if (channelId != null) {
-      final channel = _channels.firstWhere(
-        (c) => c.id == channelId,
-      );
-      
+      final channel = _channels.firstWhere((c) => c.id == channelId);
+
       // 找到消息在当前频道的位置
       final index = channel.messages.indexWhere((msg) => msg.id == messageId);
       if (index != -1) {
         // 计算要获取的消息范围(从当前消息向前数count个)
-        final index1 = index ;
+        final index1 = index;
         final index2 = index1 - count;
         final startIndex = min(index1, index2);
         final endIndex = max(index1, index2);
         // 返回指定数量的消息，按时间从旧到新排序
-        final messages = channel.messages.sublist(max(0, startIndex), min(endIndex, channel.messages.length - 1)).toList();
+        final messages =
+            channel.messages
+                .sublist(
+                  max(0, startIndex),
+                  min(endIndex, channel.messages.length - 1),
+                )
+                .toList();
         messages.sort((a, b) => a.date.compareTo(b.date)); // 确保按时间从旧到新排序
         return messages;
       }

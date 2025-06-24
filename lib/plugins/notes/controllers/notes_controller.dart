@@ -14,12 +14,12 @@ class NotesController {
   // 发送事件通知
   void _notifyEvent(String action, Note note) {
     final eventArgs = ItemEventArgs(
-      eventName: 'note_${action}',
+      eventName: 'note_$action',
       itemId: note.id,
       title: note.title,
       action: action,
     );
-    EventManager.instance.broadcast('note_${action}', eventArgs);
+    EventManager.instance.broadcast('note_$action', eventArgs);
   }
 
   NotesController(this._storage);

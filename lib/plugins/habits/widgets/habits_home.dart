@@ -1,5 +1,4 @@
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_view.dart';
-import 'package:Memento/plugins/habits/widgets/habits_list/habits_list.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
