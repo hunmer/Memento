@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class CompletionRecord {
   final String id;
   final String parentId;

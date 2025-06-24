@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'floating_ball_service.dart';
 import '../../dialogs/plugin_list_dialog.dart';
 import '../plugin_manager.dart';

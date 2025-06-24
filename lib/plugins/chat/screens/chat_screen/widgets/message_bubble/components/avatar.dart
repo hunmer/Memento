@@ -9,31 +9,25 @@ class MessageAvatar extends StatefulWidget {
   final User user;
   final VoidCallback? onTap;
 
-  const MessageAvatar({
-    super.key,
-    required this.user,
-    this.onTap,
-  });
-
+  const MessageAvatar({super.key, required this.user, this.onTap});
 
   @override
   State<MessageAvatar> createState() => _MessageAvatarState();
 }
 
 class _MessageAvatarState extends State<MessageAvatar> {
-  late String _subscriptionId;
   late User _currentUser;
-  
+
   User get user => _currentUser;
-  
+
   @override
   void initState() {
     super.initState();
     _currentUser = widget.user;
     // 订阅用户头像更新事件
-    _subscriptionId = EventManager.instance.subscribe(
+    EventManager.instance.subscribe(
       UserEventNames.userAvatarUpdated,
-      _handleAvatarUpdate
+      _handleAvatarUpdate,
     );
   }
 
@@ -45,13 +39,10 @@ class _MessageAvatarState extends State<MessageAvatar> {
     }
   }
 
-
   @override
   void dispose() {
     // 取消订阅
-    EventManager.instance.unsubscribe(
-      UserEventNames.userAvatarUpdated
-    );
+    EventManager.instance.unsubscribe(UserEventNames.userAvatarUpdated);
     super.dispose();
   }
 
@@ -65,7 +56,7 @@ class _MessageAvatarState extends State<MessageAvatar> {
       }
     }
   }
-  
+
   Widget _buildDefaultAvatar(BuildContext context) {
     return Center(
       child: Text(
@@ -91,25 +82,26 @@ class _MessageAvatarState extends State<MessageAvatar> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Theme.of(context).colorScheme.primaryContainer,
-        ),
-        child: user.iconPath != null && user.iconPath != ''
-            ? FutureBuilder<String>(
-                future: ImageUtils.getAbsolutePath(user.iconPath!),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data != null) {
-                      return ClipOval(
-                        child: Image.file(
-                          File(snapshot.data!),
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                        ),
-                      );
-                    }
-                    return _buildDefaultAvatar(context);
-                  },
-                )
-              : _buildDefaultAvatar(context),
+          ),
+          child:
+              user.iconPath != null && user.iconPath != ''
+                  ? FutureBuilder<String>(
+                    future: ImageUtils.getAbsolutePath(user.iconPath!),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data != null) {
+                        return ClipOval(
+                          child: Image.file(
+                            File(snapshot.data!),
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      }
+                      return _buildDefaultAvatar(context);
+                    },
+                  )
+                  : _buildDefaultAvatar(context),
         ),
       ),
     );

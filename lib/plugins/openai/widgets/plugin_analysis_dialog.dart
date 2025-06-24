@@ -9,7 +9,6 @@ import '../controllers/prompt_replacement_controller.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/ai_agent.dart';
 import '../widgets/agent_list_drawer.dart';
-import '../services/plugin_analysis_service.dart';
 import '../widgets/plugin_method_selection_dialog.dart';
 import '../../../utils/image_utils.dart';
 import '../l10n/openai_localizations.dart';
@@ -21,7 +20,8 @@ class PluginAnalysisDialog extends StatefulWidget {
   State<PluginAnalysisDialog> createState() => _PluginAnalysisDialogState();
 }
 
-class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with TickerProviderStateMixin {
+class _PluginAnalysisDialogState extends State<PluginAnalysisDialog>
+    with TickerProviderStateMixin {
   // 构建智能体图标
   Widget _buildAgentIcon(AIAgent agent) {
     // 如果有头像，优先显示头像
@@ -35,36 +35,41 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: _getColorForServiceProvider(agent.serviceProviderId).withAlpha(128),
+                color: _getColorForServiceProvider(
+                  agent.serviceProviderId,
+                ).withAlpha(128),
                 width: 2,
               ),
             ),
             child: ClipOval(
-              child: agent.avatarUrl!.startsWith('http')
-                ? Image.network(
-                    agent.avatarUrl!,
-                    width: 48,
-                    height: 48,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildDefaultIcon(agent),
-                  )
-                : snapshot.hasData
-                    ? Image.file(
+              child:
+                  agent.avatarUrl!.startsWith('http')
+                      ? Image.network(
+                        agent.avatarUrl!,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (context, error, stackTrace) =>
+                                _buildDefaultIcon(agent),
+                      )
+                      : snapshot.hasData
+                      ? Image.file(
                         File(snapshot.data!),
                         width: 48,
                         height: 48,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            _buildDefaultIcon(agent),
+                        errorBuilder:
+                            (context, error, stackTrace) =>
+                                _buildDefaultIcon(agent),
                       )
-                    : _buildDefaultIcon(agent),
+                      : _buildDefaultIcon(agent),
             ),
           );
         },
       );
     }
-    
+
     // 如果有自定义图标，使用自定义图标
     if (agent.icon != null) {
       return Container(
@@ -72,16 +77,14 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
         height: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: agent.iconColor ?? _getColorForServiceProvider(agent.serviceProviderId),
+          color:
+              agent.iconColor ??
+              _getColorForServiceProvider(agent.serviceProviderId),
         ),
-        child: Icon(
-          agent.icon,
-          size: 24,
-          color: Colors.white,
-        ),
+        child: Icon(agent.icon, size: 24, color: Colors.white),
       );
     }
-    
+
     // 默认图标
     return _buildDefaultIcon(agent);
   }
@@ -95,11 +98,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
         shape: BoxShape.circle,
         color: _getColorForServiceProvider(agent.serviceProviderId),
       ),
-      child: const Icon(
-        Icons.smart_toy,
-        size: 24,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.smart_toy, size: 24, color: Colors.white),
     );
   }
 
@@ -120,13 +119,13 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
   }
 
   final TextEditingController _promptController = TextEditingController();
-  final PluginAnalysisService _service = PluginAnalysisService();
   AIAgent? _selectedAgent;
-  String _responseMessage = '';  // 改为空字符串初始值，方便拼接
+  String _responseMessage = ''; // 改为空字符串初始值，方便拼接
   bool _isLoading = false;
   late TabController _tabController;
   final StreamController<String> _streamController = StreamController<String>();
-  final PromptReplacementController _promptReplacementController = PromptReplacementController();
+  final PromptReplacementController _promptReplacementController =
+      PromptReplacementController();
 
   @override
   void initState() {
@@ -149,55 +148,71 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => AgentListDrawer(
-        selectedAgents: _selectedAgent != null ? [{'id': _selectedAgent!.id, 'name': _selectedAgent!.name}] : const [],
-        onAgentSelected: (selectedAgents) async {
-          if (selectedAgents.isNotEmpty) {
-            try {
-               final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
-              final agentController = plugin.controller;
-              final selectedAgent = await agentController.getAgent(selectedAgents.first['id']!);
-              if (selectedAgent != null) {
-                setState(() {
-                  _selectedAgent = selectedAgent;
-                });
+      builder:
+          (context) => AgentListDrawer(
+            selectedAgents:
+                _selectedAgent != null
+                    ? [
+                      {'id': _selectedAgent!.id, 'name': _selectedAgent!.name},
+                    ]
+                    : const [],
+            onAgentSelected: (selectedAgents) async {
+              if (selectedAgents.isNotEmpty) {
+                try {
+                  final plugin =
+                      PluginManager.instance.getPlugin('openai')
+                          as OpenAIPlugin;
+                  final agentController = plugin.controller;
+                  final selectedAgent = await agentController.getAgent(
+                    selectedAgents.first['id']!,
+                  );
+                  if (selectedAgent != null) {
+                    setState(() {
+                      _selectedAgent = selectedAgent;
+                    });
+                  }
+                } catch (e) {
+                  // 在异步操作后使用 BuildContext 前先检查 mounted
+                  if (!mounted) return;
+
+                  // 获取当前上下文，而不是使用闭包中的上下文
+                  final currentContext = context;
+                  final currentLocalizations = OpenAILocalizations.of(
+                    currentContext,
+                  );
+                  ScaffoldMessenger.of(currentContext).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '${currentLocalizations.loadingProviders} $e',
+                      ),
+                    ),
+                  );
+                }
               }
-            } catch (e) {
-              // 在异步操作后使用 BuildContext 前先检查 mounted
-              if (!mounted) return;
-              
-              // 获取当前上下文，而不是使用闭包中的上下文
-              final currentContext = context;
-              final currentLocalizations = OpenAILocalizations.of(currentContext);
-              ScaffoldMessenger.of(currentContext).showSnackBar(
-                SnackBar(content: Text('${currentLocalizations.loadingProviders} $e')),
-              );
-            }
-          }
-        },
-        allowMultipleSelection: false,
-        title: localizations.selectAgent,
-        confirmButtonText: localizations.confirm,
-      ),
+            },
+            allowMultipleSelection: false,
+            title: localizations.selectAgent,
+            confirmButtonText: localizations.confirm,
+          ),
     );
   }
 
   // 处理发送到智能体的请求
   Future<void> _sendToAgent() async {
     final localizations = OpenAILocalizations.of(context);
-    
+
     // 验证输入
     if (_selectedAgent == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(localizations.noAgentSelected)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(localizations.noAgentSelected)));
       return;
     }
 
     setState(() {
       _isLoading = true;
     });
-    
+
     // 使用TabController切换到输出标签页
     _tabController.animateTo(1);
 
@@ -208,15 +223,15 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
       });
 
       // 在主线程中预处理所有方法替换
-      final processedReplacements = await _promptReplacementController.preprocessPromptReplacements(
-        _promptController.text
-      );
+      final processedReplacements = await _promptReplacementController
+          .preprocessPromptReplacements(_promptController.text);
 
       // 处理提示词替换
-      final processedPrompt = PromptReplacementController.applyProcessedReplacements(
-        _promptController.text,
-        processedReplacements
-      );
+      final processedPrompt =
+          PromptReplacementController.applyProcessedReplacements(
+            _promptController.text,
+            processedReplacements,
+          );
       String raw = '';
       // 直接在当前上下文处理流式响应
       await RequestService.streamResponse(
@@ -255,49 +270,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
   }
 
   // 在后台线程处理API请求的方法
-  static Future<String> _processInBackground(Map<String, dynamic> params) async {
-    final agent = params['agent'] as AIAgent;
-    final prompt = params['prompt'] as String;
-    final processedReplacements = params['processedReplacements'] as List<ProcessedMethodReplacement>;
-    final service = PluginAnalysisService();
 
-    try {
-      // 应用预处理的替换结果
-      final processedPrompt = PromptReplacementController.applyProcessedReplacements(
-        prompt,
-        processedReplacements
-      );
-      
-      // 创建一个Completer来处理异步响应
-      final completer = Completer<String>();
-      final responseBuffer = StringBuffer();
-      
-      // 使用RequestService直接发送请求
-      await RequestService.streamResponse(
-        agent: agent,
-        prompt: processedPrompt,
-        onToken: (token) {
-          responseBuffer.write(token);
-        },
-        onError: (error) {
-          if (!completer.isCompleted) {
-            completer.completeError(error);
-          }
-        },
-        onComplete: () {
-          if (!completer.isCompleted) {
-            completer.complete(responseBuffer.toString());
-          }
-        },
-        replacePrompt: true,
-      );
-      
-      return await completer.future;
-    } catch (e) {
-      return "ERROR: $e";
-    }
-    // 注意：不需要在这里清理方法，因为我们现在在主线程中预处理了
-  }
   // 构建表单标签页
   Widget _buildFormTab(OpenAILocalizations localizations) {
     return Column(
@@ -325,10 +298,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
                       const SizedBox(height: 4),
                       Text(
                         _selectedAgent!.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -339,10 +309,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
                 Expanded(
                   child: Text(
                     localizations.noAgentSelected,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ),
               IconButton(
@@ -353,7 +320,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
             ],
           ),
         ),
-        
+
         // 提示词输入
         const SizedBox(height: 16),
         TextField(
@@ -366,7 +333,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
           maxLines: 8,
           minLines: 4,
         ),
-        
+
         // 添加分析方法按钮
         const SizedBox(height: 16),
         Center(
@@ -376,15 +343,16 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
                 context: context,
                 builder: (context) => const PluginMethodSelectionDialog(),
               );
-              
+
               if (result != null && mounted) {
                 setState(() {
                   // 在当前提示词的末尾添加 JSON 字符串
                   final currentText = _promptController.text;
                   final jsonString = result['jsonString'] ?? '';
-                  final newText = currentText.isEmpty
-                      ? jsonString
-                      : '$currentText\n$jsonString';
+                  final newText =
+                      currentText.isEmpty
+                          ? jsonString
+                          : '$currentText\n$jsonString';
                   _promptController.text = newText;
                 });
               }
@@ -419,10 +387,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MarkdownBody(
-                    data: _responseMessage,
-                    selectable: true,
-                  ),
+                  MarkdownBody(data: _responseMessage, selectable: true),
                   if (_isLoading)
                     const Padding(
                       padding: EdgeInsets.only(top: 8.0),
@@ -440,11 +405,11 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
   @override
   Widget build(BuildContext context) {
     final localizations = OpenAILocalizations.of(context);
-    
+
     // 获取屏幕尺寸
     final screenSize = MediaQuery.of(context).size;
     final dialogHeight = screenSize.height * 0.8; // 设置为屏幕高度的80%
-    
+
     return Dialog(
       child: Container(
         width: 600,
@@ -466,35 +431,35 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog> with Ticker
               ],
             ),
             const Divider(),
-            
+
             // 添加标签页
             Expanded(
               child: Column(
-                  children: [
-                    TabBar(
+                children: [
+                  TabBar(
+                    controller: _tabController,
+                    tabs: [
+                      Tab(text: localizations.form),
+                      Tab(text: localizations.output),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: TabBarView(
                       controller: _tabController,
-                      tabs: [
-                        Tab(text: localizations.form),
-                        Tab(text: localizations.output),
+                      children: [
+                        // 表单标签页内容
+                        _buildFormTab(localizations),
+
+                        // 输出标签页内容
+                        _buildOutputTab(localizations),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          // 表单标签页内容
-                          _buildFormTab(localizations),
-                          
-                          // 输出标签页内容
-                          _buildOutputTab(localizations),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            
+            ),
+
             // 底部按钮
             const SizedBox(height: 16),
             Row(

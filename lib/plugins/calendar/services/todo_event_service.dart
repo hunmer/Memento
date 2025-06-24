@@ -26,7 +26,7 @@ class TodoEventService {
           endTime: task.dueDate,
           icon: task.statusIcon, // 使用任务状态图标
           color: _getPriorityColor(task.priority), // 根据任务优先级设置颜色
-          source: 'todo' // 标记来源为todo插件
+          source: 'todo', // 标记来源为todo插件
         );
         events.add(event);
       }
@@ -44,8 +44,7 @@ class TodoEventService {
         return Colors.orange.shade300;
       case TaskPriority.low:
         return Colors.blue.shade300;
-      default:
-        return Colors.grey.shade300; // 添加默认颜色
+      // 添加默认颜色
     }
   }
 }

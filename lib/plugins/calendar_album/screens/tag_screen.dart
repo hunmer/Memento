@@ -5,7 +5,7 @@ import '../controllers/calendar_controller.dart';
 import '../l10n/calendar_album_localizations.dart';
 import '../widgets/entry_list.dart';
 import 'entry_editor_screen.dart';
-import 'entry_detail_screen.dart' hide Center, SizedBox;
+import 'entry_detail_screen.dart';
 
 class TagScreen extends StatefulWidget {
   const TagScreen({super.key});
@@ -18,7 +18,7 @@ class _TagItem {
   final String tag;
   bool active;
 
-  _TagItem(this.tag, {this.active = true});
+  _TagItem(this.tag, {this.active = false});
 }
 
 class _TagScreenState extends State<TagScreen> {
@@ -84,8 +84,10 @@ class _TagScreenState extends State<TagScreen> {
                                 tagItem.active = selected;
                               });
                             },
-                            backgroundColor: color.withOpacity(0.2),
-                            selectedColor: color.withOpacity(0.6),
+                            backgroundColor: color.withAlpha(
+                              (0.2 * 255).toInt(),
+                            ),
+                            selectedColor: color.withAlpha((0.6 * 255).toInt()),
                             deleteIcon: const Icon(Icons.close, size: 18),
                             onDeleted: () {
                               setState(() {

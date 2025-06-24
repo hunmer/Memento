@@ -22,7 +22,6 @@ class _CalendarScreenState extends State<CalendarScreen>
   @override
   bool get wantKeepAlive => true;
   DateTime _focusedDay = DateTime.now();
-  var _forceRefresh = 0;
   final ScrollController _scrollController = ScrollController();
   bool _isInitialized = false;
 
@@ -97,6 +96,7 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l10n = CalendarAlbumLocalizations.of(context);
     final calendarController = Provider.of<CalendarController>(context);
     final tagController = Provider.of<TagController>(context);

@@ -14,19 +14,19 @@ class EventDetailCard extends StatelessWidget {
       return '提前$minutes分钟';
     }
   }
-  
+
   final CalendarEvent event;
   final VoidCallback onEdit;
   final VoidCallback onComplete;
   final VoidCallback onDelete;
 
   const EventDetailCard({
-    Key? key,
+    super.key,
     required this.event,
     required this.onEdit,
     required this.onComplete,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +40,7 @@ class EventDetailCard extends StatelessWidget {
             // 标题和图标
             Row(
               children: [
-                Icon(
-                  event.icon,
-                  size: 24,
-                  color: event.color,
-                ),
+                Icon(event.icon, size: 24, color: event.color),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -55,7 +51,7 @@ class EventDetailCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            
+
             // 时间信息
             _buildInfoRow(
               context,
@@ -71,44 +67,41 @@ class EventDetailCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 16),
-            
+
             // 描述
-            if (event.description?.isNotEmpty ?? false) ...[
-              _buildInfoRow(
-                context,
-                Icons.description,
-                event.description!,
-              ),
+            if (event.description.isNotEmpty) ...[
+              _buildInfoRow(context, Icons.description, event.description),
               const SizedBox(height: 16),
             ],
-            
+
             // 按钮行
-            if(event.source == 'default') Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildActionButton(
-                  context,
-                  '编辑',
-                  Icons.edit,
-                  Colors.blue,
-                  onEdit,
-                ),
-                _buildActionButton(
-                  context,
-                  '完成',
-                  Icons.check_circle,
-                  Colors.green,
-                  onComplete,
-                ),
-                _buildActionButton(
-                  context,
-                  '删除',
-                  Icons.delete,
-                  Colors.red,
-                  onDelete,
-                ),
-              ],
-            ),
+            if (event.source == 'default')
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildActionButton(
+                    context,
+                    '编辑',
+                    Icons.edit,
+                    Colors.blue,
+                    onEdit,
+                  ),
+                  _buildActionButton(
+                    context,
+                    '完成',
+                    Icons.check_circle,
+                    Colors.green,
+                    onComplete,
+                  ),
+                  _buildActionButton(
+                    context,
+                    '删除',
+                    Icons.delete,
+                    Colors.red,
+                    onDelete,
+                  ),
+                ],
+              ),
           ],
         ),
       ),
@@ -119,17 +112,10 @@ class EventDetailCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 24,
-          color: Theme.of(context).primaryColor,
-        ),
+        Icon(icon, size: 24, color: Theme.of(context).primaryColor),
         const SizedBox(width: 16),
         Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+          child: Text(text, style: Theme.of(context).textTheme.bodyLarge),
         ),
       ],
     );

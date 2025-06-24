@@ -1,7 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:flutter/material.dart';
-import '../controllers/notes_controller.dart';
 import '../l10n/notes_localizations.dart';
 import 'notes_screen/folder_item.dart';
 import 'notes_screen/folder_operations.dart';

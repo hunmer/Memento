@@ -6,10 +6,7 @@ import '../product_card.dart';
 class ArchivedProductsPage extends StatefulWidget {
   final StoreController controller;
 
-  const ArchivedProductsPage({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
+  const ArchivedProductsPage({super.key, required this.controller});
 
   @override
   _ArchivedProductsPageState createState() => _ArchivedProductsPageState();
@@ -19,33 +16,28 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('存档商品'),
-      ),
-      body: widget.controller.archivedProducts.isEmpty
-          ? const Center(
-              child: Text('没有存档商品'),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: widget.controller.archivedProducts.length,
-              itemBuilder: (context, index) {
-                final product = widget.controller.archivedProducts[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: _buildArchivedProductCard(product),
-                );
-              },
-            ),
+      appBar: AppBar(title: const Text('存档商品')),
+      body:
+          widget.controller.archivedProducts.isEmpty
+              ? const Center(child: Text('没有存档商品'))
+              : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: widget.controller.archivedProducts.length,
+                itemBuilder: (context, index) {
+                  final product = widget.controller.archivedProducts[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _buildArchivedProductCard(product),
+                  );
+                },
+              ),
     );
   }
 
   Widget _buildArchivedProductCard(Product product) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Stack(
         children: [
           ProductCard(
@@ -88,20 +80,21 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
   Future<void> _showRestoreConfirmation(Product product) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认恢复'),
-        content: const Text('确定要恢复这个商品吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('确认恢复'),
+            content: const Text('确定要恢复这个商品吗？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('恢复'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('恢复'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {

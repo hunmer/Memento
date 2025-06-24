@@ -742,7 +742,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     }
 
     // 获取当前选中的服务商
-    final selectedProvider = _providers.firstWhere(
+    _providers.firstWhere(
       (p) => p.id == _selectedProviderId,
       orElse: () => throw Exception('未找到选定的服务商'),
     );

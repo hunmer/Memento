@@ -4,7 +4,6 @@ import 'package:Memento/plugins/calendar_album/screens/entry_detail/entry_detail
 import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import '../controllers/calendar_controller.dart';
 import '../controllers/tag_controller.dart';

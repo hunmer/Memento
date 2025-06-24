@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
-import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/common_record_list.dart';
@@ -93,7 +92,7 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
   }
 
   Future<void> _showClearAllDialog(BuildContext context) async {
-    final l10n = HabitsLocalizations.of(context);
+    HabitsLocalizations.of(context);
     final shouldClear =
         await showDialog<bool>(
           context: context,

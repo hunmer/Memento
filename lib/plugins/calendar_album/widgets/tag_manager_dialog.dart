@@ -7,11 +7,11 @@ class TagManagerDialog extends StatefulWidget {
   final ValueChanged<List<dialog.TagGroup>> onGroupsChanged;
 
   const TagManagerDialog({
-    Key? key,
+    super.key,
     required this.groups,
     required this.selectedTags,
     required this.onGroupsChanged,
-  }) : super(key: key);
+  });
 
   @override
   _TagManagerDialogState createState() => _TagManagerDialogState();

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
-import 'package:path_provider/path_provider.dart';
 import '../../../core/storage/storage_manager.dart';
 import 'package:mime/mime.dart';
 import 'dart:async';
@@ -681,7 +680,6 @@ class WebDAVController {
 
           // 检查远程文件是否存在
           try {
-            final response = await _client!.read(remoteFilePath);
             debugPrint('远程文件已存在，将覆盖: $remoteFilePath');
           } catch (e) {
             // 文件不存在或其他错误，继续上传

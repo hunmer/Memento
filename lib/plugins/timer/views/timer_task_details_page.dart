@@ -2,7 +2,6 @@ import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
 import '../models/timer_task.dart';
 import '../../../../core/event/event_manager.dart';
-import '../../../../core/event/event_args.dart';
 
 class TimerTaskDetailsPage extends StatefulWidget {
   final TimerTask task;
@@ -22,9 +21,6 @@ class TimerTaskDetailsPage extends StatefulWidget {
 
 class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
   late TimerTask _currentTask;
-  late String _subscriptionId;
-  late String _progressSubscriptionId;
-  late String _startSubscriptionId;
   late int _currentTimerIndex = 0;
   late bool _isRunning = false;
 
@@ -35,20 +31,11 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
     _currentTimerIndex = _currentTask.getCurrentIndex();
     if (_currentTimerIndex == -1) _currentTimerIndex = 0;
     // 订阅任务变更事件
-    _subscriptionId = EventManager.instance.subscribe(
-      'timer_task_changed',
-      onTimerTaskChanged,
-    );
+    EventManager.instance.subscribe('timer_task_changed', onTimerTaskChanged);
     // 订阅计时器进度更新事件
-    _progressSubscriptionId = EventManager.instance.subscribe(
-      'timer_item_progress',
-      onTimerItemProgress,
-    );
+    EventManager.instance.subscribe('timer_item_progress', onTimerItemProgress);
     // 订阅计时器开始事件
-    _startSubscriptionId = EventManager.instance.subscribe(
-      'timer_item_changed',
-      onTimerItemChanged,
-    );
+    EventManager.instance.subscribe('timer_item_changed', onTimerItemChanged);
   }
 
   onTimerItemProgress(EventArgs args) {
@@ -152,7 +139,7 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
                       BuildContext context,
                       ControlsDetails details,
                     ) {
-                      return Container(width: 0, height: 0);
+                      return SizedBox(width: 0, height: 0);
                     },
                     type: StepperType.horizontal,
                     steps:

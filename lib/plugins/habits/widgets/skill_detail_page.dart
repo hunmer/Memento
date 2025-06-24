@@ -4,7 +4,6 @@ import 'package:Memento/plugins/habits/controllers/completion_record_controller.
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
-import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/widgets/completion_records_tab.dart';
 import 'package:Memento/plugins/habits/widgets/statistics_tab.dart';
 

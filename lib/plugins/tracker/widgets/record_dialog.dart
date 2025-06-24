@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
@@ -8,11 +7,7 @@ class RecordDialog extends StatefulWidget {
   final Goal goal;
   final TrackerController controller;
 
-  const RecordDialog({
-    super.key,
-    required this.goal,
-    required this.controller,
-  });
+  const RecordDialog({super.key, required this.goal, required this.controller});
 
   @override
   State<RecordDialog> createState() => _RecordDialogState();
@@ -23,7 +18,6 @@ class _RecordDialogState extends State<RecordDialog> {
   late DateTime _recordedAt;
   late double _value;
   late String? _note;
-  bool _autoCalculateDiff = false;
 
   @override
   void initState() {
@@ -56,7 +50,9 @@ class _RecordDialogState extends State<RecordDialog> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: TextEditingController(text: _value.toString()),
+                      controller: TextEditingController(
+                        text: _value.toString(),
+                      ),
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: '增加值 (${widget.goal.unitType})',
@@ -100,10 +96,7 @@ class _RecordDialogState extends State<RecordDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('取消'),
         ),
-        ElevatedButton(
-          onPressed: _submit,
-          child: const Text('确认'),
-        ),
+        ElevatedButton(onPressed: _submit, child: const Text('确认')),
       ],
     );
   }
@@ -148,9 +141,7 @@ class _RecordDialogState extends State<RecordDialog> {
           content: TextFormField(
             controller: textController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: '输入目标值',
-            ),
+            decoration: const InputDecoration(labelText: '输入目标值'),
           ),
           actions: [
             TextButton(
@@ -181,7 +172,7 @@ class _RecordDialogState extends State<RecordDialog> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      
+
       final record = Record(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         goalId: widget.goal.id,

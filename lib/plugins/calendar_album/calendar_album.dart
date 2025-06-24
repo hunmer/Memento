@@ -67,11 +67,7 @@ class CalendarAlbumPlugin extends BasePlugin {
   @override
   Future<void> initialize() async {
     calendarController = CalendarController();
-    tagController = TagController(
-      onTagsChanged: () {
-        tagController.notifyListeners();
-      },
-    );
+    tagController = TagController(onTagsChanged: () {});
     await initializeDefaultData();
   }
 

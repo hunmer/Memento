@@ -13,8 +13,6 @@ import 'widgets/filter_dialog.dart';
 
 class ContactPlugin extends BasePlugin {
   late ContactController _controller;
-  bool _isListView = false;
-
   @override
   String get id => 'contact';
 
@@ -144,7 +142,7 @@ class ContactPlugin extends BasePlugin {
 }
 
 class ContactMainView extends StatefulWidget {
-  const ContactMainView();
+  const ContactMainView({super.key});
 
   @override
   State<ContactMainView> createState() => ContactMainViewState();

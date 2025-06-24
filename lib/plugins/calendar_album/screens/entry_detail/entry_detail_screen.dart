@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/calendar_controller.dart';
 import '../../controllers/tag_controller.dart';
-import '../../models/calendar_entry.dart';
-import '../../l10n/calendar_album_localizations.dart';
 import 'entry_detail_app_bar.dart';
 import 'entry_detail_content.dart';
 import 'entry_detail_editor_launcher.dart';

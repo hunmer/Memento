@@ -93,7 +93,7 @@ class GoalDetailScreen extends StatelessWidget {
                           : Theme.of(context).primaryColor,
                 ),
                 const flutter.SizedBox(height: 16),
-                Text('当前进度: ${currentValue}/${goal.targetValue}'),
+                Text('当前进度: $currentValue/${goal.targetValue}'),
                 const flutter.SizedBox(height: 16),
                 if (goal.reminderTime != null)
                   Text('提醒时间: ${goal.reminderTime}'),

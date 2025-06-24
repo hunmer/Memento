@@ -54,18 +54,20 @@ class _MessageInputState extends State<MessageInput> {
     widget.controller.addListener(_onTextChanged);
   }
 
-  @override
   // 加载频道元数据
   void _loadChannelMetadata() {
     if (ChatPlugin.instance.channelService.currentChannel != null) {
       final currentChannel = ChatPlugin.instance.channelService.currentChannel!;
       final metadata = currentChannel.metadata;
-      
+
       if (metadata != null) {
         // 加载保存的智能体列表
         final savedAgents = metadata['selectedAgents'] as List<dynamic>?;
         if (savedAgents != null) {
-          selectedAgents = savedAgents.map((agent) => Map<String, String>.from(agent)).toList();
+          selectedAgents =
+              savedAgents
+                  .map((agent) => Map<String, String>.from(agent))
+                  .toList();
         }
 
         // 加载保存的上下文范围
@@ -116,16 +118,13 @@ class _MessageInputState extends State<MessageInput> {
       showAgentList = false;
       _updateMessageInputState();
     });
-    
+
     // 保存选择的智能体到频道元数据
     if (ChatPlugin.instance.channelService.currentChannel != null) {
       final channelId = ChatPlugin.instance.channelService.currentChannel!.id;
-      ChatPlugin.instance.channelService.updateChannelMetadata(
-        channelId,
-        {
-          'selectedAgents': agents,
-        },
-      );
+      ChatPlugin.instance.channelService.updateChannelMetadata(channelId, {
+        'selectedAgents': agents,
+      });
     }
   }
 
@@ -134,16 +133,13 @@ class _MessageInputState extends State<MessageInput> {
       contextRange = newRange;
       _updateMessageInputState();
     });
-    
+
     // 保存上下文范围到频道元数据
     if (ChatPlugin.instance.channelService.currentChannel != null) {
       final channelId = ChatPlugin.instance.channelService.currentChannel!.id;
-      ChatPlugin.instance.channelService.updateChannelMetadata(
-        channelId,
-        {
-          'contextRange': newRange,
-        },
-      );
+      ChatPlugin.instance.channelService.updateChannelMetadata(channelId, {
+        'contextRange': newRange,
+      });
     }
   }
 
@@ -179,28 +175,22 @@ class _MessageInputState extends State<MessageInput> {
       selectedAgents.removeWhere((agent) => agent['id'] == agentId);
       _updateMessageInputState();
     });
-    
+
     // 更新频道元数据中的智能体列表
     if (ChatPlugin.instance.channelService.currentChannel != null) {
       final channelId = ChatPlugin.instance.channelService.currentChannel!.id;
-      
+
       // 如果移除后没有选中的智能体，则清空元数据中的智能体列表和上下文范围
       if (selectedAgents.isEmpty) {
-        ChatPlugin.instance.channelService.updateChannelMetadata(
-          channelId,
-          {
-            'selectedAgents': [],
-            'contextRange': null,
-          },
-        );
+        ChatPlugin.instance.channelService.updateChannelMetadata(channelId, {
+          'selectedAgents': [],
+          'contextRange': null,
+        });
       } else {
         // 否则只更新智能体列表
-        ChatPlugin.instance.channelService.updateChannelMetadata(
-          channelId,
-          {
-            'selectedAgents': selectedAgents,
-          },
-        );
+        ChatPlugin.instance.channelService.updateChannelMetadata(channelId, {
+          'selectedAgents': selectedAgents,
+        });
       }
     }
   }

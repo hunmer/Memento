@@ -16,25 +16,26 @@ class TaskDetailView extends StatefulWidget {
     required this.taskController,
     required this.reminderController,
   });
-  
+
   @override
   State<TaskDetailView> createState() => _TaskDetailViewState();
 }
 
 class _TaskDetailViewState extends State<TaskDetailView> {
   Timer? _timer;
-  
+
   @override
   void initState() {
     super.initState();
     // 创建一个定时器，每秒更新一次UI，以刷新计时器显示
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (widget.task.status == TaskStatus.inProgress && widget.task.startTime != null) {
+      if (widget.task.status == TaskStatus.inProgress &&
+          widget.task.startTime != null) {
         setState(() {});
       }
     });
   }
-  
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -46,8 +47,6 @@ class _TaskDetailViewState extends State<TaskDetailView> {
     final theme = Theme.of(context);
     final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('HH:mm');
-    final task = widget.task; // 为了代码兼容性，创建一个本地引用
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Task Details'),
@@ -58,11 +57,12 @@ class _TaskDetailViewState extends State<TaskDetailView> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => TaskForm(
-                    task: widget.task,
-                    taskController: widget.taskController,
-                    reminderController: widget.reminderController,
-                  ),
+                  builder:
+                      (context) => TaskForm(
+                        task: widget.task,
+                        taskController: widget.taskController,
+                        reminderController: widget.reminderController,
+                      ),
                 ),
               );
             },
@@ -72,20 +72,23 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Delete Task'),
-                  content: const Text('Are you sure you want to delete this task?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('Delete Task'),
+                      content: const Text(
+                        'Are you sure you want to delete this task?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Delete'),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Delete'),
-                    ),
-                  ],
-                ),
               );
 
               if (confirmed == true && context.mounted) {
@@ -107,23 +110,29 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                 IconButton(
                   icon: Icon(
                     widget.task.statusIcon,
-                    color: widget.task.status == TaskStatus.done
-                        ? Colors.green
-                        : theme.disabledColor,
+                    color:
+                        widget.task.status == TaskStatus.done
+                            ? Colors.green
+                            : theme.disabledColor,
                   ),
                   onPressed: () {
-                    final newStatus = TaskStatus.values[
-                        (widget.task.status.index + 1) % TaskStatus.values.length];
-                    widget.taskController.updateTaskStatus(widget.task.id, newStatus);
+                    final newStatus =
+                        TaskStatus.values[(widget.task.status.index + 1) %
+                            TaskStatus.values.length];
+                    widget.taskController.updateTaskStatus(
+                      widget.task.id,
+                      newStatus,
+                    );
                   },
                 ),
                 Expanded(
                   child: Text(
                     widget.task.title,
                     style: theme.textTheme.headlineSmall?.copyWith(
-                      decoration: widget.task.status == TaskStatus.done
-                          ? TextDecoration.lineThrough
-                          : null,
+                      decoration:
+                          widget.task.status == TaskStatus.done
+                              ? TextDecoration.lineThrough
+                              : null,
                     ),
                   ),
                 ),
@@ -140,11 +149,9 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             const SizedBox(height: 16),
 
             // 描述
-            if (widget.task.description != null && widget.task.description!.isNotEmpty) ...[
-              Text(
-                'Description',
-                style: theme.textTheme.titleMedium,
-              ),
+            if (widget.task.description != null &&
+                widget.task.description!.isNotEmpty) ...[
+              Text('Description', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               Text(widget.task.description!),
               const SizedBox(height: 16),
@@ -152,27 +159,26 @@ class _TaskDetailViewState extends State<TaskDetailView> {
 
             // 标签
             if (widget.task.tags.isNotEmpty) ...[
-              Text(
-                'Tags',
-                style: theme.textTheme.titleMedium,
-              ),
+              Text('Tags', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8.0,
                 runSpacing: 4.0,
-                children: widget.task.tags.map((tag) => Chip(
-                  label: Text(tag),
-                  backgroundColor: Colors.blue.shade100,
-                )).toList(),
+                children:
+                    widget.task.tags
+                        .map(
+                          (tag) => Chip(
+                            label: Text(tag),
+                            backgroundColor: Colors.blue.shade100,
+                          ),
+                        )
+                        .toList(),
               ),
               const SizedBox(height: 16),
             ],
 
             // 计时器信息
-            Text(
-              'Timer',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('Timer', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             Card(
               child: Padding(
@@ -183,18 +189,16 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Duration:',
-                          style: theme.textTheme.titleSmall,
-                        ),
+                        Text('Duration:', style: theme.textTheme.titleSmall),
                         Text(
                           widget.task.formattedDuration,
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: widget.task.status == TaskStatus.inProgress
-                                ? theme.colorScheme.primary
-                                : null,
+                            color:
+                                widget.task.status == TaskStatus.inProgress
+                                    ? theme.colorScheme.primary
+                                    : null,
                           ),
                         ),
                       ],
@@ -206,35 +210,44 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                         ElevatedButton.icon(
                           icon: const Icon(Icons.play_arrow),
                           label: const Text('Start'),
-                          onPressed: widget.task.status != TaskStatus.inProgress
-                              ? () {
-                                  widget.taskController.updateTaskStatus(
-                                      widget.task.id, TaskStatus.inProgress);
-                                  setState(() {});
-                                }
-                              : null,
+                          onPressed:
+                              widget.task.status != TaskStatus.inProgress
+                                  ? () {
+                                    widget.taskController.updateTaskStatus(
+                                      widget.task.id,
+                                      TaskStatus.inProgress,
+                                    );
+                                    setState(() {});
+                                  }
+                                  : null,
                         ),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.pause),
                           label: const Text('Pause'),
-                          onPressed: widget.task.status == TaskStatus.inProgress
-                              ? () {
-                                  widget.taskController.updateTaskStatus(
-                                      widget.task.id, TaskStatus.todo);
-                                  setState(() {});
-                                }
-                              : null,
+                          onPressed:
+                              widget.task.status == TaskStatus.inProgress
+                                  ? () {
+                                    widget.taskController.updateTaskStatus(
+                                      widget.task.id,
+                                      TaskStatus.todo,
+                                    );
+                                    setState(() {});
+                                  }
+                                  : null,
                         ),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.check),
                           label: const Text('Complete'),
-                          onPressed: widget.task.status != TaskStatus.done
-                              ? () {
-                                  widget.taskController.updateTaskStatus(
-                                      widget.task.id, TaskStatus.done);
-                                  setState(() {});
-                                }
-                              : null,
+                          onPressed:
+                              widget.task.status != TaskStatus.done
+                                  ? () {
+                                    widget.taskController.updateTaskStatus(
+                                      widget.task.id,
+                                      TaskStatus.done,
+                                    );
+                                    setState(() {});
+                                  }
+                                  : null,
                         ),
                       ],
                     ),
@@ -243,12 +256,9 @@ class _TaskDetailViewState extends State<TaskDetailView> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // 日期信息
-            Text(
-              'Dates',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('Dates', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             Column(
               children: [
@@ -269,10 +279,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
 
             // 子任务
             if (widget.task.subtasks.isNotEmpty) ...[
-              Text(
-                'Subtasks',
-                style: theme.textTheme.titleMedium,
-              ),
+              Text('Subtasks', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               ListView.builder(
                 shrinkWrap: true,
@@ -294,9 +301,10 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                     title: Text(
                       subtask.title,
                       style: TextStyle(
-                        decoration: subtask.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
+                        decoration:
+                            subtask.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
                       ),
                     ),
                   );
@@ -307,10 +315,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
 
             // 提醒
             if (widget.task.reminders.isNotEmpty) ...[
-              Text(
-                'Reminders',
-                style: theme.textTheme.titleMedium,
-              ),
+              Text('Reminders', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               ListView.builder(
                 shrinkWrap: true,

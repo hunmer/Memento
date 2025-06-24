@@ -226,7 +226,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
 
 /// 账单插件主视图
 class BillMainView extends StatefulWidget {
-  const BillMainView();
+  const BillMainView({super.key});
   @override
   State<BillMainView> createState() => _BillMainViewState();
 }

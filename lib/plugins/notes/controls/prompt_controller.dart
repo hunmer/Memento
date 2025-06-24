@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import '../controllers/notes_controller.dart';
 import '../services/prompt_replacements.dart';

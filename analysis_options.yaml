@@ -10,6 +10,7 @@
 analyzer:
   errors:
     unnecessary_null_comparison: ignore
+    unnecessary_type_check: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

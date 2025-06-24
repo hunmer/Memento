@@ -1,4 +1,3 @@
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import '../models/contact_model.dart';
@@ -6,10 +5,6 @@ import '../l10n/contact_strings.dart';
 // ignore: depend_on_referenced_packages
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../utils/image_utils.dart';
-import '../controllers/contact_controller.dart';
-import '../../base_plugin.dart';
-import '../../../core/plugin_manager.dart';
-import '_temp_base_plugin.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
@@ -17,11 +12,11 @@ class ContactCard extends StatelessWidget {
   final bool isListView;
 
   const ContactCard({
-    Key? key,
+    super.key,
     required this.contact,
     required this.onTap,
     this.isListView = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,20 +44,14 @@ class ContactCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             contact.name,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
             contact.phone,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Colors.grey, fontSize: 14),
           ),
           const SizedBox(height: 8),
           _buildTags(),
@@ -92,10 +81,7 @@ class ContactCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  contact.phone,
-                  style: const TextStyle(color: Colors.grey),
-                ),
+                Text(contact.phone, style: const TextStyle(color: Colors.grey)),
                 if (contact.address != null && contact.address!.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
@@ -128,27 +114,33 @@ class ContactCard extends StatelessWidget {
             ),
           ),
           child: FutureBuilder<String>(
-            future: contact.avatar!.startsWith('http')
-                ? Future.value(contact.avatar!)
-                : ImageUtils.getAbsolutePath(contact.avatar),
+            future:
+                contact.avatar!.startsWith('http')
+                    ? Future.value(contact.avatar!)
+                    : ImageUtils.getAbsolutePath(contact.avatar),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return ClipOval(
-                  child: contact.avatar!.startsWith('http')
-                      ? Image.network(
-                          snapshot.data!,
-                          width: size,
-                          height: size,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => _buildIconAvatar(size),
-                        )
-                      : Image.file(
-                          File(snapshot.data!),
-                          width: size,
-                          height: size,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => _buildIconAvatar(size),
-                        ),
+                  child:
+                      contact.avatar!.startsWith('http')
+                          ? Image.network(
+                            snapshot.data!,
+                            width: size,
+                            height: size,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (context, error, stackTrace) =>
+                                    _buildIconAvatar(size),
+                          )
+                          : Image.file(
+                            File(snapshot.data!),
+                            width: size,
+                            height: size,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (context, error, stackTrace) =>
+                                    _buildIconAvatar(size),
+                          ),
                 );
               } else if (snapshot.hasError) {
                 return _buildIconAvatar(size);
@@ -177,11 +169,7 @@ class ContactCard extends StatelessWidget {
         shape: BoxShape.circle,
         color: contact.iconColor,
       ),
-      child: Icon(
-        contact.icon,
-        color: Colors.white,
-        size: size * 0.5,
-      ),
+      child: Icon(contact.icon, color: Colors.white, size: size * 0.5),
     );
   }
 
@@ -194,31 +182,29 @@ class ContactCard extends StatelessWidget {
       spacing: 4,
       runSpacing: 4,
       alignment: WrapAlignment.center,
-      children: contact.tags.map((tag) {
-        return Chip(
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          label: Text(
-            tag,
-            style: const TextStyle(fontSize: 10),
-          ),
-          padding: EdgeInsets.zero,
-          labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-        );
-      }).toList(),
+      children:
+          contact.tags.map((tag) {
+            return Chip(
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              label: Text(tag, style: const TextStyle(fontSize: 10)),
+              padding: EdgeInsets.zero,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+            );
+          }).toList(),
     );
   }
 
   Widget _buildLastContactInfo({bool compact = false}) {
-    final lastContactText = timeago.format(contact.lastContactTime, locale: 'zh');
-    
+    final lastContactText = timeago.format(
+      contact.lastContactTime,
+      locale: 'zh',
+    );
+
     return Text(
-      compact 
+      compact
           ? lastContactText
           : '${ContactStrings.lastContactTime}: $lastContactText',
-      style: TextStyle(
-        fontSize: compact ? 12 : 14,
-        color: Colors.grey,
-      ),
+      style: TextStyle(fontSize: compact ? 12 : 14, color: Colors.grey),
     );
   }
 }

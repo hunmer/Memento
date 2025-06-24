@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../models/message.dart';
 import '../../../chat_plugin.dart';
 import '../models/timeline_filter.dart';
 import 'timeline_controller/base_controller.dart';
@@ -13,17 +12,19 @@ import 'timeline_controller/channel_controller.dart';
 enum TimelineDisplayMode {
   /// 标准显示模式
   standard,
+
   /// 紧凑显示模式
   compact,
+
   /// 详细显示模式
-  detailed
+  detailed,
 }
 
 /// 时间线排序方式
 enum TimelineSortOrder {
   /// 最新消息在前
   newestFirst,
-  
+
   /// 最旧消息在前
   oldestFirst,
 }
@@ -38,18 +39,20 @@ class TimelineController extends BaseTimelineController
         ChannelControllerMixin {
   // 存储路径
   static const String _storagePath = 'chat/timeline';
-  
+
   /// 时间线显示模式
   TimelineDisplayMode? _displayMode;
-  TimelineDisplayMode get displayMode => _displayMode ?? TimelineDisplayMode.standard;
+  TimelineDisplayMode get displayMode =>
+      _displayMode ?? TimelineDisplayMode.standard;
   set displayMode(TimelineDisplayMode value) {
     _displayMode = value;
     saveTimelineState();
   }
-  
+
   // 排序方式
   TimelineSortOrder? _currentSortOrder;
-  TimelineSortOrder get currentSortOrder => _currentSortOrder ?? TimelineSortOrder.newestFirst;
+  TimelineSortOrder get currentSortOrder =>
+      _currentSortOrder ?? TimelineSortOrder.newestFirst;
   set currentSortOrder(TimelineSortOrder value) {
     _currentSortOrder = value;
     saveTimelineState();
@@ -57,32 +60,26 @@ class TimelineController extends BaseTimelineController
 
   TimelineController(
     ChatPlugin chatPlugin, {
-    void Function(Message)? onMessageEdit,
-    Future<void> Function(Message)? onMessageDelete,
-    void Function(Message)? onMessageCopy,
-    void Function(Message, String?)? onSetFixedSymbol,
-    void Function(Message, Color?)? onSetBubbleColor,
-    void Function(Message)? onToggleFavorite,
+    super.onMessageEdit,
+    super.onMessageDelete,
+    super.onMessageCopy,
+    super.onSetFixedSymbol,
+    super.onSetBubbleColor,
+    super.onToggleFavorite,
   }) : super(
-          chatPlugin: chatPlugin,
-          searchController: TextEditingController(),
-          scrollController: ScrollController(),
-          filter: TimelineFilter(
-            type: TimelineFilterType.all,
-            title: 'All Messages',
-            icon: Icons.all_inbox,
-          ),
-          onMessageEdit: onMessageEdit,
-          onMessageDelete: onMessageDelete,
-          onMessageCopy: onMessageCopy,
-          onSetFixedSymbol: onSetFixedSymbol,
-          onSetBubbleColor: onSetBubbleColor,
-          onToggleFavorite: onToggleFavorite,
-        ) {
+         chatPlugin: chatPlugin,
+         searchController: TextEditingController(),
+         scrollController: ScrollController(),
+         filter: TimelineFilter(
+           type: TimelineFilterType.all,
+           title: 'All Messages',
+           icon: Icons.all_inbox,
+         ),
+       ) {
     // 初始化默认值会通过getter处理
     _currentSortOrder = null;
     _displayMode = null;
-    
+
     // 监听搜索输入变化
     searchController.addListener(onSearchChanged);
 
@@ -205,11 +202,13 @@ class TimelineController extends BaseTimelineController
       // 恢复过滤器设置
       final filterData = timelineState['filterData'] as Map<String, dynamic>?;
       if (filterData != null) {
-        final type = TimelineFilterType.values[filterData['type'] as int];
-        
         // 只恢复必要的过滤器属性
-        filter.selectedChannelIds = Set<String>.from(filterData['selectedChannelIds'] as List? ?? []);
-        filter.selectedUserIds = Set<String>.from(filterData['selectedUserIds'] as List? ?? []);
+        filter.selectedChannelIds = Set<String>.from(
+          filterData['selectedChannelIds'] as List? ?? [],
+        );
+        filter.selectedUserIds = Set<String>.from(
+          filterData['selectedUserIds'] as List? ?? [],
+        );
         filter.isAI = filterData['isAI'] as bool?;
         filter.isFavorite = filterData['isFavorite'] as bool?;
       }
@@ -218,7 +217,7 @@ class TimelineController extends BaseTimelineController
       final viewState = timelineState['viewState'] as Map<String, dynamic>?;
       if (viewState != null) {
         isFilterActive = viewState['isFilterActive'] as bool? ?? false;
-        
+
         final lastSearchQuery = viewState['searchQuery'] as String?;
         if (lastSearchQuery != null && lastSearchQuery.isNotEmpty) {
           searchQuery = lastSearchQuery;
@@ -249,34 +248,12 @@ class TimelineController extends BaseTimelineController
     notifyListeners();
   }
 
-  /// 根据过滤器类型获取对应的图标
-  IconData _getIconForFilterType(TimelineFilterType type) {
-    switch (type) {
-      case TimelineFilterType.all:
-        return Icons.all_inbox;
-      case TimelineFilterType.text:
-        return Icons.text_fields;
-      case TimelineFilterType.image:
-        return Icons.image;
-      case TimelineFilterType.file:
-        return Icons.file_present;
-      case TimelineFilterType.system:
-        return Icons.system_update;
-      case TimelineFilterType.dateRange:
-        return Icons.date_range;
-      case TimelineFilterType.user:
-        return Icons.person;
-      case TimelineFilterType.custom:
-        return Icons.filter_list;
-    }
-  }
-
   @override
   void dispose() {
     // 移除监听器
     chatPlugin.removeListener(_onChatDataChanged);
     searchController.removeListener(onSearchChanged);
-    
+
     // 释放控制器已在父类中处理
     super.dispose();
   }

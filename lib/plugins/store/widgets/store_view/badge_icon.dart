@@ -6,11 +6,11 @@ class BadgeIcon extends StatelessWidget {
   final bool isPoints;
 
   const BadgeIcon({
-    Key? key,
+    super.key,
     required this.icon,
     required this.count,
     this.isPoints = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,16 +27,14 @@ class BadgeIcon extends StatelessWidget {
                 color: Colors.red,
                 borderRadius: BorderRadius.circular(10),
               ),
-              constraints: const BoxConstraints(
-                minWidth: 16,
-                minHeight: 16,
-              ),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(
-                isPoints ? count.toString() : count > 99 ? '99+' : count.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                ),
+                isPoints
+                    ? count.toString()
+                    : count > 99
+                    ? '99+'
+                    : count.toString(),
+                style: const TextStyle(color: Colors.white, fontSize: 10),
                 textAlign: TextAlign.center,
               ),
             ),

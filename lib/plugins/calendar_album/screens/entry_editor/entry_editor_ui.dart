@@ -1,9 +1,6 @@
-import 'package:Memento/plugins/calendar_album/calendar_album.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../widgets/location_picker.dart';
-import '../../controllers/tag_controller.dart';
 import '../../l10n/calendar_album_localizations.dart';
 import 'entry_editor_controller.dart';
 import 'entry_editor_image_handler.dart';

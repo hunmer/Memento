@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/core/storage/storage_manager.dart';
-import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
@@ -36,7 +34,6 @@ class _HabitFormState extends State<HabitForm> {
   String? _image;
   Color _iconColor = Colors.blue;
   final List<String> _tags = [];
-  final _tagController = TextEditingController();
 
   @override
   void initState() {
@@ -236,7 +233,7 @@ class _HabitFormState extends State<HabitForm> {
                     value: skill.id,
                     child: Text(skill.title),
                   );
-                }).toList(),
+                }),
               ],
               onChanged: (value) {
                 setState(() {

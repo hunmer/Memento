@@ -71,8 +71,6 @@ class _AlbumScreenState extends State<AlbumScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final calendarController = Provider.of<CalendarController>(context);
-    final images = calendarController.getAllImages();
     return Scaffold(
       appBar: AppBar(title: Text(l10n.get('allPhotos'))),
       body: Consumer<CalendarController>(

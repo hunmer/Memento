@@ -24,29 +24,24 @@ class CheckinItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isToday = item.lastCheckinDate != null ? controller.isToday(item.lastCheckinDate) : false;
-    final isCompleted = controller.isCompleted(item);
-
     return Card(
-      margin: const EdgeInsets.symmetric(
-        vertical: 4,
-        horizontal: 8,
-      ),
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: InkWell(
         onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CheckinRecordScreen(
-                      checkinItem: item,
-                      controller: controller,
-                    ),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => CheckinRecordScreen(
+                    checkinItem: item,
+                    controller: controller,
                   ),
-                ).then((_) => onStateChanged());
-              },
+            ),
+          ).then((_) => onStateChanged());
+        },
         onLongPress: () {
-                controller.showItemOptionsDialog(item);
-              },
+          controller.showItemOptionsDialog(item);
+        },
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
@@ -59,13 +54,9 @@ class CheckinItemCard extends StatelessWidget {
                     child: Row(
                       children: [
                         // 项目图标
-                        Icon(
-                          item.icon,
-                          color: item.color,
-                          size: 24,
-                        ),
+                        Icon(item.icon, color: item.color, size: 24),
                         const SizedBox(width: 8),
-                        
+
                         // 项目名称和描述
                         Expanded(
                           child: Column(
@@ -131,12 +122,13 @@ class CheckinItemCard extends StatelessWidget {
                   onDateSelected: (selectedDate) {
                     showDialog(
                       context: context,
-                      builder: (context) => CheckinRecordDialog(
-                        item: item,
-                        controller: controller,
-                        onCheckinCompleted: onStateChanged,
-                        selectedDate: selectedDate,
-                      ),
+                      builder:
+                          (context) => CheckinRecordDialog(
+                            item: item,
+                            controller: controller,
+                            onCheckinCompleted: onStateChanged,
+                            selectedDate: selectedDate,
+                          ),
                     );
                   },
                 ),
@@ -158,12 +150,13 @@ class CheckinItemCard extends StatelessWidget {
       const SizedBox(height: 8),
       Text(
         '今日打卡记录:',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
       ),
       ...todayRecords.map((record) {
-        final timeStr = '${record.startTime.hour.toString().padLeft(2, '0')}:${record.startTime.minute.toString().padLeft(2, '0')} - '
+        final timeStr =
+            '${record.startTime.hour.toString().padLeft(2, '0')}:${record.startTime.minute.toString().padLeft(2, '0')} - '
             '${record.endTime.hour.toString().padLeft(2, '0')}:${record.endTime.minute.toString().padLeft(2, '0')}';
         return Padding(
           padding: const EdgeInsets.only(top: 4),
@@ -175,36 +168,39 @@ class CheckinItemCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
-                IconButton(
-                  icon: const Icon(Icons.close, size: 16),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('删除打卡记录'),
-                        content: const Text('确定要删除这条打卡记录吗？'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('取消'),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              await item.cancelCheckinRecord(record.checkinTime);
-                              onStateChanged();
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            },
-                            child: const Text('删除'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
+              IconButton(
+                icon: const Icon(Icons.close, size: 16),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder:
+                        (context) => AlertDialog(
+                          title: const Text('删除打卡记录'),
+                          content: const Text('确定要删除这条打卡记录吗？'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('取消'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                await item.cancelCheckinRecord(
+                                  record.checkinTime,
+                                );
+                                onStateChanged();
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              child: const Text('删除'),
+                            ),
+                          ],
+                        ),
+                  );
+                },
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
             ],
           ),
         );

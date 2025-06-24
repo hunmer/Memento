@@ -96,7 +96,7 @@ class NodesScreen extends StatelessWidget {
 
     void processNode(Node node, int depth) {
       buffer.writeln('${'  ' * depth}${node.title}');
-      if (node.notes.isNotEmpty ?? false) {
+      if (node.notes.isNotEmpty) {
         buffer.writeln('${'  ' * (depth + 1)}${node.notes}');
       }
       for (var child in node.children) {

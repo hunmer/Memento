@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class ImageUtils {

@@ -4,43 +4,43 @@ import 'package:flutter/material.dart';
 class TimelineFilter {
   /// 筛选器类型
   final TimelineFilterType type;
-  
+
   /// 筛选器标题
   final String title;
-  
+
   /// 筛选器图标
   final IconData icon;
-  
+
   /// 筛选器颜色
   final Color color;
-  
+
   /// 筛选器描述
   final String description;
-  
+
   /// 搜索范围 - 是否包含频道名称
   bool includeChannels;
-  
+
   /// 搜索范围 - 是否包含用户名
   bool includeUsernames;
-  
+
   /// 搜索范围 - 是否包含消息内容
   bool includeContent;
-  
+
   /// 筛选开始日期
   DateTime? startDate;
-  
+
   /// 筛选结束日期
   DateTime? endDate;
-  
+
   /// 选中的频道ID列表
   Set<String> selectedChannelIds;
-  
+
   /// 选中的用户ID列表
   Set<String> selectedUserIds;
-  
+
   /// 是否筛选AI消息
   bool? isAI;
-  
+
   /// 是否筛选收藏消息
   bool? isFavorite;
 
@@ -60,9 +60,8 @@ class TimelineFilter {
     Set<String>? selectedUserIds,
     this.isAI,
     this.isFavorite,
-  }) : 
-    this.selectedChannelIds = selectedChannelIds ?? {},
-    this.selectedUserIds = selectedUserIds ?? {};
+  }) : selectedChannelIds = selectedChannelIds ?? {},
+       selectedUserIds = selectedUserIds ?? {};
 
   /// 创建一个筛选器的副本，但可以更改某些属性
   TimelineFilter copyWith({
@@ -92,13 +91,14 @@ class TimelineFilter {
       includeContent: includeContent ?? this.includeContent,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
-      selectedChannelIds: selectedChannelIds ?? Set.from(this.selectedChannelIds),
+      selectedChannelIds:
+          selectedChannelIds ?? Set.from(this.selectedChannelIds),
       selectedUserIds: selectedUserIds ?? Set.from(this.selectedUserIds),
       isAI: isAI ?? this.isAI,
       isFavorite: isFavorite ?? this.isFavorite,
     );
   }
-  
+
   /// 从另一个筛选器更新属性
   void updateFrom(TimelineFilter other) {
     // 更新可变属性
@@ -131,25 +131,25 @@ class TimelineFilter {
 enum TimelineFilterType {
   /// 全部消息
   all,
-  
+
   /// 仅显示文本消息
   text,
-  
+
   /// 仅显示图片消息
   image,
-  
+
   /// 仅显示文件消息
   file,
-  
+
   /// 仅显示系统消息
   system,
-  
+
   /// 仅显示特定日期范围的消息
   dateRange,
-  
+
   /// 仅显示特定用户的消息
   user,
-  
+
   /// 自定义筛选条件
   custom,
 }

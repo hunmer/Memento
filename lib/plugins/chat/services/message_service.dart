@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../chat_plugin.dart';
 
@@ -15,15 +14,15 @@ class MessageService {
   /// 获取所有频道中的所有消息
   Future<List<Message>> getAllMessages() async {
     List<Message> allMessages = [];
-    
+
     // 遍历所有频道，收集所有消息
     for (var channel in _plugin.channelService.channels) {
       allMessages.addAll(channel.messages);
     }
-    
+
     // 按时间排序，最新的消息在前面
     allMessages.sort((a, b) => b.date.compareTo(a.date));
-    
+
     return allMessages;
   }
 

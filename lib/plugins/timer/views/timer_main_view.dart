@@ -35,7 +35,7 @@ class _TimerMainViewState extends State<TimerMainView> {
 
   Future<void> _loadConfig() async {
     try {
-      final config = await _plugin.storage.read('configs/${_plugin.id}.json');
+      // final config = await _plugin.storage.read('configs/${_plugin.id}.json');
     } catch (e) {
       // 如果配置不存在，使用默认值
     }
@@ -98,7 +98,7 @@ class _TimerMainViewState extends State<TimerMainView> {
   }
 
   void _showAddTaskDialog() async {
-    final groups = await _plugin.timerController.getGroups();
+    final groups = _plugin.timerController.getGroups();
     final newTask = await showDialog<TimerTask>(
       context: context,
       builder: (context) => AddTimerTaskDialog(groups: groups),

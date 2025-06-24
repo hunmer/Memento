@@ -36,7 +36,7 @@ class _SkillsListState extends State<SkillsList> {
   }
 
   Future<void> _loadSkills() async {
-    final skills = await widget.skillController.getSkills();
+    final skills = widget.skillController.getSkills();
     setState(() => _skills = skills);
   }
 

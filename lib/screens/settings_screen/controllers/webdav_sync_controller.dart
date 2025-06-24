@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 import 'package:path/path.dart' as path;
 import '../widgets/backup_progress_dialog.dart';

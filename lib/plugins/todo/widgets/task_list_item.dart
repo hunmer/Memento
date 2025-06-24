@@ -17,16 +17,14 @@ class TaskListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    
     // 格式化日期
     final dateFormat = DateFormat('MMM d, yyyy');
-    final dueDate = task.dueDate != null
-        ? dateFormat.format(task.dueDate!)
-        : 'No due date';
-        
+    final dueDate =
+        task.dueDate != null ? dateFormat.format(task.dueDate!) : 'No due date';
+
     // 检查是否过期
-    final bool isOverdue = task.dueDate != null &&
+    final bool isOverdue =
+        task.dueDate != null &&
         task.dueDate!.isBefore(DateTime.now()) &&
         task.status != TaskStatus.done;
 
@@ -37,26 +35,30 @@ class TaskListItem extends StatelessWidget {
         leading: IconButton(
           icon: Icon(
             task.statusIcon,
-            color: task.status == TaskStatus.done
-                ? Colors.green
-                : theme.disabledColor,
+            color:
+                task.status == TaskStatus.done
+                    ? Colors.green
+                    : theme.disabledColor,
           ),
           onPressed: () {
             // 循环切换状态
-            final newStatus = TaskStatus.values[
-                (task.status.index + 1) % TaskStatus.values.length];
+            final newStatus =
+                TaskStatus.values[(task.status.index + 1) %
+                    TaskStatus.values.length];
             onStatusChanged(newStatus);
           },
         ),
         title: Text(
           task.title,
           style: TextStyle(
-            decoration: task.status == TaskStatus.done
-                ? TextDecoration.lineThrough
-                : null,
-            fontWeight: task.priority == TaskPriority.high
-                ? FontWeight.bold
-                : FontWeight.normal,
+            decoration:
+                task.status == TaskStatus.done
+                    ? TextDecoration.lineThrough
+                    : null,
+            fontWeight:
+                task.priority == TaskPriority.high
+                    ? FontWeight.bold
+                    : FontWeight.normal,
           ),
         ),
         subtitle: Column(
@@ -73,11 +75,7 @@ class TaskListItem extends StatelessWidget {
               children: [
                 // 显示计时器（如果任务正在进行中）
                 if (task.status == TaskStatus.inProgress) ...[
-                  Icon(
-                    Icons.timer,
-                    size: 14,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.timer, size: 14, color: theme.colorScheme.primary),
                   const SizedBox(width: 4),
                   Text(
                     task.formattedDuration,
@@ -90,19 +88,13 @@ class TaskListItem extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
                 // 显示持续时间（如果任务已完成且有记录时间）
-                if (task.status == TaskStatus.done && task.duration != null) ...[
-                  Icon(
-                    Icons.timer_off,
-                    size: 14,
-                    color: theme.disabledColor,
-                  ),
+                if (task.status == TaskStatus.done &&
+                    task.duration != null) ...[
+                  Icon(Icons.timer_off, size: 14, color: theme.disabledColor),
                   const SizedBox(width: 4),
                   Text(
                     task.formattedDuration,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.disabledColor,
-                    ),
+                    style: TextStyle(fontSize: 12, color: theme.disabledColor),
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -121,18 +113,11 @@ class TaskListItem extends StatelessWidget {
                 ),
                 if (task.subtasks.isNotEmpty) ...[
                   const SizedBox(width: 8),
-                  Icon(
-                    Icons.check_box,
-                    size: 14,
-                    color: theme.disabledColor,
-                  ),
+                  Icon(Icons.check_box, size: 14, color: theme.disabledColor),
                   const SizedBox(width: 4),
                   Text(
                     '${task.subtasks.where((s) => s.isCompleted).length}/${task.subtasks.length}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.disabledColor,
-                    ),
+                    style: TextStyle(fontSize: 12, color: theme.disabledColor),
                   ),
                 ],
               ],

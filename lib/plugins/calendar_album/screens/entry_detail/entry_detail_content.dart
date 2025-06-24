@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:provider/provider.dart';
-import '../../controllers/tag_controller.dart';
 import '../../models/calendar_entry.dart';
 import 'entry_detail_image_viewer.dart';
 
@@ -51,10 +49,11 @@ class EntryDetailContent extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EntryDetailImageViewer(
-                              imageUrls: entry.imageUrls,
-                              initialIndex: index,
-                            ),
+                            builder:
+                                (context) => EntryDetailImageViewer(
+                                  imageUrls: entry.imageUrls,
+                                  initialIndex: index,
+                                ),
                           ),
                         );
                       },
@@ -92,15 +91,18 @@ class EntryDetailContent extends StatelessWidget {
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
-              children: tags.map((tag) {
-                final color = Colors.primaries[tag.hashCode % Colors.primaries.length];
-                return Chip(
-                  label: Text(tag),
-                  backgroundColor: color.withOpacity(0.2),
-                  labelStyle: TextStyle(color: color),
-                  side: BorderSide(color: color.withOpacity(0.5)),
-                );
-              }).toList(),
+              children:
+                  tags.map((tag) {
+                    final color =
+                        Colors.primaries[tag.hashCode %
+                            Colors.primaries.length];
+                    return Chip(
+                      label: Text(tag),
+                      backgroundColor: color.withOpacity(0.2),
+                      labelStyle: TextStyle(color: color),
+                      side: BorderSide(color: color.withOpacity(0.5)),
+                    );
+                  }).toList(),
             ),
           ],
           const SizedBox(height: 16),

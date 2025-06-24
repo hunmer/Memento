@@ -1,8 +1,6 @@
-
 import 'dart:async';
 
 import 'package:Memento/plugins/store/models/used_item.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
@@ -12,22 +10,22 @@ import '../models/points_log.dart';
 
 class StoreController with ChangeNotifier {
   List<Product> _products = [];
-  List<Product> _archivedProducts = [];
+  final List<Product> _archivedProducts = [];
   List<UserItem> _userItems = [];
   List<PointsLog> _pointsLogs = [];
   int _userPoints = 0;
   late final BasePlugin plugin;
-  
+
   // 添加流控制器
   final _productsStreamController = StreamController<int>.broadcast();
   final _userItemsStreamController = StreamController<int>.broadcast();
   final _pointsStreamController = StreamController<int>.broadcast();
-  
+
   // 获取流
   Stream<int> get productsStream => _productsStreamController.stream;
   Stream<int> get userItemsStream => _userItemsStreamController.stream;
   Stream<int> get pointsStream => _pointsStreamController.stream;
-  
+
   StoreController([BasePlugin? plugin]) {
     if (plugin != null) {
       this.plugin = plugin;
@@ -38,11 +36,11 @@ class StoreController with ChangeNotifier {
       }
       this.plugin = pluginInstance as BasePlugin;
     }
-    
+
     // 初始化流数据
     _updateStreams();
   }
-  
+
   @override
   void dispose() {
     _productsStreamController.close();
@@ -50,7 +48,7 @@ class StoreController with ChangeNotifier {
     _pointsStreamController.close();
     super.dispose();
   }
-  
+
   // 更新所有流
   void _updateStreams() {
     _productsStreamController.add(_products.length);
@@ -60,16 +58,16 @@ class StoreController with ChangeNotifier {
 
   // 获取商品列表
   List<Product> get products => _products;
-  
+
   // 获取存档商品列表
   List<Product> get archivedProducts => _archivedProducts;
 
   // 获取可序列化的商品列表
-  List<Map<String, dynamic>> get productsJson => 
+  List<Map<String, dynamic>> get productsJson =>
       _products.map((p) => p.toJson()).toList();
-      
+
   // 获取可序列化的存档商品列表
-  List<Map<String, dynamic>> get archivedProductsJson => 
+  List<Map<String, dynamic>> get archivedProductsJson =>
       _archivedProducts.map((p) => p.toJson()).toList();
 
   // 获取用户物品
@@ -103,10 +101,13 @@ class StoreController with ChangeNotifier {
   int getExpiringItemsCount() {
     final now = DateTime.now();
     final sevenDaysLater = now.add(const Duration(days: 7));
-    return _userItems.where((item) => 
-      item.expireDate.isAfter(now) && 
-      item.expireDate.isBefore(sevenDaysLater)
-    ).length;
+    return _userItems
+        .where(
+          (item) =>
+              item.expireDate.isAfter(now) &&
+              item.expireDate.isBefore(sevenDaysLater),
+        )
+        .length;
   }
 
   // 添加商品
@@ -125,7 +126,7 @@ class StoreController with ChangeNotifier {
     // 校验积分和库存
     if (_userPoints < product.price) return false;
     if (product.stock <= 0) return false;
-    if (DateTime.now().isBefore(product.exchangeStart) || 
+    if (DateTime.now().isBefore(product.exchangeStart) ||
         DateTime.now().isAfter(product.exchangeEnd)) {
       return false;
     }
@@ -158,13 +159,15 @@ class StoreController with ChangeNotifier {
     _userItems.add(newItem);
 
     // 添加积分记录
-    _pointsLogs.add(PointsLog(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      type: '消耗',
-      value: product.price,
-      reason: '兑换商品: ${product.name}',
-      timestamp: DateTime.now(),
-    ));
+    _pointsLogs.add(
+      PointsLog(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        type: '消耗',
+        value: product.price,
+        reason: '兑换商品: ${product.name}',
+        timestamp: DateTime.now(),
+      ),
+    );
 
     await saveProducts();
     await savePoints();
@@ -172,21 +175,22 @@ class StoreController with ChangeNotifier {
     _updateStreams(); // 更新badge显示
     notifyListeners(); // 通知UI更新
     return true;
-
   }
 
   // 使用物品
   Future<bool> useItem(UserItem item) async {
     if (DateTime.now().isAfter(item.expireDate)) return false;
-    
+
     // 记录使用历史
-    _usedItems.add(UsedItem(
-      id: item.id,
-      productId: item.productId,
-      useDate: DateTime.now(),
-      productSnapshot: item.productSnapshot,
-    ));
-    
+    _usedItems.add(
+      UsedItem(
+        id: item.id,
+        productId: item.productId,
+        useDate: DateTime.now(),
+        productSnapshot: item.productSnapshot,
+      ),
+    );
+
     item.use();
     if (item.remaining <= 0) {
       _userItems.remove(item);
@@ -202,7 +206,7 @@ class StoreController with ChangeNotifier {
   // 保存已使用物品
   Future<void> saveUsedItems() async {
     await plugin.storage.write('store/used_items', {
-      'items': _usedItems.map((item) => item.toJson()).toList()
+      'items': _usedItems.map((item) => item.toJson()).toList(),
     });
   }
 
@@ -214,9 +218,10 @@ class StoreController with ChangeNotifier {
       if (itemsData is List) {
         _usedItems.clear();
         _usedItems.addAll(
-          (itemsData as List).whereType<Map<String, dynamic>>()
-            .map((item) => UsedItem.fromJson(item))
-            .toList()
+          (itemsData)
+              .whereType<Map<String, dynamic>>()
+              .map((item) => UsedItem.fromJson(item))
+              .toList(),
         );
       }
     }
@@ -225,13 +230,15 @@ class StoreController with ChangeNotifier {
   // 添加积分
   Future<void> addPoints(int value, String reason) async {
     _userPoints += value;
-    _pointsLogs.add(PointsLog(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      type: value > 0 ? '获得' : '失去',
-      value: value,
-      reason: reason,
-      timestamp: DateTime.now(),
-    ));
+    _pointsLogs.add(
+      PointsLog(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        type: value > 0 ? '获得' : '失去',
+        value: value,
+        reason: reason,
+        timestamp: DateTime.now(),
+      ),
+    );
     await savePoints();
     _updateStreams();
     notifyListeners();
@@ -288,7 +295,7 @@ class StoreController with ChangeNotifier {
     await saveArchivedProducts();
     notifyListeners();
   }
-  
+
   // 恢复存档产品
   Future<void> restoreProduct(Product product) async {
     // 从存档列表中移除
@@ -303,30 +310,34 @@ class StoreController with ChangeNotifier {
   // 从存储加载数据
   Future<void> loadFromStorage() async {
     final storedProducts = await plugin.storage.read('store/products');
-    final storedArchivedProducts = await plugin.storage.read('store/archived_products');
+    final storedArchivedProducts = await plugin.storage.read(
+      'store/archived_products',
+    );
     final storedPoints = await plugin.storage.read('store/points');
     final storedUserItems = await plugin.storage.read('store/user_items');
     await loadUsedItems();
-    
+
     _products.clear();
     _pointsLogs.clear();
     _userItems.clear();
     try {
       final productsData = storedProducts as Map<String, dynamic>;
-      final productsList = productsData['products'] is List 
-          ? productsData['products'] as List 
-          : [];
+      final productsList =
+          productsData['products'] is List
+              ? productsData['products'] as List
+              : [];
       for (final productData in productsList) {
         if (productData is Map<String, dynamic>) {
           addProductFromJson(productData);
         }
       }
-      
+
       // 加载存档产品
       if (storedArchivedProducts is Map<String, dynamic>) {
-        final archivedList = storedArchivedProducts['products'] is List 
-            ? storedArchivedProducts['products'] as List 
-            : [];
+        final archivedList =
+            storedArchivedProducts['products'] is List
+                ? storedArchivedProducts['products'] as List
+                : [];
         _archivedProducts.clear();
         for (final productData in archivedList) {
           if (productData is Map<String, dynamic>) {
@@ -340,22 +351,29 @@ class StoreController with ChangeNotifier {
     }
 
     if (storedPoints is Map<String, dynamic>) {
-        _userPoints = storedPoints['value'] is int 
-            ? storedPoints['value'] as int 
-            : 0;
-        final logsData = storedPoints['logs'];
-        if (logsData is List) {
-          _pointsLogs = (logsData as List).whereType<Map<String, dynamic>>().map((log) => PointsLog.fromJson(log)).toList();
-        }
+      _userPoints =
+          storedPoints['value'] is int ? storedPoints['value'] as int : 0;
+      final logsData = storedPoints['logs'];
+      if (logsData is List) {
+        _pointsLogs =
+            (logsData)
+                .whereType<Map<String, dynamic>>()
+                .map((log) => PointsLog.fromJson(log))
+                .toList();
+      }
     }
 
     if (storedUserItems is Map<String, dynamic>) {
       final itemsData = storedUserItems['items'];
       if (itemsData is List) {
-        _userItems = (itemsData as List).whereType<Map<String, dynamic>>().map((item) => UserItem.fromJson(item)).toList();
+        _userItems =
+            (itemsData)
+                .whereType<Map<String, dynamic>>()
+                .map((item) => UserItem.fromJson(item))
+                .toList();
       }
     }
-    
+
     // 更新流数据
     _updateStreams();
   }
@@ -364,24 +382,26 @@ class StoreController with ChangeNotifier {
   Future<void> saveProducts() async {
     await plugin.storage.write('store/products', {'products': productsJson});
   }
-  
+
   // 保存存档商品数据
   Future<void> saveArchivedProducts() async {
-    await plugin.storage.write('store/archived_products', {'products': archivedProductsJson});
+    await plugin.storage.write('store/archived_products', {
+      'products': archivedProductsJson,
+    });
   }
 
   // 保存积分数据
   Future<void> savePoints() async {
     await plugin.storage.write('store/points', {
       'value': _userPoints,
-      'logs': _pointsLogs.map((log) => log.toJson()).toList()
+      'logs': _pointsLogs.map((log) => log.toJson()).toList(),
     });
   }
 
   // 保存用户物品数据
   Future<void> saveUserItems() async {
     await plugin.storage.write('store/user_items', {
-      'items': _userItems.map((item) => item.toJson()).toList()
+      'items': _userItems.map((item) => item.toJson()).toList(),
     });
   }
 
@@ -410,7 +430,7 @@ class StoreController with ChangeNotifier {
     _updateStreams();
     notifyListeners();
   }
-  
+
   // 清空积分记录
   Future<void> clearPointsLogs() async {
     _pointsLogs.clear();
@@ -421,9 +441,10 @@ class StoreController with ChangeNotifier {
 
   // 应用价格筛选
   void applyPriceFilter(double minPrice, double maxPrice) {
-    _products = _products.where((p) => 
-      p.price >= minPrice && p.price <= maxPrice
-    ).toList();
+    _products =
+        _products
+            .where((p) => p.price >= minPrice && p.price <= maxPrice)
+            .toList();
     notifyListeners();
   }
 
@@ -434,9 +455,10 @@ class StoreController with ChangeNotifier {
     DateTimeRange? dateRange,
   }) {
     if (name != null && name.isNotEmpty) {
-      _products = _products.where((p) => 
-        p.name.toLowerCase().contains(name.toLowerCase())
-      ).toList();
+      _products =
+          _products
+              .where((p) => p.name.toLowerCase().contains(name.toLowerCase()))
+              .toList();
     }
 
     if (priceRange != null && priceRange.isNotEmpty) {
@@ -445,18 +467,21 @@ class StoreController with ChangeNotifier {
         final min = int.tryParse(parts[0]);
         final max = int.tryParse(parts[1]);
         if (min != null && max != null) {
-          _products = _products.where((p) => 
-            p.price >= min && p.price <= max
-          ).toList();
+          _products =
+              _products.where((p) => p.price >= min && p.price <= max).toList();
         }
       }
     }
 
     if (dateRange != null) {
-      _products = _products.where((p) => 
-        !p.exchangeEnd.isBefore(dateRange.start) &&
-        !p.exchangeStart.isAfter(dateRange.end)
-      ).toList();
+      _products =
+          _products
+              .where(
+                (p) =>
+                    !p.exchangeEnd.isBefore(dateRange.start) &&
+                    !p.exchangeStart.isAfter(dateRange.end),
+              )
+              .toList();
     }
     notifyListeners();
   }

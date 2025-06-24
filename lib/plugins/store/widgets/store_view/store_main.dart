@@ -7,11 +7,10 @@ import 'package:Memento/plugins/store/widgets/store_view/product_list.dart';
 import 'package:Memento/plugins/store/widgets/store_view/user_items.dart';
 import 'package:Memento/plugins/store/widgets/store_view/points_history.dart';
 import 'package:Memento/plugins/store/widgets/add_product_page.dart';
-import '../../controllers/store_controller.dart';
 import '../../models/product.dart';
 
 class StoreMainView extends StatefulWidget {
-  const StoreMainView({Key? key}) : super(key: key);
+  const StoreMainView({super.key});
 
   @override
   _StoreMainState createState() => _StoreMainState();

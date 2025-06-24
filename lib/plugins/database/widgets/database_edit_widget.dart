@@ -1,7 +1,6 @@
 import 'package:Memento/plugins/database/controllers/field_controller.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import '../controllers/database_controller.dart';
 import '../models/database_model.dart';
 import '../models/field_model.dart';
@@ -36,7 +35,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
     _tabController = TabController(length: 2, vsync: this);
     _fields =
         _editedDatabase.fields
-            ?.map(
+            .map(
               (field) => FieldModel(
                 id: field.id,
                 name: field.name,
@@ -47,8 +46,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                         : null,
               ),
             )
-            .toList() ??
-        [];
+            .toList();
   }
 
   @override
@@ -138,8 +136,8 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
           bottom: 16,
           right: 16,
           child: FloatingActionButton(
-            child: const Icon(Icons.add),
             onPressed: _showAddFieldDialog,
+            child: const Icon(Icons.add),
           ),
         ),
       ],
@@ -196,7 +194,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                   ],
                 ),
               ),
-              ButtonBar(
+              OverflowBar(
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
@@ -243,7 +241,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                     Navigator.pop(context, type);
                   },
                 ),
-              ButtonBar(
+              OverflowBar(
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),

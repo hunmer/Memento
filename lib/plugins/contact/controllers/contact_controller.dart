@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/contact_model.dart';
 import '../models/interaction_record_model.dart';
@@ -101,10 +99,7 @@ class ContactController {
   // 获取联系人
   Future<Contact?> getContact(String id) async {
     final contacts = await getAllContacts();
-    return contacts.firstWhere(
-      (c) => c.id == id,
-      orElse: () => null as Contact,
-    );
+    return contacts.firstWhere((c) => c.id == id);
   }
 
   // 获取所有交互记录

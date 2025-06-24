@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../widgets/image_picker_dialog.dart';
 import '../../../../utils/image_utils.dart';
 import 'dart:io';
-import 'package:collection/collection.dart';
 
 class EntryEditorImageHandler extends StatefulWidget {
   final List<String> imageUrls;
@@ -23,7 +22,7 @@ class EntryEditorImageHandler extends StatefulWidget {
 
 class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
   Widget _buildDefaultCover() {
-    return Container(
+    return SizedBox(
       height: 100,
       width: 100,
       child: const Icon(Icons.image_not_supported, color: Colors.grey),

@@ -2,10 +2,8 @@ import 'dart:io';
 
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
-import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_history_list.dart';
 import 'package:Memento/plugins/habits/widgets/timer_dialog.dart';
@@ -75,7 +73,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
   }
 
   Future<void> _loadHabits() async {
-    final habits = await widget.controller.getHabits();
+    final habits = widget.controller.getHabits();
     if (mounted) {
       setState(() => _habits = habits);
     }
@@ -98,7 +96,6 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
 
   Future<void> _startTimer(BuildContext context, Habit habit) async {
     final timerData = _timerController.getTimerData(habit.id);
-    final isTiming = timerData != null;
 
     final result = await showDialog<bool>(
       context: context,
@@ -412,7 +409,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                   onTap: () => _showHabitForm(context, habit),
                   onLongPress: () => _showHistory(context, habit),
                 );
-              }).toList(),
+              }),
             ];
           }).toList(),
     );

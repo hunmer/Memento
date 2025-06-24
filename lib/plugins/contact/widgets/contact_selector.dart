@@ -9,12 +9,12 @@ class ContactSelector extends StatefulWidget {
   final ContactController controller;
 
   const ContactSelector({
-    Key? key,
+    super.key,
     required this.selectedContactIds,
     required this.onContactsSelected,
     required this.controller,
     this.excludeContactId,
-  }) : super(key: key);
+  });
 
   @override
   State<ContactSelector> createState() => _ContactSelectorState();
@@ -34,12 +34,12 @@ class _ContactSelectorState extends State<ContactSelector> {
 
   Future<void> _loadContacts() async {
     final contacts = await widget.controller.getAllContacts();
-    
+
     // 排除当前联系人
     if (widget.excludeContactId != null) {
       contacts.removeWhere((contact) => contact.id == widget.excludeContactId);
     }
-    
+
     setState(() {
       _contacts = contacts;
     });
@@ -49,9 +49,12 @@ class _ContactSelectorState extends State<ContactSelector> {
     if (_searchQuery.isEmpty) {
       return _contacts;
     }
-    return _contacts.where((contact) => 
-      contact.name.toLowerCase().contains(_searchQuery.toLowerCase())
-    ).toList();
+    return _contacts
+        .where(
+          (contact) =>
+              contact.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+        )
+        .toList();
   }
 
   @override
@@ -63,10 +66,7 @@ class _ContactSelectorState extends State<ContactSelector> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(
-              '选择联系人',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('选择联系人', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             TextField(
               decoration: const InputDecoration(
@@ -87,7 +87,7 @@ class _ContactSelectorState extends State<ContactSelector> {
                 itemBuilder: (context, index) {
                   final contact = _filteredContacts[index];
                   final isSelected = _selectedIds.contains(contact.id);
-                  
+
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: contact.iconColor,
@@ -95,9 +95,13 @@ class _ContactSelectorState extends State<ContactSelector> {
                     ),
                     title: Text(contact.name),
                     subtitle: Text(contact.phone),
-                    trailing: isSelected 
-                      ? const Icon(Icons.check_circle, color: Colors.green)
-                      : const Icon(Icons.circle_outlined),
+                    trailing:
+                        isSelected
+                            ? const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                            )
+                            : const Icon(Icons.circle_outlined),
                     onTap: () {
                       setState(() {
                         if (isSelected) {
@@ -141,28 +145,25 @@ class ContactChips extends StatelessWidget {
   final List<Contact> contacts;
   final Function(String)? onDelete;
 
-  const ContactChips({
-    Key? key,
-    required this.contacts,
-    this.onDelete,
-  }) : super(key: key);
+  const ContactChips({super.key, required this.contacts, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 8,
       runSpacing: 4,
-      children: contacts.map((contact) {
-        return Chip(
-          avatar: CircleAvatar(
-            backgroundColor: contact.iconColor,
-            child: Icon(contact.icon, color: Colors.white, size: 16),
-          ),
-          label: Text(contact.name),
-          deleteIcon: const Icon(Icons.close, size: 16),
-          onDeleted: onDelete != null ? () => onDelete!(contact.id) : null,
-        );
-      }).toList(),
+      children:
+          contacts.map((contact) {
+            return Chip(
+              avatar: CircleAvatar(
+                backgroundColor: contact.iconColor,
+                child: Icon(contact.icon, color: Colors.white, size: 16),
+              ),
+              label: Text(contact.name),
+              deleteIcon: const Icon(Icons.close, size: 16),
+              onDeleted: onDelete != null ? () => onDelete!(contact.id) : null,
+            );
+          }).toList(),
     );
   }
 }

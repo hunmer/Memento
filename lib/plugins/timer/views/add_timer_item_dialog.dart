@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class AddTimerItemDialog extends StatefulWidget {
   final TimerItem? initialItem;
 
-  const AddTimerItemDialog({this.initialItem});
+  const AddTimerItemDialog({super.key, this.initialItem});
 
   @override
   _AddTimerItemDialogState createState() => _AddTimerItemDialogState();

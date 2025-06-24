@@ -23,9 +23,7 @@ class GoalCard extends StatelessWidget {
     final progress = controller.calculateProgress(goal);
     final isCompleted = progress >= 1.0;
     final remainingDays =
-        goal.dateSettings.endDate != null
-            ? goal.dateSettings.endDate!.difference(DateTime.now()).inDays
-            : null;
+        goal.dateSettings.endDate?.difference(DateTime.now()).inDays;
 
     return SizedBox(
       height: 180, // 为Card添加固定高度
@@ -144,11 +142,11 @@ class GoalCard extends StatelessWidget {
                                     materialTapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                     fillColor:
-                                        MaterialStateProperty.resolveWith<
-                                          Color
-                                        >((states) {
+                                        WidgetStateProperty.resolveWith<Color>((
+                                          states,
+                                        ) {
                                           if (states.contains(
-                                            MaterialState.selected,
+                                            WidgetState.selected,
                                           )) {
                                             return goal.progressColor != null
                                                 ? Color(goal.progressColor!)

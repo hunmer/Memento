@@ -39,7 +39,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = CalendarAlbumLocalizations.of(context);
-    final _pages = [
+    final pages = [
       CalendarScreen(key: const PageStorageKey('calendar')),
       TagScreen(key: const PageStorageKey('tags')),
       AlbumScreen(key: const PageStorageKey('album')),
@@ -56,8 +56,8 @@ class _MainScreenState extends State<MainScreen> {
           onPageChanged: (index) {
             setState(() => _currentIndex = index);
           },
-          itemBuilder: (context, index) => _pages[index],
-          itemCount: _pages.length,
+          itemBuilder: (context, index) => pages[index],
+          itemCount: pages.length,
         ),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,

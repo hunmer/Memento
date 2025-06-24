@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../controllers/calendar_controller.dart';
 import '../../controllers/tag_controller.dart';
 import '../../models/calendar_entry.dart';
-import 'entry_detail_screen.dart';
 import '../entry_editor_screen.dart';
 
 class EntryDetailEditorLauncher extends StatelessWidget {

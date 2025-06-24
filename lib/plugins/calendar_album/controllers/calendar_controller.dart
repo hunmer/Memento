@@ -187,19 +187,19 @@ class CalendarController extends ChangeNotifier {
 
   List<String> getAllTags() {
     final Set<String> tags = {};
-    _entries.values.forEach((entries) {
-      entries.forEach((entry) {
+    for (var entries in _entries.values) {
+      for (var entry in entries) {
         tags.addAll(entry.tags);
-      });
-    });
+      }
+    }
     return tags.toList()..sort();
   }
 
   List<CalendarEntry> getEntriesByTag(String tag) {
     final List<CalendarEntry> taggedEntries = [];
-    _entries.values.forEach((entries) {
+    for (var entries in _entries.values) {
       taggedEntries.addAll(entries.where((entry) => entry.tags.contains(tag)));
-    });
+    }
     return taggedEntries..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
@@ -207,22 +207,22 @@ class CalendarController extends ChangeNotifier {
     if (tags.isEmpty) return [];
 
     final List<CalendarEntry> taggedEntries = [];
-    _entries.values.forEach((entries) {
+    for (var entries in _entries.values) {
       taggedEntries.addAll(
         entries.where((entry) => tags.every((tag) => entry.tags.contains(tag))),
       );
-    });
+    }
     return taggedEntries..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   List<String> getAllImages() {
     final Set<String> images = {};
-    _entries.values.forEach((entries) {
-      entries.forEach((entry) {
+    for (var entries in _entries.values) {
+      for (var entry in entries) {
         images.addAll(entry.imageUrls);
         images.addAll(entry.extractImagesFromMarkdown());
-      });
-    });
+      }
+    }
     return images.toList();
   }
 

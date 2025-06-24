@@ -7,7 +7,6 @@ class CompletionRecordController {
   final StorageManager storage;
   final HabitController habitController;
   final SkillController skillControlle;
-  static const _recordsKey = 'habits_records';
 
   CompletionRecordController(
     this.storage, {
@@ -36,7 +35,7 @@ class CompletionRecordController {
   }
 
   getSkillHabitIds(skillId) async {
-    final habits = await habitController.getHabits();
+    final habits = habitController.getHabits();
     return habits
         .where((habit) => habit.skillId == skillId)
         .map((habit) => habit.id)

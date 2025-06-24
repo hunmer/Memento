@@ -18,12 +18,12 @@ class ContactForm extends StatefulWidget {
   final GlobalKey<ContactFormState>? formStateKey;
 
   const ContactForm({
-    Key? key,
+    super.key,
     this.contact,
     required this.onSave,
     required this.controller,
     this.formStateKey,
-  }) : super(key: key);
+  });
 
   @override
   ContactFormState createState() => ContactFormState();
