@@ -2,6 +2,8 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:provider/provider.dart';
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('目标跟踪'),
+        title: Text(TrackerLocalizations.of(context).goalTracking),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
@@ -33,9 +35,18 @@ class _HomeScreenState extends State<HomeScreen> {
             onSelected: (value) => setState(() => _filterStatus = value),
             itemBuilder:
                 (context) => [
-                  const PopupMenuItem(value: '全部', child: Text('全部')),
-                  const PopupMenuItem(value: '进行中', child: Text('进行中')),
-                  const PopupMenuItem(value: '已完成', child: Text('已完成')),
+                  PopupMenuItem(
+                    value: '全部',
+                    child: Text(TrackerLocalizations.of(context).all),
+                  ),
+                  PopupMenuItem(
+                    value: '进行中',
+                    child: Text(TrackerLocalizations.of(context).inProgress),
+                  ),
+                  PopupMenuItem(
+                    value: '已完成',
+                    child: Text(TrackerLocalizations.of(context).completed),
+                  ),
                 ],
             icon: const Icon(Icons.filter_list),
           ),
@@ -43,9 +54,18 @@ class _HomeScreenState extends State<HomeScreen> {
             onSelected: (value) => setState(() => {}),
             itemBuilder:
                 (context) => [
-                  const PopupMenuItem(value: '最近', child: Text('最近')),
-                  const PopupMenuItem(value: '本周', child: Text('本周')),
-                  const PopupMenuItem(value: '本月', child: Text('本月')),
+                  PopupMenuItem(
+                    value: '最近',
+                    child: Text(TrackerLocalizations.of(context).recent),
+                  ),
+                  PopupMenuItem(
+                    value: '本周',
+                    child: Text(TrackerLocalizations.of(context).thisWeek),
+                  ),
+                  PopupMenuItem(
+                    value: '本月',
+                    child: Text(TrackerLocalizations.of(context).thisMonth),
+                  ),
                 ],
             icon: const Icon(Icons.calendar_today),
           ),
@@ -150,18 +170,20 @@ class _HomeScreenState extends State<HomeScreen> {
               context: context,
               builder:
                   (context) => AlertDialog(
-                    title: const Text('确认删除'),
+                    title: Text(
+                      TrackerLocalizations.of(context).confirmDeletion,
+                    ),
                     content: Text('确定要删除目标"${goal.name}"吗？'),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('取消'),
+                        child: Text(AppLocalizations.of(context)!.cancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text(
-                          '删除',
-                          style: TextStyle(color: Colors.red),
+                        child: Text(
+                          AppLocalizations.of(context)!.delete,
+                          style: const TextStyle(color: Colors.red),
                         ),
                       ),
                     ],

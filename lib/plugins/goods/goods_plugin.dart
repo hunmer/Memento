@@ -157,9 +157,6 @@ class GoodsPlugin extends BasePlugin {
   String get name => '物品管理';
 
   @override
-  String get description => '管理各种物品的存储位置和使用记录';
-
-  @override
   IconData get icon => Icons.inventory_2;
 
   // 用于存储用户的排序偏好

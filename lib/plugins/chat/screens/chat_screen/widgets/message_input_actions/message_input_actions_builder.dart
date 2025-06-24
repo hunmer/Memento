@@ -4,6 +4,8 @@ import '../../../../services/file_service.dart';
 import 'handlers/index.dart';
 import 'types.dart';
 import 'package:Memento/plugins/openai/widgets/plugin_analysis_dialog.dart';
+import '../../../../l10n/chat_localizations.dart';
+
 /// 构建消息输入动作列表
 class MessageInputActionsBuilder {
   final BuildContext context;
@@ -43,11 +45,12 @@ class MessageInputActionsBuilder {
   /// 获取所有可用的消息输入动作
   List<MessageInputAction> buildActions() {
     final List<MessageInputAction> actions = [];
+    final chatLocalizations = ChatLocalizations.of(context);
 
     // 添加高级编辑器动作
     actions.add(
       MessageInputAction(
-        title: '高级编辑',
+        title: chatLocalizations?.advancedEditor ?? '高级编辑',
         icon: Icons.edit_note,
         onTap:
             () => handleAdvancedEditor(
@@ -60,7 +63,7 @@ class MessageInputActionsBuilder {
     // 添加图片选择动作
     actions.add(
       MessageInputAction(
-        title: '图片',
+        title: chatLocalizations?.photo ?? '图片',
         icon: Icons.photo,
         onTap:
             () => handleImageSelection(
@@ -75,7 +78,7 @@ class MessageInputActionsBuilder {
     // 添加拍照动作
     actions.add(
       MessageInputAction(
-        title: '拍照',
+        title: chatLocalizations?.takePhoto ?? '拍照',
         icon: Icons.camera_alt,
         onTap:
             () => handleImageSelection(
@@ -91,7 +94,7 @@ class MessageInputActionsBuilder {
     // 在Web平台上不支持视频拍摄，但我们仍然显示按钮，点击后会提示不支持
     actions.add(
       MessageInputAction(
-        title: '录像',
+        title: chatLocalizations?.recordVideo ?? '录像',
         icon: Icons.videocam,
         onTap:
             () => handleVideoSelection(
@@ -105,7 +108,7 @@ class MessageInputActionsBuilder {
     // 添加视频选择动作
     actions.add(
       MessageInputAction(
-        title: '视频',
+        title: chatLocalizations?.video ?? '视频',
         icon: Icons.video_library,
         onTap:
             () => handleLocalVideoSelection(
@@ -119,7 +122,7 @@ class MessageInputActionsBuilder {
     // 添加插件分析功能
     actions.add(
       MessageInputAction(
-        title: '插件分析',
+        title: chatLocalizations?.pluginAnalysis ?? '插件分析',
         icon: Icons.analytics,
         onTap: () {
           showDialog(
@@ -133,7 +136,7 @@ class MessageInputActionsBuilder {
     // 添加文件选择动作
     actions.add(
       MessageInputAction(
-        title: '文件',
+        title: chatLocalizations?.file ?? '文件',
         icon: Icons.attach_file,
         onTap:
             () => handleFileSelection(
@@ -149,7 +152,7 @@ class MessageInputActionsBuilder {
     if (!kIsWeb) {
       actions.add(
         MessageInputAction(
-          title: '录音',
+          title: chatLocalizations?.audioRecording ?? '录音',
           icon: Icons.mic,
           onTap:
               () => handleAudioRecording(
@@ -164,7 +167,7 @@ class MessageInputActionsBuilder {
     // 添加智能体动作
     actions.add(
       MessageInputAction(
-        title: '智能体',
+        title: chatLocalizations?.smartAgent ?? '智能体',
         icon: Icons.smart_toy,
         onTap: () {
           // 直接在文本框末尾添加 @ 符号，这会触发 MessageInput 中的处理逻辑

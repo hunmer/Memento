@@ -40,9 +40,6 @@ class ActivityPlugin extends BasePlugin {
   String get name => 'Activity';
 
   @override
-  String get description => '活动记录插件';
-
-  @override
   IconData get icon => Icons.timeline;
 
   @override

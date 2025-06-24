@@ -52,8 +52,6 @@ class HabitsPlugin extends PluginBase {
 
   final String author = 'Memento Team';
   @override
-  String get description => '';
-  @override
   String get id => 'habits';
   @override
   String get name => '习惯管理';

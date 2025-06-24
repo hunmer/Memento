@@ -92,9 +92,6 @@ class CheckinPlugin extends BasePlugin {
   String get name => '打卡';
 
   @override
-  String get description => '管理日常打卡项目';
-
-  @override
   IconData get icon => Icons.checklist;
 
   List<CheckinItem> _checkinItems = [];

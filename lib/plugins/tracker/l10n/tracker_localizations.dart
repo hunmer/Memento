@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class TrackerLocalizations {
@@ -6,7 +5,10 @@ class TrackerLocalizations {
       _TrackerLocalizationsDelegate();
 
   static TrackerLocalizations of(BuildContext context) {
-    return Localizations.of<TrackerLocalizations>(context, TrackerLocalizations)!;
+    return Localizations.of<TrackerLocalizations>(
+      context,
+      TrackerLocalizations,
+    )!;
   }
 
   String get goalsTitle => '目标';
@@ -39,6 +41,16 @@ class TrackerLocalizations {
   String get history => '历史记录';
   String get todayRecords => '今日记录';
   String get totalGoals => '目标总数';
+
+  // New translations
+  String get goalTracking => '目标跟踪';
+  String get all => '全部';
+  String get inProgress => '进行中';
+  String get completed => '已完成';
+  String get recent => '最近';
+  String get thisWeek => '本周';
+  String get thisMonth => '本月';
+  String get confirmDeletion => '确认删除';
 }
 
 class _TrackerLocalizationsDelegate

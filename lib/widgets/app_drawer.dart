@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../core/plugin_base.dart';
 import '../screens/settings_screen/settings_screen.dart';
@@ -38,14 +39,16 @@ class AppDrawer extends StatelessWidget {
                             headerBuilder: (context, isExpanded) {
                               return ListTile(
                                 leading: Icon(plugin.icon),
-                                title: Text(plugin.name),
+                                title: Text(plugin.getPluginName(context)),
                               );
                             },
                             body: Column(
                               children: [
                                 ListTile(
                                   leading: const Icon(Icons.settings),
-                                  title: const Text('插件设置'),
+                                  title: Text(
+                                    AppLocalizations.of(context)!.settings,
+                                  ),
                                   onTap: () {
                                     // 添加安全检查，防止黑屏
                                     if (context.mounted) {
@@ -70,9 +73,7 @@ class AppDrawer extends StatelessWidget {
                                               builder:
                                                   (context) => Scaffold(
                                                     appBar: AppBar(
-                                                      title: Text(
-                                                        '${plugin.name}设置',
-                                                      ),
+                                                      title: Text(plugin.name),
                                                     ),
                                                     body: plugin
                                                         .buildSettingsView(

@@ -62,9 +62,6 @@ class NodesPlugin extends PluginBase {
   String get name => 'Nodes';
 
   @override
-  String get description => 'A plugin for managing hierarchical notes';
-
-  @override
   Future<void> initialize() async {
     _controller = NodesController(storage);
     _promptReplacements.initialize();

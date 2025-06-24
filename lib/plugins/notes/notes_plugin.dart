@@ -29,9 +29,6 @@ class NotesPlugin extends BasePlugin {
   String get name => 'Notes';
 
   @override
-  String get description => 'A simple note-taking plugin for Memento';
-
-  @override
   IconData get icon => Icons.note_alt_outlined;
 
   @override

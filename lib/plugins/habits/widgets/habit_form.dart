@@ -225,9 +225,12 @@ class _HabitFormState extends State<HabitForm> {
                   _skills.any((s) => s.id == _selectedSkillId)
                       ? _selectedSkillId
                       : null,
-              decoration: InputDecoration(labelText: '选择技能'),
+              decoration: InputDecoration(labelText: l10n.skill),
               items: [
-                DropdownMenuItem<String>(value: null, child: Text('请选择技能')),
+                DropdownMenuItem<String>(
+                  value: null,
+                  child: Text(l10n.selectSkill),
+                ),
                 ..._skills.map((skill) {
                   return DropdownMenuItem<String>(
                     value: skill.id,
@@ -242,7 +245,7 @@ class _HabitFormState extends State<HabitForm> {
               },
               validator: (value) {
                 if (value == null) {
-                  return '请选择技能';
+                  return l10n.selectSkill;
                 }
                 return null;
               },

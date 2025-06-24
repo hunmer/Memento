@@ -49,7 +49,7 @@ class UIService {
               ),
               const SizedBox(width: 12),
               Text(
-                _plugin.name,
+                ChatLocalizations.of(context)!.pluginName,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -60,61 +60,70 @@ class UIService {
 
           // 统计信息卡片 - 两行显示
           Column(
-              children: [
-                // 第一行
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        Text('频道数量', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '${channels.length}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+            children: [
+              // 第一行
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        ChatLocalizations.of(context)!.channelCount,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '${channels.length}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    const VerticalDivider(),
-                    Column(
-                      children: [
-                        Text('总消息数量', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '${_plugin.channelService.getTotalMessageCount()}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                    ],
+                  ),
+                  const VerticalDivider(),
+                  Column(
+                    children: [
+                      Text(
+                        ChatLocalizations.of(context)!.totalMessages,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '${_plugin.channelService.getTotalMessageCount()}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                
-                // 第二行
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        Text('今日新增消息', style: theme.textTheme.bodyMedium),
-                        Text(
-                          '${_plugin.channelService.getTodayMessageCount()}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                _plugin.channelService.getTodayMessageCount() > 0
-                                    ? theme.colorScheme.primary
-                                    : null,
-                          ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // 第二行
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        ChatLocalizations.of(context)!.todayMessages,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '${_plugin.channelService.getTodayMessageCount()}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color:
+                              _plugin.channelService.getTodayMessageCount() > 0
+                                  ? theme.colorScheme.primary
+                                  : null,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -161,12 +170,9 @@ class UIService {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text(
-              '个人资料',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Text(
+              ChatLocalizations.of(context)!.profileTitle,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Row(
@@ -196,10 +202,7 @@ class UIService {
                       ),
                       Text(
                         'ID: ${_userService.currentUser.id}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -210,10 +213,11 @@ class UIService {
                   onPressed: () async {
                     final updatedUser = await showDialog<User>(
                       context: context,
-                      builder: (context) => ProfileEditDialog(
-                        user: _userService.currentUser,
-                        chatPlugin: _plugin,
-                      ),
+                      builder:
+                          (context) => ProfileEditDialog(
+                            user: _userService.currentUser,
+                            chatPlugin: _plugin,
+                          ),
                     );
                     if (updatedUser != null) {
                       setState(() {
@@ -275,18 +279,15 @@ class UIService {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              '聊天设置',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              ChatLocalizations.of(context)!.chatSettings,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           SwitchListTile(
-            title: const Text('在聊天中显示头像'),
+            title: Text(ChatLocalizations.of(context)!.showAvatarInChat),
             value: _settingsService.showAvatarInChat,
             onChanged: (bool value) {
               setState(() {
@@ -295,7 +296,7 @@ class UIService {
             },
           ),
           SwitchListTile(
-            title: const Text('发送消息播放提示音'),
+            title: Text(ChatLocalizations.of(context)!.playSoundOnSend),
             value: _settingsService.playSoundOnSend,
             onChanged: (bool value) {
               setState(() {
@@ -304,7 +305,7 @@ class UIService {
             },
           ),
           SwitchListTile(
-            title: const Text('在时间线中显示头像'),
+            title: Text(ChatLocalizations.of(context)!.showAvatarInTimeline),
             value: _settingsService.showAvatarInTimeline,
             onChanged: (bool value) {
               setState(() {

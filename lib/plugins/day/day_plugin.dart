@@ -43,9 +43,6 @@ class DayPlugin extends BasePlugin {
   final String name = 'Day';
 
   @override
-  String get description => '纪念日管理插件';
-
-  @override
   IconData get icon => Icons.event_outlined;
 
   @override

@@ -31,9 +31,6 @@ class TimerPlugin extends BasePlugin {
   String get name => '计时器';
 
   @override
-  String get description => '支持多种计时类型的任务管理器';
-
-  @override
   IconData get icon => Icons.timer;
 
   @override

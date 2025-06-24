@@ -1,5 +1,7 @@
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -32,6 +34,7 @@ class _ChatMainViewState extends State<ChatMainView> {
 
 class ChatPlugin extends BasePlugin with ChangeNotifier {
   static ChatPlugin? _instance;
+
   static ChatPlugin get instance {
     if (_instance == null) {
       _instance = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
@@ -53,9 +56,6 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
 
   @override
   String get name => 'Chat';
-
-  @override
-  String get description => 'A plugin for chatting with other users';
 
   @override
   IconData get icon => Icons.chat_bubble;
@@ -81,6 +81,11 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
   /// 代理到 channelService.getMessageById
   Future<Message?> getMessage(String messageId) async {
     return channelService.getMessageById(messageId);
+  }
+
+  @override
+  getPluginName(context) {
+    return ChatLocalizations.of(context)!.pluginName;
   }
 
   @override

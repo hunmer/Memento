@@ -17,14 +17,16 @@ abstract class ChatLocalizations {
     return Localizations.of<ChatLocalizations>(context, ChatLocalizations);
   }
 
-  static const LocalizationsDelegate<ChatLocalizations> delegate = _ChatLocalizationsDelegate();
+  static const LocalizationsDelegate<ChatLocalizations> delegate =
+      _ChatLocalizationsDelegate();
 
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
@@ -32,8 +34,7 @@ abstract class ChatLocalizations {
   ];
 
   // 聊天插件的本地化字符串
-  String get chatPluginName;
-  String get chatPluginDescription;
+  String get pluginName;
   String get showAvatarInChannelList;
   String get channelList;
   String get newChannel;
@@ -58,7 +59,7 @@ abstract class ChatLocalizations {
   String get timelineTab;
   String get timelineComingSoon;
   String get editProfile;
-  
+
   // Advanced filter related strings
   String get advancedFilter;
   String get searchIn;
@@ -77,25 +78,50 @@ abstract class ChatLocalizations {
   String get reset;
   String get apply;
   String get setBackground;
-  
+
+  // New localization keys for UI service
+  String get channelCount;
+  String get totalMessages;
+  String get todayMessages;
+  String get profileTitle;
+  String get chatSettings;
+  String get showAvatarInChat;
+  String get playSoundOnSend;
+  String get showAvatarInTimeline;
+
   String minutesAgo(int minutes);
   String hoursAgo(int hours);
   String daysAgo(int days);
   String userInitial(String username);
   String get today;
   String get yesterday;
+
+  // Message input actions
+  String get advancedEditor;
+  String get photo;
+  String get takePhoto;
+  String get recordVideo;
+  String get video;
+  String get pluginAnalysis;
+  String get file;
+  String get audioRecording;
+  String get smartAgent;
 }
 
-class _ChatLocalizationsDelegate extends LocalizationsDelegate<ChatLocalizations> {
+class _ChatLocalizationsDelegate
+    extends LocalizationsDelegate<ChatLocalizations> {
   const _ChatLocalizationsDelegate();
 
   @override
   Future<ChatLocalizations> load(Locale locale) {
-    return SynchronousFuture<ChatLocalizations>(lookupChatLocalizations(locale));
+    return SynchronousFuture<ChatLocalizations>(
+      lookupChatLocalizations(locale),
+    );
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_ChatLocalizationsDelegate old) => false;
@@ -104,12 +130,14 @@ class _ChatLocalizationsDelegate extends LocalizationsDelegate<ChatLocalizations
 ChatLocalizations lookupChatLocalizations(Locale locale) {
   // 支持的语言代码
   switch (locale.languageCode) {
-    case 'en': return ChatLocalizationsEn();
-    case 'zh': return ChatLocalizationsZh();
+    case 'en':
+      return ChatLocalizationsEn();
+    case 'zh':
+      return ChatLocalizationsZh();
   }
 
   throw FlutterError(
     'ChatLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localization\'s implementation.'
+    'an issue with the localization\'s implementation.',
   );
 }

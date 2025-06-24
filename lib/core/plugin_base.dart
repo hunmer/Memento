@@ -14,9 +14,6 @@ abstract class PluginBase {
   /// 插件存储目录
   String get storageDir => getPluginStoragePath();
 
-  /// 插件描述
-  String get description;
-
   /// 插件图标
   IconData? get icon => Icons.extension;
 
@@ -42,6 +39,8 @@ abstract class PluginBase {
   void setStorageManager(StorageManager storageManager) {
     _storage = storageManager;
   }
+
+  String getPluginName(context) => name;
 
   String getPluginSettingPath() => ConfigManager.getPluginConfigPath(id);
 

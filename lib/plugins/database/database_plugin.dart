@@ -31,9 +31,6 @@ class DatabasePlugin extends BasePlugin {
   @override
   String get name => DatabaseLocalizations.pluginName;
 
-  @override
-  String get description => DatabaseLocalizations.pluginDescription;
-
   static DatabasePlugin? _instance;
   static DatabasePlugin get instance {
     if (_instance == null) {

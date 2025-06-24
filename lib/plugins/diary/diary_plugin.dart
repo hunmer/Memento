@@ -73,9 +73,6 @@ class DiaryPlugin extends BasePlugin {
   String get name => 'Diary';
 
   @override
-  String get description => 'Diary management plugin';
-
-  @override
   IconData get icon => Icons.book;
 
   // 获取今日文字数

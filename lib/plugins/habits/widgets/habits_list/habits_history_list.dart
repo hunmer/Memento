@@ -92,24 +92,22 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
   }
 
   Future<void> _showClearAllDialog(BuildContext context) async {
-    HabitsLocalizations.of(context);
+    final l10n = HabitsLocalizations.of(context);
     final shouldClear =
         await showDialog<bool>(
           context: context,
           builder:
               (context) => AlertDialog(
-                title: const Text('Clear All Records'),
-                content: const Text(
-                  'Are you sure you want to clear all records?',
-                ),
+                title: Text(l10n.clearAllRecords),
+                content: Text(l10n.deleteRecordMessage),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel'),
+                    child: Text(l10n.cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Clear'),
+                    child: Text(l10n.clearAllRecords),
                   ),
                 ],
               ),
@@ -120,7 +118,7 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
       await widget.controller.clearAllCompletionRecords(widget.habitId);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('All records cleared')));
+      ).showSnackBar(SnackBar(content: Text(l10n.clearAllRecords)));
       await _loadRecords();
     }
   }

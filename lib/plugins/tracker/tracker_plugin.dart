@@ -60,9 +60,6 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
   String get name => '目标跟踪';
 
   @override
-  String get description => '用于跟踪和管理个人目标的插件';
-
-  @override
   IconData get icon => Icons.track_changes;
 
   @override

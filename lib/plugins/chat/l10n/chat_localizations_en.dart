@@ -5,10 +5,7 @@ class ChatLocalizationsEn extends ChatLocalizations {
   ChatLocalizationsEn() : super('en');
 
   @override
-  String get chatPluginName => 'Chat';
-
-  @override
-  String get chatPluginDescription => 'Basic chat functionality plugin';
+  String get pluginName => 'Chat';
 
   @override
   String get showAvatarInChannelList => 'Show avatars in channel list';
@@ -148,7 +145,60 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String get apply => 'Apply';
-  
+
   @override
   String get setBackground => 'Set Background';
+
+  // New localizations for UI service
+  @override
+  String get channelCount => 'Channels';
+
+  @override
+  String get totalMessages => 'Messages';
+
+  @override
+  String get todayMessages => 'Today';
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get chatSettings => 'Chat Settings';
+
+  @override
+  String get showAvatarInChat => 'Show avatar in chat';
+
+  @override
+  String get playSoundOnSend => 'Play sound when sending message';
+
+  @override
+  String get showAvatarInTimeline => 'Show avatar in timeline';
+
+  // Message input actions
+  @override
+  String get advancedEditor => 'Advanced Editor';
+
+  @override
+  String get photo => 'Photo';
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get recordVideo => 'Record Video';
+
+  @override
+  String get video => 'Video';
+
+  @override
+  String get pluginAnalysis => 'Plugin Analysis';
+
+  @override
+  String get file => 'File';
+
+  @override
+  String get audioRecording => 'Audio Recording';
+
+  @override
+  String get smartAgent => 'Smart Agent';
 }

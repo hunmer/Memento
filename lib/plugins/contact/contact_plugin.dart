@@ -20,9 +20,6 @@ class ContactPlugin extends BasePlugin {
   String get name => ContactStrings.pluginName;
 
   @override
-  String get description => ContactStrings.pluginDescription;
-
-  @override
   IconData get icon => Icons.contacts;
 
   @override
