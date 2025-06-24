@@ -39,10 +39,6 @@ abstract class BasePlugin extends PluginBase {
   @override
   String get name;
 
-  /// 插件描述
-  @override
-  String get description;
-
   /// 插件存储目录
   @override
   String get storageDir => getPluginStoragePath();

@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 
@@ -22,12 +23,13 @@ class InputField extends StatelessWidget {
     // 获取屏幕高度，用于计算输入框的最大高度
     final screenHeight = MediaQuery.of(context).size.height;
     final maxHeight = screenHeight / 2; // 最大高度为屏幕高度的一半
-    
+
     return KeyboardListener(
       focusNode: keyboardListenerFocusNode,
-      onKeyEvent: Platform.isMacOS || Platform.isWindows || Platform.isLinux
-          ? onKeyEvent
-          : null,
+      onKeyEvent:
+          Platform.isMacOS || Platform.isWindows || Platform.isLinux
+              ? onKeyEvent
+              : null,
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxHeight: maxHeight, // 限制最大高度
@@ -36,16 +38,18 @@ class InputField extends StatelessWidget {
           controller: controller,
           onChanged: onChanged,
           style: TextStyle(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Colors.black87,
+            color:
+                Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black87,
           ),
           decoration: InputDecoration(
-            hintText: '输入消息...',
+            hintText: ChatLocalizations.of(context)?.enterMessage,
             hintStyle: TextStyle(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[400]
-                  : Colors.grey[600],
+              color:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[400]
+                      : Colors.grey[600],
             ),
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(
@@ -56,7 +60,7 @@ class InputField extends StatelessWidget {
             isCollapsed: false,
           ),
           maxLines: null, // 允许多行
-          minLines: 1,    // 最少显示1行
+          minLines: 1, // 最少显示1行
           keyboardType: TextInputType.multiline,
           textInputAction: TextInputAction.newline,
           focusNode: focusNode,

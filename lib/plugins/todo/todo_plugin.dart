@@ -26,9 +26,6 @@ class TodoPlugin extends BasePlugin {
   String get name => 'Todo';
 
   @override
-  String get description => 'A comprehensive todo management plugin';
-
-  @override
   IconData get icon => Icons.check_box;
 
   @override

@@ -5,10 +5,7 @@ class ChatLocalizationsZh extends ChatLocalizations {
   ChatLocalizationsZh() : super('zh');
 
   @override
-  String get chatPluginName => '聊天';
-
-  @override
-  String get chatPluginDescription => '基础聊天功能插件';
+  String get pluginName => '频道聊天';
 
   @override
   String get showAvatarInChannelList => '在聊天列表显示头像';
@@ -148,7 +145,60 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String get apply => '应用';
-  
+
   @override
   String get setBackground => '设置背景';
+
+  // UI服务新增的本地化键值
+  @override
+  String get channelCount => '频道数量';
+
+  @override
+  String get totalMessages => '总消息数量';
+
+  @override
+  String get todayMessages => '今日新增消息';
+
+  @override
+  String get profileTitle => '个人资料';
+
+  @override
+  String get chatSettings => '聊天设置';
+
+  @override
+  String get showAvatarInChat => '在聊天中显示头像';
+
+  @override
+  String get playSoundOnSend => '发送消息播放提示音';
+
+  @override
+  String get showAvatarInTimeline => '在时间线中显示头像';
+
+  // 消息输入动作
+  @override
+  String get advancedEditor => '高级编辑';
+
+  @override
+  String get photo => '图片';
+
+  @override
+  String get takePhoto => '拍照';
+
+  @override
+  String get recordVideo => '录像';
+
+  @override
+  String get video => '视频';
+
+  @override
+  String get pluginAnalysis => '插件分析';
+
+  @override
+  String get file => '文件';
+
+  @override
+  String get audioRecording => '录音';
+
+  @override
+  String get smartAgent => '智能体';
 }

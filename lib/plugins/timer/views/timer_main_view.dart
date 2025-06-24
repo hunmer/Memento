@@ -8,6 +8,7 @@ import 'timer_task_card.dart';
 import 'add_timer_task_dialog.dart';
 import 'timer_task_details_page.dart';
 import 'package:collection/collection.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 
 class TimerMainView extends StatefulWidget {
   const TimerMainView({super.key});
@@ -167,16 +168,18 @@ class _TimerMainViewState extends State<TimerMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('删除计时器'),
-            content: Text('确定要删除"${task.name}"吗？'),
+            title: Text(AppLocalizations.of(context)!.deleteTimer),
+            content: Text(
+              '${AppLocalizations.of(context)!.deleteTimerConfirmation} "${task.name}"',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('删除'),
+                child: Text(AppLocalizations.of(context)!.delete),
               ),
             ],
           ),

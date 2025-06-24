@@ -24,18 +24,12 @@ class OpenAIPlugin extends BasePlugin {
   final PromptReplacementController _promptReplacementController =
       PromptReplacementController();
   final ChatEventHandler _chatEventHandler = ChatEventHandler();
-  @override
-  final String storageDir = 'openai';
 
   @override
   String get id => 'openai';
 
   @override
-  String get name => 'AI Assistant'; // 保持英文ID不变
-
-  @override
-  String get description =>
-      'AI assistant plugin supporting multiple LLM providers'; // 保持英文描述作为默认值
+  String get name => 'AI Assistant';
 
   @override
   Future<void> initialize() async {
@@ -50,13 +44,13 @@ class OpenAIPlugin extends BasePlugin {
   @override
   Future<void> initializeDefaultData() async {
     // 确保 agents.json 文件存在并初始化默认智能体
-    final agentData = await storage.read('$storageDir/agents.json');
+    final agentData = await storage.read('openai/agents.json');
     if (agentData.isEmpty) {
       // 如果文件为空，创建包含默认智能体的文件
       final defaultAgents = [
         {
           'id': 'assistant-1',
-          'name': '通用助手', // 默认使用中文，后续可通过UI更新
+          'name': '通用助手',
           'description': '一个友好的AI助手，可以帮助回答各种问题和完成各种任务。',
           'serviceProviderId': 'ollama',
           'baseUrl': 'http://localhost:11434',

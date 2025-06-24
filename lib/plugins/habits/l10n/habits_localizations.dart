@@ -50,6 +50,9 @@ class HabitsLocalizations {
   String get recordUpdated => 'Record updated';
   String get recordDeleted => 'Record deleted';
 
+  String get selectSkill => 'Select Skill';
+  String get clearAllRecords => 'Clear All Records';
+
   static HabitsLocalizations of(BuildContext context) {
     return const HabitsLocalizations();
   }

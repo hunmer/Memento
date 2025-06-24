@@ -85,14 +85,6 @@
     "@showAvatarInChannelList": {
         "description": "是否在频道列表中显示头像的选项"
     },
-    "chatPluginName": "聊天",
-    "@chatPluginName": {
-        "description": "聊天插件的名称"
-    },
-    "chatPluginDescription": "用于与其他用户聊天的插件",
-    "@chatPluginDescription": {
-        "description": "聊天插件的描述"
-    },
     "switchedToDarkTheme": "已切换到深色主题",
     "@switchedToDarkTheme": {
         "description": "切换到深色主题时显示的消息"
