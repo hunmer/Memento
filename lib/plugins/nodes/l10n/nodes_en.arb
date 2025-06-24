@@ -24,5 +24,8 @@
   "done": "Done",
   "key": "Key",
   "value": "Value",
-  "addCustomField": "Add Custom Field"
+  "addCustomField": "Add Custom Field",
+  "confirmDeleteNotebook": "Are you sure you want to delete \"{notebookTitle}\"?",
+  "confirmDeleteNode": "Are you sure you want to delete \"{nodeTitle}\"?",
+  "nodeCount": "{count} nodes"
 }

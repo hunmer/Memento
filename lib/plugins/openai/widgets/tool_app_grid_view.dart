@@ -2,22 +2,19 @@ import 'package:flutter/material.dart';
 import '../models/tool_app.dart';
 import 'tool_app_card.dart';
 import '../controllers/tool_app_controller.dart';
+import '../../l10n/openai_localizations.dart';
 
 class ToolAppGridView extends StatelessWidget {
   final List<ToolApp> apps;
   final ToolAppController? controller;
-  
-  const ToolAppGridView({
-    super.key,
-    required this.apps,
-    this.controller,
-  });
+
+  const ToolAppGridView({super.key, required this.apps, this.controller});
 
   @override
   Widget build(BuildContext context) {
     if (apps.isEmpty) {
-      return const Center(
-        child: Text('No tools available'),
+      return Center(
+        child: Text(OpenAILocalizations.of(context).noToolsAvailable),
       );
     }
 

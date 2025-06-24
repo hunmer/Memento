@@ -2,7 +2,6 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:provider/provider.dart';
-import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(TrackerLocalizations.of(context).goalTracking),
+        title: Text(TrackerLocalizations.of(context)!.goalTracking),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
@@ -37,15 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 (context) => [
                   PopupMenuItem(
                     value: '全部',
-                    child: Text(TrackerLocalizations.of(context).all),
+                    child: Text(TrackerLocalizations.of(context)!.all),
                   ),
                   PopupMenuItem(
                     value: '进行中',
-                    child: Text(TrackerLocalizations.of(context).inProgress),
+                    child: Text(TrackerLocalizations.of(context)!.inProgress),
                   ),
                   PopupMenuItem(
                     value: '已完成',
-                    child: Text(TrackerLocalizations.of(context).completed),
+                    child: Text(TrackerLocalizations.of(context)!.completed),
                   ),
                 ],
             icon: const Icon(Icons.filter_list),
@@ -56,15 +55,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 (context) => [
                   PopupMenuItem(
                     value: '最近',
-                    child: Text(TrackerLocalizations.of(context).recent),
+                    child: Text(TrackerLocalizations.of(context)!.recent),
                   ),
                   PopupMenuItem(
                     value: '本周',
-                    child: Text(TrackerLocalizations.of(context).thisWeek),
+                    child: Text(TrackerLocalizations.of(context)!.thisWeek),
                   ),
                   PopupMenuItem(
                     value: '本月',
-                    child: Text(TrackerLocalizations.of(context).thisMonth),
+                    child: Text(TrackerLocalizations.of(context)!.thisMonth),
                   ),
                 ],
             icon: const Icon(Icons.calendar_today),
@@ -171,9 +170,11 @@ class _HomeScreenState extends State<HomeScreen> {
               builder:
                   (context) => AlertDialog(
                     title: Text(
-                      TrackerLocalizations.of(context).confirmDeletion,
+                      TrackerLocalizations.of(context)!.confirmDeletion,
                     ),
-                    content: Text('确定要删除目标"${goal.name}"吗？'),
+                    content: Text(
+                      '${TrackerLocalizations.of(context)!.confirmDeletion} "${goal.name}"',
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
@@ -192,9 +193,13 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           onDismissed: (direction) {
             controller.deleteGoal(goal.id);
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('已删除目标"${goal.name}"')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${TrackerLocalizations.of(context)!.goalDeleted} "${goal.name}"',
+                ),
+              ),
+            );
           },
           child: GoalCard(
             goal: goal,

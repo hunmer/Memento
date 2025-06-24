@@ -17,14 +17,16 @@ abstract class NotesLocalizations {
     return Localizations.of<NotesLocalizations>(context, NotesLocalizations);
   }
 
-  static const LocalizationsDelegate<NotesLocalizations> delegate = _NotesLocalizationsDelegate();
+  static const LocalizationsDelegate<NotesLocalizations> delegate =
+      _NotesLocalizationsDelegate();
 
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
@@ -38,7 +40,7 @@ abstract class NotesLocalizations {
   // 统计信息
   String get totalNotes;
   String get recentNotes;
-  
+
   // 文件夹和笔记操作
   String get newNote;
   String get newFolder;
@@ -50,37 +52,54 @@ abstract class NotesLocalizations {
   String get deleteFolder;
   String get deleteFolderConfirm;
   String get emptyFolder;
-  
+
   // 搜索
   String get searchHint;
   String get search;
   String get noSearchResults;
-  
+
   // 列表标题
   String get folders;
   String get notes;
-  
+
   // 按钮文本
   String get cancel;
   String get confirm;
   String get edit;
   String get delete;
   String get moveTo;
-  
+
   // 输入提示
   String get folderNameHint;
+
+  // 新增文本
+  String get createNew;
+  String get newFolder;
+  String get newNote;
+  String get movedTo;
+  String get filter;
+  String get tags;
+  String get dateRange;
+  String get clearAll;
+  String get apply;
+  String get typeToSearch;
+  String get noResultsFound;
 }
 
-class _NotesLocalizationsDelegate extends LocalizationsDelegate<NotesLocalizations> {
+class _NotesLocalizationsDelegate
+    extends LocalizationsDelegate<NotesLocalizations> {
   const _NotesLocalizationsDelegate();
 
   @override
   Future<NotesLocalizations> load(Locale locale) {
-    return SynchronousFuture<NotesLocalizations>(lookupNotesLocalizations(locale));
+    return SynchronousFuture<NotesLocalizations>(
+      lookupNotesLocalizations(locale),
+    );
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_NotesLocalizationsDelegate old) => false;
@@ -89,12 +108,14 @@ class _NotesLocalizationsDelegate extends LocalizationsDelegate<NotesLocalizatio
 NotesLocalizations lookupNotesLocalizations(Locale locale) {
   // 支持的语言代码
   switch (locale.languageCode) {
-    case 'en': return NotesLocalizationsEn();
-    case 'zh': return NotesLocalizationsZh();
+    case 'en':
+      return NotesLocalizationsEn();
+    case 'zh':
+      return NotesLocalizationsZh();
   }
 
   throw FlutterError(
     'NotesLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations setup. Please ensure that the locale is supported.'
+    'an issue with the localizations setup. Please ensure that the locale is supported.',
   );
 }

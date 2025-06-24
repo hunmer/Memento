@@ -1,4 +1,5 @@
-
+import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart'
+    show FloatingBallLocalizations;
 import 'package:Memento/widgets/backup_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/event/event_manager.dart';
@@ -33,40 +34,52 @@ class BackupService {
   Future<void> showBackupScheduleDialog() async {
     await showDialog(
       context: context,
-      builder: (context) => BackupTimePicker(
-        initialSchedule: _controller.backupSchedule,
-        onScheduleSelected: (schedule) {
-          _controller.setBackupSchedule(schedule);
-          _checkInitialBackup();
-        },
-      ),
+      builder:
+          (context) => BackupTimePicker(
+            initialSchedule: _controller.backupSchedule,
+            onScheduleSelected: (schedule) {
+              _controller.setBackupSchedule(schedule);
+              _checkInitialBackup();
+            },
+          ),
     );
   }
 
   Future<void> showBackupOptionsDialog() async {
     // 在弹出对话框之前先保存当前备份检查日期
     _controller.resetBackupCheckDate();
-    
+
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('备份选项'),
-        content: const Text('请选择备份方式'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'export'),
-            child: const Text('导出应用数据'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              FloatingBallLocalizations.getText(context, 'backupOptions'),
+            ),
+            content: Text(
+              FloatingBallLocalizations.getText(context, 'selectBackupMethod'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'export'),
+                child: Text(
+                  FloatingBallLocalizations.getText(context, 'exportAppData'),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'full'),
+                child: Text(
+                  FloatingBallLocalizations.getText(context, 'fullBackup'),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'webdav'),
+                child: Text(
+                  FloatingBallLocalizations.getText(context, 'webdavSync'),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'full'),
-            child: const Text('完整备份'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'webdav'),
-            child: const Text('WebDAV同步'),
-          ),
-        ],
-      ),
     );
 
     if (result != null && context.mounted) {

@@ -24,5 +24,8 @@
   "done": "已完成",
   "key": "键",
   "value": "值",
-  "addCustomField": "添加自定义属性"
+  "addCustomField": "添加自定义属性",
+  "confirmDeleteNotebook": "确定要删除\"{notebookTitle}\"吗？",
+  "confirmDeleteNode": "确定要删除\"{nodeTitle}\"吗？",
+  "nodeCount": "{count}个节点"
 }

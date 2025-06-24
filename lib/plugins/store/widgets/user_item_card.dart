@@ -1,3 +1,4 @@
+import '../l10n/store_localizations.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
@@ -129,19 +130,19 @@ class UserItemCard extends StatelessWidget {
                   context: context,
                   builder:
                       (context) => AlertDialog(
-                        title: const Text('使用确认'),
-                        content: Text('确定要使用 ${item.productName} 吗？'),
+                        title: Text(StoreLocalizations.of(context)!.confirmUse),
+                        content: Text(StoreLocalizations.of(context)!.confirmUseMessage.replaceFirst('%s', item.productName)),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('取消'),
+                            child: Text(StoreLocalizations.of(context)!.cancel),
                           ),
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
                               onUse();
                             },
-                            child: const Text('确定'),
+                            child: Text(StoreLocalizations.of(context)!.confirm),
                           ),
                         ],
                       ),

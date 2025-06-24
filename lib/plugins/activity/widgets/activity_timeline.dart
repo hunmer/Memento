@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/activity_record.dart';
 
@@ -380,28 +381,34 @@ class ActivityTimeline extends StatelessWidget {
             const SizedBox(width: 16),
             // 活动内容
             Expanded(
-                child: Dismissible(
-                  key: Key('activity_${activity.id}'),
-                  direction: DismissDirection.endToStart,
-                  dismissThresholds: const {
-                    DismissDirection.endToStart: 0.4
-                  },
-                  movementDuration: const Duration(milliseconds: 200),
-                  confirmDismiss: (direction) async {
+              child: Dismissible(
+                key: Key('activity_${activity.id}'),
+                direction: DismissDirection.endToStart,
+                dismissThresholds: const {DismissDirection.endToStart: 0.4},
+                movementDuration: const Duration(milliseconds: 200),
+                confirmDismiss: (direction) async {
                   return await showDialog(
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('确认删除'),
-                        content: Text('确定要删除活动"${activity.title}"吗？'),
+                        title: Text(
+                          ActivityLocalizations.of(context)!.confirmDelete,
+                        ),
+                        content: Text(
+                          '${ActivityLocalizations.of(context)!.confirmDelete.replaceFirst('确定要删除', '确定要删除活动')}"${activity.title}"吗？',
+                        ),
                         actions: <Widget>[
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('取消'),
+                            child: Text(
+                              ActivityLocalizations.of(context)!.cancel,
+                            ),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('删除'),
+                            child: Text(
+                              ActivityLocalizations.of(context)!.deleteActivity,
+                            ),
                           ),
                         ],
                       );

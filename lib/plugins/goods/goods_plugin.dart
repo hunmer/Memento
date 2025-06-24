@@ -7,6 +7,7 @@ import 'screens/goods_main_screen.dart';
 import 'models/warehouse.dart';
 import 'models/goods_item.dart';
 import 'models/find_item_result.dart';
+import 'l10n/goods_localizations.dart';
 
 /// 物品相关事件的基类
 abstract class GoodsEventArgs extends EventArgs {
@@ -428,7 +429,14 @@ class GoodsPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return GoodsMainView();
+    return Localizations(
+      delegates: const [
+        GoodsLocalizationsDelegate(),
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: GoodsMainView(),
+    );
   }
 
   @override

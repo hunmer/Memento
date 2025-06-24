@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
@@ -36,7 +37,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('账户管理'),
+        title: Text(BillLocalizations.getText(context, 'accountManagement')),
         // 添加返回按钮
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -61,7 +62,9 @@ class _AccountListScreenState extends State<AccountListScreen> {
 
   Widget _buildAccountList() {
     if (widget.billPlugin.accounts.isEmpty) {
-      return const Center(child: Text('暂无账户，点击右下角按钮创建'));
+      return Center(
+        child: Text(BillLocalizations.getText(context, 'noAccounts')),
+      );
     }
 
     return ListView.builder(
@@ -82,21 +85,20 @@ class _AccountListScreenState extends State<AccountListScreen> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: const Text('确认删除'),
+                  title: Text(
+                    BillLocalizations.getText(context, 'confirmDelete'),
+                  ),
                   content: Text(
                     '确定要删除账户"${account.title}"吗？\n删除后该账户下的所有账单记录都将被删除！',
                   ),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text('取消'),
+                      child: Text(BillLocalizations.getText(context, 'cancel')),
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text(
-                        '删除',
-                        style: TextStyle(color: Colors.red),
-                      ),
+                      child: const Text(style: TextStyle(color: Colors.red)),
                     ),
                   ],
                 );
@@ -107,9 +109,11 @@ class _AccountListScreenState extends State<AccountListScreen> {
             widget.billPlugin.controller.deleteAccount(account.id);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('账户"${account.title}"已删除'),
+                content: Text(
+                  '${BillLocalizations.getText(context, 'accountDeleted')} "${account.title}"',
+                ),
                 action: SnackBarAction(
-                  label: '撤销',
+                  label: BillLocalizations.getText(context, 'undo'),
                   onPressed: () {
                     // 重新创建账户
                     widget.billPlugin.controller.createAccount(account);

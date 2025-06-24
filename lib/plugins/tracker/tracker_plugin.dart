@@ -1,3 +1,4 @@
+import '../l10n/tracker_localizations.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
@@ -140,7 +141,10 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                   // 今日完成
                   Column(
                     children: [
-                      Text('今日完成', style: theme.textTheme.bodyMedium),
+                      Text(
+                        TrackerLocalizations.of(context)!.todayComplete,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${controller.getTodayCompletedGoals()} 个',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -154,7 +158,10 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                   // 本月完成
                   Column(
                     children: [
-                      Text('本月完成', style: theme.textTheme.bodyMedium),
+                      Text(
+                        TrackerLocalizations.of(context)!.thisMonthComplete,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${controller.getMonthCompletedGoals()} 个',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -174,7 +181,10 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                 children: [
                   Column(
                     children: [
-                      Text('本月新增', style: theme.textTheme.bodyMedium),
+                      Text(
+                        TrackerLocalizations.of(context)!.thisMonthNew,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${controller.getMonthAddedGoals()} 个',
                         style: theme.textTheme.bodyMedium?.copyWith(

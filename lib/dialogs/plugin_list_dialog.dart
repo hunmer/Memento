@@ -1,14 +1,12 @@
+import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:flutter/material.dart';
 import '../core/plugin_manager.dart';
 import '../core/plugin_base.dart';
 
 class PluginListDialog extends StatelessWidget {
   final bool sortByRecentlyOpened;
-  
-  const PluginListDialog({
-    super.key,
-    this.sortByRecentlyOpened = true,
-  });
+
+  const PluginListDialog({super.key, this.sortByRecentlyOpened = true});
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +30,7 @@ class PluginListDialog extends StatelessWidget {
             children: [
               const Text(
                 '插件列表',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -47,12 +42,17 @@ class PluginListDialog extends StatelessWidget {
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                   ),
-                  itemCount: PluginManager.instance
-                      .getAllPlugins(sortByRecentlyOpened: sortByRecentlyOpened)
-                      .length,
+                  itemCount:
+                      PluginManager.instance
+                          .getAllPlugins(
+                            sortByRecentlyOpened: sortByRecentlyOpened,
+                          )
+                          .length,
                   itemBuilder: (context, index) {
-                    final plugin = PluginManager.instance
-                        .getAllPlugins(sortByRecentlyOpened: sortByRecentlyOpened)[index];
+                    final plugin =
+                        PluginManager.instance.getAllPlugins(
+                          sortByRecentlyOpened: sortByRecentlyOpened,
+                        )[index];
                     return _buildPluginCard(context, plugin);
                   },
                 ),
@@ -60,7 +60,9 @@ class PluginListDialog extends StatelessWidget {
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('关闭'),
+                child: Text(
+                  FloatingBallLocalizations.getText(context, 'close'),
+                ),
               ),
             ],
           ),
@@ -68,7 +70,7 @@ class PluginListDialog extends StatelessWidget {
       ),
     );
   }
-  
+
   // 构建插件卡片
   Widget _buildPluginCard(BuildContext context, PluginBase plugin) {
     // 如果没有自定义卡片视图，使用默认卡片布局
@@ -112,11 +114,14 @@ class PluginListDialog extends StatelessWidget {
 }
 
 /// 显示插件列表对话框
-void showPluginListDialog(BuildContext context, {bool sortByRecentlyOpened = true}) {
+void showPluginListDialog(
+  BuildContext context, {
+  bool sortByRecentlyOpened = true,
+}) {
   showDialog(
     context: context,
-    builder: (context) => PluginListDialog(
-      sortByRecentlyOpened: sortByRecentlyOpened,
-    ),
+    builder:
+        (context) =>
+            PluginListDialog(sortByRecentlyOpened: sortByRecentlyOpened),
   );
 }

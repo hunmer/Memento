@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/custom_field.dart';
+import '../../l10n/goods_localizations.dart';
 
 class CustomFieldsList extends StatefulWidget {
   final List<CustomField> fields;
@@ -32,23 +33,26 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              '自定义字段',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              GoodsLocalizations.of(context)!.customFields,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               icon: const Icon(Icons.add),
-              label: const Text('添加字段'),
+              label: Text(GoodsLocalizations.of(context)!.addField),
               onPressed: _addNewField,
             ),
           ],
         ),
         const SizedBox(height: 8),
         if (_fields.isEmpty)
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('暂无自定义字段', style: TextStyle(color: Colors.grey)),
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                GoodsLocalizations.of(context)!.noCustomFields,
+                style: const TextStyle(color: Colors.grey),
+              ),
             ),
           )
         else
@@ -84,23 +88,23 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('添加自定义字段'),
+          title: Text(GoodsLocalizations.of(context)!.addCustomField),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: keyController,
-                decoration: const InputDecoration(
-                  labelText: '字段名',
-                  hintText: '输入字段名',
+                decoration: InputDecoration(
+                  labelText: GoodsLocalizations.of(context)!.fieldName,
+                  hintText: GoodsLocalizations.of(context)!.enterFieldName,
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: valueController,
-                decoration: const InputDecoration(
-                  labelText: '字段值',
-                  hintText: '输入字段值',
+                decoration: InputDecoration(
+                  labelText: GoodsLocalizations.of(context)!.fieldValue,
+                  hintText: GoodsLocalizations.of(context)!.enterFieldValue,
                 ),
                 maxLines: 2,
               ),
@@ -109,7 +113,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+              child: Text(GoodsLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -117,12 +121,18 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
                     valueController.text.isNotEmpty) {
                   Navigator.of(context).pop(true);
                 } else {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('字段名和字段值不能为空')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        GoodsLocalizations.of(
+                          context,
+                        )!.fieldNameAndValueCannotBeEmpty,
+                      ),
+                    ),
+                  );
                 }
               },
-              child: const Text('确认'),
+              child: Text(GoodsLocalizations.of(context)!.confirm),
             ),
           ],
         );
@@ -152,23 +162,23 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('编辑自定义字段'),
+          title: Text(GoodsLocalizations.of(context)!.editCustomField),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: keyController,
-                decoration: const InputDecoration(
-                  labelText: '字段名',
-                  hintText: '输入字段名',
+                decoration: InputDecoration(
+                  labelText: GoodsLocalizations.of(context)!.fieldName,
+                  hintText: GoodsLocalizations.of(context)!.enterFieldName,
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: valueController,
-                decoration: const InputDecoration(
-                  labelText: '字段值',
-                  hintText: '输入字段值',
+                decoration: InputDecoration(
+                  labelText: GoodsLocalizations.of(context)!.fieldValue,
+                  hintText: GoodsLocalizations.of(context)!.enterFieldValue,
                 ),
                 maxLines: 2,
               ),
@@ -177,7 +187,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+              child: Text(GoodsLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -185,12 +195,18 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
                     valueController.text.isNotEmpty) {
                   Navigator.of(context).pop(true);
                 } else {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('字段名和字段值不能为空')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        GoodsLocalizations.of(
+                          context,
+                        )!.fieldNameAndValueCannotBeEmpty,
+                      ),
+                    ),
+                  );
                 }
               },
-              child: const Text('确认'),
+              child: Text(GoodsLocalizations.of(context)!.confirm),
             ),
           ],
         );
@@ -213,16 +229,18 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('确认删除'),
-          content: const Text('确定要删除这个自定义字段吗？'),
+          title: Text(GoodsLocalizations.of(context)!.confirmDelete),
+          content: Text(
+            GoodsLocalizations.of(context)!.confirmDeleteCustomField,
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+              child: Text(GoodsLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('删除'),
+              child: Text(GoodsLocalizations.of(context)!.delete),
             ),
           ],
         );

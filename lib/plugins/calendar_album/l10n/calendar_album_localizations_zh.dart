@@ -38,5 +38,8 @@ class CalendarAlbumLocalizationsZh {
     'tagColor': '标签颜色',
     'noTags': '没有可用的标签',
     'noPhotos': '没有可用的照片',
+    'calendarDiary': '日历日记',
+    'tagManagement': '标签管理',
+    'confirm': '确定',
   };
 }

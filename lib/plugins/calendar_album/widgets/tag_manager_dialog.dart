@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../widgets/tag_manager_dialog/models/tag_group.dart' as dialog;
 
@@ -31,7 +32,7 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('标签管理'),
+      title: Text(CalendarAlbumLocalizations.of(context).get('tagManagement')),
       content: SingleChildScrollView(
         child: Column(
           children: [
@@ -70,14 +71,14 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(CalendarAlbumLocalizations.of(context).get('cancel')),
         ),
         TextButton(
           onPressed: () {
             widget.onGroupsChanged(_groups);
             Navigator.pop(context, _selectedTags);
           },
-          child: const Text('确定'),
+          child: Text(CalendarAlbumLocalizations.of(context).get('confirm')),
         ),
       ],
     );

@@ -121,7 +121,9 @@ class _TimelineScreenState extends State<TimelineScreen> {
               setState(() {
                 _isGridView = !_isGridView;
                 // 保存视图模式到插件配置
-                widget.chatPlugin.settingsService.setTimelineIsGridView(_isGridView);
+                widget.chatPlugin.settingsService.setTimelineIsGridView(
+                  _isGridView,
+                );
               });
             },
           ),
@@ -148,11 +150,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
                   if (_controller.searchQuery.isNotEmpty) {
                     return Center(
                       child: Text(
-                        'No messages found for "${_controller.searchQuery}"',
+                        '${l10n.noMessagesFound} "${_controller.searchQuery}"',
                       ),
                     );
                   }
-                  return const Center(child: Text('No messages yet'));
+                  return Center(child: Text(l10n.noMessagesYet));
                 }
 
                 return RefreshIndicator(
@@ -173,7 +175,8 @@ class _TimelineScreenState extends State<TimelineScreen> {
       controller: _controller.scrollController,
       padding: const EdgeInsets.all(8),
       itemCount:
-          _controller.displayMessages.length + (_controller.hasMoreMessages ? 1 : 0),
+          _controller.displayMessages.length +
+          (_controller.hasMoreMessages ? 1 : 0),
       itemBuilder: (context, index) {
         // 显示加载更多指示器
         if (_controller.hasMoreMessages &&

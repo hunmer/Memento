@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:Memento/plugins/activity/widgets/activity_form/activity_form_widget.dart';
 import 'package:flutter/material.dart';
 import '../../models/activity_record.dart';
@@ -291,27 +292,44 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     // 检查时间是否有效
     if (endDateTime.isBefore(startDateTime)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('结束时间必须晚于开始时间')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ActivityLocalizations.of(context)!.endTime +
+                '必须晚于' +
+                ActivityLocalizations.of(context)!.startTime,
+          ),
+        ),
+      );
       return;
     }
 
     // 检查时间间隔是否小于1分钟
     final duration = endDateTime.difference(startDateTime);
     if (duration.inMinutes < 1) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('活动时间必须至少为1分钟')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '活动时间必须至少为1' +
+                ActivityLocalizations.of(
+                  context,
+                )!.minutesFormat(1).replaceAll('1 ', ''),
+          ),
+        ),
+      );
       return;
     }
 
     // 检查是否超过当天结束时间
     final dayEnd = DateTime(now.year, now.month, now.day, 23, 59);
     if (endDateTime.isAfter(dayEnd)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('活动结束时间不能超过当天23:59')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ActivityLocalizations.of(context)!.endTime + '不能超过当天23:59',
+          ),
+        ),
+      );
       return;
     }
 

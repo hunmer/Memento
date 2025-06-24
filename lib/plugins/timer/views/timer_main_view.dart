@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import 'package:flutter/material.dart';
@@ -168,9 +169,9 @@ class _TimerMainViewState extends State<TimerMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.deleteTimer),
+            title: Text(TimerLocalizations.of(context)!.deleteTimer),
             content: Text(
-              '${AppLocalizations.of(context)!.deleteTimerConfirmation} "${task.name}"',
+              '${TimerLocalizations.of(context)!.deleteTimerConfirmation} "${task.name}"',
             ),
             actions: [
               TextButton(

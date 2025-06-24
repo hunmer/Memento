@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/tag_group.dart';
+import '../l10n/tag_manager_localizations.dart';
+import '../l10n/tag_manager_dialog_localizations.dart';
 
 /// 对话框服务类，处理标签管理对话框的各种操作
 class DialogService {
@@ -11,25 +13,26 @@ class DialogService {
     final TextEditingController textController = TextEditingController();
     return showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('新建分组'),
-        content: TextField(
-          autofocus: true,
-          controller: textController,
-          decoration: InputDecoration(hintText: hintText),
-          onSubmitted: (value) => Navigator.of(context).pop(value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(TagManagerLocalizations.of(context, 'newGroup')),
+            content: TextField(
+              autofocus: true,
+              controller: textController,
+              decoration: InputDecoration(hintText: hintText),
+              onSubmitted: (value) => Navigator.of(context).pop(value),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(TagManagerLocalizations.of(context, 'cancel')),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(textController.text),
+                child: Text(TagManagerLocalizations.of(context, 'confirm')),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(textController.text),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -41,25 +44,26 @@ class DialogService {
     final TextEditingController textController = TextEditingController();
     return showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('新建标签'),
-        content: TextField(
-          autofocus: true,
-          controller: textController,
-          decoration: InputDecoration(hintText: hintText),
-          onSubmitted: (value) => Navigator.of(context).pop(value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(TagManagerLocalizations.of(context, 'newTag')),
+            content: TextField(
+              autofocus: true,
+              controller: textController,
+              decoration: InputDecoration(hintText: hintText),
+              onSubmitted: (value) => Navigator.of(context).pop(value),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(TagManagerLocalizations.of(context, 'cancel')),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(textController.text),
+                child: Text(TagManagerLocalizations.of(context, 'confirm')),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(textController.text),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -75,33 +79,35 @@ class DialogService {
 
     return showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('编辑分组'),
-        content: TextField(
-          autofocus: true,
-          controller: textController,
-          decoration: InputDecoration(hintText: hintText),
-        ),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            onPressed: () => Navigator.of(context).pop({'action': 'delete'}),
-            child: const Text('删除分组'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(TagManagerDialogLocalizations.getEditGroup(context)),
+            content: TextField(
+              autofocus: true,
+              controller: textController,
+              decoration: InputDecoration(hintText: hintText),
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                onPressed:
+                    () => Navigator.of(context).pop({'action': 'delete'}),
+                child: Text(TagManagerLocalizations.of(context, 'deleteGroup')),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(TagManagerLocalizations.of(context, 'cancel')),
+              ),
+              TextButton(
+                onPressed:
+                    () => Navigator.of(
+                      context,
+                    ).pop({'action': 'rename', 'name': textController.text}),
+                child: Text(TagManagerLocalizations.of(context, 'confirm')),
+              ),
+            ],
           ),
-          const Spacer(),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop({
-              'action': 'rename',
-              'name': textController.text
-            }),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
     );
   }
 

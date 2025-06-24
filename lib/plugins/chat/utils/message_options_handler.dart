@@ -39,11 +39,12 @@ class MessageOptionsHandler {
 
   /// 复制消息内容到剪贴板
   static void copyMessageContent(BuildContext context, Message message) {
-    if (message.type == MessageType.received || message.type == MessageType.sent) {
+    if (message.type == MessageType.received ||
+        message.type == MessageType.sent) {
       Clipboard.setData(ClipboardData(text: message.content));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已复制到剪贴板')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
     }
   }
 
@@ -52,18 +53,18 @@ class MessageOptionsHandler {
     try {
       final prefs = await SharedPreferences.getInstance();
       List<String> recentSymbols = prefs.getStringList('recent_symbols') ?? [];
-      
+
       // 如果符号已存在，先移除它
       recentSymbols.remove(symbol);
-      
+
       // 将符号添加到列表开头
       recentSymbols.insert(0, symbol);
-      
+
       // 保持列表不超过10个项目
       if (recentSymbols.length > 10) {
         recentSymbols = recentSymbols.sublist(0, 10);
       }
-      
+
       await prefs.setStringList('recent_symbols', recentSymbols);
     } catch (e) {
       debugPrint('保存最近符号失败: $e');
@@ -84,13 +85,14 @@ class MessageOptionsHandler {
   /// 分享消息内容
   static void shareMessage(BuildContext context, Message message) {
     String shareContent = '';
-    
+
     // 根据消息类型准备分享内容
-    if (message.type == MessageType.received || message.type == MessageType.sent) {
+    if (message.type == MessageType.received ||
+        message.type == MessageType.sent) {
       shareContent = message.content;
-    } else if (message.type == MessageType.file || 
-               message.type == MessageType.image ||
-               message.type == MessageType.video) {
+    } else if (message.type == MessageType.file ||
+        message.type == MessageType.image ||
+        message.type == MessageType.video) {
       try {
         final fileInfo = FileMessage.fromJson(
           Map<String, dynamic>.from(
@@ -99,13 +101,13 @@ class MessageOptionsHandler {
         );
         shareContent = fileInfo.filePath;
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('无法分享文件: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('无法分享文件: $e')));
         return;
       }
     }
-    
+
     // 调用系统分享
     if (shareContent.isNotEmpty) {
       Share.share(shareContent);

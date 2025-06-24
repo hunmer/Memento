@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/bill_model.dart';
@@ -242,21 +243,39 @@ class _BillListScreenState extends State<BillListScreen>
                       children: [
                         Row(
                           children: [
-                            const Text('时间范围：'),
+                            Text(
+                              BillLocalizations.getText(context, 'timeRange') +
+                                  ':',
+                            ),
                             const SizedBox(width: 8),
                             SegmentedButton<String>(
                               segments: const [
                                 ButtonSegment<String>(
-                                  value: '周',
-                                  label: Text('本周'),
+                                  value: 'week',
+                                  label: Text(
+                                    BillLocalizations.getText(
+                                      context,
+                                      'thisWeek',
+                                    ),
+                                  ),
                                 ),
                                 ButtonSegment<String>(
-                                  value: '月',
-                                  label: Text('本月'),
+                                  value: 'month',
+                                  label: Text(
+                                    BillLocalizations.getText(
+                                      context,
+                                      'thisMonth',
+                                    ),
+                                  ),
                                 ),
                                 ButtonSegment<String>(
-                                  value: '年',
-                                  label: Text('本年'),
+                                  value: 'year',
+                                  label: Text(
+                                    BillLocalizations.getText(
+                                      context,
+                                      'thisYear',
+                                    ),
+                                  ),
                                 ),
                               ],
                               selected: {_selectedPeriod},
@@ -294,19 +313,19 @@ class _BillListScreenState extends State<BillListScreen>
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               _buildStatItem(
-                                '收入',
+                                BillLocalizations.getText(context, 'income'),
                                 totalIncome,
                                 Colors.green,
                                 Icons.arrow_downward,
                               ),
                               _buildStatItem(
-                                '支出',
+                                BillLocalizations.getText(context, 'expense'),
                                 totalExpense,
                                 Colors.red,
                                 Icons.arrow_upward,
                               ),
                               _buildStatItem(
-                                '结余',
+                                BillLocalizations.getText(context, 'balance'),
                                 balance,
                                 balance >= 0 ? Colors.blue : Colors.orange,
                                 Icons.account_balance_wallet,
@@ -322,7 +341,14 @@ class _BillListScreenState extends State<BillListScreen>
                   Expanded(
                     child:
                         _bills.isEmpty
-                            ? const Center(child: Text('暂无账单记录，点击右下角添加'))
+                            ? Center(
+                              child: Text(
+                                BillLocalizations.getText(
+                                  context,
+                                  'noBillsClickToAdd',
+                                ),
+                              ),
+                            )
                             : ListView.builder(
                               itemCount: _bills.length,
                               itemBuilder: (context, index) {
@@ -393,16 +419,21 @@ class _BillListScreenState extends State<BillListScreen>
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text('确认删除'),
-              content: const Text('确定要删除这条账单记录吗？'),
+              title: Text(BillLocalizations.getText(context, 'confirmDelete')),
+              content: Text(
+                BillLocalizations.getText(context, 'confirmDeleteBill'),
+              ),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('取消'),
+                  child: Text(BillLocalizations.getText(context, 'cancel')),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('删除', style: TextStyle(color: Colors.red)),
+                  child: Text(
+                    BillLocalizations.getText(context, 'delete'),
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               ],
             );
@@ -421,7 +452,7 @@ class _BillListScreenState extends State<BillListScreen>
         // 显示删除成功提示
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('账单已删除'),
+            content: Text(BillLocalizations.getText(context, 'billDeleted')),
             duration: Duration(seconds: 3),
           ),
         );

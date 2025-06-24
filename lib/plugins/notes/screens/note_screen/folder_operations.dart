@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
@@ -16,7 +17,7 @@ Future<void> createNewFolder(
           TextEditingController();
 
       return AlertDialog(
-        title: const Text('新建文件夹'),
+        title: Text(NotesLocalizations.of(context)!.newFolder),
         content: TextField(
           controller: folderNameController,
           autofocus: true,
@@ -64,7 +65,7 @@ Future<void> renameFolderDialog(
       );
 
       return AlertDialog(
-        title: const Text('重命名文件夹'),
+        title: Text(NotesLocalizations.of(context)!.renameFolder),
         content: TextField(
           controller: renameController,
           autofocus: true,
@@ -105,8 +106,8 @@ Future<void> deleteFolderDialog(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: const Text('删除文件夹'),
-          content: const Text('确定要删除此文件夹吗？此操作将删除文件夹中的所有内容，且不可恢复。'),
+          title: Text(NotesLocalizations.of(context)!.deleteFolder),
+          content: Text(NotesLocalizations.of(context)!.deleteFolderConfirm),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),

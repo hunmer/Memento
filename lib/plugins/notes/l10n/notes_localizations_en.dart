@@ -8,7 +8,8 @@ class NotesLocalizationsEn extends NotesLocalizations {
   String get notesPluginName => 'Notes';
 
   @override
-  String get notesPluginDescription => 'A simple note-taking plugin for Memento';
+  String get notesPluginDescription =>
+      'A simple note-taking plugin for Memento';
 
   @override
   String get totalNotes => 'Total Notes';
@@ -32,7 +33,8 @@ class NotesLocalizationsEn extends NotesLocalizations {
   String get deleteNote => 'Delete';
 
   @override
-  String get deleteNoteConfirm => 'Are you sure you want to delete this note? This action cannot be undone.';
+  String get deleteNoteConfirm =>
+      'Are you sure you want to delete this note? This action cannot be undone.';
 
   @override
   String get renameFolder => 'Rename Folder';
@@ -41,7 +43,8 @@ class NotesLocalizationsEn extends NotesLocalizations {
   String get deleteFolder => 'Delete Folder';
 
   @override
-  String get deleteFolderConfirm => 'Are you sure you want to delete this folder? All content in this folder will be deleted and cannot be recovered.';
+  String get deleteFolderConfirm =>
+      'Are you sure you want to delete this folder? All content in this folder will be deleted and cannot be recovered.';
 
   @override
   String get emptyFolder => 'This folder is empty';
@@ -78,4 +81,30 @@ class NotesLocalizationsEn extends NotesLocalizations {
 
   @override
   String get folderNameHint => 'Folder name';
+
+  @override
+  String get createNew => 'Create new';
+  @override
+  String get movedTo => 'Moved to {folderName}';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get tags => 'Tags';
+
+  @override
+  String get dateRange => 'Date Range';
+
+  @override
+  String get clearAll => 'Clear All';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get typeToSearch => 'Type to search';
+
+  @override
+  String get noResultsFound => 'No results found';
 }

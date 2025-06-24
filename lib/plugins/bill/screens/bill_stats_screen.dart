@@ -190,7 +190,12 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
                   const Center(
                     child: Padding(
                       padding: EdgeInsets.all(32),
-                      child: Text('所选时间段内没有支出记录'),
+                      child: Text(
+                        BillLocalizations.getText(
+                          context,
+                          'noBills',
+                        ).replaceFirst('账单记录', '支出记录'),
+                      ),
                     ),
                   ),
                 ],

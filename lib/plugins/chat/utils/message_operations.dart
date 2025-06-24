@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../chat_plugin.dart';
 import '../models/message.dart';
+import '../l10n/chat_localizations.dart';
 
 /// 统一管理消息操作的处理器
 class MessageOperations {
@@ -19,7 +20,7 @@ class MessageOperations {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('编辑消息'),
+            title: Text(ChatLocalizations.of(context)!.editMessage),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -56,11 +57,11 @@ class MessageOperations {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: Text(ChatLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('保存'),
+                child: Text(ChatLocalizations.of(context)!.save),
               ),
             ],
           ),
@@ -86,8 +87,10 @@ class MessageOperations {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('删除消息'),
-            content: const Text('确定要删除这条消息吗？此操作不可撤销。'),
+            title: Text(ChatLocalizations.of(context)!.deleteMessage),
+            content: Text(
+              ChatLocalizations.of(context)!.deleteMessageConfirmation,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -95,7 +98,7 @@ class MessageOperations {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('删除'),
+                child: Text(ChatLocalizations.of(context)!.delete),
               ),
             ],
           ),
@@ -142,9 +145,11 @@ class MessageOperations {
     if (message.type == MessageType.received ||
         message.type == MessageType.sent) {
       Clipboard.setData(ClipboardData(text: message.content));
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ChatLocalizations.of(context)!.copiedToClipboard),
+        ),
+      );
     }
   }
 

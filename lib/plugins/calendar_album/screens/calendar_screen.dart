@@ -137,7 +137,10 @@ class _CalendarScreenState extends State<CalendarScreen>
         icon: const Icon(Icons.arrow_back),
         onPressed: () => PluginManager.toHomeScreen(context),
       ),
-      title: const Text('日历日记', style: TextStyle(fontSize: 18)),
+      title: Text(
+        CalendarAlbumLocalizations.of(context).get('calendarDiary'),
+        style: const TextStyle(fontSize: 18),
+      ),
       actions: [
         IconButton(
           icon: const Icon(Icons.today),

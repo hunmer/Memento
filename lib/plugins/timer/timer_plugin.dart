@@ -8,6 +8,7 @@ import 'models/timer_task.dart';
 import 'views/timer_main_view.dart';
 import 'services/timer_service.dart';
 import 'storage/timer_controller.dart';
+import 'l10n/timer_localizations.dart';
 
 class TimerPlugin extends BasePlugin {
   late final TimerController timerController;
@@ -28,7 +29,7 @@ class TimerPlugin extends BasePlugin {
   String get id => 'timer';
 
   @override
-  String get name => '计时器';
+  String get name => 'Timer';
 
   @override
   IconData get icon => Icons.timer;
@@ -94,7 +95,10 @@ class TimerPlugin extends BasePlugin {
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Column(
                     children: [
-                      Text('总计时器', style: theme.textTheme.bodyMedium),
+                      Text(
+                        TimerLocalizations.of(context)!.totalTimer,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${_tasks.length}',
                         style: theme.textTheme.bodyMedium?.copyWith(

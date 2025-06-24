@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/goods_item.dart';
 import '../goods_plugin.dart';
+import '../l10n/goods_localizations.dart';
 
 class GoodsItemSelectorDialog extends StatefulWidget {
   final String? excludeItemId; // 要排除的物品ID（避免选择自己或已选择的子物品）
@@ -127,7 +128,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
               children: [
                 Expanded(
                   child: Text(
-                    '选择物品',
+                    GoodsLocalizations.of(context)!.selectItem,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
@@ -140,16 +141,16 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
             const SizedBox(height: 16),
             // 分类选择器
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
-                labelText: '按分类筛选',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.category),
+              decoration: InputDecoration(
+                labelText: GoodsLocalizations.of(context)!.filterByCategory,
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.category),
               ),
               value: _selectedCategory,
               items: [
-                const DropdownMenuItem<String>(
+                DropdownMenuItem<String>(
                   value: null,
-                  child: Text('所有分类'),
+                  child: Text(GoodsLocalizations.of(context)!.allCategories),
                 ),
                 ..._availableCategories.map(
                   (category) => DropdownMenuItem<String>(
@@ -167,10 +168,10 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
             const SizedBox(height: 16),
             TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: '搜索物品...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: GoodsLocalizations.of(context)!.searchItems,
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
               ),
               onChanged: (value) {
                 setState(() {
@@ -193,7 +194,12 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
                     title: Text(item.title),
                     subtitle:
                         item.purchasePrice != null
-                            ? Text('￥${item.purchasePrice?.toStringAsFixed(2)}')
+                            ? Text(
+                              GoodsLocalizations.of(context)!.price(
+                                item.purchasePrice?.toStringAsFixed(2) ??
+                                    '0.00',
+                              ),
+                            )
                             : null,
                     onTap: () => Navigator.of(context).pop(item),
                   );

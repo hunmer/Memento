@@ -1,3 +1,4 @@
+import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:flutter/material.dart';
 import 'floating_ball_manager.dart';
 import 'floating_ball_service.dart';
@@ -50,7 +51,11 @@ class _FloatingBallSettingsScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('悬浮球设置')),
+      appBar: AppBar(
+        title: Text(
+          FloatingBallLocalizations.getText(context, 'floatingBallSettings'),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -69,7 +74,12 @@ class _FloatingBallSettingsScreenState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('启用悬浮球'),
+                      Text(
+                        FloatingBallLocalizations.getText(
+                          context,
+                          'enableFloatingBall',
+                        ),
+                      ),
                       Switch(
                         value: _isEnabled,
                         onChanged: (value) async {
@@ -107,7 +117,7 @@ class _FloatingBallSettingsScreenState
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Text('小'),
+                      Text(FloatingBallLocalizations.getText(context, 'small')),
                       Expanded(
                         child: Slider(
                           value: _sizeScale,
@@ -123,7 +133,7 @@ class _FloatingBallSettingsScreenState
                           },
                         ),
                       ),
-                      const Text('大'),
+                      Text(FloatingBallLocalizations.getText(context, 'large')),
                     ],
                   ),
                 ],
@@ -170,11 +180,23 @@ class _FloatingBallSettingsScreenState
                   ElevatedButton(
                     onPressed: () {
                       _manager.resetPosition();
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(const SnackBar(content: Text('悬浮球位置已重置')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            FloatingBallLocalizations.getText(
+                              context,
+                              'positionReset',
+                            ),
+                          ),
+                        ),
+                      );
                     },
-                    child: const Text('重置悬浮球位置'),
+                    child: Text(
+                      FloatingBallLocalizations.getText(
+                        context,
+                        'resetPosition',
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -200,11 +222,15 @@ class _FloatingBallSettingsScreenState
                 child: DropdownButton<String?>(
                   isExpanded: true,
                   value: _selectedActions[gesture],
-                  hint: const Text('未设置'),
+                  hint: Text(
+                    FloatingBallLocalizations.getText(context, 'notSet'),
+                  ),
                   items: [
                     const DropdownMenuItem<String?>(
                       value: null,
-                      child: Text('无动作'),
+                      child: Text(
+                        FloatingBallLocalizations.getText(context, 'noAction'),
+                      ),
                     ),
                     ..._availableActions.map((action) {
                       return DropdownMenuItem<String?>(

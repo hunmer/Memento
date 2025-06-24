@@ -118,7 +118,10 @@ class StorePlugin extends BasePlugin {
                   // 商品数量
                   Column(
                     children: [
-                      Text('商品数量', style: theme.textTheme.bodyMedium),
+                      Text(
+                        StoreLocalizations.of(context)!.productQuantity,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${controller.getGoodsCount()} 件',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -131,7 +134,10 @@ class StorePlugin extends BasePlugin {
                   // 物品数量
                   Column(
                     children: [
-                      Text('物品数量', style: theme.textTheme.bodyMedium),
+                      Text(
+                        StoreLocalizations.of(context)!.itemQuantity,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${controller.getItemsCount()} 件',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -151,7 +157,10 @@ class StorePlugin extends BasePlugin {
                   // 我的积分
                   Column(
                     children: [
-                      Text('我的积分', style: theme.textTheme.bodyMedium),
+                      Text(
+                        StoreLocalizations.of(context)!.myPoints,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${controller.currentPoints} 分',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -165,7 +174,10 @@ class StorePlugin extends BasePlugin {
                   // 七天到期
                   Column(
                     children: [
-                      Text('七天到期', style: theme.textTheme.bodyMedium),
+                      Text(
+                        StoreLocalizations.of(context)!.expiringIn7Days,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${controller.getExpiringItemsCount()} 件',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -192,8 +204,10 @@ class StorePlugin extends BasePlugin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            title: const Text('积分奖励设置'),
-            subtitle: const Text('设置各项行为的积分奖励'),
+            title: Text(StoreLocalizations.of(context)!.pointSettingsTitle),
+            subtitle: Text(
+              StoreLocalizations.of(context)!.pointSettingsSubtitle,
+            ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Navigator.of(context).push(

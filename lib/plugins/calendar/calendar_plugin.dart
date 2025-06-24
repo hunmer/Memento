@@ -337,7 +337,13 @@ class CalendarPlugin extends BasePlugin {
                       // 活动数量
                       Column(
                         children: [
-                          Text('活动数量', style: theme.textTheme.bodyMedium),
+                          Text(
+                            CalendarLocalizations.getText(
+                              context,
+                              'eventCount',
+                            ),
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Text(
                             '${_getEventCount()} 个',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -350,7 +356,13 @@ class CalendarPlugin extends BasePlugin {
                       // 7天活动
                       Column(
                         children: [
-                          Text('7天活动', style: theme.textTheme.bodyMedium),
+                          Text(
+                            CalendarLocalizations.getText(
+                              context,
+                              'weekEvents',
+                            ),
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Text(
                             '${_getUpcomingEventCount()} 个',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -370,7 +382,13 @@ class CalendarPlugin extends BasePlugin {
                     children: [
                       Column(
                         children: [
-                          Text('过期活动', style: theme.textTheme.bodyMedium),
+                          Text(
+                            CalendarLocalizations.getText(
+                              context,
+                              'expiredEvents',
+                            ),
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Text(
                             '${_getExpiredEventCount()} 个',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -426,7 +444,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
               icon: const Icon(Icons.arrow_back),
               onPressed: () => PluginManager.toHomeScreen(context),
             ),
-            title: const Text('日历'),
+            title: Text(CalendarLocalizations.getText(context, 'calendar')),
             actions: [
               // 跳转到今天按钮
               IconButton(
