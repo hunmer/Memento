@@ -202,14 +202,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           },
         ),
         actions: [
-          IconButton(
-            icon: Icon(_isReorderMode ? Icons.done : Icons.sort),
-            onPressed: () {
-              setState(() {
-                _isReorderMode = !_isReorderMode;
-              });
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(_isReorderMode ? Icons.done : Icons.sort),
+          //   onPressed: () {
+          //     setState(() {
+          //       _isReorderMode = !_isReorderMode;
+          //     });
+          //   },
+          // ),
         ],
       ),
       drawer: const AppDrawer(),
