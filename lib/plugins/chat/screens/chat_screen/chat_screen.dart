@@ -439,19 +439,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         isMultiSelectMode: _controller.isMultiSelectMode,
                         selectedCount: _controller.selectedMessageIds.length,
                         onShowDatePicker: _showDatePickerDialog,
-                        onShowChannelInfo: () {
-                          if (mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => ChannelInfoScreen(
-                                      channel: widget.channel,
-                                    ),
-                              ),
-                            );
-                          }
-                        },
                         onCopySelected: _copySelectedMessages,
                         onDeleteSelected: _deleteSelectedMessages,
                         onShowClearConfirmation: _showClearConfirmationDialog,

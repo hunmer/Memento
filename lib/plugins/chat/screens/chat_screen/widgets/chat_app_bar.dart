@@ -10,7 +10,6 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isMultiSelectMode;
   final int selectedCount;
   final VoidCallback onShowDatePicker;
-  final VoidCallback onShowChannelInfo;
   final VoidCallback onCopySelected;
   final VoidCallback onDeleteSelected;
   final VoidCallback onShowClearConfirmation;
@@ -23,7 +22,6 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.isMultiSelectMode,
     required this.selectedCount,
     required this.onShowDatePicker,
-    required this.onShowChannelInfo,
     required this.onCopySelected,
     required this.onDeleteSelected,
     required this.onShowClearConfirmation,
@@ -95,22 +93,6 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 PopupMenuItem(
-                  value: 'info',
-                  child: Row(
-                    children: [
-                      const Icon(Icons.info_outline, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        _getLocalizedText(
-                          context,
-                          'Channel Info',
-                          (l) => l.channelInfo,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
                   value: 'clear',
                   child: Row(
                     children: [
@@ -148,9 +130,6 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
               case 'multiselect':
                 onEnterMultiSelect();
                 break;
-              case 'info':
-                onShowChannelInfo();
-                break;
               case 'clear':
                 onShowClearConfirmation();
                 break;
@@ -168,18 +147,16 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // 直接使用result中返回的url路径
                   if (result.containsKey('url') && result['url'] != null) {
                     // 更新频道背景
-                    await ChatPlugin
-                        .instance
-                        .channelService
+                    await ChatPlugin.instance.channelService
                         .updateChannelBackground(
                           channel.id,
                           result['url'], // 直接使用返回的url
                         );
                   }
                 }
-            break;
-          }
-          }
+                break;
+            }
+          },
         ),
       ],
     );
