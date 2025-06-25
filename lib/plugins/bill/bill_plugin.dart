@@ -122,7 +122,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                   Column(
                     children: [
                       Text(
-                        BillLocalizations.getText(context, 'todayFinance'),
+                        BillLocalizations.of(context)!.todayFinance,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -142,7 +142,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                   Column(
                     children: [
                       Text(
-                        BillLocalizations.getText(context, 'monthFinance'),
+                        BillLocalizations.of(context)!.monthFinance,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -168,7 +168,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                   Column(
                     children: [
                       Text(
-                        BillLocalizations.getText(context, 'monthBills'),
+                        BillLocalizations.of(context)!.monthBills,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -267,7 +267,7 @@ class _BillMainViewState extends State<BillMainView> {
             onPressed: () => PluginManager.toHomeScreen(context),
           ),
           title: Text(
-            '${billPlugin.selectedAccount?.title ?? BillLocalizations.getText(context, 'accountTitle')}',
+            '${billPlugin.selectedAccount?.title ?? BillLocalizations.of(context)!.accountTitle}',
           ),
           bottom: const TabBar(tabs: [Tab(text: '账单列表'), Tab(text: '统计分析')]),
           actions: [

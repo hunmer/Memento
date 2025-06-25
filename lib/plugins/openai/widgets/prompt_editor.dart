@@ -55,7 +55,7 @@ class _PromptEditorState extends State<PromptEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final i10n = OpenAILocalizations.of(context);
+    final l10n = OpenAILocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -75,21 +75,21 @@ class _PromptEditorState extends State<PromptEditor> {
                         child: DropdownButtonFormField<String>(
                           value: prompt.type,
                           decoration: InputDecoration(
-                            labelText: i10n.promptTypeLabel,
+                            labelText: l10n.promptTypeLabel,
                             border: const OutlineInputBorder(),
                           ),
                           items: const [
                             DropdownMenuItem(
                               value: 'system',
-                              child: Text(i10n.systemRole),
+                              child: Text(l10n.systemRole),
                             ),
                             DropdownMenuItem(
                               value: 'user',
-                              child: Text(i10n.userRole),
+                              child: Text(l10n.userRole),
                             ),
                             DropdownMenuItem(
                               value: 'assistant',
-                              child: Text(i10n.assistantRole),
+                              child: Text(l10n.assistantRole),
                             ),
                           ],
                           onChanged: (value) {
@@ -110,7 +110,7 @@ class _PromptEditorState extends State<PromptEditor> {
                   TextFormField(
                     initialValue: prompt.content,
                     decoration: InputDecoration(
-                      labelText: i10n.contentLabel,
+                      labelText: l10n.contentLabel,
                       border: const OutlineInputBorder(),
                     ),
                     maxLines: 3,
@@ -125,7 +125,7 @@ class _PromptEditorState extends State<PromptEditor> {
         OutlinedButton.icon(
           onPressed: _addPrompt,
           icon: const Icon(Icons.add),
-          label: Text(i10n.addPrompt),
+          label: Text(l10n.addPrompt),
         ),
       ],
     );

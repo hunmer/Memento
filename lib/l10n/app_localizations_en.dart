@@ -13,4 +13,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pluginManager => 'Plugin Manager';
+
+  @override
+  String get backupOptions => 'Backup Options';
+
+  @override
+  String get selectBackupMethod => 'Please select backup method';
+
+  @override
+  String get exportAppData => 'Export App Data';
+
+  @override
+  String get fullBackup => 'Full Backup';
+
+  @override
+  String get webdavSync => 'WebDAV Sync';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get startTime => 'Start Time';
+
+  @override
+  String get endTime => 'End Time';
+
+  @override
+  String get interval => 'Interval';
+
+  @override
+  String get minutes => 'Minutes';
+
+  @override
+  String get tags => 'Tags';
+
+  @override
+  String get confirm => 'Confirm';
 }

@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:Memento/plugins/activity/widgets/activity_form/activity_form_widget.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ import 'activity_form_utils.dart';
 import 'activity_time_section.dart';
 
 class ActivityFormState extends State<ActivityFormWidget> {
-  late DiaryLocalizations l10n;
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _tagsController;
@@ -22,14 +22,17 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    l10n = DiaryLocalizations.of(context)!;
+    final l10n = DiaryLocalizations.of(context)!;
+    final app_l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           widget.activity == null ? l10n.addActivity : l10n.editActivity,
         ),
-        actions: [TextButton(onPressed: _handleSave, child: Text(l10n.save))],
+        actions: [
+          TextButton(onPressed: _handleSave, child: Text(app_l10n.save)),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -77,7 +80,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                 TextField(
                   controller: _tagsController,
                   decoration: InputDecoration(
-                    labelText: l10n.tags,
+                    labelText: app_l10n.tags,
                     hintText: l10n.tagsHint,
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
@@ -91,10 +94,10 @@ class ActivityFormState extends State<ActivityFormWidget> {
                 if (widget.recentTags != null &&
                     widget.recentTags!.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4.0, bottom: 4.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0, bottom: 4.0),
                     child: Text(
-                      '最近使用的标签',
+                      l10n.recentlyUsed,
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ),
@@ -273,6 +276,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
   Future<void> _handleSave() async {
     if (!mounted) return;
+    final l10n = ActivityLocalizations.of(context)!;
     // 创建DateTime对象
     final now = widget.selectedDate;
     final startDateTime = DateTime(
@@ -351,16 +355,16 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     // 确保有未分组标签组
     TagGroup? unGroupedTags = tagGroups.firstWhere(
-      (group) => group.name == '未分组',
+      (group) => group.name == l10n.ungrouped,
       orElse: () {
-        final newGroup = TagGroup(name: '未分组', tags: []);
+        final newGroup = TagGroup(name: l10n.ungrouped, tags: []);
         // 如果列表为空，直接添加；否则在合适的位置插入
         if (tagGroups.isEmpty) {
           tagGroups.add(newGroup);
         } else {
           // 在"所有"标签组后面插入（如果存在），否则插入到开头
           final allTagsIndex = tagGroups.indexWhere(
-            (group) => group.name == '所有',
+            (group) => group.name == l10n.all,
           );
           if (allTagsIndex != -1) {
             tagGroups.insert(allTagsIndex + 1, newGroup);

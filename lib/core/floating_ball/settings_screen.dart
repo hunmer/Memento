@@ -50,12 +50,9 @@ class _FloatingBallSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = FloatingBallLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          FloatingBallLocalizations.getText(context, 'floatingBallSettings'),
-        ),
-      ),
+      appBar: AppBar(title: Text(l10n!.floatingBallSettings)),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -66,20 +63,15 @@ class _FloatingBallSettingsScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '悬浮球开关',
+                  Text(
+                    l10n!.floatingBallSettings,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        FloatingBallLocalizations.getText(
-                          context,
-                          'enableFloatingBall',
-                        ),
-                      ),
+                      Text(l10n!.enableFloatingBall),
                       Switch(
                         value: _isEnabled,
                         onChanged: (value) async {
@@ -110,14 +102,14 @@ class _FloatingBallSettingsScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '悬浮球大小',
+                  Text(
+                    l10n!.floatingBallSettings,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Text(FloatingBallLocalizations.getText(context, 'small')),
+                      Text(l10n!.small),
                       Expanded(
                         child: Slider(
                           value: _sizeScale,
@@ -133,7 +125,7 @@ class _FloatingBallSettingsScreenState
                           },
                         ),
                       ),
-                      Text(FloatingBallLocalizations.getText(context, 'large')),
+                      Text(l10n!.large),
                     ],
                   ),
                 ],
@@ -150,8 +142,8 @@ class _FloatingBallSettingsScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '悬浮球手势动作',
+                  Text(
+                    l10n!.floatingBallSettings,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -172,8 +164,8 @@ class _FloatingBallSettingsScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '位置重置',
+                  Text(
+                    l10n!.resetPosition,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -181,22 +173,10 @@ class _FloatingBallSettingsScreenState
                     onPressed: () {
                       _manager.resetPosition();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            FloatingBallLocalizations.getText(
-                              context,
-                              'positionReset',
-                            ),
-                          ),
-                        ),
+                        SnackBar(content: Text(l10n!.positionReset)),
                       );
                     },
-                    child: Text(
-                      FloatingBallLocalizations.getText(
-                        context,
-                        'resetPosition',
-                      ),
-                    ),
+                    child: Text(l10n!.resetPosition),
                   ),
                 ],
               ),
@@ -209,6 +189,7 @@ class _FloatingBallSettingsScreenState
 
   // 构建所有手势动作选择器
   List<Widget> _buildGestureActionSelectors() {
+    final l10n = FloatingBallLocalizations.of(context);
     final List<Widget> selectors = [];
 
     for (var gesture in FloatingBallGesture.values) {
@@ -222,15 +203,11 @@ class _FloatingBallSettingsScreenState
                 child: DropdownButton<String?>(
                   isExpanded: true,
                   value: _selectedActions[gesture],
-                  hint: Text(
-                    FloatingBallLocalizations.getText(context, 'notSet'),
-                  ),
+                  hint: Text(l10n!.notSet),
                   items: [
-                    const DropdownMenuItem<String?>(
+                    DropdownMenuItem<String?>(
                       value: null,
-                      child: Text(
-                        FloatingBallLocalizations.getText(context, 'noAction'),
-                      ),
+                      child: Text(l10n!.noAction),
                     ),
                     ..._availableActions.map((action) {
                       return DropdownMenuItem<String?>(
@@ -272,17 +249,18 @@ class _FloatingBallSettingsScreenState
 
   // 获取手势名称
   String _getGestureName(FloatingBallGesture gesture) {
+    final l10n = FloatingBallLocalizations.of(context);
     switch (gesture) {
       case FloatingBallGesture.tap:
-        return '单击';
+        return l10n!.tapGesture;
       case FloatingBallGesture.swipeUp:
-        return '上滑';
+        return l10n!.swipeUpGesture;
       case FloatingBallGesture.swipeDown:
-        return '下滑';
+        return l10n!.swipeDownGesture;
       case FloatingBallGesture.swipeLeft:
-        return '左滑';
+        return l10n!.swipeLeftGesture;
       case FloatingBallGesture.swipeRight:
-        return '右滑';
+        return l10n!.swipeRightGesture;
     }
   }
 }

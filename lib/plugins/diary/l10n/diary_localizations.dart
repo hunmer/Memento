@@ -17,24 +17,32 @@ abstract class DiaryLocalizations {
     return Localizations.of<DiaryLocalizations>(context, DiaryLocalizations);
   }
 
-  static const LocalizationsDelegate<DiaryLocalizations> delegate = _DiaryLocalizationsDelegate();
+  static const LocalizationsDelegate<DiaryLocalizations> delegate =
+      _DiaryLocalizationsDelegate();
 
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('zh'),
   ];
 
+  String get recentlyUsed;
+  String get recentlyUsed;
+  String get recentlyUsed;
+  String get recentlyUsed;
+  String get recentlyUsed;
+
   // 日记插件的本地化字符串
   String get diaryPluginName;
   String get diaryPluginDescription;
-  
+
   // 统计信息
   String get todayWordCount;
   String get monthWordCount;
@@ -45,22 +53,15 @@ abstract class DiaryLocalizations {
   String get contentHint;
   String get selectMood;
   String get clearSelection;
-  String get close;
+
   String get moodSelectorTooltip;
 
   // Activity form translations
   String get addActivity;
   String get editActivity;
-  String get cancel;
-  String get save;
   String get activityName;
   String get unnamedActivity;
   String get activityDescription;
-  String get startTime;
-  String get endTime;
-  String get interval;
-  String get minutes;
-  String get tags;
   String get tagsHint;
   String get tagsHelperText;
   String get editInterval;
@@ -83,16 +84,20 @@ abstract class DiaryLocalizations {
   String get mood;
 }
 
-class _DiaryLocalizationsDelegate extends LocalizationsDelegate<DiaryLocalizations> {
+class _DiaryLocalizationsDelegate
+    extends LocalizationsDelegate<DiaryLocalizations> {
   const _DiaryLocalizationsDelegate();
 
   @override
   Future<DiaryLocalizations> load(Locale locale) {
-    return SynchronousFuture<DiaryLocalizations>(lookupDiaryLocalizations(locale));
+    return SynchronousFuture<DiaryLocalizations>(
+      lookupDiaryLocalizations(locale),
+    );
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_DiaryLocalizationsDelegate old) => false;
@@ -101,12 +106,14 @@ class _DiaryLocalizationsDelegate extends LocalizationsDelegate<DiaryLocalizatio
 DiaryLocalizations lookupDiaryLocalizations(Locale locale) {
   // 支持的语言代码
   switch (locale.languageCode) {
-    case 'en': return DiaryLocalizationsEn();
-    case 'zh': return DiaryLocalizationsZh();
+    case 'en':
+      return DiaryLocalizationsEn();
+    case 'zh':
+      return DiaryLocalizationsZh();
   }
 
   throw FlutterError(
     'DiaryLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localization\'s implementation.'
+    'an issue with the localization\'s implementation.',
   );
 }

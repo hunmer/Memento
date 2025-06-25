@@ -1,4 +1,4 @@
-import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../core/plugin_manager.dart';
 import '../core/plugin_base.dart';
@@ -60,9 +60,7 @@ class PluginListDialog extends StatelessWidget {
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  FloatingBallLocalizations.getText(context, 'close'),
-                ),
+                child: Text(AppLocalizations.of(context)!.close),
               ),
             ],
           ),

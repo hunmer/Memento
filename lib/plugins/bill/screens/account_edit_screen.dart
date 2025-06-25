@@ -81,7 +81,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
                 ),
                 icon: const Icon(Icons.delete),
                 label: Text(
-                  BillLocalizations.getText(context, 'deleteAccount'),
+                  BillLocalizations.of(context)!.deleteAccount,
                 ),
                 onPressed: _deleteAccount,
               ),
@@ -97,7 +97,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
     if (title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(BillLocalizations.getText(context, 'enterAccountName')),
+          content: Text(BillLocalizations.of(context)!.enterAccountName),
         ),
       );
       return;
@@ -155,20 +155,20 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(BillLocalizations.getText(context, 'confirmDelete')),
+            title: Text(BillLocalizations.of(context)!.confirmDelete),
             content: Text(
-              BillLocalizations.getText(
+              BillLocalizations.of(context)!.
                 context,
                 'confirmDeleteAccountWithBills',
               ),
             ),
             actions: [
               TextButton(
-                child: Text(BillLocalizations.getText(context, 'cancel')),
+                child: Text(BillLocalizations.of(context)!.cancel),
                 onPressed: () => Navigator.pop(context, false),
               ),
               TextButton(
-                child: Text(BillLocalizations.getText(context, 'delete')),
+                child: Text(BillLocalizations.of(context)!.delete),
                 onPressed: () => Navigator.pop(context, true),
               ),
             ],

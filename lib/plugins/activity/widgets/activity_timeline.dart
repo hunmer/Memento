@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/activity_record.dart';
@@ -400,9 +401,7 @@ class ActivityTimeline extends StatelessWidget {
                         actions: <Widget>[
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
-                            child: Text(
-                              ActivityLocalizations.of(context)!.cancel,
-                            ),
+                            child: Text(AppLocalizations.of(context)!.cancel),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),

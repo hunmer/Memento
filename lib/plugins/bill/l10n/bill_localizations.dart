@@ -1,61 +1,116 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class BillLocalizations {
-  static const Map<String, Map<String, String>> _localizedValues = {
-    'en': {
-      'todayFinance': 'Today Finance',
-      'monthFinance': 'Month Finance',
-      'monthBills': 'Month Bills',
-      'accountTitle': 'Account',
-      'thisWeek': 'This Week',
-      'thisMonth': 'This Month',
-      'thisYear': 'This Year',
-      'all': 'All',
-      'custom': 'Custom',
-      'noBills': 'No bill records',
-      'confirmDelete': 'Are you sure you want to delete this bill record?',
-      'deleteAccount': 'Delete Account',
-      'enterAccountName': 'Please enter account name',
-      'saveFailed': 'Save failed',
-      'deleteFailed': 'Delete failed',
-      'accountManagement': 'Account Management',
-      'noAccounts': 'No accounts, click the button below to create',
-      'accountDeleted': 'Account deleted',
-      'saveSuccess': 'Save success',
-      'expense': 'Expense',
-      'income': 'Income',
-      'timeRange': 'Time Range:',
-      'delete': 'Delete',
-    },
-    'zh': {
-      'todayFinance': '今日财务',
-      'monthFinance': '本月财务',
-      'monthBills': '本月记账',
-      'accountTitle': '账户',
-      'thisWeek': '本周',
-      'thisMonth': '本月',
-      'thisYear': '本年',
-      'all': '全部',
-      'custom': '自定义',
-      'noBills': '暂无账单记录',
-      'confirmDelete': '确定要删除这条账单记录吗？',
-      'deleteAccount': '删除账户',
-      'enterAccountName': '请输入账户名称',
-      'saveFailed': '保存失败',
-      'deleteFailed': '删除失败',
-      'accountManagement': '账户管理',
-      'noAccounts': '暂无账户，点击右下角按钮创建',
-      'accountDeleted': '账户已删除',
-      'saveSuccess': '保存成功',
-      'expense': '支出',
-      'income': '收入',
-      'timeRange': '时间范围：',
-      'delete': '删除',
-    },
-  };
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-  static String getText(BuildContext context, String key) {
-    final locale = Localizations.localeOf(context).languageCode;
-    return _localizedValues[locale]?[key] ?? _localizedValues['en']![key]!;
+import 'bill_localizations_en.dart';
+import 'bill_localizations_zh.dart';
+
+/// 账单插件的本地化支持类
+abstract class BillLocalizations {
+  BillLocalizations(String locale) : localeName = locale;
+
+  final String localeName;
+
+  static BillLocalizations? of(BuildContext context) {
+    return Localizations.of<BillLocalizations>(context, BillLocalizations);
   }
+
+  static const LocalizationsDelegate<BillLocalizations> delegate =
+      _BillLocalizationsDelegate();
+
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('zh'),
+  ];
+
+  // 账单插件的本地化字符串
+  String get pluginName;
+  String get billList;
+  String get newBill;
+  String get editBill;
+  String get deleteBill;
+  String get amount;
+  String get category;
+  String get date;
+  String get note;
+  String get income;
+  String get expense;
+  String get transfer;
+  String get save;
+  String get cancel;
+  String get confirmDelete;
+  String get deleteBillConfirmation;
+  String get selectCategory;
+  String get selectDate;
+  String get addNote;
+  String get statistics;
+  String get monthlyReport;
+  String get yearlyReport;
+  String get byCategory;
+  String get byTime;
+  String get allCategories;
+  String get noBillsYet;
+  String get noBillsFound;
+  String get searchBills;
+  String get filter;
+  String get clearFilter;
+  String get fromDate;
+  String get toDate;
+  String get minAmount;
+  String get maxAmount;
+  String get type;
+  String get allTypes;
+  String get billSaved;
+  String get billSaveFailed;
+  String get billDeleted;
+  String get billDeleteFailed;
+  String get invalidAmount;
+  String get invalidDate;
+  String get requiredField;
+
+  get noBills => null;
+}
+
+class _BillLocalizationsDelegate
+    extends LocalizationsDelegate<BillLocalizations> {
+  const _BillLocalizationsDelegate();
+
+  @override
+  Future<BillLocalizations> load(Locale locale) {
+    return SynchronousFuture<BillLocalizations>(
+      lookupBillLocalizations(locale),
+    );
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_BillLocalizationsDelegate old) => false;
+}
+
+BillLocalizations lookupBillLocalizations(Locale locale) {
+  // 支持的语言代码
+  switch (locale.languageCode) {
+    case 'en':
+      return BillLocalizationsEn();
+    case 'zh':
+      return BillLocalizationsZh();
+  }
+
+  throw FlutterError(
+    'BillLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localization\'s implementation.',
+  );
 }
