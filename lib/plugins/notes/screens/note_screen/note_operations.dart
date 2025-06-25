@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
@@ -14,11 +15,12 @@ Future<void> createNewNote(
   await Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => NoteEditScreen(
-        onSave: (title, content) async {
-          await controller.createNote(title, content, currentFolderId);
-        },
-      ),
+      builder:
+          (context) => NoteEditScreen(
+            onSave: (title, content) async {
+              await controller.createNote(title, content, currentFolderId);
+            },
+          ),
     ),
   );
   onReload();
@@ -34,21 +36,22 @@ Future<void> editNote(
   await Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => NoteEditScreen(
-        note: note,
-        onSave: (title, content) async {
-          final updatedNote = Note(
-            id: note.id,
-            title: title,
-            content: content,
-            folderId: note.folderId,
-            createdAt: note.createdAt,
-            updatedAt: DateTime.now(),
-            tags: note.tags,
-          );
-          await controller.updateNote(updatedNote);
-        },
-      ),
+      builder:
+          (context) => NoteEditScreen(
+            note: note,
+            onSave: (title, content) async {
+              final updatedNote = Note(
+                id: note.id,
+                title: title,
+                content: content,
+                folderId: note.folderId,
+                createdAt: note.createdAt,
+                updatedAt: DateTime.now(),
+                tags: note.tags,
+              );
+              await controller.updateNote(updatedNote);
+            },
+          ),
     ),
   );
   onReload();
@@ -60,16 +63,17 @@ Future<void> moveNoteDialog(
   NotesController controller,
   Note note,
   VoidCallback onReload,
-  Future<Folder?> Function(Note?, {Folder? parentFolder}) onShowFolderSelectionDialog,
+  Future<Folder?> Function(Note?, {Folder? parentFolder})
+  onShowFolderSelectionDialog,
 ) async {
   final targetFolder = await onShowFolderSelectionDialog(note);
   if (targetFolder != null) {
     await controller.moveNote(note.id, targetFolder.id);
     onReload();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已移动到 ${targetFolder.name}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('已移动到 ${targetFolder.name}')));
     }
   }
 }
@@ -83,20 +87,21 @@ Future<void> deleteNoteDialog(
 ) async {
   final confirmed = await showDialog<bool>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('删除笔记'),
-      content: const Text('确定要删除此笔记吗？此操作不可恢复。'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('取消'),
+    builder:
+        (context) => AlertDialog(
+          title: const Text('删除笔记'),
+          content: const Text('确定要删除此笔记吗？此操作不可恢复。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('删除', style: TextStyle(color: Colors.red)),
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('删除', style: TextStyle(color: Colors.red)),
-        ),
-      ],
-    ),
   );
 
   if (confirmed == true) {

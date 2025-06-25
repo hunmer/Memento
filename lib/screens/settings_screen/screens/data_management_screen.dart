@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/utils/file_utils.dart';
 import 'package:Memento/core/utils/zip.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -99,7 +100,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -182,11 +183,11 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
-                child: const Text('确定'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),
@@ -386,7 +387,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
@@ -417,7 +418,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
@@ -682,7 +683,7 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, currentDirectory),

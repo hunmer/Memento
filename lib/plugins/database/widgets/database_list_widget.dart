@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/database/controllers/database_controller.dart';
 import 'package:Memento/plugins/database/widgets/database_detail_widget.dart';
 import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
@@ -293,7 +294,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: const Text('取消'),
+                              child: Text(AppLocalizations.of(context)!.cancel),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),

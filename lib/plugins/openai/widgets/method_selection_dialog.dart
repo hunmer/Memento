@@ -1,13 +1,11 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/plugin_analysis_method.dart';
 
 class MethodSelectionDialog extends StatelessWidget {
   final Function(PluginAnalysisMethod) onMethodSelected;
 
-  const MethodSelectionDialog({
-    super.key,
-    required this.onMethodSelected,
-  });
+  const MethodSelectionDialog({super.key, required this.onMethodSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +33,7 @@ class MethodSelectionDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
       ],
     );

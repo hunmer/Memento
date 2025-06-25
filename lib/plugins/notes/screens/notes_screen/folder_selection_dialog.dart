@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../models/folder.dart';
 import '../../models/note.dart';
@@ -80,7 +81,7 @@ mixin FolderSelectionDialog on NotesMainViewState {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               if (parentFolder != null && parentFolder.id != currentFolderId)
                 TextButton(

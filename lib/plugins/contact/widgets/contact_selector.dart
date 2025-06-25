@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/contact_model.dart';
 import '../controllers/contact_controller.dart';
@@ -121,7 +122,7 @@ class _ContactSelectorState extends State<ContactSelector> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('取消'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
@@ -129,7 +130,7 @@ class _ContactSelectorState extends State<ContactSelector> {
                     widget.onContactsSelected(_selectedIds);
                     Navigator.of(context).pop();
                   },
-                  child: const Text('确定'),
+                  child: Text(AppLocalizations.of(context)!.ok),
                 ),
               ],
             ),

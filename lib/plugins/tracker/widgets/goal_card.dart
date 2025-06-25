@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/tracker/widgets/timer_dialog.dart';
 import 'package:flutter/material.dart';
 import '../models/goal.dart';
@@ -296,7 +297,7 @@ class GoalCard extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -315,7 +316,7 @@ class GoalCard extends StatelessWidget {
                     Navigator.pop(context);
                   }
                 },
-                child: const Text('保存'),
+                child: Text(AppLocalizations.of(context)!.save),
               ),
             ],
           ),

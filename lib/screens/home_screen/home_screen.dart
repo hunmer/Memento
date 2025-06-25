@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
 import '../../widgets/app_drawer.dart';
@@ -90,11 +91,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: const Text('取消'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 TextButton(
-                  child: const Text('确定'),
+                  child: Text(AppLocalizations.of(context)!.ok),
                   onPressed: () {
                     // 关闭对话框
                     Navigator.of(context).pop();

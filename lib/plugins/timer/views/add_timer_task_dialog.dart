@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
 import 'package:Memento/widgets/group_selector_dialog.dart';
 import 'package:flutter/material.dart';
@@ -222,7 +223,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(

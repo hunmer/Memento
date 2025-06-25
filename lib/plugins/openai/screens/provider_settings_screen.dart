@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/service_provider.dart';
 import '../controllers/provider_controller.dart';
@@ -47,17 +48,15 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
 
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _addProvider() async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ProviderEditScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const ProviderEditScreen()),
     );
 
     if (result == true) {
@@ -81,20 +80,21 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
   Future<void> _deleteProvider(ServiceProvider provider) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除服务商 "${provider.label}" 吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('确认删除'),
+            content: Text('确定要删除服务商 "${provider.label}" 吗？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(AppLocalizations.of(context)!.delete),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -120,9 +120,10 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _providers.isEmpty
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _providers.isEmpty
               ? _buildEmptyState()
               : _buildProviderList(),
     );
@@ -142,10 +143,7 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
           const SizedBox(height: 8),
           const Text('点击右上角的加号添加服务商'),
           const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _addProvider,
-            child: const Text('添加服务商'),
-          ),
+          ElevatedButton(onPressed: _addProvider, child: const Text('添加服务商')),
         ],
       ),
     );

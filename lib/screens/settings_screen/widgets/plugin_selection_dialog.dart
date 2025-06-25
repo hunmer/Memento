@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../core/plugin_base.dart';
 
@@ -39,11 +40,11 @@ class _PluginSelectionDialogState extends State<PluginSelectionDialog> {
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: const Text('确定'),
+          child: Text(AppLocalizations.of(context)!.ok),
           onPressed: () => Navigator.of(context).pop(_selectedPlugins.toList()),
         ),
       ],

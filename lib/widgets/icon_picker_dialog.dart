@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'custom_dialog.dart';
 import '../constants/app_icons.dart';
@@ -53,19 +54,27 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
       result = _iconData;
     } else {
       // 先过滤名称列表
-      final filteredIndices = _iconNames.asMap().entries.where((entry) {
-        return entry.value.toLowerCase().contains(searchQuery.toLowerCase());
-      }).map((entry) => entry.key).toList();
-      
+      final filteredIndices =
+          _iconNames
+              .asMap()
+              .entries
+              .where((entry) {
+                return entry.value.toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                );
+              })
+              .map((entry) => entry.key)
+              .toList();
+
       // 转换为对应的图标数据
       result = filteredIndices.map((index) => _iconData[index]).toList();
     }
-    
+
     // 重置页码当过滤结果变化时
     if (_currentPage > 0 && _currentPage * _iconsPerPage >= result.length) {
       _currentPage = 0;
     }
-    
+
     _cachedFilteredIcons = result;
   }
 
@@ -137,9 +146,8 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                 final isSelected = icon == selectedIcon;
                 return IconButton(
                   icon: Icon(icon),
-                  color: isSelected 
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+                  color:
+                      isSelected ? Theme.of(context).colorScheme.primary : null,
                   onPressed: () {
                     setState(() {
                       selectedIcon = icon;
@@ -156,9 +164,10 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
-                  onPressed: _currentPage > 0
-                      ? () => setState(() => _currentPage--)
-                      : null,
+                  onPressed:
+                      _currentPage > 0
+                          ? () => setState(() => _currentPage--)
+                          : null,
                 ),
                 Text(
                   '${_currentPage + 1}/$_totalPages',
@@ -166,9 +175,10 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
-                  onPressed: _currentPage < _totalPages - 1
-                      ? () => setState(() => _currentPage++)
-                      : null,
+                  onPressed:
+                      _currentPage < _totalPages - 1
+                          ? () => setState(() => _currentPage++)
+                          : null,
                 ),
               ],
             ),
@@ -178,11 +188,11 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, selectedIcon),
-          child: const Text('确定'),
+          child: Text(AppLocalizations.of(context)!.ok),
         ),
       ],
     );

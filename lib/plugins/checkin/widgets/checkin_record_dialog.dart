@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
@@ -164,7 +165,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               const SizedBox(height: 16),
               // 打卡时间显示
               Text(
-                widget.selectedDate != null 
+                widget.selectedDate != null
                     ? '打卡日期：${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}'
                     : '打卡时间：${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -178,7 +179,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -188,9 +189,10 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
                 startTime: _startTime,
                 endTime: _endTime,
                 checkinTime: widget.selectedDate != null ? _selectedDate : now,
-                note: _noteController.text.trim().isNotEmpty 
-                    ? _noteController.text.trim() 
-                    : null,
+                note:
+                    _noteController.text.trim().isNotEmpty
+                        ? _noteController.text.trim()
+                        : null,
               );
               widget.item.addCheckinRecord(record);
               widget.onCheckinCompleted();

@@ -1,6 +1,6 @@
-
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
@@ -11,11 +11,7 @@ class AddProductPage extends StatefulWidget {
   final StoreController controller;
   final Product? product;
 
-  const AddProductPage({
-    super.key, 
-    required this.controller,
-    this.product,
-  });
+  const AddProductPage({super.key, required this.controller, this.product});
 
   @override
   State<AddProductPage> createState() => _AddProductPageState();
@@ -45,10 +41,9 @@ class _AddProductPageState extends State<AddProductPage> {
   Future<void> _pickImage() async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => ImagePickerDialog(
-        enableCrop: true,
-        cropAspectRatio: 1.0,
-      ),
+      builder:
+          (context) =>
+              ImagePickerDialog(enableCrop: true, cropAspectRatio: 1.0),
     );
 
     if (result != null) {
@@ -62,20 +57,21 @@ class _AddProductPageState extends State<AddProductPage> {
   Future<void> _confirmArchive() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认存档'),
-        content: const Text('确定要将这个商品存档吗？存档后可以在筛选器中查看。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('确认存档'),
+            content: const Text('确定要将这个商品存档吗？存档后可以在筛选器中查看。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('存档'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('存档'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true && widget.product != null) {
@@ -87,20 +83,21 @@ class _AddProductPageState extends State<AddProductPage> {
   Future<void> _confirmDelete() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: const Text('确定要删除这个商品吗？此操作不可撤销。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('确认删除'),
+            content: const Text('确定要删除这个商品吗？此操作不可撤销。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('删除', style: TextStyle(color: Colors.red)),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -114,29 +111,30 @@ class _AddProductPageState extends State<AddProductPage> {
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      final product = widget.product != null
-          ? Product(
-              id: widget.product!.id,
-              name: _nameController.text,
-              description: _descController.text,
-              image: _imageUrl ?? widget.product!.image,
-              stock: int.parse(_stockController.text),
-              price: int.parse(_priceController.text),
-              exchangeStart: widget.product!.exchangeStart,
-              exchangeEnd: widget.product!.exchangeEnd,
-              useDuration: widget.product!.useDuration,
-            )
-          : Product(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              name: _nameController.text,
-              description: _descController.text,
-              image: _imageUrl ?? '',
-              stock: int.parse(_stockController.text),
-              price: int.parse(_priceController.text),
-              exchangeStart: DateTime.now(),
-              exchangeEnd: DateTime.now().add(const Duration(days: 30)),
-              useDuration: 30,
-            );
+      final product =
+          widget.product != null
+              ? Product(
+                id: widget.product!.id,
+                name: _nameController.text,
+                description: _descController.text,
+                image: _imageUrl ?? widget.product!.image,
+                stock: int.parse(_stockController.text),
+                price: int.parse(_priceController.text),
+                exchangeStart: widget.product!.exchangeStart,
+                exchangeEnd: widget.product!.exchangeEnd,
+                useDuration: widget.product!.useDuration,
+              )
+              : Product(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                name: _nameController.text,
+                description: _descController.text,
+                image: _imageUrl ?? '',
+                stock: int.parse(_stockController.text),
+                price: int.parse(_priceController.text),
+                exchangeStart: DateTime.now(),
+                exchangeEnd: DateTime.now().add(const Duration(days: 30)),
+                useDuration: 30,
+              );
 
       if (widget.product != null) {
         widget.controller.products.removeWhere((p) => p.id == product.id);
@@ -163,10 +161,7 @@ class _AddProductPageState extends State<AddProductPage> {
               onPressed: _confirmDelete,
             ),
           ],
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _submit,
-          ),
+          IconButton(icon: const Icon(Icons.check), onPressed: _submit),
         ],
       ),
       body: SingleChildScrollView(
@@ -286,17 +281,17 @@ class _AddProductPageState extends State<AddProductPage> {
               final imagePath = snapshot.data!;
               return isNetworkImage(imagePath)
                   ? Image.network(
-                      imagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildErrorImage(),
-                    )
+                    imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder:
+                        (context, error, stackTrace) => _buildErrorImage(),
+                  )
                   : Image.file(
-                      File(imagePath),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildErrorImage(),
-                    );
+                    File(imagePath),
+                    fit: BoxFit.cover,
+                    errorBuilder:
+                        (context, error, stackTrace) => _buildErrorImage(),
+                  );
             }
           }
           return _buildLoadingIndicator();
@@ -305,7 +300,6 @@ class _AddProductPageState extends State<AddProductPage> {
     }
     return const Icon(Icons.add_a_photo, size: 50);
   }
-
 
   @override
   void dispose() {

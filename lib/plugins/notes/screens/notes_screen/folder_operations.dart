@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/notes_localizations.dart';
 import '../../models/folder.dart';
@@ -66,11 +67,11 @@ mixin FolderOperations on NotesMainViewState {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, renameController.text),
-                child: const Text('确定'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),
@@ -98,7 +99,7 @@ mixin FolderOperations on NotesMainViewState {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),

@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -260,11 +261,11 @@ class _LocationPickerState extends State<LocationPicker> {
       ),
       actions: [
         TextButton(
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: const Text('确定'),
+          child: Text(AppLocalizations.of(context)!.ok),
           onPressed: () {
             if (_selectedLocation != null) {
               widget.onLocationSelected(_selectedLocation!);

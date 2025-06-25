@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../widgets/image_picker_dialog.dart';
 import '../../../widgets/circle_icon_picker.dart';
@@ -251,11 +252,11 @@ class ContactFormState extends State<ContactForm> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('删除'),
+                child: Text(AppLocalizations.of(context)!.delete),
               ),
             ],
           ),

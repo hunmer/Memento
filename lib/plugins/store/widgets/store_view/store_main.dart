@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/store/widgets/store_view/archived_products.dart';
 import 'package:flutter/material.dart';
@@ -267,7 +268,7 @@ class _StoreMainState extends State<StoreMainView> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () async {
@@ -318,7 +319,7 @@ class _StoreMainState extends State<StoreMainView> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () async {
@@ -346,7 +347,7 @@ class _StoreMainState extends State<StoreMainView> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () async {
@@ -504,7 +505,7 @@ class _StoreMainState extends State<StoreMainView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -620,7 +621,7 @@ class _StoreMainState extends State<StoreMainView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () {

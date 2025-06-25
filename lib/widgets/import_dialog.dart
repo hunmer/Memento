@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class ImportDialog extends StatefulWidget {
@@ -39,24 +40,25 @@ class _ImportDialogState extends State<ImportDialog> {
         width: double.maxFinite,
         child: ListView(
           shrinkWrap: true,
-          children: widget.pluginDataMap.entries.map((entry) {
-            return CheckboxListTile(
-              title: Text(entry.key),
-              subtitle: Text('数据大小: ${_formatFileSize(entry.value)}'),
-              value: _selectedPlugins[entry.key],
-              onChanged: (bool? value) {
-                setState(() {
-                  _selectedPlugins[entry.key] = value ?? false;
-                });
-              },
-            );
-          }).toList(),
+          children:
+              widget.pluginDataMap.entries.map((entry) {
+                return CheckboxListTile(
+                  title: Text(entry.key),
+                  subtitle: Text('数据大小: ${_formatFileSize(entry.value)}'),
+                  value: _selectedPlugins[entry.key],
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _selectedPlugins[entry.key] = value ?? false;
+                    });
+                  },
+                );
+              }).toList(),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         TextButton(
           onPressed: () {

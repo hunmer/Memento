@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/database/controllers/field_controller.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
@@ -198,11 +199,11 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, field),
-                    child: const Text('Save'),
+                    child: Text(AppLocalizations.of(context)!.save),
                   ),
                 ],
               ),
@@ -245,11 +246,11 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, _selectedFieldType),
-                    child: const Text('OK'),
+                    child: Text(AppLocalizations.of(context)!.ok),
                   ),
                 ],
               ),

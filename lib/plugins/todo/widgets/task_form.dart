@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../controllers/controllers.dart';
@@ -33,14 +34,16 @@ class _TaskFormState extends State<TaskForm> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.task?.title ?? '');
-    _descriptionController = TextEditingController(text: widget.task?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.task?.description ?? '',
+    );
     _startDate = widget.task?.startDate;
     _dueDate = widget.task?.dueDate;
     _priority = widget.task?.priority ?? TaskPriority.medium;
-    
+
     // 初始化标签
     _tags = widget.task?.tags.toList() ?? [];
-    
+
     _subtasks = widget.task?.subtasks.toList() ?? [];
     _reminders = widget.task?.reminders.toList() ?? [];
     _subtaskController = TextEditingController();
@@ -57,12 +60,13 @@ class _TaskFormState extends State<TaskForm> {
   Future<void> _selectDateRange(BuildContext context) async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      initialDateRange: _startDate != null && _dueDate != null
-          ? DateTimeRange(start: _startDate!, end: _dueDate!)
-          : DateTimeRange(
-              start: DateTime.now(),
-              end: DateTime.now().add(const Duration(days: 7)),
-            ),
+      initialDateRange:
+          _startDate != null && _dueDate != null
+              ? DateTimeRange(start: _startDate!, end: _dueDate!)
+              : DateTimeRange(
+                start: DateTime.now(),
+                end: DateTime.now().add(const Duration(days: 7)),
+              ),
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
     );
@@ -143,18 +147,20 @@ class _TaskFormState extends State<TaskForm> {
 
   Future<void> _saveTask() async {
     if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a title')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter a title')));
       return;
     }
-
 
     if (widget.task == null) {
       // 创建新任务
       await widget.taskController.createTask(
         title: _titleController.text,
-        description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+        description:
+            _descriptionController.text.isEmpty
+                ? null
+                : _descriptionController.text,
         startDate: _startDate,
         dueDate: _dueDate,
         priority: _priority,
@@ -167,7 +173,10 @@ class _TaskFormState extends State<TaskForm> {
       final updatedTask = Task(
         id: widget.task!.id,
         title: _titleController.text,
-        description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+        description:
+            _descriptionController.text.isEmpty
+                ? null
+                : _descriptionController.text,
         createdAt: widget.task!.createdAt,
         startDate: _startDate,
         dueDate: _dueDate,
@@ -191,10 +200,7 @@ class _TaskFormState extends State<TaskForm> {
       appBar: AppBar(
         title: Text(widget.task == null ? 'New Task' : 'Edit Task'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _saveTask,
-          ),
+          IconButton(icon: const Icon(Icons.check), onPressed: _saveTask),
         ],
       ),
       body: SingleChildScrollView(
@@ -211,7 +217,7 @@ class _TaskFormState extends State<TaskForm> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // 描述
             TextField(
               controller: _descriptionController,
@@ -222,7 +228,7 @@ class _TaskFormState extends State<TaskForm> {
               maxLines: 3,
             ),
             const SizedBox(height: 16),
-            
+
             // 日期范围
             Row(
               children: [
@@ -252,7 +258,7 @@ class _TaskFormState extends State<TaskForm> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // 优先级
             const Text('Priority:'),
             const SizedBox(height: 8),
@@ -282,7 +288,7 @@ class _TaskFormState extends State<TaskForm> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // 标签
             const Text('Tags:'),
             const SizedBox(height: 8),
@@ -290,15 +296,17 @@ class _TaskFormState extends State<TaskForm> {
               spacing: 8.0,
               runSpacing: 4.0,
               children: [
-                ..._tags.map((tag) => Chip(
-                  label: Text(tag),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () {
-                    setState(() {
-                      _tags.remove(tag);
-                    });
-                  },
-                )),
+                ..._tags.map(
+                  (tag) => Chip(
+                    label: Text(tag),
+                    deleteIcon: const Icon(Icons.close, size: 18),
+                    onDeleted: () {
+                      setState(() {
+                        _tags.remove(tag);
+                      });
+                    },
+                  ),
+                ),
                 ActionChip(
                   avatar: const Icon(Icons.add, size: 18),
                   label: const Text('Add Tag'),
@@ -309,14 +317,11 @@ class _TaskFormState extends State<TaskForm> {
               ],
             ),
             const SizedBox(height: 24),
-            
+
             // 子任务
             const Text(
               'Subtasks',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Row(
@@ -331,10 +336,7 @@ class _TaskFormState extends State<TaskForm> {
                     onSubmitted: (_) => _addSubtask(),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: _addSubtask,
-                ),
+                IconButton(icon: const Icon(Icons.add), onPressed: _addSubtask),
               ],
             ),
             const SizedBox(height: 8),
@@ -352,9 +354,10 @@ class _TaskFormState extends State<TaskForm> {
                   title: Text(
                     subtask.title,
                     style: TextStyle(
-                      decoration: subtask.isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
+                      decoration:
+                          subtask.isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
                     ),
                   ),
                   trailing: IconButton(
@@ -365,14 +368,11 @@ class _TaskFormState extends State<TaskForm> {
               },
             ),
             const SizedBox(height: 24),
-            
+
             // 提醒
             const Text(
               'Reminders',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             TextButton.icon(
@@ -403,44 +403,45 @@ class _TaskFormState extends State<TaskForm> {
       ),
     );
   }
-  
+
   // 显示添加标签对话框
   void _showAddTagDialog() {
     final TextEditingController tagController = TextEditingController();
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Tag'),
-        content: TextField(
-          controller: tagController,
-          decoration: const InputDecoration(
-            labelText: 'Tag Name',
-            hintText: 'Enter a tag name',
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Add Tag'),
+            content: TextField(
+              controller: tagController,
+              decoration: const InputDecoration(
+                labelText: 'Tag Name',
+                hintText: 'Enter a tag name',
+              ),
+              autofocus: true,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () {
+                  final tagName = tagController.text.trim();
+                  if (tagName.isNotEmpty && !_tags.contains(tagName)) {
+                    setState(() {
+                      _tags.add(tagName);
+                    });
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Add'),
+              ),
+            ],
           ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              final tagName = tagController.text.trim();
-              if (tagName.isNotEmpty && !_tags.contains(tagName)) {
-                setState(() {
-                  _tags.add(tagName);
-                });
-              }
-              Navigator.of(context).pop();
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
     );
   }
 }

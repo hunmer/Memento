@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform, Process;
 
@@ -85,7 +86,7 @@ class MetadataDisplay extends StatelessWidget {
           // 如果两者都存在，添加一个间隔
           if (selectedFile != null && selectedAgents.isNotEmpty)
             const SizedBox(width: 8),
-            
+
           // 只有在选择了智能体时才显示上下文范围
           if (selectedAgents.isNotEmpty) ...[
             _buildContextRangeChip(context),
@@ -152,7 +153,7 @@ class MetadataDisplay extends StatelessWidget {
 
   Future<void> _showContextRangeDialog(BuildContext context) async {
     double currentValue = contextRange.toDouble();
-    
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -178,10 +179,7 @@ class MetadataDisplay extends StatelessWidget {
                   ),
                   const Text(
                     '范围: 0-50，0表示不使用上下文',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
@@ -190,14 +188,14 @@ class MetadataDisplay extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('取消'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 TextButton(
                   onPressed: () {
                     onContextRangeChange(currentValue.round());
                     Navigator.of(context).pop();
                   },
-                  child: const Text('确定'),
+                  child: Text(AppLocalizations.of(context)!.ok),
                 ),
               ],
             );
