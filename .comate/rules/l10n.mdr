@@ -10,3 +10,6 @@ alwaysApply: false
 
 - 2.需要将ui的text硬编码修改成Localizations.of(context).属性名 （ps 不使用 ?? !. 等语法）
 
+- 3.如果插件不存在localizations或者不完善，遵循跟lib/plugins/chat/l10nchat_localizations.dart一样的写法，创建了三个本地化文件
+
+- 4.如果Text文本夹杂变量参数，需要在Localizations添加一个getText方法，接收三个参数，一个是context,一个是字符串id,一个是key-value，key是变量名，value是变量值，字符串前后用%包裹变量，遍历key-value进行替换

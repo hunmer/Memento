@@ -13,11 +13,15 @@ abstract class CheckinLocalizations {
 
   final String localeName;
 
-  static CheckinLocalizations? of(BuildContext context) {
-    return Localizations.of<CheckinLocalizations>(
+  static CheckinLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<CheckinLocalizations>(
       context,
       CheckinLocalizations,
     );
+    if (localizations == null) {
+      throw FlutterError('No CheckinLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const LocalizationsDelegate<CheckinLocalizations> delegate =
@@ -62,6 +66,38 @@ abstract class CheckinLocalizations {
   String get groupSortTitle;
   String get reverseSort;
   String get confirm;
+
+  // 删除对话框
+  String get deleteCheckinItemTitle;
+
+  // 重置对话框
+  String get resetCheckinRecordsTitle;
+  String get resetCheckinRecordsMessage;
+
+  // 打卡成功对话框
+  String get checkinSuccessTitle;
+  String get timeRangeLabel;
+  String get noteLabel;
+  String get consecutiveDaysLabel;
+
+  // 分组管理对话框配置
+  String get manageGroupsTitle;
+  String get addGroupHint;
+  String get addTagHint;
+  String get editGroupHint;
+  String get allTagsLabel;
+  String get newGroupLabel;
+
+  // 操作菜单项
+  String get editCheckinItem;
+  String get resetCheckinRecords;
+
+  // 确认按钮
+  String get confirmReset;
+
+  // 操作结果提示
+  String get resetSuccessMessage;
+  String get deleteSuccessMessage;
 }
 
 class _CheckinLocalizationsDelegate

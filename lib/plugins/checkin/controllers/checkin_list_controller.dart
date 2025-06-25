@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -203,8 +204,12 @@ class CheckinListController {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('删除打卡项'),
-            content: Text('确定要删除"${item.name}"吗？此操作不可恢复。'),
+            title: Text(
+              CheckinLocalizations.of(context)!.deleteCheckinItemTitle,
+            ),
+            content: Text(
+              '${CheckinLocalizations.of(context)!.deleteConfirmMessage}"${item.name}"?',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -243,7 +248,9 @@ class CheckinListController {
               children: [
                 ListTile(
                   leading: const Icon(Icons.edit),
-                  title: const Text('编辑打卡项目'),
+                  title: Text(
+                    CheckinLocalizations.of(context)!.editCheckinItem,
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     _editCheckinItem(item);
@@ -251,7 +258,9 @@ class CheckinListController {
                 ),
                 ListTile(
                   leading: const Icon(Icons.refresh),
-                  title: const Text('重置打卡记录'),
+                  title: Text(
+                    CheckinLocalizations.of(context)!.resetCheckinRecords,
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     _showResetConfirmDialog(item);
@@ -302,8 +311,12 @@ class CheckinListController {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('重置打卡记录'),
-            content: Text('确定要重置"${item.name}"的所有打卡记录吗？这将清除所有历史打卡数据，且无法恢复。'),
+            title: Text(
+              CheckinLocalizations.of(context)!.resetCheckinRecordsTitle,
+            ),
+            content: Text(
+              '${CheckinLocalizations.of(context)!.resetCheckinRecordsMessage}"${item.name}"',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -315,10 +328,19 @@ class CheckinListController {
                   await item.resetRecords();
                   onStateChanged();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('已重置"${item.name}"的打卡记录')),
+                    SnackBar(
+                      content: Text(
+                        CheckinLocalizations.of(
+                          context,
+                        )!.resetSuccessMessage.replaceFirst('%s', item.name),
+                      ),
+                    ),
                   );
                 },
-                child: const Text('确定重置', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  CheckinLocalizations.of(context)!.confirmReset,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
@@ -331,8 +353,12 @@ class CheckinListController {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('删除打卡项目'),
-            content: Text('确定要删除"${item.name}"吗？这将同时删除所有历史打卡记录，且无法恢复。'),
+            title: Text(
+              CheckinLocalizations.of(context)!.deleteCheckinItemTitle,
+            ),
+            content: Text(
+              '${CheckinLocalizations.of(context)!.deleteConfirmMessage}"${item.name}"?',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -346,11 +372,20 @@ class CheckinListController {
                   notifyEvent('deleted', item);
                   await CheckinPlugin.shared.triggerSave();
                   onStateChanged();
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('已删除"${item.name}"')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        CheckinLocalizations.of(
+                          context,
+                        )!.deleteSuccessMessage.replaceFirst('%s', item.name),
+                      ),
+                    ),
+                  );
                 },
-                child: const Text('确定删除', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  CheckinLocalizations.of(context)!.confirmDelete,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
@@ -370,30 +405,32 @@ class CheckinListController {
               children: [
                 const Icon(Icons.check_circle, color: Colors.green),
                 const SizedBox(width: 8),
-                const Text('打卡成功'),
+                Text(CheckinLocalizations.of(context)!.checkinSuccessTitle),
               ],
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('您已成功完成 ${item.name} 的打卡'),
+                Text(
+                  '${CheckinLocalizations.of(context)!.checkinSuccessTitle} ${item.name}',
+                ),
                 const SizedBox(height: 8),
                 Text(
-                  '时间段: ${timeFormat.format(record.startTime)} - ${timeFormat.format(record.endTime)}',
+                  '${CheckinLocalizations.of(context)!.timeRangeLabel}: ${timeFormat.format(record.startTime)} - ${timeFormat.format(record.endTime)}',
                   style: const TextStyle(fontSize: 14),
                 ),
                 if (record.note != null) ...[
                   const SizedBox(height: 4),
                   Text(
-                    '备注: ${record.note}',
+                    '${CheckinLocalizations.of(context)!.noteLabel}: ${record.note}',
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
                 const SizedBox(height: 8),
                 if (streak > 1)
                   Text(
-                    '连续打卡天数: $streak',
+                    '${CheckinLocalizations.of(context)!.consecutiveDaysLabel}: $streak',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.orange,
@@ -512,13 +549,13 @@ class CheckinListController {
             onRefreshData: () async {
               return getCurrentTagGroups();
             },
-            config: const TagManagerConfig(
-              title: '管理分组',
-              addGroupHint: '请输入分组名称',
-              addTagHint: '请输入打卡项目名称',
-              editGroupHint: '请输入新的分组名称',
-              allTagsLabel: '所有打卡项目',
-              newGroupLabel: '新建分组',
+            config: TagManagerConfig(
+              title: CheckinLocalizations.of(context)!.manageGroupsTitle,
+              addGroupHint: CheckinLocalizations.of(context)!.addGroupHint,
+              addTagHint: CheckinLocalizations.of(context)!.addTagHint,
+              editGroupHint: CheckinLocalizations.of(context)!.editGroupHint,
+              allTagsLabel: CheckinLocalizations.of(context)!.allTagsLabel,
+              newGroupLabel: CheckinLocalizations.of(context)!.newGroupLabel,
             ),
           ),
     ).then((_) {

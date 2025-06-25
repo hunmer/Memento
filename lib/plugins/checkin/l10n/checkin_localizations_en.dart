@@ -69,4 +69,54 @@ class CheckinLocalizationsEn extends CheckinLocalizations {
 
   @override
   String get confirm => 'Confirm';
+
+  // 删除对话框
+  @override
+  String get deleteCheckinItemTitle => 'Delete Check-in Item';
+
+  // 重置对话框
+  @override
+  String get resetCheckinRecordsTitle => 'Reset Check-in Records';
+  @override
+  String get resetCheckinRecordsMessage =>
+      'Are you sure you want to reset all check-in records for this item? This will clear all historical data and cannot be undone.';
+
+  // 打卡成功对话框
+  @override
+  String get checkinSuccessTitle => 'Check-in Success';
+  @override
+  String get timeRangeLabel => 'Time Range';
+  @override
+  String get noteLabel => 'Note';
+  @override
+  String get consecutiveDaysLabel => 'Consecutive Days';
+
+  // 分组管理对话框配置
+  @override
+  String get manageGroupsTitle => 'Manage Groups';
+  @override
+  String get addGroupHint => 'Enter group name';
+  @override
+  String get addTagHint => 'Enter check-in item name';
+  @override
+  String get editGroupHint => 'Enter new group name';
+  @override
+  String get allTagsLabel => 'All Check-in Items';
+  @override
+  String get newGroupLabel => 'New Group';
+
+  // 操作菜单项
+  @override
+  String get editCheckinItem => 'Edit Check-in Item';
+  @override
+  String get resetCheckinRecords => 'Reset Check-in Records';
+
+  // 确认按钮
+  @override
+  String get confirmReset => 'Confirm Reset';
+  // 操作结果提示
+  @override
+  String get resetSuccessMessage => 'Check-in records for "%s" have been reset';
+  @override
+  String get deleteSuccessMessage => '"%s" has been deleted';
 }

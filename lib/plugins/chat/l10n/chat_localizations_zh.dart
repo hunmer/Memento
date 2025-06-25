@@ -324,4 +324,7 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String get stopRecordingHint => '点击停止录音';
+
+  @override
+  String get rangeHint => '上下文范围';
 }

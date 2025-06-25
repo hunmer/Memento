@@ -183,7 +183,7 @@ class MetadataDisplay extends StatelessWidget {
                     },
                   ),
                   Text(
-                    '${ChatLocalizations.of(context).rangeHint}: 0-50，0表示不使用上下文',
+                    ChatLocalizations.of(context).rangeHint,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
