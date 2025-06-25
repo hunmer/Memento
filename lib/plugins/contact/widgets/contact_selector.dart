@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/contact_model.dart';
 import '../controllers/contact_controller.dart';
@@ -67,12 +68,15 @@ class _ContactSelectorState extends State<ContactSelector> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text('选择联系人', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              ContactLocalizations.of(context).selectContactTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 16),
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 prefixIcon: Icon(Icons.search),
-                hintText: '搜索联系人...',
+                hintText: ContactLocalizations.of(context).searchContactsHint,
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) {

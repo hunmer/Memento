@@ -1,13 +1,14 @@
 import 'dart:io';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import '../l10n/contact_localizations.dart';
 import '../../../widgets/image_picker_dialog.dart';
 import '../../../widgets/circle_icon_picker.dart';
 import '../../../utils/image_utils.dart';
 import '../models/contact_model.dart';
 import '../models/interaction_record_model.dart';
-import '../l10n/contact_strings.dart';
 import '../controllers/contact_controller.dart';
+import '../l10n/contact_localizations.dart';
 import 'interaction_form.dart';
 import 'package:uuid/uuid.dart';
 
@@ -89,7 +90,7 @@ class ContactFormState extends State<ContactForm> {
       builder: (context) {
         final controller = TextEditingController();
         return AlertDialog(
-          title: Text(ContactStrings.addTag),
+          title: Text(ContactLocalizations.of(context)!.addTag),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(hintText: '输入标签名称'),
@@ -97,7 +98,7 @@ class ContactFormState extends State<ContactForm> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(ContactStrings.cancel),
+              child: Text(ContactLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -108,7 +109,7 @@ class ContactFormState extends State<ContactForm> {
                   Navigator.pop(context);
                 }
               },
-              child: Text(ContactStrings.save),
+              child: Text(ContactLocalizations.of(context)!.save),
             ),
           ],
         );
@@ -129,7 +130,7 @@ class ContactFormState extends State<ContactForm> {
         final keyController = TextEditingController();
         final valueController = TextEditingController();
         return AlertDialog(
-          title: Text(ContactStrings.addCustomField),
+          title: Text(ContactLocalizations.of(context)!.addCustomField),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -147,7 +148,7 @@ class ContactFormState extends State<ContactForm> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(ContactStrings.cancel),
+              child: Text(ContactLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -159,7 +160,7 @@ class ContactFormState extends State<ContactForm> {
                   Navigator.pop(context);
                 }
               },
-              child: Text(ContactStrings.save),
+              child: Text(ContactLocalizations.of(context)!.save),
             ),
           ],
         );
@@ -218,9 +219,11 @@ class ContactFormState extends State<ContactForm> {
 
   void _addInteraction() async {
     if (widget.contact == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请先保存联系人信息')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ContactLocalizations.of(context)!.saveFirstMessage),
+        ),
+      );
       return;
     }
 
@@ -248,7 +251,9 @@ class ContactFormState extends State<ContactForm> {
       builder:
           (context) => AlertDialog(
             title: Text(AppLocalizations.of(context)!.confirmDelete),
-            content: const Text('确定要删除这条联系记录吗？'),
+            content: Text(
+              ContactLocalizations.of(context)!.deleteConfirmMessage,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -274,7 +279,12 @@ class ContactFormState extends State<ContactForm> {
       length: 2,
       child: Column(
         children: [
-          const TabBar(tabs: [Tab(text: '基本信息'), Tab(text: '联系记录')]),
+          TabBar(
+            tabs: [
+              Tab(text: ContactLocalizations.of(context)!.basicInfoTab),
+              Tab(text: ContactLocalizations.of(context)!.recordsTab),
+            ],
+          ),
           Expanded(
             child: TabBarView(
               children: [
@@ -326,10 +336,12 @@ class ContactFormState extends State<ContactForm> {
                                                 : Container(
                                                   color: _selectedIconColor
                                                       .withOpacity(0.1),
-                                                  child: const Center(
+                                                  child: Center(
                                                     child: Text(
-                                                      '上传',
-                                                      style: TextStyle(
+                                                      ContactLocalizations.of(
+                                                        context,
+                                                      )!.upload,
+                                                      style: const TextStyle(
                                                         color: Colors.black54,
                                                         fontSize: 14,
                                                       ),
@@ -364,13 +376,16 @@ class ContactFormState extends State<ContactForm> {
                         // 基本信息表单
                         TextFormField(
                           controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: '姓名',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText:
+                                ContactLocalizations.of(context)!.nameLabel,
+                            border: const OutlineInputBorder(),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return '请输入姓名';
+                              return ContactLocalizations.of(
+                                context,
+                              )!.nameRequiredError;
                             }
                             return null;
                           },
@@ -378,25 +393,28 @@ class ContactFormState extends State<ContactForm> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _phoneController,
-                          decoration: const InputDecoration(
-                            labelText: '电话',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText:
+                                ContactLocalizations.of(context)!.phoneLabel,
+                            border: const OutlineInputBorder(),
                           ),
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _addressController,
-                          decoration: const InputDecoration(
-                            labelText: '地址',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText:
+                                ContactLocalizations.of(context)!.addressLabel,
+                            border: const OutlineInputBorder(),
                           ),
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _notesController,
-                          decoration: const InputDecoration(
-                            labelText: '备注',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText:
+                                ContactLocalizations.of(context)!.notesLabel,
+                            border: const OutlineInputBorder(),
                           ),
                           maxLines: 3,
                         ),
@@ -413,7 +431,10 @@ class ContactFormState extends State<ContactForm> {
                             IconButton(
                               icon: const Icon(Icons.add),
                               onPressed: _addTag,
-                              tooltip: '添加标签',
+                              tooltip:
+                                  ContactLocalizations.of(
+                                    context,
+                                  )!.addTagTooltip,
                             ),
                           ],
                         ),
@@ -442,7 +463,10 @@ class ContactFormState extends State<ContactForm> {
                             IconButton(
                               icon: const Icon(Icons.add),
                               onPressed: _addCustomField,
-                              tooltip: '添加自定义字段',
+                              tooltip:
+                                  ContactLocalizations.of(
+                                    context,
+                                  )!.addCustomFieldTooltip,
                             ),
                           ],
                         ),
@@ -462,7 +486,10 @@ class ContactFormState extends State<ContactForm> {
                                   icon: const Icon(Icons.delete_outline),
                                   onPressed:
                                       () => _removeCustomField(entry.key),
-                                  tooltip: '删除字段',
+                                  tooltip:
+                                      ContactLocalizations.of(
+                                        context,
+                                      )!.deleteFieldTooltip,
                                 ),
                               ],
                             ),

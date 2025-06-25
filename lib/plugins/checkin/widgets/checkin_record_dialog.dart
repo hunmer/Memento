@@ -1,5 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
 
@@ -110,7 +111,11 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.selectedDate != null ? '添加指定日期打卡' : '添加打卡记录'),
+      title: Text(
+        widget.selectedDate != null
+            ? CheckinLocalizations.of(context).addSpecificDateCheckin
+            : CheckinLocalizations.of(context).addCheckinRecord,
+      ),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -155,9 +160,9 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               // 备注输入框
               TextFormField(
                 controller: _noteController,
-                decoration: const InputDecoration(
-                  labelText: '备注',
-                  hintText: '请输入备注（可选）',
+                decoration: InputDecoration(
+                  labelText: CheckinLocalizations.of(context).noteLabel,
+                  hintText: CheckinLocalizations.of(context).noteHint,
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
@@ -166,8 +171,8 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               // 打卡时间显示
               Text(
                 widget.selectedDate != null
-                    ? '打卡日期：${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}'
-                    : '打卡时间：${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+                    ? '${CheckinLocalizations.of(context).checkinDateLabel}: ${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}'
+                    : '${CheckinLocalizations.of(context).checkinTimeLabel}: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).hintColor,
                 ),
@@ -200,7 +205,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('打卡'),
+          child: Text(CheckinLocalizations.of(context).checkinButton),
         ),
       ],
     );

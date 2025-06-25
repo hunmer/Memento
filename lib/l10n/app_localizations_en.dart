@@ -106,4 +106,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showAll => 'Show All';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get yes => 'Yes';
 }

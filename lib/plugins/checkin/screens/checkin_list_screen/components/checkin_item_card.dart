@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../controllers/checkin_list_controller.dart';
 import '../../../models/checkin_item.dart';
@@ -176,8 +177,16 @@ class CheckinItemCard extends StatelessWidget {
                     context: context,
                     builder:
                         (context) => AlertDialog(
-                          title: const Text('删除打卡记录'),
-                          content: const Text('确定要删除这条打卡记录吗？'),
+                          title: Text(
+                            CheckinLocalizations.of(
+                              context,
+                            ).deleteCheckinRecordTitle,
+                          ),
+                          content: Text(
+                            CheckinLocalizations.of(
+                              context,
+                            ).deleteCheckinRecordSimpleMessage,
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),

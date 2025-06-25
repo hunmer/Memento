@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/filter_sort_config.dart';
-import '../l10n/contact_strings.dart';
+import '../l10n/contact_localizations.dart';
 
 class FilterDialog extends StatefulWidget {
   final FilterConfig initialFilter;
@@ -106,7 +106,7 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(ContactStrings.filter),
+      title: Text(ContactLocalizations.of(context).filter),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -115,12 +115,12 @@ class _FilterDialogState extends State<FilterDialog> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: ContactStrings.nameKeyword,
+                labelText: ContactLocalizations.of(context).nameKeyword,
                 prefixIcon: const Icon(Icons.search),
               ),
             ),
             const SizedBox(height: 16),
-            Text(ContactStrings.dateRange),
+            Text(ContactLocalizations.of(context).dateRange),
             Row(
               children: [
                 Expanded(
@@ -129,7 +129,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     icon: const Icon(Icons.calendar_today),
                     label: Text(
                       _startDate == null
-                          ? '开始日期'
+                          ? ContactLocalizations.of(context).startDate
                           : '${_startDate!.year}-${_startDate!.month}-${_startDate!.day}',
                     ),
                   ),
@@ -141,7 +141,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     icon: const Icon(Icons.calendar_today),
                     label: Text(
                       _endDate == null
-                          ? '结束日期'
+                          ? ContactLocalizations.of(context).endDate
                           : '${_endDate!.year}-${_endDate!.month}-${_endDate!.day}',
                     ),
                   ),
@@ -149,7 +149,7 @@ class _FilterDialogState extends State<FilterDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            Text('${ContactStrings.uncontactedDays}:'),
+            Text('${ContactLocalizations.of(context).uncontactedDays}:'),
             Slider(
               value: _uncontactedDays?.toDouble() ?? 0,
               min: 0,
@@ -157,8 +157,8 @@ class _FilterDialogState extends State<FilterDialog> {
               divisions: 73,
               label:
                   _uncontactedDays == null || _uncontactedDays == 0
-                      ? '不限'
-                      : '$_uncontactedDays 天',
+                      ? ContactLocalizations.of(context).noLimit
+                      : '$_uncontactedDays ${ContactLocalizations.of(context).days}',
               onChanged: (value) {
                 setState(() {
                   _uncontactedDays = value == 0 ? null : value.toInt();
@@ -166,7 +166,7 @@ class _FilterDialogState extends State<FilterDialog> {
               },
             ),
             const SizedBox(height: 16),
-            Text('${ContactStrings.tags}:'),
+            Text('${ContactLocalizations.of(context).tags}:'),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -183,14 +183,17 @@ class _FilterDialogState extends State<FilterDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: _resetFilters, child: const Text('重置')),
+        TextButton(
+          onPressed: _resetFilters,
+          child: Text(ContactLocalizations.of(context)?.reset ?? 'Reset'),
+        ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(ContactStrings.cancel),
+          child: Text(ContactLocalizations.of(context)?.cancel ?? 'Cancel'),
         ),
         ElevatedButton(
           onPressed: _applyFilters,
-          child: Text(ContactStrings.save),
+          child: Text(ContactLocalizations.of(context)?.save ?? 'Save'),
         ),
       ],
     );
