@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
@@ -28,27 +29,41 @@ class FolderListTile extends StatelessWidget {
         onPressed: () {
           showModalBottomSheet(
             context: context,
-            builder: (context) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: const Text('重命名'),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    await renameFolderDialog(context, controller, folder, onReload);
-                  },
+            builder:
+                (context) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.edit),
+                      title: Text(AppLocalizations.of(context)!.rename),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await renameFolderDialog(
+                          context,
+                          controller,
+                          folder,
+                          onReload,
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.delete, color: Colors.red),
+                      title: const Text(
+                        '删除',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await deleteFolderDialog(
+                          context,
+                          controller,
+                          folder,
+                          onReload,
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text('删除', style: TextStyle(color: Colors.red)),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    await deleteFolderDialog(context, controller, folder, onReload);
-                  },
-                ),
-              ],
-            ),
           );
         },
       ),

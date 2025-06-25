@@ -56,7 +56,10 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
           onPressed: () => Navigator.pop(context),
           child: Text(AppLocalizations.of(context)!.cancel),
         ),
-        TextButton(onPressed: _confirmSelection, child: const Text('确认')),
+        TextButton(
+          onPressed: _confirmSelection,
+          child: Text(AppLocalizations.of(context)!.ok),
+        ),
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
@@ -7,10 +8,7 @@ import 'package:path/path.dart' as path;
 class RecordAudioDialog extends StatefulWidget {
   final Function(File audioFile, Duration duration) onStop;
 
-  const RecordAudioDialog({
-    super.key,
-    required this.onStop,
-  });
+  const RecordAudioDialog({super.key, required this.onStop});
 
   @override
   State<RecordAudioDialog> createState() => _RecordAudioDialogState();
@@ -34,7 +32,6 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
       }
     });
   }
-
 
   @override
   void dispose() {
@@ -79,20 +76,21 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
         // 显示错误提示对话框
         await showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('录音失败'),
-            content: Text(
-              e.toString().contains('权限') 
-                  ? '请在系统设置中允许应用使用麦克风，以便录制语音消息。'
-                  : '开始录音时出现错误，请检查麦克风是否正常工作并重试。'
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('知道了'),
+          builder:
+              (context) => AlertDialog(
+                title: const Text('录音失败'),
+                content: Text(
+                  e.toString().contains('权限')
+                      ? '请在系统设置中允许应用使用麦克风，以便录制语音消息。'
+                      : '开始录音时出现错误，请检查麦克风是否正常工作并重试。',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('知道了'),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
         // 关闭录音对话框
         Navigator.of(context).pop();
@@ -125,16 +123,17 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
         // 显示错误提示对话框
         await showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('录音失败'),
-            content: const Text('停止录音时出现错误，录音可能未能保存。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('知道了'),
+          builder:
+              (context) => AlertDialog(
+                title: const Text('录音失败'),
+                content: const Text('停止录音时出现错误，录音可能未能保存。'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(AppLocalizations.of(context)!.ok),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
       }
     }
@@ -161,18 +160,12 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
           children: [
             const Text(
               '录制语音消息',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(
               _formatDuration(_duration),
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
             Row(
@@ -193,10 +186,7 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
             const SizedBox(height: 16),
             const Text(
               '点击停止按钮结束录音',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ],
         ),

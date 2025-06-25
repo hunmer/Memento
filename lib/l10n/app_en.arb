@@ -1,7 +1,7 @@
 
 {
   "@@locale": "en",
-  "appTitle": "My Flutter App",
+  "appTitle": "memento",
   "pluginManager": "Plugin Manager",
   "backupOptions": "Backup Options",
   "selectBackupMethod": "Please select backup method",
@@ -23,70 +23,13 @@
   "tags": "Tags",
   "confirm": "Confirm",
   "confirmDelete": "Confirm Delete?",
-  "@appTitle": {
-    "description": "The title of the application"
-  },
-  "@pluginManager": {
-    "description": "Title for plugin management section"
-  },
-  "@backupOptions": {
-    "description": "Backup options menu title"
-  },
-  "@selectBackupMethod": {
-    "description": "Prompt to select backup method"
-  },
-  "@exportAppData": {
-    "description": "Export app data option"
-  },
-  "@fullBackup": {
-    "description": "Full backup option"
-  },
-  "@webdavSync": {
-    "description": "WebDAV sync option"
-  },
-  "@ok": {
-    "description": "OK button text"
-  },
-  "@cancel": {
-    "description": "Cancel button text"
-  },
-  "@save": {
-    "description": "Save button text"
-  },
-  "@close": {
-    "description": "Close button text"
-  },
-  "@delete": {
-    "description": "Delete button text"
-  },
-  "@reset": {
-    "description": "Reset button text"
-  },
-  "@apply": {
-    "description": "Apply button text"
-  },
-  "@settings": {
-    "description": "Settings menu title"
-  },
-  "@startTime": {
-    "description": "Start time label"
-  },
-  "@endTime": {
-    "description": "End time label"
-  },
-  "@interval": {
-    "description": "Interval label"
-  },
-  "@minutes": {
-    "description": "Minutes unit label"
-  },
-  "@tags": {
-    "description": "Tags label"
-  },
-  "@confirm": {
-    "description": "Confirm button text"
-  },
-  "@confirmDelete": {
-    "description": "Delete confirmation prompt"
-  }
+  "week": "Week",
+  "month": "Month",
+  "date": "Date",
+  "edit": "Edit",
+  "retry": "Retry",
+  "rename": "Rename",
+  "copy": "Copy",
+  "done": "Done",
+  "create": "Create"
 }

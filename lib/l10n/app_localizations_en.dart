@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'My Flutter App';
+  String get appTitle => 'memento';
 
   @override
   String get pluginManager => 'Plugin Manager';
@@ -73,4 +73,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmDelete => 'Confirm Delete?';
+
+  @override
+  String get week => 'Week';
+
+  @override
+  String get month => 'Month';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get rename => 'Rename';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get create => 'Create';
 }

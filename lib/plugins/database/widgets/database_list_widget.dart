@@ -99,7 +99,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                         _databasesFuture = widget.service.getAllDatabases();
                       });
                     },
-                    child: const Text('重试'),
+                    child: Text(AppLocalizations.of(context)!.retry),
                   ),
                 ],
               ),
@@ -244,7 +244,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: const Text('编辑'),
+                title: Text(AppLocalizations.of(context)!.edit),
                 onTap: () async {
                   Navigator.pop(context);
                   final result = await Navigator.of(context).push<bool>(
@@ -265,7 +265,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
               ),
               ListTile(
                 leading: const Icon(Icons.copy),
-                title: const Text('复制'),
+                title: Text(AppLocalizations.of(context)!.copy),
                 onTap: () async {
                   Navigator.pop(context);
                   final newDatabase = database.copyWith(id: Uuid().v4());

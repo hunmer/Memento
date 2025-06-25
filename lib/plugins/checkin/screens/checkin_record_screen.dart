@@ -184,7 +184,10 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
                     setState(() {});
                   }
                 },
-                child: const Text('删除', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  AppLocalizations.of(context)!.delete,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),

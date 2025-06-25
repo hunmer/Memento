@@ -121,7 +121,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               // 日期选择
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('日期'),
+                title: Text(AppLocalizations.of(context)!.save),
                 trailing: TextButton(
                   onPressed: () => _selectDate(context),
                   child: Text(
@@ -132,7 +132,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               // 起始时间选择
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('起始时间'),
+                title: Text(AppLocalizations.of(context)!.startTime),
                 trailing: TextButton(
                   onPressed: () => _selectTime(context, true),
                   child: Text(
@@ -143,7 +143,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               // 终止时间选择
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('终止时间'),
+                title: Text(AppLocalizations.of(context)!.endTime),
                 trailing: TextButton(
                   onPressed: () => _selectTime(context, false),
                   child: Text(

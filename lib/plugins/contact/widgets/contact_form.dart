@@ -247,7 +247,7 @@ class ContactFormState extends State<ContactForm> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('删除确认'),
+            title: Text(AppLocalizations.of(context)!.confirmDelete),
             content: const Text('确定要删除这条联系记录吗？'),
             actions: [
               TextButton(

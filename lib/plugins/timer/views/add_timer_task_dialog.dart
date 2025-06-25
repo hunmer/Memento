@@ -228,7 +228,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _timerItems.isEmpty ? null : _submit,
-                    child: const Text('确认'),
+                    child: Text(AppLocalizations.of(context)!.ok),
                   ),
                 ],
               ),

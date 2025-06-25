@@ -271,7 +271,10 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                     child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(onPressed: _submit, child: const Text('确认')),
+                  ElevatedButton(
+                    onPressed: _submit,
+                    child: Text(AppLocalizations.of(context)!.ok),
+                  ),
                 ],
               ),
             ],

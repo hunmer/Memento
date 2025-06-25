@@ -248,7 +248,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
           children: [
             ListTile(
               leading: const Icon(Icons.edit),
-              title: const Text('Edit'),
+              title: Text(AppLocalizations.of(context)!.edit),
               onTap: () {
                 Navigator.of(context).pop();
                 _editRecord(context, record);

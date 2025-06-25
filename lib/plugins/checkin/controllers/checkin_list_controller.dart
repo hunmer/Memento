@@ -219,7 +219,10 @@ class CheckinListController {
                   CheckinPlugin.shared.triggerSave();
                   onStateChanged();
                 },
-                child: const Text('删除', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  AppLocalizations.of(context)!.delete,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
@@ -256,7 +259,10 @@ class CheckinListController {
                 ),
                 ListTile(
                   leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text('删除', style: TextStyle(color: Colors.red)),
+                  title: Text(
+                    AppLocalizations.of(context)!.delete,
+                    style: TextStyle(color: Colors.red),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     _showDeleteConfirmDialog(item);
