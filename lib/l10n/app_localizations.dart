@@ -283,6 +283,10 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create'**
   String get create;
+
+  String get selectDate;
+
+  String get showAll;
 }
 
 class _AppLocalizationsDelegate

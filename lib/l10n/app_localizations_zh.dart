@@ -100,4 +100,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get create => '新建';
+
+  @override
+  String get selectDate => '选择日期';
+
+  @override
+  String get showAll => '显示全部';
 }

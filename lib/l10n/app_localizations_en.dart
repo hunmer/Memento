@@ -100,4 +100,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get create => 'Create';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get showAll => 'Show All';
 }

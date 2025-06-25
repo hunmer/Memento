@@ -163,6 +163,14 @@ abstract class ChatLocalizations {
   String get smartAgent;
   String get channelCount;
   String get totalMessages;
+
+  String get editMessageTitle;
+
+  get messageHintText;
+
+  String get errorFilePreviewFailed;
+
+  String get audioMessageBubbleErrorText;
 }
 
 class _ChatLocalizationsDelegate
