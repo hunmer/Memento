@@ -78,7 +78,7 @@ Future<void> handleLocalVideoSelection({
         // 显示视频选择成功的提示
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text('已发送视频: ${path.basename(video.path)}'),
+            content: Text('已发送视频'),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
