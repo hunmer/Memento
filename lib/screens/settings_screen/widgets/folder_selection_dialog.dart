@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class FolderSelectionDialog extends StatefulWidget {
@@ -39,11 +40,11 @@ class _FolderSelectionDialogState extends State<FolderSelectionDialog> {
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: const Text('确定'),
+          child: Text(AppLocalizations.of(context)!.ok),
           onPressed: () => Navigator.of(context).pop(_selectedIds.toList()),
         ),
       ],

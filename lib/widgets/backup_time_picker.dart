@@ -1,12 +1,12 @@
-
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class BackupTimePicker extends StatefulWidget {
   final Function(BackupSchedule) onScheduleSelected;
   final BackupSchedule? initialSchedule;
-  
+
   const BackupTimePicker({
-    super.key, 
+    super.key,
     required this.onScheduleSelected,
     this.initialSchedule,
   });
@@ -54,12 +54,9 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
-        TextButton(
-          onPressed: _confirmSelection,
-          child: const Text('确认'),
-        ),
+        TextButton(onPressed: _confirmSelection, child: const Text('确认')),
       ],
     );
   }
@@ -68,12 +65,10 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
     return DropdownButton<BackupScheduleType>(
       value: _selectedType,
       onChanged: (type) => setState(() => _selectedType = type!),
-      items: BackupScheduleType.values.map((type) {
-        return DropdownMenuItem(
-          value: type,
-          child: Text(type.displayName),
-        );
-      }).toList(),
+      items:
+          BackupScheduleType.values.map((type) {
+            return DropdownMenuItem(value: type, child: Text(type.displayName));
+          }).toList(),
     );
   }
 
@@ -84,27 +79,19 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
       case BackupScheduleType.daily:
         return _buildTimePicker();
       case BackupScheduleType.weekly:
-        return Column(
-          children: [
-            _buildTimePicker(),
-            _buildDaySelector(),
-          ],
-        );
+        return Column(children: [_buildTimePicker(), _buildDaySelector()]);
       case BackupScheduleType.monthly:
-        return Column(
-          children: [
-            _buildTimePicker(),
-            _buildMonthDaySelector(),
-          ],
-        );
+        return Column(children: [_buildTimePicker(), _buildMonthDaySelector()]);
     }
   }
 
   Widget _buildDatePicker() {
     return ListTile(
-      title: Text(_selectedDate == null 
-          ? '选择日期' 
-          : '${_selectedDate!.year}-${_selectedDate!.month}-${_selectedDate!.day}'),
+      title: Text(
+        _selectedDate == null
+            ? '选择日期'
+            : '${_selectedDate!.year}-${_selectedDate!.month}-${_selectedDate!.day}',
+      ),
       onTap: () async {
         final date = await showDatePicker(
           context: context,
@@ -121,9 +108,11 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
 
   Widget _buildTimePicker() {
     return ListTile(
-      title: Text(_selectedTime == null 
-          ? '选择时间' 
-          : '${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}'),
+      title: Text(
+        _selectedTime == null
+            ? '选择时间'
+            : '${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}',
+      ),
       onTap: () async {
         final time = await showTimePicker(
           context: context,
@@ -180,14 +169,22 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
 
   String _getDayName(int day) {
     switch (day) {
-      case 1: return '周一';
-      case 2: return '周二';
-      case 3: return '周三';
-      case 4: return '周四';
-      case 5: return '周五';
-      case 6: return '周六';
-      case 7: return '周日';
-      default: return '';
+      case 1:
+        return '周一';
+      case 2:
+        return '周二';
+      case 3:
+        return '周三';
+      case 4:
+        return '周四';
+      case 5:
+        return '周五';
+      case 6:
+        return '周六';
+      case 7:
+        return '周日';
+      default:
+        return '';
     }
   }
 

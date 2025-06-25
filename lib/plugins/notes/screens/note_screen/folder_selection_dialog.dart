@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
@@ -16,34 +17,35 @@ Future<Folder?> showFolderSelectionDialog(
 
   return showDialog<Folder>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(parentFolder != null ? '选择子文件夹' : '选择目标文件夹'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildFolderTree(
-              context,
-              startFolder,
-              controller,
-              isRoot: startFolder.id == 'root',
-              currentFolderId: currentFolderId,
+    builder:
+        (context) => AlertDialog(
+          title: Text(parentFolder != null ? '选择子文件夹' : '选择目标文件夹'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildFolderTree(
+                  context,
+                  startFolder,
+                  controller,
+                  isRoot: startFolder.id == 'root',
+                  currentFolderId: currentFolderId,
+                ),
+              ],
             ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+            if (parentFolder != null && parentFolder.id != currentFolderId)
+              TextButton(
+                onPressed: () => Navigator.pop(context, parentFolder),
+                child: const Text('选择当前文件夹'),
+              ),
           ],
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
-        ),
-        if (parentFolder != null && parentFolder.id != currentFolderId)
-          TextButton(
-            onPressed: () => Navigator.pop(context, parentFolder),
-            child: const Text('选择当前文件夹'),
-          ),
-      ],
-    ),
   );
 }
 
@@ -87,14 +89,17 @@ Widget _buildFolderTree(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: children
-                .map((child) => _buildFolderTree(
-                      context,
-                      child,
-                      controller,
-                      currentFolderId: currentFolderId,
-                    ))
-                .toList(),
+            children:
+                children
+                    .map(
+                      (child) => _buildFolderTree(
+                        context,
+                        child,
+                        controller,
+                        currentFolderId: currentFolderId,
+                      ),
+                    )
+                    .toList(),
           ),
         ),
     ],

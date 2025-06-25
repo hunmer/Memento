@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -207,7 +208,7 @@ class CheckinListController {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -300,7 +301,7 @@ class CheckinListController {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () async {
@@ -329,7 +330,7 @@ class CheckinListController {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () async {
@@ -397,7 +398,7 @@ class CheckinListController {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('确定'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),

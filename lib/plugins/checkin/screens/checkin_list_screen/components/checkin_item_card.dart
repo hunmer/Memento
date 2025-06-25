@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../controllers/checkin_list_controller.dart';
 import '../../../models/checkin_item.dart';
@@ -180,7 +181,7 @@ class CheckinItemCard extends StatelessWidget {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('取消'),
+                              child: Text(AppLocalizations.of(context)!.cancel),
                             ),
                             TextButton(
                               onPressed: () async {
@@ -192,7 +193,7 @@ class CheckinItemCard extends StatelessWidget {
                                   Navigator.of(context).pop();
                                 }
                               },
-                              child: const Text('删除'),
+                              child: Text(AppLocalizations.of(context)!.delete),
                             ),
                           ],
                         ),

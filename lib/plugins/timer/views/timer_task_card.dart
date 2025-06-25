@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/timer_task.dart';
 import '../models/timer_item.dart';
@@ -306,7 +307,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete),
-                title: const Text('删除'),
+                title: Text(AppLocalizations.of(context)!.delete),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onDelete(task);

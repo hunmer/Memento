@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/interaction_record_model.dart';
@@ -239,12 +240,12 @@ class _InteractionFormState extends State<InteractionForm> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _saveInteraction,
-                    child: const Text('保存'),
+                    child: Text(AppLocalizations.of(context)!.save),
                   ),
                 ],
               ),

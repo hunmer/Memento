@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../utils/date_formatter.dart';
 
@@ -24,7 +25,8 @@ class DatePickerDialog extends StatelessWidget {
           itemCount: availableDates.length,
           itemBuilder: (context, index) {
             final date = availableDates[index];
-            final isSelected = selectedDate != null &&
+            final isSelected =
+                selectedDate != null &&
                 date.year == selectedDate!.year &&
                 date.month == selectedDate!.month &&
                 date.day == selectedDate!.day;
@@ -44,7 +46,7 @@ class DatePickerDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
       ],
     );

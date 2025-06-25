@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
@@ -137,11 +138,11 @@ class _TimerDialogState extends State<TimerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         ElevatedButton(
           onPressed: _seconds > 0 ? _saveRecord : null,
-          child: const Text('保存'),
+          child: Text(AppLocalizations.of(context)!.save),
         ),
       ],
     );

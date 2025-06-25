@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart' hide ListTile, Row, Center, SizedBox;
 import 'package:flutter/material.dart'
     as flutter
@@ -38,7 +39,7 @@ class GoalDetailScreen extends StatelessWidget {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: const Text('取消'),
+                              child: Text(AppLocalizations.of(context)!.cancel),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
@@ -155,7 +156,11 @@ class GoalDetailScreen extends StatelessWidget {
                                                               context,
                                                               false,
                                                             ),
-                                                        child: const Text('取消'),
+                                                        child: Text(
+                                                          AppLocalizations.of(
+                                                            context,
+                                                          )!.cancel,
+                                                        ),
                                                       ),
                                                       TextButton(
                                                         onPressed:

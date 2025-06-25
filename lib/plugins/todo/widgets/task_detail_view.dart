@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/models.dart';
@@ -81,11 +82,11 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel'),
+                          child: Text(AppLocalizations.of(context)!.cancel),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Delete'),
+                          child: Text(AppLocalizations.of(context)!.delete),
                         ),
                       ],
                     ),

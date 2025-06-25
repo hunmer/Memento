@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
 import '../controllers/checkin_list_controller.dart';
@@ -8,7 +9,7 @@ class CheckinRecordScreen extends StatefulWidget {
   final CheckinListController controller;
 
   const CheckinRecordScreen({
-    super.key, 
+    super.key,
     required this.checkinItem,
     required this.controller,
   });
@@ -30,9 +31,9 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
       final dateParts = entry.key.split('-');
       if (dateParts.length == 3) {
         final date = DateTime(
-          int.parse(dateParts[0]), 
-          int.parse(dateParts[1]), 
-          int.parse(dateParts[2])
+          int.parse(dateParts[0]),
+          int.parse(dateParts[1]),
+          int.parse(dateParts[2]),
         );
         recordsByDate.putIfAbsent(date, () => []).addAll(entry.value);
       }
@@ -52,7 +53,9 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
                 itemBuilder: (context, index) {
                   final date = sortedDates[index];
                   final records = recordsByDate[date]!;
-                  records.sort((a, b) => b.checkinTime.compareTo(a.checkinTime)); // 按打卡时间降序排序
+                  records.sort(
+                    (a, b) => b.checkinTime.compareTo(a.checkinTime),
+                  ); // 按打卡时间降序排序
 
                   return Card(
                     margin: const EdgeInsets.symmetric(
@@ -171,7 +174,7 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () async {

@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/llm_models.dart';
 import '../controllers/model_controller.dart';
@@ -11,7 +12,8 @@ class ModelSearchScreen extends StatefulWidget {
   State<ModelSearchScreen> createState() => _ModelSearchScreenState();
 }
 
-class _ModelSearchScreenState extends State<ModelSearchScreen> with SingleTickerProviderStateMixin {
+class _ModelSearchScreenState extends State<ModelSearchScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late List<LLMModelGroup> _modelGroups;
   late ModelController _modelController;
@@ -35,7 +37,10 @@ class _ModelSearchScreenState extends State<ModelSearchScreen> with SingleTicker
       final models = await _modelController.getModels();
       setState(() {
         _modelGroups = models;
-        _tabController = TabController(length: _modelGroups.length, vsync: this);
+        _tabController = TabController(
+          length: _modelGroups.length,
+          vsync: this,
+        );
         _isLoading = false;
       });
 
@@ -44,9 +49,9 @@ class _ModelSearchScreenState extends State<ModelSearchScreen> with SingleTicker
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载模型失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('加载模型失败: $e')));
       }
       setState(() {
         _modelGroups = [];
@@ -74,10 +79,16 @@ class _ModelSearchScreenState extends State<ModelSearchScreen> with SingleTicker
     if (_searchQuery.isEmpty) {
       return models;
     }
-    return models.where((model) => 
-      model.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-      (model.description?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)
-    ).toList();
+    return models
+        .where(
+          (model) =>
+              model.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              (model.description?.toLowerCase().contains(
+                    _searchQuery.toLowerCase(),
+                  ) ??
+                  false),
+        )
+        .toList();
   }
 
   @override
@@ -91,107 +102,127 @@ class _ModelSearchScreenState extends State<ModelSearchScreen> with SingleTicker
               onPressed: () {
                 Navigator.of(context).pop(_selectedModel);
               },
-              child: const Text('确定'),
+              child: Text(AppLocalizations.of(context)!.ok),
             ),
         ],
-        bottom: _isLoading 
-          ? null 
-          : PreferredSize(
-              preferredSize: const Size.fromHeight(96.0),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: '搜索模型...',
-                        prefixIcon: Icon(Icons.search),
-                        border: InputBorder.none,
+        bottom:
+            _isLoading
+                ? null
+                : PreferredSize(
+                  preferredSize: const Size.fromHeight(96.0),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            hintText: '搜索模型...',
+                            prefixIcon: Icon(Icons.search),
+                            border: InputBorder.none,
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value;
+                            });
+                          },
+                        ),
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchQuery = value;
-                        });
-                      },
-                    ),
+                      TabBar(
+                        controller: _tabController,
+                        isScrollable: true,
+                        tabs:
+                            _modelGroups
+                                .map((group) => Tab(text: group.name))
+                                .toList(),
+                      ),
+                    ],
                   ),
-                  TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    tabs: _modelGroups.map((group) => Tab(text: group.name)).toList(),
-                  ),
-                ],
-              ),
-            ),
+                ),
       ),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : TabBarView(
-            controller: _tabController,
-            children: _modelGroups.map((group) {
-              final filteredModels = _getFilteredModels(group.models);
-              return filteredModels.isEmpty
-                ? const Center(child: Text('没有找到匹配的模型'))
-                : ListView.builder(
-                    itemCount: filteredModels.length,
-                    itemBuilder: (context, index) {
-                      final model = filteredModels[index];
-                      final isSelected = _selectedModel?.id == model.id;
-                      
-                      return ListTile(
-                        title: Text(model.name),
-                        subtitle: model.description != null 
-                          ? Text(model.description!)
-                          : null,
-                        trailing: isSelected 
-                          ? const Icon(Icons.check_circle, color: Colors.green)
-                          : null,
-                        selected: isSelected,
-                        onTap: () {
-                          setState(() {
-                            _selectedModel = model;
-                          });
-                        },
-                        onLongPress: () {
-                          if (model.url != null) {
-                            // 显示模型详情
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : TabBarView(
+                controller: _tabController,
+                children:
+                    _modelGroups.map((group) {
+                      final filteredModels = _getFilteredModels(group.models);
+                      return filteredModels.isEmpty
+                          ? const Center(child: Text('没有找到匹配的模型'))
+                          : ListView.builder(
+                            itemCount: filteredModels.length,
+                            itemBuilder: (context, index) {
+                              final model = filteredModels[index];
+                              final isSelected = _selectedModel?.id == model.id;
+
+                              return ListTile(
                                 title: Text(model.name),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (model.description != null)
-                                      Text('描述: ${model.description}'),
-                                    const SizedBox(height: 8),
-                                    Text('URL: ${model.url}'),
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
-                                    child: const Text('关闭'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        },
-                      );
-                    },
-                  );
-            }).toList(),
-          ),
-      floatingActionButton: _selectedModel != null
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).pop(_selectedModel);
-              },
-              child: const Icon(Icons.check),
-            )
-          : null,
+                                subtitle:
+                                    model.description != null
+                                        ? Text(model.description!)
+                                        : null,
+                                trailing:
+                                    isSelected
+                                        ? const Icon(
+                                          Icons.check_circle,
+                                          color: Colors.green,
+                                        )
+                                        : null,
+                                selected: isSelected,
+                                onTap: () {
+                                  setState(() {
+                                    _selectedModel = model;
+                                  });
+                                },
+                                onLongPress: () {
+                                  if (model.url != null) {
+                                    // 显示模型详情
+                                    showDialog(
+                                      context: context,
+                                      builder:
+                                          (context) => AlertDialog(
+                                            title: Text(model.name),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                if (model.description != null)
+                                                  Text(
+                                                    '描述: ${model.description}',
+                                                  ),
+                                                const SizedBox(height: 8),
+                                                Text('URL: ${model.url}'),
+                                              ],
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed:
+                                                    () =>
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop(),
+                                                child: const Text('关闭'),
+                                              ),
+                                            ],
+                                          ),
+                                    );
+                                  }
+                                },
+                              );
+                            },
+                          );
+                    }).toList(),
+              ),
+      floatingActionButton:
+          _selectedModel != null
+              ? FloatingActionButton(
+                onPressed: () {
+                  Navigator.of(context).pop(_selectedModel);
+                },
+                child: const Icon(Icons.check),
+              )
+              : null,
     );
   }
 

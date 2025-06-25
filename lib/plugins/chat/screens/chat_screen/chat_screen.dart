@@ -14,7 +14,6 @@ import '../../models/message.dart';
 import '../../models/user.dart';
 import '../../chat_plugin.dart';
 import '../profile_edit_dialog.dart';
-import '../channel_info_screen.dart';
 import '../../utils/message_operations.dart'; // 添加消息操作工具类
 // 移除未使用的导入
 import 'controllers/chat_screen_controller.dart';

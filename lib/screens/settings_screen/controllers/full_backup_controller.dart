@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async'; // 添加 StreamController 和 TimeoutException 的导入
 import 'dart:typed_data'; // 添加 Uint8List 的导入
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
@@ -195,7 +196,7 @@ class FullBackupController {
                 ),
                 actions: [
                   TextButton(
-                    child: const Text('取消'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                     onPressed: () {
                       Navigator.of(dialogContext).pop(false);
                     },

@@ -1,4 +1,5 @@
 import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/warehouse.dart';
 import '../widgets/warehouse_form.dart';
@@ -28,17 +29,19 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
     _warehouse = widget.warehouse;
     // 从插件中获取该仓库的排序偏好
     _sortBy = GoodsPlugin.instance.getSortPreference(_warehouse.id);
-    
+
     // 监听物品添加事件
     EventManager.instance.subscribe('goods_item_added', (args) {
-      if (args is GoodsItemAddedEventArgs && args.warehouseId == _warehouse.id) {
+      if (args is GoodsItemAddedEventArgs &&
+          args.warehouseId == _warehouse.id) {
         _refreshWarehouse();
       }
     });
 
     // 监听物品删除事件
     EventManager.instance.subscribe('goods_item_deleted', (args) {
-      if (args is GoodsItemDeletedEventArgs && args.warehouseId == _warehouse.id) {
+      if (args is GoodsItemDeletedEventArgs &&
+          args.warehouseId == _warehouse.id) {
         _refreshWarehouse();
       }
     });
@@ -116,11 +119,11 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                           content: const Text('确定要清空此仓库中的所有物品吗？'),
                           actions: [
                             TextButton(
-                              child: const Text('取消'),
+                              child: Text(AppLocalizations.of(context)!.cancel),
                               onPressed: () => Navigator.pop(context, false),
                             ),
                             TextButton(
-                              child: const Text('确定'),
+                              child: Text(AppLocalizations.of(context)!.ok),
                               onPressed: () => Navigator.pop(context, true),
                             ),
                           ],
@@ -148,7 +151,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                           ),
                           actions: [
                             TextButton(
-                              child: const Text('取消'),
+                              child: Text(AppLocalizations.of(context)!.cancel),
                               onPressed: () => Navigator.pop(context, false),
                             ),
                             TextButton(
@@ -156,7 +159,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                                 foregroundColor: Colors.red,
                               ),
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('删除'),
+                              child: Text(AppLocalizations.of(context)!.delete),
                             ),
                           ],
                         ),
@@ -266,7 +269,10 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                 _sortBy = value;
               });
               // 保存排序偏好
-              await GoodsPlugin.instance.saveSortPreference(_warehouse.id, value);
+              await GoodsPlugin.instance.saveSortPreference(
+                _warehouse.id,
+                value,
+              );
             },
             itemBuilder:
                 (context) => [
