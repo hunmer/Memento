@@ -60,8 +60,15 @@ abstract class StoreLocalizations {
   static const LocalizationsDelegate<StoreLocalizations> delegate =
       _StoreLocalizationsDelegate();
 
-  static StoreLocalizations? of(BuildContext context) {
-    return Localizations.of<StoreLocalizations>(context, StoreLocalizations);
+  static StoreLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<StoreLocalizations>(
+      context,
+      StoreLocalizations,
+    );
+    if (localizations == null) {
+      throw FlutterError('No StoreLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
