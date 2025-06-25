@@ -129,6 +129,5 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
   String get mood => 'Mood';
 
   @override
-  // TODO: implement recentlyUsed
-  String get recentlyUsed => throw UnimplementedError();
+  String get recentlyUsed => 'Recently Used';
 }

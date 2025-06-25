@@ -75,7 +75,7 @@ abstract class CalendarLocalizations {
 
   String get endTimeCannotBeEarlier;
 
-  String? get dateRange => null;
+  String get dateRange;
 }
 
 class _CalendarLocalizationsDelegate

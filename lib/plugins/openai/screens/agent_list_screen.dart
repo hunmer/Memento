@@ -125,9 +125,10 @@ class _AgentListScreenState extends State<AgentListScreen>
                 ),
               ],
             ),
-            body: _isGridView
-                ? AgentGridView(agents: _getFilteredAgents())
-                : AgentListView(agents: _getFilteredAgents()),
+            body:
+                _isGridView
+                    ? AgentGridView(agents: _getFilteredAgents())
+                    : AgentListView(agents: _getFilteredAgents()),
           ),
           // Tools Tab
           Scaffold(
@@ -161,8 +162,14 @@ class _AgentListScreenState extends State<AgentListScreen>
         child: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(icon: const Icon(Icons.people), text: OpenAILocalizations.of(context).agentsTab),
-            Tab(icon: const Icon(Icons.build), text: OpenAILocalizations.of(context).toolsTab),
+            Tab(
+              icon: const Icon(Icons.people),
+              text: OpenAILocalizations.of(context).agentsTab,
+            ),
+            Tab(
+              icon: const Icon(Icons.build),
+              text: OpenAILocalizations.of(context).toolsTab,
+            ),
           ],
           labelColor: Theme.of(context).primaryColor,
           unselectedLabelColor: Colors.grey,
@@ -172,20 +179,16 @@ class _AgentListScreenState extends State<AgentListScreen>
       ),
     );
   }
-  
+
   Widget _buildToolsBody() {
     return AnimatedBuilder(
       animation: _toolAppController,
       builder: (context, child) {
         if (_toolAppController.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
-        
-        return ToolAppGridView(
-          apps: _toolAppController.apps,
-        );
+
+        return ToolAppGridView(apps: _toolAppController.apps);
       },
     );
   }

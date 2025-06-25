@@ -128,6 +128,5 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
   String get mood => '心情';
 
   @override
-  // TODO: implement recentlyUsed
-  String get recentlyUsed => throw UnimplementedError();
+  String get recentlyUsed => '最近使用';
 }

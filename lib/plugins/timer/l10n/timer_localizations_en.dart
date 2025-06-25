@@ -7,10 +7,9 @@ class TimerLocalizationsEn extends TimerLocalizations {
   String get totalTimer => 'Total Timer';
 
   @override
-  // TODO: implement deleteTimer
-  String get deleteTimer => throw UnimplementedError();
+  String get deleteTimer => 'Delete Timer';
 
   @override
-  // TODO: implement deleteTimerConfirmation
-  get deleteTimerConfirmation => throw UnimplementedError();
+  String get deleteTimerConfirmation =>
+      'Are you sure you want to delete this timer?';
 }

@@ -145,10 +145,8 @@ class StoreLocalizationsZh extends StoreLocalizations {
   String get pointsHistoryEntry => '{value}积分 ({type})';
 
   @override
-  // TODO: implement points
-  String get points => throw UnimplementedError();
+  String get points => '积分';
 
   @override
-  // TODO: implement redeemConfirmation
-  String get redeemConfirmation => throw UnimplementedError();
+  String get redeemConfirmation => '确定要兑换这个商品吗？';
 }

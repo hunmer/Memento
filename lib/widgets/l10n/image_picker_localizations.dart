@@ -1,91 +1,95 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class ImagePickerLocalizations {
-  static const Map<String, Map<String, String>> _localizedValues = {
-    'en': {
-      'selectFromGallery': 'From Gallery',
-      'takePhoto': 'Take Photo',
-      'cancel': 'Cancel',
-      'confirm': 'Confirm',
-      'selectImageFailed': 'Failed to select image: %s',
-      'takePhotoFailed': 'Failed to take photo: %s',
-      'saveCroppedImageFailed': 'Failed to save cropped image: %s',
-      'cropFailed': 'Crop failed: %s',
-      'selectImage': 'Select Image',
-      'selectMultipleImages': 'Select Multiple Images',
-      'cropImage': 'Crop Image',
-    },
-    'zh': {
-      'selectFromGallery': '从相册选择',
-      'takePhoto': '拍摄照片',
-      'cancel': '取消',
-      'confirm': '确定',
-      'selectImageFailed': '选择图片失败: %s',
-      'takePhotoFailed': '拍摄照片失败: %s',
-      'saveCroppedImageFailed': '保存裁剪图片失败: %s',
-      'cropFailed': '裁剪失败: %s',
-      'selectImage': '选择图片',
-      'selectMultipleImages': '选择多张图片',
-      'cropImage': '裁剪图片',
-    },
-  };
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-  static String getSelectFromGallery(BuildContext context) =>
-      _localizedValues[Localizations.localeOf(
-        context,
-      ).languageCode]!['selectFromGallery']!;
+import 'image_picker_localizations_en.dart';
+import 'image_picker_localizations_zh.dart';
 
-  static String getTakePhoto(BuildContext context) =>
-      _localizedValues[Localizations.localeOf(
-        context,
-      ).languageCode]!['takePhoto']!;
+/// 图片选择器的本地化支持类
+abstract class ImagePickerLocalizations {
+  ImagePickerLocalizations(String locale) : localeName = locale;
 
-  static String getCancel(BuildContext context) =>
-      _localizedValues[Localizations.localeOf(
-        context,
-      ).languageCode]!['cancel']!;
+  final String localeName;
 
-  static String getConfirm(BuildContext context) =>
-      _localizedValues[Localizations.localeOf(
-        context,
-      ).languageCode]!['confirm']!;
+  static ImagePickerLocalizations? of(BuildContext context) {
+    return Localizations.of<ImagePickerLocalizations>(
+      context,
+      ImagePickerLocalizations,
+    );
+  }
 
-  static String getSelectImageFailed(BuildContext context, String error) =>
-      _localizedValues[Localizations.localeOf(
-            context,
-          ).languageCode]!['selectImageFailed']!
-          .replaceFirst('%s', error);
+  static const LocalizationsDelegate<ImagePickerLocalizations> delegate =
+      _ImagePickerLocalizationsDelegate();
 
-  static String getTakePhotoFailed(BuildContext context, String error) =>
-      _localizedValues[Localizations.localeOf(
-            context,
-          ).languageCode]!['takePhotoFailed']!
-          .replaceFirst('%s', error);
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
-  static String getSaveCroppedImageFailed(BuildContext context, String error) =>
-      _localizedValues[Localizations.localeOf(
-            context,
-          ).languageCode]!['saveCroppedImageFailed']!
-          .replaceFirst('%s', error);
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('zh'),
+  ];
 
-  static String getCropFailed(BuildContext context, String error) =>
-      _localizedValues[Localizations.localeOf(
-            context,
-          ).languageCode]!['cropFailed']!
-          .replaceFirst('%s', error);
+  // 图片选择器的本地化字符串
+  String get pluginName;
+  String get takePhoto;
+  String get chooseFromGallery;
+  String get cancel;
+  String get permissionDenied;
+  String get permissionDeniedMessage;
+  String get settings;
+  String get noCameraAvailable;
+  String get photoCaptureFailed;
+  String get imageSelectionFailed;
+  String get imageProcessingFailed;
+  String get maxImagesReached;
+  String get deleteImage;
+  String get confirmDeleteImage;
+  String get selectMultipleImages;
+  String get selectImage;
+  String get selectFromGallery;
+  String get selectImageFailed;
+  String get takePhotoFailed;
+  String get cropImage;
+  String get saveCroppedImageFailed;
+  String get cropFailed;
+}
 
-  static String getSelectImage(BuildContext context) =>
-      _localizedValues[Localizations.localeOf(
-        context,
-      ).languageCode]!['selectImage']!;
+class _ImagePickerLocalizationsDelegate
+    extends LocalizationsDelegate<ImagePickerLocalizations> {
+  const _ImagePickerLocalizationsDelegate();
 
-  static String getSelectMultipleImages(BuildContext context) =>
-      _localizedValues[Localizations.localeOf(
-        context,
-      ).languageCode]!['selectMultipleImages']!;
+  @override
+  Future<ImagePickerLocalizations> load(Locale locale) {
+    return SynchronousFuture<ImagePickerLocalizations>(
+      lookupImagePickerLocalizations(locale),
+    );
+  }
 
-  static String getCropImage(BuildContext context) =>
-      _localizedValues[Localizations.localeOf(
-        context,
-      ).languageCode]!['cropImage']!;
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_ImagePickerLocalizationsDelegate old) => false;
+}
+
+ImagePickerLocalizations lookupImagePickerLocalizations(Locale locale) {
+  switch (locale.languageCode) {
+    case 'en':
+      return ImagePickerLocalizationsEn(locale.languageCode);
+    case 'zh':
+      return ImagePickerLocalizationsZh(locale.languageCode);
+  }
+
+  throw FlutterError(
+    'ImagePickerLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localization\'s implementation.',
+  );
 }
