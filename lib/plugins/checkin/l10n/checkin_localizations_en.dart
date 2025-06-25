@@ -119,4 +119,103 @@ class CheckinLocalizationsEn extends CheckinLocalizations {
   String get resetSuccessMessage => 'Check-in records for "%s" have been reset';
   @override
   String get deleteSuccessMessage => '"%s" has been deleted';
+
+  // 表单相关
+  @override
+  String get addCheckinItem => 'Add Check-in Item';
+  @override
+  String get editCheckinItemTitle => 'Edit Check-in Item';
+  @override
+  String get nameLabel => 'Name';
+  @override
+  String get nameHint => 'Enter check-in item name';
+  @override
+  String get nameRequiredError => 'Please enter a name';
+  @override
+  String get nameExistsError => 'This name already exists';
+  @override
+  String get groupLabel => 'Group (optional)';
+  @override
+  String get groupHint => 'Enter group name';
+  @override
+  String get reminderTypeLabel => 'Reminder Type';
+  @override
+  String get noReminder => 'No Reminder';
+  @override
+  String get weeklyReminder => 'Weekly Reminder';
+  @override
+  String get monthlyReminder => 'Monthly Reminder';
+  @override
+  String get specificDateReminder => 'Specific Date Reminder';
+  @override
+  String get monthlyReminderDayLabel => 'Monthly Reminder Day';
+  @override
+  String get selectDate => 'Select Date';
+  @override
+  String get selectTime => 'Select Time';
+
+  // 星期和日期相关
+  @override
+  String get sunday => 'Sunday';
+  @override
+  String get monday => 'Monday';
+  @override
+  String get tuesday => 'Tuesday';
+  @override
+  String get wednesday => 'Wednesday';
+  @override
+  String get thursday => 'Thursday';
+  @override
+  String get friday => 'Friday';
+  @override
+  String get saturday => 'Saturday';
+  @override
+  String get daySuffix => '';
+
+  // 新增字段
+  @override
+  String get checkinRecordsTitle => '%s\'s Check-in Records';
+  @override
+  String get deleteCheckinRecordTitle => 'Delete Check-in Record';
+  @override
+  String get deleteCheckinRecordMessage =>
+      'Are you sure you want to delete this check-in record? This cannot be undone.';
+  @override
+  String get deleteCheckinRecordSimpleMessage =>
+      'Are you sure you want to delete this check-in record?';
+  @override
+  String get checkinButton => 'Check-in';
+  @override
+  String get saveFailedMessage => 'Save failed: %s';
+  @override
+  String get formValidationMessage => 'Please fill out the form correctly';
+  @override
+  String get errorMessage => 'Error: %s';
+  @override
+  String get saveFirstMessage => 'Please save the contact information first';
+  @override
+  String get selectContactTitle => 'Select Contact';
+  @override
+  String get separator => ' - ';
+  @override
+  String get uncontactedDaysLabel => 'Uncontacted Days:';
+  @override
+  String get tagsLabel => 'Tags:';
+  @override
+  String get resetButton => 'Reset';
+
+  @override
+  String get addCheckinRecord => 'Add Check-in Record';
+
+  @override
+  String get addSpecificDateCheckin => 'Add Check-in for Specific Date';
+
+  @override
+  String get checkinDateLabel => 'Check-in Date';
+
+  @override
+  String get checkinTimeLabel => 'Check-in Time';
+
+  @override
+  String get noteHint => 'Add notes (optional)';
 }

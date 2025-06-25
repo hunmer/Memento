@@ -106,4 +106,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get showAll => '显示全部';
+
+  @override
+  String get no => '否';
+
+  @override
+  String get yes => '是';
 }

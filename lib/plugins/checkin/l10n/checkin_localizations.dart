@@ -98,6 +98,60 @@ abstract class CheckinLocalizations {
   // 操作结果提示
   String get resetSuccessMessage;
   String get deleteSuccessMessage;
+
+  // 表单相关
+  String get addCheckinItem;
+  String get editCheckinItemTitle;
+  String get nameLabel;
+  String get nameHint;
+  String get nameRequiredError;
+  String get nameExistsError;
+  String get groupLabel;
+  String get groupHint;
+  String get reminderTypeLabel;
+  String get noReminder;
+  String get weeklyReminder;
+  String get monthlyReminder;
+  String get specificDateReminder;
+  String get monthlyReminderDayLabel;
+  String get selectDate;
+  String get selectTime;
+
+  // 星期和日期相关
+  String get sunday;
+  String get monday;
+  String get tuesday;
+  String get wednesday;
+  String get thursday;
+  String get friday;
+  String get saturday;
+  String get daySuffix;
+
+  // 新增字段
+  String get checkinRecordsTitle;
+  String get deleteCheckinRecordTitle;
+  String get deleteCheckinRecordMessage;
+  String get deleteCheckinRecordSimpleMessage;
+  String get checkinButton;
+  String get saveFailedMessage;
+  String get formValidationMessage;
+  String get errorMessage;
+  String get saveFirstMessage;
+  String get selectContactTitle;
+  String get separator;
+  String get uncontactedDaysLabel;
+  String get tagsLabel;
+  String get resetButton;
+
+  String get addSpecificDateCheckin;
+
+  String get addCheckinRecord;
+
+  get noteHint;
+
+  get checkinDateLabel;
+
+  get checkinTimeLabel;
 }
 
 class _CheckinLocalizationsDelegate

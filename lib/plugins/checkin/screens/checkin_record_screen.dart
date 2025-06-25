@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/checkin_item.dart';
 import '../controllers/checkin_list_controller.dart';
@@ -44,7 +45,9 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
         recordsByDate.keys.toList()..sort((a, b) => b.compareTo(a));
 
     return Scaffold(
-      appBar: AppBar(title: Text('${widget.checkinItem.name}的打卡记录')),
+      appBar: AppBar(
+        title: Text(CheckinLocalizations.of(context).checkinRecordsTitle),
+      ),
       body:
           sortedDates.isEmpty
               ? _buildEmptyState()
@@ -151,7 +154,10 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
             color: Theme.of(context).disabledColor,
           ),
           const SizedBox(height: 16),
-          Text('暂无打卡记录', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            CheckinLocalizations.of(context).noRecords,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           Text(
             '点击打卡按钮开始记录',
@@ -169,8 +175,12 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('删除打卡记录'),
-            content: const Text('确定要删除这条打卡记录吗？此操作不可恢复。'),
+            title: Text(
+              CheckinLocalizations.of(context).deleteCheckinRecordTitle,
+            ),
+            content: Text(
+              CheckinLocalizations.of(context).deleteCheckinRecordMessage,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),

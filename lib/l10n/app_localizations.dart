@@ -287,6 +287,10 @@ abstract class AppLocalizations {
   String get selectDate;
 
   String get showAll;
+
+  String get yes;
+
+  String get no;
 }
 
 class _AppLocalizationsDelegate

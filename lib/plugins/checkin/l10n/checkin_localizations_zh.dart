@@ -118,4 +118,101 @@ class CheckinLocalizationsZh extends CheckinLocalizations {
   String get resetSuccessMessage => '已重置"%s"的打卡记录';
   @override
   String get deleteSuccessMessage => '已删除"%s"';
+
+  // 表单相关
+  @override
+  String get addCheckinItem => '添加打卡项目';
+  @override
+  String get editCheckinItemTitle => '编辑打卡项目';
+  @override
+  String get nameLabel => '名称';
+  @override
+  String get nameHint => '请输入打卡项目名称';
+  @override
+  String get nameRequiredError => '请输入名称';
+  @override
+  String get nameExistsError => '该名称已存在';
+  @override
+  String get groupLabel => '分组 (可选)';
+  @override
+  String get groupHint => '请输入分组名称';
+  @override
+  String get reminderTypeLabel => '提醒类型';
+  @override
+  String get noReminder => '不设置提醒';
+  @override
+  String get weeklyReminder => '每周提醒';
+  @override
+  String get monthlyReminder => '每月提醒';
+  @override
+  String get specificDateReminder => '特定日期提醒';
+  @override
+  String get monthlyReminderDayLabel => '每月提醒日期';
+  @override
+  String get selectDate => '选择日期';
+  @override
+  String get selectTime => '选择提醒时间';
+
+  // 星期和日期相关
+  @override
+  String get sunday => '周日';
+  @override
+  String get monday => '周一';
+  @override
+  String get tuesday => '周二';
+  @override
+  String get wednesday => '周三';
+  @override
+  String get thursday => '周四';
+  @override
+  String get friday => '周五';
+  @override
+  String get saturday => '周六';
+  @override
+  String get daySuffix => '日';
+
+  // 新增字段
+  @override
+  String get checkinRecordsTitle => '%s的打卡记录';
+  @override
+  String get deleteCheckinRecordTitle => '删除打卡记录';
+  @override
+  String get deleteCheckinRecordMessage => '确定要删除这条打卡记录吗？此操作不可恢复。';
+  @override
+  String get deleteCheckinRecordSimpleMessage => '确定要删除这条打卡记录吗？';
+  @override
+  String get checkinButton => '打卡';
+  @override
+  String get saveFailedMessage => '保存失败: %s';
+  @override
+  String get formValidationMessage => '请正确填写表单';
+  @override
+  String get errorMessage => '错误: %s';
+  @override
+  String get saveFirstMessage => '请先保存联系人信息';
+  @override
+  String get selectContactTitle => '选择联系人';
+  @override
+  String get separator => ' - ';
+  @override
+  String get uncontactedDaysLabel => '未联系天数:';
+  @override
+  String get tagsLabel => '标签:';
+  @override
+  String get resetButton => '重置';
+
+  @override
+  String get addCheckinRecord => '添加打卡记录';
+
+  @override
+  String get addSpecificDateCheckin => '添加指定日期打卡';
+
+  @override
+  String get checkinDateLabel => '打卡日期';
+
+  @override
+  String get checkinTimeLabel => '打卡时间';
+
+  @override
+  String get noteHint => '添加备注(可选)';
 }

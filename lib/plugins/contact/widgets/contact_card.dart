@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
+import '../l10n/contact_localizations.dart';
 import 'dart:io';
 import '../models/contact_model.dart';
-import '../l10n/contact_strings.dart';
-// ignore: depend_on_referenced_packages
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../utils/image_utils.dart';
 
@@ -56,7 +56,7 @@ class ContactCard extends StatelessWidget {
           const SizedBox(height: 8),
           _buildTags(),
           const SizedBox(height: 8),
-          _buildLastContactInfo(),
+          _buildLastContactInfo(context),
         ],
       ),
     );
@@ -194,7 +194,7 @@ class ContactCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLastContactInfo({bool compact = false}) {
+  Widget _buildLastContactInfo(context, {bool compact = false}) {
     final lastContactText = timeago.format(
       contact.lastContactTime,
       locale: 'zh',
@@ -203,7 +203,7 @@ class ContactCard extends StatelessWidget {
     return Text(
       compact
           ? lastContactText
-          : '${ContactStrings.lastContactTime}: $lastContactText',
+          : '${ContactLocalizations.of(context)!.lastContactTime}: $lastContactText',
       style: TextStyle(fontSize: compact ? 12 : 14, color: Colors.grey),
     );
   }

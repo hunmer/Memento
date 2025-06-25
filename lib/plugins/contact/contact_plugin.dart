@@ -1,3 +1,5 @@
+import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 
@@ -6,7 +8,6 @@ import '../../core/config_manager.dart';
 import 'controllers/contact_controller.dart';
 import 'models/contact_model.dart';
 import 'models/filter_sort_config.dart';
-import 'l10n/contact_strings.dart';
 import 'widgets/contact_card.dart';
 import 'widgets/contact_form.dart';
 import 'widgets/filter_dialog.dart';
@@ -17,7 +18,7 @@ class ContactPlugin extends BasePlugin {
   String get id => 'contact';
 
   @override
-  String get name => ContactStrings.pluginName;
+  String get name => 'Contact';
 
   @override
   IconData get icon => Icons.contacts;
@@ -71,7 +72,7 @@ class ContactPlugin extends BasePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    ContactStrings.pluginName,
+                    ContactLocalizations.of(context).pluginName,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -91,7 +92,7 @@ class ContactPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            ContactStrings.totalContacts,
+                            ContactLocalizations.of(context).totalContacts,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -108,7 +109,7 @@ class ContactPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            ContactStrings.recentContacts,
+                            ContactLocalizations.of(context).recentContacts,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -188,7 +189,7 @@ class ContactMainViewState extends State<ContactMainView> {
       context: context,
       builder:
           (context) => SimpleDialog(
-            title: Text(ContactStrings.sortBy),
+            title: Text(ContactLocalizations.of(context).sortBy),
             children: [
               for (final type in SortType.values)
                 RadioListTile<SortType>(
@@ -229,13 +230,13 @@ class ContactMainViewState extends State<ContactMainView> {
   String _getSortTypeName(SortType type) {
     switch (type) {
       case SortType.name:
-        return ContactStrings.name;
+        return ContactLocalizations.of(context).name;
       case SortType.createdTime:
-        return ContactStrings.createdTime;
+        return ContactLocalizations.of(context).createdTime;
       case SortType.lastContactTime:
-        return ContactStrings.lastContactTime;
+        return ContactLocalizations.of(context).lastContactTime;
       case SortType.contactCount:
-        return ContactStrings.contactCount;
+        return ContactLocalizations.of(context).contactCount;
     }
   }
 
@@ -250,8 +251,8 @@ class ContactMainViewState extends State<ContactMainView> {
               appBar: AppBar(
                 title: Text(
                   contact == null
-                      ? ContactStrings.addContact
-                      : ContactStrings.editContact,
+                      ? ContactLocalizations.of(context).addContact
+                      : ContactLocalizations.of(context).editContact,
                 ),
                 actions: [
                   IconButton(
@@ -272,15 +273,28 @@ class ContactMainViewState extends State<ContactMainView> {
                           }
                         } catch (e) {
                           if (mounted) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  ContactLocalizations.of(
+                                        context,
+                                      )?.saveFailedMessage ??
+                                      'Save failed',
+                                ),
+                              ),
+                            );
                           }
                         }
                       } else {
                         // 如果 savedContact 为 null，可能是表单验证失败
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('请正确填写表单')),
+                          SnackBar(
+                            content: Text(
+                              ContactLocalizations.of(
+                                context,
+                              ).formValidationMessage,
+                            ),
+                          ),
                         );
                       }
                     },
@@ -311,16 +325,18 @@ class ContactMainViewState extends State<ContactMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(ContactStrings.confirmDelete),
-            content: Text(ContactStrings.deleteConfirmMessage),
+            title: Text(ContactLocalizations.of(context).confirmDelete),
+            content: Text(
+              ContactLocalizations.of(context).deleteConfirmMessage,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(ContactStrings.no),
+                child: Text(AppLocalizations.of(context)!.no),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(ContactStrings.yes),
+                child: Text(AppLocalizations.of(context)!.yes),
               ),
             ],
           ),
@@ -341,7 +357,7 @@ class ContactMainViewState extends State<ContactMainView> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
-        title: Text(ContactStrings.contacts),
+        title: Text(ContactLocalizations.of(context)!.contacts),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
@@ -366,7 +382,9 @@ class ContactMainViewState extends State<ContactMainView> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(ContactLocalizations.of(context)!.errorMessage),
+            );
           }
 
           final contacts = snapshot.data ?? [];
@@ -383,7 +401,7 @@ class ContactMainViewState extends State<ContactMainView> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '没有联系人',
+                    ContactLocalizations.of(context)!.noContacts,
                     style: Theme.of(
                       context,
                     ).textTheme.titleLarge?.copyWith(color: Colors.grey),
