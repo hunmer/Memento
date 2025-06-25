@@ -11,8 +11,7 @@ abstract class StoreLocalizations {
 
   String get confirmUse;
   String get confirmUseMessage;
-  String get cancel;
-  String get confirm;
+
   String get pointSettingsTitle;
   String get pointSettingsSubtitle;
   String get productQuantity;

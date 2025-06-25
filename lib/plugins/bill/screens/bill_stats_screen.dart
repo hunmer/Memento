@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -187,15 +188,10 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
                     );
                   }),
                 ] else ...[
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Text(
-                        BillLocalizations.getText(
-                          context,
-                          'noBills',
-                        ).replaceFirst('账单记录', '支出记录'),
-                      ),
+                      padding: const EdgeInsets.all(32),
+                      child: Text(BillLocalizations.of(context)!.noBills),
                     ),
                   ),
                 ],

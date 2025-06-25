@@ -60,10 +60,7 @@ class FloatingBallManager {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    FloatingBallLocalizations.getText(
-                      context,
-                      'noRecentPlugin',
-                    ),
+                    FloatingBallLocalizations.of(context)!.noRecentPlugin,
                   ),
                 ),
               );
@@ -94,13 +91,15 @@ class FloatingBallManager {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  FloatingBallLocalizations.getText(context, 'pageRefreshed'),
+                  FloatingBallLocalizations.of(context)!.pageRefreshed,
                 ),
               ),
             );
           }
         },
   };
+
+  static get noRecentPlugin => null;
 
   // 获取存储文件
   Future<File> _getStorageFile() async {

@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../plugins/diary/l10n/diary_localizations.dart';
 import 'activity_form_utils.dart';
@@ -23,7 +24,8 @@ class ActivityTimeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = DiaryLocalizations.of(context)!;
-    
+    final app_l10n = AppLocalizations.of(context)!;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -41,7 +43,7 @@ class ActivityTimeSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    l10n.startTime,
+                    app_l10n.startTime,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
@@ -64,29 +66,32 @@ class ActivityTimeSection extends StatelessWidget {
               onPressed: () async {
                 final result = await showDialog<String>(
                   context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Text(l10n.editInterval),
-                    content: TextField(
-                      controller: durationController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: l10n.interval,
-                        suffixText: l10n.minutes,
+                  builder:
+                      (BuildContext context) => AlertDialog(
+                        title: Text(l10n.editInterval),
+                        content: TextField(
+                          controller: durationController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: app_l10n.interval,
+                            suffixText: app_l10n.minutes,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(l10n.cancelButton),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(
+                                context,
+                              ).pop(durationController.text);
+                            },
+                            child: Text(l10n.confirmButton),
+                          ),
+                        ],
                       ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(l10n.cancelButton),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(durationController.text);
-                        },
-                        child: Text(l10n.confirmButton),
-                      ),
-                    ],
-                  ),
                 );
 
                 if (result != null) {
@@ -94,20 +99,23 @@ class ActivityTimeSection extends StatelessWidget {
                 }
               },
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 backgroundColor: Theme.of(context).primaryColor.withAlpha(25),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    l10n.interval,
+                    app_l10n.interval,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${calculateDuration(selectedDate, startTime, endTime)}${l10n.minutes}',
+                    '${calculateDuration(selectedDate, startTime, endTime)}${app_l10n.minutes}',
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
                       fontWeight: FontWeight.bold,
@@ -133,7 +141,7 @@ class ActivityTimeSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    l10n.endTime,
+                    app_l10n.endTime,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),

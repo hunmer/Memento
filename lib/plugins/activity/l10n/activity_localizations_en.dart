@@ -47,13 +47,7 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
   String get deleteTag => 'Delete Tag';
 
   @override
-  String get save => 'Save';
-
-  @override
   String get mood => 'Mood';
-
-  @override
-  String get cancel => 'Cancel';
 
   @override
   String get addActivity => 'Add Activity';
@@ -99,4 +93,28 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
 
   @override
   String get confirm => 'Confirm';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get ungrouped => 'Ungrouped';
+
+  @override
+  String get recentlyUsed => 'Recently Used';
+
+  @override
+  String get tagManagement => 'Tag Management';
+
+  @override
+  String get tagsHint => 'Separate tags with commas';
+
+  @override
+  String get unnamedActivity => 'Unnamed Activity';
+
+  @override
+  String get contentHint => 'Enter activity description';
+
+  @override
+  String get grouped => 'Grouped';
 }

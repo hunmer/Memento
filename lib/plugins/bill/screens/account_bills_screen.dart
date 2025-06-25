@@ -49,23 +49,23 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
               return [
                 const PopupMenuItem(
                   value: StatisticRange.week,
-                  child: Text(BillLocalizations.getText(context, 'thisWeek')),
+                  child: Text(BillLocalizations.of(context)!.thisWeek),
                 ),
                 const PopupMenuItem(
                   value: StatisticRange.month,
-                  child: Text(BillLocalizations.getText(context, 'thisMonth')),
+                  child: Text(BillLocalizations.of(context)!.thisMonth),
                 ),
                 const PopupMenuItem(
                   value: StatisticRange.year,
-                  child: Text(BillLocalizations.getText(context, 'thisYear')),
+                  child: Text(BillLocalizations.of(context)!.thisYear),
                 ),
                 const PopupMenuItem(
                   value: StatisticRange.all,
-                  child: Text(BillLocalizations.getText(context, 'all')),
+                  child: Text(BillLocalizations.of(context)!.all),
                 ),
                 const PopupMenuItem(
                   value: StatisticRange.custom,
-                  child: Text(BillLocalizations.getText(context, 'custom')),
+                  child: Text(BillLocalizations.of(context)!.custom),
                 ),
               ];
             },
@@ -139,9 +139,7 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
 
   Widget _buildBillsList(List<Bill> bills) {
     if (bills.isEmpty) {
-      return Center(
-        child: Text(BillLocalizations.getText(context, 'noBillsRecord')),
-      );
+      return Center(child: Text(BillLocalizations.of(context)!.noBillsYet));
     }
 
     // 对账单按日期排序
@@ -175,19 +173,17 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(
-                  BillLocalizations.getText(context, 'confirmDelete'),
-                ),
+                title: Text(BillLocalizations.of(context)!.confirmDelete),
                 content: Text(
-                  BillLocalizations.getText(context, 'confirmDeleteBill'),
+                  BillLocalizations.of(context)!.deleteBillConfirmation,
                 ),
                 actions: [
                   TextButton(
-                    child: Text(BillLocalizations.getText(context, 'cancel')),
+                    child: Text(BillLocalizations.of(context)!.cancel),
                     onPressed: () => Navigator.pop(context, false),
                   ),
                   TextButton(
-                    child: Text(BillLocalizations.getText(context, 'delete')),
+                    child: Text(BillLocalizations.of(context)!.delete),
                     onPressed: () => Navigator.pop(context, true),
                   ),
                 ],

@@ -11,6 +11,7 @@ import './pages/event_list_page.dart';
 import './widgets/event_detail_card.dart';
 import './services/todo_event_service.dart';
 import '../todo/todo_plugin.dart';
+import './l10n/calendar_localizations.dart';
 
 class CalendarPlugin extends BasePlugin {
   // 总控制器，管理所有日历相关服务
@@ -33,7 +34,7 @@ class CalendarPlugin extends BasePlugin {
   String get id => 'calendar';
 
   @override
-  String get name => '日历';
+  String get name => 'calendar';
 
   @override
   IconData get icon => Icons.calendar_month;
@@ -449,7 +450,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
               // 跳转到今天按钮
               IconButton(
                 icon: const Icon(Icons.today),
-                tooltip: '回到今天',
+                tooltip: CalendarLocalizations.getText(context, 'backToToday'),
                 onPressed: () {
                   plugin.sfController.displayDate = DateTime.now();
                 },
@@ -457,13 +458,16 @@ class _CalendarMainViewState extends State<CalendarMainView> {
               // 查看所有事件按钮
               IconButton(
                 icon: const Icon(Icons.list_alt),
-                tooltip: '所有事件',
+                tooltip: CalendarLocalizations.getText(context, 'allEvents'),
                 onPressed: () => plugin.showAllEvents(context),
               ),
               // 查看已完成事件按钮
               IconButton(
                 icon: const Icon(Icons.done_all),
-                tooltip: '已完成事件',
+                tooltip: CalendarLocalizations.getText(
+                  context,
+                  'completedEvents',
+                ),
                 onPressed: () => plugin.showCompletedEvents(context),
               ),
             ],

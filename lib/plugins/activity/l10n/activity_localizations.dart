@@ -57,9 +57,7 @@ abstract class ActivityLocalizations {
   String get tags;
   String get addTag;
   String get deleteTag;
-  String get save;
   String get mood;
-  String get cancel;
 
   // Timeline screen
   String get addActivity;
@@ -81,6 +79,22 @@ abstract class ActivityLocalizations {
   String get close;
   String get inputMood;
   String get confirm;
+  String get ungrouped;
+  String get grouped;
+  String get all;
+  String get unnamedActivity;
+
+  /// Get text with parameters
+  String getText(String key, [Map<String, dynamic>? params]) {
+    switch (key) {
+      case 'hoursFormat':
+        return hoursFormat(params?['hours'] as double);
+      case 'minutesFormat':
+        return minutesFormat(params?['minutes'] as int);
+      default:
+        throw FlutterError('Localization key "$key" not found');
+    }
+  }
 }
 
 class _ActivityLocalizationsDelegate

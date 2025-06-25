@@ -74,9 +74,6 @@ abstract class ChatLocalizations {
   String get selectUsers;
   String get noChannelsAvailable;
   String get noUsersAvailable;
-  String get cancel;
-  String get reset;
-  String get apply;
   String get setBackground;
 
   // Message options dialog
@@ -84,7 +81,6 @@ abstract class ChatLocalizations {
   String get addEmoji;
   String get settings;
   String get editMessage;
-  String get save;
   String get deleteMessage;
   String get deleteMessageConfirmation;
   String get copiedToClipboard;

@@ -244,7 +244,7 @@ class _BillListScreenState extends State<BillListScreen>
                         Row(
                           children: [
                             Text(
-                              BillLocalizations.getText(context, 'timeRange') +
+                              BillLocalizations.of(context)!.timeRange +
                                   ':',
                             ),
                             const SizedBox(width: 8),
@@ -253,7 +253,7 @@ class _BillListScreenState extends State<BillListScreen>
                                 ButtonSegment<String>(
                                   value: 'week',
                                   label: Text(
-                                    BillLocalizations.getText(
+                                    BillLocalizations.of(context)!.
                                       context,
                                       'thisWeek',
                                     ),
@@ -262,7 +262,7 @@ class _BillListScreenState extends State<BillListScreen>
                                 ButtonSegment<String>(
                                   value: 'month',
                                   label: Text(
-                                    BillLocalizations.getText(
+                                    BillLocalizations.of(context)!.
                                       context,
                                       'thisMonth',
                                     ),
@@ -271,7 +271,7 @@ class _BillListScreenState extends State<BillListScreen>
                                 ButtonSegment<String>(
                                   value: 'year',
                                   label: Text(
-                                    BillLocalizations.getText(
+                                    BillLocalizations.of(context)!.
                                       context,
                                       'thisYear',
                                     ),
@@ -313,19 +313,19 @@ class _BillListScreenState extends State<BillListScreen>
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               _buildStatItem(
-                                BillLocalizations.getText(context, 'income'),
+                                BillLocalizations.of(context)!.income,
                                 totalIncome,
                                 Colors.green,
                                 Icons.arrow_downward,
                               ),
                               _buildStatItem(
-                                BillLocalizations.getText(context, 'expense'),
+                                BillLocalizations.of(context)!.expense,
                                 totalExpense,
                                 Colors.red,
                                 Icons.arrow_upward,
                               ),
                               _buildStatItem(
-                                BillLocalizations.getText(context, 'balance'),
+                                BillLocalizations.of(context)!.balance,
                                 balance,
                                 balance >= 0 ? Colors.blue : Colors.orange,
                                 Icons.account_balance_wallet,
@@ -343,7 +343,7 @@ class _BillListScreenState extends State<BillListScreen>
                         _bills.isEmpty
                             ? Center(
                               child: Text(
-                                BillLocalizations.getText(
+                                BillLocalizations.of(context)!.
                                   context,
                                   'noBillsClickToAdd',
                                 ),
@@ -419,19 +419,19 @@ class _BillListScreenState extends State<BillListScreen>
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text(BillLocalizations.getText(context, 'confirmDelete')),
+              title: Text(BillLocalizations.of(context)!.confirmDelete),
               content: Text(
-                BillLocalizations.getText(context, 'confirmDeleteBill'),
+                BillLocalizations.of(context)!.deleteBillConfirmation,
               ),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: Text(BillLocalizations.getText(context, 'cancel')),
+                  child: Text(BillLocalizations.of(context)!.cancel),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text(
-                    BillLocalizations.getText(context, 'delete'),
+                    BillLocalizations.of(context)!.delete,
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
@@ -452,7 +452,7 @@ class _BillListScreenState extends State<BillListScreen>
         // 显示删除成功提示
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(BillLocalizations.getText(context, 'billDeleted')),
+            content: Text(BillLocalizations.of(context)!.billDeleted),
             duration: Duration(seconds: 3),
           ),
         );
