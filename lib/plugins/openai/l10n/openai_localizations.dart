@@ -526,20 +526,16 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
   String get contentLabel => '内容';
 
   @override
-  // TODO: implement filterAgents
-  String get filterAgents => throw UnimplementedError();
+  String get filterAgents => '筛选智能体';
 
   @override
-  // TODO: implement apply
-  String get apply => throw UnimplementedError();
+  String get apply => '应用';
 
   @override
-  // TODO: implement selectAnalysisMethod
-  String get selectAnalysisMethod => throw UnimplementedError();
+  String get selectAnalysisMethod => '选择分析方法';
 
   @override
-  // TODO: implement noToolsAvailable
-  String get noToolsAvailable => throw UnimplementedError();
+  String get noToolsAvailable => '没有可用工具';
 }
 
 /// 英文实现
@@ -912,20 +908,16 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   String get contentLabel => 'Content';
 
   @override
-  // TODO: implement filterAgents
-  String get filterAgents => throw UnimplementedError();
+  String get filterAgents => 'Filter Agents';
 
   @override
-  // TODO: implement apply
-  String get apply => throw UnimplementedError();
+  String get apply => 'Apply';
 
   @override
-  // TODO: implement selectAnalysisMethod
-  String get selectAnalysisMethod => throw UnimplementedError();
+  String get selectAnalysisMethod => 'Select Analysis Method';
 
   @override
-  // TODO: implement noToolsAvailable
-  String get noToolsAvailable => throw UnimplementedError();
+  String get noToolsAvailable => 'No Tools Available';
 }
 
 /// 本地化代理

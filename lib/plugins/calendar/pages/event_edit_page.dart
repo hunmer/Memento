@@ -145,7 +145,6 @@ class _EventEditPageState extends State<EventEditPage> {
 
     @override
     Widget build(BuildContext context) {
-      // TODO: implement build
       throw UnimplementedError();
     }
   }

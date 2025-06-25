@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
+import 'package:Memento/widgets/l10n/image_picker_localizations_en.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:crop_your_image/crop_your_image.dart';
@@ -66,8 +68,8 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
     return AlertDialog(
       title: Text(
         widget.multiple
-            ? ImagePickerLocalizations.getSelectMultipleImages(context)
-            : ImagePickerLocalizations.getSelectImage(context),
+            ? ImagePickerLocalizations.of(context)!.selectMultipleImages
+            : ImagePickerLocalizations.of(context)!.selectImage,
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -91,7 +93,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.photo_library),
                   label: Text(
-                    ImagePickerLocalizations.getSelectFromGallery(context),
+                    ImagePickerLocalizations.of(context)!.selectFromGallery,
                   ),
                   onPressed: () async {
                     try {
@@ -154,10 +156,9 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              ImagePickerLocalizations.getSelectImageFailed(
+                              ImagePickerLocalizations.of(
                                 context,
-                                e.toString(),
-                              ),
+                              )!.selectImageFailed,
                             ),
                           ),
                         );
@@ -170,7 +171,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
               Expanded(
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.camera_alt),
-                  label: Text(ImagePickerLocalizations.getTakePhoto(context)),
+                  label: Text(ImagePickerLocalizations.of(context)!.takePhoto),
                   onPressed: () async {
                     try {
                       final XFile? photo = await _picker.pickImage(
@@ -223,10 +224,9 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              ImagePickerLocalizations.getTakePhotoFailed(
+                              ImagePickerLocalizations.of(
                                 context,
-                                e.toString(),
-                              ),
+                              )!.takePhotoFailed,
                             ),
                           ),
                         );
@@ -242,7 +242,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(ImagePickerLocalizations.getCancel(context)),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         TextButton(
           onPressed:
@@ -251,7 +251,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                     context,
                   ).pop({'url': _urlController.text, 'bytes': null})
                   : null,
-          child: Text(ImagePickerLocalizations.getConfirm(context)),
+          child: Text(AppLocalizations.of(context)!.confirm),
         ),
       ],
     );
@@ -283,10 +283,10 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        ImagePickerLocalizations.getCropImage(context),
+                        ImagePickerLocalizations.of(context)!.cropImage,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -327,10 +327,9 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        ImagePickerLocalizations.getSaveCroppedImageFailed(
+                                        ImagePickerLocalizations.of(
                                           context,
-                                          e.toString(),
-                                        ),
+                                        )!.saveCroppedImageFailed,
                                       ),
                                     ),
                                   );
@@ -342,10 +341,9 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      ImagePickerLocalizations.getCropFailed(
+                                      ImagePickerLocalizations.of(
                                         context,
-                                        cause,
-                                      ),
+                                      )!.cropFailed,
                                     ),
                                   ),
                                 );
@@ -374,15 +372,11 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                 'bytes': imageBytes,
                               });
                             },
-                            child: Text(
-                              ImagePickerLocalizations.getCancel(context),
-                            ),
+                            child: Text(AppLocalizations.of(context)!.cancel),
                           ),
                           ElevatedButton(
                             onPressed: () => cropController.crop(),
-                            child: Text(
-                              ImagePickerLocalizations.getConfirm(context),
-                            ),
+                            child: Text(AppLocalizations.of(context)!.confirm),
                           ),
                         ],
                       ),

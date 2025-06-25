@@ -97,22 +97,21 @@ class CalendarLocalizationsEn extends CalendarLocalizations {
   String get noCompletedEvents => 'No completed events';
 
   @override
-  // TODO: implement reminderSettings
-  String get reminderSettings => throw UnimplementedError();
+  String get reminderSettings => 'Reminder settings';
 
   @override
-  // TODO: implement selectDateRangeFirst
-  String get selectDateRangeFirst => throw UnimplementedError();
+  String get selectDateRangeFirst => 'Please select date range first';
 
   @override
-  // TODO: implement selectReminderTime
-  String get selectReminderTime => throw UnimplementedError();
+  String get selectReminderTime => 'Select reminder time';
 
   @override
-  // TODO: implement enterEventTitle
-  String get enterEventTitle => throw UnimplementedError();
+  String get enterEventTitle => 'Please enter event title';
 
   @override
-  // TODO: implement endTimeCannotBeEarlier
-  String get endTimeCannotBeEarlier => throw UnimplementedError();
+  String get endTimeCannotBeEarlier =>
+      'End time cannot be earlier than start time';
+
+  @override
+  String get dateRange => 'Date range';
 }

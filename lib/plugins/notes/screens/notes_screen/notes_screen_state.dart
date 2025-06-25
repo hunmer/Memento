@@ -74,7 +74,6 @@ class NotesMainViewState extends State<NotesMainView> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     throw UnimplementedError();
   }
 }

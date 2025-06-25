@@ -7,10 +7,9 @@ class TimerLocalizationsZh extends TimerLocalizations {
   String get totalTimer => '总计时器';
 
   @override
-  // TODO: implement deleteTimer
-  String get deleteTimer => throw UnimplementedError();
+  @override
+  String get deleteTimer => '删除计时器';
 
   @override
-  // TODO: implement deleteTimerConfirmation
-  get deleteTimerConfirmation => throw UnimplementedError();
+  String get deleteTimerConfirmation => '确定要删除这个计时器吗？';
 }

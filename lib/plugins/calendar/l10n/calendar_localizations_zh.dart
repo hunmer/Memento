@@ -96,22 +96,20 @@ class CalendarLocalizationsZh extends CalendarLocalizations {
   String get scheduleView => '日程视图';
 
   @override
-  // TODO: implement reminderSettings
-  String get reminderSettings => throw UnimplementedError();
+  String get reminderSettings => '提醒设置';
 
   @override
-  // TODO: implement selectDateRangeFirst
-  String get selectDateRangeFirst => throw UnimplementedError();
+  String get selectDateRangeFirst => '请先选择日期范围';
 
   @override
-  // TODO: implement selectReminderTime
-  String get selectReminderTime => throw UnimplementedError();
+  String get selectReminderTime => '选择提醒时间';
 
   @override
-  // TODO: implement enterEventTitle
-  String get enterEventTitle => throw UnimplementedError();
+  String get enterEventTitle => '请输入活动标题';
 
   @override
-  // TODO: implement endTimeCannotBeEarlier
-  String get endTimeCannotBeEarlier => throw UnimplementedError();
+  String get endTimeCannotBeEarlier => '结束时间不能早于开始时间';
+
+  @override
+  String get dateRange => '日期范围';
 }
