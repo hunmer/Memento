@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
@@ -27,7 +28,12 @@ Future<void> handleImageSelection({
         final File imageFile = File(image.path);
         if (!await imageFile.exists()) {
           scaffoldMessenger.showSnackBar(
-            SnackBar(content: Text('图片文件不存在'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(
+                ChatLocalizations.of(context)?.imageNotExist ?? '图片文件不存在',
+              ),
+              backgroundColor: Colors.red,
+            ),
           );
           return;
         }
@@ -61,10 +67,22 @@ Future<void> handleImageSelection({
 
         onFileSelected?.call(metadata);
       } catch (e) {
-        scaffoldMessenger.showSnackBar(SnackBar(content: Text('处理图片失败: $e')));
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              '${ChatLocalizations.of(context)?.imageProcessingFailed ?? '处理图片失败'}: $e',
+            ),
+          ),
+        );
       }
     }
   } catch (e) {
-    scaffoldMessenger.showSnackBar(SnackBar(content: Text('选择图片失败: $e')));
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          '${ChatLocalizations.of(context)?.imageSelectionFailed ?? '选择图片失败'}: $e',
+        ),
+      ),
+    );
   }
 }
