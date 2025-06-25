@@ -30,7 +30,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get webdavSync => 'WebDAV同步';
 
   @override
+  String get selectDate => '选择日期';
+
+  @override
+  String get showAll => '显示全部';
+
+  @override
   String get ok => '确定';
+
+  @override
+  String get no => '否';
+
+  @override
+  String get yes => '是';
 
   @override
   String get cancel => '取消';
@@ -100,16 +112,4 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get create => '新建';
-
-  @override
-  String get selectDate => '选择日期';
-
-  @override
-  String get showAll => '显示全部';
-
-  @override
-  String get no => '否';
-
-  @override
-  String get yes => '是';
 }

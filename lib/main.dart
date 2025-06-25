@@ -5,6 +5,7 @@ import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
+import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
@@ -202,6 +203,7 @@ class _MyAppState extends State<MyApp> {
         ActivityLocalizations.delegate,
         TimerLocalizations.delegate,
         ChatLocalizations.delegate,
+        ContactLocalizations.delegate,
         TrackerLocalizations.delegate,
         CalendarLocalizations.delegate,
         BillLocalizations.delegate,
