@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/l10n/local_video_handler_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
@@ -14,22 +15,23 @@ Future<void> handleLocalVideoSelection({
   final scaffoldMessenger = ScaffoldMessenger.of(context);
 
   try {
-    debugPrint('开始选择本地视频...');
     // 使用ImagePicker从相册选择视频
     final ImagePicker picker = ImagePicker();
     final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
 
     if (video != null) {
-      debugPrint('本地视频选择完成: ${video.path}');
-
       try {
         // 将视频转换为文件
         final File videoFile = File(video.path);
         if (!await videoFile.exists()) {
-          debugPrint('警告：视频文件不存在: ${video.path}');
           scaffoldMessenger.showSnackBar(
-            const SnackBar(
-              content: Text('视频文件不存在'),
+            SnackBar(
+              content: Text(
+                LocalVideoHandlerLocalizations.getText(
+                  context,
+                  LocalVideoHandlerLocalizations.videoFileNotExist,
+                ),
+              ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
@@ -38,19 +40,13 @@ Future<void> handleLocalVideoSelection({
         }
 
         final originalFileName = path.basename(video.path);
-        debugPrint('原始文件名: $originalFileName');
 
-        // 保存视频到应用目录
-        debugPrint('开始保存视频...');
         final savedFile = await fileService.saveVideo(videoFile);
-        debugPrint('视频已保存: ${savedFile.path}');
 
-        debugPrint('创建文件消息...');
         final fileMessage = await FileMessage.fromFile(
           savedFile,
           originalFileName: originalFileName,
         );
-        debugPrint('文件消息已创建: ${fileMessage.id}');
 
         // 标准化文件信息结构
         final Map<String, dynamic> metadata = {
@@ -78,29 +74,42 @@ Future<void> handleLocalVideoSelection({
         // 显示视频选择成功的提示
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text('已发送视频'),
+            content: Text(
+              LocalVideoHandlerLocalizations.getText(
+                context,
+                LocalVideoHandlerLocalizations.videoSent,
+              ),
+            ),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
         );
       } catch (processingError) {
-        debugPrint('错误：处理视频时出错: $processingError');
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text('处理视频失败: $processingError'),
+            content: Text(
+              LocalVideoHandlerLocalizations.getText(
+                context,
+                LocalVideoHandlerLocalizations.videoProcessingFailed,
+                processingError.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
-    } else {
-      debugPrint('未获取到视频文件，可能是用户取消了选择');
     }
   } catch (e) {
-    debugPrint('错误：选择视频过程中出错: $e');
     scaffoldMessenger.showSnackBar(
       SnackBar(
-        content: Text('选择视频失败: $e'),
+        content: Text(
+          LocalVideoHandlerLocalizations.getText(
+            context,
+            LocalVideoHandlerLocalizations.videoSelectionFailed,
+            e.toString(),
+          ),
+        ),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
       ),

@@ -23,10 +23,10 @@ class ChannelDialog extends StatefulWidget {
     this.onUpdateChannel,
     this.defaultGroup,
   }) : assert(
-          (isEditMode && channel != null && onUpdateChannel != null) ||
-              (!isEditMode && onAddChannel != null),
-          '编辑模式需要提供channel和onUpdateChannel，添加模式需要提供onAddChannel',
-        );
+         (isEditMode && channel != null && onUpdateChannel != null) ||
+             (!isEditMode && onAddChannel != null),
+         '编辑模式需要提供channel和onUpdateChannel，添加模式需要提供onAddChannel',
+       );
 
   @override
   State<ChannelDialog> createState() => _ChannelDialogState();
@@ -46,17 +46,17 @@ class _ChannelDialogState extends State<ChannelDialog> {
       // 编辑模式，初始化为现有频道数据
       _titleController = TextEditingController(text: widget.channel!.title);
       _groupController = TextEditingController(
-          text: widget.channel!.groups.isNotEmpty
-              ? widget.channel!.groups.join(', ')
-              : '');
+        text:
+            widget.channel!.groups.isNotEmpty
+                ? widget.channel!.groups.join(', ')
+                : '',
+      );
       _selectedIcon = widget.channel!.icon;
       _selectedColor = widget.channel!.backgroundColor;
     } else {
       // 添加模式，使用默认值
       _titleController = TextEditingController();
-      _groupController = TextEditingController(
-        text: widget.defaultGroup ?? '',
-      );
+      _groupController = TextEditingController(text: widget.defaultGroup ?? '');
       _selectedIcon = Icons.chat;
       _selectedColor = Colors.blue;
     }
@@ -71,9 +71,10 @@ class _ChannelDialogState extends State<ChannelDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.isEditMode
-        ? '编辑频道'
-        : (ChatLocalizations.of(context)?.newChannel ?? '新建频道');
+    final title =
+        widget.isEditMode
+            ? '编辑频道'
+            : (ChatLocalizations.of(context)?.newChannel ?? '新建频道');
 
     return AlertDialog(
       title: Text(title),
@@ -129,13 +130,14 @@ class _ChannelDialogState extends State<ChannelDialog> {
         ElevatedButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              final List<String> groups = _groupController.text.isEmpty
-                  ? []
-                  : _groupController.text
-                      .split(',')
-                      .map((e) => e.trim())
-                      .where((e) => e.isNotEmpty)
-                      .toList();
+              final List<String> groups =
+                  _groupController.text.isEmpty
+                      ? []
+                      : _groupController.text
+                          .split(',')
+                          .map((e) => e.trim())
+                          .where((e) => e.isNotEmpty)
+                          .toList();
 
               if (widget.isEditMode && widget.channel != null) {
                 // 编辑模式
@@ -189,17 +191,23 @@ class _ChannelDialogState extends State<ChannelDialog> {
                   if (context.mounted) {
                     Navigator.of(context).pop();
                     // 显示错误提示
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('创建频道失败: $e')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          '${ChatLocalizations.of(context).channelCreationFailed}: $e',
+                        ),
+                      ),
+                    );
                   }
                 }
               }
             }
           },
-          child: Text(widget.isEditMode
-              ? '保存'
-              : MaterialLocalizations.of(context).okButtonLabel),
+          child: Text(
+            widget.isEditMode
+                ? '保存'
+                : MaterialLocalizations.of(context).okButtonLabel,
+          ),
         ),
       ],
     );

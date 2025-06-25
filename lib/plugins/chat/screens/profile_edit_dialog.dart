@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import '../../../utils/image_utils.dart';
@@ -132,9 +133,13 @@ class _ProfileEditDialogState extends State<ProfileEditDialog>
                   onPressed: () async {
                     final newUsername = _usernameController.text.trim();
                     if (newUsername.isEmpty) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(const SnackBar(content: Text('用户名不能为空')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            ChatLocalizations.of(context).usernameCannotBeEmpty,
+                          ),
+                        ),
+                      );
                       return;
                     }
 
@@ -163,9 +168,13 @@ class _ProfileEditDialogState extends State<ProfileEditDialog>
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('更新失败: $e')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${ChatLocalizations.of(context).updateFailed}: $e',
+                            ),
+                          ),
+                        );
                       }
                     }
                   },

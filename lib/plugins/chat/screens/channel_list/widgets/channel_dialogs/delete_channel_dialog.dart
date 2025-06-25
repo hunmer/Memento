@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../models/channel.dart';
 
@@ -15,8 +16,8 @@ class DeleteChannelDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('删除频道'),
-      content: Text('确定要删除频道 "${channel.title}" 吗？此操作无法撤销。'),
+      title: Text(ChatLocalizations.of(context).deleteChannel),
+      content: Text(ChatLocalizations.of(context).deleteChannelConfirmation),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

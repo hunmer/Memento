@@ -288,7 +288,33 @@ class ChatLocalizationsEn extends ChatLocalizations {
   @override
   String get channelCreationFailed => 'Failed to create channel: \$e';
 
+  // New translations
+  @override
+  String get usernameCannotBeEmpty => 'Username cannot be empty';
+  @override
+  String get updateFailed => 'Update failed: \$e';
+  @override
+  String get showAll => 'Show all';
+
+  @override
+  String get singleFile => '1 file';
+  @override
+  String get contextRange => 'Context: \$contextRange';
+  @override
+  String get setContextRange => 'Set Context Range';
+  @override
+  String get currentRange => 'Current range: \${currentValue.round()}';
+
+  @override
+  String get titleCannotBeEmpty => 'Title cannot be empty';
+
+  @override
+  String get metadataFilters => 'Metadata filters';
+
   @override
   String get deleteChannelConfirmation =>
       'Are you sure you want to delete channel "\${channel.title}"? This action cannot be undone.';
+
+  @override
+  String get fileOpenFailed => 'Failed to open file: \$e';
 }
