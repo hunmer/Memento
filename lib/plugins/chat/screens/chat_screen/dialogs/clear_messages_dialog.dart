@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -19,11 +20,11 @@ class ClearMessagesDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: onCancel,
-          child: Text(ChatLocalizations.of(context)!.cancel),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         TextButton(
           onPressed: onConfirm,
-          child: Text(ChatLocalizations.of(context)!.save),
+          child: Text(AppLocalizations.of(context)!.save),
         ),
       ],
     );

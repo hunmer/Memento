@@ -63,79 +63,19 @@ abstract class CalendarLocalizations {
   String get timelineWeekView;
   String get timelineWorkWeekView;
   String get scheduleView;
+  String get noCompletedEvents;
 
-  // 辅助方法，用于直接获取本地化文本
-  static String getText(BuildContext context, String key) {
-    final localizations = of(context);
-    if (localizations == null) {
-      debugPrint('CalendarLocalizations not found in context');
-      return key;
-    }
+  String get reminderSettings;
 
-    switch (key) {
-      case 'pluginName':
-        return localizations.pluginName;
-      case 'calendar':
-        return localizations.calendar;
-      case 'eventCount':
-        return localizations.eventCount;
-      case 'weekEvents':
-        return localizations.weekEvents;
-      case 'expiredEvents':
-        return localizations.expiredEvents;
-      case 'allEvents':
-        return localizations.allEvents;
-      case 'completedEvents':
-        return localizations.completedEvents;
-      case 'backToToday':
-        return localizations.backToToday;
-      case 'addEvent':
-        return localizations.addEvent;
-      case 'editEvent':
-        return localizations.editEvent;
-      case 'deleteEvent':
-        return localizations.deleteEvent;
-      case 'completeEvent':
-        return localizations.completeEvent;
-      case 'eventTitle':
-        return localizations.eventTitle;
-      case 'eventDescription':
-        return localizations.eventDescription;
-      case 'startTime':
-        return localizations.startTime;
-      case 'endTime':
-        return localizations.endTime;
-      case 'save':
-        return localizations.save;
-      case 'cancel':
-        return localizations.cancel;
-      case 'delete':
-        return localizations.delete;
-      case 'confirmDeleteEvent':
-        return localizations.confirmDeleteEvent;
-      case 'noEvents':
-        return localizations.noEvents;
-      case 'dayView':
-        return localizations.dayView;
-      case 'weekView':
-        return localizations.weekView;
-      case 'workWeekView':
-        return localizations.workWeekView;
-      case 'monthView':
-        return localizations.monthView;
-      case 'timelineDayView':
-        return localizations.timelineDayView;
-      case 'timelineWeekView':
-        return localizations.timelineWeekView;
-      case 'timelineWorkWeekView':
-        return localizations.timelineWorkWeekView;
-      case 'scheduleView':
-        return localizations.scheduleView;
-      default:
-        debugPrint('Unknown localization key: $key');
-        return key;
-    }
-  }
+  String get selectReminderTime;
+
+  String get selectDateRangeFirst;
+
+  String get enterEventTitle;
+
+  String get endTimeCannotBeEarlier;
+
+  String? get dateRange => null;
 }
 
 class _CalendarLocalizationsDelegate
@@ -160,9 +100,9 @@ class _CalendarLocalizationsDelegate
 CalendarLocalizations lookupCalendarLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
-      return CalendarLocalizationsEn();
+      return CalendarLocalizationsEn(locale.languageCode);
     case 'zh':
-      return CalendarLocalizationsZh();
+      return CalendarLocalizationsZh(locale.languageCode);
   }
 
   throw FlutterError(

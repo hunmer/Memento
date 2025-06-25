@@ -78,7 +78,7 @@ class _PromptEditorState extends State<PromptEditor> {
                             labelText: l10n.promptTypeLabel,
                             border: const OutlineInputBorder(),
                           ),
-                          items: const [
+                          items: [
                             DropdownMenuItem(
                               value: 'system',
                               child: Text(l10n.systemRole),

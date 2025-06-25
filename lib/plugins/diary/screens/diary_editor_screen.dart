@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../../../widgets/markdown_editor/markdown_editor.dart';
@@ -27,8 +28,16 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
 
   // 心情表情列表
   final List<String> _moods = [
-    '😊', '😢', '😡', '😴', '🤔',
-    '😎', '😍', '🤮', '😱', '🥳',
+    '😊',
+    '😢',
+    '😡',
+    '😴',
+    '🤔',
+    '😎',
+    '😍',
+    '🤮',
+    '😱',
+    '🥳',
   ];
 
   @override
@@ -49,47 +58,50 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
   void _showMoodSelector() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(DiaryLocalizations.of(context)!.selectMood),
-        content: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _moods.map((mood) {
-            return InkWell(
-              onTap: () {
-                setState(() => _selectedMood = mood);
-                Navigator.pop(context);
-              },
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: mood == _selectedMood
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.grey,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(mood, style: const TextStyle(fontSize: 24)),
-              ),
-            );
-          }).toList(),
-        ),
-        actions: [
-          if (_selectedMood != null)
-            TextButton(
-              onPressed: () {
-                setState(() => _selectedMood = null);
-                Navigator.pop(context);
-              },
-              child: Text(DiaryLocalizations.of(context)!.clearSelection),
+      builder:
+          (context) => AlertDialog(
+            title: Text(DiaryLocalizations.of(context)!.selectMood),
+            content: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children:
+                  _moods.map((mood) {
+                    return InkWell(
+                      onTap: () {
+                        setState(() => _selectedMood = mood);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color:
+                                mood == _selectedMood
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Colors.grey,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(mood, style: const TextStyle(fontSize: 24)),
+                      ),
+                    );
+                  }).toList(),
             ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(DiaryLocalizations.of(context)!.close),
+            actions: [
+              if (_selectedMood != null)
+                TextButton(
+                  onPressed: () {
+                    setState(() => _selectedMood = null);
+                    Navigator.pop(context);
+                  },
+                  child: Text(DiaryLocalizations.of(context)!.clearSelection),
+                ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)!.close),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -105,23 +117,24 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
         onSave: (title, content) async {
           // 保存前捕获当前上下文
           final currentContext = context;
-          
+
           await DiaryUtils.saveDiaryEntry(
             widget.date,
             content,
             title: title,
             mood: _selectedMood,
           );
-          
+
           if (mounted) {
             Navigator.of(currentContext).pop();
           }
         },
         extraActions: [
           IconButton(
-            icon: _selectedMood != null
-                ? Text(_selectedMood!, style: const TextStyle(fontSize: 24))
-                : const Icon(Icons.mood),
+            icon:
+                _selectedMood != null
+                    ? Text(_selectedMood!, style: const TextStyle(fontSize: 24))
+                    : const Icon(Icons.mood),
             onPressed: _showMoodSelector,
             tooltip: DiaryLocalizations.of(context)?.moodSelectorTooltip,
           ),

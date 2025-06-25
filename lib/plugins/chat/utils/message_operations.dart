@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../chat_plugin.dart';
@@ -57,11 +58,11 @@ class MessageOperations {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(ChatLocalizations.of(context)!.cancel),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(ChatLocalizations.of(context)!.save),
+                child: Text(AppLocalizations.of(context)!.save),
               ),
             ],
           ),

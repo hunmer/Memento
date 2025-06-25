@@ -1,3 +1,5 @@
+import 'package:Memento/l10n/app_localizations.dart';
+
 import '../l10n/store_localizations.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -131,18 +133,21 @@ class UserItemCard extends StatelessWidget {
                   builder:
                       (context) => AlertDialog(
                         title: Text(StoreLocalizations.of(context)!.confirmUse),
-                        content: Text(StoreLocalizations.of(context)!.confirmUseMessage.replaceFirst('%s', item.productName)),
+                        content: Text(
+                          StoreLocalizations.of(context)!.confirmUseMessage
+                              .replaceFirst('%s', item.productName),
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: Text(StoreLocalizations.of(context)!.cancel),
+                            child: Text(AppLocalizations.of(context)!.cancel),
                           ),
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
                               onUse();
                             },
-                            child: Text(StoreLocalizations.of(context)!.confirm),
+                            child: Text(AppLocalizations.of(context)!.confirm),
                           ),
                         ],
                       ),

@@ -1,3 +1,5 @@
+import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/l10n/app_localizations_en.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/chat_localizations.dart';
 import '../../../models/channel.dart';
@@ -9,7 +11,7 @@ import '../models/timeline_filter.dart';
 class FilterDialog extends StatefulWidget {
   final TimelineFilter filter;
   final ChatPlugin chatPlugin;
-  
+
   const FilterDialog({
     super.key,
     required this.filter,
@@ -30,14 +32,14 @@ class _FilterDialogState extends State<FilterDialog> {
     super.initState();
     // 创建过滤器的副本以便在对话框中编辑
     _filter = widget.filter.copyWith();
-    
+
     // 获取所有可用的频道和用户
     _availableChannels = widget.chatPlugin.channelService.channels;
-    
+
     // 从所有频道中收集唯一的用户
     final Set<String> userIds = {};
     final List<User> users = [];
-    
+
     for (final channel in _availableChannels) {
       for (final message in channel.messages) {
         if (!userIds.contains(message.user.id)) {
@@ -46,15 +48,16 @@ class _FilterDialogState extends State<FilterDialog> {
         }
       }
     }
-    
+
     _availableUsers = users;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = ChatLocalizations.of(context);
+    final app_l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    
+
     return AlertDialog(
       title: Text(l10n?.advancedFilter ?? 'Advanced Filter'),
       content: SizedBox(
@@ -68,7 +71,7 @@ class _FilterDialogState extends State<FilterDialog> {
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            
+
             CheckboxListTile(
               title: Text(l10n?.channelNames ?? 'Channel names'),
               value: _filter.includeChannels,
@@ -79,7 +82,7 @@ class _FilterDialogState extends State<FilterDialog> {
               },
               dense: true,
             ),
-            
+
             CheckboxListTile(
               title: Text(l10n?.usernames ?? 'Usernames'),
               value: _filter.includeUsernames,
@@ -90,7 +93,7 @@ class _FilterDialogState extends State<FilterDialog> {
               },
               dense: true,
             ),
-            
+
             CheckboxListTile(
               title: Text(l10n?.messageContent ?? 'Message content'),
               value: _filter.includeContent,
@@ -101,16 +104,13 @@ class _FilterDialogState extends State<FilterDialog> {
               },
               dense: true,
             ),
-            
+
             const Divider(),
-            
+
             // 元数据过滤选项
-            Text(
-              'Metadata filters:',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('Metadata filters:', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
-            
+
             // AI 消息过滤选项
             CheckboxListTile(
               title: const Text('AI Messages'),
@@ -124,7 +124,7 @@ class _FilterDialogState extends State<FilterDialog> {
               },
               dense: true,
             ),
-            
+
             // 收藏消息过滤选项
             CheckboxListTile(
               title: const Text('Favorite Messages'),
@@ -138,16 +138,16 @@ class _FilterDialogState extends State<FilterDialog> {
               },
               dense: true,
             ),
-            
+
             const Divider(),
-            
+
             // 日期范围选择
             Text(
               l10n?.dateRange ?? 'Date range:',
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            
+
             Row(
               children: [
                 Expanded(
@@ -175,7 +175,7 @@ class _FilterDialogState extends State<FilterDialog> {
                 ),
               ],
             ),
-            
+
             if (_filter.startDate != null || _filter.endDate != null)
               Align(
                 alignment: Alignment.centerRight,
@@ -189,74 +189,80 @@ class _FilterDialogState extends State<FilterDialog> {
                   child: Text(l10n?.clearDates ?? 'Clear dates'),
                 ),
               ),
-            
+
             const Divider(),
-            
+
             // 频道选择
             Text(
               l10n?.selectChannels ?? 'Select channels:',
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            
+
             if (_availableChannels.isEmpty)
               Text(l10n?.noChannelsAvailable ?? 'No channels available')
             else
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: _availableChannels.map((channel) {
-                  final isSelected = _filter.selectedChannelIds.contains(channel.id);
-                  return FilterChip(
-                    label: Text(channel.title),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _filter.selectedChannelIds.add(channel.id);
-                        } else {
-                          _filter.selectedChannelIds.remove(channel.id);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
+                children:
+                    _availableChannels.map((channel) {
+                      final isSelected = _filter.selectedChannelIds.contains(
+                        channel.id,
+                      );
+                      return FilterChip(
+                        label: Text(channel.title),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _filter.selectedChannelIds.add(channel.id);
+                            } else {
+                              _filter.selectedChannelIds.remove(channel.id);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
               ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 用户选择
             Text(
               l10n?.selectUsers ?? 'Select users:',
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            
+
             if (_availableUsers.isEmpty)
               Text(l10n?.noUsersAvailable ?? 'No users available')
             else
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: _availableUsers.map((user) {
-                  final isSelected = _filter.selectedUserIds.contains(user.id);
-                  return FilterChip(
-                    avatar: CircleAvatar(
-                      child: Text(user.username[0].toUpperCase()),
-                    ),
-                    label: Text(user.username),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _filter.selectedUserIds.add(user.id);
-                        } else {
-                          _filter.selectedUserIds.remove(user.id);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
+                children:
+                    _availableUsers.map((user) {
+                      final isSelected = _filter.selectedUserIds.contains(
+                        user.id,
+                      );
+                      return FilterChip(
+                        avatar: CircleAvatar(
+                          child: Text(user.username[0].toUpperCase()),
+                        ),
+                        label: Text(user.username),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _filter.selectedUserIds.add(user.id);
+                            } else {
+                              _filter.selectedUserIds.remove(user.id);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
               ),
           ],
         ),
@@ -266,20 +272,20 @@ class _FilterDialogState extends State<FilterDialog> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text(l10n?.cancel ?? 'Cancel'),
+          child: Text(app_l10n!.cancel),
         ),
         TextButton(
           onPressed: () {
             _filter.reset();
             setState(() {});
           },
-          child: Text(l10n?.reset ?? 'Reset'),
+          child: Text(app_l10n.reset),
         ),
         FilledButton(
           onPressed: () {
             Navigator.of(context).pop(_filter);
           },
-          child: Text(l10n?.apply ?? 'Apply'),
+          child: Text(app_l10n.apply),
         ),
       ],
     );
@@ -288,14 +294,14 @@ class _FilterDialogState extends State<FilterDialog> {
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final initialDate = isStartDate ? _filter.startDate : _filter.endDate;
     final now = DateTime.now();
-    
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: initialDate ?? now,
       firstDate: DateTime(now.year - 5),
       lastDate: DateTime(now.year + 1),
     );
-    
+
     if (picked != null) {
       setState(() {
         if (isStartDate) {

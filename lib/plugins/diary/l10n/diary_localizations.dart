@@ -34,11 +34,6 @@ abstract class DiaryLocalizations {
   ];
 
   String get recentlyUsed;
-  String get recentlyUsed;
-  String get recentlyUsed;
-  String get recentlyUsed;
-  String get recentlyUsed;
-
   // 日记插件的本地化字符串
   String get diaryPluginName;
   String get diaryPluginDescription;

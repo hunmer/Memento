@@ -131,4 +131,64 @@ class BillLocalizationsZh extends BillLocalizations {
 
   @override
   String get requiredField => '此项为必填项';
+
+  @override
+  String get accountManagement => '账户管理';
+
+  @override
+  String get noAccounts => '暂无账户';
+
+  @override
+  String get accountDeleted => '账户已删除';
+
+  @override
+  String get accountTitle => '账户名称';
+
+  @override
+  String get all => '全部';
+
+  @override
+  String get confirmDeleteAccountWithBills => '确认删除账户及其关联账单？';
+
+  @override
+  String get custom => '自定义';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get deleteAccount => '删除账户';
+
+  @override
+  String get enterAccountName => '输入账户名称';
+
+  @override
+  String get monthBills => '月度账单';
+
+  @override
+  String get monthFinance => '月度财务';
+
+  @override
+  String get noBills => '无账单';
+
+  @override
+  String get thisMonth => '本月';
+
+  @override
+  String get thisWeek => '本周';
+
+  @override
+  String get thisYear => '今年';
+
+  @override
+  String get todayFinance => '今日财务';
+
+  @override
+  String get balance => '余额';
+
+  @override
+  String get noBillsClickToAdd => '无账单，点击添加';
+
+  @override
+  String get timeRange => '时间范围';
 }

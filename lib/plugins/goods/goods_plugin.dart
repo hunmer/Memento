@@ -429,14 +429,7 @@ class GoodsPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return Localizations(
-      delegates: const [
-        GoodsLocalizationsDelegate(),
-        DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-      ],
-      child: GoodsMainView(),
-    );
+    return GoodsMainView();
   }
 
   @override

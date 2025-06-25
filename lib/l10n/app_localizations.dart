@@ -53,6 +53,7 @@ abstract class AppLocalizations {
   String get minutes;
   String get tags;
   String get confirm;
+  String get confirmDelete;
 }
 
 class _AppLocalizationsDelegate

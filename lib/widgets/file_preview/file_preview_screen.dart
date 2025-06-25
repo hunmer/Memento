@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as FilePreviewLocalizations;
 import 'package:photo_view/photo_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as path;

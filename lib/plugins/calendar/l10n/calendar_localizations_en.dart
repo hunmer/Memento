@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'calendar_localizations.dart';
 
 class CalendarLocalizationsEn extends CalendarLocalizations {
+  CalendarLocalizationsEn(super.locale);
+
   @override
   String get pluginName => 'Calendar';
 
@@ -61,7 +63,8 @@ class CalendarLocalizationsEn extends CalendarLocalizations {
   String get delete => 'Delete';
 
   @override
-  String get confirmDeleteEvent => 'Are you sure you want to delete this event?';
+  String get confirmDeleteEvent =>
+      'Are you sure you want to delete this event?';
 
   @override
   String get noEvents => 'No events';
@@ -89,4 +92,27 @@ class CalendarLocalizationsEn extends CalendarLocalizations {
 
   @override
   String get scheduleView => 'Schedule';
+
+  @override
+  String get noCompletedEvents => 'No completed events';
+
+  @override
+  // TODO: implement reminderSettings
+  String get reminderSettings => throw UnimplementedError();
+
+  @override
+  // TODO: implement selectDateRangeFirst
+  String get selectDateRangeFirst => throw UnimplementedError();
+
+  @override
+  // TODO: implement selectReminderTime
+  String get selectReminderTime => throw UnimplementedError();
+
+  @override
+  // TODO: implement enterEventTitle
+  String get enterEventTitle => throw UnimplementedError();
+
+  @override
+  // TODO: implement endTimeCannotBeEarlier
+  String get endTimeCannotBeEarlier => throw UnimplementedError();
 }

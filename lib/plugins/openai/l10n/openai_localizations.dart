@@ -151,6 +151,14 @@ abstract class OpenAILocalizations {
   String get addAnalysisMethod;
   String get agentResponse;
   String get sendRequest;
+
+  String get filterAgents;
+
+  String get apply;
+
+  String get selectAnalysisMethod;
+
+  String get noToolsAvailable;
 }
 
 /// 中文实现
@@ -516,6 +524,22 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
   String get promptTypeLabel => 'Prompt类型';
   @override
   String get contentLabel => '内容';
+
+  @override
+  // TODO: implement filterAgents
+  String get filterAgents => throw UnimplementedError();
+
+  @override
+  // TODO: implement apply
+  String get apply => throw UnimplementedError();
+
+  @override
+  // TODO: implement selectAnalysisMethod
+  String get selectAnalysisMethod => throw UnimplementedError();
+
+  @override
+  // TODO: implement noToolsAvailable
+  String get noToolsAvailable => throw UnimplementedError();
 }
 
 /// 英文实现
@@ -886,6 +910,22 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   String get promptTypeLabel => 'Prompt Type';
   @override
   String get contentLabel => 'Content';
+
+  @override
+  // TODO: implement filterAgents
+  String get filterAgents => throw UnimplementedError();
+
+  @override
+  // TODO: implement apply
+  String get apply => throw UnimplementedError();
+
+  @override
+  // TODO: implement selectAnalysisMethod
+  String get selectAnalysisMethod => throw UnimplementedError();
+
+  @override
+  // TODO: implement noToolsAvailable
+  String get noToolsAvailable => throw UnimplementedError();
 }
 
 /// 本地化代理

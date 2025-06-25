@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/event.dart';
 import '../widgets/event_detail_card.dart';
@@ -96,14 +97,10 @@ class _EventListPageState extends State<EventListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CalendarLocalizations.getText(context, 'allEvents')),
-      ),
+      appBar: AppBar(title: Text(CalendarLocalizations.of(context)!.allEvents)),
       body:
           _events.isEmpty
-              ? Center(
-                child: Text(CalendarLocalizations.getText(context, 'noEvents')),
-              )
+              ? Center(child: Text(CalendarLocalizations.of(context)!.noEvents))
               : ListView.builder(
                 itemCount: _events.length,
                 itemBuilder: (context, index) {
