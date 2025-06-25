@@ -2,8 +2,12 @@ import 'dart:async';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/services/shortcut_manager.dart';
 import 'package:Memento/core/utils/logger_util.dart';
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
+import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
 
 import 'package:flutter/material.dart';
@@ -193,9 +197,14 @@ class _MyAppState extends State<MyApp> {
       localizationsDelegates: [
         AppLocalizations.delegate,
         DiaryLocalizations.delegate,
+        StoreLocalizations.delegate,
         CheckinLocalizations.delegate,
         ActivityLocalizations.delegate,
+        TimerLocalizations.delegate,
         ChatLocalizations.delegate,
+        TrackerLocalizations.delegate,
+        CalendarLocalizations.delegate,
+        BillLocalizations.delegate,
         DayLocalizationsDelegate.delegate,
         OpenAILocalizationsDelegate.delegate,
         NotesLocalizations.delegate,

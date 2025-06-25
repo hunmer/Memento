@@ -120,7 +120,7 @@ class StorePlugin extends BasePlugin {
                   Column(
                     children: [
                       Text(
-                        StoreLocalizations.of(context)!.productQuantity,
+                        StoreLocalizations.of(context).productQuantity,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -136,7 +136,7 @@ class StorePlugin extends BasePlugin {
                   Column(
                     children: [
                       Text(
-                        StoreLocalizations.of(context)!.itemQuantity,
+                        StoreLocalizations.of(context).itemQuantity,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -159,7 +159,7 @@ class StorePlugin extends BasePlugin {
                   Column(
                     children: [
                       Text(
-                        StoreLocalizations.of(context)!.myPoints,
+                        StoreLocalizations.of(context).myPoints,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -176,7 +176,7 @@ class StorePlugin extends BasePlugin {
                   Column(
                     children: [
                       Text(
-                        StoreLocalizations.of(context)!.expiringIn7Days,
+                        StoreLocalizations.of(context).expiringIn7Days,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
