@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_detail_screen.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/calendar_controller.dart';
@@ -58,18 +59,14 @@ class EntryDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
               context: context,
               builder:
                   (context) => AlertDialog(
-                    title: Text(
-                      CalendarAlbumLocalizations.of(context).get('delete'),
-                    ),
+                    title: Text(AppLocalizations.of(context)!.delete),
                     content: Text(
-                      '${CalendarAlbumLocalizations.of(context).get('delete')} "${entry.title}"?',
+                      '${AppLocalizations.of(context)!.delete} "${entry.title}"?',
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: Text(
-                          CalendarAlbumLocalizations.of(context).get('cancel'),
-                        ),
+                        child: Text(AppLocalizations.of(context)!.cancel),
                       ),
                       TextButton(
                         onPressed: () {
@@ -77,9 +74,7 @@ class EntryDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
                           Navigator.of(context).pop(); // 关闭对话框
                           Navigator.of(context).pop(); // 返回上一页
                         },
-                        child: Text(
-                          CalendarAlbumLocalizations.of(context).get('delete'),
-                        ),
+                        child: Text(AppLocalizations.of(context)!.delete),
                       ),
                     ],
                   ),

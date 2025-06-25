@@ -281,4 +281,8 @@ class ChatLocalizationsZh extends ChatLocalizations {
   String get videoRecordingFailed => '拍摄视频失败: \$e';
   @override
   String get channelCreationFailed => '创建频道失败: \$e';
+
+  @override
+  String get deleteChannelConfirmation =>
+      '确定要删除频道"\${channel.title}"吗？此操作不可撤销。';
 }

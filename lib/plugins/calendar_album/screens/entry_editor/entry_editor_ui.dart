@@ -38,7 +38,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     final l10n = CalendarAlbumLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? l10n.get('edit') : l10n.get('newEntry')),
+        title: Text(isEditing ? l10n.edit : l10n.newEntry),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -95,7 +95,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     return TextField(
       controller: controller.titleController,
       decoration: InputDecoration(
-        labelText: l10n.get('title'),
+        labelText: l10n.title,
         border: const OutlineInputBorder(),
       ),
       maxLines: 1,
@@ -106,7 +106,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     return TextField(
       controller: controller.contentController,
       decoration: InputDecoration(
-        labelText: l10n.get('content'),
+        labelText: l10n.content,
         border: const OutlineInputBorder(),
       ),
       maxLines: 10,
@@ -115,7 +115,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
 
   Widget _buildWordCount(CalendarAlbumLocalizations l10n) {
     return Text(
-      '${l10n.get('wordCount')}: ${controller.contentController.text.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).length}',
+      '${l10n.wordCount}: ${controller.contentController.text.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).length}',
       style: const TextStyle(color: Colors.grey),
     );
   }
@@ -124,7 +124,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     return TextField(
       controller: controller.locationController,
       decoration: InputDecoration(
-        labelText: l10n.get('location'),
+        labelText: l10n.location,
         border: const OutlineInputBorder(),
         prefixIcon: IconButton(
           icon: const Icon(Icons.location_on),
@@ -175,7 +175,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     return Expanded(
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
-          labelText: l10n.get('mood'),
+          labelText: l10n.mood,
           border: const OutlineInputBorder(),
         ),
         value: controller.mood,
@@ -206,7 +206,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     return Expanded(
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
-          labelText: l10n.get('weather'),
+          labelText: l10n.weather,
           border: const OutlineInputBorder(),
         ),
         value: controller.weather,

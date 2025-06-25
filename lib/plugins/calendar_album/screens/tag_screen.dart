@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/tag_controller.dart';
@@ -30,7 +31,7 @@ class _TagScreenState extends State<TagScreen> {
     final tagController = Provider.of<TagController>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.get('tagManagement')),
+        title: Text(l10n.tagManagement),
         actions: [
           IconButton(
             icon: const Icon(Icons.label),
@@ -47,7 +48,7 @@ class _TagScreenState extends State<TagScreen> {
                 });
               }
             },
-            tooltip: l10n.get('tagManagement'),
+            tooltip: l10n.tagManagement,
           ),
         ],
       ),
@@ -59,7 +60,7 @@ class _TagScreenState extends State<TagScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child:
                 _selectedTags.isEmpty
-                    ? Center(child: Text(l10n.get('noTags')))
+                    ? Center(child: Text(l10n.noTags))
                     : ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: _selectedTags.length,
@@ -105,7 +106,7 @@ class _TagScreenState extends State<TagScreen> {
             child: Consumer<CalendarController>(
               builder: (context, calendarController, child) {
                 return _selectedTags.isEmpty
-                    ? Center(child: Text(l10n.get('selectTag')))
+                    ? Center(child: Text(l10n.selectTag))
                     : EntryList(
                       entries: calendarController.getEntriesByTags(
                         _selectedTags
@@ -154,19 +155,20 @@ class _TagScreenState extends State<TagScreen> {
                       },
                       onDelete: (entry) {
                         final l10n = CalendarAlbumLocalizations.of(context);
+                        final app_l10n = AppLocalizations.of(context);
                         showDialog<void>(
                           context: context,
                           builder:
                               (context) => AlertDialog(
-                                title: Text(l10n.get('deleteEntry')),
+                                title: Text(l10n.deleteEntry),
                                 content: Text(
-                                  '${l10n.get('delete')} "${entry.title}"?',
+                                  '${app_l10n!.delete} "${entry.title}"?',
                                 ),
                                 actions: [
                                   TextButton(
                                     onPressed:
                                         () => Navigator.of(context).pop(),
-                                    child: Text(l10n.get('cancel')),
+                                    child: Text(app_l10n!.cancel),
                                   ),
                                   TextButton(
                                     onPressed: () {
@@ -174,7 +176,7 @@ class _TagScreenState extends State<TagScreen> {
                                       Navigator.of(context).pop();
                                       setState(() {}); // 强制刷新界面
                                     },
-                                    child: Text(l10n.get('delete')),
+                                    child: Text(app_l10n!.delete),
                                   ),
                                 ],
                               ),

@@ -78,7 +78,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
             const Icon(Icons.note_add, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              CalendarAlbumLocalizations.of(context).get('noEntriesForDate'),
+              CalendarAlbumLocalizations.of(context).noEntriesForDate,
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 16),
@@ -98,9 +98,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 );
               },
               icon: const Icon(Icons.add),
-              label: Text(
-                CalendarAlbumLocalizations.of(context).get('createEntry'),
-              ),
+              label: Text(CalendarAlbumLocalizations.of(context).createEntry),
             ),
           ],
         ),

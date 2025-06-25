@@ -6,6 +6,7 @@ import '../base_plugin.dart';
 import 'screens/main_screen.dart';
 import 'controllers/calendar_controller.dart';
 import 'controllers/tag_controller.dart';
+import 'l10n/calendar_album_localizations.dart';
 
 /// 日历相册插件主视图
 class CalendarAlbumMainView extends StatefulWidget {
@@ -56,7 +57,7 @@ class CalendarAlbumPlugin extends BasePlugin {
   String get id => 'calendar_album';
 
   @override
-  String get name => '日记相册';
+  String get name => 'calendar album';
 
   @override
   IconData get icon => Icons.notes_rounded;
@@ -123,9 +124,12 @@ class CalendarAlbumPlugin extends BasePlugin {
                   // 今日日记
                   Column(
                     children: [
-                      Text('今日日记', style: theme.textTheme.bodyMedium),
                       Text(
-                        '${calendarController.getTodayEntriesCount()} 篇',
+                        CalendarAlbumLocalizations.of(context).todayDiary,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '${calendarController.getTodayEntriesCount()} ${CalendarAlbumLocalizations.of(context).entriesUnit}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -136,9 +140,12 @@ class CalendarAlbumPlugin extends BasePlugin {
                   // 七日日记
                   Column(
                     children: [
-                      Text('七日日记', style: theme.textTheme.bodyMedium),
                       Text(
-                        '${calendarController.getLast7DaysEntriesCount()} 篇',
+                        CalendarAlbumLocalizations.of(context).sevenDayDiary,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '${calendarController.getLast7DaysEntriesCount()} ${CalendarAlbumLocalizations.of(context).entriesUnit}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -156,9 +163,12 @@ class CalendarAlbumPlugin extends BasePlugin {
                   // 所有日记
                   Column(
                     children: [
-                      Text('所有日记', style: theme.textTheme.bodyMedium),
                       Text(
-                        '${calendarController.getAllEntriesCount()} 篇',
+                        CalendarAlbumLocalizations.of(context).allDiaries,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '${calendarController.getAllEntriesCount()} ${CalendarAlbumLocalizations.of(context).entriesUnit}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -169,9 +179,12 @@ class CalendarAlbumPlugin extends BasePlugin {
                   // 标签数量
                   Column(
                     children: [
-                      Text('标签数量', style: theme.textTheme.bodyMedium),
                       Text(
-                        '${tagController.tags.length} 个',
+                        CalendarAlbumLocalizations.of(context).tagCount,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        '${tagController.tags.length} ${CalendarAlbumLocalizations.of(context).itemsUnit}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

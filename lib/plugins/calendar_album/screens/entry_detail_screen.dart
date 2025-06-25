@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_detail/entry_detail_image_viewer.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart';
@@ -157,7 +158,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = CalendarAlbumLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final calendarController = Provider.of<CalendarController>(context);
     final tagController = Provider.of<TagController>(context);
 
@@ -197,14 +198,12 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 context: context,
                 builder:
                     (context) => AlertDialog(
-                      title: Text(l10n.get('delete')),
-                      content: Text(
-                        '${l10n.get('delete')} "${currentEntry.title}"?',
-                      ),
+                      title: Text(l10n.delete),
+                      content: Text('${l10n.delete} "${currentEntry.title}"?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: Text(l10n.get('cancel')),
+                          child: Text(l10n.cancel),
                         ),
                         TextButton(
                           onPressed: () {
@@ -212,7 +211,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                             Navigator.of(context).pop();
                             Navigator.of(context).pop();
                           },
-                          child: Text(l10n.get('delete')),
+                          child: Text(l10n.delete),
                         ),
                       ],
                     ),

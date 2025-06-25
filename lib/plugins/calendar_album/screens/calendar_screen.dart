@@ -138,7 +138,7 @@ class _CalendarScreenState extends State<CalendarScreen>
         onPressed: () => PluginManager.toHomeScreen(context),
       ),
       title: Text(
-        CalendarAlbumLocalizations.of(context).get('calendarDiary'),
+        CalendarAlbumLocalizations.of(context).calendarDiary,
         style: const TextStyle(fontSize: 18),
       ),
       actions: [

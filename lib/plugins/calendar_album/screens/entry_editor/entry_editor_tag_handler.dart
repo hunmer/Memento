@@ -28,8 +28,8 @@ class EntryEditorTagHandler extends StatelessWidget {
       children: [
         TextField(
           decoration: InputDecoration(
-            labelText: l10n.get('tags'),
-            hintText: l10n.get('tagsHint'),
+            labelText: l10n.tags,
+            hintText: l10n.tagsHint,
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
               icon: const Icon(Icons.label),
@@ -42,7 +42,7 @@ class EntryEditorTagHandler extends StatelessWidget {
                   (context as Element).markNeedsBuild();
                 }
               },
-              tooltip: l10n.get('tagManagement'),
+              tooltip: l10n.tagManagement,
             ),
           ),
           readOnly: true,
