@@ -108,13 +108,16 @@ class _FilterDialogState extends State<FilterDialog> {
             const Divider(),
 
             // 元数据过滤选项
-            Text('Metadata filters:', style: theme.textTheme.titleMedium),
+            Text(
+              ChatLocalizations.of(context)!.metadataFilters,
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
 
             // AI 消息过滤选项
             CheckboxListTile(
-              title: const Text('AI Messages'),
-              subtitle: const Text('Filter messages created by AI'),
+              title: Text(ChatLocalizations.of(context)!.aiMessages),
+              subtitle: Text(ChatLocalizations.of(context)!.filterAiMessages),
               value: _filter.isAI,
               tristate: true,
               onChanged: (value) {
@@ -127,8 +130,8 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 收藏消息过滤选项
             CheckboxListTile(
-              title: const Text('Favorite Messages'),
-              subtitle: const Text('Show only favorited messages'),
+              title: Text(ChatLocalizations.of(context)!.favoriteMessages),
+              subtitle: Text(ChatLocalizations.of(context)!.showOnlyFavorites),
               value: _filter.isFavorite,
               tristate: true,
               onChanged: (value) {

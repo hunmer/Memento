@@ -332,4 +332,7 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String get stopRecordingHint => 'Tap to stop recording...';
+
+  @override
+  String get rangeHint => 'Context Range: ';
 }

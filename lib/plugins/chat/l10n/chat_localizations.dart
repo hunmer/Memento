@@ -166,7 +166,7 @@ abstract class ChatLocalizations {
 
   String get editMessageTitle;
 
-  get messageHintText;
+  String get messageHintText;
 
   String get errorFilePreviewFailed;
 
@@ -174,7 +174,9 @@ abstract class ChatLocalizations {
 
   String get stopRecordingHint;
 
-  get rangeHint => null;
+  String get rangeHint;
+
+  String get metadataFilters;
 }
 
 class _ChatLocalizationsDelegate

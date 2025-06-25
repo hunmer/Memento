@@ -68,4 +68,54 @@ class CheckinLocalizationsZh extends CheckinLocalizations {
 
   @override
   String get confirm => '确定';
+
+  // 删除对话框
+  @override
+  String get deleteCheckinItemTitle => '删除打卡项';
+
+  // 重置对话框
+  @override
+  String get resetCheckinRecordsTitle => '重置打卡记录';
+  @override
+  String get resetCheckinRecordsMessage => '确定要重置此项目的所有打卡记录吗？这将清除所有历史数据且无法恢复。';
+
+  // 打卡成功对话框
+  @override
+  String get checkinSuccessTitle => '打卡成功';
+  @override
+  String get timeRangeLabel => '时间段';
+  @override
+  String get noteLabel => '备注';
+  @override
+  String get consecutiveDaysLabel => '连续打卡天数';
+
+  // 分组管理对话框配置
+  @override
+  String get manageGroupsTitle => '管理分组';
+  @override
+  String get addGroupHint => '请输入分组名称';
+  @override
+  String get addTagHint => '请输入打卡项目名称';
+  @override
+  String get editGroupHint => '请输入新的分组名称';
+  @override
+  String get allTagsLabel => '所有打卡项目';
+  @override
+  String get newGroupLabel => '新建分组';
+
+  // 操作菜单项
+  @override
+  String get editCheckinItem => '编辑打卡项目';
+  @override
+  String get resetCheckinRecords => '重置打卡记录';
+
+  // 确认按钮
+  @override
+  String get confirmReset => '确定重置';
+
+  // 操作结果提示
+  @override
+  String get resetSuccessMessage => '已重置"%s"的打卡记录';
+  @override
+  String get deleteSuccessMessage => '已删除"%s"';
 }
