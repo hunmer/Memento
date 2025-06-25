@@ -71,15 +71,15 @@ class _MainScreenState extends State<MainScreen> {
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.calendar_today),
-              label: l10n.get('calendar'),
+              label: l10n.calendar,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.tag),
-              label: l10n.get('tags'),
+              label: l10n.tags,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.photo_library),
-              label: l10n.get('album'),
+              label: l10n.album,
             ),
           ],
         ),

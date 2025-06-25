@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../widgets/tag_manager_dialog/models/tag_group.dart' as dialog;
@@ -32,7 +33,7 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(CalendarAlbumLocalizations.of(context).get('tagManagement')),
+      title: Text(CalendarAlbumLocalizations.of(context).tagManagement),
       content: SingleChildScrollView(
         child: Column(
           children: [
@@ -71,14 +72,14 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(CalendarAlbumLocalizations.of(context).get('cancel')),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         TextButton(
           onPressed: () {
             widget.onGroupsChanged(_groups);
             Navigator.pop(context, _selectedTags);
           },
-          child: Text(CalendarAlbumLocalizations.of(context).get('confirm')),
+          child: Text(AppLocalizations.of(context)!.confirm),
         ),
       ],
     );

@@ -76,7 +76,7 @@ class EntryList extends StatelessWidget {
     final l10n = CalendarAlbumLocalizations.of(context);
 
     if (entries.isEmpty) {
-      return Center(child: Text(l10n.get('noEntries')));
+      return Center(child: Text(l10n.noEntries));
     }
 
     return ListView.builder(

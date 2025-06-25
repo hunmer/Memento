@@ -287,4 +287,8 @@ class ChatLocalizationsEn extends ChatLocalizations {
   String get videoRecordingFailed => 'Video recording failed: \$e';
   @override
   String get channelCreationFailed => 'Failed to create channel: \$e';
+
+  @override
+  String get deleteChannelConfirmation =>
+      'Are you sure you want to delete channel "\${channel.title}"? This action cannot be undone.';
 }

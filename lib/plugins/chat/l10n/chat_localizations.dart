@@ -13,8 +13,15 @@ abstract class ChatLocalizations {
 
   final String localeName;
 
-  static ChatLocalizations? of(BuildContext context) {
-    return Localizations.of<ChatLocalizations>(context, ChatLocalizations);
+  static ChatLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<ChatLocalizations>(
+      context,
+      ChatLocalizations,
+    );
+    if (localizations == null) {
+      throw FlutterError('No ChatLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const LocalizationsDelegate<ChatLocalizations> delegate =

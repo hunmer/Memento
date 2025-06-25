@@ -142,13 +142,13 @@ class _AgentListScreenState extends State<AgentListScreen>
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () {
-                    // TODO: Implement tools search
+                    // TODO
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
-                    // TODO: Implement add new tool app
+                    // TODO
                   },
                 ),
               ],

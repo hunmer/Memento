@@ -102,49 +102,40 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
       return;
     }
 
-    try {
-      if (widget.account == null) {
-        // 创建新账户
-        final newAccount = Account(
-          title: title,
-          icon: _selectedIcon,
-          backgroundColor: _selectedColor,
-        );
-        await widget.billPlugin.controller.createAccount(newAccount);
+    if (widget.account == null) {
+      // 创建新账户
+      final newAccount = Account(
+        title: title,
+        icon: _selectedIcon,
+        backgroundColor: _selectedColor,
+      );
+      await widget.billPlugin.controller.createAccount(newAccount);
 
-        if (mounted) {
-          // 检查是否是第一个账户
-          if (widget.billPlugin.accounts.length == 1) {
-            // 如果是第一个账户，自动设置为选中账户并进入
-            widget.billPlugin.selectedAccount =
-                widget.billPlugin.accounts.first;
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => widget.billPlugin.buildMainView(context),
-              ),
-            );
-            return;
-          }
-          Navigator.pop(context);
-        }
-      } else {
-        // 更新现有账户
-        final updatedAccount = widget.account!.copyWith(
-          title: title,
-          icon: _selectedIcon,
-          backgroundColor: _selectedColor,
-        );
-        await widget.billPlugin.controller.saveAccount(updatedAccount);
-        if (mounted) {
-          Navigator.pop(context);
-        }
-      }
-    } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+        // 检查是否是第一个账户
+        if (widget.billPlugin.accounts.length == 1) {
+          // 如果是第一个账户，自动设置为选中账户并进入
+          widget.billPlugin.selectedAccount = widget.billPlugin.accounts.first;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => widget.billPlugin.buildMainView(context),
+            ),
+          );
+          return;
+        }
+        Navigator.pop(context);
+      }
+    } else {
+      // 更新现有账户
+      final updatedAccount = widget.account!.copyWith(
+        title: title,
+        icon: _selectedIcon,
+        backgroundColor: _selectedColor,
+      );
+      await widget.billPlugin.controller.saveAccount(updatedAccount);
+      if (mounted) {
+        Navigator.pop(context);
       }
     }
   }
@@ -173,17 +164,9 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
 
     if (confirmed != true || !mounted) return;
 
-    try {
-      await widget.billPlugin.controller.deleteAccount(widget.account!.id);
-      if (mounted) {
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('删除失败: $e')));
-      }
+    await widget.billPlugin.controller.deleteAccount(widget.account!.id);
+    if (mounted) {
+      Navigator.pop(context);
     }
   }
 }
