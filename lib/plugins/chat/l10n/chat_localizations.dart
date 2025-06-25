@@ -171,6 +171,10 @@ abstract class ChatLocalizations {
   String get errorFilePreviewFailed;
 
   String get audioMessageBubbleErrorText;
+
+  String get stopRecordingHint;
+
+  get rangeHint => null;
 }
 
 class _ChatLocalizationsDelegate

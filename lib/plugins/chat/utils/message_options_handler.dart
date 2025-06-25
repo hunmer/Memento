@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
@@ -42,44 +43,37 @@ class MessageOptionsHandler {
     if (message.type == MessageType.received ||
         message.type == MessageType.sent) {
       Clipboard.setData(ClipboardData(text: message.content));
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ChatLocalizations.of(context)!.copiedToClipboard),
+        ),
+      );
     }
   }
 
   /// 保存最近使用的固定符号
   static Future<void> saveRecentSymbol(String symbol) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      List<String> recentSymbols = prefs.getStringList('recent_symbols') ?? [];
+    final prefs = await SharedPreferences.getInstance();
+    List<String> recentSymbols = prefs.getStringList('recent_symbols') ?? [];
 
-      // 如果符号已存在，先移除它
-      recentSymbols.remove(symbol);
+    // 如果符号已存在，先移除它
+    recentSymbols.remove(symbol);
 
-      // 将符号添加到列表开头
-      recentSymbols.insert(0, symbol);
+    // 将符号添加到列表开头
+    recentSymbols.insert(0, symbol);
 
-      // 保持列表不超过10个项目
-      if (recentSymbols.length > 10) {
-        recentSymbols = recentSymbols.sublist(0, 10);
-      }
-
-      await prefs.setStringList('recent_symbols', recentSymbols);
-    } catch (e) {
-      debugPrint('保存最近符号失败: $e');
+    // 保持列表不超过10个项目
+    if (recentSymbols.length > 10) {
+      recentSymbols = recentSymbols.sublist(0, 10);
     }
+
+    await prefs.setStringList('recent_symbols', recentSymbols);
   }
 
   /// 获取最近使用的固定符号
   static Future<List<String>> getRecentSymbols() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getStringList('recent_symbols') ?? [];
-    } catch (e) {
-      debugPrint('获取最近符号失败: $e');
-      return [];
-    }
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('recent_symbols') ?? [];
   }
 
   /// 分享消息内容
@@ -93,19 +87,12 @@ class MessageOptionsHandler {
     } else if (message.type == MessageType.file ||
         message.type == MessageType.image ||
         message.type == MessageType.video) {
-      try {
-        final fileInfo = FileMessage.fromJson(
-          Map<String, dynamic>.from(
-            message.metadata![Message.metadataKeyFileInfo],
-          ),
-        );
-        shareContent = fileInfo.filePath;
-      } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('无法分享文件: $e')));
-        return;
-      }
+      final fileInfo = FileMessage.fromJson(
+        Map<String, dynamic>.from(
+          message.metadata![Message.metadataKeyFileInfo],
+        ),
+      );
+      shareContent = fileInfo.filePath;
     }
 
     // 调用系统分享

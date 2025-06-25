@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform, Process;
 
@@ -69,7 +70,7 @@ class MetadataDisplay extends StatelessWidget {
                       size: 18,
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
-                    label: Text('1个文件'),
+                    label: Text(ChatLocalizations.of(context).singleFile),
                     onDeleted: onFileRemove,
                     backgroundColor:
                         Theme.of(context).colorScheme.primaryContainer,
@@ -140,7 +141,9 @@ class MetadataDisplay extends StatelessWidget {
             size: 18,
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
-          label: Text('上下文: $contextRange'),
+          label: Text(
+            '${ChatLocalizations.of(context).contextRange}: $contextRange',
+          ),
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           labelStyle: TextStyle(
             color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -160,11 +163,13 @@ class MetadataDisplay extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('设置上下文范围'),
+              title: Text(ChatLocalizations.of(context).setContextRange),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('当前范围: ${currentValue.round()}'),
+                  Text(
+                    '${ChatLocalizations.of(context).currentRange}: ${currentValue.round()}',
+                  ),
                   Slider(
                     value: currentValue,
                     min: minRange.toDouble(),
@@ -177,9 +182,9 @@ class MetadataDisplay extends StatelessWidget {
                       });
                     },
                   ),
-                  const Text(
-                    '范围: 0-50，0表示不使用上下文',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  Text(
+                    '${ChatLocalizations.of(context).rangeHint}: 0-50，0表示不使用上下文',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),

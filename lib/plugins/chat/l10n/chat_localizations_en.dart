@@ -329,4 +329,7 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   get messageHintText => 'Type your message here...';
+
+  @override
+  String get stopRecordingHint => 'Tap to stop recording...';
 }

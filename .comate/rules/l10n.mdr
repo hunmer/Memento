@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+# 基本规则
+
+- 1.替换文件里 Text(' 开头的硬编码text文本，逐个根据文件所在的插件目录（比如是plugins\chat下的文件，则对应的多语言文件是lib\plugins\chat\l10n\chat_localizations.dart）找到此插件目录下的localizations文件，并添加zh,en的多语言
+
+- 2.需要将ui的text硬编码修改成Localizations.of(context).属性名 （ps 不使用 ?? !. 等语法）
+

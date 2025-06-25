@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 import '../../../../../models/file_message.dart';
 import '../../../../../services/file_service.dart';
 import '../types.dart';
+import '../l10n/local_video_handler_localizations.dart';
 
 Future<void> handleVideoSelection({
   required BuildContext context,
@@ -17,8 +18,13 @@ Future<void> handleVideoSelection({
   // 检查是否在Web平台上
   if (kIsWeb) {
     scaffoldMessenger.showSnackBar(
-      const SnackBar(
-        content: Text('Web平台不支持视频拍摄功能'),
+      SnackBar(
+        content: Text(
+          LocalVideoHandlerLocalizations.getText(
+            context,
+            LocalVideoHandlerLocalizations.videoCantBeSelectedOnWeb,
+          ),
+        ),
         backgroundColor: Colors.orange,
         behavior: SnackBarBehavior.floating,
       ),
@@ -40,7 +46,12 @@ Future<void> handleVideoSelection({
           if (!await videoFile.exists()) {
             scaffoldMessenger.showSnackBar(
               SnackBar(
-                content: Text('视频文件不存在'),
+                content: Text(
+                  LocalVideoHandlerLocalizations.getText(
+                    context,
+                    LocalVideoHandlerLocalizations.videoFileNotExist,
+                  ),
+                ),
                 backgroundColor: Colors.red,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -83,7 +94,13 @@ Future<void> handleVideoSelection({
         } catch (processingError) {
           scaffoldMessenger.showSnackBar(
             SnackBar(
-              content: Text('处理视频失败: $processingError'),
+              content: Text(
+                LocalVideoHandlerLocalizations.getText(
+                  context,
+                  LocalVideoHandlerLocalizations.videoProcessingFailed,
+                  processingError.toString(),
+                ),
+              ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
@@ -93,7 +110,13 @@ Future<void> handleVideoSelection({
     } catch (e) {
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text('选择视频失败: $e'),
+          content: Text(
+            LocalVideoHandlerLocalizations.getText(
+              context,
+              LocalVideoHandlerLocalizations.videoSelectionFailed,
+              e.toString(),
+            ),
+          ),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -117,7 +140,12 @@ Future<void> handleVideoSelection({
         if (!await videoFile.exists()) {
           scaffoldMessenger.showSnackBar(
             SnackBar(
-              content: Text('视频文件不存在'),
+              content: Text(
+                LocalVideoHandlerLocalizations.getText(
+                  context,
+                  LocalVideoHandlerLocalizations.videoFileNotExist,
+                ),
+              ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
@@ -161,7 +189,9 @@ Future<void> handleVideoSelection({
         // 显示视频选择成功的提示
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text('已发送视频: ${path.basename(video.path)}'),
+            content: Text(
+              '${LocalVideoHandlerLocalizations.getText(context, LocalVideoHandlerLocalizations.videoSent)}: ${path.basename(video.path)}',
+            ),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
@@ -169,7 +199,13 @@ Future<void> handleVideoSelection({
       } catch (processingError) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text('处理视频失败: $processingError'),
+            content: Text(
+              LocalVideoHandlerLocalizations.getText(
+                context,
+                LocalVideoHandlerLocalizations.videoProcessingFailed,
+                processingError.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -179,7 +215,13 @@ Future<void> handleVideoSelection({
   } catch (e) {
     scaffoldMessenger.showSnackBar(
       SnackBar(
-        content: Text('拍摄视频失败: $e'),
+        content: Text(
+          LocalVideoHandlerLocalizations.getText(
+            context,
+            LocalVideoHandlerLocalizations.videoSelectionFailed,
+            e.toString(),
+          ),
+        ),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
       ),
