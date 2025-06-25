@@ -339,10 +339,7 @@ class CalendarPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            CalendarLocalizations.getText(
-                              context,
-                              'eventCount',
-                            ),
+                            CalendarLocalizations.of(context)!.eventCount,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -358,10 +355,7 @@ class CalendarPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            CalendarLocalizations.getText(
-                              context,
-                              'weekEvents',
-                            ),
+                            CalendarLocalizations.of(context)!.weekEvents,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -384,10 +378,7 @@ class CalendarPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            CalendarLocalizations.getText(
-                              context,
-                              'expiredEvents',
-                            ),
+                            CalendarLocalizations.of(context)!.expiredEvents,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -445,12 +436,12 @@ class _CalendarMainViewState extends State<CalendarMainView> {
               icon: const Icon(Icons.arrow_back),
               onPressed: () => PluginManager.toHomeScreen(context),
             ),
-            title: Text(CalendarLocalizations.getText(context, 'calendar')),
+            title: Text(CalendarLocalizations.of(context)!.calendar),
             actions: [
               // 跳转到今天按钮
               IconButton(
                 icon: const Icon(Icons.today),
-                tooltip: CalendarLocalizations.getText(context, 'backToToday'),
+                tooltip: CalendarLocalizations.of(context)!.backToToday,
                 onPressed: () {
                   plugin.sfController.displayDate = DateTime.now();
                 },
@@ -458,16 +449,14 @@ class _CalendarMainViewState extends State<CalendarMainView> {
               // 查看所有事件按钮
               IconButton(
                 icon: const Icon(Icons.list_alt),
-                tooltip: CalendarLocalizations.getText(context, 'allEvents'),
+                tooltip: CalendarLocalizations.of(context)!.allEvents,
                 onPressed: () => plugin.showAllEvents(context),
               ),
               // 查看已完成事件按钮
               IconButton(
                 icon: const Icon(Icons.done_all),
-                tooltip: CalendarLocalizations.getText(
-                  context,
-                  'completedEvents',
-                ),
+                tooltip: CalendarLocalizations.of(context)!.completedEvents,
+
                 onPressed: () => plugin.showCompletedEvents(context),
               ),
             ],

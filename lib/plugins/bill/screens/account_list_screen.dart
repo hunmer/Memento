@@ -94,7 +94,10 @@ class _AccountListScreenState extends State<AccountListScreen> {
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text(style: TextStyle(color: Colors.red)),
+                      child: const Text(
+                        '',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ),
                   ],
                 );
@@ -107,13 +110,6 @@ class _AccountListScreenState extends State<AccountListScreen> {
               SnackBar(
                 content: Text(
                   '${BillLocalizations.of(context)!.accountDeleted} "${account.title}"',
-                ),
-                action: SnackBarAction(
-                  label: BillLocalizations.of(context)!.undo,
-                  onPressed: () {
-                    // 重新创建账户
-                    widget.billPlugin.controller.createAccount(account);
-                  },
                 ),
               ),
             );

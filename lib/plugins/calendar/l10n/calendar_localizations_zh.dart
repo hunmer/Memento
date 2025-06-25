@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'calendar_localizations.dart';
 
 class CalendarLocalizationsZh extends CalendarLocalizations {
+  CalendarLocalizationsZh(super.locale);
+
+  @override
+  String get noCompletedEvents => '暂无活动';
+
   @override
   String get pluginName => '日历';
 
@@ -89,4 +94,24 @@ class CalendarLocalizationsZh extends CalendarLocalizations {
 
   @override
   String get scheduleView => '日程视图';
+
+  @override
+  // TODO: implement reminderSettings
+  String get reminderSettings => throw UnimplementedError();
+
+  @override
+  // TODO: implement selectDateRangeFirst
+  String get selectDateRangeFirst => throw UnimplementedError();
+
+  @override
+  // TODO: implement selectReminderTime
+  String get selectReminderTime => throw UnimplementedError();
+
+  @override
+  // TODO: implement enterEventTitle
+  String get enterEventTitle => throw UnimplementedError();
+
+  @override
+  // TODO: implement endTimeCannotBeEarlier
+  String get endTimeCannotBeEarlier => throw UnimplementedError();
 }

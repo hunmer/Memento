@@ -74,8 +74,6 @@ abstract class NotesLocalizations {
 
   // 新增文本
   String get createNew;
-  String get newFolder;
-  String get newNote;
   String get movedTo;
   String get filter;
   String get tags;

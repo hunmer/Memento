@@ -123,7 +123,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
                       // 显示成功提示
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
                             BillLocalizations.of(context)!.billSaved,
                           ),
@@ -188,16 +188,16 @@ class _BillEditScreenState extends State<BillEditScreen> {
       children: [
         Expanded(
           child: SegmentedButton<bool>(
-            segments: const [
+            segments: [
               ButtonSegment<bool>(
                 value: true,
                 label: Text(BillLocalizations.of(context)!.expense),
-                icon: Icon(Icons.arrow_upward),
+                icon: const Icon(Icons.arrow_upward),
               ),
               ButtonSegment<bool>(
                 value: false,
                 label: Text(BillLocalizations.of(context)!.income),
-                icon: Icon(Icons.arrow_downward),
+                icon: const Icon(Icons.arrow_downward),
               ),
             ],
             selected: {_isExpense},

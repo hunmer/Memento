@@ -244,37 +244,27 @@ class _BillListScreenState extends State<BillListScreen>
                         Row(
                           children: [
                             Text(
-                              BillLocalizations.of(context)!.timeRange +
-                                  ':',
+                              BillLocalizations.of(context)!.timeRange + ':',
                             ),
                             const SizedBox(width: 8),
                             SegmentedButton<String>(
-                              segments: const [
+                              segments: [
                                 ButtonSegment<String>(
                                   value: 'week',
                                   label: Text(
-                                    BillLocalizations.of(context)!.
-                                      context,
-                                      'thisWeek',
-                                    ),
+                                    BillLocalizations.of(context)!.thisWeek,
                                   ),
                                 ),
                                 ButtonSegment<String>(
                                   value: 'month',
                                   label: Text(
-                                    BillLocalizations.of(context)!.
-                                      context,
-                                      'thisMonth',
-                                    ),
+                                    BillLocalizations.of(context)!.thisMonth,
                                   ),
                                 ),
                                 ButtonSegment<String>(
                                   value: 'year',
                                   label: Text(
-                                    BillLocalizations.of(context)!.
-                                      context,
-                                      'thisYear',
-                                    ),
+                                    BillLocalizations.of(context)!.thisYear,
                                   ),
                                 ),
                               ],
@@ -343,10 +333,9 @@ class _BillListScreenState extends State<BillListScreen>
                         _bills.isEmpty
                             ? Center(
                               child: Text(
-                                BillLocalizations.of(context)!.
+                                BillLocalizations.of(
                                   context,
-                                  'noBillsClickToAdd',
-                                ),
+                                )!.noBillsClickToAdd,
                               ),
                             )
                             : ListView.builder(
@@ -451,9 +440,9 @@ class _BillListScreenState extends State<BillListScreen>
 
         // 显示删除成功提示
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(BillLocalizations.of(context)!.billDeleted),
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
       },

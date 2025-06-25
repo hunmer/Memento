@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/event.dart';
 import '../../../widgets/circle_icon_picker.dart';
@@ -120,9 +121,7 @@ class _EventEditPageState extends State<EventEditPage> {
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
-          title: Text(
-            CalendarLocalizations.getText(context, 'selectReminderTime'),
-          ),
+          title: Text(CalendarLocalizations.of(context)!.selectReminderTime),
           children:
               items
                   .map(
@@ -143,6 +142,12 @@ class _EventEditPageState extends State<EventEditPage> {
         _reminderMinutes = result;
       });
     }
+
+    @override
+    Widget build(BuildContext context) {
+      // TODO: implement build
+      throw UnimplementedError();
+    }
   }
 
   Future<void> _selectEndTime() async {
@@ -150,7 +155,7 @@ class _EventEditPageState extends State<EventEditPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            CalendarLocalizations.getText(context, 'selectDateRangeFirst'),
+            CalendarLocalizations.of(context)!.selectDateRangeFirst,
           ),
         ),
       );
@@ -176,9 +181,7 @@ class _EventEditPageState extends State<EventEditPage> {
     if (_titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            CalendarLocalizations.getText(context, 'enterEventTitle'),
-          ),
+          content: Text(CalendarLocalizations.of(context)!.enterEventTitle),
         ),
       );
       return;
@@ -201,7 +204,7 @@ class _EventEditPageState extends State<EventEditPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            CalendarLocalizations.getText(context, 'endTimeCannotBeEarlier'),
+            CalendarLocalizations.of(context)!.endTimeCannotBeEarlier,
           ),
         ),
       );
@@ -280,7 +283,7 @@ class _EventEditPageState extends State<EventEditPage> {
             ),
             const SizedBox(height: 16),
             ListTile(
-              title: Text(CalendarLocalizations.getText(context, 'dateRange')),
+              title: Text(CalendarLocalizations.of(context)!.dateRange),
               subtitle: Text(
                 _endDate != null
                     ? '${_startDate.year}-${_startDate.month}-${_startDate.day} 至 ${_endDate!.year}-${_endDate!.month}-${_endDate!.day}'
@@ -289,9 +292,7 @@ class _EventEditPageState extends State<EventEditPage> {
               onTap: _selectDateRange,
             ),
             ListTile(
-              title: Text(
-                CalendarLocalizations.getText(context, 'reminderSettings'),
-              ),
+              title: Text(CalendarLocalizations.of(context)!.reminderSettings),
               subtitle: Text(
                 _reminderMinutes != null
                     ? _getReminderText(_reminderMinutes!)
@@ -312,18 +313,14 @@ class _EventEditPageState extends State<EventEditPage> {
               children: [
                 Expanded(
                   child: ListTile(
-                    title: Text(
-                      CalendarLocalizations.getText(context, 'startTime'),
-                    ),
+                    title: Text(CalendarLocalizations.of(context)!.startTime),
                     subtitle: Text(_startTime.format(context)),
                     onTap: _selectStartTime,
                   ),
                 ),
                 Expanded(
                   child: ListTile(
-                    title: Text(
-                      CalendarLocalizations.getText(context, 'endTime'),
-                    ),
+                    title: Text(CalendarLocalizations.of(context)!.endTime),
                     subtitle: Text(_endTime?.format(context) ?? '无'),
                     onTap: _selectEndTime,
                   ),

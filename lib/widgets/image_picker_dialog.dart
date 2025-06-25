@@ -1,6 +1,5 @@
-import '../l10n/image_picker_localizations.dart';
 import 'dart:async';
-
+import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:crop_your_image/crop_your_image.dart';

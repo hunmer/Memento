@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import '../bill_plugin.dart';
@@ -80,9 +81,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
                   foregroundColor: Colors.white,
                 ),
                 icon: const Icon(Icons.delete),
-                label: Text(
-                  BillLocalizations.of(context)!.deleteAccount,
-                ),
+                label: Text(BillLocalizations.of(context)!.deleteAccount),
                 onPressed: _deleteAccount,
               ),
             ],
@@ -155,20 +154,17 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(BillLocalizations.of(context)!.confirmDelete),
+            title: Text(AppLocalizations.of(context)!.confirmDelete),
             content: Text(
-              BillLocalizations.of(context)!.
-                context,
-                'confirmDeleteAccountWithBills',
-              ),
+              BillLocalizations.of(context)!.confirmDeleteAccountWithBills,
             ),
             actions: [
               TextButton(
-                child: Text(BillLocalizations.of(context)!.cancel),
+                child: Text(AppLocalizations.of(context)!.cancel),
                 onPressed: () => Navigator.pop(context, false),
               ),
               TextButton(
-                child: Text(BillLocalizations.of(context)!.delete),
+                child: Text(AppLocalizations.of(context)!.delete),
                 onPressed: () => Navigator.pop(context, true),
               ),
             ],

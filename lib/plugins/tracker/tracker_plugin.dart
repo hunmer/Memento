@@ -1,5 +1,5 @@
-import '../l10n/tracker_localizations.dart';
 import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_base.dart';

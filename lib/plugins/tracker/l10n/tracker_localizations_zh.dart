@@ -173,10 +173,4 @@ class TrackerLocalizationsZh extends TrackerLocalizations {
 
   @override
   String get timerTitle => '计时 - {goalName}';
-
-  @override
-  String get cancel => '取消';
-
-  @override
-  String get save => '保存';
 }

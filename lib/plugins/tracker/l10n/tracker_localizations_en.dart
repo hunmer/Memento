@@ -175,10 +175,4 @@ class TrackerLocalizationsEn extends TrackerLocalizations {
 
   @override
   String get timerTitle => 'Timer - {goalName}';
-
-  @override
-  String get cancel => 'Cancel';
-
-  @override
-  String get save => 'Save';
 }

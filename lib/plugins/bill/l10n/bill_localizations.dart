@@ -77,8 +77,27 @@ abstract class BillLocalizations {
   String get invalidAmount;
   String get invalidDate;
   String get requiredField;
+  String get accountManagement;
+  String get accountDeleted;
+  String get noAccounts;
+  String get noBills;
+  String get todayFinance;
+  String get monthFinance;
+  String get monthBills;
+  String get accountTitle;
+  String get thisWeek;
+  String get thisMonth;
+  String get thisYear;
+  String get all;
+  String get custom;
+  String get delete;
+  String get deleteAccount;
+  String get enterAccountName;
+  String get confirmDeleteAccountWithBills;
 
-  get noBills => null;
+  String get noBillsClickToAdd;
+  String get balance;
+  String get timeRange;
 }
 
 class _BillLocalizationsDelegate

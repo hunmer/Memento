@@ -148,4 +148,12 @@ class StoreLocalizationsEn extends StoreLocalizations {
 
   @override
   String get pointsHistoryEntry => '{value} points ({type})';
+
+  @override
+  // TODO: implement points
+  String get points => throw UnimplementedError();
+
+  @override
+  // TODO: implement redeemConfirmation
+  String get redeemConfirmation => throw UnimplementedError();
 }

@@ -72,6 +72,10 @@ abstract class StoreLocalizations {
   ];
 
   static const List<Locale> supportedLocales = [Locale('en'), Locale('zh')];
+
+  String get redeemConfirmation;
+
+  get confirmUseItem => null;
 }
 
 class _StoreLocalizationsDelegate

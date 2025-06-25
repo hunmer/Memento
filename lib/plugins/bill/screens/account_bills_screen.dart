@@ -47,23 +47,23 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
             },
             itemBuilder: (BuildContext context) {
               return [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: StatisticRange.week,
                   child: Text(BillLocalizations.of(context)!.thisWeek),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: StatisticRange.month,
                   child: Text(BillLocalizations.of(context)!.thisMonth),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: StatisticRange.year,
                   child: Text(BillLocalizations.of(context)!.thisYear),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: StatisticRange.all,
                   child: Text(BillLocalizations.of(context)!.all),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: StatisticRange.custom,
                   child: Text(BillLocalizations.of(context)!.custom),
                 ),
