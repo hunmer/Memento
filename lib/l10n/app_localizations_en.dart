@@ -30,7 +30,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get webdavSync => 'WebDAV Sync';
 
   @override
+  String get selectDate => 'select Date';
+
+  @override
+  String get showAll => 'show All';
+
+  @override
   String get ok => 'OK';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get yes => 'Yes';
 
   @override
   String get cancel => 'Cancel';
@@ -100,16 +112,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get create => 'Create';
-
-  @override
-  String get selectDate => 'Select Date';
-
-  @override
-  String get showAll => 'Show All';
-
-  @override
-  String get no => 'No';
-
-  @override
-  String get yes => 'Yes';
 }

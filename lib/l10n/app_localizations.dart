@@ -140,11 +140,35 @@ abstract class AppLocalizations {
   /// **'WebDAV Sync'**
   String get webdavSync;
 
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'select Date'**
+  String get selectDate;
+
+  /// No description provided for @showAll.
+  ///
+  /// In en, this message translates to:
+  /// **'show All'**
+  String get showAll;
+
   /// No description provided for @ok.
   ///
   /// In en, this message translates to:
   /// **'OK'**
   String get ok;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
 
   /// No description provided for @cancel.
   ///
@@ -283,14 +307,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create'**
   String get create;
-
-  String get selectDate;
-
-  String get showAll;
-
-  String get yes;
-
-  String get no;
 }
 
 class _AppLocalizationsDelegate
