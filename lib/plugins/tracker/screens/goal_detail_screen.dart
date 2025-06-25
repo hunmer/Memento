@@ -43,7 +43,7 @@ class GoalDetailScreen extends StatelessWidget {
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('确认'),
+                              child: Text(AppLocalizations.of(context)!.ok),
                             ),
                           ],
                         ),
@@ -168,7 +168,11 @@ class GoalDetailScreen extends StatelessWidget {
                                                               context,
                                                               true,
                                                             ),
-                                                        child: const Text('确认'),
+                                                        child: Text(
+                                                          AppLocalizations.of(
+                                                            context,
+                                                          )!.ok,
+                                                        ),
                                                       ),
                                                     ],
                                                   ),

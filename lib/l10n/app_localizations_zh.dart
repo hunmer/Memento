@@ -9,7 +9,7 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => '备忘录';
+  String get appTitle => 'memento';
 
   @override
   String get pluginManager => '插件管理器';
@@ -73,4 +73,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get confirmDelete => '确认删除？';
+
+  @override
+  String get week => '周';
+
+  @override
+  String get month => '月';
+
+  @override
+  String get date => '日期';
+
+  @override
+  String get edit => '编辑';
+
+  @override
+  String get retry => '重试';
+
+  @override
+  String get rename => '重命名';
+
+  @override
+  String get copy => '复制';
+
+  @override
+  String get done => '完成';
+
+  @override
+  String get create => '新建';
 }

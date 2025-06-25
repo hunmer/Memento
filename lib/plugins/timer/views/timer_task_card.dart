@@ -291,7 +291,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: const Text('编辑'),
+                title: Text(AppLocalizations.of(context)!.edit),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onEdit(task);

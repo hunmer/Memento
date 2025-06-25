@@ -107,7 +107,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
                     Navigator.of(context).pop();
                   }
                 },
-                child: const Text('确认'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),
@@ -133,7 +133,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
                   setState(() {}); // 刷新列表
                   Navigator.of(context).pop();
                 },
-                child: const Text('确认'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),
@@ -168,7 +168,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
                     Navigator.of(context).pop(_selectedGroup);
                   }
                 },
-                child: const Text('确认'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),

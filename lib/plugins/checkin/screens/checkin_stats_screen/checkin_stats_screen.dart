@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';
 import 'widgets/daily_checkin_chart.dart';
@@ -32,7 +33,7 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ChoiceChip(
-                    label: const Text('周'),
+                    label: Text(AppLocalizations.of(context)!.week),
                     selected: !_isMonthly,
                     onSelected: (selected) {
                       if (selected) {
@@ -42,7 +43,7 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
                   ),
                   const SizedBox(width: 8),
                   ChoiceChip(
-                    label: const Text('月'),
+                    label: Text(AppLocalizations.of(context)!.month),
                     selected: _isMonthly,
                     onSelected: (selected) {
                       if (selected) {

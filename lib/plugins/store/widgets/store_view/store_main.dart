@@ -287,7 +287,7 @@ class _StoreMainState extends State<StoreMainView> {
                     }
                   }
                 },
-                child: const Text('确认'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),

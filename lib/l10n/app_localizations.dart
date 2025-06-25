@@ -98,137 +98,191 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
-  /// The title of the application
+  /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'My Flutter App'**
+  /// **'memento'**
   String get appTitle;
 
-  /// Title for plugin management section
+  /// No description provided for @pluginManager.
   ///
   /// In en, this message translates to:
   /// **'Plugin Manager'**
   String get pluginManager;
 
-  /// Backup options menu title
+  /// No description provided for @backupOptions.
   ///
   /// In en, this message translates to:
   /// **'Backup Options'**
   String get backupOptions;
 
-  /// Prompt to select backup method
+  /// No description provided for @selectBackupMethod.
   ///
   /// In en, this message translates to:
   /// **'Please select backup method'**
   String get selectBackupMethod;
 
-  /// Export app data option
+  /// No description provided for @exportAppData.
   ///
   /// In en, this message translates to:
   /// **'Export App Data'**
   String get exportAppData;
 
-  /// Full backup option
+  /// No description provided for @fullBackup.
   ///
   /// In en, this message translates to:
   /// **'Full Backup'**
   String get fullBackup;
 
-  /// WebDAV sync option
+  /// No description provided for @webdavSync.
   ///
   /// In en, this message translates to:
   /// **'WebDAV Sync'**
   String get webdavSync;
 
-  /// OK button text
+  /// No description provided for @ok.
   ///
   /// In en, this message translates to:
   /// **'OK'**
   String get ok;
 
-  /// Cancel button text
+  /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
 
-  /// Save button text
+  /// No description provided for @save.
   ///
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
 
-  /// Close button text
+  /// No description provided for @close.
   ///
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
 
-  /// Delete button text
+  /// No description provided for @delete.
   ///
   /// In en, this message translates to:
   /// **'Delete'**
   String get delete;
 
-  /// Reset button text
+  /// No description provided for @reset.
   ///
   /// In en, this message translates to:
   /// **'Reset'**
   String get reset;
 
-  /// Apply button text
+  /// No description provided for @apply.
   ///
   /// In en, this message translates to:
   /// **'Apply'**
   String get apply;
 
-  /// Settings menu title
+  /// No description provided for @settings.
   ///
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
 
-  /// Start time label
+  /// No description provided for @startTime.
   ///
   /// In en, this message translates to:
   /// **'Start Time'**
   String get startTime;
 
-  /// End time label
+  /// No description provided for @endTime.
   ///
   /// In en, this message translates to:
   /// **'End Time'**
   String get endTime;
 
-  /// Interval label
+  /// No description provided for @interval.
   ///
   /// In en, this message translates to:
   /// **'Interval'**
   String get interval;
 
-  /// Minutes unit label
+  /// No description provided for @minutes.
   ///
   /// In en, this message translates to:
   /// **'Minutes'**
   String get minutes;
 
-  /// Tags label
+  /// No description provided for @tags.
   ///
   /// In en, this message translates to:
   /// **'Tags'**
   String get tags;
 
-  /// Confirm button text
+  /// No description provided for @confirm.
   ///
   /// In en, this message translates to:
   /// **'Confirm'**
   String get confirm;
 
-  /// Delete confirmation prompt
+  /// No description provided for @confirmDelete.
   ///
   /// In en, this message translates to:
   /// **'Confirm Delete?'**
   String get confirmDelete;
+
+  /// No description provided for @week.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get week;
+
+  /// No description provided for @month.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get month;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rename;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
 }
 
 class _AppLocalizationsDelegate

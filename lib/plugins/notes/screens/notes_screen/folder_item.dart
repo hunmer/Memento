@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../models/folder.dart';
 import 'folder_operations.dart';
@@ -21,7 +22,7 @@ mixin FolderItem on NotesMainViewState, FolderOperations {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.edit),
-                      title: const Text('重命名'),
+                      title: Text(AppLocalizations.of(context)!.rename),
                       onTap: () {
                         Navigator.pop(context);
                         renameFolder(folder);

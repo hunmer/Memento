@@ -31,8 +31,8 @@ class DeleteChannelDialog extends StatelessWidget {
             backgroundColor: Colors.red,
             foregroundColor: Colors.white, // 设置文字颜色为白色，确保在红色背景上清晰可见
           ),
-          child: const Text(
-            '删除',
+          child: Text(
+            AppLocalizations.of(context)!.delete,
             style: TextStyle(
               fontWeight: FontWeight.bold, // 加粗文字增强可见性
             ),

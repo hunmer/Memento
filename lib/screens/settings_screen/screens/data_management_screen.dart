@@ -175,7 +175,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('重命名'),
+            title: Text(AppLocalizations.of(context)!.rename),
             content: TextField(
               controller: nameController,
               decoration: const InputDecoration(hintText: '输入新名称'),
@@ -220,7 +220,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
               if (!isDirectory)
                 ListTile(
                   leading: const Icon(Icons.edit),
-                  title: const Text('编辑'),
+                  title: Text(AppLocalizations.of(context)!.edit),
                   onTap: () {
                     Navigator.pop(context);
                     // 这里可以添加编辑文件的逻辑
@@ -231,7 +231,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 ),
               ListTile(
                 leading: const Icon(Icons.drive_file_rename_outline),
-                title: const Text('重命名'),
+                title: Text(AppLocalizations.of(context)!.rename),
                 onTap: () {
                   Navigator.pop(context);
                   _renameItem(itemPath, isDirectory);
@@ -391,7 +391,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
-                child: const Text('创建'),
+                child: Text(AppLocalizations.of(context)!.create),
               ),
             ],
           ),
@@ -422,7 +422,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
-                child: const Text('创建'),
+                child: Text(AppLocalizations.of(context)!.create),
               ),
             ],
           ),

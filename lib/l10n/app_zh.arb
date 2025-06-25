@@ -1,110 +1,14 @@
 {
-    "newChannel": "新建频道",
-    "@newChannel": {
-        "description": "创建新频道的按钮文本"
-    },
-    "channelName": "频道名称",
-    "@channelName": {
-        "description": "频道名称输入框标签"
-    },
-    "channelGroups": "频道分组",
-    "@channelGroups": {
-        "description": "频道分组输入框标签"
-    },
-    "channelGroupsHint": "例如：工作,学习,娱乐",
-    "@channelGroupsHint": {
-        "description": "频道分组输入框提示文本"
-    },
+    "@@locale": "zh",
+  "appTitle": "memento",
+  "pluginManager": "插件管理器",
     "cancel": "取消",
-    "@cancel": {
-        "description": "取消按钮文本"
-    },
-    "create": "创建",
-    "@create": {
-        "description": "创建按钮文本"
-    },
     "editChannel": "编辑频道",
-    "@editChannel": {
-        "description": "编辑频道对话框标题"
-    },
     "save": "保存",
-    "@save": {
-        "description": "保存按钮文本"
-    },
-    "deleteChannel": "删除频道",
-    "@deleteChannel": {
-        "description": "删除频道对话框标题"
-    },
-    "deleteChannelConfirmation": "确定要删除\"{channelTitle}\"频道吗？此操作不可撤销。",
-    "@deleteChannelConfirmation": {
-        "description": "删除频道确认提示",
-        "placeholders": {
-            "channelTitle": {
-                "type": "String",
-                "example": "工作频道"
-            }
-        }
-    },
     "delete": "删除",
-    "@delete": {
-        "description": "删除按钮文本"
-    },
-    "selectIcon": "选择图标:",
-    "@selectIcon": {
-        "description": "选择图标提示文本"
-    },
-    "selectChannelGroup": "选择频道组",
-    "@selectChannelGroup": {
-        "description": "选择频道组对话框标题"
-    },
-    "noChannels": "这里没有任何频道",
-    "@noChannels": {
-        "description": "没有频道时显示的文本"
-    },
-    "clickToAddChannel": "点击右上角添加频道",
-    "@clickToAddChannel": {
-        "description": "添加频道提示文本"
-    },
-    "draft": "草稿",
-    "@draft": {
-        "description": "草稿标签文本"
-    },
-    "noMessages": "暂无消息",
-    "@noMessages": {
-        "description": "没有消息时显示的文本"
-    },
-    "appTitle": "备忘录",
-    "@appTitle": {
-        "description": "应用程序标题"
-    },
-    "pluginManager": "插件管理器",
-    "@pluginManager": {
-        "description": "插件管理器页面标题"
-    },
-    "showAvatarInChannelList": "在频道列表中显示头像",
-    "@showAvatarInChannelList": {
-        "description": "是否在频道列表中显示头像的选项"
-    },
-    "chatPluginName": "聊天",
-    "@chatPluginName": {
-        "description": "聊天插件的名称"
-    },
-    "chatPluginDescription": "用于与其他用户聊天的插件",
-    "@chatPluginDescription": {
-        "description": "聊天插件的描述"
-    },
     "switchedToDarkTheme": "已切换到深色主题",
-    "@switchedToDarkTheme": {
-        "description": "切换到深色主题时显示的消息"
-    },
     "switchedToLightTheme": "已切换到浅色主题",
-    "@switchedToLightTheme": {
-        "description": "切换到浅色主题时显示的消息"
-    },
     "darkMode": "深色模式",
-    "@darkMode": {
-        "description": "深色模式切换标签"
-    },
     "backupOptions": "备份选项",
     "selectBackupMethod": "请选择备份方式",
     "exportAppData": "导出应用数据",
@@ -122,55 +26,13 @@
     "tags": "标签",
     "confirm": "确认",
     "confirmDelete": "确认删除？",
-    "@backupOptions": {
-        "description": "备份选项菜单标题"
-    },
-    "@selectBackupMethod": {
-        "description": "选择备份方式提示"
-    },
-    "@exportAppData": {
-        "description": "导出应用数据选项"
-    },
-    "@fullBackup": {
-        "description": "完整备份选项"
-    },
-    "@webdavSync": {
-        "description": "WebDAV同步选项"
-    },
-    "@ok": {
-        "description": "确定按钮文本"
-    },
-    "@close": {
-        "description": "关闭按钮文本"
-    },
-    "@reset": {
-        "description": "重置按钮文本"
-    },
-    "@apply": {
-        "description": "应用按钮文本"
-    },
-    "@settings": {
-        "description": "设置菜单标题"
-    },
-    "@startTime": {
-        "description": "开始时间标签"
-    },
-    "@endTime": {
-        "description": "结束时间标签"
-    },
-    "@interval": {
-        "description": "间隔标签"
-    },
-    "@minutes": {
-        "description": "分钟单位标签"
-    },
-    "@tags": {
-        "description": "标签标签"
-    },
-    "@confirm": {
-        "description": "确认按钮文本"
-    },
-    "@confirmDelete": {
-        "description": "删除确认提示"
-    }
+     "week": "周",
+     "done": "完成",
+  "month": "月",
+  "date": "日期",
+  "edit": "编辑",
+  "retry": "重试",
+  "rename": "重命名",
+  "copy": "复制",
+  "create": "新建"
 }
