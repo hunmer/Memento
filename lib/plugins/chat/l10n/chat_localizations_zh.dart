@@ -309,4 +309,16 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String get metadataFilters => '元数据筛选器';
+
+  @override
+  String get audioMessageBubbleErrorText => '音频消息气泡错误文本';
+
+  @override
+  String get editMessageTitle => '编辑消息标题';
+
+  @override
+  String get errorFilePreviewFailed => '预览文件失败: \$e';
+
+  @override
+  String get messageHintText => '消息提示文本';
 }

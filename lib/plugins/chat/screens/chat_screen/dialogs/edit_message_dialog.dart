@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../models/message.dart';
 
@@ -19,7 +20,7 @@ class EditMessageDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('编辑消息'),
+      title: Text(ChatLocalizations.of(context)!.editMessageTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -27,7 +28,9 @@ class EditMessageDialog extends StatelessWidget {
             controller: controller,
             autofocus: true,
             maxLines: null,
-            decoration: const InputDecoration(hintText: '输入新的消息内容...'),
+            decoration: InputDecoration(
+              hintText: ChatLocalizations.of(context)!.messageHintText,
+            ),
           ),
           const SizedBox(height: 10),
           Row(

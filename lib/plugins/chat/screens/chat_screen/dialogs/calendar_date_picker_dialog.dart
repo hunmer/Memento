@@ -68,16 +68,19 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  '选择日期',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context)!.selectDate,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
                     widget.onDateSelected(null);
                     Navigator.of(context).pop();
                   },
-                  child: const Text('显示全部'),
+                  child: Text(AppLocalizations.of(context)!.showAll),
                 ),
               ],
             ),

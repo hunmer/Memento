@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../models/message.dart';
 import '../../../models/file_message.dart';
@@ -78,7 +79,8 @@ class _MessageListState extends State<MessageList> {
 
         if (item is Message) {
           // 确保消息的 metadata 中包含 channelId
-          if (item.metadata == null || !item.metadata!.containsKey('channelId')) {
+          if (item.metadata == null ||
+              !item.metadata!.containsKey('channelId')) {
             final metadata = Map<String, dynamic>.from(item.metadata ?? {});
             metadata['channelId'] = item.channelId; // 使用消息对象中的 channelId
             // 创建一个临时消息对象，等待异步操作完成
@@ -101,20 +103,20 @@ class _MessageListState extends State<MessageList> {
             children: [
               if (dateSeparator != null) dateSeparator,
               GestureDetector(
-                  onLongPress: () {
-                    // 使用统一的消息选项处理器
-                    MessageOptionsHandler.showOptionsDialog(
-                      context: context,
-                      message: item,
-                      onMessageEdit: widget.onMessageEdit,
-                      onMessageDelete: widget.onMessageDelete,
-                      onMessageCopy: widget.onMessageCopy,
-                      onSetFixedSymbol: widget.onSetFixedSymbol,
-                      onSetBubbleColor: widget.onSetBubbleColor,
-                      onReply: widget.onReply,
-                      onToggleFavorite: widget.onToggleFavorite,
-                    );
-                  },
+                onLongPress: () {
+                  // 使用统一的消息选项处理器
+                  MessageOptionsHandler.showOptionsDialog(
+                    context: context,
+                    message: item,
+                    onMessageEdit: widget.onMessageEdit,
+                    onMessageDelete: widget.onMessageDelete,
+                    onMessageCopy: widget.onMessageCopy,
+                    onSetFixedSymbol: widget.onSetFixedSymbol,
+                    onSetBubbleColor: widget.onSetBubbleColor,
+                    onReply: widget.onReply,
+                    onToggleFavorite: widget.onToggleFavorite,
+                  );
+                },
                 onDoubleTap: () {
                   // 使用统一的消息选项处理器，直接显示固态符号编辑对话框
                   MessageOptionsHandler.showOptionsDialog(
@@ -137,7 +139,8 @@ class _MessageListState extends State<MessageList> {
                   onEdit: () => widget.onMessageEdit(item),
                   onDelete: () => widget.onMessageDelete(item),
                   onCopy: () => widget.onMessageCopy(item),
-                  onSetFixedSymbol: (symbol) => widget.onSetFixedSymbol(item, symbol),
+                  onSetFixedSymbol:
+                      (symbol) => widget.onSetFixedSymbol(item, symbol),
                   onLongPress: null, // 移除重复的长按处理
                   onTap:
                       widget.isMultiSelectMode
@@ -171,13 +174,21 @@ class _MessageListState extends State<MessageList> {
                                 );
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('无法打开文件: $e')),
+                                  SnackBar(
+                                    content: Text(
+                                      ChatLocalizations.of(
+                                        context,
+                                      )!.errorFilePreviewFailed,
+                                    ),
+                                  ),
                                 );
                               }
                             }
                           },
                   onAvatarTap:
-                      widget.onAvatarTap != null ? () => widget.onAvatarTap!(item) : null,
+                      widget.onAvatarTap != null
+                          ? () => widget.onAvatarTap!(item)
+                          : null,
                   showAvatar: widget.showAvatar,
                   currentUserId: widget.currentUserId ?? '',
                   isHighlighted:

@@ -317,4 +317,16 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String get fileOpenFailed => 'Failed to open file: \$e';
+
+  @override
+  String get audioMessageBubbleErrorText => 'Failed to load audio message: \$e';
+
+  @override
+  String get editMessageTitle => 'Edit Message Title';
+
+  @override
+  String get errorFilePreviewFailed => 'Failed to preview file: \$e';
+
+  @override
+  get messageHintText => 'Type your message here...';
 }

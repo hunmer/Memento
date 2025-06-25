@@ -17,7 +17,7 @@ class DatePickerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('选择日期'),
+      title: Text(AppLocalizations.of(context)!.selectDate),
       content: SizedBox(
         width: double.maxFinite,
         height: 300,
