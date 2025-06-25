@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/calendar_controller.dart';
@@ -42,9 +43,11 @@ class EntryEditorController {
       listen: false,
     );
     if (titleController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Title cannot be empty')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ChatLocalizations.of(context).titleCannotBeEmpty),
+        ),
+      );
       return null;
     }
 

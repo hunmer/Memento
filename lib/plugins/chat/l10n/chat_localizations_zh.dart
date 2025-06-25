@@ -282,7 +282,31 @@ class ChatLocalizationsZh extends ChatLocalizations {
   @override
   String get channelCreationFailed => '创建频道失败: \$e';
 
+  // 新增翻译
+  @override
+  String get usernameCannotBeEmpty => '用户名不能为空';
+  @override
+  String get updateFailed => '更新失败: \$e';
+  @override
+  String get showAll => '显示全部';
+  @override
+  String get singleFile => '1个文件';
+  @override
+  String get contextRange => '上下文: \$contextRange';
+  @override
+  String get setContextRange => '设置上下文范围';
+  @override
+  String get currentRange => '当前范围: \${currentValue.round()}';
+
+  @override
+  String get titleCannotBeEmpty => '标题不能为空';
   @override
   String get deleteChannelConfirmation =>
       '确定要删除频道"\${channel.title}"吗？此操作不可撤销。';
+
+  @override
+  String get fileOpenFailed => '打开文件失败: \$e';
+
+  @override
+  String get metadataFilters => '元数据筛选器';
 }

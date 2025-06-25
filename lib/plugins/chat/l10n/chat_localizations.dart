@@ -125,10 +125,19 @@ abstract class ChatLocalizations {
   String get videoRecordingFailed;
   String get channelCreationFailed;
 
-  // New localization keys for UI service
-  String get channelCount;
-  String get totalMessages;
-  String get todayMessages;
+  // New strings for the found hardcoded texts
+  String get usernameCannotBeEmpty;
+  String get updateFailed;
+  String get showAll;
+  String get singleFile;
+  String get contextRange;
+  String get setContextRange;
+  String get currentRange;
+  String get titleCannotBeEmpty;
+
+  @override
+  String get deleteChannelConfirmation =>
+      'Are you sure you want to delete channel "\${channel.title}"? This action cannot be undone.';
   String get profileTitle;
   String get chatSettings;
   String get showAvatarInChat;
@@ -152,6 +161,8 @@ abstract class ChatLocalizations {
   String get file;
   String get audioRecording;
   String get smartAgent;
+  String get channelCount;
+  String get totalMessages;
 }
 
 class _ChatLocalizationsDelegate

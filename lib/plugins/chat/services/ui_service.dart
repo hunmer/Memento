@@ -105,7 +105,7 @@ class UIService {
                   Column(
                     children: [
                       Text(
-                        ChatLocalizations.of(context)!.todayMessages,
+                        ChatLocalizations.of(context)!.totalMessages,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
