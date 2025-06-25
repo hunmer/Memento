@@ -29,19 +29,15 @@ Future<void> handleVideoSelection({
   // 检查是否在macOS平台上
   if (Platform.isMacOS) {
     try {
-      debugPrint('在macOS上使用文件选择器选择视频...');
       // 在macOS上使用图片选择器从相册选择视频
       final ImagePicker picker = ImagePicker();
       final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
 
       if (video != null) {
-        debugPrint('视频选择完成: ${video.path}');
-
         try {
           // 将视频转换为文件
           final File videoFile = File(video.path);
           if (!await videoFile.exists()) {
-            debugPrint('警告：视频文件不存在: ${video.path}');
             scaffoldMessenger.showSnackBar(
               SnackBar(
                 content: Text('视频文件不存在'),
@@ -53,19 +49,14 @@ Future<void> handleVideoSelection({
           }
 
           final originalFileName = path.basename(video.path);
-          debugPrint('原始文件名: $originalFileName');
 
           // 保存视频到应用目录
-          debugPrint('开始保存视频...');
           final savedFile = await fileService.saveVideo(videoFile);
-          debugPrint('视频已保存: ${savedFile.path}');
 
-          debugPrint('创建文件消息...');
           final fileMessage = await FileMessage.fromFile(
             savedFile,
             originalFileName: originalFileName,
           );
-          debugPrint('文件消息已创建: ${fileMessage.id}');
 
           // 标准化文件信息结构，确保包含FileMessage.fromJson所需的所有字段
           final Map<String, dynamic> metadata = {
@@ -88,11 +79,8 @@ Future<void> handleVideoSelection({
           };
 
           // 调用回调函数
-          debugPrint('调用onFileSelected回调...');
           onFileSelected?.call(metadata);
-          debugPrint('onFileSelected回调已调用');
         } catch (processingError) {
-          debugPrint('错误：处理视频时出错: $processingError');
           scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text('处理视频失败: $processingError'),
@@ -101,11 +89,8 @@ Future<void> handleVideoSelection({
             ),
           );
         }
-      } else {
-        debugPrint('未获取到视频文件，可能是用户取消了选择');
       }
     } catch (e) {
-      debugPrint('错误：选择视频过程中出错: $e');
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text('选择视频失败: $e'),
@@ -118,7 +103,6 @@ Future<void> handleVideoSelection({
   }
 
   try {
-    debugPrint('开始拍摄视频...');
     // 使用ImagePicker启动相机拍摄视频
     final ImagePicker picker = ImagePicker();
     final XFile? video = await picker.pickVideo(
@@ -127,13 +111,10 @@ Future<void> handleVideoSelection({
     );
 
     if (video != null) {
-      debugPrint('视频拍摄完成: ${video.path}');
-
       try {
         // 将视频转换为文件
         final File videoFile = File(video.path);
         if (!await videoFile.exists()) {
-          debugPrint('警告：视频文件不存在: ${video.path}');
           scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text('视频文件不存在'),
@@ -145,19 +126,14 @@ Future<void> handleVideoSelection({
         }
 
         final originalFileName = path.basename(video.path);
-        debugPrint('原始文件名: $originalFileName');
 
         // 保存视频到应用目录
-        debugPrint('开始保存视频...');
         final savedFile = await fileService.saveVideo(videoFile);
-        debugPrint('视频已保存: ${savedFile.path}');
 
-        debugPrint('创建文件消息...');
         final fileMessage = await FileMessage.fromFile(
           savedFile,
           originalFileName: originalFileName,
         );
-        debugPrint('文件消息已创建: ${fileMessage.id}');
 
         // 标准化文件信息结构
         final Map<String, dynamic> metadata = {
@@ -180,9 +156,7 @@ Future<void> handleVideoSelection({
         };
 
         // 调用回调函数
-        debugPrint('调用onFileSelected回调...');
         onFileSelected?.call(metadata);
-        debugPrint('onFileSelected回调已调用');
 
         // 显示视频选择成功的提示
         scaffoldMessenger.showSnackBar(
@@ -193,7 +167,6 @@ Future<void> handleVideoSelection({
           ),
         );
       } catch (processingError) {
-        debugPrint('错误：处理视频时出错: $processingError');
         scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text('处理视频失败: $processingError'),
@@ -202,12 +175,8 @@ Future<void> handleVideoSelection({
           ),
         );
       }
-    } else {
-      debugPrint('未获取到视频文件，可能是用户取消了拍摄或拍摄过程中出现问题');
-      // 不显示取消提示，因为这可能是完成拍摄后的正常流程
     }
   } catch (e) {
-    debugPrint('错误：拍摄视频过程中出错: $e');
     scaffoldMessenger.showSnackBar(
       SnackBar(
         content: Text('拍摄视频失败: $e'),
