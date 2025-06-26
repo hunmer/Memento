@@ -275,9 +275,13 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   final newDatabase = database.copyWith(id: Uuid().v4());
                   await widget.service.createDatabase(newDatabase);
                   if (mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('复制成功')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          DatabaseLocalizations.of(context).copySuccess,
+                        ),
+                      ),
+                    );
                     setState(() {
                       _databasesFuture = widget.service.getAllDatabases();
                     });
@@ -286,7 +290,10 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('删除', style: TextStyle(color: Colors.red)),
+                title: Text(
+                  DatabaseLocalizations.of(context).deleteAction,
+                  style: const TextStyle(color: Colors.red),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   final confirm = await showDialog<bool>(

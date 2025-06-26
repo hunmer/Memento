@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:flutter/material.dart';
 import '../controllers/database_controller.dart';
 import '../models/record.dart';
@@ -75,8 +76,10 @@ class _RecordDetailWidgetState extends State<RecordDetailWidget> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Delete Record'),
-            content: const Text('Are you sure you want to delete this record?'),
+            title: Text(DatabaseLocalizations.of(context).deleteRecordTitle),
+            content: Text(
+              DatabaseLocalizations.of(context).deleteRecordMessage,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),

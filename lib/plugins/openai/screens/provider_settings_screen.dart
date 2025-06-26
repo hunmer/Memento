@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/service_provider.dart';
 import '../controllers/provider_controller.dart';
@@ -38,7 +39,9 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
         _providers = providers;
       }
     } catch (e) {
-      _showErrorSnackBar('加载服务商失败: $e');
+      _showErrorSnackBar(
+        '${OpenAILocalizations.of(context).loadProvidersError}: $e',
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -82,8 +85,13 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认删除'),
-            content: Text('确定要删除服务商 "${provider.label}" 吗？'),
+            title: Text(
+              OpenAILocalizations.of(context).confirmDeleteProviderTitle,
+            ),
+            content: Text(
+              OpenAILocalizations.of(context).confirmDeleteProviderMessage
+                  .replaceAll('{providerLabel}', provider.label),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -102,7 +110,9 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
         await _controller.deleteProvider(provider.id);
         await _loadProviders();
       } catch (e) {
-        _showErrorSnackBar('删除服务商失败: $e');
+        _showErrorSnackBar(
+          '${OpenAILocalizations.of(context).deleteFailed}: $e',
+        );
       }
     }
   }
@@ -111,12 +121,12 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('服务商设置'),
+        title: Text(OpenAILocalizations.of(context).providerSettingsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _addProvider,
-            tooltip: '添加服务商',
+            tooltip: OpenAILocalizations.of(context).addProviderTooltip,
           ),
         ],
       ),
@@ -136,14 +146,17 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
         children: [
           const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
-          const Text(
-            '没有配置服务商',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            OpenAILocalizations.of(context).noProvidersConfigured,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text('点击右上角的加号添加服务商'),
+          Text(OpenAILocalizations.of(context).addProviderTooltip),
           const SizedBox(height: 24),
-          ElevatedButton(onPressed: _addProvider, child: const Text('添加服务商')),
+          ElevatedButton(
+            onPressed: _addProvider,
+            child: Text(OpenAILocalizations.of(context).addProviderButton),
+          ),
         ],
       ),
     );
@@ -169,12 +182,12 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () => _editProvider(provider),
-                  tooltip: '编辑',
+                  tooltip: OpenAILocalizations.of(context).editAgent,
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () => _deleteProvider(provider),
-                  tooltip: '删除',
+                  tooltip: OpenAILocalizations.of(context).deleteAgent,
                 ),
               ],
             ),

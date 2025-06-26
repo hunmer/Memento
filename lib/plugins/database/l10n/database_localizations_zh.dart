@@ -95,4 +95,19 @@ class DatabaseLocalizationsZh extends DatabaseLocalizations {
 
   @override
   String get deleteFailedMessage => '删除失败: %s';
+
+  @override
+  String get totalDatabasesCount => '总数据库数';
+
+  @override
+  String get selectImage => '选择图片';
+
+  @override
+  String get copySuccess => '复制成功';
+
+  @override
+  String get deleteAction => '删除';
+
+  @override
+  String get editRecordTitle => '编辑记录';
 }

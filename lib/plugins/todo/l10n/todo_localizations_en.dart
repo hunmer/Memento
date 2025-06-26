@@ -134,4 +134,13 @@ class TodoLocalizationsEn extends TodoLocalizations {
 
   @override
   String get add => 'Add';
+
+  @override
+  String get totalTasksCount => 'Total Tasks Count';
+
+  @override
+  String get weeklyTasksCount => 'Weekly Tasks Count';
+
+  @override
+  String get completedOn => 'Completed on';
 }

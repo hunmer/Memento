@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
@@ -43,7 +44,7 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('物品详情'),
+        title: Text(StoreLocalizations.of(context).itemDetailsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.redeem),
@@ -53,8 +54,13 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
                 context: context,
                 builder:
                     (context) => AlertDialog(
-                      title: const Text('使用确认'),
-                      content: Text('确定要使用 ${currentItem.productName} 吗？'),
+                      title: Text(
+                        StoreLocalizations.of(context).useConfirmationTitle,
+                      ),
+                      content: Text(
+                        StoreLocalizations.of(context).useConfirmationMessage
+                            .replaceFirst('%s', currentItem.productName),
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
@@ -195,27 +201,28 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
           // 物品信息
           _buildDetailRow(
             icon: Icons.shopping_bag,
-            label: '物品名称',
+            label: StoreLocalizations.of(context).productNameLabel,
             value: item.productName,
           ),
           _buildDetailRow(
             icon: Icons.calendar_today,
-            label: '购买日期',
+            label: StoreLocalizations.of(context).purchaseDateLabel,
             value: _formatDate(item.purchaseDate),
           ),
           _buildDetailRow(
             icon: Icons.calendar_today,
-            label: '过期日期',
+            label: StoreLocalizations.of(context).expiryDateLabel,
             value: _formatDate(item.expireDate),
           ),
           _buildDetailRow(
             icon: Icons.attach_money,
-            label: '购买价格',
-            value: '${item.purchasePrice}积分',
+            label: StoreLocalizations.of(context).purchasePriceLabel,
+            value:
+                '${item.purchasePrice}${StoreLocalizations.of(context).points}',
           ),
           _buildDetailRow(
             icon: Icons.layers,
-            label: '剩余数量',
+            label: StoreLocalizations.of(context).remainingQuantityLabel,
             value: '${item.remaining}',
           ),
           const SizedBox(height: 20),
@@ -224,9 +231,12 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '物品描述',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Text(
+                  StoreLocalizations.of(context).descriptionLabel,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(item.productSnapshot['description']),
@@ -259,13 +269,17 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
     final item = widget.items[_currentIndex];
     if (await widget.controller.useItem(item)) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('使用成功')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(StoreLocalizations.of(context).useSuccessMessage),
+        ),
+      );
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('物品已过期')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(StoreLocalizations.of(context).itemExpiredMessage),
+        ),
+      );
     }
   }
 

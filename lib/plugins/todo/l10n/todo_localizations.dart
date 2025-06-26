@@ -53,6 +53,9 @@ abstract class TodoLocalizations {
   String get notSet;
   String get clear;
   String get add;
+  String get totalTasksCount; // 总任务数
+  String get weeklyTasksCount; // 七日任务数
+  String get completedOn; // 完成于
 
   static const LocalizationsDelegate<TodoLocalizations> delegate =
       _TodoLocalizationsDelegate();

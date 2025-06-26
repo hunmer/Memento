@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -97,7 +98,10 @@ class TodoPlugin extends BasePlugin {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text('总任务数', style: theme.textTheme.bodyMedium),
+                  Text(
+                    TodoLocalizations.of(context)!.totalTasksCount,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                   Text(
                     '$totalTasks',
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -109,7 +113,10 @@ class TodoPlugin extends BasePlugin {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text('七日任务数', style: theme.textTheme.bodyMedium),
+                  Text(
+                    TodoLocalizations.of(context)!.weeklyTasksCount,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                   Text(
                     '$weeklyTasks',
                     style: theme.textTheme.bodyMedium?.copyWith(

@@ -96,4 +96,19 @@ class DatabaseLocalizationsEn extends DatabaseLocalizations {
 
   @override
   String get deleteFailedMessage => 'Delete failed: %s';
+
+  @override
+  String get totalDatabasesCount => 'Total databases';
+
+  @override
+  String get selectImage => 'Select Image';
+
+  @override
+  String get copySuccess => 'Copy successful';
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get editRecordTitle => 'Edit Record';
 }

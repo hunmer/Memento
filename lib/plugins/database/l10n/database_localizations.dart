@@ -93,6 +93,16 @@ abstract class DatabaseLocalizations {
   String get deleteSuccessMessage;
 
   get deleteFailedMessage;
+
+  String get selectImage;
+
+  String get totalDatabasesCount;
+
+  String get copySuccess;
+
+  String get deleteAction;
+
+  String get editRecordTitle;
 }
 
 class _DatabaseLocalizationsDelegate

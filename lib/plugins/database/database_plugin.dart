@@ -110,7 +110,12 @@ class DatabasePlugin extends BasePlugin {
                     children: [
                       Column(
                         children: [
-                          Text('总数据库数', style: theme.textTheme.bodyMedium),
+                          Text(
+                            DatabaseLocalizations.of(
+                              context,
+                            ).totalDatabasesCount,
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Text(
                             '$dbCount',
                             style: theme.textTheme.bodyMedium?.copyWith(

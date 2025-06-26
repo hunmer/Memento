@@ -244,4 +244,21 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
 
   @override
   String get confirmDeleteItemMessage => "确定要删除此物品吗？";
+
+  @override
+  String get totalQuantity => "总数量";
+
+  @override
+  String get totalValue => "总价值";
+
+  @override
+  String get oneMonthUnused => "一个月未使用";
+
+  @override
+  // TODO: implement enterProductDescription
+  get enterProductDescription => throw UnimplementedError();
+
+  @override
+  // TODO: implement productDescription
+  get productDescription => throw UnimplementedError();
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/timer_task.dart';
 import '../models/timer_item.dart';
@@ -299,7 +300,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
               ),
               ListTile(
                 leading: const Icon(Icons.refresh),
-                title: const Text('重置'),
+                title: Text(TimerLocalizations.of(context)!.reset),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onReset(task);

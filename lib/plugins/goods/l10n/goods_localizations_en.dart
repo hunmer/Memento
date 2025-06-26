@@ -251,4 +251,21 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
   @override
   String get confirmDeleteItemMessage =>
       "Are you sure you want to delete this item?";
+
+  @override
+  String get totalQuantity => "Total Quantity";
+
+  @override
+  String get totalValue => "Total Value";
+
+  @override
+  String get oneMonthUnused => "Unused for one month";
+
+  @override
+  // TODO: implement enterProductDescription
+  get enterProductDescription => throw UnimplementedError();
+
+  @override
+  // TODO: implement productDescription
+  get productDescription => throw UnimplementedError();
 }

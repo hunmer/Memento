@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/models/database_field.dart';
 import '../controllers/field_controller.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,7 @@ class _RecordEditWidgetState extends State<RecordEditWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Record'),
+        title: Text(DatabaseLocalizations.of(context).editRecordTitle),
         actions: [
           IconButton(icon: const Icon(Icons.save), onPressed: _saveRecord),
         ],

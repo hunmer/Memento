@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 
@@ -35,7 +36,7 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Filter Tasks'),
+      title: Text(TodoLocalizations.of(context)!.filterTasksTitle),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -73,7 +74,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
               // 标签选择
               InputChip(
-                label: const Text('Tags'),
+                label: Text(TodoLocalizations.of(context)!.tags),
                 onSelected: (_) => _showTagSelector(context),
                 selected: _selectedTags.isNotEmpty,
               ),
@@ -158,7 +159,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       });
                     },
                   ),
-                  const Text('Show Completed'),
+                  Text(TodoLocalizations.of(context)!.showCompleted),
                   const SizedBox(width: 16),
                   Checkbox(
                     value: _showIncomplete,
@@ -168,7 +169,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       });
                     },
                   ),
-                  const Text('Show Incomplete'),
+                  Text(TodoLocalizations.of(context)!.showIncomplete),
                 ],
               ),
             ],
@@ -193,7 +194,7 @@ class _FilterDialogState extends State<FilterDialog> {
             };
             widget.onFilter(filter);
           },
-          child: const Text('Apply'),
+          child: Text(TodoLocalizations.of(context)!.ok),
         ),
       ],
     );
@@ -242,7 +243,7 @@ class _MultiSelectDialogState extends State<MultiSelectDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Select Tags'),
+      title: Text(TodoLocalizations.of(context)!.selectTagsTitle),
       content: SingleChildScrollView(
         child: Column(
           children:

@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -56,7 +57,7 @@ class _TodoMainViewState extends State<TodoMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Todo'),
+        title: Text(TodoLocalizations.of(context)!.todoPluginName),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
@@ -115,17 +116,17 @@ class _TodoMainViewState extends State<TodoMainView> {
             onSelected: _plugin.taskController.setSortBy,
             itemBuilder:
                 (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: SortBy.dueDate,
-                    child: Text('Sort by Due Date'),
+                    child: Text(TodoLocalizations.of(context)!.sortByDueDate),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: SortBy.priority,
-                    child: Text('Sort by Priority'),
+                    child: Text(TodoLocalizations.of(context)!.sortByPriority),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: SortBy.custom,
-                    child: Text('Custom Sort'),
+                    child: Text(TodoLocalizations.of(context)!.customSort),
                   ),
                 ],
           ),

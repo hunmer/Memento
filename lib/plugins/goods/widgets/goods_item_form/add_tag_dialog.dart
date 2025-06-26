@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 
 class AddTagDialog extends StatefulWidget {
@@ -14,7 +15,7 @@ class _AddTagDialogState extends State<AddTagDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('添加标签'),
+      title: Text(GoodsLocalizations.of(context).addTag),
       content: TextField(
         controller: _controller,
         decoration: const InputDecoration(

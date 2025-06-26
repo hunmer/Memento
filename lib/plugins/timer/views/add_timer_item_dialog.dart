@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
 
@@ -125,18 +126,18 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                   labelText: '计时器类型',
                   border: OutlineInputBorder(),
                 ),
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: TimerType.countUp,
-                    child: Text('正计时'),
+                    child: Text(TimerLocalizations.of(context)!.countUpTimer),
                   ),
                   DropdownMenuItem(
                     value: TimerType.countDown,
-                    child: Text('倒计时'),
+                    child: Text(TimerLocalizations.of(context)!.countDownTimer),
                   ),
                   DropdownMenuItem(
                     value: TimerType.pomodoro,
-                    child: Text('番茄钟'),
+                    child: Text(TimerLocalizations.of(context)!.pomodoroTimer),
                   ),
                 ],
                 onChanged: (value) {
@@ -252,7 +253,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               const SizedBox(height: 16),
 
               SwitchListTile(
-                title: const Text('启用消息提醒'),
+                title: Text(TimerLocalizations.of(context)!.enableNotification),
                 value: _enableNotification,
                 onChanged: (value) {
                   setState(() {
@@ -334,11 +335,11 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
   String _getTimerTypeName(TimerType type) {
     switch (type) {
       case TimerType.countUp:
-        return '正计时';
+        return TimerLocalizations.of(context)!.countUpTimer;
       case TimerType.countDown:
-        return '倒计时';
+        return TimerLocalizations.of(context)!.countDownTimer;
       case TimerType.pomodoro:
-        return '番茄钟';
+        return TimerLocalizations.of(context)!.pomodoroTimer;
     }
   }
 }

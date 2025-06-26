@@ -474,7 +474,10 @@ class GoodsPlugin extends BasePlugin {
                   // 物品总数量
                   Column(
                     children: [
-                      Text('总数量', style: theme.textTheme.bodyMedium),
+                      Text(
+                        GoodsLocalizations.of(context).totalQuantity,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${getTotalItemsCount()}',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -487,7 +490,10 @@ class GoodsPlugin extends BasePlugin {
                   // 物品总价值
                   Column(
                     children: [
-                      Text('总价值', style: theme.textTheme.bodyMedium),
+                      Text(
+                        GoodsLocalizations.of(context).totalValue,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '¥${getTotalItemsValue().toStringAsFixed(2)}',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -507,7 +513,10 @@ class GoodsPlugin extends BasePlugin {
                 children: [
                   Column(
                     children: [
-                      Text('一个月未使用', style: theme.textTheme.bodyMedium),
+                      Text(
+                        GoodsLocalizations.of(context).oneMonthUnused,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                       Text(
                         '${getUnusedItemsCount()}',
                         style: theme.textTheme.bodyMedium?.copyWith(

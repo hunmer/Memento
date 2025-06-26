@@ -114,6 +114,28 @@ abstract class StoreLocalizations {
   String get priceInvalid;
   String get stockRequired;
   String get stockInvalid;
+
+  // 新增积分相关本地化键
+  String get addPointsDialogTitle;
+  String get pointsAmountLabel;
+  String get reasonLabel;
+  String get pointsAdjustmentDefaultReason;
+
+  // 新增筛选相关本地化键
+  String get dateRangeSelectionHint;
+  String get priceRangeHint;
+  String get nameFilterHint;
+
+  // 新增物品详情页本地化键
+  String get itemDetailsTitle;
+  String get useConfirmationTitle;
+  String get useConfirmationMessage;
+  String get useSuccessMessage;
+  String get itemExpiredMessage;
+  String get purchaseDateLabel;
+  String get expiryDateLabel;
+  String get purchasePriceLabel;
+  String get remainingQuantityLabel;
 }
 
 class _StoreLocalizationsDelegate
