@@ -46,7 +46,10 @@ class StatisticsTab extends StatelessWidget {
                         ListTile(
                           leading: const Icon(Icons.check_circle),
                           title: Text(l10n.totalCompletions),
-                          trailing: Text('$count'),
+                          trailing: Text(
+                            HabitsLocalizations.of(context).completions +
+                                ': $count',
+                          ),
                         ),
                         ListTile(
                           leading: const Icon(Icons.timer),
@@ -63,8 +66,8 @@ class StatisticsTab extends StatelessWidget {
                   child: Text(
                     l10n.statisticsChartsPlaceholder,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                        ),
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ),
               ],

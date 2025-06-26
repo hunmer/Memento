@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../models/folder.dart';
 import '../../models/note.dart';
@@ -86,7 +87,9 @@ mixin FolderSelectionDialog on NotesMainViewState {
               if (parentFolder != null && parentFolder.id != currentFolderId)
                 TextButton(
                   onPressed: () => Navigator.pop(context, parentFolder),
-                  child: const Text('选择当前文件夹'),
+                  child: Text(
+                    NodesLocalizations.of(context).selectCurrentFolder,
+                  ),
                 ),
             ],
           ),

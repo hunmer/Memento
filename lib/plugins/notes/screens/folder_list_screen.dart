@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../controllers/notes_controller.dart';
 import '../models/folder.dart';
@@ -10,10 +11,7 @@ import 'search_screen.dart';
 class FolderListScreen extends StatefulWidget {
   final NotesController controller;
 
-  const FolderListScreen({
-    super.key,
-    required this.controller,
-  });
+  const FolderListScreen({super.key, required this.controller});
 
   @override
   State<FolderListScreen> createState() => _FolderListScreenState();
@@ -60,12 +58,13 @@ class _FolderListScreenState extends State<FolderListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: currentFolder?.parentId != null
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: _navigateBack,
-              )
-            : null,
+        leading:
+            currentFolder?.parentId != null
+                ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _navigateBack,
+                )
+                : null,
         title: Text(currentFolder?.name ?? 'Notes'),
         actions: [
           IconButton(
@@ -74,9 +73,8 @@ class _FolderListScreenState extends State<FolderListScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SearchScreen(
-                    controller: widget.controller,
-                  ),
+                  builder:
+                      (context) => SearchScreen(controller: widget.controller),
                 ),
               );
             },
@@ -88,72 +86,83 @@ class _FolderListScreenState extends State<FolderListScreen> {
           // Implement reordering logic here
         },
         children: [
-          ...folders.map((folder) => FolderItem(
-                key: ValueKey(folder.id),
-                folder: folder,
-                onTap: () => _navigateToFolder(folder),
-              )),
-          ...notes.map((note) => NoteItem(
-                key: ValueKey(note.id),
-                note: note,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NoteEditScreen(
-                        note: note,
-                        onSave: (title, content) {
-                          final updatedNote = note.copyWith(
-                            title: title,
-                            content: content,
-                            updatedAt: DateTime.now(),
-                          );
-                          widget.controller.updateNote(updatedNote);
-                        },
-                      ),
-                    ),
-                  ).then((_) => _loadCurrentFolder());
-                },
-              )),
+          ...folders.map(
+            (folder) => FolderItem(
+              key: ValueKey(folder.id),
+              folder: folder,
+              onTap: () => _navigateToFolder(folder),
+            ),
+          ),
+          ...notes.map(
+            (note) => NoteItem(
+              key: ValueKey(note.id),
+              note: note,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => NoteEditScreen(
+                          note: note,
+                          onSave: (title, content) {
+                            final updatedNote = note.copyWith(
+                              title: title,
+                              content: content,
+                              updatedAt: DateTime.now(),
+                            );
+                            widget.controller.updateNote(updatedNote);
+                          },
+                        ),
+                  ),
+                ).then((_) => _loadCurrentFolder());
+              },
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Create new'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.folder),
-                    title: const Text('New folder'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      // Show folder creation dialog
-                    },
+            builder:
+                (context) => AlertDialog(
+                  title: Text(NodesLocalizations.of(context).createNew),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.folder),
+                        title: Text(NodesLocalizations.of(context).newFolder),
+                        onTap: () {
+                          Navigator.pop(context);
+                          // Show folder creation dialog
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.note),
+                        title: Text(NodesLocalizations.of(context).newNote),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => NoteEditScreen(
+                                    onSave: (title, content) {
+                                      widget.controller.createNote(
+                                        title,
+                                        content,
+                                        currentFolderId,
+                                      );
+                                    },
+                                  ),
+                            ),
+                          ).then((_) => _loadCurrentFolder());
+                        },
+                      ),
+                    ],
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.note),
-                    title: const Text('New note'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NoteEditScreen(
-                            onSave: (title, content) {
-                              widget.controller.createNote(title, content, currentFolderId);
-                            },
-                          ),
-                        ),
-                      ).then((_) => _loadCurrentFolder());
-                    },
-                  ),
-                ],
-              ),
-            ),
+                ),
           );
         },
         child: const Icon(Icons.add),

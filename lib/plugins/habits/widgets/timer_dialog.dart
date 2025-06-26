@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
@@ -59,7 +60,9 @@ class _TimerDialogState extends State<TimerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('${widget.habit.title} Timer'),
+      title: Text(
+        '${widget.habit.title} ${HabitsLocalizations.of(context).habit}',
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -106,7 +109,7 @@ class _TimerDialogState extends State<TimerDialog> {
           onPressed: () => Navigator.pop(context, false),
         ),
         TextButton(
-          child: const Text('Complete'),
+          child: Text(HabitsLocalizations.of(context).save),
           onPressed: () => _completeTimer(context),
         ),
       ],

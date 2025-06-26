@@ -255,10 +255,8 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
   String get oneMonthUnused => "一个月未使用";
 
   @override
-  // TODO: implement enterProductDescription
-  get enterProductDescription => throw UnimplementedError();
+  get enterProductDescription => "输入产品描述";
 
   @override
-  // TODO: implement productDescription
-  get productDescription => throw UnimplementedError();
+  get productDescription => "产品描述";
 }

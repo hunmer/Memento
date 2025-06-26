@@ -8,6 +8,7 @@ import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
@@ -213,7 +214,7 @@ class _MyAppState extends State<MyApp> {
         OpenAILocalizationsDelegate.delegate,
         NotesLocalizations.delegate,
         CalendarAlbumLocalizations.delegate,
-        NodesPlugin().localizationsDelegate,
+        NodesLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

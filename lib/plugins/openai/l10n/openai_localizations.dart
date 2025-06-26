@@ -552,28 +552,23 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
   String get noToolsAvailable => '没有可用工具';
 
   @override
-  // TODO: implement addProviderButton
-  String get addProviderButton => throw UnimplementedError();
+  String get addProviderButton => "Add Provider";
 
   @override
-  // TODO: implement addProviderTooltip
-  get addProviderTooltip => throw UnimplementedError();
+  get addProviderTooltip => "Add new AI provider";
 
   @override
-  // TODO: implement confirmDeleteProviderMessage
-  get confirmDeleteProviderMessage => throw UnimplementedError();
+  get confirmDeleteProviderMessage =>
+      "Are you sure you want to delete this provider?";
 
   @override
-  // TODO: implement confirmDeleteProviderTitle
-  String get confirmDeleteProviderTitle => throw UnimplementedError();
+  String get confirmDeleteProviderTitle => "Confirm Delete";
 
   @override
-  // TODO: implement noProvidersConfigured
-  String get noProvidersConfigured => throw UnimplementedError();
+  String get noProvidersConfigured => "No providers configured";
 
   @override
-  // TODO: implement providerSettingsTitle
-  String get providerSettingsTitle => throw UnimplementedError();
+  String get providerSettingsTitle => "Provider Settings";
 
   @override
   String get modelManagementDescription => '管理大语言模型列表';
@@ -961,28 +956,22 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   String get noToolsAvailable => 'No Tools Available';
 
   @override
-  // TODO: implement addProviderButton
-  String get addProviderButton => throw UnimplementedError();
+  String get addProviderButton => "添加提供商";
 
   @override
-  // TODO: implement addProviderTooltip
-  get addProviderTooltip => throw UnimplementedError();
+  get addProviderTooltip => "添加新的AI提供商";
 
   @override
-  // TODO: implement confirmDeleteProviderMessage
-  get confirmDeleteProviderMessage => throw UnimplementedError();
+  get confirmDeleteProviderMessage => "确定要删除此提供商吗？";
 
   @override
-  // TODO: implement confirmDeleteProviderTitle
-  String get confirmDeleteProviderTitle => throw UnimplementedError();
+  String get confirmDeleteProviderTitle => "确认删除";
 
   @override
-  // TODO: implement noProvidersConfigured
-  String get noProvidersConfigured => throw UnimplementedError();
+  String get noProvidersConfigured => "未配置任何提供商";
 
   @override
-  // TODO: implement providerSettingsTitle
-  String get providerSettingsTitle => throw UnimplementedError();
+  String get providerSettingsTitle => "提供商设置";
 
   @override
   String get modelManagementDescription => 'Manage large language models';

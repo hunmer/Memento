@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/notes_localizations.dart';
 import '../../models/folder.dart';
@@ -103,7 +104,10 @@ mixin FolderOperations on NotesMainViewState {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('删除', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  NodesLocalizations.of(context).delete,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),

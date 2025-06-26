@@ -1,6 +1,7 @@
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
+import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
@@ -145,7 +146,10 @@ class HabitsPlugin extends PluginBase {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text('习惯', style: theme.textTheme.bodyMedium),
+                  Text(
+                    HabitsLocalizations.of(context).habits,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ],
               ),
               Column(
@@ -156,7 +160,10 @@ class HabitsPlugin extends PluginBase {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text('技能', style: theme.textTheme.bodyMedium),
+                  Text(
+                    HabitsLocalizations.of(context).skills,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ],
               ),
             ],
