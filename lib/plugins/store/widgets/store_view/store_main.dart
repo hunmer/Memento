@@ -344,7 +344,10 @@ class _StoreMainState extends State<StoreMainView> {
                     ),
                   );
                 },
-                child: const Text('清空', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  StoreLocalizations.of(context).clear,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
@@ -378,7 +381,10 @@ class _StoreMainState extends State<StoreMainView> {
                     ),
                   );
                 },
-                child: const Text('清空', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  StoreLocalizations.of(context).clear,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
@@ -559,7 +565,7 @@ class _StoreMainState extends State<StoreMainView> {
                 setState(() {});
                 Navigator.pop(context);
               },
-              child: const Text('应用'),
+              child: Text(StoreLocalizations.of(context).apply),
             ),
           ],
         );
@@ -625,7 +631,7 @@ class _StoreMainState extends State<StoreMainView> {
                   keyboardType: TextInputType.number,
                 ),
                 ListTile(
-                  title: const Text('日期范围'),
+                  title: Text(StoreLocalizations.of(context).dateRangeTitle),
                   subtitle: Text(
                     dateRange == null
                         ? '未选择'
@@ -664,7 +670,7 @@ class _StoreMainState extends State<StoreMainView> {
                 setState(() {});
                 Navigator.pop(context);
               },
-              child: const Text('应用'),
+              child: Text(StoreLocalizations.of(context).apply),
             ),
           ],
         );

@@ -22,7 +22,13 @@ class AppDrawer extends StatelessWidget {
                 }
 
                 if (snapshot.hasError) {
-                  return Center(child: Text('加载插件失败: ${snapshot.error}'));
+                  return Center(
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.failedToLoadPlugins(snapshot.error.toString()),
+                    ),
+                  );
                 }
 
                 final plugins = snapshot.data ?? [];
@@ -99,7 +105,7 @@ class AppDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('设置'),
+            title: Text(AppLocalizations.of(context)!.settings),
             onTap: () {
               Navigator.push(
                 context,

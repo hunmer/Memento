@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../controllers/webdav_controller.dart';
 import '../../../core/storage/storage_manager.dart';
@@ -347,7 +348,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
                 ),
               );
             },
-            child: const Text('Done'),
+            child: Text(AppLocalizations.of(context)!.done),
           ),
         ],
       ],

@@ -41,7 +41,7 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('设置备份计划'),
+      title: Text(AppLocalizations.of(context)!.setBackupSchedule),
       content: SingleChildScrollView(
         child: Column(
           children: [
@@ -154,7 +154,7 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
       children: List.generate(31, (index) {
         final day = index + 1;
         return ChoiceChip(
-          label: Text('$day'),
+          label: Text(AppLocalizations.of(context)!.day(day.toString())),
           selected: _selectedMonthDays.contains(day),
           onSelected: (selected) {
             setState(() {

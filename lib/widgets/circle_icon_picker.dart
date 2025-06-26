@@ -54,7 +54,9 @@ class CircleIconPicker extends StatelessWidget {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('选择背景颜色'),
+                        title: Text(
+                          AppLocalizations.of(context)!.selectBackgroundColor,
+                        ),
                         content: SingleChildScrollView(
                           child: ColorPicker(
                             pickerColor: backgroundColor,

@@ -142,6 +142,11 @@ class StoreLocalizationsZh extends StoreLocalizations {
   String get points => '积分';
 
   @override
+  String get clear => '清空';
+  @override
+  String get dateRangeTitle => '日期范围';
+
+  @override
   String get redeemConfirmation => '确定要兑换这个商品吗？';
 
   @override

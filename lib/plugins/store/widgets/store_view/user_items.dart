@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/widgets/user_item_card.dart';
@@ -36,7 +37,7 @@ class _UserItemsState extends State<UserItems> {
   @override
   Widget build(BuildContext context) {
     if (widget.controller.userItems.isEmpty) {
-      return const Center(child: Text('暂无物品'));
+      return Center(child: Text(StoreLocalizations.of(context).noItems));
     }
 
     return _buildMyItemsView();
@@ -87,13 +88,17 @@ class _UserItemsState extends State<UserItems> {
 
               if (await widget.controller.useItem(itemToUse)) {
                 setState(() {});
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('使用成功')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(StoreLocalizations.of(context).useSuccess),
+                  ),
+                );
               } else {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('物品已过期')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(StoreLocalizations.of(context).itemExpired),
+                  ),
+                );
               }
             },
           ),

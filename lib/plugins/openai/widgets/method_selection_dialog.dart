@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/plugin_analysis_method.dart';
 
@@ -12,7 +13,7 @@ class MethodSelectionDialog extends StatelessWidget {
     final methods = PluginAnalysisMethod.predefinedMethods;
 
     return AlertDialog(
-      title: const Text('选择分析方法'),
+      title: Text(OpenAILocalizations.of(context).selectAnalysisMethod),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView.builder(

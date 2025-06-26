@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
 import '../store_plugin.dart';
 
@@ -9,7 +10,9 @@ class PointSettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('积分奖励设置')),
+      appBar: AppBar(
+        title: Text(StoreLocalizations.of(context).pointSettingsTitle),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -39,8 +42,10 @@ class PointSettingsView extends StatelessWidget {
                               child: TextFormField(
                                 initialValue: entry.value.toString(),
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  suffix: Text('积分'),
+                                decoration: InputDecoration(
+                                  suffix: Text(
+                                    StoreLocalizations.of(context).points,
+                                  ),
                                   border: OutlineInputBorder(),
                                 ),
                                 onChanged: (value) async {

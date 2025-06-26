@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/tool_app_controller.dart';
@@ -15,7 +16,9 @@ class ToolAppGrid extends StatelessWidget {
         }
 
         if (controller.apps.isEmpty) {
-          return const Center(child: Text('没有可用的工具应用'));
+          return Center(
+            child: Text(OpenAILocalizations.of(context).noToolsAvailable),
+          );
         }
 
         return GridView.builder(
@@ -37,9 +40,9 @@ class ToolAppGrid extends StatelessWidget {
   }
 
   Widget _buildAppCard(
-    BuildContext context, 
-    ToolApp app, 
-    ToolAppController controller
+    BuildContext context,
+    ToolApp app,
+    ToolAppController controller,
   ) {
     return Card(
       elevation: 2,

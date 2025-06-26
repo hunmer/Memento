@@ -17,7 +17,7 @@ class _PluginSelectionDialogState extends State<PluginSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('选择要导出的插件'),
+      title: Text(AppLocalizations.of(context)!.selectPluginToExport),
       content: SingleChildScrollView(
         child: ListBody(
           children:
