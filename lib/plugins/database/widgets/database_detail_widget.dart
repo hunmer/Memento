@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/widgets/record_edit_widget.dart';
 import 'package:flutter/material.dart';
 import '../controllers/database_controller.dart';
@@ -38,10 +39,6 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-        }
-
-        if (widget.controller.currentDatabase == null) {
-          return const Center(child: Text('Database not found'));
         }
 
         final database = widget.controller.currentDatabase!;
@@ -131,7 +128,10 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
                 _deleteRecord(record);
               },
               child: ListTile(
-                title: Text(record.fields['title']?.toString() ?? 'Untitled'),
+                title: Text(
+                  record.fields['title']?.toString() ??
+                      DatabaseLocalizations.of(context).untitledRecord,
+                ),
                 subtitle: Text(record.updatedAt.toString()),
                 onTap: () {
                   Navigator.of(context).push(
@@ -196,7 +196,10 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
                     children: [
                       if (record.fields['image'] != null)
                         Image.network(record.fields['image'], height: 80),
-                      Text(record.fields['title']?.toString() ?? 'Untitled'),
+                      Text(
+                        record.fields['title']?.toString() ??
+                            DatabaseLocalizations.of(context).untitledRecord,
+                      ),
                     ],
                   ),
                 ),
@@ -216,18 +219,24 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Delete Record'),
+            title: Text(DatabaseLocalizations.of(context).deleteRecordTitle),
             content: Text(
-              'Are you sure you want to delete "${record.fields['title'] ?? 'Untitled'}"?',
+              DatabaseLocalizations.of(
+                context,
+              ).deleteRecordMessage.replaceFirst(
+                '%s',
+                record.fields['title'] ??
+                    DatabaseLocalizations.of(context).untitledRecord,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text(DatabaseLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(AppLocalizations.of(context)!.delete),
+                child: Text(DatabaseLocalizations.of(context).delete),
               ),
             ],
           ),
@@ -248,7 +257,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
           children: [
             ListTile(
               leading: const Icon(Icons.edit),
-              title: Text(AppLocalizations.of(context)!.edit),
+              title: Text(DatabaseLocalizations.of(context).edit),
               onTap: () {
                 Navigator.of(context).pop();
                 _editRecord(context, record);
@@ -256,7 +265,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
             ),
             ListTile(
               leading: const Icon(Icons.delete),
-              title: Text(AppLocalizations.of(context)!.delete),
+              title: Text(DatabaseLocalizations.of(context).delete),
               onTap: () async {
                 Navigator.of(context).pop();
                 final shouldDelete = await _confirmDelete(context, record);

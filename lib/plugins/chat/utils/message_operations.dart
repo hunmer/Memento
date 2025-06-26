@@ -106,38 +106,27 @@ class MessageOperations {
     );
 
     if (confirmed == true) {
-      try {
-        // 获取频道ID
-        final channelId = message.channelId;
-        if (channelId == null) {
-          throw Exception('消息没有关联的频道ID');
-        }
-
-        // 获取频道
-        final channel = _chatPlugin.channelService.channels.firstWhere(
-          (c) => c.id == channelId,
-        );
-
-        // 从频道的消息列表中删除消息
-        final updatedMessages = List<Message>.from(channel.messages)
-          ..removeWhere((m) => m.id == message.id);
-
-        // 更新频道的消息列表
-        channel.messages.clear();
-        channel.messages.addAll(updatedMessages);
-
-        // 保存更新后的消息列表
-        await _chatPlugin.channelService.saveMessages(
-          channelId,
-          updatedMessages,
-        );
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('删除消息失败: ${e.toString()}')));
-        }
+      // 获取频道ID
+      final channelId = message.channelId;
+      if (channelId == null) {
+        return;
       }
+
+      // 获取频道
+      final channel = _chatPlugin.channelService.channels.firstWhere(
+        (c) => c.id == channelId,
+      );
+
+      // 从频道的消息列表中删除消息
+      final updatedMessages = List<Message>.from(channel.messages)
+        ..removeWhere((m) => m.id == message.id);
+
+      // 更新频道的消息列表
+      channel.messages.clear();
+      channel.messages.addAll(updatedMessages);
+
+      // 保存更新后的消息列表
+      await _chatPlugin.channelService.saveMessages(channelId, updatedMessages);
     }
   }
 

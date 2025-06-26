@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';
 import 'widgets/daily_checkin_chart.dart';
@@ -64,7 +65,10 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('打卡数量趋势', style: theme.textTheme.titleMedium),
+                  Text(
+                    CheckinLocalizations.of(context).checkinTrendTitle,
+                    style: theme.textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 200,
@@ -86,7 +90,10 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('连续打卡排行榜', style: theme.textTheme.titleMedium),
+                  Text(
+                    CheckinLocalizations.of(context).checkinRankingTitle,
+                    style: theme.textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 16),
                   CheckinStreakRanking(checkinItems: widget.checkinItems),
                 ],
@@ -102,7 +109,10 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('打卡分组占比', style: theme.textTheme.titleMedium),
+                  Text(
+                    CheckinLocalizations.of(context).checkinGroupPieTitle,
+                    style: theme.textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 200,
