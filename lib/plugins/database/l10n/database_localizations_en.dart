@@ -26,4 +26,74 @@ class DatabaseLocalizationsEn extends DatabaseLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get editDatabaseTitle => 'Edit Database';
+
+  @override
+  String get informationTabTitle => 'Information';
+
+  @override
+  String get fieldsTabTitle => 'Fields';
+
+  @override
+  String get databaseNameLabel => 'Database Name';
+
+  @override
+  String get uploadCoverImage => 'Upload Cover Image';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get fieldNameLabel => 'Field Name';
+
+  @override
+  String get defaultValueLabel => 'Default Value';
+
+  @override
+  String get selectFieldTypeTitle => 'Select Field Type';
+
+  @override
+  String get newFieldTitle => 'New %s Field';
+
+  @override
+  String get saveFailedMessage => 'Save failed: %s';
+
+  @override
+  String get databaseListTitle => 'Database List';
+
+  @override
+  String get newDatabaseDefaultName => 'New Database';
+
+  @override
+  String get loadFailedMessage => 'Load failed';
+
+  @override
+  String get noDatabasesMessage => 'No databases';
+
+  @override
+  String get addDatabaseHint => 'Click the button below to add';
+
+  @override
+  String get copySuccessMessage => 'Copy successful';
+
+  @override
+  String get confirmDeleteTitle => 'Confirm Delete';
+
+  @override
+  String get confirmDeleteMessage =>
+      'Are you sure you want to delete database "%s"?';
+
+  @override
+  String get deleteSuccessMessage => 'Delete successful';
+
+  @override
+  String get deleteFailedMessage => 'Delete failed: %s';
 }

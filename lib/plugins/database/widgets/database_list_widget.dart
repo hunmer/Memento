@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/controllers/database_controller.dart';
 import 'package:Memento/plugins/database/widgets/database_detail_widget.dart';
 import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
@@ -37,7 +38,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
-        title: const Text('数据库列表'),
+        title: Text(DatabaseLocalizations.of(context).databaseListTitle),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -49,7 +50,10 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     controller: DatabaseController(widget.service),
                     database: DatabaseModel(
                       id: '',
-                      name: 'New Database',
+                      name:
+                          DatabaseLocalizations.of(
+                            context,
+                          ).newDatabaseDefaultName,
                       description: '',
                       fields: [],
                       createdAt: date,
@@ -81,7 +85,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
                   Text(
-                    '加载失败',
+                    DatabaseLocalizations.of(context).loadFailedMessage,
                     style: Theme.of(
                       context,
                     ).textTheme.titleMedium?.copyWith(color: Colors.red),
@@ -116,14 +120,14 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   const Icon(Icons.inbox, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
-                    '暂无数据库',
+                    DatabaseLocalizations.of(context).noDatabasesMessage,
                     style: Theme.of(
                       context,
                     ).textTheme.titleMedium?.copyWith(color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '点击右下角按钮添加',
+                    DatabaseLocalizations.of(context).addDatabaseHint,
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -289,8 +293,16 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     context: context,
                     builder:
                         (context) => AlertDialog(
-                          title: const Text('确认删除'),
-                          content: Text('确定要删除数据库 "${database.name}" 吗？'),
+                          title: Text(
+                            DatabaseLocalizations.of(
+                              context,
+                            ).confirmDeleteTitle,
+                          ),
+                          content: Text(
+                            DatabaseLocalizations.of(context)
+                                .confirmDeleteMessage
+                                .replaceFirst('%s', database.name),
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
@@ -298,9 +310,9 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text(
-                                '删除',
-                                style: TextStyle(color: Colors.red),
+                              child: Text(
+                                DatabaseLocalizations.of(context).delete,
+                                style: const TextStyle(color: Colors.red),
                               ),
                             ),
                           ],
@@ -310,18 +322,30 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     try {
                       await widget.service.deleteDatabase(database.id);
                       if (mounted) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(const SnackBar(content: Text('删除成功')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              DatabaseLocalizations.of(
+                                context,
+                              ).deleteSuccessMessage,
+                            ),
+                          ),
+                        );
                         setState(() {
                           _databasesFuture = widget.service.getAllDatabases();
                         });
                       }
                     } catch (e) {
                       if (mounted) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('删除失败: $e')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              DatabaseLocalizations.of(context)
+                                  .deleteFailedMessage
+                                  .replaceFirst('%s', e.toString()),
+                            ),
+                          ),
+                        );
                       }
                     }
                   }

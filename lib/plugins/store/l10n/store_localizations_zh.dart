@@ -10,12 +10,6 @@ class StoreLocalizationsZh extends StoreLocalizations {
   String get confirmUseMessage => '确定要使用 {productName} 吗？';
 
   @override
-  String get cancel => '取消';
-
-  @override
-  String get confirm => '确定';
-
-  @override
   String get pointSettingsTitle => '积分奖励设置';
 
   @override
@@ -149,4 +143,61 @@ class StoreLocalizationsZh extends StoreLocalizations {
 
   @override
   String get redeemConfirmation => '确定要兑换这个商品吗？';
+
+  @override
+  String get productList => '商品列表';
+
+  @override
+  String get myItems => '我的物品';
+
+  @override
+  String get pointsHistory => '积分记录';
+
+  @override
+  String get storeTitle => '积分商城';
+
+  @override
+  String get confirmClearTitle => '确认清空';
+
+  @override
+  String get itemFilter => '物品筛选';
+
+  @override
+  String get itemStatus => '物品状态';
+
+  @override
+  String get all => '全部';
+
+  @override
+  String get usable => '可使用';
+
+  @override
+  String get expired => '已过期';
+
+  @override
+  String get nameFilter => '名称筛选';
+
+  @override
+  String get priceRange => '价格区间';
+
+  @override
+  String get sortAndFilter => '排序与筛选';
+
+  @override
+  String get sortMethod => '排序方式';
+
+  @override
+  String get byStock => '按库存数';
+
+  @override
+  String get byPrice => '按单价';
+
+  @override
+  String get byExpiry => '按有效兑换期';
+
+  @override
+  String get viewArchivedProducts => '查看存档商品';
+
+  @override
+  String get confirmUseItem => '你确定要使用这个物品吗？';
 }

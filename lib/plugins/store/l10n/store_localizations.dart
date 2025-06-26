@@ -82,7 +82,25 @@ abstract class StoreLocalizations {
 
   String get redeemConfirmation;
 
-  get confirmUseItem => null;
+  String get productList;
+  String get myItems;
+  String get pointsHistory;
+  String get storeTitle;
+  String get confirmClearTitle;
+  String get itemFilter;
+  String get itemStatus;
+  String get all;
+  String get usable;
+  String get expired;
+  String get nameFilter;
+  String get priceRange;
+  String get sortAndFilter;
+  String get sortMethod;
+  String get byStock;
+  String get byPrice;
+  String get byExpiry;
+  String get viewArchivedProducts;
+  String get confirmUseItem;
 }
 
 class _StoreLocalizationsDelegate

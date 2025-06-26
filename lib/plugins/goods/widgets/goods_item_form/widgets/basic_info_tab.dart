@@ -326,9 +326,7 @@ class BasicInfoTab extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              GoodsLocalizations.of(context)!.selectImageFailed(e.toString()),
-            ),
+            content: Text(GoodsLocalizations.of(context)!.selectImageFailed),
             backgroundColor: Colors.red,
           ),
         );

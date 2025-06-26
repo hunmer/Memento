@@ -1,5 +1,6 @@
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/store/widgets/store_view/archived_products.dart';
 import 'package:flutter/material.dart';
@@ -63,10 +64,10 @@ class _StoreMainState extends State<StoreMainView> {
         ),
         title: Text(
           _selectedIndex == 0
-              ? '积分商城'
+              ? StoreLocalizations.of(context)!.storeTitle
               : _selectedIndex == 1
-              ? '我的物品'
-              : '积分记录',
+              ? StoreLocalizations.of(context)!.myItems
+              : StoreLocalizations.of(context)!.pointsHistory,
         ),
         actions: [
           if (_selectedIndex == 1)
@@ -135,7 +136,7 @@ class _StoreMainState extends State<StoreMainView> {
                       if (mounted) setState(() {});
                     });
                   },
-                  tooltip: '查看存档商品',
+                  tooltip: StoreLocalizations.of(context)!.viewArchivedProducts,
                 ),
               ],
             ),
@@ -169,7 +170,7 @@ class _StoreMainState extends State<StoreMainView> {
                 );
               },
             ),
-            label: '商品列表',
+            label: StoreLocalizations.of(context)!.productList,
           ),
           BottomNavigationBarItem(
             icon: StreamBuilder<int>(
@@ -182,7 +183,7 @@ class _StoreMainState extends State<StoreMainView> {
                 );
               },
             ),
-            label: '我的物品',
+            label: StoreLocalizations.of(context)!.myItems,
           ),
           BottomNavigationBarItem(
             icon: StreamBuilder<int>(
@@ -196,7 +197,7 @@ class _StoreMainState extends State<StoreMainView> {
                 );
               },
             ),
-            label: '积分记录',
+            label: StoreLocalizations.of(context)!.pointsHistory,
           ),
         ],
       ),
@@ -314,8 +315,10 @@ class _StoreMainState extends State<StoreMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认清空'),
-            content: const Text('确定要清空所有物品记录吗？此操作不可撤销。'),
+            title: Text(StoreLocalizations.of(context)!.confirmClearTitle),
+            content: Text(
+              StoreLocalizations.of(context)!.confirmClearItemsMessage,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -326,9 +329,13 @@ class _StoreMainState extends State<StoreMainView> {
                   await _plugin.controller.clearUserItems();
                   if (mounted) setState(() {});
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('已清空物品记录')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        StoreLocalizations.of(context)!.itemsCleared,
+                      ),
+                    ),
+                  );
                 },
                 child: const Text('清空', style: TextStyle(color: Colors.red)),
               ),
@@ -342,8 +349,10 @@ class _StoreMainState extends State<StoreMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认清空'),
-            content: const Text('确定要清空所有积分记录吗？此操作不可撤销。'),
+            title: Text(StoreLocalizations.of(context)!.confirmClearTitle),
+            content: Text(
+              StoreLocalizations.of(context)!.confirmClearPointsMessage,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -354,9 +363,13 @@ class _StoreMainState extends State<StoreMainView> {
                   await _plugin.controller.clearPointsLogs();
                   if (mounted) setState(() {});
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('已清空积分记录')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        StoreLocalizations.of(context)!.pointsCleared,
+                      ),
+                    ),
+                  );
                 },
                 child: const Text('清空', style: TextStyle(color: Colors.red)),
               ),
@@ -378,15 +391,18 @@ class _StoreMainState extends State<StoreMainView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('物品筛选', textAlign: TextAlign.left),
+          title: Text(
+            StoreLocalizations.of(context)!.itemFilter,
+            textAlign: TextAlign.left,
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '物品状态',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  StoreLocalizations.of(context)!.itemStatus,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 StatefulBuilder(
@@ -394,7 +410,7 @@ class _StoreMainState extends State<StoreMainView> {
                     return Column(
                       children: [
                         RadioListTile<int>(
-                          title: const Text('全部'),
+                          title: Text(StoreLocalizations.of(context)!.all),
                           value: 0,
                           groupValue: statusIndex,
                           onChanged: (value) {
@@ -402,7 +418,7 @@ class _StoreMainState extends State<StoreMainView> {
                           },
                         ),
                         RadioListTile<int>(
-                          title: const Text('可使用'),
+                          title: Text(StoreLocalizations.of(context)!.usable),
                           value: 1,
                           groupValue: statusIndex,
                           onChanged: (value) {
@@ -410,7 +426,7 @@ class _StoreMainState extends State<StoreMainView> {
                           },
                         ),
                         RadioListTile<int>(
-                          title: const Text('已过期'),
+                          title: Text(StoreLocalizations.of(context)!.expired),
                           value: 2,
                           groupValue: statusIndex,
                           onChanged: (value) {
@@ -422,9 +438,9 @@ class _StoreMainState extends State<StoreMainView> {
                   },
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  '名称筛选',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  StoreLocalizations.of(context)!.nameFilter,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -438,9 +454,9 @@ class _StoreMainState extends State<StoreMainView> {
                   onChanged: (value) => nameFilter = value,
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  '价格区间',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  StoreLocalizations.of(context)!.priceRange,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -475,9 +491,9 @@ class _StoreMainState extends State<StoreMainView> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  '日期范围',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  StoreLocalizations.of(context)!.dateRange,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 ListTile(
@@ -550,29 +566,29 @@ class _StoreMainState extends State<StoreMainView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('排序与筛选'),
+          title: Text(StoreLocalizations.of(context)!.sortAndFilter),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '排序方式',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  StoreLocalizations.of(context)!.sortMethod,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 RadioListTile<String>(
-                  title: const Text('按库存数'),
+                  title: Text(StoreLocalizations.of(context)!.byStock),
                   value: 'stock',
                   groupValue: selectedSort,
                   onChanged: (value) => setState(() => selectedSort = value),
                 ),
                 RadioListTile<String>(
-                  title: const Text('按单价'),
+                  title: Text(StoreLocalizations.of(context)!.byPrice),
                   value: 'price',
                   groupValue: selectedSort,
                   onChanged: (value) => setState(() => selectedSort = value),
                 ),
                 RadioListTile<String>(
-                  title: const Text('按有效兑换期'),
+                  title: Text(StoreLocalizations.of(context)!.byExpiry),
                   value: 'exchangeEnd',
                   groupValue: selectedSort,
                   onChanged: (value) => setState(() => selectedSort = value),
