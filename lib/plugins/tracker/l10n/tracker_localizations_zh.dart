@@ -79,6 +79,9 @@ class TrackerLocalizationsZh extends TrackerLocalizations {
   String get confirmDelete => '确认删除';
 
   @override
+  String get confirmDeleteRecordMessage => '确定要删除这条记录吗？';
+
+  @override
   String get recordDeleted => '记录已删除';
 
   @override

@@ -101,6 +101,19 @@ abstract class StoreLocalizations {
   String get byExpiry;
   String get viewArchivedProducts;
   String get confirmUseItem;
+
+  String get productNameLabel;
+  String get priceLabel;
+  String get stockLabel;
+  String get descriptionLabel;
+  String get deleteButton;
+  String get archiveButton;
+  String get saveButton;
+  String get productNameRequired;
+  String get priceRequired;
+  String get priceInvalid;
+  String get stockRequired;
+  String get stockInvalid;
 }
 
 class _StoreLocalizationsDelegate

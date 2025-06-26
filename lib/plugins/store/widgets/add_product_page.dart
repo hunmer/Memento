@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
@@ -59,8 +60,8 @@ class _AddProductPageState extends State<AddProductPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认存档'),
-            content: const Text('确定要将这个商品存档吗？存档后可以在筛选器中查看。'),
+            title: Text(StoreLocalizations.of(context).confirmArchiveTitle),
+            content: Text(StoreLocalizations.of(context).confirmArchiveMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -68,7 +69,7 @@ class _AddProductPageState extends State<AddProductPage> {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('存档'),
+                child: Text(StoreLocalizations.of(context).archiveButton),
               ),
             ],
           ),
@@ -85,8 +86,8 @@ class _AddProductPageState extends State<AddProductPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认删除'),
-            content: const Text('确定要删除这个商品吗？此操作不可撤销。'),
+            title: Text(StoreLocalizations.of(context).confirmDeleteTitle),
+            content: Text(StoreLocalizations.of(context).confirmDeleteMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -94,7 +95,10 @@ class _AddProductPageState extends State<AddProductPage> {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('删除', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  StoreLocalizations.of(context).deleteButton,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
@@ -149,19 +153,25 @@ class _AddProductPageState extends State<AddProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('添加商品'),
+        title: Text(StoreLocalizations.of(context).addProductTitle),
         actions: [
           if (widget.product != null) ...[
             IconButton(
               icon: const Icon(Icons.archive),
               onPressed: _confirmArchive,
+              tooltip: StoreLocalizations.of(context).archiveButton,
             ),
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _confirmDelete,
+              tooltip: StoreLocalizations.of(context).deleteButton,
             ),
           ],
-          IconButton(icon: const Icon(Icons.check), onPressed: _submit),
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: _submit,
+            tooltip: StoreLocalizations.of(context).saveButton,
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -187,13 +197,13 @@ class _AddProductPageState extends State<AddProductPage> {
               // 商品名称
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: '商品名称',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: StoreLocalizations.of(context).productNameLabel,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入商品名称';
+                    return StoreLocalizations.of(context).productNameRequired;
                   }
                   return null;
                 },
@@ -202,17 +212,17 @@ class _AddProductPageState extends State<AddProductPage> {
               // 价格
               TextFormField(
                 controller: _priceController,
-                decoration: const InputDecoration(
-                  labelText: '价格(积分)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: StoreLocalizations.of(context).priceLabel,
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入价格';
+                    return StoreLocalizations.of(context).priceRequired;
                   }
                   if (int.tryParse(value) == null) {
-                    return '请输入有效数字';
+                    return StoreLocalizations.of(context).priceInvalid;
                   }
                   return null;
                 },
@@ -221,17 +231,17 @@ class _AddProductPageState extends State<AddProductPage> {
               // 库存
               TextFormField(
                 controller: _stockController,
-                decoration: const InputDecoration(
-                  labelText: '库存数量',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: StoreLocalizations.of(context).stockLabel,
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入库存数量';
+                    return StoreLocalizations.of(context).stockRequired;
                   }
                   if (int.tryParse(value) == null) {
-                    return '请输入有效数字';
+                    return StoreLocalizations.of(context).stockInvalid;
                   }
                   return null;
                 },
@@ -240,9 +250,9 @@ class _AddProductPageState extends State<AddProductPage> {
               // 描述
               TextFormField(
                 controller: _descController,
-                decoration: const InputDecoration(
-                  labelText: '商品描述',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: StoreLocalizations.of(context).descriptionLabel,
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 3,
               ),

@@ -43,13 +43,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('调整卡片大小'),
+              title: Text(AppLocalizations.of(context)!.adjustCardSize),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
-                      const Text('宽度: '),
+                      Text(AppLocalizations.of(context)!.width),
                       Expanded(
                         child: Slider(
                           min: 1,
@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                   ),
                   Row(
                     children: [
-                      const Text('高度: '),
+                      Text(AppLocalizations.of(context)!.height),
                       Expanded(
                         child: Slider(
                           min: 1,
@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('首页'),
+        title: Text(AppLocalizations.of(context)!.home),
         centerTitle: true,
         leading: Builder(
           builder: (BuildContext context) {
@@ -226,7 +226,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No plugins available'));
+            return Center(
+              child: Text(AppLocalizations.of(context)!.noPluginsAvailable),
+            );
           }
 
           return PluginGrid(

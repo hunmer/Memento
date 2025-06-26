@@ -31,6 +31,9 @@ class TodoLocalizationsZh extends TodoLocalizations {
   String get tags => '标签';
 
   @override
+  String get add => '添加';
+
+  @override
   String get timer => '计时器';
 
   @override
@@ -113,4 +116,22 @@ class TodoLocalizationsZh extends TodoLocalizations {
 
   @override
   String get completedTaskDetailsTitle => '已完成任务详情';
+
+  @override
+  String get newTask => '新建任务';
+
+  @override
+  String get editTask => '编辑任务';
+
+  @override
+  String get title => '标题';
+
+  @override
+  String get startDate => '开始日期';
+
+  @override
+  String get notSet => '未设置';
+
+  @override
+  String get clear => '清除';
 }

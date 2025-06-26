@@ -46,6 +46,13 @@ abstract class TodoLocalizations {
   String get customSort;
   String get completedTasksHistoryTitle;
   String get completedTaskDetailsTitle;
+  String get newTask;
+  String get editTask;
+  String get title;
+  String get startDate;
+  String get notSet;
+  String get clear;
+  String get add;
 
   static const LocalizationsDelegate<TodoLocalizations> delegate =
       _TodoLocalizationsDelegate();

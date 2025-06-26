@@ -205,4 +205,40 @@ class StoreLocalizationsEn extends StoreLocalizations {
 
   @override
   String get confirmUseItem => 'Are you sure you want to use this item?';
+
+  @override
+  String get productNameLabel => 'Product Name';
+
+  @override
+  String get priceLabel => 'Price (points)';
+
+  @override
+  String get stockLabel => 'Stock Quantity';
+
+  @override
+  String get descriptionLabel => 'Product Description';
+
+  @override
+  String get deleteButton => 'Delete';
+
+  @override
+  String get archiveButton => 'Archive';
+
+  @override
+  String get saveButton => 'Save';
+
+  @override
+  String get productNameRequired => 'Please enter product name';
+
+  @override
+  String get priceRequired => 'Please enter price';
+
+  @override
+  String get priceInvalid => 'Please enter a valid number';
+
+  @override
+  String get stockRequired => 'Please enter stock quantity';
+
+  @override
+  String get stockInvalid => 'Please enter a valid number';
 }

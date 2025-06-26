@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/settings_screen/l10n/settings_screen_localizations.dart';
 import 'package:Memento/core/utils/network.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -139,7 +140,11 @@ class AutoUpdateController extends ChangeNotifier {
       if (context?.mounted ?? false) {
         ScaffoldMessenger.of(context!).showSnackBar(
           SnackBar(
-            content: Text('检查更新失败: ${e.toString()}'),
+            content: Text(
+              SettingsScreenLocalizations.of(
+                context!,
+              ).updateCheckFailed.replaceFirst('{error}', e.toString()),
+            ),
             duration: const Duration(seconds: 3),
             backgroundColor: Theme.of(context!).colorScheme.error,
           ),
@@ -218,16 +223,20 @@ class AutoUpdateController extends ChangeNotifier {
         context: context!,
         builder:
             (context) => AlertDialog(
-              title: const Text('发现新版本'),
+              title: Text(
+                SettingsScreenLocalizations.of(context).updateAvailableTitle,
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('当前版本: $_currentVersion'),
-                    Text('最新版本: $_latestVersion'),
-                    const SizedBox(height: 16),
-                    const Text('更新内容:'),
+                    Text(
+                      SettingsScreenLocalizations.of(context)
+                          .updateAvailableContent
+                          .replaceFirst('{currentVersion}', _currentVersion)
+                          .replaceFirst('{latestVersion}', _latestVersion),
+                    ),
                     const SizedBox(height: 8),
                     Text(_releaseNotes),
                   ],
@@ -236,14 +245,18 @@ class AutoUpdateController extends ChangeNotifier {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('稍后再说'),
+                  child: Text(
+                    SettingsScreenLocalizations.of(context).updateLaterButton,
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                     openReleasePage();
                   },
-                  child: const Text('查看更新'),
+                  child: Text(
+                    SettingsScreenLocalizations.of(context).updateViewButton,
+                  ),
                 ),
               ],
             ),
@@ -252,7 +265,11 @@ class AutoUpdateController extends ChangeNotifier {
       if (context?.mounted ?? false) {
         ScaffoldMessenger.of(context!).showSnackBar(
           SnackBar(
-            content: Text('检查更新时出错: ${e.toString()}'),
+            content: Text(
+              SettingsScreenLocalizations.of(
+                context!,
+              ).updateCheckFailed.replaceFirst('{error}', e.toString()),
+            ),
             duration: const Duration(seconds: 3),
             backgroundColor: Theme.of(context!).colorScheme.error,
           ),

@@ -98,4 +98,26 @@ class SettingsScreenLocalizationsZh extends SettingsScreenLocalizations {
 
   @override
   String get testForegroundTaskTitle => '测试前台服务';
+
+  @override
+  String get updateAvailableTitle => '发现新版本';
+
+  @override
+  String get updateAvailableContent =>
+      '当前版本: {currentVersion}\n最新版本: {latestVersion}\n更新内容:';
+
+  @override
+  String get updateLaterButton => '稍后再说';
+
+  @override
+  String get updateViewButton => '查看更新';
+
+  @override
+  String get alreadyLatestVersion => '当前已是最新版本';
+
+  @override
+  String get updateCheckFailed => '检查更新失败: {error}';
+
+  @override
+  String get checkingForUpdates => '正在检查更新...';
 }

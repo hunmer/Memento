@@ -200,4 +200,40 @@ class StoreLocalizationsZh extends StoreLocalizations {
 
   @override
   String get confirmUseItem => '你确定要使用这个物品吗？';
+
+  @override
+  String get productNameLabel => '商品名称';
+
+  @override
+  String get priceLabel => '价格(积分)';
+
+  @override
+  String get stockLabel => '库存数量';
+
+  @override
+  String get descriptionLabel => '商品描述';
+
+  @override
+  String get deleteButton => '删除';
+
+  @override
+  String get archiveButton => '存档';
+
+  @override
+  String get saveButton => '保存';
+
+  @override
+  String get productNameRequired => '请输入商品名称';
+
+  @override
+  String get priceRequired => '请输入价格';
+
+  @override
+  String get priceInvalid => '请输入有效数字';
+
+  @override
+  String get stockRequired => '请输入库存数量';
+
+  @override
+  String get stockInvalid => '请输入有效数字';
 }

@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../controllers/controllers.dart';
@@ -147,9 +148,11 @@ class _TaskFormState extends State<TaskForm> {
 
   Future<void> _saveTask() async {
     if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter a title')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(TodoLocalizations.of(context)!.pleaseEnterTitle),
+        ),
+      );
       return;
     }
 
@@ -198,7 +201,11 @@ class _TaskFormState extends State<TaskForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.task == null ? 'New Task' : 'Edit Task'),
+        title: Text(
+          widget.task == null
+              ? TodoLocalizations.of(context)!.newTask
+              : TodoLocalizations.of(context)!.editTask,
+        ),
         actions: [
           IconButton(icon: const Icon(Icons.check), onPressed: _saveTask),
         ],
@@ -211,9 +218,9 @@ class _TaskFormState extends State<TaskForm> {
             // 标题
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: TodoLocalizations.of(context)!.title,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -221,9 +228,9 @@ class _TaskFormState extends State<TaskForm> {
             // 描述
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: TodoLocalizations.of(context)!.description,
+                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
@@ -237,18 +244,18 @@ class _TaskFormState extends State<TaskForm> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Start Date: ${_startDate == null ? 'Not set' : '${_startDate!.year}/${_startDate!.month}/${_startDate!.day}'}',
+                        '${TodoLocalizations.of(context)!.startDate}: ${_startDate == null ? TodoLocalizations.of(context)!.notSet : '${_startDate!.year}/${_startDate!.month}/${_startDate!.day}'}',
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Due Date: ${_dueDate == null ? 'Not set' : '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}'}',
+                        '${TodoLocalizations.of(context)!.dueDate}: ${_dueDate == null ? TodoLocalizations.of(context)!.notSet : '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}'}',
                       ),
                     ],
                   ),
                 ),
                 TextButton(
                   onPressed: () => _selectDateRange(context),
-                  child: const Text('Select Dates'),
+                  child: Text(TodoLocalizations.of(context)!.selectDates),
                 ),
                 if (_startDate != null || _dueDate != null)
                   IconButton(
@@ -260,24 +267,24 @@ class _TaskFormState extends State<TaskForm> {
             const SizedBox(height: 16),
 
             // 优先级
-            const Text('Priority:'),
+            Text(TodoLocalizations.of(context)!.priority),
             const SizedBox(height: 8),
             SegmentedButton<TaskPriority>(
-              segments: const [
+              segments: [
                 ButtonSegment<TaskPriority>(
                   value: TaskPriority.low,
-                  label: Text('Low'),
-                  icon: Icon(Icons.arrow_downward),
+                  label: Text(TodoLocalizations.of(context)!.low),
+                  icon: const Icon(Icons.arrow_downward),
                 ),
                 ButtonSegment<TaskPriority>(
                   value: TaskPriority.medium,
-                  label: Text('Medium'),
-                  icon: Icon(Icons.remove),
+                  label: Text(TodoLocalizations.of(context)!.medium),
+                  icon: const Icon(Icons.remove),
                 ),
                 ButtonSegment<TaskPriority>(
                   value: TaskPriority.high,
-                  label: Text('High'),
-                  icon: Icon(Icons.arrow_upward),
+                  label: Text(TodoLocalizations.of(context)!.high),
+                  icon: const Icon(Icons.arrow_upward),
                 ),
               ],
               selected: {_priority},
@@ -290,7 +297,7 @@ class _TaskFormState extends State<TaskForm> {
             const SizedBox(height: 16),
 
             // 标签
-            const Text('Tags:'),
+            Text(TodoLocalizations.of(context)!.tags),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8.0,
@@ -309,7 +316,7 @@ class _TaskFormState extends State<TaskForm> {
                 ),
                 ActionChip(
                   avatar: const Icon(Icons.add, size: 18),
-                  label: const Text('Add Tag'),
+                  label: Text(TodoLocalizations.of(context)!.addTag),
                   onPressed: () {
                     _showAddTagDialog();
                   },
@@ -319,9 +326,9 @@ class _TaskFormState extends State<TaskForm> {
             const SizedBox(height: 24),
 
             // 子任务
-            const Text(
-              'Subtasks',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              TodoLocalizations.of(context)!.subtasks,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Row(
@@ -329,9 +336,10 @@ class _TaskFormState extends State<TaskForm> {
                 Expanded(
                   child: TextField(
                     controller: _subtaskController,
-                    decoration: const InputDecoration(
-                      labelText: 'New Subtask',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText:
+                          '${TodoLocalizations.of(context)!.add} ${TodoLocalizations.of(context)!.subtasks.toLowerCase()}',
+                      border: const OutlineInputBorder(),
                     ),
                     onSubmitted: (_) => _addSubtask(),
                   ),
@@ -370,14 +378,14 @@ class _TaskFormState extends State<TaskForm> {
             const SizedBox(height: 24),
 
             // 提醒
-            const Text(
-              'Reminders',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              TodoLocalizations.of(context)!.reminders,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             TextButton.icon(
               icon: const Icon(Icons.add_alarm),
-              label: const Text('Add Reminder'),
+              label: Text(TodoLocalizations.of(context)!.addReminder),
               onPressed: _addReminder,
             ),
             ListView.builder(
@@ -412,12 +420,14 @@ class _TaskFormState extends State<TaskForm> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Add Tag'),
+            title: Text(TodoLocalizations.of(context)!.addTag),
             content: TextField(
               controller: tagController,
-              decoration: const InputDecoration(
-                labelText: 'Tag Name',
-                hintText: 'Enter a tag name',
+              decoration: InputDecoration(
+                labelText:
+                    '${TodoLocalizations.of(context)!.tags} ${TodoLocalizations.of(context)!.title.toLowerCase()}',
+                hintText:
+                    '${TodoLocalizations.of(context)!.pleaseEnterTitle.toLowerCase()} ${TodoLocalizations.of(context)!.tags.toLowerCase()}',
               ),
               autofocus: true,
             ),
@@ -438,7 +448,7 @@ class _TaskFormState extends State<TaskForm> {
                   }
                   Navigator.of(context).pop();
                 },
-                child: const Text('Add'),
+                child: Text(TodoLocalizations.of(context)!.add),
               ),
             ],
           ),

@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart' hide ListTile, Row, Center, SizedBox;
 import 'package:flutter/material.dart'
     as flutter
@@ -34,8 +35,14 @@ class GoalDetailScreen extends StatelessWidget {
                     context: context,
                     builder:
                         (context) => AlertDialog(
-                          title: const Text('确认清空'),
-                          content: const Text('确定要清空所有记录吗？此操作不可撤销。'),
+                          title: Text(
+                            TrackerLocalizations.of(context)!.confirmClear,
+                          ),
+                          content: Text(
+                            TrackerLocalizations.of(
+                              context,
+                            )!.confirmClearMessage,
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
@@ -51,9 +58,13 @@ class GoalDetailScreen extends StatelessWidget {
                   if (confirmed == true) {
                     await controller.clearRecordsForGoal(goal.id);
                     if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(const SnackBar(content: Text('记录已清空')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            TrackerLocalizations.of(context)!.recordsCleared,
+                          ),
+                        ),
+                      );
                     }
                   }
                 },
@@ -79,7 +90,7 @@ class GoalDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '目标: ${goal.name}',
+                  '${TrackerLocalizations.of(context)!.goalsTitle}: ${goal.name}',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const flutter.SizedBox(height: 16),
@@ -94,12 +105,27 @@ class GoalDetailScreen extends StatelessWidget {
                           : Theme.of(context).primaryColor,
                 ),
                 const flutter.SizedBox(height: 16),
-                Text('当前进度: $currentValue/${goal.targetValue}'),
+                Text(
+                  TrackerLocalizations.of(context)!.currentProgress
+                      .replaceFirst('{currentValue}', currentValue.toString())
+                      .replaceFirst(
+                        '{targetValue}',
+                        goal.targetValue.toString(),
+                      ),
+                ),
                 const flutter.SizedBox(height: 16),
                 if (goal.reminderTime != null)
-                  Text('提醒时间: ${goal.reminderTime}'),
+                  Text(
+                    TrackerLocalizations.of(context)!.reminderTime.replaceFirst(
+                      '{reminderTime}',
+                      goal.reminderTime.toString(),
+                    ),
+                  ),
                 const flutter.SizedBox(height: 16),
-                Text('记录历史', style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  TrackerLocalizations.of(context)!.recordHistory,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const flutter.SizedBox(height: 8),
                 Expanded(
                   child: FutureBuilder<List<Record>>(
@@ -118,7 +144,11 @@ class GoalDetailScreen extends StatelessWidget {
                         builder: (context, snapshot) {
                           final records = snapshot.data ?? [];
                           if (records.isEmpty) {
-                            return const flutter.Center(child: Text('暂无记录'));
+                            return flutter.Center(
+                              child: Text(
+                                TrackerLocalizations.of(context)!.noRecords,
+                              ),
+                            );
                           }
                           return ListView.builder(
                             itemCount: records.length,
@@ -140,43 +170,50 @@ class GoalDetailScreen extends StatelessWidget {
                                     IconButton(
                                       icon: const Icon(Icons.delete, size: 20),
                                       onPressed: () async {
-                                        final confirmed =
-                                            await showDialog<bool>(
-                                              context: context,
-                                              builder:
-                                                  (context) => AlertDialog(
-                                                    title: const Text('确认删除'),
-                                                    content: const Text(
-                                                      '确定要删除这条记录吗？',
+                                        final confirmed = await showDialog<
+                                          bool
+                                        >(
+                                          context: context,
+                                          builder:
+                                              (context) => AlertDialog(
+                                                title: Text(
+                                                  TrackerLocalizations.of(
+                                                    context,
+                                                  )!.confirmDelete,
+                                                ),
+                                                content: Text(
+                                                  TrackerLocalizations.of(
+                                                    context,
+                                                  )!.confirmDeleteRecordMessage,
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed:
+                                                        () => Navigator.pop(
+                                                          context,
+                                                          false,
+                                                        ),
+                                                    child: Text(
+                                                      AppLocalizations.of(
+                                                        context,
+                                                      )!.cancel,
                                                     ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed:
-                                                            () => Navigator.pop(
-                                                              context,
-                                                              false,
-                                                            ),
-                                                        child: Text(
-                                                          AppLocalizations.of(
-                                                            context,
-                                                          )!.cancel,
-                                                        ),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed:
-                                                            () => Navigator.pop(
-                                                              context,
-                                                              true,
-                                                            ),
-                                                        child: Text(
-                                                          AppLocalizations.of(
-                                                            context,
-                                                          )!.ok,
-                                                        ),
-                                                      ),
-                                                    ],
                                                   ),
-                                            );
+                                                  TextButton(
+                                                    onPressed:
+                                                        () => Navigator.pop(
+                                                          context,
+                                                          true,
+                                                        ),
+                                                    child: Text(
+                                                      AppLocalizations.of(
+                                                        context,
+                                                      )!.ok,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                        );
                                         if (confirmed == true) {
                                           await controller.deleteRecord(
                                             record.id,
@@ -185,8 +222,12 @@ class GoalDetailScreen extends StatelessWidget {
                                             ScaffoldMessenger.of(
                                               context,
                                             ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('记录已删除'),
+                                              SnackBar(
+                                                content: Text(
+                                                  TrackerLocalizations.of(
+                                                    context,
+                                                  )!.recordDeleted,
+                                                ),
                                               ),
                                             );
                                           }

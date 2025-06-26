@@ -29,11 +29,11 @@ abstract class SettingsScreenLocalizations {
 
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
@@ -73,6 +73,14 @@ abstract class SettingsScreenLocalizations {
   String get logSettingsTitle;
   String get logSettingsSubtitle;
   String get testForegroundTaskTitle;
+
+  String get updateAvailableTitle;
+  String get updateAvailableContent;
+  String get updateLaterButton;
+  String get updateViewButton;
+  String get alreadyLatestVersion;
+  String get updateCheckFailed;
+  String get checkingForUpdates;
 }
 
 class _SettingsScreenLocalizationsDelegate
