@@ -218,4 +218,20 @@ class ContactLocalizationsZh extends ContactLocalizations {
 
   @override
   String get upload => '上传';
+
+  // 交互记录表单
+  @override
+  String get addInteractionRecord => '添加联系记录';
+  @override
+  String get editInteractionRecord => '编辑联系记录';
+  @override
+  String get dateLabel => '日期';
+  @override
+  String get timeLabel => '时间';
+  @override
+  String get notesHint => '输入联系内容...';
+  @override
+  String get otherParticipants => '其他参与者';
+  @override
+  String get addParticipantTooltip => '添加参与者';
 }

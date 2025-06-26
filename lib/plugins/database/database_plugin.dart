@@ -29,7 +29,7 @@ class DatabasePlugin extends BasePlugin {
   String get id => 'database';
 
   @override
-  String get name => DatabaseLocalizations.pluginName;
+  String get name => 'Database';
 
   static DatabasePlugin? _instance;
   static DatabasePlugin get instance {
@@ -93,7 +93,7 @@ class DatabasePlugin extends BasePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    DatabaseLocalizations.pluginName,
+                    DatabaseLocalizations.of(context).pluginName,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

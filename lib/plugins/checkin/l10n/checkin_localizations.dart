@@ -147,11 +147,17 @@ abstract class CheckinLocalizations {
 
   String get addCheckinRecord;
 
-  get noteHint;
+  String get noteHint;
 
-  get checkinDateLabel;
+  String get checkinDateLabel;
 
-  get checkinTimeLabel;
+  String get checkinTimeLabel;
+
+  String get checkinTrendTitle;
+
+  String get checkinRankingTitle;
+
+  String get checkinGroupPieTitle;
 }
 
 class _CheckinLocalizationsDelegate

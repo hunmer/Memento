@@ -218,4 +218,12 @@ class CheckinLocalizationsEn extends CheckinLocalizations {
 
   @override
   String get noteHint => 'Add notes (optional)';
+
+  // 统计页面标题
+  @override
+  String get checkinTrendTitle => 'Check-in Trend';
+  @override
+  String get checkinRankingTitle => 'Check-in Ranking';
+  @override
+  String get checkinGroupPieTitle => 'Check-in Group Distribution';
 }

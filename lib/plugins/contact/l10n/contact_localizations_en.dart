@@ -220,4 +220,22 @@ class ContactLocalizationsEn extends ContactLocalizations {
 
   @override
   String get upload => 'Upload';
+
+  // 交互记录表单
+  @override
+  String get addInteractionRecord => 'Add Interaction Record';
+  @override
+  String get editInteractionRecord => 'Edit Interaction Record';
+
+  @override
+  String get dateLabel => 'Date';
+  @override
+  String get timeLabel => 'Time';
+
+  @override
+  String get notesHint => 'Enter interaction details...';
+  @override
+  String get otherParticipants => 'Other Participants';
+  @override
+  String get addParticipantTooltip => 'Add participant';
 }

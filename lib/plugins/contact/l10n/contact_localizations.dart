@@ -152,6 +152,15 @@ abstract class ContactLocalizations {
   get tags;
 
   get reset;
+
+  // 交互记录表单
+  String get addInteractionRecord;
+  String get editInteractionRecord;
+  String get dateLabel;
+  String get timeLabel;
+  String get notesHint;
+  String get otherParticipants;
+  String get addParticipantTooltip;
 }
 
 class _ContactLocalizationsDelegate

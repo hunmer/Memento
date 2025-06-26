@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/interaction_record_model.dart';
@@ -169,10 +170,10 @@ class _InteractionFormState extends State<InteractionForm> {
                     child: InkWell(
                       onTap: () => _selectDate(context),
                       child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: '日期',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.calendar_today),
+                        decoration: InputDecoration(
+                          labelText: ContactLocalizations.of(context).dateLabel,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.calendar_today),
                         ),
                         child: Text(
                           '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}',
@@ -185,10 +186,10 @@ class _InteractionFormState extends State<InteractionForm> {
                     child: InkWell(
                       onTap: () => _selectTime(context),
                       child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: '时间',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.access_time),
+                        decoration: InputDecoration(
+                          labelText: ContactLocalizations.of(context).timeLabel,
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.access_time),
                         ),
                         child: Text(
                           '${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}',
@@ -203,10 +204,10 @@ class _InteractionFormState extends State<InteractionForm> {
               // 备注输入
               TextFormField(
                 controller: _notesController,
-                decoration: const InputDecoration(
-                  labelText: '备注',
-                  border: OutlineInputBorder(),
-                  hintText: '输入联系内容...',
+                decoration: InputDecoration(
+                  labelText: ContactLocalizations.of(context).notes,
+                  border: const OutlineInputBorder(),
+                  hintText: ContactLocalizations.of(context).notesHint,
                 ),
                 maxLines: 3,
               ),
@@ -216,11 +217,15 @@ class _InteractionFormState extends State<InteractionForm> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('其他参与者', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    ContactLocalizations.of(context).otherParticipants,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   IconButton(
                     icon: const Icon(Icons.person_add),
                     onPressed: _showContactSelector,
-                    tooltip: '添加参与者',
+                    tooltip:
+                        ContactLocalizations.of(context).addParticipantTooltip,
                   ),
                 ],
               ),

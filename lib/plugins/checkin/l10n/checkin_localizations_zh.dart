@@ -215,4 +215,12 @@ class CheckinLocalizationsZh extends CheckinLocalizations {
 
   @override
   String get noteHint => '添加备注(可选)';
+
+  // 统计页面标题
+  @override
+  String get checkinTrendTitle => '打卡数量趋势';
+  @override
+  String get checkinRankingTitle => '连续打卡排行榜';
+  @override
+  String get checkinGroupPieTitle => '打卡分组占比';
 }
