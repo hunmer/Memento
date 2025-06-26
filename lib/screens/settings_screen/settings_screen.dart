@@ -8,6 +8,7 @@ import './controllers/webdav_controller.dart';
 import '../../core/floating_ball/settings_screen.dart';
 import '../../core/floating_ball/floating_ball_manager.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
+import './l10n/settings_screen_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -91,25 +92,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('设置')),
+      appBar: AppBar(
+        title: Text(SettingsScreenLocalizations.of(context).settingsTitle),
+      ),
       body: ListView(
         children: [
           ListTile(
             leading: const Icon(Icons.language),
-            title: Text(
-              _controller.isChineseLocale ? '语言 (中文)' : 'Language (English)',
-            ),
+            title: Text(SettingsScreenLocalizations.of(context).languageTitle),
             subtitle: Text(
-              _controller.isChineseLocale
-                  ? '点击切换到英文'
-                  : 'Tap to switch to Chinese',
+              SettingsScreenLocalizations.of(context).languageSubtitle,
             ),
             onTap: _controller.toggleLanguage,
           ),
           ListTile(
             leading: const Icon(Icons.brightness_4),
-            title: const Text('深色模式'),
-            subtitle: const Text('切换应用主题'),
+            title: Text(SettingsScreenLocalizations.of(context).darkModeTitle),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).darkModeSubtitle,
+            ),
             trailing: Switch(
               value: _controller.isDarkMode,
               onChanged: (value) => _controller.toggleTheme(),
@@ -118,8 +119,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.upload),
-            title: const Text('导出应用数据'),
-            subtitle: const Text('将插件数据导出到文件'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).exportDataTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).exportDataSubtitle,
+            ),
             onTap: () {
               if (mounted) {
                 _controller.exportData(context);
@@ -128,8 +133,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.storage),
-            title: const Text('数据文件管理'),
-            subtitle: const Text('管理应用数据目录中的文件'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).dataManagementTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).dataManagementSubtitle,
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -139,29 +148,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.download),
-            title: const Text('导入应用数据'),
-            subtitle: const Text('从文件导入插件数据'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).importDataTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).importDataSubtitle,
+            ),
             onTap: _controller.importData,
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.backup),
-            title: const Text('完整备份'),
-            subtitle: const Text('备份整个应用数据目录'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).fullBackupTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).fullBackupSubtitle,
+            ),
             onTap: _controller.exportAllData,
           ),
           ListTile(
             leading: const Icon(Icons.restore),
-            title: const Text('完整恢复'),
-            subtitle: const Text('从备份恢复整个应用数据（覆盖现有数据）'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).fullRestoreTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).fullRestoreSubtitle,
+            ),
             onTap: _controller.importAllData,
             trailing: const Icon(Icons.warning, color: Colors.orange),
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.cloud),
-            title: const Text('WebDAV 同步'),
-            subtitle: Text(_isWebDAVConnected ? '已连接' : '未连接'),
+            title: Text(SettingsScreenLocalizations.of(context).webDAVTitle),
+            subtitle: Text(
+              _isWebDAVConnected
+                  ? SettingsScreenLocalizations.of(context).webDAVConnected
+                  : SettingsScreenLocalizations.of(context).webDAVDisconnected,
+            ),
             trailing:
                 _isWebDAVConnected
                     ? const Icon(Icons.check_circle, color: Colors.green)
@@ -179,8 +204,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final bool isEnabled = snapshot.data ?? true;
               return ListTile(
                 leading: const Icon(Icons.touch_app),
-                title: const Text('悬浮球设置'),
-                subtitle: Text(isEnabled ? '已启用' : '已禁用'),
+                title: Text(
+                  SettingsScreenLocalizations.of(context).floatingBallTitle,
+                ),
+                subtitle: Text(
+                  isEnabled
+                      ? SettingsScreenLocalizations.of(
+                        context,
+                      ).floatingBallEnabled
+                      : SettingsScreenLocalizations.of(
+                        context,
+                      ).floatingBallDisabled,
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
                   Navigator.push(
@@ -196,15 +231,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.schedule),
-            title: const Text('自动备份设置'),
-            subtitle: const Text('设置自动备份计划'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).autoBackupTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).autoBackupSubtitle,
+            ),
             onTap: _backupService.showBackupScheduleDialog,
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.play_circle),
-            title: const Text('自动打开上次使用的插件'),
-            subtitle: const Text('启动时自动打开最后使用的插件'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).autoOpenLastPluginTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(
+                context,
+              ).autoOpenLastPluginSubtitle,
+            ),
             trailing: Switch(
               value: _controller.autoOpenLastPlugin,
               onChanged:
@@ -216,8 +261,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.system_update),
-            title: const Text('自动检查更新'),
-            subtitle: const Text('定期检查应用新版本'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).autoCheckUpdateTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).autoCheckUpdateSubtitle,
+            ),
             trailing: Switch(
               value: _controller.autoCheckUpdate,
               onChanged:
@@ -228,15 +277,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.update),
-            title: const Text('检查更新'),
-            subtitle: const Text('立即检查应用新版本'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).checkUpdateTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).checkUpdateSubtitle,
+            ),
             onTap: _controller.checkForUpdates,
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.assignment),
-            title: const Text('日志设置'),
-            subtitle: const Text('配置日志记录选项'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).logSettingsTitle,
+            ),
+            subtitle: Text(
+              SettingsScreenLocalizations.of(context).logSettingsSubtitle,
+            ),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.push(
@@ -249,7 +306,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.update),
-            title: const Text('测试前台服务'),
+            title: Text(
+              SettingsScreenLocalizations.of(context).testForegroundTaskTitle,
+            ),
             onTap: () {
               Navigator.push(
                 context,

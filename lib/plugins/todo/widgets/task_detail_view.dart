@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/models.dart';
@@ -50,7 +51,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
     final timeFormat = DateFormat('HH:mm');
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task Details'),
+        title: Text(TodoLocalizations.of(context)!.taskDetailsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -75,9 +76,11 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                 context: context,
                 builder:
                     (context) => AlertDialog(
-                      title: const Text('Delete Task'),
-                      content: const Text(
-                        'Are you sure you want to delete this task?',
+                      title: Text(
+                        TodoLocalizations.of(context)!.deleteTaskTitle,
+                      ),
+                      content: Text(
+                        TodoLocalizations.of(context)!.deleteTaskMessage,
                       ),
                       actions: [
                         TextButton(
@@ -152,7 +155,10 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             // 描述
             if (widget.task.description != null &&
                 widget.task.description!.isNotEmpty) ...[
-              Text('Description', style: theme.textTheme.titleMedium),
+              Text(
+                TodoLocalizations.of(context)!.description,
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Text(widget.task.description!),
               const SizedBox(height: 16),
@@ -160,7 +166,10 @@ class _TaskDetailViewState extends State<TaskDetailView> {
 
             // 标签
             if (widget.task.tags.isNotEmpty) ...[
-              Text('Tags', style: theme.textTheme.titleMedium),
+              Text(
+                TodoLocalizations.of(context)!.tags,
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8.0,
@@ -179,7 +188,10 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             ],
 
             // 计时器信息
-            Text('Timer', style: theme.textTheme.titleMedium),
+            Text(
+              TodoLocalizations.of(context)!.timer,
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Card(
               child: Padding(
@@ -190,7 +202,10 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Duration:', style: theme.textTheme.titleSmall),
+                        Text(
+                          TodoLocalizations.of(context)!.duration,
+                          style: theme.textTheme.titleSmall,
+                        ),
                         Text(
                           widget.task.formattedDuration,
                           style: TextStyle(
@@ -210,7 +225,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                       children: [
                         ElevatedButton.icon(
                           icon: const Icon(Icons.play_arrow),
-                          label: const Text('Start'),
+                          label: Text(TodoLocalizations.of(context)!.start),
                           onPressed:
                               widget.task.status != TaskStatus.inProgress
                                   ? () {
@@ -224,7 +239,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                         ),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.pause),
-                          label: const Text('Pause'),
+                          label: Text(TodoLocalizations.of(context)!.pause),
                           onPressed:
                               widget.task.status == TaskStatus.inProgress
                                   ? () {
@@ -238,7 +253,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                         ),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.check),
-                          label: const Text('Complete'),
+                          label: Text(TodoLocalizations.of(context)!.complete),
                           onPressed:
                               widget.task.status != TaskStatus.done
                                   ? () {
@@ -259,19 +274,22 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             const SizedBox(height: 16),
 
             // 日期信息
-            Text('Dates', style: theme.textTheme.titleMedium),
+            Text(
+              TodoLocalizations.of(context)!.dates,
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Column(
               children: [
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
-                  title: const Text('Created'),
+                  title: Text(TodoLocalizations.of(context)!.created),
                   subtitle: Text(dateFormat.format(widget.task.createdAt)),
                 ),
                 if (widget.task.dueDate != null)
                   ListTile(
                     leading: const Icon(Icons.event),
-                    title: const Text('Due Date'),
+                    title: Text(TodoLocalizations.of(context)!.dueDate),
                     subtitle: Text(dateFormat.format(widget.task.dueDate!)),
                   ),
                 const SizedBox(height: 16),
@@ -280,7 +298,10 @@ class _TaskDetailViewState extends State<TaskDetailView> {
 
             // 子任务
             if (widget.task.subtasks.isNotEmpty) ...[
-              Text('Subtasks', style: theme.textTheme.titleMedium),
+              Text(
+                TodoLocalizations.of(context)!.subtasks,
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               ListView.builder(
                 shrinkWrap: true,
@@ -316,7 +337,10 @@ class _TaskDetailViewState extends State<TaskDetailView> {
 
             // 提醒
             if (widget.task.reminders.isNotEmpty) ...[
-              Text('Reminders', style: theme.textTheme.titleMedium),
+              Text(
+                TodoLocalizations.of(context)!.reminders,
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               ListView.builder(
                 shrinkWrap: true,

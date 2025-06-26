@@ -1,7 +1,7 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../controllers/webdav_controller.dart';
 import '../../../core/storage/storage_manager.dart';
+import 'webdav_localizations.dart';
 
 class WebDAVSettingsDialog extends StatefulWidget {
   final WebDAVController controller;
@@ -73,7 +73,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
 
     setState(() {
       _isConnecting = true;
-      _statusMessage = '正在连接...';
+      _statusMessage = WebDAVLocalizations.of(context).connectingStatus;
     });
 
     try {
@@ -87,13 +87,18 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       setState(() {
         _isConnecting = false;
         _isConnected = success;
-        _statusMessage = success ? '连接成功!' : '连接失败，请检查设置';
+        _statusMessage =
+            success
+                ? WebDAVLocalizations.of(context).connectionSuccessStatus
+                : WebDAVLocalizations.of(context).connectionFailedStatus;
       });
     } catch (e) {
       setState(() {
         _isConnecting = false;
         _isConnected = false;
-        _statusMessage = '连接错误: $e';
+        _statusMessage =
+            WebDAVLocalizations.of(context).connectionErrorStatus +
+            e.toString();
       });
     }
   }
@@ -102,7 +107,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
   Future<void> _disconnect() async {
     setState(() {
       _isConnecting = true;
-      _statusMessage = '正在断开连接...';
+      _statusMessage = WebDAVLocalizations.of(context).disconnectingStatus;
     });
 
     // 停止文件监控
@@ -125,14 +130,14 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       _isConnecting = false;
       _isConnected = false;
       _autoSync = false;
-      _statusMessage = '已断开连接';
+      _statusMessage = WebDAVLocalizations.of(context).disconnectedStatus;
     });
   }
 
   // 将本地数据同步到WebDAV
   Future<void> _syncLocalToWebDAV() async {
     setState(() {
-      _statusMessage = '正在上传数据到WebDAV...';
+      _statusMessage = WebDAVLocalizations.of(context).uploadingStatus;
       _isConnecting = true;
     });
 
@@ -140,14 +145,17 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
 
     setState(() {
       _isConnecting = false;
-      _statusMessage = success ? '上传成功!' : '上传失败，请检查连接';
+      _statusMessage =
+          success
+              ? WebDAVLocalizations.of(context).uploadSuccessStatus
+              : WebDAVLocalizations.of(context).uploadFailedStatus;
     });
   }
 
   // 将WebDAV数据同步到本地
   Future<void> _syncWebDAVToLocal() async {
     setState(() {
-      _statusMessage = '正在从WebDAV下载数据...';
+      _statusMessage = WebDAVLocalizations.of(context).downloadingStatus;
       _isConnecting = true;
     });
 
@@ -155,14 +163,17 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
 
     setState(() {
       _isConnecting = false;
-      _statusMessage = success ? '下载成功!' : '下载失败，请检查连接';
+      _statusMessage =
+          success
+              ? WebDAVLocalizations.of(context).downloadSuccessStatus
+              : WebDAVLocalizations.of(context).downloadFailedStatus;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('WebDAV 设置'),
+      title: Text(WebDAVLocalizations.of(context).settingsTitle),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -172,17 +183,21 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
             children: [
               TextFormField(
                 controller: _urlController,
-                decoration: const InputDecoration(
-                  labelText: 'WebDAV 服务器地址',
-                  hintText: 'https://example.com/webdav',
+                decoration: InputDecoration(
+                  labelText: WebDAVLocalizations.of(context).serverAddressLabel,
+                  hintText: WebDAVLocalizations.of(context).serverAddressHint,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入WebDAV服务器地址';
+                    return WebDAVLocalizations.of(
+                      context,
+                    ).serverAddressEmptyError;
                   }
                   if (!value.startsWith('http://') &&
                       !value.startsWith('https://')) {
-                    return '地址必须以http://或https://开头';
+                    return WebDAVLocalizations.of(
+                      context,
+                    ).serverAddressInvalidError;
                   }
                   return null;
                 },
@@ -191,10 +206,12 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _usernameController,
-                decoration: const InputDecoration(labelText: '用户名'),
+                decoration: InputDecoration(
+                  labelText: WebDAVLocalizations.of(context).usernameLabel,
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入用户名';
+                    return WebDAVLocalizations.of(context).usernameEmptyError;
                   }
                   return null;
                 },
@@ -203,11 +220,13 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: '密码'),
+                decoration: InputDecoration(
+                  labelText: WebDAVLocalizations.of(context).passwordLabel,
+                ),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入密码';
+                    return WebDAVLocalizations.of(context).passwordEmptyError;
                   }
                   return null;
                 },
@@ -216,16 +235,16 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _dataPathController,
-                decoration: const InputDecoration(
-                  labelText: '数据目录路径',
-                  hintText: '/app_data',
+                decoration: InputDecoration(
+                  labelText: WebDAVLocalizations.of(context).dataPathLabel,
+                  hintText: WebDAVLocalizations.of(context).dataPathHint,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入数据目录路径';
+                    return WebDAVLocalizations.of(context).dataPathEmptyError;
                   }
                   if (!value.startsWith('/')) {
-                    return '路径必须以/开头';
+                    return WebDAVLocalizations.of(context).dataPathInvalidError;
                   }
                   return null;
                 },
@@ -234,14 +253,22 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               const SizedBox(height: 16),
               if (_isConnected)
                 SwitchListTile(
-                  title: const Text('自动同步'),
-                  subtitle: const Text('监控本地文件变化并自动同步到WebDAV (不包含配置文件)'),
+                  title: Text(WebDAVLocalizations.of(context).autoSyncLabel),
+                  subtitle: Text(
+                    WebDAVLocalizations.of(context).autoSyncSubtitle,
+                  ),
                   value: _autoSync,
                   onChanged: (bool value) {
                     setState(() {
                       _autoSync = value;
                       _statusMessage =
-                          value ? '自动同步已开启，点击完成后生效' : '自动同步已关闭，点击完成后生效';
+                          value
+                              ? WebDAVLocalizations.of(
+                                context,
+                              ).autoSyncEnabledStatus
+                              : WebDAVLocalizations.of(
+                                context,
+                              ).autoSyncDisabledStatus;
                     });
                   },
                 ),
@@ -267,20 +294,20 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
         if (!_isConnected)
           TextButton(
             onPressed: _isConnecting ? null : _testConnection,
-            child: const Text('测试连接'),
+            child: Text(WebDAVLocalizations.of(context).testConnectionButton),
           )
         else ...[
           TextButton(
             onPressed: _isConnecting ? null : _disconnect,
-            child: const Text('断开连接'),
+            child: Text(WebDAVLocalizations.of(context).disconnectButton),
           ),
           TextButton(
             onPressed: _isConnecting ? null : _syncWebDAVToLocal,
-            child: const Text('下载'),
+            child: Text(WebDAVLocalizations.of(context).downloadButton),
           ),
           TextButton(
             onPressed: _isConnecting ? null : _syncLocalToWebDAV,
-            child: const Text('上传'),
+            child: Text(WebDAVLocalizations.of(context).uploadButton),
           ),
           TextButton(
             onPressed: () async {
@@ -312,13 +339,15 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
 
               // 显示提示
               ScaffoldMessenger.of(currentContext).showSnackBar(
-                const SnackBar(
-                  content: Text('设置已保存'),
+                SnackBar(
+                  content: Text(
+                    WebDAVLocalizations.of(context).settingsSavedMessage,
+                  ),
                   backgroundColor: Colors.green,
                 ),
               );
             },
-            child: Text(AppLocalizations.of(context)!.done),
+            child: const Text('Done'),
           ),
         ],
       ],

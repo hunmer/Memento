@@ -7,6 +7,7 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
+import 'data_management_localizations.dart';
 
 class DataManagementScreen extends StatefulWidget {
   const DataManagementScreen({super.key});
@@ -36,9 +37,13 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       });
       await _refreshFiles();
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('无法加载文档目录: ${e.toString()}')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${DataManagementLocalizations.of(context)!.directoryLoadFailed}: ${e.toString()}',
+          ),
+        ),
+      );
       debugPrint('Documents directory load error: ${e.toString()}');
     }
   }
@@ -57,9 +62,13 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         });
       });
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('无法访问目录: ${e.toString()}')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${DataManagementLocalizations.of(context)!.directoryAccessFailed}: ${e.toString()}',
+          ),
+        ),
+      );
       debugPrint('Directory access error: ${e.toString()}');
     }
   }
@@ -95,16 +104,22 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认删除'),
-            content: Text('确定要删除选中的 ${selectedPaths.length} 个项目吗？'),
+            title: Text(DataManagementLocalizations.of(context)!.confirmDelete),
+            content: Text(
+              DataManagementLocalizations.of(context)!.confirmDeleteItems
+                  .replaceFirst('%d', selectedPaths.length.toString()),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text(DataManagementLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('删除', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  DataManagementLocalizations.of(context)!.delete,
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
@@ -122,9 +137,11 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         selectedItems.clear();
         _refreshFiles();
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('删除成功')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(DataManagementLocalizations.of(context)!.deleteSuccess),
+        ),
+      );
     }
   }
 
@@ -175,19 +192,21 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.rename),
+            title: Text(DataManagementLocalizations.of(context)!.rename),
             content: TextField(
               controller: nameController,
-              decoration: const InputDecoration(hintText: '输入新名称'),
+              decoration: InputDecoration(
+                hintText: DataManagementLocalizations.of(context)!.rename,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text(DataManagementLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
-                child: Text(AppLocalizations.of(context)!.ok),
+                child: Text(DataManagementLocalizations.of(context)!.create),
               ),
             ],
           ),
@@ -224,9 +243,15 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                   onTap: () {
                     Navigator.pop(context);
                     // 这里可以添加编辑文件的逻辑
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('编辑功能待实现')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          DataManagementLocalizations.of(
+                            context,
+                          )!.editNotImplemented,
+                        ),
+                      ),
+                    );
                   },
                 ),
               ListTile(
@@ -276,7 +301,11 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       _refreshFiles();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('导入完成: 成功 $successCount 个, 失败 $failCount 个')),
+        SnackBar(
+          content: Text(
+            '${DataManagementLocalizations.of(context)!.importSuccess}: $successCount, ${DataManagementLocalizations.of(context)!.importFailed}: $failCount',
+          ),
+        ),
       );
     }
   }
@@ -346,7 +375,9 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('导出失败: ${e.toString()}'),
+          content: Text(
+            '${DataManagementLocalizations.of(context)!.exportFailed}: ${e.toString()}',
+          ),
           duration: const Duration(seconds: 5),
         ),
       );
@@ -379,19 +410,21 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('新建文件'),
+            title: Text(DataManagementLocalizations.of(context)!.newFile),
             content: TextField(
               controller: nameController,
-              decoration: const InputDecoration(hintText: '输入文件名'),
+              decoration: InputDecoration(
+                hintText: DataManagementLocalizations.of(context)!.newFile,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text(DataManagementLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
-                child: Text(AppLocalizations.of(context)!.create),
+                child: Text(DataManagementLocalizations.of(context)!.create),
               ),
             ],
           ),
@@ -410,19 +443,21 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('新建文件夹'),
+            title: Text(DataManagementLocalizations.of(context)!.newFolder),
             content: TextField(
               controller: nameController,
-              decoration: const InputDecoration(hintText: '输入文件夹名'),
+              decoration: InputDecoration(
+                hintText: DataManagementLocalizations.of(context)!.newFolder,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text(DataManagementLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
-                child: Text(AppLocalizations.of(context)!.create),
+                child: Text(DataManagementLocalizations.of(context)!.create),
               ),
             ],
           ),
@@ -448,7 +483,10 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(currentDirectory?.path.split('/').last ?? '数据管理'),
+        title: Text(
+          currentDirectory?.path.split('/').last ??
+              DataManagementLocalizations.of(context)!.dataManagementTitle,
+        ),
         leading:
             directoryStack.length > 1
                 ? IconButton(
@@ -460,28 +498,28 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshFiles,
-            tooltip: '刷新',
+            tooltip: DataManagementLocalizations.of(context)!.refresh,
           ),
           IconButton(
             icon: const Icon(Icons.upload_file),
             onPressed: _importFiles,
-            tooltip: '导入文件',
+            tooltip: DataManagementLocalizations.of(context)!.importFiles,
           ),
           if (selectedItems.isNotEmpty) ...[
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteSelected,
-              tooltip: '删除选中项',
+              tooltip: DataManagementLocalizations.of(context)!.deleteSelected,
             ),
             IconButton(
               icon: const Icon(Icons.drive_file_move),
               onPressed: _moveSelected,
-              tooltip: '移动选中项',
+              tooltip: DataManagementLocalizations.of(context)!.moveSelected,
             ),
             IconButton(
               icon: const Icon(Icons.download),
               onPressed: _exportSelected,
-              tooltip: '导出选中项',
+              tooltip: DataManagementLocalizations.of(context)!.exportSelected,
             ),
           ],
         ],
@@ -540,7 +578,9 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.create_new_folder),
-                    label: const Text('新建文件夹'),
+                    label: Text(
+                      DataManagementLocalizations.of(context)!.newFolder,
+                    ),
                     onPressed: _createNewFolder,
                   ),
                 ),
@@ -548,7 +588,9 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.note_add),
-                    label: const Text('新建文件'),
+                    label: Text(
+                      DataManagementLocalizations.of(context)!.newFile,
+                    ),
                     onPressed: _createNewFile,
                   ),
                 ),
@@ -657,7 +699,13 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
                 : errorMessage != null
                 ? Center(child: Text(errorMessage!))
                 : folders.isEmpty
-                ? const Center(child: Text('没有子目录'))
+                ? Center(
+                  child: Text(
+                    DataManagementLocalizations.of(
+                      context,
+                    )!.directoryAccessFailed,
+                  ),
+                )
                 : ListView.builder(
                   shrinkWrap: true,
                   itemCount: folders.length,
@@ -670,7 +718,9 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
                               : const Icon(Icons.folder, color: Colors.amber),
                       title:
                           folder.path == '..'
-                              ? const Text('跳到上级目录')
+                              ? Text(
+                                DataManagementLocalizations.of(context)!.move,
+                              )
                               : Text(path.basename(folder.path)),
                       onTap:
                           folder.path == '..'
@@ -687,7 +737,7 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, currentDirectory),
-          child: const Text('选择'),
+          child: Text(DataManagementLocalizations.of(context)!.select),
         ),
       ],
     );
