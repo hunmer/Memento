@@ -1,5 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
@@ -72,9 +73,15 @@ Future<void> moveNoteDialog(
     await controller.moveNote(note.id, targetFolder.id);
     onReload();
     if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('已移动到 ${targetFolder.name}')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            NotesLocalizations.of(
+              context,
+            )!.movedToFolder.replaceFirst('{folderName}', targetFolder.name),
+          ),
+        ),
+      );
     }
   }
 }

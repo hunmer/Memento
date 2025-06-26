@@ -35,7 +35,9 @@ class _ImportDialogState extends State<ImportDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('选择要导入的插件 (${widget.isMergeMode ? "合并模式" : "覆盖模式"})'),
+      title: Text(
+        '${AppLocalizations.of(context)!.selectPluginsToImport} (${widget.isMergeMode ? AppLocalizations.of(context)!.mergeMode : AppLocalizations.of(context)!.overwriteMode})',
+      ),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView(
@@ -44,7 +46,9 @@ class _ImportDialogState extends State<ImportDialog> {
               widget.pluginDataMap.entries.map((entry) {
                 return CheckboxListTile(
                   title: Text(entry.key),
-                  subtitle: Text('数据大小: ${_formatFileSize(entry.value)}'),
+                  subtitle: Text(
+                    '${AppLocalizations.of(context)!.dataSize}: ${_formatFileSize(entry.value)}',
+                  ),
                   value: _selectedPlugins[entry.key],
                   onChanged: (bool? value) {
                     setState(() {
@@ -64,7 +68,7 @@ class _ImportDialogState extends State<ImportDialog> {
           onPressed: () {
             Navigator.of(context).pop(_selectedPlugins);
           },
-          child: const Text('导入'),
+          child: Text(AppLocalizations.of(context)!.import),
         ),
       ],
     );

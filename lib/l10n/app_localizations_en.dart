@@ -340,4 +340,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get titleRequired => 'Title is required';
+
+  @override
+  get mergeMode => 'Merge mode';
+
+  @override
+  get overwriteMode => 'Overwrite mode';
+
+  @override
+  String get pleaseEnterTitle => 'Please enter title';
+
+  @override
+  get selectPluginsToImport => 'Select plugins to import';
 }

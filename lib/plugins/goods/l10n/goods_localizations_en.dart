@@ -262,6 +262,9 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
   String get oneMonthUnused => "Unused for one month";
 
   @override
+  String get subItemsList => "Sub Items List";
+
+  @override
   get enterProductDescription => "Enter product description";
 
   @override

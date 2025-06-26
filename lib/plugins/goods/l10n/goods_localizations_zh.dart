@@ -255,6 +255,9 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
   String get oneMonthUnused => "一个月未使用";
 
   @override
+  String get subItemsList => "子物品列表";
+
+  @override
   get enterProductDescription => "输入产品描述";
 
   @override

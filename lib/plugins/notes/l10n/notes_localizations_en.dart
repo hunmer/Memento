@@ -107,4 +107,10 @@ class NotesLocalizationsEn extends NotesLocalizations {
 
   @override
   String get noResultsFound => 'No results found';
+
+  @override
+  String get movedToFolder => 'Moved to {folderName}';
+
+  @override
+  String get selectSubfolder => 'Select subfolder';
 }

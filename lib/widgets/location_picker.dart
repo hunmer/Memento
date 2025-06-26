@@ -191,7 +191,7 @@ class _LocationPickerState extends State<LocationPicker> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('选择位置'),
+      title: Text(AppLocalizations.of(context)!.selectLocation),
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
         height: MediaQuery.of(context).size.height * 0.6,

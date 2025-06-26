@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
@@ -114,7 +115,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('新建分组'),
+            title: Text(TrackerLocalizations.of(context)!.createGroup),
             content: TextField(
               controller: newGroupController,
               decoration: const InputDecoration(labelText: '分组名称'),
@@ -313,13 +314,15 @@ class _GoalEditPageState extends State<GoalEditPage> {
                               child: Text(group),
                             ),
                           ),
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: '新建分组',
                             child: Row(
                               children: [
-                                Icon(Icons.add, size: 16),
-                                SizedBox(width: 8),
-                                Text('新建分组'),
+                                const Icon(Icons.add, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  TrackerLocalizations.of(context)!.createGroup,
+                                ),
                               ],
                             ),
                           ),

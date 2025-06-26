@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -224,9 +225,11 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
             final title = _titleController.text.trim();
             final content = _contentController.text.trim();
             if (widget.showTitle && title.isEmpty) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('请输入标题')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.pleaseEnterTitle),
+                ),
+              );
               return;
             }
             widget.onSave(title, content);

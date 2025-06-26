@@ -101,14 +101,15 @@ class AppearanceTab extends StatelessWidget {
                     onTap: () async {
                       final result = await showDialog(
                         context: context,
-                        builder: (context) => ImagePickerDialog(
-                          initialUrl: backgroundImageUrl,
-                          enableCrop: true,
-                          cropAspectRatio: 1.0,
-                          saveDirectory: 'day/backgrounds',
-                        ),
+                        builder:
+                            (context) => ImagePickerDialog(
+                              initialUrl: backgroundImageUrl,
+                              enableCrop: true,
+                              cropAspectRatio: 1.0,
+                              saveDirectory: 'day/backgrounds',
+                            ),
                       );
-                      
+
                       if (result != null && result is Map<String, dynamic>) {
                         final url = result['url'] as String;
                         onBackgroundImageSelected(url);
@@ -122,12 +123,15 @@ class AppearanceTab extends StatelessWidget {
                         border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.add_photo_alternate, size: 32),
                           SizedBox(height: 8),
-                          Text('本地图片', textAlign: TextAlign.center),
+                          Text(
+                            DayLocalizations.of(context).localImage,
+                            textAlign: TextAlign.center,
+                          ),
                         ],
                       ),
                     ),

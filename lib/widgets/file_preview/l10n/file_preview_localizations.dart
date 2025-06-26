@@ -1,64 +1,104 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class FilePreviewLocalizations {
-  static const String fileNotExist = '文件不存在或无法访问';
-  static const String filePathError = '文件路径解析错误: ';
-  static const String fileInfo = '文件信息';
-  static const String fileName = '文件名：';
-  static const String filePath = '路径：';
-  static const String fileSize = '大小：';
-  static const String fileType = '类型：';
-  static const String confirm = '确定';
-  static const String operationFailed = '操作失败：';
-  static const String cannotLoadFile = '无法加载文件';
-  static const String imageLoadFailed = '图片加载失败';
-  static const String videoLoadFailed = '视频加载失败';
-  static const String tryOpenWithOtherApp = '尝试使用其他应用打开';
-  static const String shareFailed = '分享失败：';
-  static const String videoPlayFailed = '无法播放此视频，可能是格式不支持或文件损坏';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-  static Map<String, Map<String, String>> _localizedValues = {
-    'en': {
-      'fileNotExist': 'File does not exist or cannot be accessed',
-      'filePathError': 'File path parsing error: ',
-      'fileInfo': 'File Information',
-      'fileName': 'Name: ',
-      'filePath': 'Path: ',
-      'fileSize': 'Size: ',
-      'fileType': 'Type: ',
-      'confirm': 'OK',
-      'operationFailed': 'Operation failed: ',
-      'cannotLoadFile': 'Cannot load file',
-      'imageLoadFailed': 'Image load failed',
-      'videoLoadFailed': 'Video load failed',
-      'videoPlayFailed':
-          'Cannot play this video, possibly due to unsupported format or corrupted file',
-      'tryOpenWithOtherApp': 'Try to open with another app',
-      'shareFailed': 'Share failed: ',
-    },
-    'zh': {
-      'fileNotExist': '文件不存在或无法访问',
-      'filePathError': '文件路径解析错误: ',
-      'fileInfo': '文件信息',
-      'fileName': '文件名：',
-      'filePath': '路径：',
-      'fileSize': '大小：',
-      'fileType': '类型：',
-      'confirm': '确定',
-      'operationFailed': '操作失败：',
-      'cannotLoadFile': '无法加载文件',
-      'imageLoadFailed': '图片加载失败',
-      'videoLoadFailed': '视频加载失败',
-      'tryOpenWithOtherApp': '尝试使用其他应用打开',
-      'shareFailed': '分享失败：',
-      'videoPlayFailed': '无法播放此视频，可能是格式不支持或文件损坏',
-    },
-  };
+import 'file_preview_localizations_en.dart';
+import 'file_preview_localizations_zh.dart';
 
-  static String get(BuildContext context, String key, [String? param]) {
-    final value =
-        _localizedValues[Localizations.localeOf(context).languageCode]?[key] ??
-        key;
-    return param != null ? value + param : value;
+/// 文件预览插件的本地化支持类
+abstract class FilePreviewLocalizations {
+  FilePreviewLocalizations(String locale) : localeName = locale;
+
+  final String localeName;
+
+  static FilePreviewLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<FilePreviewLocalizations>(
+      context,
+      FilePreviewLocalizations,
+    );
+    if (localizations == null) {
+      throw FlutterError('No FilePreviewLocalizations found in context');
+    }
+    return localizations;
   }
+
+  static const LocalizationsDelegate<FilePreviewLocalizations> delegate =
+      _FilePreviewLocalizationsDelegate();
+
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('zh'),
+  ];
+
+  // 文件预览插件的本地化字符串
+  String get pluginName;
+  String get errorFilePreviewFailed;
+  String get fileNotAccessible;
+  String get fileProcessingFailed;
+  String get fileSelectionFailed;
+  String get fileSelected;
+  String get imageNotExist;
+  String get imageProcessingFailed;
+  String get imageSelectionFailed;
+  String get videoNotSupportedOnWeb;
+  String get videoNotExist;
+  String get videoProcessingFailed;
+  String get videoSelectionFailed;
+  String get videoSent;
+  String get singleFile;
+  String get openFile;
+  String get downloadFile;
+  String get shareFile;
+  String get fileSize;
+  String get fileType;
+  String get lastModified;
+  String get previewNotAvailable;
+  String get loadingPreview;
+  String get videoLoadFailed;
+  String get fileNotExist;
+
+  String get openWithOtherApp;
+}
+
+class _FilePreviewLocalizationsDelegate
+    extends LocalizationsDelegate<FilePreviewLocalizations> {
+  const _FilePreviewLocalizationsDelegate();
+
+  @override
+  Future<FilePreviewLocalizations> load(Locale locale) {
+    return SynchronousFuture<FilePreviewLocalizations>(
+      lookupFilePreviewLocalizations(locale),
+    );
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'zh'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_FilePreviewLocalizationsDelegate old) => false;
+}
+
+FilePreviewLocalizations lookupFilePreviewLocalizations(Locale locale) {
+  switch (locale.languageCode) {
+    case 'en':
+      return FilePreviewLocalizationsEn();
+    case 'zh':
+      return FilePreviewLocalizationsZh();
+  }
+
+  throw FlutterError(
+    'FilePreviewLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localization\'s implementation.',
+  );
 }
