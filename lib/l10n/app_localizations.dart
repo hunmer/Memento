@@ -680,19 +680,35 @@ abstract class AppLocalizations {
   /// **'Loading video...'**
   String get loadingVideo;
 
+  /// No description provided for @pleaseEnterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter Title'**
+  String get pleaseEnterTitle;
+
+  /// No description provided for @selectPluginsToImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Plugins To Import'**
+  String get selectPluginsToImport;
+
+  /// No description provided for @mergeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge Mode'**
+  String get mergeMode;
+
+  /// No description provided for @overwriteMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite Mode'**
+  String get overwriteMode;
+
   /// No description provided for @titleRequired.
   ///
   /// In en, this message translates to:
   /// **'Title is required'**
   String get titleRequired;
-
-  get selectPluginsToImport;
-
-  get mergeMode;
-
-  get overwriteMode;
-
-  String get pleaseEnterTitle;
 }
 
 class _AppLocalizationsDelegate

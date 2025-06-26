@@ -98,5 +98,9 @@
   "selectGroup": "Select group",
   "videoLoadFailed": "Video load failed: {error}",
   "loadingVideo": "Loading video...",
+  "pleaseEnterTitle": "Please Enter Title",
+  "selectPluginsToImport": "Select Plugins To Import",
+  "mergeMode": "Merge Mode",
+  "overwriteMode": "Overwrite Mode",
   "titleRequired": "Title is required"
 }

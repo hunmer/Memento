@@ -46,9 +46,10 @@ class _FilterDialogState extends State<FilterDialog> {
               // 关键词搜索
               TextFormField(
                 controller: _keywordController,
-                decoration: const InputDecoration(
-                  labelText: 'Keyword',
-                  hintText: 'Search in title & description',
+                decoration: InputDecoration(
+                  labelText: TodoLocalizations.of(context).searchIn,
+                  hintText:
+                      '${TodoLocalizations.of(context).searchIn} ${TodoLocalizations.of(context).title} & ${TodoLocalizations.of(context).description}',
                 ),
               ),
               const SizedBox(height: 16),
@@ -56,7 +57,9 @@ class _FilterDialogState extends State<FilterDialog> {
               // 优先级选择
               DropdownButtonFormField<TaskPriority>(
                 value: _selectedPriority,
-                decoration: const InputDecoration(labelText: 'Priority'),
+                decoration: InputDecoration(
+                  labelText: TodoLocalizations.of(context).priority,
+                ),
                 items:
                     TaskPriority.values.map((priority) {
                       return DropdownMenuItem(
@@ -104,8 +107,8 @@ class _FilterDialogState extends State<FilterDialog> {
                     child: ListTile(
                       title: Text(
                         _startDate == null
-                            ? 'Start Date'
-                            : 'Start: ${_startDate!.toLocal()}',
+                            ? TodoLocalizations.of(context).startDate
+                            : '${TodoLocalizations.of(context).startDate}: ${_startDate!.toLocal()}',
                       ),
                       onTap: () async {
                         final date = await showDatePicker(
@@ -126,8 +129,8 @@ class _FilterDialogState extends State<FilterDialog> {
                     child: ListTile(
                       title: Text(
                         _endDate == null
-                            ? 'End Date'
-                            : 'End: ${_endDate!.toLocal()}',
+                            ? TodoLocalizations.of(context).dueDate
+                            : '${TodoLocalizations.of(context).dueDate}: ${_endDate!.toLocal()}',
                       ),
                       onTap: () async {
                         final date = await showDatePicker(

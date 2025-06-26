@@ -97,13 +97,13 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
               // 任务名称输入
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: '任务名称',
+                decoration: InputDecoration(
+                  labelText: TimerLocalizations.of(context).taskName,
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入任务名称';
+                    return '请输入${TimerLocalizations.of(context).taskName}';
                   }
                   return null;
                 },
@@ -113,8 +113,8 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
               // 重复次数设置
               TextFormField(
                 initialValue: '$_repeatCount',
-                decoration: const InputDecoration(
-                  labelText: '重复次数',
+                decoration: InputDecoration(
+                  labelText: TimerLocalizations.of(context).repeatCount,
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
@@ -141,8 +141,8 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
 
               // 分组选择
               InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: '选择分组',
+                decoration: InputDecoration(
+                  labelText: TimerLocalizations.of(context).selectGroup,
                   border: OutlineInputBorder(),
                 ),
                 child: InkWell(

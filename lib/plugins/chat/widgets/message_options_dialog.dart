@@ -281,9 +281,9 @@ class MessageOptionsDialog extends StatelessWidget {
               children: [
                 TextField(
                   controller: symbolController,
-                  decoration: const InputDecoration(
-                    labelText: '标记',
-                    hintText: '输入标记或留空以清除',
+                  decoration: InputDecoration(
+                    labelText: ChatLocalizations.of(context).tag,
+                    hintText: ChatLocalizations.of(context).tagHint,
                   ),
                   maxLength: 1, // 限制只能输入一个字符
                 ),

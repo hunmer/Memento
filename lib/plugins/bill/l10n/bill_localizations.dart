@@ -13,8 +13,13 @@ abstract class BillLocalizations {
 
   final String localeName;
 
-  static BillLocalizations? of(BuildContext context) {
-    return Localizations.of<BillLocalizations>(context, BillLocalizations);
+  static BillLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<BillLocalizations>(
+      context,
+      BillLocalizations,
+    );
+    assert(localizations != null, 'No BillLocalizations found in context');
+    return localizations!;
   }
 
   static const LocalizationsDelegate<BillLocalizations> delegate =
@@ -77,6 +82,7 @@ abstract class BillLocalizations {
   String get invalidAmount;
   String get invalidDate;
   String get requiredField;
+  String get accountName;
   String get accountManagement;
   String get accountDeleted;
   String get noAccounts;
@@ -98,6 +104,12 @@ abstract class BillLocalizations {
   String get noBillsClickToAdd;
   String get balance;
   String get timeRange;
+
+  String get title => 'Title';
+  String get enterTitle => 'Enter title';
+  String get enterAmount => 'Enter amount';
+  String get enterValidAmount => 'Enter valid amount';
+  String get time => 'Time';
 }
 
 class _BillLocalizationsDelegate

@@ -617,16 +617,16 @@ class _StoreMainState extends State<StoreMainView> {
                 ),
                 TextField(
                   controller: nameFilterController,
-                  decoration: const InputDecoration(
-                    labelText: '名称筛选',
-                    hintText: '输入商品名称关键词',
+                  decoration: InputDecoration(
+                    labelText: StoreLocalizations.of(context).nameFilter,
+                    hintText: StoreLocalizations.of(context).nameFilterHint,
                   ),
                 ),
                 TextField(
                   controller: priceRangeController,
-                  decoration: const InputDecoration(
-                    labelText: '价格范围',
-                    hintText: '例如: 100-500',
+                  decoration: InputDecoration(
+                    labelText: StoreLocalizations.of(context).priceRange,
+                    hintText: StoreLocalizations.of(context).priceRangeHint,
                   ),
                   keyboardType: TextInputType.number,
                 ),

@@ -335,4 +335,22 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String get rangeHint => 'Context Range: ';
+
+  @override
+  String get channelName => 'Channel Name';
+
+  @override
+  String get tag => 'Tag';
+
+  @override
+  String get tagHint => 'Add tags to categorize messages';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get channelGroupLabel => 'Channel Groups';
+
+  @override
+  String get channelGroupHint => 'Optional, leave empty for default group';
 }

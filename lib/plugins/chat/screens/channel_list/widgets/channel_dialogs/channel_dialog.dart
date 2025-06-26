@@ -102,7 +102,9 @@ class _ChannelDialogState extends State<ChannelDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: '频道名称'),
+                decoration: InputDecoration(
+                  labelText: ChatLocalizations.of(context).channelName,
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return '请输入频道名称';
@@ -113,9 +115,9 @@ class _ChannelDialogState extends State<ChannelDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _groupController,
-                decoration: const InputDecoration(
-                  labelText: '频道分组（多个分组用逗号分隔）',
-                  hintText: '可选，留空则归类为默认分组',
+                decoration: InputDecoration(
+                  labelText: ChatLocalizations.of(context).channelGroupLabel,
+                  hintText: ChatLocalizations.of(context).channelGroupHint,
                 ),
               ),
             ],

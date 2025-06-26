@@ -89,7 +89,7 @@ class CheckinPlugin extends BasePlugin {
   String get id => 'checkin';
 
   @override
-  String get name => '打卡';
+  String get name => 'checkin';
 
   @override
   IconData get icon => Icons.checklist;
@@ -224,7 +224,7 @@ class CheckinPlugin extends BasePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                CheckinLocalizations.of(context).checkinPluginName,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

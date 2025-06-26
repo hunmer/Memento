@@ -122,7 +122,8 @@ class _TimerDialogState extends State<TimerDialog> {
           TextField(
             controller: _valueController,
             decoration: InputDecoration(
-              labelText: '记录值 (${widget.goal.unitType})',
+              labelText: TrackerLocalizations.of(context)!.recordValueWithUnit
+                  .replaceFirst('\${unit}', widget.goal.unitType),
               border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
@@ -130,8 +131,9 @@ class _TimerDialogState extends State<TimerDialog> {
           const SizedBox(height: 16),
           TextField(
             controller: _noteController,
-            decoration: const InputDecoration(
-              labelText: '备注 (可选)',
+            decoration: InputDecoration(
+              labelText:
+                  '${TrackerLocalizations.of(context)!.note} (${TrackerLocalizations.of(context)!.noteHint})',
               border: OutlineInputBorder(),
             ),
             maxLines: 2,

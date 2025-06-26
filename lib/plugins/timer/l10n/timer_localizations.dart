@@ -12,8 +12,15 @@ abstract class TimerLocalizations {
   static const LocalizationsDelegate<TimerLocalizations> delegate =
       _TimerLocalizationsDelegate();
 
-  static TimerLocalizations? of(BuildContext context) {
-    return Localizations.of<TimerLocalizations>(context, TimerLocalizations);
+  static TimerLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<TimerLocalizations>(
+      context,
+      TimerLocalizations,
+    );
+    if (localizations == null) {
+      throw FlutterError('No TimerLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
@@ -34,6 +41,20 @@ abstract class TimerLocalizations {
   String get enableNotification;
   String get addTimer;
   String get reset;
+
+  // 新增计时器相关本地化键
+  String get timerName;
+  String get timerDescription;
+  String get timerType;
+  String get repeatCount;
+  String get hours;
+  String get minutes;
+  String get seconds;
+  String get workDuration;
+  String get breakDuration;
+  String get cycleCount;
+  String get taskName;
+  String get selectGroup;
 }
 
 class _TimerLocalizationsDelegate

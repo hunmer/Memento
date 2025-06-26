@@ -68,9 +68,9 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
             const SizedBox(height: 24),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: '账户名称',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: BillLocalizations.of(context)!.accountName,
+                border: const OutlineInputBorder(),
               ),
             ),
             if (widget.account != null) ...[

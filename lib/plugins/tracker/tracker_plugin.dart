@@ -122,7 +122,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                TrackerLocalizations.of(context)!.pluginName,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

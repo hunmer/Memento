@@ -185,4 +185,19 @@ class TrackerLocalizationsEn extends TrackerLocalizations {
 
   @override
   String get timerTitle => 'Timer - {goalName}';
+
+  @override
+  get selectGroup => 'Select Group';
+
+  @override
+  String get incrementValueWithUnit => 'Increment Value (\${unit})';
+
+  @override
+  String get inputTargetValue => 'Input Target Value';
+
+  @override
+  String get recordValueWithUnit => 'Record Value (\${unit})';
+
+  @override
+  String get pluginName => 'Goal Tracker';
 }

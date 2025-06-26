@@ -182,4 +182,19 @@ class TrackerLocalizationsZh extends TrackerLocalizations {
 
   @override
   String get timerTitle => '计时 - {goalName}';
+
+  @override
+  get selectGroup => '选择分组';
+
+  @override
+  String get incrementValueWithUnit => '增加值 (\${unit})';
+
+  @override
+  String get inputTargetValue => '输入目标值';
+
+  @override
+  String get recordValueWithUnit => '记录值 (\${unit})';
+
+  @override
+  String get pluginName => '进度';
 }

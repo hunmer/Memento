@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
@@ -67,14 +68,14 @@ class _SkillRecordHistoryListState extends State<SkillRecordHistoryList> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   TextButton(
                     onPressed: () async {
                       await widget.controller.deleteCompletionRecord(record.id);
                       Navigator.pop(context, true);
                     },
-                    child: Text(l10n.delete),
+                    child: Text(AppLocalizations.of(context)!.delete),
                   ),
                 ],
               ),

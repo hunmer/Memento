@@ -157,9 +157,9 @@ class _WarehouseFormState extends State<WarehouseForm> {
             const SizedBox(height: 16),
             TextFormField(
               initialValue: _title,
-              decoration: const InputDecoration(
-                labelText: '仓库名称',
-                hintText: '输入仓库名称',
+              decoration: InputDecoration(
+                labelText: GoodsLocalizations.of(context).warehouseName,
+                hintText: GoodsLocalizations.of(context).warehouseNameHint,
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {

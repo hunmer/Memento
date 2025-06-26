@@ -7,11 +7,15 @@ import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:Memento/plugins/database/l10n/database_localizations.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
+import 'package:Memento/widgets/l10n/group_selector_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -208,12 +212,16 @@ class _MyAppState extends State<MyApp> {
         ChatLocalizations.delegate,
         ContactLocalizations.delegate,
         TrackerLocalizations.delegate,
+        HabitsLocalizations.delegate,
         CalendarLocalizations.delegate,
+        GroupSelectorLocalizations.delegate,
         BillLocalizations.delegate,
         DayLocalizationsDelegate.delegate,
         OpenAILocalizationsDelegate.delegate,
         NotesLocalizations.delegate,
+        TodoLocalizations.delegate,
         CalendarAlbumLocalizations.delegate,
+        GoodsLocalizations.delegate,
         NodesLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

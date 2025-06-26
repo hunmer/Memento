@@ -75,6 +75,7 @@
   "permissionRequired": "需要{permission}权限",
   "permissionRequiredForApp": "应用需要{permission}权限来正常工作，是否授予权限？",
   "notNow": "暂不授予",
+  "pleaseEnterTitle": "请输入标题",
   "grantPermission": "授予权限",
   "permissionRequiredInSettings": "需要{permission}权限才能继续。请在系统设置中授予权限。",
   "storagePermissionRequired": "需要存储权限才能继续。请在系统设置中授予权限。",
@@ -101,5 +102,8 @@
   "selectGroup": "选择分组",
   "videoLoadFailed": "视频加载失败: {error}",
   "loadingVideo": "正在加载视频...",
+  "selectPluginsToImport": "选择插件导入",
+  "mergeMode": "合并模式",
+  "overwriteMode": "覆盖模式",
   "titleRequired": "请输入标题"
 }

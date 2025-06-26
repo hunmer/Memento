@@ -269,4 +269,22 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
 
   @override
   get productDescription => "Product description";
+
+  @override
+  String get tagName => "Tag Name";
+
+  @override
+  String get tagNameHint => "Enter tag name";
+
+  @override
+  String get priceHint => "Enter price";
+
+  @override
+  String get stockHint => "Enter stock quantity";
+
+  @override
+  String get warehouseName => "Warehouse Name";
+
+  @override
+  String get warehouseNameHint => "Enter warehouse name";
 }

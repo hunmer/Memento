@@ -143,4 +143,7 @@ class TodoLocalizationsZh extends TodoLocalizations {
 
   @override
   String get clear => '清除';
+
+  @override
+  String get searchIn => '搜索';
 }

@@ -30,4 +30,40 @@ class TimerLocalizationsEn extends TimerLocalizations {
 
   @override
   String get reset => 'Reset';
+
+  @override
+  String get timerName => 'Timer Name';
+
+  @override
+  String get timerDescription => 'Timer Description';
+
+  @override
+  String get timerType => 'Timer Type';
+
+  @override
+  String get repeatCount => 'Repeat Count';
+
+  @override
+  String get hours => 'Hours';
+
+  @override
+  String get minutes => 'Minutes';
+
+  @override
+  String get seconds => 'Seconds';
+
+  @override
+  String get workDuration => 'Work Duration (minutes)';
+
+  @override
+  String get breakDuration => 'Break Duration (minutes)';
+
+  @override
+  String get cycleCount => 'Cycle Count';
+
+  @override
+  String get taskName => 'Task Name';
+
+  @override
+  String get selectGroup => 'Select Group';
 }

@@ -61,10 +61,8 @@ class TaskController extends ChangeNotifier {
 
   // 应用过滤
   void applyFilter(Map<String, dynamic> filter) {
-    print('Applying filter: $filter');
     _currentFilter = filter;
     _applyFilter(filter);
-    print('Filtered tasks count: ${_filteredTasks.length}');
 
     // 确保在UI线程安全地通知监听器
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -80,10 +78,8 @@ class TaskController extends ChangeNotifier {
 
   // 实际执行过滤逻辑
   void _applyFilter(Map<String, dynamic> filter) {
-    print('Original tasks count: ${_tasks.length}');
     _filteredTasks =
         _tasks.where((task) {
-          print('Checking task: ${task.title}');
           // 关键词过滤
           final keyword = filter['keyword'] as String?;
           if (keyword != null && keyword.isNotEmpty) {
@@ -182,39 +178,31 @@ class TaskController extends ChangeNotifier {
 
   // 加载任务
   Future<void> _loadTasks() async {
-    try {
-      final data = await _storage.read('$_storageDir/tasks.json');
-      if (data.isNotEmpty) {
-        final List<dynamic> taskList = data['tasks'] as List<dynamic>;
-        _tasks = taskList.map((item) => Task.fromJson(item)).toList();
+    final data = await _storage.read('$_storageDir/tasks.json');
+    if (data.isNotEmpty) {
+      final List<dynamic> taskList = data['tasks'] as List<dynamic>;
+      _tasks = taskList.map((item) => Task.fromJson(item)).toList();
 
-        // 加载已完成任务历史
-        if (data['completedTasks'] != null) {
-          final List<dynamic> completedTaskList =
-              data['completedTasks'] as List<dynamic>;
-          _completedTasks =
-              completedTaskList.map((item) => Task.fromJson(item)).toList();
-        }
-
-        _sortTasks();
-        notifyListeners();
+      // 加载已完成任务历史
+      if (data['completedTasks'] != null) {
+        final List<dynamic> completedTaskList =
+            data['completedTasks'] as List<dynamic>;
+        _completedTasks =
+            completedTaskList.map((item) => Task.fromJson(item)).toList();
       }
-    } catch (e) {
-      print('Error loading tasks: $e');
+
+      _sortTasks();
+      notifyListeners();
     }
   }
 
   // 保存任务
   Future<void> _saveTasks() async {
-    try {
-      final data = {
-        'tasks': _tasks.map((task) => task.toJson()).toList(),
-        'completedTasks': _completedTasks.map((task) => task.toJson()).toList(),
-      };
-      await _storage.write('$_storageDir/tasks.json', data);
-    } catch (e) {
-      print('Error saving tasks: $e');
-    }
+    final data = {
+      'tasks': _tasks.map((task) => task.toJson()).toList(),
+      'completedTasks': _completedTasks.map((task) => task.toJson()).toList(),
+    };
+    await _storage.write('$_storageDir/tasks.json', data);
   }
 
   // 添加任务

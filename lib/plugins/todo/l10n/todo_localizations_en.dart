@@ -143,4 +143,7 @@ class TodoLocalizationsEn extends TodoLocalizations {
 
   @override
   String get completedOn => 'Completed on';
+
+  @override
+  String get searchIn => 'Search in';
 }

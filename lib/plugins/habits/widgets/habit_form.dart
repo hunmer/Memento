@@ -215,7 +215,8 @@ class _HabitFormState extends State<HabitForm> {
             TextField(
               controller: _durationController,
               decoration: InputDecoration(
-                labelText: '${l10n.duration} (${l10n.minutes})',
+                labelText:
+                    '${HabitsLocalizations.of(context).duration} (${HabitsLocalizations.of(context).minutes})',
               ),
               keyboardType: TextInputType.number,
             ),

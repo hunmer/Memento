@@ -334,17 +334,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadingVideo => '正在加载视频...';
 
   @override
-  String get titleRequired => '请输入标题';
-
-  @override
-  get mergeMode => '合并模式';
-
-  @override
-  get overwriteMode => '覆盖模式';
-
-  @override
   String get pleaseEnterTitle => '请输入标题';
 
   @override
-  get selectPluginsToImport => '选择要导入的插件';
+  String get selectPluginsToImport => '选择插件导入';
+
+  @override
+  String get mergeMode => '合并模式';
+
+  @override
+  String get overwriteMode => '覆盖模式';
+
+  @override
+  String get titleRequired => '请输入标题';
 }
