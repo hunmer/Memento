@@ -29,11 +29,11 @@ abstract class WebDAVLocalizations {
 
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
@@ -41,25 +41,56 @@ abstract class WebDAVLocalizations {
   ];
 
   // WebDAV设置对话框的本地化字符串
-  String get settingsTitle;
-  String get serverAddressLabel;
-  String get serverAddressHint;
-  String get serverAddressEmptyError;
-  String get serverAddressInvalidError;
-  String get usernameLabel;
-  String get usernameEmptyError;
-  String get passwordLabel;
+  String get pluginName;
+  String get serverUrl;
+  String get serverUrlHint;
+  String get username;
+  String get usernameHint;
+  String get password;
+  String get passwordHint;
+  String get testConnection;
+  String get connectionSuccess;
+  String get connectionFailed;
+  String get saveSettings;
+  String get settingsSaved;
+  String get settingsSaveFailed;
+  String get rootPath;
+  String get rootPathHint;
+  String get syncInterval;
+  String get syncIntervalHint;
+  String get enableAutoSync;
+  String get lastSyncTime;
+  String get syncNow;
+  String get syncInProgress;
+  String get syncCompleted;
+  String get syncFailed;
+  String get invalidUrl;
+  String get invalidCredentials;
+  String get serverUnreachable;
+  String get permissionDenied;
+  String get sslCertificateError;
+  String get advancedSettings;
+  String get connectionTimeout;
+  String get connectionTimeoutHint;
+  String get useHTTPS;
+  String get verifyCertificate;
+  String get maxRetries;
+  String get maxRetriesHint;
+  String get retryInterval;
+  String get retryIntervalHint;
+  String get dataSync;
+  String get downloadAllData;
   String get passwordEmptyError;
-  String get dataPathLabel;
-  String get dataPathHint;
-  String get dataPathEmptyError;
-  String get dataPathInvalidError;
-  String get autoSyncLabel;
-  String get autoSyncSubtitle;
-  String get testConnectionButton;
-  String get disconnectButton;
-  String get downloadButton;
-  String get uploadButton;
+  String get saveFailed;
+  String get serverAddress;
+  String get serverAddressEmptyError;
+  String get serverAddressHint;
+  String? get serverAddressInvalidError;
+  String get title;
+  String get uploadAllData;
+  String get usernameEmptyError;
+
+  // 状态消息
   String get connectingStatus;
   String get connectionSuccessStatus;
   String get connectionFailedStatus;
@@ -75,6 +106,12 @@ abstract class WebDAVLocalizations {
   String get autoSyncEnabledStatus;
   String get autoSyncDisabledStatus;
   String get settingsSavedMessage;
+
+  get rootPathEmptyError;
+
+  String? get rootPathInvalidError;
+
+  String get disconnect;
 }
 
 class _WebDAVLocalizationsDelegate

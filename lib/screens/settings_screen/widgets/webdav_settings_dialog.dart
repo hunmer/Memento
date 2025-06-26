@@ -174,7 +174,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(WebDAVLocalizations.of(context).settingsTitle),
+      title: Text(WebDAVLocalizations.of(context).title),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -185,7 +185,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               TextFormField(
                 controller: _urlController,
                 decoration: InputDecoration(
-                  labelText: WebDAVLocalizations.of(context).serverAddressLabel,
+                  labelText: WebDAVLocalizations.of(context).serverAddress,
                   hintText: WebDAVLocalizations.of(context).serverAddressHint,
                 ),
                 validator: (value) {
@@ -208,7 +208,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               TextFormField(
                 controller: _usernameController,
                 decoration: InputDecoration(
-                  labelText: WebDAVLocalizations.of(context).usernameLabel,
+                  labelText: WebDAVLocalizations.of(context).username,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -222,7 +222,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
-                  labelText: WebDAVLocalizations.of(context).passwordLabel,
+                  labelText: WebDAVLocalizations.of(context).password,
                 ),
                 obscureText: true,
                 validator: (value) {
@@ -237,15 +237,15 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               TextFormField(
                 controller: _dataPathController,
                 decoration: InputDecoration(
-                  labelText: WebDAVLocalizations.of(context).dataPathLabel,
-                  hintText: WebDAVLocalizations.of(context).dataPathHint,
+                  labelText: WebDAVLocalizations.of(context).rootPath,
+                  hintText: WebDAVLocalizations.of(context).rootPathHint,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return WebDAVLocalizations.of(context).dataPathEmptyError;
+                    return WebDAVLocalizations.of(context).rootPathEmptyError;
                   }
                   if (!value.startsWith('/')) {
-                    return WebDAVLocalizations.of(context).dataPathInvalidError;
+                    return WebDAVLocalizations.of(context).rootPathInvalidError;
                   }
                   return null;
                 },
@@ -254,9 +254,9 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               const SizedBox(height: 16),
               if (_isConnected)
                 SwitchListTile(
-                  title: Text(WebDAVLocalizations.of(context).autoSyncLabel),
+                  title: Text(WebDAVLocalizations.of(context).enableAutoSync),
                   subtitle: Text(
-                    WebDAVLocalizations.of(context).autoSyncSubtitle,
+                    WebDAVLocalizations.of(context).syncIntervalHint,
                   ),
                   value: _autoSync,
                   onChanged: (bool value) {
@@ -295,20 +295,20 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
         if (!_isConnected)
           TextButton(
             onPressed: _isConnecting ? null : _testConnection,
-            child: Text(WebDAVLocalizations.of(context).testConnectionButton),
+            child: Text(WebDAVLocalizations.of(context).testConnection),
           )
         else ...[
           TextButton(
             onPressed: _isConnecting ? null : _disconnect,
-            child: Text(WebDAVLocalizations.of(context).disconnectButton),
+            child: Text(WebDAVLocalizations.of(context).disconnect),
           ),
           TextButton(
             onPressed: _isConnecting ? null : _syncWebDAVToLocal,
-            child: Text(WebDAVLocalizations.of(context).downloadButton),
+            child: Text(WebDAVLocalizations.of(context).downloadAllData),
           ),
           TextButton(
             onPressed: _isConnecting ? null : _syncLocalToWebDAV,
-            child: Text(WebDAVLocalizations.of(context).uploadButton),
+            child: Text(WebDAVLocalizations.of(context).uploadAllData),
           ),
           TextButton(
             onPressed: () async {

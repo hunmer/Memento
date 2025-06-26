@@ -137,7 +137,7 @@ class WebDAVLocalizationsZh extends WebDAVLocalizations {
   String get serverAddressHint => '输入服务器地址';
 
   @override
-  String? get serverAddressInvalidError => '无效的服务器地址';
+  String get serverAddressInvalidError => '无效的服务器地址';
 
   @override
   String get title => 'WebDAV设置';
@@ -147,4 +147,50 @@ class WebDAVLocalizationsZh extends WebDAVLocalizations {
 
   @override
   String get usernameEmptyError => '用户名不能为空';
+
+  // 状态消息
+  @override
+  String get connectingStatus => '正在连接...';
+
+  @override
+  String get connectionSuccessStatus => '连接成功';
+
+  @override
+  String get connectionFailedStatus => '连接失败';
+
+  @override
+  String get connectionErrorStatus => '连接错误';
+
+  @override
+  String get disconnectingStatus => '正在断开连接...';
+
+  @override
+  String get disconnectedStatus => '已断开连接';
+
+  @override
+  String get uploadingStatus => '正在上传...';
+
+  @override
+  String get uploadSuccessStatus => '上传成功';
+
+  @override
+  String get uploadFailedStatus => '上传失败';
+
+  @override
+  String get downloadingStatus => '正在下载...';
+
+  @override
+  String get downloadSuccessStatus => '下载成功';
+
+  @override
+  String get downloadFailedStatus => '下载失败';
+
+  @override
+  String get autoSyncEnabledStatus => '自动同步已启用';
+
+  @override
+  String get autoSyncDisabledStatus => '自动同步已禁用';
+
+  @override
+  String get settingsSavedMessage => '设置保存成功';
 }
