@@ -455,7 +455,7 @@ class GoodsPlugin extends BasePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                GoodsLocalizations.of(context).pluginName,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

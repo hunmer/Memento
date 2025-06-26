@@ -123,4 +123,37 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
 
   @override
   String get contentHint => '输入活动描述';
+
+  @override
+  String get todayRange => '本日';
+
+  @override
+  String get weekRange => '本周';
+
+  @override
+  String get monthRange => '本月';
+
+  @override
+  String get yearRange => '本年';
+
+  @override
+  String get customRange => '自定义范围';
+
+  @override
+  String get timeDistributionTitle => '活动时间分布';
+
+  @override
+  String get activityDistributionTitle => '活动占比统计';
+
+  @override
+  String get totalDuration => '总时长';
+
+  @override
+  String get activityRecords => '活动记录';
+
+  @override
+  String get to => '至';
+
+  @override
+  String get hour => '时';
 }

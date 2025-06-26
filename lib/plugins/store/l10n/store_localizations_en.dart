@@ -286,4 +286,7 @@ class StoreLocalizationsEn extends StoreLocalizations {
   String get purchasePriceLabel => 'Purchase Price';
   @override
   String get remainingQuantityLabel => 'Remaining Quantity';
+
+  @override
+  String get pluginName => 'Store';
 }

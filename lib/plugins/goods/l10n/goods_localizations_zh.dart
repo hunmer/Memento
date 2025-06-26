@@ -262,4 +262,25 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
 
   @override
   get productDescription => "产品描述";
+
+  @override
+  String get priceHint => '价格';
+
+  @override
+  String get stockHint => '库存';
+
+  @override
+  String get tagName => '标签名';
+
+  @override
+  String get tagNameHint => '输入标签名';
+
+  @override
+  String get warehouseName => '仓库名';
+
+  @override
+  String get warehouseNameHint => '输入仓库名';
+
+  @override
+  String get pluginName => '物品管理';
 }

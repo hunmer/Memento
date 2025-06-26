@@ -15,6 +15,10 @@ import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
+import 'package:Memento/screens/settings_screen/l10n/log_settings_localizations.dart';
+import 'package:Memento/screens/settings_screen/l10n/settings_screen_localizations.dart';
+import 'package:Memento/screens/settings_screen/screens/data_management_localizations.dart';
+import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_localizations.dart';
 import 'package:Memento/widgets/l10n/group_selector_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -213,6 +217,10 @@ class _MyAppState extends State<MyApp> {
         ContactLocalizations.delegate,
         TrackerLocalizations.delegate,
         HabitsLocalizations.delegate,
+        SettingsScreenLocalizations.delegate,
+        WebDAVLocalizations.delegate,
+        DataManagementLocalizations.delegate,
+        LogSettingsLocalizationsDelegate(),
         CalendarLocalizations.delegate,
         GroupSelectorLocalizations.delegate,
         BillLocalizations.delegate,
