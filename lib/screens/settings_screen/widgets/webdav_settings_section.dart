@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/settings_screen_controller.dart';
 import '../models/webdav_config.dart';
+import 'l10n/webdav_localizations.dart';
 
 class WebDAVSettingsSection extends StatefulWidget {
   final SettingsScreenController controller;
@@ -73,8 +74,8 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('WebDAV设置已保存'),
+        SnackBar(
+          content: Text(WebDAVLocalizations.of(context).settingsSaved),
           backgroundColor: Colors.green,
         ),
       );
@@ -82,7 +83,10 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('保存失败: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('${WebDAVLocalizations.of(context).saveFailed}: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       if (mounted) {
@@ -138,7 +142,10 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
               children: [
                 const Icon(Icons.cloud_sync),
                 const SizedBox(width: 8),
-                Text('WebDAV同步', style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  WebDAVLocalizations.of(context).title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -148,18 +155,23 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                 children: [
                   TextFormField(
                     controller: _serverController,
-                    decoration: const InputDecoration(
-                      labelText: 'WebDAV服务器地址',
-                      hintText: 'https://your-webdav-server.com/dav',
+                    decoration: InputDecoration(
+                      labelText: WebDAVLocalizations.of(context).serverAddress,
+                      hintText:
+                          WebDAVLocalizations.of(context).serverAddressHint,
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return '请输入WebDAV服务器地址';
+                        return WebDAVLocalizations.of(
+                          context,
+                        ).serverAddressEmptyError;
                       }
                       if (!value.startsWith('http://') &&
                           !value.startsWith('https://')) {
-                        return '服务器地址必须以http://或https://开头';
+                        return WebDAVLocalizations.of(
+                          context,
+                        ).serverAddressInvalidError;
                       }
                       return null;
                     },
@@ -167,13 +179,15 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: '用户名',
+                    decoration: InputDecoration(
+                      labelText: WebDAVLocalizations.of(context).username,
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return '请输入用户名';
+                        return WebDAVLocalizations.of(
+                          context,
+                        ).usernameEmptyError;
                       }
                       return null;
                     },
@@ -183,7 +197,7 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: '密码',
+                      labelText: WebDAVLocalizations.of(context).password,
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -200,7 +214,9 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return '请输入密码';
+                        return WebDAVLocalizations.of(
+                          context,
+                        ).passwordEmptyError;
                       }
                       return null;
                     },
@@ -211,7 +227,9 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _saveSettings,
-                          child: const Text('保存设置'),
+                          child: Text(
+                            WebDAVLocalizations.of(context).saveSettings,
+                          ),
                         ),
                       ),
                     ],
@@ -220,7 +238,10 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
               ),
             ),
             const Divider(height: 32),
-            Text('数据同步', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              WebDAVLocalizations.of(context).dataSync,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -228,7 +249,7 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                   child: ElevatedButton.icon(
                     onPressed: _isLoading ? null : _uploadAllToWebDAV,
                     icon: const Icon(Icons.cloud_upload),
-                    label: const Text('上传所有数据'),
+                    label: Text(WebDAVLocalizations.of(context).uploadAllData),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -236,7 +257,9 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                   child: ElevatedButton.icon(
                     onPressed: _isLoading ? null : _downloadAllFromWebDAV,
                     icon: const Icon(Icons.cloud_download),
-                    label: const Text('下载所有数据'),
+                    label: Text(
+                      WebDAVLocalizations.of(context).downloadAllData,
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.secondary,
                       foregroundColor:

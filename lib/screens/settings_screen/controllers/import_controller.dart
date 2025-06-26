@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import '../../../main.dart';
 import '../../../core/utils/file_utils.dart';
 import '../widgets/folder_selection_dialog.dart';
+import '../../../core/l10n/import_localizations.dart';
 
 class ImportController {
   final BuildContext context;
@@ -33,9 +34,11 @@ class ImportController {
       final filePath = result.files.first.path;
       if (filePath == null) {
         if (_mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('无法获取文件路径')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(ImportLocalizations.of(context).filePathError),
+            ),
+          );
         }
         return;
       }
@@ -138,15 +141,17 @@ class ImportController {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: const Text('导入成功'),
-                content: const Text('数据已成功导入。需要重启应用以应用更改。'),
+                title: Text(ImportLocalizations.of(context).importSuccess),
+                content: Text(
+                  ImportLocalizations.of(context).importSuccessContent,
+                ),
                 actions: [
                   TextButton(
-                    child: const Text('稍后重启'),
+                    child: Text(ImportLocalizations.of(context).restartLater),
                     onPressed: () => Navigator.of(context).pop(false),
                   ),
                   TextButton(
-                    child: const Text('立即重启'),
+                    child: Text(ImportLocalizations.of(context).restartNow),
                     onPressed: () => Navigator.of(context).pop(true),
                   ),
                 ],
@@ -161,9 +166,13 @@ class ImportController {
         }
       } catch (e) {
         if (_mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('导入失败: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${ImportLocalizations.of(context).importFailed}: $e',
+              ),
+            ),
+          );
         }
       } finally {
         // 清理临时目录
