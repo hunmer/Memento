@@ -213,4 +213,35 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
 
   @override
   String get viewAsGrid => "网格视图";
+
+  @override
+  String get editWarehouseTitle => "编辑仓库";
+
+  @override
+  String get clearWarehouseTitle => "清空仓库";
+
+  @override
+  String get confirmClearWarehouseMessage => "确定要清空此仓库中的所有物品吗？";
+
+  @override
+  String get deleteWarehouseTitle => "删除仓库";
+
+  @override
+  String get confirmDeleteWarehouseMessage =>
+      "确定要删除仓库\"%s\"吗？\\n删除后将无法恢复，仓库内所有物品也将被删除。";
+
+  @override
+  String get sortByDefault => "默认排序";
+
+  @override
+  String get addItemButtonLabel => "添加";
+
+  @override
+  String get editItemButtonLabel => "编辑";
+
+  @override
+  String get deleteItemButtonLabel => "删除";
+
+  @override
+  String get confirmDeleteItemMessage => "确定要删除此物品吗？";
 }

@@ -47,15 +47,13 @@ class FullBackupController {
             stream: progressStream,
             builder: (builderContext, snapshot) {
               return AlertDialog(
-                title: const Text('正在备份'),
+                title: Text(AppLocalizations.of(context)!.exportingData),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     LinearProgressIndicator(value: snapshot.data),
                     const SizedBox(height: 16),
-                    Text(
-                      '已完成: ${((snapshot.data ?? 0) * 100).toStringAsFixed(1)}%',
-                    ),
+                    Text('${((snapshot.data ?? 0) * 100).toStringAsFixed(1)}%'),
                   ],
                 ),
               );
@@ -99,7 +97,7 @@ class FullBackupController {
       if (Platform.isAndroid || Platform.isIOS) {
         // 在移动平台上使用分享功能来保存文件
         final result = await FilePicker.platform.saveFile(
-          dialogTitle: '选择备份保存位置',
+          dialogTitle: AppLocalizations.of(context)!.selectBackupMethod,
           fileName: 'full_backup_$timestamp.zip',
           allowedExtensions: ['zip'],
           type: FileType.custom,
@@ -111,9 +109,11 @@ class FullBackupController {
         if (updatedContext == null) return;
 
         if (result == null) {
-          ScaffoldMessenger.of(
-            updatedContext,
-          ).showSnackBar(const SnackBar(content: Text('导出已取消')));
+          ScaffoldMessenger.of(updatedContext).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.exportCancelled),
+            ),
+          );
           return;
         }
       } else {
@@ -130,9 +130,11 @@ class FullBackupController {
         if (updatedContext == null) return;
 
         if (savedFile == null) {
-          ScaffoldMessenger.of(
-            updatedContext,
-          ).showSnackBar(const SnackBar(content: Text('导出已取消')));
+          ScaffoldMessenger.of(updatedContext).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.exportCancelled),
+            ),
+          );
           return;
         }
 
@@ -149,9 +151,9 @@ class FullBackupController {
       if (finalContext == null) return;
 
       Navigator.of(finalContext, rootNavigator: true).pop();
-      ScaffoldMessenger.of(
-        finalContext,
-      ).showSnackBar(const SnackBar(content: Text('数据导出成功')));
+      ScaffoldMessenger.of(finalContext).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.exportSuccess)),
+      );
     } catch (e) {
       // 关闭进度对话框并显示错误消息
       if (!_mounted) return;
@@ -159,9 +161,13 @@ class FullBackupController {
       if (errorContext == null) return;
 
       Navigator.of(errorContext, rootNavigator: true).pop();
-      ScaffoldMessenger.of(
-        errorContext,
-      ).showSnackBar(SnackBar(content: Text('导出失败: $e')));
+      ScaffoldMessenger.of(errorContext).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.exportFailed(e.toString()),
+          ),
+        ),
+      );
     }
   }
 
@@ -182,12 +188,8 @@ class FullBackupController {
               // 使用 PopScope 代替已弃用的 WillPopScope
               canPop: false, // 防止返回键关闭对话框
               child: AlertDialog(
-                title: const Text('警告'),
-                content: const Text(
-                  '导入操作将完全覆盖当前的应用数据。\n'
-                  '建议在导入前备份现有数据。\n\n'
-                  '是否继续？',
-                ),
+                title: Text(AppLocalizations.of(context)!.warning),
+                content: Text(AppLocalizations.of(context)!.importWarning),
                 actions: [
                   TextButton(
                     child: Text(AppLocalizations.of(context)!.cancel),
@@ -199,7 +201,7 @@ class FullBackupController {
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.red, // 使用红色强调风险
                     ),
-                    child: const Text('继续'),
+                    child: Text(AppLocalizations.of(context)!.confirm),
                     onPressed: () {
                       Navigator.of(dialogContext).pop(true);
                     },
@@ -214,9 +216,11 @@ class FullBackupController {
       if (afterDialogContext == null) return;
 
       if (confirmed != true) {
-        ScaffoldMessenger.of(
-          afterDialogContext,
-        ).showSnackBar(const SnackBar(content: Text('已取消导入操作')));
+        ScaffoldMessenger.of(afterDialogContext).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.importCancelled),
+          ),
+        );
         return;
       }
 
@@ -227,7 +231,7 @@ class FullBackupController {
 
       // 显示短暂的提示
       ScaffoldMessenger.of(beforePickContext).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(AppLocalizations.of(context)!.selectBackupFile),
           duration: Duration(seconds: 1),
         ),
@@ -239,7 +243,7 @@ class FullBackupController {
           type: FileType.custom,
           allowedExtensions: ['zip'],
           allowMultiple: false,
-          dialogTitle: '选择备份文件',
+          dialogTitle: AppLocalizations.of(context)!.selectBackupFile,
           withData: true, // 确保可以读取文件数据
         );
 
@@ -248,9 +252,11 @@ class FullBackupController {
         if (afterPickContext == null) return;
 
         if (result == null || result.files.isEmpty) {
-          ScaffoldMessenger.of(
-            afterPickContext,
-          ).showSnackBar(const SnackBar(content: Text('未选择文件')));
+          ScaffoldMessenger.of(afterPickContext).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.noFileSelected),
+            ),
+          );
           return;
         }
 
@@ -259,14 +265,14 @@ class FullBackupController {
           context: afterPickContext,
           barrierDismissible: false,
           builder:
-              (dialogContext) => const AlertDialog(
-                title: Text('正在导入'),
+              (dialogContext) => AlertDialog(
+                title: Text(AppLocalizations.of(context)!.importingData),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text('正在处理备份文件...'),
+                    Text(AppLocalizations.of(context)!.pleaseWait),
                   ],
                 ),
               ),
@@ -337,11 +343,7 @@ class FullBackupController {
         ).popUntil((route) => route.isFirst);
         ScaffoldMessenger.of(errorContext).showSnackBar(
           SnackBar(
-            content: Text(
-              AppLocalizations.of(
-                context,
-              )!.fileSelectionFailed.replaceFirst('{error}', e.toString()),
-            ),
+            content: Text(AppLocalizations.of(context)!.fileSelectionFailed(e)),
           ),
         );
       }

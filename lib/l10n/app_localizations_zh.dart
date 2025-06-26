@@ -112,4 +112,97 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get create => '新建';
+
+  @override
+  String get adjustCardSize => '调整卡片大小';
+
+  @override
+  String get width => '宽度';
+
+  @override
+  String get height => '高度';
+
+  @override
+  String get home => '首页';
+
+  @override
+  String get noPluginsAvailable => '没有可用的插件';
+
+  @override
+  String get backupInProgress => '正在备份';
+
+  @override
+  String completed(Object percentage) {
+    return '已完成: $percentage%';
+  }
+
+  @override
+  String get exportCancelled => '导出已取消';
+
+  @override
+  String get exportSuccess => '数据导出成功';
+
+  @override
+  String exportFailed(Object error) {
+    return '导出失败: $error';
+  }
+
+  @override
+  String get warning => '警告';
+
+  @override
+  String get importWarning => '导入操作将完全覆盖当前的应用数据。\n建议在导入前备份现有数据。\n\n是否继续？';
+
+  @override
+  String get stillContinue => '继续';
+
+  @override
+  String get importCancelled => '已取消导入操作';
+
+  @override
+  String get selectBackupFile => '请选择备份文件';
+
+  @override
+  String get noFileSelected => '未选择文件';
+
+  @override
+  String get importInProgress => '正在导入';
+
+  @override
+  String get processingBackupFile => '正在处理备份文件...';
+
+  @override
+  String get importSuccess => '数据导入成功，请重启应用';
+
+  @override
+  String get restartRequired => '需要重启';
+
+  @override
+  String get exportingData => '正在导出数据';
+
+  @override
+  String get importingData => '正在导入数据';
+
+  @override
+  String get pleaseWait => '请等待';
+
+  @override
+  String get restartMessage => '数据已导入完成，需要重启应用才能生效。';
+
+  @override
+  String fileSelectionFailed(Object error) {
+    return '文件选择失败: $error';
+  }
+
+  @override
+  String get importFailed => '导入失败';
+
+  @override
+  String get importTimeout => '导入超时：文件可能过大或无法访问';
+
+  @override
+  String get filesystemError => '文件系统错误：无法读取或写入文件';
+
+  @override
+  String get invalidBackupFile => '无效的备份文件：文件可能已损坏';
 }
