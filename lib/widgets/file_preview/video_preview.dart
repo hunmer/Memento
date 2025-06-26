@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';           
-import 'package:media_kit_video/media_kit_video.dart';  
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import '../../../utils/image_utils.dart';
 
 class VideoPreview extends StatefulWidget {
@@ -42,10 +44,10 @@ class _VideoPreviewState extends State<VideoPreview> {
       }
 
       debugPrint('正在初始化视频播放器，文件路径: $absolutePath');
-      
+
       // 打开视频文件
       await _player.open(Media(absolutePath));
-      
+
       if (mounted) {
         setState(() {
           _isInitialized = true;
@@ -59,11 +61,15 @@ class _VideoPreviewState extends State<VideoPreview> {
           _errorMessage = e.toString();
           _isInitialized = false;
         });
-        
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('视频加载失败: ${e.toString()}'),
-          duration: const Duration(seconds: 5),
-        ));
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${AppLocalizations.of(context)!.videoLoadFailed}: ${e.toString()}',
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     }
   }
@@ -90,7 +96,7 @@ class _VideoPreviewState extends State<VideoPreview> {
               ),
               const SizedBox(height: 16),
               Text(
-                '视频加载失败',
+                FilePreviewLocalizations.of(context)!.videoLoadFailed,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
@@ -112,7 +118,10 @@ class _VideoPreviewState extends State<VideoPreview> {
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
-            Text('正在加载视频...', style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              AppLocalizations.of(context)!.loadingVideo,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
       );
@@ -156,7 +165,10 @@ class _PlayPauseOverlay extends StatelessWidget {
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 50),
               reverseDuration: const Duration(milliseconds: 200),
-              child: isPlaying ? const SizedBox.shrink() : Container(color: Colors.black26),
+              child:
+                  isPlaying
+                      ? const SizedBox.shrink()
+                      : Container(color: Colors.black26),
             ),
             GestureDetector(
               onTap: () {
@@ -179,7 +191,7 @@ class _VideoProgressIndicator extends StatelessWidget {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return duration.inHours > 0 
+    return duration.inHours > 0
         ? '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds'
         : '$twoDigitMinutes:$twoDigitSeconds';
   }
@@ -203,8 +215,11 @@ class _VideoProgressIndicator extends StatelessWidget {
                     children: [
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: Theme.of(context).colorScheme.primary,
-                          inactiveTrackColor: Theme.of(context).colorScheme.primary.withAlpha(76),
+                          activeTrackColor:
+                              Theme.of(context).colorScheme.primary,
+                          inactiveTrackColor: Theme.of(
+                            context,
+                          ).colorScheme.primary.withAlpha(76),
                           thumbColor: Theme.of(context).colorScheme.primary,
                         ),
                         child: Slider(

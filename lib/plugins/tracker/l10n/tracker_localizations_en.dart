@@ -95,6 +95,12 @@ class TrackerLocalizationsEn extends TrackerLocalizations {
 
   @override
   String get thisMonthNew => 'This Month New';
+  @override
+  String get quickRecord => 'Quick Record';
+  @override
+  String get createGroup => 'Create Group';
+  @override
+  String get timer => 'Timer';
 
   @override
   String get cancel => 'Cancel';

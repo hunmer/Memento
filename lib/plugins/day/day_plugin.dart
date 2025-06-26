@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/day/l10n/day_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -128,7 +129,10 @@ class DayPlugin extends BasePlugin {
               // 纪念日数
               Column(
                 children: [
-                  Text('纪念日数', style: theme.textTheme.bodyMedium),
+                  Text(
+                    DayLocalizations.of(context).memorialDaysCount,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                   Text(
                     '$totalCount',
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -142,7 +146,10 @@ class DayPlugin extends BasePlugin {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text('即将到来', style: theme.textTheme.bodyMedium),
+                  Text(
+                    DayLocalizations.of(context).upcoming,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                   Text(
                     upcomingDays.isNotEmpty ? upcomingDays.join('，') : '无',
                     style: theme.textTheme.bodyMedium?.copyWith(

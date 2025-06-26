@@ -82,6 +82,9 @@ abstract class NotesLocalizations {
   String get apply;
   String get typeToSearch;
   String get noResultsFound;
+
+  String get movedToFolder;
+  String get selectSubfolder;
 }
 
 class _NotesLocalizationsDelegate

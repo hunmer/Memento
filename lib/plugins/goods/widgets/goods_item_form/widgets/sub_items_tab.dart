@@ -99,7 +99,10 @@ class _SubItemsTabState extends State<SubItemsTab> {
         children: [
           Row(
             children: [
-              Text('子物品列表', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                GoodsLocalizations.of(context).subItemsList,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(width: 8),
               Text(
                 widget.controller.subItems.isEmpty

@@ -131,6 +131,8 @@ abstract class GoodsLocalizations {
   String get totalValue;
 
   String get oneMonthUnused;
+
+  String get subItemsList;
 }
 
 class _GoodsLocalizationsDelegate

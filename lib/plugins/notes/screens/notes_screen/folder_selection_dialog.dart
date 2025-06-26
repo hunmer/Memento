@@ -1,5 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../models/folder.dart';
 import '../../models/note.dart';
@@ -67,7 +68,11 @@ mixin FolderSelectionDialog on NotesMainViewState {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(parentFolder != null ? '选择子文件夹' : '选择目标文件夹'),
+            title: Text(
+              parentFolder != null
+                  ? NotesLocalizations.of(context)!.selectSubfolder
+                  : NotesLocalizations.of(context)!.moveTo,
+            ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -102,9 +107,15 @@ mixin FolderSelectionDialog on NotesMainViewState {
       await plugin.controller.moveNote(note.id, targetFolder.id);
       loadCurrentFolder(); // 刷新当前文件夹视图
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('已移动到 ${targetFolder.name}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              NotesLocalizations.of(
+                context,
+              )!.movedToFolder.replaceFirst('{folderName}', targetFolder.name),
+            ),
+          ),
+        );
       }
     }
   }

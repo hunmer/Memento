@@ -86,6 +86,9 @@ class NotesLocalizationsZh extends NotesLocalizations {
   String get movedTo => '已移动到 {folderName}';
 
   @override
+  String get movedToFolder => '已移动到 {folderName}';
+
+  @override
   String get filter => '筛选';
 
   @override
@@ -105,4 +108,7 @@ class NotesLocalizationsZh extends NotesLocalizations {
 
   @override
   String get noResultsFound => '未找到结果';
+
+  @override
+  String get selectSubfolder => '选择子文件夹';
 }

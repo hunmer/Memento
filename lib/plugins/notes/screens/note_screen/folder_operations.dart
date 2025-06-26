@@ -116,7 +116,10 @@ Future<void> deleteFolderDialog(
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('删除', style: TextStyle(color: Colors.red)),
+              child: Text(
+                AppLocalizations.of(context)!.delete,
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         ),

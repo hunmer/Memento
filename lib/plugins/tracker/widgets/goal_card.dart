@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/plugins/tracker/widgets/timer_dialog.dart';
 import 'package:flutter/material.dart';
 import '../models/goal.dart';
@@ -271,7 +272,9 @@ class GoalCard extends StatelessWidget {
         return Form(
           key: formKey,
           child: AlertDialog(
-            title: Text('快速记录 - ${goal.name}'),
+            title: Text(
+              '${TrackerLocalizations.of(context)!.quickRecord} - ${goal.name}',
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

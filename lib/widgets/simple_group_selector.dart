@@ -16,7 +16,7 @@ class SimpleGroupSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('选择分组'),
+      title: Text(AppLocalizations.of(context)!.selectGroup),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView.builder(

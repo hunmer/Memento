@@ -335,4 +335,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get titleRequired => '请输入标题';
+
+  @override
+  get mergeMode => '合并模式';
+
+  @override
+  get overwriteMode => '覆盖模式';
+
+  @override
+  String get pleaseEnterTitle => '请输入标题';
+
+  @override
+  get selectPluginsToImport => '选择要导入的插件';
 }

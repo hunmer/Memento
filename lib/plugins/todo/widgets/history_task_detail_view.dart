@@ -48,7 +48,10 @@ class HistoryTaskDetailView extends StatelessWidget {
 
             // 描述
             if (task.description != null && task.description!.isNotEmpty) ...[
-              Text('Description', style: theme.textTheme.titleMedium),
+              Text(
+                TodoLocalizations.of(context)!.description,
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Text(task.description!),
               const SizedBox(height: 16),
@@ -56,7 +59,10 @@ class HistoryTaskDetailView extends StatelessWidget {
 
             // 标签
             if (task.tags.isNotEmpty) ...[
-              Text('Tags', style: theme.textTheme.titleMedium),
+              Text(
+                TodoLocalizations.of(context)!.tags,
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8.0,
@@ -75,7 +81,10 @@ class HistoryTaskDetailView extends StatelessWidget {
             ],
 
             // 日期信息
-            Text('Dates', style: theme.textTheme.titleMedium),
+            Text(
+              TodoLocalizations.of(context)!.dates,
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Column(
               children: [
@@ -96,7 +105,10 @@ class HistoryTaskDetailView extends StatelessWidget {
 
             // 子任务
             if (task.subtasks.isNotEmpty) ...[
-              Text('Subtasks', style: theme.textTheme.titleMedium),
+              Text(
+                TodoLocalizations.of(context)!.subtasks,
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               ListView.builder(
                 shrinkWrap: true,
@@ -131,7 +143,10 @@ class HistoryTaskDetailView extends StatelessWidget {
 
             // 提醒
             if (task.reminders.isNotEmpty) ...[
-              Text('Reminders', style: theme.textTheme.titleMedium),
+              Text(
+                TodoLocalizations.of(context)!.reminders,
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               ListView.builder(
                 shrinkWrap: true,

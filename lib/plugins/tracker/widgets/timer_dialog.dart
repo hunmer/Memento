@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
@@ -96,7 +97,9 @@ class _TimerDialogState extends State<TimerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('计时 - ${widget.goal.name}'),
+      title: Text(
+        '${TrackerLocalizations.of(context)!.timer} - ${widget.goal.name}',
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

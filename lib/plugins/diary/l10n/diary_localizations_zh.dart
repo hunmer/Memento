@@ -128,5 +128,11 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
   String get mood => '心情';
 
   @override
+  String get cannotSelectFutureDate => '不能选择未来的日期';
+
+  @override
+  String get myDiary => '我的日记';
+
+  @override
   String get recentlyUsed => '最近使用';
 }

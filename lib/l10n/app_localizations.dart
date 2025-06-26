@@ -685,6 +685,14 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Title is required'**
   String get titleRequired;
+
+  get selectPluginsToImport;
+
+  get mergeMode;
+
+  get overwriteMode;
+
+  String get pleaseEnterTitle;
 }
 
 class _AppLocalizationsDelegate

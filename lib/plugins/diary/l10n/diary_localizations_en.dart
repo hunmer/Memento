@@ -129,5 +129,11 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
   String get mood => 'Mood';
 
   @override
+  String get cannotSelectFutureDate => 'Cannot select future date';
+
+  @override
+  String get myDiary => 'My Diary';
+
+  @override
   String get recentlyUsed => 'Recently Used';
 }

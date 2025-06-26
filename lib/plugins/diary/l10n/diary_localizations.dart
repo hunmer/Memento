@@ -77,6 +77,9 @@ abstract class DiaryLocalizations {
   String get sortByDuration;
   String get sortByStartTimeDesc;
   String get mood;
+
+  String get cannotSelectFutureDate;
+  String get myDiary;
 }
 
 class _DiaryLocalizationsDelegate
