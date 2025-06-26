@@ -308,7 +308,179 @@ abstract class AppLocalizations {
   /// **'Create'**
   String get create;
 
-  String get adjustCardSize => null;
+  /// No description provided for @adjustCardSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust Card Size'**
+  String get adjustCardSize;
+
+  /// No description provided for @width.
+  ///
+  /// In en, this message translates to:
+  /// **'Width'**
+  String get width;
+
+  /// No description provided for @height.
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get height;
+
+  /// No description provided for @home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
+  /// No description provided for @noPluginsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No plugins available'**
+  String get noPluginsAvailable;
+
+  /// No description provided for @backupInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup in progress'**
+  String get backupInProgress;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: {percentage}%'**
+  String completed(Object percentage);
+
+  /// No description provided for @exportCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Export cancelled'**
+  String get exportCancelled;
+
+  /// No description provided for @exportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Data exported successfully'**
+  String get exportSuccess;
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String exportFailed(Object error);
+
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// No description provided for @importWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Import will completely overwrite current app data.\nWe recommend backing up existing data before importing.\n\nContinue?'**
+  String get importWarning;
+
+  /// No description provided for @stillContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get stillContinue;
+
+  /// No description provided for @importCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Import cancelled'**
+  String get importCancelled;
+
+  /// No description provided for @selectBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select backup file'**
+  String get selectBackupFile;
+
+  /// No description provided for @noFileSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No file selected'**
+  String get noFileSelected;
+
+  /// No description provided for @importInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Import in progress'**
+  String get importInProgress;
+
+  /// No description provided for @processingBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing backup file...'**
+  String get processingBackupFile;
+
+  /// No description provided for @importSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Data imported successfully, please restart app'**
+  String get importSuccess;
+
+  /// No description provided for @restartRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart required'**
+  String get restartRequired;
+
+  /// No description provided for @exportingData.
+  ///
+  /// In en, this message translates to:
+  /// **'exporting Data'**
+  String get exportingData;
+
+  /// No description provided for @importingData.
+  ///
+  /// In en, this message translates to:
+  /// **'importing Data'**
+  String get importingData;
+
+  /// No description provided for @pleaseWait.
+  ///
+  /// In en, this message translates to:
+  /// **'please Wait'**
+  String get pleaseWait;
+
+  /// No description provided for @restartMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Data import completed, app restart is required to take effect.'**
+  String get restartMessage;
+
+  /// No description provided for @fileSelectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'File selection failed: {error}'**
+  String fileSelectionFailed(Object error);
+
+  /// No description provided for @importFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed'**
+  String get importFailed;
+
+  /// No description provided for @importTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Import timeout: file may be too large or inaccessible'**
+  String get importTimeout;
+
+  /// No description provided for @filesystemError.
+  ///
+  /// In en, this message translates to:
+  /// **'Filesystem error: unable to read or write file'**
+  String get filesystemError;
+
+  /// No description provided for @invalidBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid backup file: file may be corrupted'**
+  String get invalidBackupFile;
 }
 
 class _AppLocalizationsDelegate

@@ -111,6 +111,16 @@ abstract class GoodsLocalizations {
   String get filter;
   String get viewAsList;
   String get viewAsGrid;
+  String get editWarehouseTitle;
+  String get clearWarehouseTitle;
+  String get confirmClearWarehouseMessage;
+  String get deleteWarehouseTitle;
+  String get confirmDeleteWarehouseMessage;
+  String get sortByDefault;
+  String get addItemButtonLabel;
+  String get editItemButtonLabel;
+  String get deleteItemButtonLabel;
+  String get confirmDeleteItemMessage;
 
   get productDescription => null;
 

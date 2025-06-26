@@ -52,23 +52,18 @@ class AutoUpdateController extends ChangeNotifier {
       return;
     }
 
-    debugPrint('AutoUpdateController: 开始检查更新');
     // 在后台执行更新检查
     Future(() async {
-      try {
-        final hasUpdate = await checkForUpdates();
-        if (!context!.mounted) return;
+      final hasUpdate = await checkForUpdates();
+      if (!context!.mounted) return;
 
-        if (hasUpdate) {
-          // 确保在主线程中显示对话框
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context?.mounted ?? false) {
-              showUpdateDialog(skipCheck: true);
-            }
-          });
-        }
-      } catch (e) {
-        debugPrint('AutoUpdateController: 检查更新失败 - $e');
+      if (hasUpdate) {
+        // 确保在主线程中显示对话框
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context?.mounted ?? false) {
+            showUpdateDialog(skipCheck: true);
+          }
+        });
       }
     });
   }
@@ -136,7 +131,6 @@ class AutoUpdateController extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
-      debugPrint('Error checking for updates: $e');
       if (context?.mounted ?? false) {
         ScaffoldMessenger.of(context!).showSnackBar(
           SnackBar(
@@ -208,8 +202,11 @@ class AutoUpdateController extends ChangeNotifier {
       if (!hasUpdate) {
         if (context != null) {
           ScaffoldMessenger.of(context!).showSnackBar(
-            const SnackBar(
-              content: Text('当前已是最新版本'),
+            SnackBar(
+              content: Text(
+                SettingsScreenLocalizations.of(context!).alreadyLatestVersion,
+              ),
+
               duration: Duration(seconds: 2),
             ),
           );

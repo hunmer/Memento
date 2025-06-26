@@ -1,5 +1,6 @@
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/warehouse.dart';
 import '../widgets/warehouse_form.dart';
@@ -83,7 +84,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: const Text('编辑仓库'),
+                title: Text(GoodsLocalizations.of(context).editWarehouseTitle),
                 onTap: () {
                   Navigator.pop(context);
                   // 实现仓库编辑功能
@@ -109,14 +110,22 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete_outline),
-                title: const Text('清空仓库'),
+                title: Text(GoodsLocalizations.of(context).clearWarehouseTitle),
                 onTap: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder:
                         (context) => AlertDialog(
-                          title: const Text('确认清空'),
-                          content: const Text('确定要清空此仓库中的所有物品吗？'),
+                          title: Text(
+                            GoodsLocalizations.of(
+                              context,
+                            ).confirmClearWarehouse,
+                          ),
+                          content: Text(
+                            GoodsLocalizations.of(
+                              context,
+                            ).confirmClearWarehouseMessage,
+                          ),
                           actions: [
                             TextButton(
                               child: Text(AppLocalizations.of(context)!.cancel),
@@ -139,15 +148,22 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete_forever, color: Colors.red),
-                title: const Text('删除仓库', style: TextStyle(color: Colors.red)),
+                title: Text(
+                  GoodsLocalizations.of(context).deleteWarehouseTitle,
+                  style: const TextStyle(color: Colors.red),
+                ),
                 onTap: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder:
                         (context) => AlertDialog(
-                          title: const Text('确认删除'),
+                          title: Text(
+                            GoodsLocalizations.of(context).confirmDelete,
+                          ),
                           content: Text(
-                            '确定要删除仓库"${_warehouse.title}"吗？\n删除后将无法恢复，仓库内所有物品也将被删除。',
+                            GoodsLocalizations.of(context)
+                                .confirmDeleteWarehouseMessage
+                                .replaceFirst('%s', _warehouse.title),
                           ),
                           actions: [
                             TextButton(
@@ -276,11 +292,19 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
             },
             itemBuilder:
                 (context) => [
-                  const PopupMenuItem(value: 'none', child: Text('默认排序')),
-                  const PopupMenuItem(value: 'price', child: Text('按价格排序')),
-                  const PopupMenuItem(
+                  PopupMenuItem(
+                    value: 'none',
+                    child: Text(GoodsLocalizations.of(context).sortByDefault),
+                  ),
+                  PopupMenuItem(
+                    value: 'price',
+                    child: Text(GoodsLocalizations.of(context).sortByPrice),
+                  ),
+                  PopupMenuItem(
                     value: 'lastUsed',
-                    child: Text('按最后使用时间'),
+                    child: Text(
+                      GoodsLocalizations.of(context).sortByLastUsedTime,
+                    ),
                   ),
                 ],
           ),

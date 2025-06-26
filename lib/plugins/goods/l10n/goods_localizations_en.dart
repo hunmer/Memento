@@ -218,4 +218,37 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
 
   @override
   String get viewAsGrid => "View as grid";
+
+  @override
+  String get editWarehouseTitle => "Edit Warehouse";
+
+  @override
+  String get clearWarehouseTitle => "Clear Warehouse";
+
+  @override
+  String get confirmClearWarehouseMessage =>
+      "Are you sure you want to clear all items in this warehouse?";
+
+  @override
+  String get deleteWarehouseTitle => "Delete Warehouse";
+
+  @override
+  String get confirmDeleteWarehouseMessage =>
+      "Are you sure you want to delete warehouse \"%s\"?\\nAll items in the warehouse will also be deleted.";
+
+  @override
+  String get sortByDefault => "Default sort";
+
+  @override
+  String get addItemButtonLabel => "Add";
+
+  @override
+  String get editItemButtonLabel => "Edit";
+
+  @override
+  String get deleteItemButtonLabel => "Delete";
+
+  @override
+  String get confirmDeleteItemMessage =>
+      "Are you sure you want to delete this item?";
 }

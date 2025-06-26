@@ -112,4 +112,101 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get create => 'Create';
+
+  @override
+  String get adjustCardSize => 'Adjust Card Size';
+
+  @override
+  String get width => 'Width';
+
+  @override
+  String get height => 'Height';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get noPluginsAvailable => 'No plugins available';
+
+  @override
+  String get backupInProgress => 'Backup in progress';
+
+  @override
+  String completed(Object percentage) {
+    return 'Completed: $percentage%';
+  }
+
+  @override
+  String get exportCancelled => 'Export cancelled';
+
+  @override
+  String get exportSuccess => 'Data exported successfully';
+
+  @override
+  String exportFailed(Object error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String get warning => 'Warning';
+
+  @override
+  String get importWarning =>
+      'Import will completely overwrite current app data.\nWe recommend backing up existing data before importing.\n\nContinue?';
+
+  @override
+  String get stillContinue => 'Continue';
+
+  @override
+  String get importCancelled => 'Import cancelled';
+
+  @override
+  String get selectBackupFile => 'Please select backup file';
+
+  @override
+  String get noFileSelected => 'No file selected';
+
+  @override
+  String get importInProgress => 'Import in progress';
+
+  @override
+  String get processingBackupFile => 'Processing backup file...';
+
+  @override
+  String get importSuccess => 'Data imported successfully, please restart app';
+
+  @override
+  String get restartRequired => 'Restart required';
+
+  @override
+  String get exportingData => 'exporting Data';
+
+  @override
+  String get importingData => 'importing Data';
+
+  @override
+  String get pleaseWait => 'please Wait';
+
+  @override
+  String get restartMessage =>
+      'Data import completed, app restart is required to take effect.';
+
+  @override
+  String fileSelectionFailed(Object error) {
+    return 'File selection failed: $error';
+  }
+
+  @override
+  String get importFailed => 'Import failed';
+
+  @override
+  String get importTimeout =>
+      'Import timeout: file may be too large or inaccessible';
+
+  @override
+  String get filesystemError =>
+      'Filesystem error: unable to read or write file';
+
+  @override
+  String get invalidBackupFile => 'Invalid backup file: file may be corrupted';
 }
