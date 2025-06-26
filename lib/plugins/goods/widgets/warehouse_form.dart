@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/warehouse.dart';
@@ -138,12 +139,14 @@ class _WarehouseFormState extends State<WarehouseForm> {
                                 borderRadius: BorderRadius.circular(8),
                                 child: _buildWarehouseImage(),
                               )
-                              : const Column(
+                              : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.add_photo_alternate, size: 40),
                                   SizedBox(height: 8),
-                                  Text('选择图片'),
+                                  Text(
+                                    GoodsLocalizations.of(context).selectImage,
+                                  ),
                                 ],
                               ),
                     ),

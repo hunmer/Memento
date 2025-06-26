@@ -159,6 +159,20 @@ abstract class OpenAILocalizations {
   String get selectAnalysisMethod;
 
   String get noToolsAvailable;
+
+  String get confirmDeleteProviderTitle;
+
+  get confirmDeleteProviderMessage;
+
+  String get providerSettingsTitle;
+
+  get addProviderTooltip;
+
+  String get noProvidersConfigured;
+
+  String get addProviderButton;
+
+  String get modelManagementDescription;
 }
 
 /// 中文实现
@@ -536,6 +550,33 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
 
   @override
   String get noToolsAvailable => '没有可用工具';
+
+  @override
+  // TODO: implement addProviderButton
+  String get addProviderButton => throw UnimplementedError();
+
+  @override
+  // TODO: implement addProviderTooltip
+  get addProviderTooltip => throw UnimplementedError();
+
+  @override
+  // TODO: implement confirmDeleteProviderMessage
+  get confirmDeleteProviderMessage => throw UnimplementedError();
+
+  @override
+  // TODO: implement confirmDeleteProviderTitle
+  String get confirmDeleteProviderTitle => throw UnimplementedError();
+
+  @override
+  // TODO: implement noProvidersConfigured
+  String get noProvidersConfigured => throw UnimplementedError();
+
+  @override
+  // TODO: implement providerSettingsTitle
+  String get providerSettingsTitle => throw UnimplementedError();
+
+  @override
+  String get modelManagementDescription => '管理大语言模型列表';
 }
 
 /// 英文实现
@@ -918,6 +959,33 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
 
   @override
   String get noToolsAvailable => 'No Tools Available';
+
+  @override
+  // TODO: implement addProviderButton
+  String get addProviderButton => throw UnimplementedError();
+
+  @override
+  // TODO: implement addProviderTooltip
+  get addProviderTooltip => throw UnimplementedError();
+
+  @override
+  // TODO: implement confirmDeleteProviderMessage
+  get confirmDeleteProviderMessage => throw UnimplementedError();
+
+  @override
+  // TODO: implement confirmDeleteProviderTitle
+  String get confirmDeleteProviderTitle => throw UnimplementedError();
+
+  @override
+  // TODO: implement noProvidersConfigured
+  String get noProvidersConfigured => throw UnimplementedError();
+
+  @override
+  // TODO: implement providerSettingsTitle
+  String get providerSettingsTitle => throw UnimplementedError();
+
+  @override
+  String get modelManagementDescription => 'Manage large language models';
 }
 
 /// 本地化代理

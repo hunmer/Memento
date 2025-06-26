@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import '../goods_plugin.dart';
 import '../models/warehouse.dart';
@@ -59,7 +60,7 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
         ),
         title: Row(
           children: [
-            const Text('所有仓库'),
+            Text(GoodsLocalizations.of(context).allWarehouses),
             const SizedBox(width: 8),
             Text(
               '(${warehouses.length})',

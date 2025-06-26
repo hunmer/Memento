@@ -251,18 +251,23 @@ class _StoreMainState extends State<StoreMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('添加积分'),
+            title: Text(StoreLocalizations.of(context)!.addPointsDialogTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: pointsController,
-                  decoration: const InputDecoration(labelText: '积分数量'),
+                  decoration: InputDecoration(
+                    labelText:
+                        StoreLocalizations.of(context)!.pointsAmountLabel,
+                  ),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
                   controller: reasonController,
-                  decoration: const InputDecoration(labelText: '原因'),
+                  decoration: InputDecoration(
+                    labelText: StoreLocalizations.of(context)!.reasonLabel,
+                  ),
                 ),
               ],
             ),
@@ -279,7 +284,9 @@ class _StoreMainState extends State<StoreMainView> {
                       await _plugin.controller.addPoints(
                         points,
                         reasonController.text.isEmpty
-                            ? '积分调整'
+                            ? StoreLocalizations.of(
+                              context,
+                            )!.pointsAdjustmentDefaultReason
                             : reasonController.text,
                       );
                       await _plugin.controller.saveToStorage();
@@ -444,9 +451,9 @@ class _StoreMainState extends State<StoreMainView> {
                 ),
                 const SizedBox(height: 8),
                 TextField(
-                  decoration: const InputDecoration(
-                    hintText: '输入物品名称关键词',
-                    contentPadding: EdgeInsets.symmetric(
+                  decoration: InputDecoration(
+                    hintText: StoreLocalizations.of(context)!.nameFilterHint,
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
                     ),
@@ -464,9 +471,10 @@ class _StoreMainState extends State<StoreMainView> {
                     Expanded(
                       child: TextField(
                         controller: priceMinController,
-                        decoration: const InputDecoration(
-                          hintText: '最低价',
-                          contentPadding: EdgeInsets.symmetric(
+                        decoration: InputDecoration(
+                          hintText:
+                              StoreLocalizations.of(context)!.priceRangeHint,
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 10,
                           ),
@@ -478,9 +486,10 @@ class _StoreMainState extends State<StoreMainView> {
                     Expanded(
                       child: TextField(
                         controller: priceMaxController,
-                        decoration: const InputDecoration(
-                          hintText: '最高价',
-                          contentPadding: EdgeInsets.symmetric(
+                        decoration: InputDecoration(
+                          hintText:
+                              StoreLocalizations.of(context)!.priceRangeHint,
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 10,
                           ),
@@ -498,10 +507,12 @@ class _StoreMainState extends State<StoreMainView> {
                 const SizedBox(height: 8),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('选择日期范围'),
+                  title: Text(
+                    StoreLocalizations.of(context)!.dateRangeSelectionHint,
+                  ),
                   subtitle: Text(
                     dateRange == null
-                        ? '未选择'
+                        ? StoreLocalizations.of(context)!.all
                         : '${dateRange!.start.toLocal().toString().split(' ')[0]} 至 ${dateRange!.end.toLocal().toString().split(' ')[0]}',
                   ),
                   onTap: () async {

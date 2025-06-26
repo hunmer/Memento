@@ -1,4 +1,4 @@
-
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import 'package:intl/intl.dart';
@@ -6,10 +6,7 @@ import 'package:intl/intl.dart';
 class HistoryTaskDetailView extends StatelessWidget {
   final Task task;
 
-  const HistoryTaskDetailView({
-    super.key,
-    required this.task,
-  });
+  const HistoryTaskDetailView({super.key, required this.task});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +16,7 @@ class HistoryTaskDetailView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Completed Task Details'),
+        title: Text(TodoLocalizations.of(context)!.completedTaskDetailsTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -33,17 +30,10 @@ class HistoryTaskDetailView extends StatelessWidget {
             // 任务状态和标题
             Row(
               children: [
-                Icon(
-                  task.statusIcon,
-                  color: Colors.green,
-                  size: 36,
-                ),
+                Icon(task.statusIcon, color: Colors.green, size: 36),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    task.title,
-                    style: theme.textTheme.headlineSmall,
-                  ),
+                  child: Text(task.title, style: theme.textTheme.headlineSmall),
                 ),
               ],
             ),
@@ -58,10 +48,7 @@ class HistoryTaskDetailView extends StatelessWidget {
 
             // 描述
             if (task.description != null && task.description!.isNotEmpty) ...[
-              Text(
-                'Description',
-                style: theme.textTheme.titleMedium,
-              ),
+              Text('Description', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               Text(task.description!),
               const SizedBox(height: 16),
@@ -69,39 +56,38 @@ class HistoryTaskDetailView extends StatelessWidget {
 
             // 标签
             if (task.tags.isNotEmpty) ...[
-              Text(
-                'Tags',
-                style: theme.textTheme.titleMedium,
-              ),
+              Text('Tags', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8.0,
                 runSpacing: 4.0,
-                children: task.tags.map((tag) => Chip(
-                  label: Text(tag),
-                  backgroundColor: Colors.blue.shade100,
-                )).toList(),
+                children:
+                    task.tags
+                        .map(
+                          (tag) => Chip(
+                            label: Text(tag),
+                            backgroundColor: Colors.blue.shade100,
+                          ),
+                        )
+                        .toList(),
               ),
               const SizedBox(height: 16),
             ],
 
             // 日期信息
-            Text(
-              'Dates',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('Dates', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             Column(
               children: [
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
-                  title: const Text('Created'),
+                  title: Text(TodoLocalizations.of(context)!.created),
                   subtitle: Text(dateFormat.format(task.createdAt)),
                 ),
                 if (task.dueDate != null)
                   ListTile(
                     leading: const Icon(Icons.event),
-                    title: const Text('Due Date'),
+                    title: Text(TodoLocalizations.of(context)!.dueDate),
                     subtitle: Text(dateFormat.format(task.dueDate!)),
                   ),
                 const SizedBox(height: 16),
@@ -110,10 +96,7 @@ class HistoryTaskDetailView extends StatelessWidget {
 
             // 子任务
             if (task.subtasks.isNotEmpty) ...[
-              Text(
-                'Subtasks',
-                style: theme.textTheme.titleMedium,
-              ),
+              Text('Subtasks', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               ListView.builder(
                 shrinkWrap: true,
@@ -123,19 +106,21 @@ class HistoryTaskDetailView extends StatelessWidget {
                   final subtask = task.subtasks[index];
                   return ListTile(
                     leading: Icon(
-                      subtask.isCompleted 
-                          ? Icons.check_circle 
+                      subtask.isCompleted
+                          ? Icons.check_circle
                           : Icons.radio_button_unchecked,
-                      color: subtask.isCompleted 
-                          ? Colors.green 
-                          : theme.disabledColor,
+                      color:
+                          subtask.isCompleted
+                              ? Colors.green
+                              : theme.disabledColor,
                     ),
                     title: Text(
                       subtask.title,
                       style: TextStyle(
-                        decoration: subtask.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
+                        decoration:
+                            subtask.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
                       ),
                     ),
                   );
@@ -146,10 +131,7 @@ class HistoryTaskDetailView extends StatelessWidget {
 
             // 提醒
             if (task.reminders.isNotEmpty) ...[
-              Text(
-                'Reminders',
-                style: theme.textTheme.titleMedium,
-              ),
+              Text('Reminders', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               ListView.builder(
                 shrinkWrap: true,

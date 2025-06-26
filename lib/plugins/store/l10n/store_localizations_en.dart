@@ -241,4 +241,45 @@ class StoreLocalizationsEn extends StoreLocalizations {
 
   @override
   String get stockInvalid => 'Please enter a valid number';
+
+  @override
+  String get addPointsDialogTitle => 'Add Points';
+
+  @override
+  String get dateRangeSelectionHint => 'Select date range';
+
+  @override
+  String get nameFilterHint => 'Filter by name';
+
+  @override
+  String get pointsAdjustmentDefaultReason => 'Points adjustment';
+
+  @override
+  String get pointsAmountLabel => 'Points Amount';
+
+  @override
+  String get priceRangeHint => 'Enter price range';
+
+  @override
+  String get reasonLabel => 'Reason';
+
+  // 物品详情页本地化
+  @override
+  String get itemDetailsTitle => 'Item Details';
+  @override
+  String get useConfirmationTitle => 'Use Confirmation';
+  @override
+  String get useConfirmationMessage => 'Are you sure you want to use %s?';
+  @override
+  String get useSuccessMessage => 'Used successfully';
+  @override
+  String get itemExpiredMessage => 'Item has expired';
+  @override
+  String get purchaseDateLabel => 'Purchase Date';
+  @override
+  String get expiryDateLabel => 'Expiry Date';
+  @override
+  String get purchasePriceLabel => 'Purchase Price';
+  @override
+  String get remainingQuantityLabel => 'Remaining Quantity';
 }

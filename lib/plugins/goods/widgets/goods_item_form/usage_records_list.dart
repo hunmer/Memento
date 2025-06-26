@@ -200,8 +200,10 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('确认删除'),
-          content: const Text('确定要删除这条使用记录吗？'),
+          title: Text(GoodsLocalizations.of(context).confirmDelete),
+          content: Text(
+            GoodsLocalizations.of(context).confirmDeleteUsageRecord,
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),

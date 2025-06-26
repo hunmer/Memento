@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
 import '../../../models/goods_item.dart';
@@ -22,10 +23,12 @@ class _SubItemsTabState extends State<SubItemsTab> {
   void _showItemSelector() async {
     final selectedItem = await showDialog<GoodsItem>(
       context: context,
-      builder: (context) => GoodsItemSelectorDialog(
-        excludeItemId: widget.controller.initialData?.id,
-        excludeItemIds: widget.controller.subItems.map((e) => e.id).toList(),
-      ),
+      builder:
+          (context) => GoodsItemSelectorDialog(
+            excludeItemId: widget.controller.initialData?.id,
+            excludeItemIds:
+                widget.controller.subItems.map((e) => e.id).toList(),
+          ),
     );
 
     if (selectedItem != null) {
@@ -48,14 +51,15 @@ class _SubItemsTabState extends State<SubItemsTab> {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) => GoodsItemFormPage(
-          itemId: item.id,
-          onSaved: (savedItem) {
-            // 更新子物品状态
-            widget.controller.updateSubItem(savedItem);
-            widget.onStateChanged();
-          },
-        ),
+        builder:
+            (context) => GoodsItemFormPage(
+              itemId: item.id,
+              onSaved: (savedItem) {
+                // 更新子物品状态
+                widget.controller.updateSubItem(savedItem);
+                widget.onStateChanged();
+              },
+            ),
       ),
     );
 
@@ -63,7 +67,7 @@ class _SubItemsTabState extends State<SubItemsTab> {
       setState(() {});
     }
   }
-  
+
   Future<Widget> _buildLeadingWidget(GoodsItem item) async {
     // 如果有图片，优先显示图片
     if (item.imageUrl != null && item.imageUrl!.isNotEmpty) {
@@ -95,10 +99,7 @@ class _SubItemsTabState extends State<SubItemsTab> {
         children: [
           Row(
             children: [
-              Text(
-                '子物品列表',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              Text('子物品列表', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(width: 8),
               Text(
                 widget.controller.subItems.isEmpty
@@ -110,7 +111,7 @@ class _SubItemsTabState extends State<SubItemsTab> {
               FilledButton.icon(
                 onPressed: _showItemSelector,
                 icon: const Icon(Icons.add),
-                label: const Text('添加子物品'),
+                label: Text(GoodsLocalizations.of(context).addSubItem),
               ),
             ],
           ),
@@ -127,21 +128,28 @@ class _SubItemsTabState extends State<SubItemsTab> {
                       leading: FutureBuilder<Widget>(
                         future: _buildLeadingWidget(item),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.done &&
+                              snapshot.hasData) {
                             return snapshot.data!;
                           }
                           // 显示加载中的占位符
                           return const SizedBox(
                             width: 40,
                             height: 40,
-                            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                            child: Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
                           );
                         },
                       ),
                       title: Text(item.title),
-                      subtitle: item.totalPrice != null
-                          ? Text('￥${item.totalPrice?.toStringAsFixed(2)}')
-                          : null,
+                      subtitle:
+                          item.totalPrice != null
+                              ? Text(
+                                '￥${item.totalPrice?.toStringAsFixed(2)}',
+                              ) // 价格格式保持不变
+                              : null,
                       trailing: IconButton(
                         icon: const Icon(Icons.remove_circle_outline),
                         color: Theme.of(context).colorScheme.error,
@@ -153,10 +161,10 @@ class _SubItemsTabState extends State<SubItemsTab> {
               ),
             ),
           ] else
-            const Center(
+            Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 32.0),
-                child: Text('暂无子物品'),
+                child: Text(GoodsLocalizations.of(context).noSubItems),
               ),
             ),
         ],

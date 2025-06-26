@@ -1,4 +1,4 @@
-
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/plugins/todo/widgets/history_task_detail_view.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
@@ -19,12 +19,11 @@ class HistoryCompletedView extends StatefulWidget {
 }
 
 class _HistoryCompletedViewState extends State<HistoryCompletedView> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Completed Tasks History'),
+        title: Text(TodoLocalizations.of(context)!.completedTasksHistoryTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -39,16 +38,14 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => HistoryTaskDetailView(
-                    task: task,
-                  ),
+                  builder: (context) => HistoryTaskDetailView(task: task),
                 ),
               );
             },
             child: ListTile(
               title: Text(task.title),
               subtitle: Text(
-                'Completed on: ${task.completedDate?.toLocal()}',
+                '${TodoLocalizations.of(context)!.completedOn}: ${task.completedDate?.toLocal()}',
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.delete),

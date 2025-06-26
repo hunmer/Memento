@@ -34,6 +34,15 @@ class TodoLocalizationsZh extends TodoLocalizations {
   String get add => '添加';
 
   @override
+  String get totalTasksCount => '总任务数';
+
+  @override
+  String get weeklyTasksCount => '七日任务数';
+
+  @override
+  String get completedOn => '完成于';
+
+  @override
   String get timer => '计时器';
 
   @override

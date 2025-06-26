@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
 import 'package:Memento/widgets/group_selector_dialog.dart';
 import 'package:flutter/material.dart';
@@ -201,13 +202,13 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
               // 添加计时器按钮
               OutlinedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('添加计时器'),
+                label: Text(TimerLocalizations.of(context)!.addTimer),
                 onPressed: _showAddTimerDialog,
               ),
               const SizedBox(height: 16),
 
               SwitchListTile(
-                title: const Text('启用消息提醒'),
+                title: Text(TimerLocalizations.of(context)!.enableNotification),
                 value: _enableNotification,
                 onChanged: (value) {
                   setState(() {
@@ -246,15 +247,15 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
     switch (timer.type) {
       case TimerType.countUp:
         icon = Icons.timer;
-        typeText = '正计时';
+        typeText = TimerLocalizations.of(context)!.countUpTimer;
         break;
       case TimerType.countDown:
         icon = Icons.hourglass_empty;
-        typeText = '倒计时';
+        typeText = TimerLocalizations.of(context)!.countDownTimer;
         break;
       case TimerType.pomodoro:
         icon = Icons.local_cafe;
-        typeText = '番茄钟';
+        typeText = TimerLocalizations.of(context)!.pomodoroTimer;
         break;
     }
 

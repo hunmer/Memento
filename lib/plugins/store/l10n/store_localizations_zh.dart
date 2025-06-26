@@ -236,4 +236,45 @@ class StoreLocalizationsZh extends StoreLocalizations {
 
   @override
   String get stockInvalid => '请输入有效数字';
+
+  @override
+  String get addPointsDialogTitle => '添加积分';
+
+  @override
+  String get dateRangeSelectionHint => '选择日期范围';
+
+  @override
+  String get nameFilterHint => '按名称筛选';
+
+  @override
+  String get pointsAdjustmentDefaultReason => '积分调整';
+
+  @override
+  String get pointsAmountLabel => '积分数量';
+
+  @override
+  String get priceRangeHint => '输入价格区间';
+
+  @override
+  String get reasonLabel => '原因';
+
+  // 物品详情页本地化
+  @override
+  String get itemDetailsTitle => '物品详情';
+  @override
+  String get useConfirmationTitle => '使用确认';
+  @override
+  String get useConfirmationMessage => '确定要使用%s吗？';
+  @override
+  String get useSuccessMessage => '使用成功';
+  @override
+  String get itemExpiredMessage => '物品已过期';
+  @override
+  String get purchaseDateLabel => '购买日期';
+  @override
+  String get expiryDateLabel => '过期日期';
+  @override
+  String get purchasePriceLabel => '购买价格';
+  @override
+  String get remainingQuantityLabel => '剩余数量';
 }

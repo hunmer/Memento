@@ -122,9 +122,15 @@ abstract class GoodsLocalizations {
   String get deleteItemButtonLabel;
   String get confirmDeleteItemMessage;
 
-  get productDescription => null;
+  get productDescription;
 
-  get enterProductDescription => null;
+  get enterProductDescription;
+
+  String get totalQuantity;
+
+  String get totalValue;
+
+  String get oneMonthUnused;
 }
 
 class _GoodsLocalizationsDelegate
