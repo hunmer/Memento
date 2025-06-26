@@ -1,141 +1,150 @@
-import 'package:Memento/screens/settings_screen/widgets/webdav_localizations.dart';
+import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_localizations.dart';
+import 'package:flutter/widgets.dart';
 
-class WebDAVLocalizationsEn implements WebDAVLocalizations {
-  const WebDAVLocalizationsEn();
-
-  @override
-  String get title => 'WebDAV Sync';
+class WebDAVLocalizationsEn extends WebDAVLocalizations {
+  WebDAVLocalizationsEn() : super('en');
 
   @override
-  String get serverAddress => 'WebDAV Server Address';
+  String get pluginName => 'WebDAV Settings';
 
   @override
-  String get serverAddressHint => 'https://your-webdav-server.com/dav';
+  String get serverUrl => 'Server URL';
 
   @override
-  String get serverAddressEmptyError => 'Please enter WebDAV server address';
-
-  @override
-  String get serverAddressInvalidError =>
-      'Server address must start with http:// or https://';
+  String get serverUrlHint => 'Enter WebDAV server URL';
 
   @override
   String get username => 'Username';
 
   @override
-  String get usernameEmptyError => 'Please enter username';
+  String get usernameHint => 'Enter your username';
 
   @override
   String get password => 'Password';
 
   @override
-  String get passwordEmptyError => 'Please enter password';
+  String get passwordHint => 'Enter your password';
+
+  @override
+  String get testConnection => 'Test Connection';
+
+  @override
+  String get connectionSuccess => 'Connection successful';
+
+  @override
+  String get connectionFailed => 'Connection failed';
 
   @override
   String get saveSettings => 'Save Settings';
 
   @override
-  String get dataSync => 'Data Sync';
+  String get settingsSaved => 'Settings saved successfully';
 
   @override
-  String get uploadAllData => 'Upload All Data';
+  String get settingsSaveFailed => 'Failed to save settings';
+
+  @override
+  String get rootPath => 'Root Path';
+
+  @override
+  String get rootPathHint => 'Enter root path on server';
+
+  @override
+  String get syncInterval => 'Sync Interval';
+
+  @override
+  String get syncIntervalHint => 'Set sync interval in minutes';
+
+  @override
+  String get enableAutoSync => 'Enable Auto Sync';
+
+  @override
+  String get lastSyncTime => 'Last Sync Time';
+
+  @override
+  String get syncNow => 'Sync Now';
+
+  @override
+  String get syncInProgress => 'Sync in progress...';
+
+  @override
+  String get syncCompleted => 'Sync completed';
+
+  @override
+  String get syncFailed => 'Sync failed';
+
+  @override
+  String get invalidUrl => 'Invalid URL';
+
+  @override
+  String get invalidCredentials => 'Invalid credentials';
+
+  @override
+  String get serverUnreachable => 'Server unreachable';
+
+  @override
+  String get permissionDenied => 'Permission denied';
+
+  @override
+  String get sslCertificateError => 'SSL certificate error';
+
+  @override
+  String get advancedSettings => 'Advanced Settings';
+
+  @override
+  String get connectionTimeout => 'Connection Timeout';
+
+  @override
+  String get connectionTimeoutHint => 'Set timeout in seconds';
+
+  @override
+  String get useHTTPS => 'Use HTTPS';
+
+  @override
+  String get verifyCertificate => 'Verify Certificate';
+
+  @override
+  String get maxRetries => 'Max Retries';
+
+  @override
+  String get maxRetriesHint => 'Set maximum retry attempts';
+
+  @override
+  String get retryInterval => 'Retry Interval';
+
+  @override
+  String get retryIntervalHint => 'Set retry interval in seconds';
+
+  @override
+  String get dataSync => 'Data Sync';
 
   @override
   String get downloadAllData => 'Download All Data';
 
   @override
-  String get settingsSaved => 'WebDAV settings saved';
+  String get passwordEmptyError => 'Password cannot be empty';
 
   @override
   String get saveFailed => 'Save failed';
 
   @override
-  String get autoSyncDisabledStatus => 'Auto sync disabled';
+  String get serverAddress => 'Server Address';
 
   @override
-  String get autoSyncEnabledStatus => 'Auto sync enabled';
+  String get serverAddressEmptyError => 'Server address cannot be empty';
 
   @override
-  String get autoSyncLabel => 'Auto Sync';
+  String get serverAddressHint => 'Enter server address';
 
   @override
-  String get autoSyncSubtitle => 'Automatically sync data periodically';
+  String? get serverAddressInvalidError => 'Invalid server address';
 
   @override
-  String get connectingStatus => 'Connecting...';
+  String get title => 'WebDAV Settings';
 
   @override
-  String get connectionErrorStatus => 'Connection error';
+  String get uploadAllData => 'Upload All Data';
 
   @override
-  String get connectionFailedStatus => 'Connection failed';
-
-  @override
-  String get connectionSuccessStatus => 'Connection successful';
-
-  @override
-  String get dataPathEmptyError => 'Please enter data path';
-
-  @override
-  String get dataPathHint => '/path/to/data';
-
-  @override
-  String get dataPathInvalidError => 'Invalid data path';
-
-  @override
-  String get dataPathLabel => 'Data Path';
-
-  @override
-  String get disconnectButton => 'Disconnect';
-
-  @override
-  String get disconnectedStatus => 'Disconnected';
-
-  @override
-  String get disconnectingStatus => 'Disconnecting...';
-
-  @override
-  String get downloadButton => 'Download';
-
-  @override
-  String get downloadFailedStatus => 'Download failed';
-
-  @override
-  String get downloadSuccessStatus => 'Download successful';
-
-  @override
-  String get downloadingStatus => 'Downloading...';
-
-  @override
-  String get localeName => 'English';
-
-  @override
-  String get passwordLabel => 'Password';
-
-  @override
-  String get serverAddressLabel => 'Server Address';
-
-  @override
-  String get settingsSavedMessage => 'Settings saved';
-
-  @override
-  String get settingsTitle => 'Settings';
-
-  @override
-  String get testConnectionButton => 'Test Connection';
-
-  @override
-  String get uploadButton => 'Upload';
-
-  @override
-  String get uploadFailedStatus => 'Upload failed';
-
-  @override
-  String get uploadSuccessStatus => 'Upload successful';
-
-  @override
-  String get uploadingStatus => 'Uploading...';
-
-  @override
-  String get usernameLabel => 'Username';
+  String get usernameEmptyError => 'Username cannot be empty';
 }

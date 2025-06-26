@@ -134,12 +134,13 @@ abstract class GoodsLocalizations {
 
   String get subItemsList;
 
-  String get tagName => 'Tag Name';
-  String get tagNameHint => 'Enter tag name';
-  String get priceHint => 'Enter price';
-  String get stockHint => 'Enter stock quantity';
-  String get warehouseName => 'Warehouse Name';
-  String get warehouseNameHint => 'Enter warehouse name';
+  String get tagName;
+  String get tagNameHint;
+  String get priceHint;
+  String get stockHint;
+  String get warehouseName;
+  String get warehouseNameHint;
+  String get pluginName;
 }
 
 class _GoodsLocalizationsDelegate

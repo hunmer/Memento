@@ -100,7 +100,7 @@ class StorePlugin extends BasePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                StoreLocalizations.of(context).pluginName,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

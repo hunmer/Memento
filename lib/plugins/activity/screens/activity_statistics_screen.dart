@@ -18,8 +18,8 @@ class ActivityStatisticsScreen extends StatefulWidget {
 
 class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   // 时间范围选择
-  String _selectedRange = '本日';
-  final List<String> _timeRanges = ['本日', '本周', '本月', '本年', '自定义范围'];
+  late String _selectedRange;
+  late List<String> _timeRanges;
 
   // 日期范围
   DateTime? _startDate;
@@ -36,7 +36,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   @override
   void initState() {
     super.initState();
-    _updateDateRange('本日');
+    _updateDateRange(ActivityLocalizations.of(context)!.todayRange);
   }
 
   // 更新日期范围并加载数据
@@ -54,24 +54,24 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     DateTime end;
 
     switch (range) {
-      case '本日':
+      case 'Today':
         start = today;
         end = todayEnd;
         break;
-      case '本周':
+      case 'This Week':
         // 获取本周一
         start = today.subtract(Duration(days: now.weekday - 1));
         end = todayEnd;
         break;
-      case '本月':
+      case 'This Month':
         start = DateTime(now.year, now.month, 1);
         end = todayEnd;
         break;
-      case '本年':
+      case 'This Year':
         start = DateTime(now.year, 1, 1);
         end = todayEnd;
         break;
-      case '自定义范围':
+      case 'Custom Range':
         // 保持当前日期范围，等待用户选择
         if (_startDate == null || _endDate == null) {
           start = today;
@@ -182,7 +182,8 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   List<int> _calculateHourlyDistribution() {
     final hourlyMinutes = List<int>.filled(24, 0);
 
-    if (_selectedRange != '本日') return hourlyMinutes;
+    if (_selectedRange != ActivityLocalizations.of(context)!.todayRange)
+      return hourlyMinutes;
 
     for (var activity in _activities) {
       final startHour = activity.startTime.hour;
@@ -222,7 +223,10 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
 
       if (activity.tags.isEmpty) {
         // 无标签的活动归类为"其他"
-        tagMinutes['其他'] = (tagMinutes['其他'] ?? 0) + duration;
+        tagMinutes[ActivityLocalizations.of(context)!.unnamedActivity] =
+            (tagMinutes[ActivityLocalizations.of(context)!.unnamedActivity] ??
+                0) +
+            duration;
       } else {
         // 将时间平均分配给每个标签
         final minutesPerTag = duration ~/ activity.tags.length;
@@ -242,7 +246,12 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
       final otherMinutes = sortedEntries
           .skip(4)
           .fold(0, (sum, entry) => sum + entry.value);
-      topEntries.add(MapEntry('其他', otherMinutes));
+      topEntries.add(
+        MapEntry(
+          ActivityLocalizations.of(context)!.unnamedActivity,
+          otherMinutes,
+        ),
+      );
       return topEntries;
     }
 
@@ -251,7 +260,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
 
   // 根据标签筛选活动
   List<ActivityRecord> _getActivitiesByTag(String tag) {
-    if (tag == '其他') {
+    if (tag == ActivityLocalizations.of(context)!.unnamedActivity) {
       // 查找没有标签的活动
       return _activities.where((activity) => activity.tags.isEmpty).toList();
     } else {
@@ -282,6 +291,15 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 时间范围选择
+    _selectedRange = ActivityLocalizations.of(context)!.todayRange;
+    _timeRanges = [
+      ActivityLocalizations.of(context)!.todayRange,
+      ActivityLocalizations.of(context)!.weekRange,
+      ActivityLocalizations.of(context)!.monthRange,
+      ActivityLocalizations.of(context)!.yearRange,
+      ActivityLocalizations.of(context)!.customRange,
+    ];
     return Scaffold(
       body: Column(
         children: [
@@ -312,7 +330,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              '${DateFormat('yyyy-MM-dd').format(_startDate!)} 至 ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
+              '${DateFormat('yyyy-MM-dd').format(_startDate!)} ${ActivityLocalizations.of(context)!.to} ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ),
@@ -330,8 +348,13 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
                 child: Column(
                   children: [
                     // 仅在选择"本日"时显示活动时间分布
-                    if (_selectedRange == '本日') ...[
-                      _buildSectionTitle('活动时间分布'),
+                    if (_selectedRange ==
+                        ActivityLocalizations.of(context)!.todayRange) ...[
+                      _buildSectionTitle(
+                        ActivityLocalizations.of(
+                          context,
+                        )!.timeDistributionTitle,
+                      ),
                       SizedBox(
                         height: 200,
                         child: _buildTimeDistributionChart(),
@@ -340,7 +363,11 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
                     ],
 
                     // 活动占比统计
-                    _buildSectionTitle('活动占比统计'),
+                    _buildSectionTitle(
+                      ActivityLocalizations.of(
+                        context,
+                      )!.activityDistributionTitle,
+                    ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -411,7 +438,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
             tooltipBgColor: Colors.black87,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               return BarTooltipItem(
-                '${group.x}时: ${rod.toY.toInt()}分钟',
+                '${group.x}${ActivityLocalizations.of(context)!.hour}: ${rod.toY.toInt()}${ActivityLocalizations.of(context)!.minutesFormat(1).replaceAll('1 ', '')}',
                 const TextStyle(color: Colors.white),
               );
             },
@@ -566,9 +593,12 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '总时长',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                Text(
+                  ActivityLocalizations.of(context)!.totalDuration,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -704,7 +734,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
             children: [
               Expanded(
                 child: Text(
-                  '"$_selectedTag"活动记录',
+                  '${ActivityLocalizations.of(context)!.activityRecords} "$_selectedTag"',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

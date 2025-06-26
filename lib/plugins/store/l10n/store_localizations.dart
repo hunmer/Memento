@@ -138,6 +138,8 @@ abstract class StoreLocalizations {
   String get expiryDateLabel;
   String get purchasePriceLabel;
   String get remainingQuantityLabel;
+
+  String get pluginName;
 }
 
 class _StoreLocalizationsDelegate

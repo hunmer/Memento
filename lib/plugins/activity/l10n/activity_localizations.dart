@@ -84,6 +84,20 @@ abstract class ActivityLocalizations {
   String get all;
   String get unnamedActivity;
 
+  // Statistics screen
+  String get todayRange;
+  String get weekRange;
+  String get monthRange;
+  String get yearRange;
+  String get customRange;
+  String get timeDistributionTitle;
+  String get activityDistributionTitle;
+  String get totalDuration;
+  String get activityRecords;
+
+  String get to;
+  String get hour;
+
   /// Get text with parameters
   String getText(String key, [Map<String, dynamic>? params]) {
     switch (key) {

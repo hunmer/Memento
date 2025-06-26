@@ -117,4 +117,37 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
 
   @override
   String get grouped => 'Grouped';
+
+  @override
+  String get todayRange => 'Today';
+
+  @override
+  String get weekRange => 'This Week';
+
+  @override
+  String get monthRange => 'This Month';
+
+  @override
+  String get yearRange => 'This Year';
+
+  @override
+  String get customRange => 'Custom Range';
+
+  @override
+  String get timeDistributionTitle => 'Activity Time Distribution';
+
+  @override
+  String get activityDistributionTitle => 'Activity Distribution';
+
+  @override
+  String get totalDuration => 'Total Duration';
+
+  @override
+  String get activityRecords => 'Activity Records';
+
+  @override
+  String get to => 'to';
+
+  @override
+  String get hour => 'hour';
 }

@@ -282,4 +282,6 @@ class StoreLocalizationsZh extends StoreLocalizations {
   String get purchasePriceLabel => '购买价格';
   @override
   String get remainingQuantityLabel => '剩余数量';
+  @override
+  String get pluginName => '积分商城';
 }

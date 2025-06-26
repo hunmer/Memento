@@ -26,7 +26,7 @@ class DialogActions extends StatelessWidget {
           onPressed: enableClear ? onClear : null,
           icon: const Icon(Icons.clear_all),
           label: Text(
-            '${TagManagerLocalizations.of(context, 'clearSelected').replaceFirst('\$selectedCount', selectedCount as String)}',
+            '${TagManagerLocalizations.of(context, 'clearSelected').replaceFirst('\$selectedCount', selectedCount.toString())}',
           ),
         ),
         Row(
