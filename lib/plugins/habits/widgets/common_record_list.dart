@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:flutter/material.dart';
 
 class CommonRecordList<T> extends StatelessWidget {
@@ -64,7 +65,7 @@ class CommonRecordList<T> extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
+                child: Text(HabitsLocalizations.of(context).close),
               ),
             ],
           ),

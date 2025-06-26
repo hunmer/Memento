@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations_en.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:Memento/l10n/app_localizations.dart';
@@ -54,7 +55,7 @@ class RebuildController {
                 AppLocalizations.delegate,
                 ChatLocalizations.delegate,
                 DayLocalizationsDelegate.delegate,
-                nodes_l10n.NodesLocalizationsDelegate.delegate,
+                nodes_l10n.NodesLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,

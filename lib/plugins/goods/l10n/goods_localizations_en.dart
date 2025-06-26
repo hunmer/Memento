@@ -262,10 +262,8 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
   String get oneMonthUnused => "Unused for one month";
 
   @override
-  // TODO: implement enterProductDescription
-  get enterProductDescription => throw UnimplementedError();
+  get enterProductDescription => "Enter product description";
 
   @override
-  // TODO: implement productDescription
-  get productDescription => throw UnimplementedError();
+  get productDescription => "Product description";
 }

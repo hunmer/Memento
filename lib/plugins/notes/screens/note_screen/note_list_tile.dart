@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
@@ -50,7 +51,7 @@ class NoteListTile extends StatelessWidget {
                     ),
                     ListTile(
                       leading: const Icon(Icons.folder),
-                      title: const Text('移动到'),
+                      title: Text(NodesLocalizations.of(context).moveTo),
                       onTap: () async {
                         Navigator.pop(context);
                         await moveNoteDialog(

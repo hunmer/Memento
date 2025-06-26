@@ -401,7 +401,9 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                             ),
                   ),
                   title: Text(habit.title),
-                  subtitle: Text('${habit.durationMinutes} ${l10n.minutes}'),
+                  subtitle: Text(
+                    '${habit.durationMinutes} ${HabitsLocalizations.of(context).minutes}',
+                  ),
                   trailing: IconButton(
                     icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
                     onPressed: () => _startTimer(context, habit),

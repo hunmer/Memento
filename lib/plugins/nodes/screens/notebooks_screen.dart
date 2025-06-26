@@ -35,7 +35,9 @@ class NotebooksScreen extends StatelessWidget {
           return AnimatedBuilder(
             animation: animation,
             builder: (BuildContext context, Widget? child) {
-              final double animValue = Curves.easeInOut.transform(animation.value);
+              final double animValue = Curves.easeInOut.transform(
+                animation.value,
+              );
               final double elevation = lerpDouble(0, 6, animValue)!;
               return Material(
                 elevation: elevation,
@@ -56,23 +58,31 @@ class NotebooksScreen extends StatelessWidget {
             confirmDismiss: (direction) async {
               final bool? result = await showDialog<bool>(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: Text(l10n.deleteNotebook),
-                  content: Text('Are you sure you want to delete "${notebook.title}"?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text(l10n.cancel),
+                builder:
+                    (context) => AlertDialog(
+                      title: Text(l10n.deleteNotebook),
+                      content: Text(
+                        NodesLocalizations.of(context)
+                            .deleteNotebookConfirmation
+                            .replaceAll('{notebook.title}', notebook.title),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text(l10n.cancel),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text(NodesLocalizations.of(context).delete),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text(l10n.deleteNode),
-                    ),
-                  ],
-                ),
               );
               if (result == true) {
-                Provider.of<NodesController>(context, listen: false).deleteNotebook(notebook.id);
+                Provider.of<NodesController>(
+                  context,
+                  listen: false,
+                ).deleteNotebook(notebook.id);
               }
               return false;
             },
@@ -84,17 +94,19 @@ class NotebooksScreen extends StatelessWidget {
             ),
             child: Card(
               key: Key(notebook.id),
-              margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 4.0,
+              ),
               child: ListTile(
                 leading: ReorderableDragStartListener(
                   index: index,
-                  child: Icon(
-                    notebook.icon,
-                    color: notebook.color,
-                  ),
+                  child: Icon(notebook.icon, color: notebook.color),
                 ),
                 title: Text(notebook.title),
-                subtitle: Text('${notebook.nodes.length} ${l10n.nodes}'),
+                subtitle: Text(
+                  '${notebook.nodes.length} ${NodesLocalizations.of(context).nodes}',
+                ),
                 selected: notebook.id == controller.selectedNotebook?.id,
                 trailing: IconButton(
                   icon: const Icon(Icons.more_vert),
@@ -105,10 +117,12 @@ class NotebooksScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ChangeNotifierProvider<NodesController>.value(
-                        value: controller,
-                        child: NodesScreen(notebook: notebook),
-                      ),
+                      builder:
+                          (context) =>
+                              ChangeNotifierProvider<NodesController>.value(
+                                value: controller,
+                                child: NodesScreen(notebook: notebook),
+                              ),
                     ),
                   );
                 },
@@ -128,7 +142,10 @@ class NotebooksScreen extends StatelessWidget {
 
   void _showAddNotebookDialog(BuildContext context) {
     final l10n = NodesLocalizations.of(context);
-    final nodesController = Provider.of<NodesController>(context, listen: false);
+    final nodesController = Provider.of<NodesController>(
+      context,
+      listen: false,
+    );
     final titleController = TextEditingController();
     IconData selectedIcon = Icons.book;
     Color selectedColor = Colors.blue;
@@ -160,9 +177,7 @@ class NotebooksScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   TextField(
                     controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: l10n.notebookTitle,
-                    ),
+                    decoration: InputDecoration(labelText: l10n.notebookTitle),
                   ),
                 ],
               ),
@@ -174,7 +189,11 @@ class NotebooksScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     if (titleController.text.isNotEmpty) {
-                      nodesController.addNotebook(titleController.text, selectedIcon, color: selectedColor);
+                      nodesController.addNotebook(
+                        titleController.text,
+                        selectedIcon,
+                        color: selectedColor,
+                      );
                       Navigator.pop(context);
                     }
                   },
@@ -182,7 +201,7 @@ class NotebooksScreen extends StatelessWidget {
                 ),
               ],
             );
-          }
+          },
         );
       },
     );
@@ -193,38 +212,42 @@ class NotebooksScreen extends StatelessWidget {
 
     showModalBottomSheet(
       context: parentContext,
-      builder: (BuildContext context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: Text(l10n.editNotebook),
-              onTap: () {
-                Navigator.pop(context);  // 关闭 BottomSheet
-                _showEditNotebookDialog(parentContext, notebook);
-              },
+      builder:
+          (BuildContext context) => SafeArea(
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: Text(l10n.editNotebook),
+                  onTap: () {
+                    Navigator.pop(context); // 关闭 BottomSheet
+                    _showEditNotebookDialog(parentContext, notebook);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete),
+                  title: Text(l10n.deleteNotebook),
+                  onTap: () {
+                    Navigator.pop(context); // 关闭 BottomSheet
+                    _showDeleteNotebookDialog(parentContext, notebook);
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.delete),
-              title: Text(l10n.deleteNotebook),
-              onTap: () {
-                Navigator.pop(context);  // 关闭 BottomSheet
-                _showDeleteNotebookDialog(parentContext, notebook);
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
   void _showEditNotebookDialog(BuildContext context, Notebook notebook) {
     final l10n = NodesLocalizations.of(context);
-    final nodesController = Provider.of<NodesController>(context, listen: false);
+    final nodesController = Provider.of<NodesController>(
+      context,
+      listen: false,
+    );
     final titleController = TextEditingController(text: notebook.title);
     IconData selectedIcon = notebook.icon;
     Color selectedColor = notebook.color;
-    
+
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -252,9 +275,7 @@ class NotebooksScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   TextField(
                     controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: l10n.notebookTitle,
-                    ),
+                    decoration: InputDecoration(labelText: l10n.notebookTitle),
                   ),
                 ],
               ),
@@ -281,7 +302,7 @@ class NotebooksScreen extends StatelessWidget {
                 ),
               ],
             );
-          }
+          },
         );
       },
     );
@@ -289,27 +310,33 @@ class NotebooksScreen extends StatelessWidget {
 
   void _showDeleteNotebookDialog(BuildContext context, Notebook notebook) {
     final l10n = NodesLocalizations.of(context);
-    final nodesController = Provider.of<NodesController>(context, listen: false);
+    final nodesController = Provider.of<NodesController>(
+      context,
+      listen: false,
+    );
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deleteNotebook),
-        content: Text('Are you sure you want to delete "${notebook.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
+      builder:
+          (context) => AlertDialog(
+            title: Text(l10n.deleteNotebook),
+            content: Text(
+              'Are you sure you want to delete "${notebook.title}"?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.cancel),
+              ),
+              TextButton(
+                onPressed: () {
+                  nodesController.deleteNotebook(notebook.id);
+                  Navigator.pop(context);
+                },
+                child: Text(l10n.deleteNode),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              nodesController.deleteNotebook(notebook.id);
-              Navigator.pop(context);
-            },
-            child: Text(l10n.deleteNode),
-          ),
-        ],
-      ),
     );
   }
 }

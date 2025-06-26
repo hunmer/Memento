@@ -100,18 +100,13 @@ class NodesPlugin extends PluginBase {
   @override
   Widget buildSettingsView(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nodes Settings')),
+      appBar: AppBar(title: Text(NodesLocalizations.of(context).nodesSettings)),
       body: super.buildSettingsView(context),
     );
   }
 
   @override
   IconData get icon => Icons.account_tree;
-
-  List<Locale> get supportedLocales => const [Locale('en'), Locale('zh')];
-
-  LocalizationsDelegate<NodesLocalizations> get localizationsDelegate =>
-      NodesLocalizationsDelegate.delegate;
 
   /// 注册 prompt 替换方法
   void _registerPromptMethods() {
@@ -123,14 +118,11 @@ class NodesPlugin extends PluginBase {
           'nodes_getNodePaths',
           _promptReplacements.getNodePaths,
         );
-        debugPrint('成功注册 nodes_getNodePaths 方法到 OpenAI 插件');
       } else {
-        debugPrint('注册 nodes_getNodePaths 方法失败：未找到 OpenAI 插件，将在 5 秒后重试');
         // 如果 OpenAI 插件还未准备好，5 秒后重试
         Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
       }
     } catch (e) {
-      debugPrint('注册 prompt 替换方法时出错: $e，将在 5 秒后重试');
       // 发生错误时，5 秒后重试
       Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
     }
@@ -222,7 +214,10 @@ class NodesPlugin extends PluginBase {
                       // 笔记本数量
                       Column(
                         children: [
-                          Text('笔记本数量', style: theme.textTheme.bodyMedium),
+                          Text(
+                            NodesLocalizations.of(context).notebooksCount,
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Text(
                             '$notebookCount',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -235,7 +230,10 @@ class NodesPlugin extends PluginBase {
                       // 节点数量
                       Column(
                         children: [
-                          Text('节点数量', style: theme.textTheme.bodyMedium),
+                          Text(
+                            NodesLocalizations.of(context).nodesCount,
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Text(
                             '$nodeCount',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -254,7 +252,10 @@ class NodesPlugin extends PluginBase {
                     children: [
                       Column(
                         children: [
-                          Text('待办节点数', style: theme.textTheme.bodyMedium),
+                          Text(
+                            NodesLocalizations.of(context).pendingNodesCount,
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Text(
                             '$todoCount',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -273,25 +274,4 @@ class NodesPlugin extends PluginBase {
       },
     );
   }
-}
-
-// Make the delegate public and add a static instance
-class NodesLocalizationsDelegate
-    extends LocalizationsDelegate<NodesLocalizations> {
-  static final NodesLocalizationsDelegate delegate =
-      NodesLocalizationsDelegate();
-
-  const NodesLocalizationsDelegate();
-  @override
-  bool isSupported(Locale locale) {
-    return ['en', 'zh'].contains(locale.languageCode);
-  }
-
-  @override
-  Future<NodesLocalizations> load(Locale locale) async {
-    return NodesLocalizations(locale);
-  }
-
-  @override
-  bool shouldReload(NodesLocalizationsDelegate old) => false;
 }

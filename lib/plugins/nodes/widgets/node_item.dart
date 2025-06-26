@@ -475,7 +475,11 @@ class NodeItem extends StatelessWidget {
       builder:
           (context) => AlertDialog(
             title: Text(l10n.deleteNode),
-            content: Text('Are you sure you want to delete "${node.title}"?'),
+            content: Text(
+              NodesLocalizations.of(
+                context,
+              ).deleteNodeConfirmation.replaceAll('{node.title}', node.title),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -486,7 +490,7 @@ class NodeItem extends StatelessWidget {
                   controller.deleteNode(notebookId, node.id);
                   Navigator.pop(context);
                 },
-                child: Text(l10n.deleteNode),
+                child: Text(NodesLocalizations.of(context).delete),
               ),
             ],
           ),

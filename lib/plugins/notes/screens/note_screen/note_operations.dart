@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
@@ -89,8 +90,8 @@ Future<void> deleteNoteDialog(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: const Text('删除笔记'),
-          content: const Text('确定要删除此笔记吗？此操作不可恢复。'),
+          title: Text(NodesLocalizations.of(context).deleteNote),
+          content: Text(NodesLocalizations.of(context).deleteNoteConfirmation),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -98,7 +99,10 @@ Future<void> deleteNoteDialog(
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('删除', style: TextStyle(color: Colors.red)),
+              child: Text(
+                NodesLocalizations.of(context).delete,
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         ),
