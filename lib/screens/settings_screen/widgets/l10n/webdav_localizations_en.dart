@@ -137,7 +137,7 @@ class WebDAVLocalizationsEn extends WebDAVLocalizations {
   String get serverAddressHint => 'Enter server address';
 
   @override
-  String? get serverAddressInvalidError => 'Invalid server address';
+  String get serverAddressInvalidError => 'Invalid server address';
 
   @override
   String get title => 'WebDAV Settings';
@@ -147,4 +147,50 @@ class WebDAVLocalizationsEn extends WebDAVLocalizations {
 
   @override
   String get usernameEmptyError => 'Username cannot be empty';
+
+  // 状态消息
+  @override
+  String get connectingStatus => 'Connecting...';
+
+  @override
+  String get connectionSuccessStatus => 'Connection successful';
+
+  @override
+  String get connectionFailedStatus => 'Connection failed';
+
+  @override
+  String get connectionErrorStatus => 'Connection error';
+
+  @override
+  String get disconnectingStatus => 'Disconnecting...';
+
+  @override
+  String get disconnectedStatus => 'Disconnected';
+
+  @override
+  String get uploadingStatus => 'Uploading...';
+
+  @override
+  String get uploadSuccessStatus => 'Upload successful';
+
+  @override
+  String get uploadFailedStatus => 'Upload failed';
+
+  @override
+  String get downloadingStatus => 'Downloading...';
+
+  @override
+  String get downloadSuccessStatus => 'Download successful';
+
+  @override
+  String get downloadFailedStatus => 'Download failed';
+
+  @override
+  String get autoSyncEnabledStatus => 'Auto sync enabled';
+
+  @override
+  String get autoSyncDisabledStatus => 'Auto sync disabled';
+
+  @override
+  String get settingsSavedMessage => 'Settings saved successfully';
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/core/services/shortcut_manager.dart';
 import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
@@ -218,7 +219,6 @@ class _MyAppState extends State<MyApp> {
         TrackerLocalizations.delegate,
         HabitsLocalizations.delegate,
         SettingsScreenLocalizations.delegate,
-        WebDAVLocalizations.delegate,
         DataManagementLocalizations.delegate,
         LogSettingsLocalizationsDelegate(),
         CalendarLocalizations.delegate,
@@ -229,10 +229,12 @@ class _MyAppState extends State<MyApp> {
         NotesLocalizations.delegate,
         TodoLocalizations.delegate,
         CalendarAlbumLocalizations.delegate,
+        FloatingBallLocalizations.delegate,
         GoodsLocalizations.delegate,
         NodesLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
+        WebDAVLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [

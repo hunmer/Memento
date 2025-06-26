@@ -79,21 +79,21 @@ abstract class WebDAVLocalizations {
   String get retryInterval;
   String get retryIntervalHint;
 
-  get passwordEmptyError;
+  String get passwordEmptyError;
 
-  get saveFailed;
+  String get saveFailed;
 
   String get title;
 
-  get serverAddress;
+  String get serverAddress;
 
-  get serverAddressHint;
+  String get serverAddressHint;
 
-  get serverAddressEmptyError;
+  String get serverAddressEmptyError;
 
-  String? get serverAddressInvalidError;
+  String get serverAddressInvalidError;
 
-  get usernameEmptyError;
+  String get usernameEmptyError;
 
   String get dataSync;
 
