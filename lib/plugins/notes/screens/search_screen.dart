@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import '../controllers/notes_controller.dart';
 import '../models/note.dart';
 import '../widgets/search_note_item.dart';
+import '../l10n/notes_localizations.dart';
 
 class SearchScreen extends StatefulWidget {
   final NotesController controller;
 
-  const SearchScreen({
-    super.key,
-    required this.controller,
-  });
+  const SearchScreen({super.key, required this.controller});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -60,90 +58,95 @@ class _SearchScreenState extends State<SearchScreen> {
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Filter'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Tags'),
-              Wrap(
-                spacing: 8,
+      builder:
+          (context) => AlertDialog(
+            title: Text(NotesLocalizations.of(context)!.filter),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // This is a simplified version. In a real app, you'd fetch all available tags.
-                  _buildTagChip('Work'),
-                  _buildTagChip('Personal'),
-                  _buildTagChip('Ideas'),
-                  _buildTagChip('Important'),
+                  Text(NotesLocalizations.of(context)!.tags),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      // This is a simplified version. In a real app, you'd fetch all available tags.
+                      _buildTagChip('Work'),
+                      _buildTagChip('Personal'),
+                      _buildTagChip('Ideas'),
+                      _buildTagChip('Important'),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(NotesLocalizations.of(context)!.dateRange),
+                  ListTile(
+                    title: Text(
+                      _startDate != null
+                          ? 'From: ${_formatDate(_startDate!)}'
+                          : NotesLocalizations.of(context)!.typeToSearch,
+                    ),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: _startDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (date != null) {
+                        setState(() {
+                          _startDate = date;
+                        });
+                        _onSearchChanged();
+                      }
+                    },
+                  ),
+                  ListTile(
+                    title: Text(
+                      _endDate != null
+                          ? 'To: ${_formatDate(_endDate!)}'
+                          : NotesLocalizations.of(context)!.typeToSearch,
+                    ),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: _endDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (date != null) {
+                        setState(() {
+                          _endDate = date;
+                        });
+                        _onSearchChanged();
+                      }
+                    },
+                  ),
                 ],
               ),
-              const SizedBox(height: 16),
-              const Text('Date Range'),
-              ListTile(
-                title: Text(_startDate != null
-                    ? 'From: ${_formatDate(_startDate!)}'
-                    : 'Select start date'),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: _startDate ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime.now(),
-                  );
-                  if (date != null) {
-                    setState(() {
-                      _startDate = date;
-                    });
-                    _onSearchChanged();
-                  }
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedTags = [];
+                    _startDate = null;
+                    _endDate = null;
+                  });
+                  _onSearchChanged();
+                  Navigator.pop(context);
                 },
+                child: Text(NotesLocalizations.of(context)!.clearAll),
               ),
-              ListTile(
-                title: Text(_endDate != null
-                    ? 'To: ${_formatDate(_endDate!)}'
-                    : 'Select end date'),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: _endDate ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime.now(),
-                  );
-                  if (date != null) {
-                    setState(() {
-                      _endDate = date;
-                    });
-                    _onSearchChanged();
-                  }
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
                 },
+                child: Text(NotesLocalizations.of(context)!.apply),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedTags = [];
-                _startDate = null;
-                _endDate = null;
-              });
-              _onSearchChanged();
-              Navigator.pop(context);
-            },
-            child: const Text('Clear All'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Apply'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -179,8 +182,8 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         title: TextField(
           controller: _searchController,
-          decoration: const InputDecoration(
-            hintText: 'Search notes...',
+          decoration: InputDecoration(
+            hintText: NotesLocalizations.of(context)!.searchHint,
             border: InputBorder.none,
           ),
           autofocus: true,
@@ -192,24 +195,28 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ],
       ),
-      body: _searchResults.isEmpty
-          ? Center(
-              child: _query.isEmpty
-                  ? const Text('Type to search')
-                  : const Text('No results found'),
-            )
-          : ListView.builder(
-              itemCount: _searchResults.length,
-              itemBuilder: (context, index) {
-                final note = _searchResults[index];
-                final folder = widget.controller.getFolder(note.folderId);
-                return SearchNoteItem(
-                  note: note,
-                  folderName: folder?.name ?? 'Unknown',
-                  query: _query,
-                );
-              },
-            ),
+      body:
+          _searchResults.isEmpty
+              ? Center(
+                child:
+                    _query.isEmpty
+                        ? Text(NotesLocalizations.of(context)!.typeToSearch)
+                        : Text(NotesLocalizations.of(context)!.noResultsFound),
+              )
+              : ListView.builder(
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  final note = _searchResults[index];
+                  final folder = widget.controller.getFolder(note.folderId);
+                  return SearchNoteItem(
+                    note: note,
+                    folderName:
+                        folder?.name ??
+                        NotesLocalizations.of(context)!.noResultsFound,
+                    query: _query,
+                  );
+                },
+              ),
     );
   }
 }

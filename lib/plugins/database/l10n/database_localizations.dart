@@ -53,6 +53,46 @@ abstract class DatabaseLocalizations {
   String get edit;
   String get delete;
   String get cancel;
+
+  String get editDatabaseTitle;
+
+  String get informationTabTitle;
+
+  String get fieldsTabTitle;
+
+  String get databaseNameLabel;
+
+  String get uploadCoverImage;
+
+  String get descriptionLabel;
+
+  String get defaultValueLabel;
+
+  String get selectFieldTypeTitle;
+
+  String get fieldNameLabel;
+
+  String get saveFailedMessage;
+
+  String get newFieldTitle;
+
+  String get databaseListTitle;
+
+  get newDatabaseDefaultName;
+
+  String get loadFailedMessage;
+
+  String get noDatabasesMessage;
+
+  String get addDatabaseHint;
+
+  String get confirmDeleteTitle;
+
+  get confirmDeleteMessage;
+
+  String get deleteSuccessMessage;
+
+  get deleteFailedMessage;
 }
 
 class _DatabaseLocalizationsDelegate

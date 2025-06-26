@@ -10,12 +10,6 @@ class StoreLocalizationsEn extends StoreLocalizations {
   String get confirmUseMessage => 'Are you sure you want to use {productName}?';
 
   @override
-  String get cancel => 'Cancel';
-
-  @override
-  String get confirm => 'Confirm';
-
-  @override
   String get pointSettingsTitle => 'Point Reward Settings';
 
   @override
@@ -154,4 +148,61 @@ class StoreLocalizationsEn extends StoreLocalizations {
 
   @override
   String get redeemConfirmation => 'Are you sure you want to redeem this item?';
+
+  @override
+  String get productList => 'Product List';
+
+  @override
+  String get myItems => 'My Items';
+
+  @override
+  String get pointsHistory => 'Points History';
+
+  @override
+  String get storeTitle => 'Points Store';
+
+  @override
+  String get confirmClearTitle => 'Confirm Clear';
+
+  @override
+  String get itemFilter => 'Item Filter';
+
+  @override
+  String get itemStatus => 'Item Status';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get usable => 'Usable';
+
+  @override
+  String get expired => 'Expired';
+
+  @override
+  String get nameFilter => 'Name Filter';
+
+  @override
+  String get priceRange => 'Price Range';
+
+  @override
+  String get sortAndFilter => 'Sort & Filter';
+
+  @override
+  String get sortMethod => 'Sort Method';
+
+  @override
+  String get byStock => 'By Stock';
+
+  @override
+  String get byPrice => 'By Price';
+
+  @override
+  String get byExpiry => 'By Expiry';
+
+  @override
+  String get viewArchivedProducts => 'View Archived Products';
+
+  @override
+  String get confirmUseItem => 'Are you sure you want to use this item?';
 }

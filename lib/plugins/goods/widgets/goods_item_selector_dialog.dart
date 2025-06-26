@@ -194,12 +194,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
                     title: Text(item.title),
                     subtitle:
                         item.purchasePrice != null
-                            ? Text(
-                              GoodsLocalizations.of(context)!.price(
-                                item.purchasePrice?.toStringAsFixed(2) ??
-                                    '0.00',
-                              ),
-                            )
+                            ? Text(GoodsLocalizations.of(context).price)
                             : null,
                     onTap: () => Navigator.of(context).pop(item),
                   );
