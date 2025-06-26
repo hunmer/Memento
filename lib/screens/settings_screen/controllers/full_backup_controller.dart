@@ -23,13 +23,7 @@ class FullBackupController {
   BuildContext? get _safeContext => _mounted ? _originalContext : null;
 
   Future<void> _initPackageInfo() async {
-    try {
-      await PackageInfo.fromPlatform();
-      // 只是初始化，不需要使用返回值
-    } catch (e) {
-      debugPrint('获取应用版本信息失败: $e');
-      // 使用默认版本号
-    }
+    await PackageInfo.fromPlatform();
   }
 
   void dispose() {
@@ -234,7 +228,7 @@ class FullBackupController {
       // 显示短暂的提示
       ScaffoldMessenger.of(beforePickContext).showSnackBar(
         const SnackBar(
-          content: Text('请选择备份文件'),
+          content: Text(AppLocalizations.of(context)!.selectBackupFile),
           duration: Duration(seconds: 1),
         ),
       );
@@ -292,12 +286,6 @@ class FullBackupController {
         // 解压缩文件
         final archive = ZipDecoder().decodeBytes(validBytes);
 
-        // 版本信息不再验证，只检查文件是否存在
-        final versionFile = archive.findFile('version.txt');
-        if (versionFile == null) {
-          debugPrint('备份文件缺少版本信息，但仍将继续导入');
-        }
-
         // 获取应用文档目录
         final appDir = await StorageManager.getApplicationDocumentsDirectory();
 
@@ -323,9 +311,9 @@ class FullBackupController {
         // 关闭导入进度对话框
         Navigator.of(afterImportContext, rootNavigator: true).pop();
 
-        ScaffoldMessenger.of(
-          afterImportContext,
-        ).showSnackBar(const SnackBar(content: Text('数据导入成功，请重启应用')));
+        ScaffoldMessenger.of(afterImportContext).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.importSuccess)),
+        );
 
         // 提示重启应用
         await showDialog(
@@ -333,8 +321,8 @@ class FullBackupController {
           barrierDismissible: false,
           builder:
               (dialogContext) => AlertDialog(
-                title: const Text('需要重启'),
-                content: const Text('数据已导入完成，需要重启应用才能生效。'),
+                title: Text(AppLocalizations.of(context)!.restartRequired),
+                content: Text(AppLocalizations.of(context)!.restartMessage),
               ),
         );
       } catch (e, stackTrace) {
@@ -347,14 +335,17 @@ class FullBackupController {
           errorContext,
           rootNavigator: true,
         ).popUntil((route) => route.isFirst);
-        debugPrint('文件选择器错误: $e\n$stackTrace');
-        ScaffoldMessenger.of(
-          errorContext,
-        ).showSnackBar(SnackBar(content: Text('文件选择失败: $e')));
+        ScaffoldMessenger.of(errorContext).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(
+                context,
+              )!.fileSelectionFailed.replaceFirst('{error}', e.toString()),
+            ),
+          ),
+        );
       }
     } catch (e, stackTrace) {
-      debugPrint('导入失败: $e\n$stackTrace');
-
       // 确保关闭所有可能的对话框
       if (!_mounted) return;
       final finalErrorContext = _safeContext;
@@ -365,22 +356,26 @@ class FullBackupController {
         rootNavigator: true,
       ).popUntil((route) => route.isFirst);
 
-      String errorMessage = '导入失败';
+      String errorMessage = AppLocalizations.of(context)!.importFailed;
       if (e is TimeoutException) {
-        errorMessage = '导入超时：文件可能过大或无法访问';
+        errorMessage = AppLocalizations.of(context)!.importTimeout;
       } else if (e is FileSystemException) {
-        errorMessage = '文件系统错误：无法读取或写入文件';
+        errorMessage = AppLocalizations.of(context)!.filesystemError;
       } else if (e.toString().contains('ArchiveException')) {
-        errorMessage = '无效的备份文件：文件可能已损坏';
+        errorMessage = AppLocalizations.of(context)!.invalidBackupFile;
       } else {
-        errorMessage = '导入失败: ${e.toString()}';
+        errorMessage =
+            AppLocalizations.of(context)!.importFailed + ': ${e.toString()}';
       }
 
       ScaffoldMessenger.of(finalErrorContext).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
           duration: const Duration(seconds: 5),
-          action: SnackBarAction(label: '重试', onPressed: () => importAllData()),
+          action: SnackBarAction(
+            label: AppLocalizations.of(context)!.retry,
+            onPressed: () => importAllData(),
+          ),
         ),
       );
     }

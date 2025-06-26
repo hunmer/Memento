@@ -113,4 +113,25 @@ class TodoLocalizationsEn extends TodoLocalizations {
 
   @override
   String get completedTaskDetailsTitle => 'Completed Task Details';
+
+  @override
+  String get newTask => 'New Task';
+
+  @override
+  String get editTask => 'Edit Task';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get startDate => 'Start Date';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get add => 'Add';
 }

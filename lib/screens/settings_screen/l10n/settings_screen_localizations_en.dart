@@ -46,7 +46,8 @@ class SettingsScreenLocalizationsEn extends SettingsScreenLocalizations {
   String get fullRestoreTitle => 'Full Restore';
 
   @override
-  String get fullRestoreSubtitle => 'Restore entire app data from backup (overwrites existing data)';
+  String get fullRestoreSubtitle =>
+      'Restore entire app data from backup (overwrites existing data)';
 
   @override
   String get webDAVTitle => 'WebDAV Sync';
@@ -76,13 +77,15 @@ class SettingsScreenLocalizationsEn extends SettingsScreenLocalizations {
   String get autoOpenLastPluginTitle => 'Auto Open Last Used Plugin';
 
   @override
-  String get autoOpenLastPluginSubtitle => 'Automatically open last used plugin on startup';
+  String get autoOpenLastPluginSubtitle =>
+      'Automatically open last used plugin on startup';
 
   @override
   String get autoCheckUpdateTitle => 'Auto Check Updates';
 
   @override
-  String get autoCheckUpdateSubtitle => 'Periodically check for new app versions';
+  String get autoCheckUpdateSubtitle =>
+      'Periodically check for new app versions';
 
   @override
   String get checkUpdateTitle => 'Check Updates';
@@ -98,4 +101,26 @@ class SettingsScreenLocalizationsEn extends SettingsScreenLocalizations {
 
   @override
   String get testForegroundTaskTitle => 'Test Foreground Service';
+
+  @override
+  String get updateAvailableTitle => 'New version available';
+
+  @override
+  String get updateAvailableContent =>
+      'Current version: {currentVersion}\nLatest version: {latestVersion}\nRelease notes:';
+
+  @override
+  String get updateLaterButton => 'Later';
+
+  @override
+  String get updateViewButton => 'View update';
+
+  @override
+  String get alreadyLatestVersion => 'You already have the latest version';
+
+  @override
+  String get updateCheckFailed => 'Update check failed: {error}';
+
+  @override
+  String get checkingForUpdates => 'Checking for updates...';
 }

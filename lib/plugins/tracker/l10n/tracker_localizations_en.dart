@@ -81,6 +81,10 @@ class TrackerLocalizationsEn extends TrackerLocalizations {
   String get confirmDelete => 'Confirm Delete';
 
   @override
+  String get confirmDeleteRecordMessage =>
+      'Are you sure you want to delete this record?';
+
+  @override
   String get recordDeleted => 'Record deleted';
 
   @override

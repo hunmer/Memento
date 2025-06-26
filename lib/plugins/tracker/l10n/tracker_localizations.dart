@@ -82,6 +82,7 @@ abstract class TrackerLocalizations {
   String get recordHistory;
   String get noRecords;
   String get confirmDelete;
+  String get confirmDeleteRecordMessage;
   String get recordDeleted;
   String get todayComplete;
   String get thisMonthComplete;

@@ -307,6 +307,8 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create'**
   String get create;
+
+  String get adjustCardSize => null;
 }
 
 class _AppLocalizationsDelegate
