@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
@@ -83,9 +84,11 @@ class ImportController {
 
         if (availablePlugins.isEmpty) {
           if (_mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('没有找到可导入的插件数据')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.noPluginDataFound),
+              ),
+            );
           }
           return;
         }
@@ -180,9 +183,13 @@ class ImportController {
       }
     } catch (e) {
       if (_mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('导入失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.importFailedWithError(e.toString()),
+            ),
+          ),
+        );
       }
     }
   }

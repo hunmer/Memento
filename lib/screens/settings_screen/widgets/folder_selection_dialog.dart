@@ -16,7 +16,7 @@ class _FolderSelectionDialogState extends State<FolderSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('选择要导入的文件夹'),
+      title: Text(AppLocalizations.of(context)!.selectFolderToImport),
       content: SingleChildScrollView(
         child: ListBody(
           children:

@@ -84,7 +84,9 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${WebDAVLocalizations.of(context).saveFailed}: $e'),
+          content: Text(
+            '${WebDAVLocalizations.of(context).saveFailed}: ${e.toString()}',
+          ),
           backgroundColor: Colors.red,
         ),
       );

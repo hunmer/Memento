@@ -209,4 +209,135 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidBackupFile => 'Invalid backup file: file may be corrupted';
+
+  @override
+  String dataExportedTo(Object path) {
+    return 'Data exported to: $path';
+  }
+
+  @override
+  String exportFailedWithError(Object error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String get noPluginDataFound => 'No plugin data found for import';
+
+  @override
+  String importFailedWithError(Object error) {
+    return 'Import failed: $error';
+  }
+
+  @override
+  String permissionRequired(Object permission) {
+    return '$permission permission required';
+  }
+
+  @override
+  String permissionRequiredForApp(Object permission) {
+    return 'App requires $permission permission to work properly. Grant permission?';
+  }
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
+  String get grantPermission => 'Grant permission';
+
+  @override
+  String permissionRequiredInSettings(Object permission) {
+    return '$permission permission is required to continue. Please grant permission in system settings.';
+  }
+
+  @override
+  String get storagePermissionRequired =>
+      'Storage permission is required to continue. Please grant permission in system settings.';
+
+  @override
+  String get downloadCancelled => 'Download cancelled';
+
+  @override
+  String get moveSuccess => 'Move successful';
+
+  @override
+  String moveFailed(Object error) {
+    return 'Move failed: $error';
+  }
+
+  @override
+  String renameFailed(Object error) {
+    return 'Rename failed: $error';
+  }
+
+  @override
+  String exportSuccessTo(Object path) {
+    return 'Export successful to: $path';
+  }
+
+  @override
+  String get selectFolderToImport => 'Select folder to import';
+
+  @override
+  String get selectPluginToExport => 'Select plugin to export';
+
+  @override
+  String get selectImage => 'Select image';
+
+  @override
+  String get selectFromGallery => 'Select from gallery';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get testForegroundTask => 'Test Foreground Task';
+
+  @override
+  String failedToLoadPlugins(Object error) {
+    return 'Failed to load plugins: $error';
+  }
+
+  @override
+  String get setBackupSchedule => 'Set backup schedule';
+
+  @override
+  String day(Object day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get selectBackgroundColor => 'Select background color';
+
+  @override
+  String get nodeColor => 'Node Color';
+
+  @override
+  String selectPluginToImport(Object mode) {
+    return 'Select plugin to import ($mode)';
+  }
+
+  @override
+  String dataSize(Object size) {
+    return 'Data size: $size';
+  }
+
+  @override
+  String get import => 'Import';
+
+  @override
+  String get selectLocation => 'Select location';
+
+  @override
+  String get selectGroup => 'Select group';
+
+  @override
+  String videoLoadFailed(Object error) {
+    return 'Video load failed: $error';
+  }
+
+  @override
+  String get loadingVideo => 'Loading video...';
+
+  @override
+  String get titleRequired => 'Title is required';
 }

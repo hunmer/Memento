@@ -10,7 +10,8 @@ class ModelListScreen extends StatefulWidget {
   State<ModelListScreen> createState() => _ModelListScreenState();
 }
 
-class _ModelListScreenState extends State<ModelListScreen> with TickerProviderStateMixin {
+class _ModelListScreenState extends State<ModelListScreen>
+    with TickerProviderStateMixin {
   TabController? _tabController;
   late List<LLMModelGroup> _modelGroups;
   late ModelController _modelController;
@@ -35,14 +36,21 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
         setState(() {
           _modelGroups = models;
           _tabController?.dispose(); // 在创建新的之前释放旧的
-          _tabController = TabController(length: _modelGroups.length, vsync: this);
+          _tabController = TabController(
+            length: _modelGroups.length,
+            vsync: this,
+          );
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${OpenAILocalizations.of(context).loadModelsFailed}: $e')),
+          SnackBar(
+            content: Text(
+              '${OpenAILocalizations.of(context).loadModelsFailed}: $e',
+            ),
+          ),
         );
         setState(() {
           _modelGroups = [];
@@ -58,9 +66,12 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
     if (_searchQuery.isEmpty) {
       return models;
     }
-    return models.where((model) => 
-      model.name.toLowerCase().contains(_searchQuery.toLowerCase())
-    ).toList();
+    return models
+        .where(
+          (model) =>
+              model.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+        )
+        .toList();
   }
 
   @override
@@ -69,77 +80,93 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
       appBar: AppBar(
         title: Text(OpenAILocalizations.of(context).modelManagement),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _addNewModel,
-          ),
+          IconButton(icon: const Icon(Icons.add), onPressed: _addNewModel),
         ],
-        bottom: _isLoading 
-          ? null 
-          : PreferredSize(
-              preferredSize: const Size.fromHeight(104.0), // 增加高度，为搜索框和TabBar提供足够空间
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: OpenAILocalizations.of(context).searchModel,
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(), // 添加边框使搜索框更明显
-                        contentPadding: EdgeInsets.symmetric(vertical: 8.0),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchQuery = value;
-                        });
-                      },
-                    ),
-                  ),
-                  if (_tabController != null) TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    tabs: _modelGroups.map((group) => Tab(text: group.name)).toList(),
-                  ),
-                ],
-              ),
-            ),
-      ),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : _tabController == null 
-          ? Center(child: Text(OpenAILocalizations.of(context).cannotLoadModels))
-          : TabBarView(
-            controller: _tabController,
-            children: _modelGroups.map((group) {
-              final filteredModels = _getFilteredModels(group.models);
-              return filteredModels.isEmpty
-                ? Center(child: Text(OpenAILocalizations.of(context).noModelsFound))
-                : ListView.builder(
-                    itemCount: filteredModels.length,
-                    itemBuilder: (context, index) {
-                      final model = filteredModels[index];
-                      return ListTile(
-                        title: Text(model.name),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _deleteModel(model),
+        bottom:
+            _isLoading
+                ? null
+                : PreferredSize(
+                  preferredSize: const Size.fromHeight(
+                    104.0,
+                  ), // 增加高度，为搜索框和TabBar提供足够空间
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
                         ),
-                        onTap: () => _editModel(model),
-                      );
-                    },
-                  );
-            }).toList(),
-          ),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText:
+                                OpenAILocalizations.of(context).searchModel,
+                            prefixIcon: Icon(Icons.search),
+                            border: OutlineInputBorder(), // 添加边框使搜索框更明显
+                            contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value;
+                            });
+                          },
+                        ),
+                      ),
+                      if (_tabController != null)
+                        TabBar(
+                          controller: _tabController,
+                          isScrollable: true,
+                          tabs:
+                              _modelGroups
+                                  .map((group) => Tab(text: group.name))
+                                  .toList(),
+                        ),
+                    ],
+                  ),
+                ),
+      ),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _tabController == null
+              ? Center(
+                child: Text(OpenAILocalizations.of(context).cannotLoadModels),
+              )
+              : TabBarView(
+                controller: _tabController,
+                children:
+                    _modelGroups.map((group) {
+                      final filteredModels = _getFilteredModels(group.models);
+                      return filteredModels.isEmpty
+                          ? Center(
+                            child: Text(
+                              OpenAILocalizations.of(context).noModelsFound,
+                            ),
+                          )
+                          : ListView.builder(
+                            itemCount: filteredModels.length,
+                            itemBuilder: (context, index) {
+                              final model = filteredModels[index];
+                              return ListTile(
+                                title: Text(model.name),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () => _deleteModel(model),
+                                ),
+                                onTap: () => _editModel(model),
+                              );
+                            },
+                          );
+                    }).toList(),
+              ),
     );
   }
 
   Future<void> _addNewModel() async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => _ModelEditDialog(
-        groups: _modelGroups.map((g) => g.id).toList(),
-      ),
+      builder:
+          (context) =>
+              _ModelEditDialog(groups: _modelGroups.map((g) => g.id).toList()),
     );
 
     if (result != null) {
@@ -149,13 +176,17 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
           name: result['name'] as String,
           group: result['group'] as String,
         );
-        
+
         await _modelController.addModel(newModel);
         await _loadModels();
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${OpenAILocalizations.of(context).addModelFailed}: $e')),
+            SnackBar(
+              content: Text(
+                '${OpenAILocalizations.of(context).addModelFailed}: $e',
+              ),
+            ),
           );
         }
       }
@@ -165,10 +196,11 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
   Future<void> _editModel(LLMModel model) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => _ModelEditDialog(
-        model: model,
-        groups: _modelGroups.map((g) => g.id).toList(),
-      ),
+      builder:
+          (context) => _ModelEditDialog(
+            model: model,
+            groups: _modelGroups.map((g) => g.id).toList(),
+          ),
     );
 
     if (result != null) {
@@ -178,13 +210,17 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
           name: result['name'] as String,
           group: result['group'] as String,
         );
-        
+
         await _modelController.updateModel(updatedModel);
         await _loadModels();
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${OpenAILocalizations.of(context).updateModelFailed}: $e')),
+            SnackBar(
+              content: Text(
+                '${OpenAILocalizations.of(context).updateModelFailed}: $e',
+              ),
+            ),
           );
         }
       }
@@ -194,20 +230,25 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
   Future<void> _deleteModel(LLMModel model) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(OpenAILocalizations.of(context).confirmDelete),
-        content: Text(OpenAILocalizations.of(context).confirmDeleteModel.replaceAll('{modelName}', model.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(OpenAILocalizations.of(context).cancel),
+      builder:
+          (context) => AlertDialog(
+            title: Text(OpenAILocalizations.of(context).confirmDelete),
+            content: Text(
+              OpenAILocalizations.of(
+                context,
+              ).confirmDeleteModel.replaceAll('{modelName}', model.name),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(OpenAILocalizations.of(context).cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(OpenAILocalizations.of(context).delete),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(OpenAILocalizations.of(context).delete),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {
@@ -217,7 +258,11 @@ class _ModelListScreenState extends State<ModelListScreen> with TickerProviderSt
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${OpenAILocalizations.of(context).deleteModelFailed}: $e')),
+            SnackBar(
+              content: Text(
+                '${OpenAILocalizations.of(context).deleteModelFailed}: $e',
+              ),
+            ),
           );
         }
       }
@@ -235,10 +280,7 @@ class _ModelEditDialog extends StatefulWidget {
   final LLMModel? model;
   final List<String> groups;
 
-  const _ModelEditDialog({
-    this.model,
-    required this.groups,
-  });
+  const _ModelEditDialog({this.model, required this.groups});
 
   @override
   State<_ModelEditDialog> createState() => _ModelEditDialogState();
@@ -265,7 +307,11 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.model == null ? OpenAILocalizations.of(context).addModel : OpenAILocalizations.of(context).editModel),
+      title: Text(
+        widget.model == null
+            ? OpenAILocalizations.of(context).addModel
+            : OpenAILocalizations.of(context).editModel,
+      ),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -305,12 +351,10 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
                 decoration: InputDecoration(
                   labelText: OpenAILocalizations.of(context).modelGroup,
                 ),
-                items: widget.groups.map((group) {
-                  return DropdownMenuItem(
-                    value: group,
-                    child: Text(group),
-                  );
-                }).toList(),
+                items:
+                    widget.groups.map((group) {
+                      return DropdownMenuItem(value: group, child: Text(group));
+                    }).toList(),
                 onChanged: (value) {
                   if (value != null) {
                     setState(() {
@@ -320,7 +364,9 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return OpenAILocalizations.of(context).pleaseSelectModelGroup;
+                    return OpenAILocalizations.of(
+                      context,
+                    ).pleaseSelectModelGroup;
                   }
                   return null;
                 },

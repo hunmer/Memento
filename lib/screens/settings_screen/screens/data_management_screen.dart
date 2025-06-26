@@ -175,13 +175,17 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
           selectedItems.clear();
           _refreshFiles();
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('移动成功')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.moveSuccess)),
+        );
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('移动失败: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.moveFailed(e.toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -222,9 +226,13 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         }
         _refreshFiles();
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('重命名失败: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.renameFailed(e.toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -360,14 +368,18 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       if (savePath != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('导出成功到: $savePath'),
+            content: Text(
+              AppLocalizations.of(context)!.exportSuccessTo(savePath),
+            ),
             duration: const Duration(seconds: 5),
           ),
         );
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('导出已取消')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.exportCancelled),
+          ),
+        );
       }
 
       // 删除临时目录

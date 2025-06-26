@@ -53,7 +53,11 @@ class FullBackupController {
                   children: [
                     LinearProgressIndicator(value: snapshot.data),
                     const SizedBox(height: 16),
-                    Text('${((snapshot.data ?? 0) * 100).toStringAsFixed(1)}%'),
+                    Text(
+                      AppLocalizations.of(context)!.completed(
+                        ((snapshot.data ?? 0) * 100).toStringAsFixed(1),
+                      ),
+                    ),
                   ],
                 ),
               );

@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:flutter/material.dart';
@@ -92,12 +93,20 @@ class _ProductListState extends State<ProductList> {
                     onExchange: () async {
                       if (await widget.controller.exchangeProduct(product)) {
                         if (mounted) setState(() {});
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(const SnackBar(content: Text('兑换成功')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              StoreLocalizations.of(context).redeemSuccess,
+                            ),
+                          ),
+                        );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('兑换失败，请检查积分或库存')),
+                          SnackBar(
+                            content: Text(
+                              StoreLocalizations.of(context).redeemFailed,
+                            ),
+                          ),
                         );
                       }
                     },

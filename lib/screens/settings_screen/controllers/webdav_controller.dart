@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 import '../../../core/storage/storage_manager.dart';
@@ -160,9 +161,13 @@ class WebDAVController {
                 onCancel: () {
                   Navigator.of(dialogContext).pop();
                   if (dialogContext.mounted) {
-                    ScaffoldMessenger.of(
-                      dialogContext,
-                    ).showSnackBar(const SnackBar(content: Text('下载已取消')));
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.downloadCancelled,
+                        ),
+                      ),
+                    );
                   }
                 },
               ),
@@ -319,9 +324,13 @@ class WebDAVController {
                 onCancel: () {
                   Navigator.of(dialogContext).pop();
                   if (dialogContext.mounted) {
-                    ScaffoldMessenger.of(
-                      dialogContext,
-                    ).showSnackBar(const SnackBar(content: Text('下载已取消')));
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.downloadCancelled,
+                        ),
+                      ),
+                    );
                   }
                 },
               ),

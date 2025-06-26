@@ -173,6 +173,8 @@ abstract class OpenAILocalizations {
   String get addProviderButton;
 
   String get modelManagementDescription;
+
+  get modelUrlLabel => null;
 }
 
 /// 中文实现
@@ -572,6 +574,7 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
 
   @override
   String get modelManagementDescription => '管理大语言模型列表';
+  String get modelUrlLabel => 'URL';
 }
 
 /// 英文实现
@@ -975,6 +978,7 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
 
   @override
   String get modelManagementDescription => 'Manage large language models';
+  String get modelUrlLabel => 'URL';
 }
 
 /// 本地化代理

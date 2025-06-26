@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/store_controller.dart';
 import '../../models/points_log.dart';
@@ -83,7 +84,7 @@ class _PointsHistoryState extends State<PointsHistory> {
   @override
   Widget build(BuildContext context) {
     if (widget.controller.pointsLogs.isEmpty) {
-      return const Center(child: Text('暂无记录'));
+      return Center(child: Text(StoreLocalizations.of(context).noRecords));
     }
 
     return Column(
@@ -115,7 +116,11 @@ class _PointsHistoryState extends State<PointsHistory> {
                     log.type == '获得' ? Icons.add : Icons.remove,
                     color: log.type == '获得' ? Colors.green : Colors.red,
                   ),
-                  title: Text('${log.value}积分 (${log.type})'),
+                  title: Text(
+                    StoreLocalizations.of(context).pointsHistoryEntry
+                        .replaceFirst('{value}', log.value.toString())
+                        .replaceFirst('{type}', log.type),
+                  ),
                   subtitle: Text(log.reason),
                   trailing: Text(
                     '${log.timestamp.hour}:${log.timestamp.minute.toString().padLeft(2, '0')}',

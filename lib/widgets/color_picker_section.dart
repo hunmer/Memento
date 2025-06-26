@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class ColorPickerSection extends StatelessWidget {
@@ -32,7 +33,10 @@ class ColorPickerSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Node Color', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          AppLocalizations.of(context)!.nodeColor,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,

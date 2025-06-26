@@ -56,6 +56,8 @@ abstract class StoreLocalizations {
   String get pointsHistoryTitle;
   String get pointsHistoryEntry;
   String get points;
+  String get clear;
+  String get dateRangeTitle;
 
   static const LocalizationsDelegate<StoreLocalizations> delegate =
       _StoreLocalizationsDelegate();

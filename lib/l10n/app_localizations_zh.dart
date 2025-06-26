@@ -205,4 +205,134 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get invalidBackupFile => '无效的备份文件：文件可能已损坏';
+
+  @override
+  String dataExportedTo(Object path) {
+    return '数据已导出到: $path';
+  }
+
+  @override
+  String exportFailedWithError(Object error) {
+    return '导出失败: $error';
+  }
+
+  @override
+  String get noPluginDataFound => '没有找到可导入的插件数据';
+
+  @override
+  String importFailedWithError(Object error) {
+    return '导入失败: $error';
+  }
+
+  @override
+  String permissionRequired(Object permission) {
+    return '需要$permission权限';
+  }
+
+  @override
+  String permissionRequiredForApp(Object permission) {
+    return '应用需要$permission权限来正常工作，是否授予权限？';
+  }
+
+  @override
+  String get notNow => '暂不授予';
+
+  @override
+  String get grantPermission => '授予权限';
+
+  @override
+  String permissionRequiredInSettings(Object permission) {
+    return '需要$permission权限才能继续。请在系统设置中授予权限。';
+  }
+
+  @override
+  String get storagePermissionRequired => '需要存储权限才能继续。请在系统设置中授予权限。';
+
+  @override
+  String get downloadCancelled => '下载已取消';
+
+  @override
+  String get moveSuccess => '移动成功';
+
+  @override
+  String moveFailed(Object error) {
+    return '移动失败: $error';
+  }
+
+  @override
+  String renameFailed(Object error) {
+    return '重命名失败: $error';
+  }
+
+  @override
+  String exportSuccessTo(Object path) {
+    return '导出成功到: $path';
+  }
+
+  @override
+  String get selectFolderToImport => '选择要导入的文件夹';
+
+  @override
+  String get selectPluginToExport => '选择要导出的插件';
+
+  @override
+  String get selectImage => '选择图片';
+
+  @override
+  String get selectFromGallery => '从相册选择';
+
+  @override
+  String get takePhoto => '拍照';
+
+  @override
+  String get testForegroundTask => '测试前台任务';
+
+  @override
+  String failedToLoadPlugins(Object error) {
+    return '加载插件失败: $error';
+  }
+
+  @override
+  String get setBackupSchedule => '设置备份计划';
+
+  @override
+  String day(Object day) {
+    return '第$day天';
+  }
+
+  @override
+  String get selectBackgroundColor => '选择背景颜色';
+
+  @override
+  String get nodeColor => '节点颜色';
+
+  @override
+  String selectPluginToImport(Object mode) {
+    return '选择要导入的插件 ($mode)';
+  }
+
+  @override
+  String dataSize(Object size) {
+    return '数据大小: $size';
+  }
+
+  @override
+  String get import => '导入';
+
+  @override
+  String get selectLocation => '选择位置';
+
+  @override
+  String get selectGroup => '选择分组';
+
+  @override
+  String videoLoadFailed(Object error) {
+    return '视频加载失败: $error';
+  }
+
+  @override
+  String get loadingVideo => '正在加载视频...';
+
+  @override
+  String get titleRequired => '请输入标题';
 }

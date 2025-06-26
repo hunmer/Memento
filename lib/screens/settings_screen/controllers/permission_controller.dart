@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -48,15 +49,23 @@ class PermissionController {
           barrierDismissible: false,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('需要$permissionName权限'),
-              content: Text('应用需要$permissionName权限来正常工作，是否授予权限？'),
+              title: Text(
+                AppLocalizations.of(
+                  context,
+                )!.permissionRequired(permissionName),
+              ),
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                )!.permissionRequiredForApp(permissionName),
+              ),
               actions: <Widget>[
                 TextButton(
-                  child: const Text('暂不授予'),
+                  child: Text(AppLocalizations.of(context)!.notNow),
                   onPressed: () => Navigator.of(context).pop(false),
                 ),
                 TextButton(
-                  child: const Text('授予权限'),
+                  child: Text(AppLocalizations.of(context)!.grantPermission),
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
               ],
@@ -118,7 +127,11 @@ class PermissionController {
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('需要$permissionName权限才能继续。请在系统设置中授予权限。'),
+                  content: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.permissionRequiredInSettings(permissionName),
+                  ),
                   duration: const Duration(seconds: 3),
                 ),
               );
@@ -143,9 +156,11 @@ class PermissionController {
             if (!_mounted) return false;
 
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('需要存储权限才能继续。请在系统设置中授予权限。'),
-                duration: Duration(seconds: 3),
+              SnackBar(
+                content: Text(
+                  AppLocalizations.of(context)!.storagePermissionRequired,
+                ),
+                duration: const Duration(seconds: 3),
               ),
             );
             return false;

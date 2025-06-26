@@ -115,9 +115,13 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('加载服务商失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${OpenAILocalizations.of(context).loadProvidersError}: $e',
+            ),
+          ),
+        );
       }
     } finally {
       setState(() {
@@ -254,9 +258,13 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving agent: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${OpenAILocalizations.of(context).errorSavingAgent}: $e',
+            ),
+          ),
+        );
       }
     }
   }
@@ -820,9 +828,13 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
           }
         } catch (e) {
           if (mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('测试过程中出错: $e')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${OpenAILocalizations.of(context).testError}: $e',
+                ),
+              ),
+            );
           }
         }
       }

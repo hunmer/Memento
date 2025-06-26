@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/store_controller.dart';
 import '../../models/product.dart';
@@ -17,10 +18,14 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('存档商品')),
+      appBar: AppBar(
+        title: Text(StoreLocalizations.of(context).archivedProductsTitle),
+      ),
       body:
           widget.controller.archivedProducts.isEmpty
-              ? const Center(child: Text('没有存档商品'))
+              ? Center(
+                child: Text(StoreLocalizations.of(context).noArchivedProducts),
+              )
               : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: widget.controller.archivedProducts.length,
@@ -54,12 +59,15 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                 color: Colors.black.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.archive, color: Colors.white, size: 16),
                   SizedBox(width: 4),
-                  Text('已存档', style: TextStyle(color: Colors.white)),
+                  Text(
+                    StoreLocalizations.of(context).archivedLabel,
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ],
               ),
             ),
@@ -83,8 +91,8 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认恢复'),
-            content: const Text('确定要恢复这个商品吗？'),
+            title: Text(StoreLocalizations.of(context).confirmRestoreTitle),
+            content: Text(StoreLocalizations.of(context).confirmRestoreMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -92,7 +100,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('恢复'),
+                child: Text(StoreLocalizations.of(context).restore),
               ),
             ],
           ),

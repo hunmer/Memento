@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
@@ -101,36 +102,41 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: _getColorForServiceProvider(agent.serviceProviderId).withOpacity(0.5),
+                color: _getColorForServiceProvider(
+                  agent.serviceProviderId,
+                ).withOpacity(0.5),
                 width: 2,
               ),
             ),
             child: ClipOval(
-              child: agent.avatarUrl!.startsWith('http')
-                ? Image.network(
-                    agent.avatarUrl!,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildDefaultIcon(agent),
-                  )
-                : snapshot.hasData
-                    ? Image.file(
+              child:
+                  agent.avatarUrl!.startsWith('http')
+                      ? Image.network(
+                        agent.avatarUrl!,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (context, error, stackTrace) =>
+                                _buildDefaultIcon(agent),
+                      )
+                      : snapshot.hasData
+                      ? Image.file(
                         File(snapshot.data!),
                         width: 40,
                         height: 40,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            _buildDefaultIcon(agent),
+                        errorBuilder:
+                            (context, error, stackTrace) =>
+                                _buildDefaultIcon(agent),
                       )
-                    : _buildDefaultIcon(agent),
+                      : _buildDefaultIcon(agent),
             ),
           );
         },
       );
     }
-    
+
     // 如果有自定义图标，使用自定义图标
     if (agent.icon != null) {
       return Container(
@@ -138,16 +144,14 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: agent.iconColor ?? _getColorForServiceProvider(agent.serviceProviderId),
+          color:
+              agent.iconColor ??
+              _getColorForServiceProvider(agent.serviceProviderId),
         ),
-        child: Icon(
-          agent.icon,
-          size: 20,
-          color: Colors.white,
-        ),
+        child: Icon(agent.icon, size: 20, color: Colors.white),
       );
     }
-    
+
     // 默认图标
     return _buildDefaultIcon(agent);
   }
@@ -161,11 +165,7 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
         shape: BoxShape.circle,
         color: _getColorForServiceProvider(agent.serviceProviderId),
       ),
-      child: const Icon(
-        Icons.smart_toy,
-        size: 20,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.smart_toy, size: 20, color: Colors.white),
     );
   }
 
@@ -191,11 +191,9 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
     final screenHeight = MediaQuery.of(context).size.height;
     // 计算抽屉最大高度为屏幕高度的70%
     final maxDrawerHeight = screenHeight * 0.7;
-    
+
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: maxDrawerHeight,
-      ),
+      constraints: BoxConstraints(maxHeight: maxDrawerHeight),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -209,19 +207,24 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
               children: [
                 const Icon(Icons.smart_toy),
                 const SizedBox(width: 8),
-                Text(widget.title ?? '选择智能体',
-                    style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  widget.title ?? '选择智能体',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ],
             ),
           ),
           const Divider(),
           Flexible(
             child: FutureBuilder<List<AIAgent>>(
-              future: (PluginManager.instance.getPlugin('openai') as OpenAIPlugin).controller.loadAgents(),
+              future:
+                  (PluginManager.instance.getPlugin('openai') as OpenAIPlugin)
+                      .controller
+                      .loadAgents(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   var agents = snapshot.data!;
-                  
+
                   // 应用过滤器（如果有）
                   if (widget.agentFilter != null) {
                     agents = agents.where(widget.agentFilter!).toList();
@@ -232,28 +235,31 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: agents.length,
                     itemBuilder: (context, index) {
-                    final agent = agents[index];
-                    final agentData = {'id': agent.id, 'name': agent.name};
-                    final isSelected = _isAgentSelected(agent.id);
+                      final agent = agents[index];
+                      final agentData = {'id': agent.id, 'name': agent.name};
+                      final isSelected = _isAgentSelected(agent.id);
 
-                    return ListTile(
-                      leading: _buildAgentIcon(agent),
-                      title: Text(agent.name),
-                      subtitle: Text(agent.description),
-                      trailing: isSelected
-                          ? const Icon(
-                              Icons.check_circle,
-                              color: Colors.green,
-                            )
-                          : const Icon(Icons.circle_outlined),
-                      onTap: () => _toggleAgentSelection(agentData),
-                    );
-                  },
+                      return ListTile(
+                        leading: _buildAgentIcon(agent),
+                        title: Text(agent.name),
+                        subtitle: Text(agent.description),
+                        trailing:
+                            isSelected
+                                ? const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                )
+                                : const Icon(Icons.circle_outlined),
+                        onTap: () => _toggleAgentSelection(agentData),
+                      );
+                    },
                   );
                 } else if (snapshot.hasError) {
-                  return const Padding(
+                  return Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: Text('加载智能体列表失败'),
+                    child: Text(
+                      OpenAILocalizations.of(context).errorReadingAgents,
+                    ),
                   );
                 }
                 return const Padding(
@@ -277,9 +283,12 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
                   child: Text(widget.cancelButtonText ?? '取消'),
                 ),
                 ElevatedButton(
-                  onPressed: _selectedAgents.isEmpty ? null : _handleSelectionComplete,
-                  child: Text(widget.confirmButtonText ??
-                      '确认选择 (${_selectedAgents.length})'),
+                  onPressed:
+                      _selectedAgents.isEmpty ? null : _handleSelectionComplete,
+                  child: Text(
+                    widget.confirmButtonText ??
+                        '确认选择 (${_selectedAgents.length})',
+                  ),
                 ),
               ],
             ),

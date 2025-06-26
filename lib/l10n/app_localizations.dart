@@ -481,6 +481,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid backup file: file may be corrupted'**
   String get invalidBackupFile;
+
+  /// No description provided for @dataExportedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Data exported to: {path}'**
+  String dataExportedTo(Object path);
+
+  /// No description provided for @exportFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String exportFailedWithError(Object error);
+
+  /// No description provided for @noPluginDataFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No plugin data found for import'**
+  String get noPluginDataFound;
+
+  /// No description provided for @importFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String importFailedWithError(Object error);
+
+  /// No description provided for @permissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'{permission} permission required'**
+  String permissionRequired(Object permission);
+
+  /// No description provided for @permissionRequiredForApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App requires {permission} permission to work properly. Grant permission?'**
+  String permissionRequiredForApp(Object permission);
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// No description provided for @grantPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant permission'**
+  String get grantPermission;
+
+  /// No description provided for @permissionRequiredInSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'{permission} permission is required to continue. Please grant permission in system settings.'**
+  String permissionRequiredInSettings(Object permission);
+
+  /// No description provided for @storagePermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage permission is required to continue. Please grant permission in system settings.'**
+  String get storagePermissionRequired;
+
+  /// No description provided for @downloadCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Download cancelled'**
+  String get downloadCancelled;
+
+  /// No description provided for @moveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Move successful'**
+  String get moveSuccess;
+
+  /// No description provided for @moveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Move failed: {error}'**
+  String moveFailed(Object error);
+
+  /// No description provided for @renameFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename failed: {error}'**
+  String renameFailed(Object error);
+
+  /// No description provided for @exportSuccessTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Export successful to: {path}'**
+  String exportSuccessTo(Object path);
+
+  /// No description provided for @selectFolderToImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Select folder to import'**
+  String get selectFolderToImport;
+
+  /// No description provided for @selectPluginToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Select plugin to export'**
+  String get selectPluginToExport;
+
+  /// No description provided for @selectImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select image'**
+  String get selectImage;
+
+  /// No description provided for @selectFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Select from gallery'**
+  String get selectFromGallery;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @testForegroundTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Foreground Task'**
+  String get testForegroundTask;
+
+  /// No description provided for @failedToLoadPlugins.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load plugins: {error}'**
+  String failedToLoadPlugins(Object error);
+
+  /// No description provided for @setBackupSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Set backup schedule'**
+  String get setBackupSchedule;
+
+  /// No description provided for @day.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String day(Object day);
+
+  /// No description provided for @selectBackgroundColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Select background color'**
+  String get selectBackgroundColor;
+
+  /// No description provided for @nodeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Node Color'**
+  String get nodeColor;
+
+  /// No description provided for @selectPluginToImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Select plugin to import ({mode})'**
+  String selectPluginToImport(Object mode);
+
+  /// No description provided for @dataSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Data size: {size}'**
+  String dataSize(Object size);
+
+  /// No description provided for @import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get import;
+
+  /// No description provided for @selectLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Select location'**
+  String get selectLocation;
+
+  /// No description provided for @selectGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Select group'**
+  String get selectGroup;
+
+  /// No description provided for @videoLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Video load failed: {error}'**
+  String videoLoadFailed(Object error);
+
+  /// No description provided for @loadingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading video...'**
+  String get loadingVideo;
+
+  /// No description provided for @titleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get titleRequired;
 }
 
 class _AppLocalizationsDelegate

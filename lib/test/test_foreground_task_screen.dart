@@ -1,3 +1,4 @@
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import '../core/services/foreground_task_manager.dart';
@@ -102,7 +103,9 @@ class _TestForegroundTaskScreenState extends State<TestForegroundTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Test Foreground Task')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.testForegroundTask),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

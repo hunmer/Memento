@@ -92,13 +92,13 @@ class ImageService {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('选择图片'),
+            title: Text(AppLocalizations.of(context)!.selectImage),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
                   leading: const Icon(Icons.photo_library),
-                  title: const Text('从相册选择'),
+                  title: Text(AppLocalizations.of(context)!.selectFromGallery),
                   onTap: () async {
                     Navigator.pop(context);
                     imageFile = await pickImageFromGallery();
@@ -107,7 +107,7 @@ class ImageService {
                 if (isMobilePlatform)
                   ListTile(
                     leading: const Icon(Icons.camera_alt),
-                    title: const Text('拍照'),
+                    title: Text(AppLocalizations.of(context)!.takePhoto),
                     onTap: () async {
                       Navigator.pop(context);
                       imageFile = await takePhoto();

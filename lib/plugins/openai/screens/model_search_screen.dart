@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/llm_models.dart';
 import '../controllers/model_controller.dart';
@@ -49,9 +50,13 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('加载模型失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${OpenAILocalizations.of(context).loadModelsFailed}: $e',
+            ),
+          ),
+        );
       }
       setState(() {
         _modelGroups = [];
@@ -95,7 +100,7 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('选择模型'),
+        title: Text(OpenAILocalizations.of(context).searchModel),
         actions: [
           if (_selectedModel != null)
             TextButton(
@@ -148,7 +153,11 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
                     _modelGroups.map((group) {
                       final filteredModels = _getFilteredModels(group.models);
                       return filteredModels.isEmpty
-                          ? const Center(child: Text('没有找到匹配的模型'))
+                          ? Center(
+                            child: Text(
+                              OpenAILocalizations.of(context).noModelsFound,
+                            ),
+                          )
                           : ListView.builder(
                             itemCount: filteredModels.length,
                             itemBuilder: (context, index) {
@@ -192,7 +201,9 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
                                                     '描述: ${model.description}',
                                                   ),
                                                 const SizedBox(height: 8),
-                                                Text('URL: ${model.url}'),
+                                                Text(
+                                                  '${OpenAILocalizations.of(context).modelUrlLabel}: ${model.url}',
+                                                ),
                                               ],
                                             ),
                                             actions: [
@@ -202,7 +213,11 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
                                                         Navigator.of(
                                                           context,
                                                         ).pop(),
-                                                child: const Text('关闭'),
+                                                child: Text(
+                                                  OpenAILocalizations.of(
+                                                    context,
+                                                  ).close,
+                                                ),
                                               ),
                                             ],
                                           ),

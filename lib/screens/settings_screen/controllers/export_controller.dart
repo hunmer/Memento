@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:Memento/core/utils/zip.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
@@ -88,15 +89,23 @@ class ExportController {
       await tempDir.delete(recursive: true);
       if (savePath != null) {
         if (!_mounted) return;
-        ScaffoldMessenger.of(
-          currentContext,
-        ).showSnackBar(SnackBar(content: Text('数据已导出到: $savePath')));
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context!)!.dataExportedTo(savePath),
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (!_mounted) return;
-      ScaffoldMessenger.of(
-        currentContext,
-      ).showSnackBar(SnackBar(content: Text('导出失败: $e')));
+      ScaffoldMessenger.of(currentContext).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context!)!.exportFailedWithError(e.toString()),
+          ),
+        ),
+      );
     }
   }
 }
