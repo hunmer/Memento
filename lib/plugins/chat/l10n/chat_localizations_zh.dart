@@ -327,4 +327,10 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String get rangeHint => '上下文范围';
+
+  @override
+  String get channelGroupLabel => '频道分组';
+
+  @override
+  String get channelGroupHint => '可选，留空则归类为默认分组';
 }

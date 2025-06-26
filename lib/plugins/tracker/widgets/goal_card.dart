@@ -281,7 +281,8 @@ class GoalCard extends StatelessWidget {
                 TextFormField(
                   controller: recordController,
                   decoration: InputDecoration(
-                    labelText: '记录值 (${goal.unitType})',
+                    labelText:
+                        '${TrackerLocalizations.of(context)!.recordValue} (${goal.unitType})',
                     hintText: '请输入要增加的数值',
                   ),
                   keyboardType: TextInputType.number,

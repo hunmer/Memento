@@ -133,6 +133,13 @@ abstract class GoodsLocalizations {
   String get oneMonthUnused;
 
   String get subItemsList;
+
+  String get tagName => 'Tag Name';
+  String get tagNameHint => 'Enter tag name';
+  String get priceHint => 'Enter price';
+  String get stockHint => 'Enter stock quantity';
+  String get warehouseName => 'Warehouse Name';
+  String get warehouseNameHint => 'Enter warehouse name';
 }
 
 class _GoodsLocalizationsDelegate

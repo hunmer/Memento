@@ -118,7 +118,9 @@ class _GoalEditPageState extends State<GoalEditPage> {
             title: Text(TrackerLocalizations.of(context)!.createGroup),
             content: TextField(
               controller: newGroupController,
-              decoration: const InputDecoration(labelText: '分组名称'),
+              decoration: InputDecoration(
+                labelText: TrackerLocalizations.of(context)!.createGroup,
+              ),
               autofocus: true,
             ),
             actions: [
@@ -298,8 +300,8 @@ class _GoalEditPageState extends State<GoalEditPage> {
               children: [
                 Expanded(
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: '分组',
+                    decoration: InputDecoration(
+                      labelText: TrackerLocalizations.of(context)!.selectGroup,
                       border: OutlineInputBorder(),
                     ),
                     child: DropdownButtonHideUnderline(
@@ -343,7 +345,9 @@ class _GoalEditPageState extends State<GoalEditPage> {
             const SizedBox(height: 16),
             TextFormField(
               initialValue: _name,
-              decoration: const InputDecoration(labelText: '目标名称'),
+              decoration: InputDecoration(
+                labelText: TrackerLocalizations.of(context)!.goalName,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return '请输入目标名称';
@@ -355,7 +359,9 @@ class _GoalEditPageState extends State<GoalEditPage> {
             const SizedBox(height: 16),
             TextFormField(
               initialValue: _unitType,
-              decoration: const InputDecoration(labelText: '单位(如: 次、ml、分钟等)'),
+              decoration: InputDecoration(
+                labelText: TrackerLocalizations.of(context)!.unitType,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return '请输入单位';
@@ -367,7 +373,9 @@ class _GoalEditPageState extends State<GoalEditPage> {
             const SizedBox(height: 16),
             TextFormField(
               initialValue: _targetValue.toString(),
-              decoration: const InputDecoration(labelText: '目标值'),
+              decoration: InputDecoration(
+                labelText: TrackerLocalizations.of(context)!.targetValue,
+              ),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -405,7 +413,9 @@ class _GoalEditPageState extends State<GoalEditPage> {
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _dateType,
-              decoration: const InputDecoration(labelText: '时间类型'),
+              decoration: InputDecoration(
+                labelText: TrackerLocalizations.of(context)!.dateSettings,
+              ),
               items:
                   ['none', 'daily', 'weekly', 'monthly', 'custom']
                       .map(

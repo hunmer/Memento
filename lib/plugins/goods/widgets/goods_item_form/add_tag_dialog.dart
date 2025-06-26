@@ -18,9 +18,9 @@ class _AddTagDialogState extends State<AddTagDialog> {
       title: Text(GoodsLocalizations.of(context).addTag),
       content: TextField(
         controller: _controller,
-        decoration: const InputDecoration(
-          labelText: '标签名称',
-          hintText: '输入标签名称',
+        decoration: InputDecoration(
+          labelText: GoodsLocalizations.of(context).tagName,
+          hintText: GoodsLocalizations.of(context).tagNameHint,
         ),
       ),
       actions: [

@@ -96,8 +96,8 @@ class _TimerDialogState extends State<TimerDialog> {
           TextField(
             controller: _notesController,
             maxLines: 5,
-            decoration: const InputDecoration(
-              labelText: 'Notes',
+            decoration: InputDecoration(
+              labelText: HabitsLocalizations.of(context).notes,
               border: OutlineInputBorder(),
             ),
           ),

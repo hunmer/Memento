@@ -29,7 +29,7 @@ class BasicInfoTab extends StatelessWidget {
       children: [
         _buildBasicInfoCard(context),
         const SizedBox(height: 16),
-        _buildPriceStockCard(),
+        _buildPriceStockCard(context),
         const SizedBox(height: 16),
         _buildTagsCard(),
         const SizedBox(height: 16),
@@ -138,7 +138,7 @@ class BasicInfoTab extends StatelessWidget {
     );
   }
 
-  Widget _buildPriceStockCard() {
+  Widget _buildPriceStockCard(context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -147,11 +147,11 @@ class BasicInfoTab extends StatelessWidget {
             Expanded(
               child: TextFormField(
                 controller: controller.priceController,
-                decoration: const InputDecoration(
-                  labelText: '价格',
-                  hintText: '输入价格',
+                decoration: InputDecoration(
+                  labelText: GoodsLocalizations.of(context).price,
+                  hintText: GoodsLocalizations.of(context).priceHint,
                   prefixText: '¥',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -169,10 +169,10 @@ class BasicInfoTab extends StatelessWidget {
             Expanded(
               child: TextFormField(
                 controller: controller.stockController,
-                decoration: const InputDecoration(
-                  labelText: '库存',
-                  hintText: '输入库存',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: GoodsLocalizations.of(context).stock,
+                  hintText: GoodsLocalizations.of(context).stockHint,
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {

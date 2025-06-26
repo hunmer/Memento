@@ -339,17 +339,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingVideo => 'Loading video...';
 
   @override
+  String get pleaseEnterTitle => 'Please Enter Title';
+
+  @override
+  String get selectPluginsToImport => 'Select Plugins To Import';
+
+  @override
+  String get mergeMode => 'Merge Mode';
+
+  @override
+  String get overwriteMode => 'Overwrite Mode';
+
+  @override
   String get titleRequired => 'Title is required';
-
-  @override
-  get mergeMode => 'Merge mode';
-
-  @override
-  get overwriteMode => 'Overwrite mode';
-
-  @override
-  String get pleaseEnterTitle => 'Please enter title';
-
-  @override
-  get selectPluginsToImport => 'Select plugins to import';
 }

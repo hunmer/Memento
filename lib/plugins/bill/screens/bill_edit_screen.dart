@@ -216,13 +216,13 @@ class _BillEditScreenState extends State<BillEditScreen> {
   Widget _buildTitleField() {
     return TextFormField(
       controller: _titleController,
-      decoration: const InputDecoration(
-        labelText: '标题',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: BillLocalizations.of(context).title,
+        border: const OutlineInputBorder(),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return '请输入标题';
+          return BillLocalizations.of(context).enterTitle;
         }
         return null;
       },
@@ -232,10 +232,10 @@ class _BillEditScreenState extends State<BillEditScreen> {
   Widget _buildAmountField() {
     return TextFormField(
       controller: _amountController,
-      decoration: const InputDecoration(
-        labelText: '金额',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.currency_yuan),
+      decoration: InputDecoration(
+        labelText: BillLocalizations.of(context).amount,
+        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(Icons.currency_yuan),
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [
@@ -243,10 +243,10 @@ class _BillEditScreenState extends State<BillEditScreen> {
       ],
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return '请输入金额';
+          return BillLocalizations.of(context).enterAmount;
         }
         if (double.tryParse(value) == null) {
-          return '请输入有效的金额';
+          return BillLocalizations.of(context).enterValidAmount;
         }
         return null;
       },
@@ -256,9 +256,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
   Widget _buildTagSelector() {
     return DropdownButtonFormField<String>(
       value: _tag,
-      decoration: const InputDecoration(
-        labelText: '分类',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: BillLocalizations.of(context).category,
+        border: const OutlineInputBorder(),
       ),
       items:
           _availableTags.map((String tag) {
@@ -287,10 +287,10 @@ class _BillEditScreenState extends State<BillEditScreen> {
         }
       },
       child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: '时间',
-          border: OutlineInputBorder(),
-          prefixIcon: Icon(Icons.calendar_today),
+        decoration: InputDecoration(
+          labelText: BillLocalizations.of(context).time,
+          border: const OutlineInputBorder(),
+          prefixIcon: const Icon(Icons.calendar_today),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -339,9 +339,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
   Widget _buildNoteField() {
     return TextFormField(
       controller: _noteController,
-      decoration: const InputDecoration(
-        labelText: '备注',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: BillLocalizations.of(context).note,
+        border: const OutlineInputBorder(),
       ),
       maxLines: 3,
     );

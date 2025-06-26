@@ -174,7 +174,29 @@ abstract class OpenAILocalizations {
 
   String get modelManagementDescription;
 
-  get modelUrlLabel => null;
+  get modelUrlLabel;
+
+  String get addProvider;
+
+  String get editProvider;
+
+  get saveTooltip;
+
+  get providerLabelError;
+
+  get baseUrlError;
+
+  get headerKey;
+
+  get headerValue;
+
+  get addHeader;
+
+  String get noHeaders;
+
+  get editHeader;
+
+  get deleteHeader;
 }
 
 /// 中文实现
@@ -574,7 +596,38 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
 
   @override
   String get modelManagementDescription => '管理大语言模型列表';
+  @override
   String get modelUrlLabel => 'URL';
+
+  // Provider Edit Screen
+  @override
+  String get addProvider => '添加服务商';
+  @override
+  String get editProvider => '编辑服务商';
+  @override
+  String get saveProvider => '保存服务商';
+  @override
+  String get providerLabel => '服务商名称';
+  @override
+  String get providerLabelHint => '请输入服务商名称';
+  @override
+  String get providerLabelError => '请输入服务商名称';
+  @override
+  String get baseUrlError => 'URL必须以http://或https://开头';
+  @override
+  String get headerKey => 'Key';
+  @override
+  String get headerValue => 'Value';
+  @override
+  String get addHeader => '添加Header';
+  @override
+  String get noHeaders => '没有Headers';
+  @override
+  String get editHeader => '编辑';
+  @override
+  String get deleteHeader => '删除';
+  @override
+  String get saveTooltip => '保存';
 }
 
 /// 英文实现
@@ -978,7 +1031,38 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
 
   @override
   String get modelManagementDescription => 'Manage large language models';
+  @override
   String get modelUrlLabel => 'URL';
+
+  // Provider Edit Screen
+  @override
+  String get addProvider => 'Add Provider';
+  @override
+  String get editProvider => 'Edit Provider';
+  @override
+  String get saveProvider => 'Save Provider';
+  @override
+  String get providerLabel => 'Provider Name';
+  @override
+  String get providerLabelHint => 'Enter provider name';
+  @override
+  String get providerLabelError => 'Please enter provider name';
+  @override
+  String get baseUrlError => 'URL must start with http:// or https://';
+  @override
+  String get headerKey => 'Key';
+  @override
+  String get headerValue => 'Value';
+  @override
+  String get addHeader => 'Add Header';
+  @override
+  String get noHeaders => 'No Headers';
+  @override
+  String get editHeader => 'Edit';
+  @override
+  String get deleteHeader => 'Delete';
+  @override
+  String get saveTooltip => 'Save';
 }
 
 /// 本地化代理

@@ -113,9 +113,9 @@ class _ProfileEditDialogState extends State<ProfileEditDialog>
             // 用户名输入框
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: '用户名',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: ChatLocalizations.of(context).username,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 24),

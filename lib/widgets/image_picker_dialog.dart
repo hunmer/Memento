@@ -78,9 +78,9 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
           // 在线URL输入
           TextField(
             controller: _urlController,
-            decoration: const InputDecoration(
-              labelText: '图片URL',
-              hintText: '输入在线图片地址',
+            decoration: InputDecoration(
+              labelText: ImagePickerLocalizations.of(context)!.selectImage,
+              hintText: ImagePickerLocalizations.of(context)!.chooseFromGallery,
               prefixIcon: Icon(Icons.link),
             ),
             onChanged: _validateUrl,

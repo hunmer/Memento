@@ -266,17 +266,17 @@ class _EventEditPageState extends State<EventEditPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: '事件标题',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: CalendarLocalizations.of(context)!.eventTitle,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: '事件描述',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: CalendarLocalizations.of(context)!.eventDescription,
+                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
             ),

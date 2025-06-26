@@ -1,4 +1,5 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/widgets/l10n/location_picker_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -127,7 +128,9 @@ class _LocationPickerState extends State<LocationPicker> {
             for (var poi in regeocode['pois']) {
               pois.add({
                 'name': poi['name'],
-                'address': poi['address'] ?? '无地址信息',
+                'address':
+                    poi['address'] ??
+                    LocationPickerLocalizations.of(context)!.noAddressInfo,
                 'location': poi['location'],
                 'isCurrent': false,
               });
@@ -171,7 +174,9 @@ class _LocationPickerState extends State<LocationPicker> {
                 (data['pois'] as List).map((poi) {
                   return {
                     'name': poi['name'],
-                    'address': poi['address'] ?? '无地址信息',
+                    'address':
+                        poi['address'] ??
+                        LocationPickerLocalizations.of(context)!.noAddressInfo,
                     'location': poi['location'],
                     'isCurrent': false,
                   };
@@ -204,7 +209,10 @@ class _LocationPickerState extends State<LocationPicker> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      labelText: '搜索位置',
+                      labelText:
+                          LocationPickerLocalizations.of(
+                            context,
+                          )!.searchLocation,
                       suffixIcon: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -216,7 +224,10 @@ class _LocationPickerState extends State<LocationPicker> {
                           IconButton(
                             icon: const Icon(Icons.my_location),
                             onPressed: _getCurrentLocation,
-                            tooltip: '获取当前位置',
+                            tooltip:
+                                LocationPickerLocalizations.of(
+                                  context,
+                                )!.getCurrentLocation,
                           ),
                         ],
                       ),

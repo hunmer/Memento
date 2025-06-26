@@ -56,12 +56,20 @@ abstract class TodoLocalizations {
   String get totalTasksCount; // 总任务数
   String get weeklyTasksCount; // 七日任务数
   String get completedOn; // 完成于
+  String get searchIn;
 
   static const LocalizationsDelegate<TodoLocalizations> delegate =
       _TodoLocalizationsDelegate();
 
-  static TodoLocalizations? of(BuildContext context) {
-    return Localizations.of<TodoLocalizations>(context, TodoLocalizations);
+  static TodoLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<TodoLocalizations>(
+      context,
+      TodoLocalizations,
+    );
+    if (localizations == null) {
+      throw FlutterError('No TodoLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [

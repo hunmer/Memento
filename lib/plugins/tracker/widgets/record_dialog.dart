@@ -60,7 +60,9 @@ class _RecordDialogState extends State<RecordDialog> {
                       ),
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: '增加值 (${widget.goal.unitType})',
+                        labelText: TrackerLocalizations.of(context)!
+                            .incrementValueWithUnit
+                            .replaceFirst('\${unit}', widget.goal.unitType),
                         border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
@@ -87,9 +89,10 @@ class _RecordDialogState extends State<RecordDialog> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                decoration: const InputDecoration(
-                  labelText: '备注 (可选)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText:
+                      '${TrackerLocalizations.of(context)!.note} (${TrackerLocalizations.of(context)!.noteHint})',
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 2,
                 onSaved: (value) => _note = value,
@@ -151,7 +154,9 @@ class _RecordDialogState extends State<RecordDialog> {
           content: TextFormField(
             controller: textController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: '输入目标值'),
+            decoration: InputDecoration(
+              labelText: TrackerLocalizations.of(context)!.inputTargetValue,
+            ),
           ),
           actions: [
             TextButton(

@@ -182,25 +182,36 @@ class _SkillFormState extends State<SkillForm> {
           const SizedBox(height: 24),
           TextField(
             controller: _titleController,
-            decoration: InputDecoration(labelText: l10n.title),
+            decoration: InputDecoration(
+              labelText: HabitsLocalizations.of(context).skillName,
+              border: const OutlineInputBorder(),
+            ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _notesController,
-            decoration: InputDecoration(labelText: l10n.notes),
+            decoration: InputDecoration(
+              labelText: HabitsLocalizations.of(context).skillDescription,
+              border: const OutlineInputBorder(),
+            ),
             maxLines: 3,
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _groupController,
-            decoration: InputDecoration(labelText: l10n.group),
+            decoration: InputDecoration(
+              labelText: HabitsLocalizations.of(context).skillGroup,
+              border: const OutlineInputBorder(),
+            ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _maxDurationController,
             decoration: InputDecoration(
-              labelText: '${l10n.maxDuration} (${l10n.minutes})',
-              hintText: '0 for no limit',
+              labelText:
+                  '${HabitsLocalizations.of(context).maxDuration} (${HabitsLocalizations.of(context).minutes})',
+              hintText: HabitsLocalizations.of(context).noLimitHint,
+              border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
           ),

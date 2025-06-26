@@ -191,4 +191,8 @@ class BillLocalizationsZh extends BillLocalizations {
 
   @override
   String get timeRange => '时间范围';
+
+  @override
+  // TODO: implement accountName
+  String get accountName => throw UnimplementedError();
 }

@@ -125,7 +125,7 @@ class HabitsPlugin extends PluginBase {
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                HabitsLocalizations.of(context).pluginName,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

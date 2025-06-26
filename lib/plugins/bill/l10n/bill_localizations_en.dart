@@ -196,4 +196,8 @@ class BillLocalizationsEn extends BillLocalizations {
 
   @override
   String get timeRange => 'Time Range';
+
+  @override
+  // TODO: implement accountName
+  String get accountName => throw UnimplementedError();
 }

@@ -89,7 +89,16 @@ abstract class TrackerLocalizations {
   String get thisMonthNew;
   String get quickRecord; // 快速记录
   String get createGroup; // 新建分组
-  String get timer; // 计时
+  String get timer;
+  get selectGroup;
+
+  get incrementValueWithUnit;
+
+  get inputTargetValue;
+
+  get recordValueWithUnit;
+
+  String get pluginName;
 }
 
 class _TrackerLocalizationsDelegate

@@ -95,13 +95,13 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               // 计时器名称
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: '计时器名称',
+                decoration: InputDecoration(
+                  labelText: TimerLocalizations.of(context).timerName,
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入计时器名称';
+                    return '请输入${TimerLocalizations.of(context).timerName}';
                   }
                   return null;
                 },
@@ -111,8 +111,8 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               // 计时器名称
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: '计时器描述',
+                decoration: InputDecoration(
+                  labelText: TimerLocalizations.of(context).timerDescription,
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 2,
@@ -122,8 +122,8 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               // 计时器类型选择
               DropdownButtonFormField<TimerType>(
                 value: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: '计时器类型',
+                decoration: InputDecoration(
+                  labelText: TimerLocalizations.of(context).timerType,
                   border: OutlineInputBorder(),
                 ),
                 items: [
@@ -150,8 +150,8 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               // 重复次数设置
               TextFormField(
                 initialValue: _repeatCount.toString(),
-                decoration: const InputDecoration(
-                  labelText: '重复次数',
+                decoration: InputDecoration(
+                  labelText: TimerLocalizations.of(context).repeatCount,
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
@@ -180,8 +180,8 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                     Expanded(
                       child: TextFormField(
                         initialValue: _hours.toString(),
-                        decoration: const InputDecoration(
-                          labelText: '小时',
+                        decoration: InputDecoration(
+                          labelText: TimerLocalizations.of(context).hours,
                           border: OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
@@ -192,8 +192,8 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                     Expanded(
                       child: TextFormField(
                         initialValue: _minutes.toString(),
-                        decoration: const InputDecoration(
-                          labelText: '分钟',
+                        decoration: InputDecoration(
+                          labelText: TimerLocalizations.of(context).minutes,
                           border: OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
@@ -205,8 +205,8 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                     Expanded(
                       child: TextFormField(
                         initialValue: _seconds.toString(),
-                        decoration: const InputDecoration(
-                          labelText: '秒',
+                        decoration: InputDecoration(
+                          labelText: TimerLocalizations.of(context).seconds,
                           border: OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
@@ -220,8 +220,8 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                 // 番茄钟设置
                 TextFormField(
                   initialValue: _workMinutes.toString(),
-                  decoration: const InputDecoration(
-                    labelText: '工作时长（分钟）',
+                  decoration: InputDecoration(
+                    labelText: TimerLocalizations.of(context).workDuration,
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
@@ -231,8 +231,8 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                 const SizedBox(height: 8),
                 TextFormField(
                   initialValue: _breakMinutes.toString(),
-                  decoration: const InputDecoration(
-                    labelText: '休息时长（分钟）',
+                  decoration: InputDecoration(
+                    labelText: TimerLocalizations.of(context).breakDuration,
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
@@ -242,8 +242,8 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                 const SizedBox(height: 8),
                 TextFormField(
                   initialValue: _cycles.toString(),
-                  decoration: const InputDecoration(
-                    labelText: '循环次数',
+                  decoration: InputDecoration(
+                    labelText: TimerLocalizations.of(context).cycleCount,
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,

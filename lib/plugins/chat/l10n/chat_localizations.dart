@@ -177,6 +177,13 @@ abstract class ChatLocalizations {
   String get rangeHint;
 
   String get metadataFilters;
+
+  String get channelName => 'Channel Name';
+  String get tag => 'Tag';
+  String get tagHint => 'Add tags to categorize messages';
+  String get username => 'Username';
+  String get channelGroupLabel => 'Channel Group';
+  String get channelGroupHint => 'Optional, leave empty for default group';
 }
 
 class _ChatLocalizationsDelegate
