@@ -31,6 +31,9 @@ class DatabasePlugin extends BasePlugin {
   @override
   IconData get icon => Icons.storage;
 
+  @override
+  Color get color => Colors.cyanAccent;
+
   static DatabasePlugin? _instance;
   static DatabasePlugin get instance {
     if (_instance == null) {
@@ -91,10 +94,10 @@ class DatabasePlugin extends BasePlugin {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.blue.withAlpha(30),
+                      color: color.withAlpha(30),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(icon, size: 24, color: Colors.blue),
+                    child: Icon(icon, size: 24, color: color),
                   ),
                   const SizedBox(width: 12),
                   Text(

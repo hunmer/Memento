@@ -9,7 +9,7 @@ import 'package:Memento/screens/settings_screen/settings_screen.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
-import 'package:Memento/plugins/calendar_album/calendar_album.dart';
+import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/database/database_plugin.dart';

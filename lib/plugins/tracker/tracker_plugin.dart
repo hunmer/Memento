@@ -58,7 +58,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
   String get id => 'tracker';
 
   @override
-  String get name => '目标跟踪';
+  Color get color => Colors.red;
 
   @override
   IconData get icon => Icons.track_changes;
@@ -120,7 +120,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color?.withAlpha(30),
+                  color: color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, size: 24, color: color),

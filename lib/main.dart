@@ -27,6 +27,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:Memento/core/theme_controller.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/diary/l10n/diary_localizations.dart';
 import 'plugins/day/l10n/day_localizations.dart';
@@ -34,7 +36,7 @@ import 'plugins/checkin/l10n/checkin_localizations.dart';
 import 'plugins/activity/l10n/activity_localizations.dart';
 import 'plugins/openai/l10n/openai_localizations.dart';
 import 'plugins/notes/l10n/notes_localizations.dart';
-import 'plugins/calendar_album/calendar_album.dart';
+import 'plugins/calendar_album/calendar_album_plugin.dart';
 import 'plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
@@ -66,6 +68,7 @@ late final StorageManager globalStorage;
 late final ConfigManager globalConfigManager;
 late final PluginManager globalPluginManager;
 late final AppShortcutManager globalShortcutManager;
+AdaptiveThemeMode? _savedThemeMode;
 LoggerUtil? logger;
 late PermissionController _permissionController;
 
@@ -81,6 +84,8 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  _savedThemeMode = await AdaptiveTheme.getThemeMode();
 
   try {
     // 创建并初始化存储管理器（内部会处理Web平台的情况）
@@ -176,8 +181,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // 延迟执行以确保context可用
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _setupAutoUpdate();
     });
   }
@@ -201,71 +205,72 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      scaffoldMessengerKey: scaffoldMessengerKey,
-      navigatorKey: navigatorKey,
-      title: 'Memento',
-      debugShowCheckedModeBanner: false, // 关闭调试横幅
-      localizationsDelegates: [
-        AppLocalizations.delegate,
-        DiaryLocalizations.delegate,
-        StoreLocalizations.delegate,
-        CheckinLocalizations.delegate,
-        DatabaseLocalizations.delegate,
-        ActivityLocalizations.delegate,
-        TimerLocalizations.delegate,
-        ChatLocalizations.delegate,
-        ContactLocalizations.delegate,
-        TrackerLocalizations.delegate,
-        HabitsLocalizations.delegate,
-        SettingsScreenLocalizations.delegate,
-        DataManagementLocalizations.delegate,
-        LogSettingsLocalizationsDelegate(),
-        CalendarLocalizations.delegate,
-        GroupSelectorLocalizations.delegate,
-        BillLocalizations.delegate,
-        DayLocalizationsDelegate.delegate,
-        OpenAILocalizationsDelegate.delegate,
-        NotesLocalizations.delegate,
-        TodoLocalizations.delegate,
-        CalendarAlbumLocalizations.delegate,
-        FloatingBallLocalizations.delegate,
-        GoodsLocalizations.delegate,
-        NodesLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        WebDAVLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('zh', ''), // 中文
-        Locale('en', ''), // 英文
-      ],
-      locale:
-          globalConfigManager.getLocale() ??
-          WidgetsBinding.instance.window.locale,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-        cardTheme: const CardThemeData(
-          elevation: 4,
-          margin: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-        ),
-      ),
-      builder: (context, child) {
-        // 确保字体大小不受系统设置影响
-        return MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: const TextScaler.linear(1.0)),
-          child: child!,
-        );
-      },
-      initialRoute: AppRoutes.initialRoute,
-      routes: AppRoutes.routes,
-      onGenerateRoute: AppRoutes.generateRoute,
-      onGenerateTitle:
-          (BuildContext context) => AppLocalizations.of(context)!.appTitle,
+    return AdaptiveTheme(
+      light: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      dark: ThemeData.dark(useMaterial3: true),
+      initial: _savedThemeMode ?? AdaptiveThemeMode.light,
+      builder:
+          (theme, darkTheme) => MaterialApp(
+            scaffoldMessengerKey: scaffoldMessengerKey,
+            navigatorKey: navigatorKey,
+            title: 'Memento',
+            debugShowCheckedModeBanner: false, // 关闭调试横幅
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              DiaryLocalizations.delegate,
+              StoreLocalizations.delegate,
+              CheckinLocalizations.delegate,
+              DatabaseLocalizations.delegate,
+              ActivityLocalizations.delegate,
+              TimerLocalizations.delegate,
+              ChatLocalizations.delegate,
+              ContactLocalizations.delegate,
+              TrackerLocalizations.delegate,
+              HabitsLocalizations.delegate,
+              SettingsScreenLocalizations.delegate,
+              DataManagementLocalizations.delegate,
+              LogSettingsLocalizationsDelegate(),
+              CalendarLocalizations.delegate,
+              GroupSelectorLocalizations.delegate,
+              BillLocalizations.delegate,
+              DayLocalizationsDelegate.delegate,
+              OpenAILocalizationsDelegate.delegate,
+              NotesLocalizations.delegate,
+              TodoLocalizations.delegate,
+              CalendarAlbumLocalizations.delegate,
+              FloatingBallLocalizations.delegate,
+              GoodsLocalizations.delegate,
+              NodesLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              WebDAVLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('zh', ''), // 中文
+              Locale('en', ''), // 英文
+            ],
+            locale:
+                globalConfigManager.getLocale() ??
+                WidgetsBinding.instance.window.locale,
+            theme: theme,
+            darkTheme: darkTheme,
+            builder: (context, child) {
+              // 确保字体大小不受系统设置影响
+              return MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(1.0)),
+                child: child!,
+              );
+            },
+            initialRoute: AppRoutes.initialRoute,
+            routes: AppRoutes.routes,
+            onGenerateRoute: AppRoutes.generateRoute,
+            onGenerateTitle:
+                (BuildContext context) =>
+                    AppLocalizations.of(context)!.appTitle,
+          ),
     );
   }
 }

@@ -37,9 +37,6 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   String get id => 'bill';
 
   @override
-  String get name => '账单';
-
-  @override
   IconData get icon => Icons.account_balance_wallet;
 
   @override

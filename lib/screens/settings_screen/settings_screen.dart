@@ -1,4 +1,5 @@
 import 'package:Memento/core/services/backup_service.dart';
+import 'package:Memento/core/theme_controller.dart';
 import 'package:Memento/screens/settings_screen/log_settings_screen.dart';
 import 'package:flutter/material.dart';
 import './controllers/settings_screen_controller.dart';
@@ -40,9 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 在这里初始化控制器和主题，这是安全的，因为此时 BuildContext 已经准备好了
     _controller.initializeControllers(context);
-    _controller.initTheme(context);
     _backupService = BackupService(_controller, context);
   }
 
@@ -111,8 +110,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SettingsScreenLocalizations.of(context).darkModeSubtitle,
             ),
             trailing: Switch(
-              value: _controller.isDarkMode,
-              onChanged: (value) => _controller.toggleTheme(),
+              value: ThemeController.isDarkTheme(context),
+              onChanged: (value) => _controller.toggleTheme(context),
             ),
           ),
           const Divider(),

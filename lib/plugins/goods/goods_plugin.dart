@@ -155,7 +155,7 @@ class GoodsPlugin extends BasePlugin {
   String get id => 'goods';
 
   @override
-  String get name => '物品管理';
+  Color get color => const Color.fromARGB(255, 207, 77, 116);
 
   @override
   IconData get icon => Icons.inventory_2;
@@ -453,10 +453,10 @@ class GoodsPlugin extends BasePlugin {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withAlpha(30),
+                  color: color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 24, color: color ?? theme.primaryColor),
+                child: Icon(icon, size: 24, color: color),
               ),
               const SizedBox(width: 12),
               Text(

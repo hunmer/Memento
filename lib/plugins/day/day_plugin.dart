@@ -42,6 +42,9 @@ class DayPlugin extends BasePlugin {
   final String id = 'day';
 
   @override
+  Color get color => Colors.tealAccent;
+
+  @override
   IconData get icon => Icons.event_outlined;
 
   @override
@@ -110,14 +113,15 @@ class DayPlugin extends BasePlugin {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withAlpha(30),
+                  color: color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 24, color: theme.primaryColor),
+                child: Icon(icon, size: 24, color: color),
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                DayLocalizations.of(context).name,
+
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

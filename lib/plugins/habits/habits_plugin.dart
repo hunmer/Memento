@@ -58,6 +58,9 @@ class HabitsPlugin extends PluginBase {
   IconData get icon => Icons.auto_awesome;
 
   @override
+  Color get color => Colors.amber;
+
+  @override
   Widget buildMainView(BuildContext context) {
     return HabitsMainView();
   }
@@ -119,10 +122,10 @@ class HabitsPlugin extends PluginBase {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withAlpha(30),
+                  color: color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 24, color: theme.colorScheme.primary),
+                child: Icon(icon, size: 24, color: color),
               ),
               const SizedBox(width: 12),
               Text(

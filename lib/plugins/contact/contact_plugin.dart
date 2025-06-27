@@ -18,7 +18,7 @@ class ContactPlugin extends BasePlugin {
   String get id => 'contact';
 
   @override
-  String get name => 'Contact';
+  Color get color => Colors.deepPurple;
 
   @override
   IconData get icon => Icons.contacts;
@@ -70,14 +70,14 @@ class ContactPlugin extends BasePlugin {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.blue.withAlpha(30),
+                      color: color.withAlpha(30),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(icon, size: 24, color: Colors.blue),
+                    child: Icon(icon, size: 24, color: color),
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    ContactLocalizations.of(context).username,
+                    ContactLocalizations.of(context).name,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

@@ -38,14 +38,10 @@ class UIService {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withAlpha(30),
+                  color: _plugin.color?.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  _plugin.icon,
-                  size: 24,
-                  color: _plugin.color ?? theme.primaryColor,
-                ),
+                child: Icon(_plugin.icon, size: 24, color: _plugin.color),
               ),
               const SizedBox(width: 12),
               Text(

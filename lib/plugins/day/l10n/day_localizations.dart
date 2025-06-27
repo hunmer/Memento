@@ -19,6 +19,7 @@ abstract class DayLocalizations {
   String get deleteMemorialDay;
   String get deleteConfirmation;
   String get title;
+  String get name;
   String get targetDate;
   String get notes;
   String get addNote;
@@ -55,6 +56,9 @@ abstract class DayLocalizations {
 class DayLocalizationsZh implements DayLocalizations {
   @override
   String get memorialDays => '纪念日';
+
+  @override
+  String get name => '纪念日';
 
   @override
   String get addMemorialDay => '添加纪念日';
@@ -160,6 +164,9 @@ class DayLocalizationsZh implements DayLocalizations {
 
 /// 英文实现
 class DayLocalizationsEn implements DayLocalizations {
+  @override
+  String get name => 'Days';
+
   @override
   String get memorialDays => 'Memorial Days';
 

@@ -42,7 +42,7 @@ class ActivityPlugin extends BasePlugin {
   final String id = 'activity';
 
   @override
-  String get name => 'Activity';
+  Color get color => Colors.pink;
 
   @override
   IconData get icon => Icons.timeline;
@@ -113,14 +113,14 @@ class ActivityPlugin extends BasePlugin {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withAlpha(30),
+                  color: color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 24, color: theme.primaryColor),
+                child: Icon(icon, size: 24, color: color),
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                ActivityLocalizations.of(context).name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
