@@ -29,7 +29,7 @@ class DatabasePlugin extends BasePlugin {
   String get id => 'database';
 
   @override
-  String get name => 'Database';
+  IconData get icon => Icons.storage;
 
   static DatabasePlugin? _instance;
   static DatabasePlugin get instance {
@@ -94,7 +94,7 @@ class DatabasePlugin extends BasePlugin {
                       color: Colors.blue.withAlpha(30),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(Icons.storage, size: 24, color: Colors.blue),
+                    child: Icon(icon, size: 24, color: Colors.blue),
                   ),
                   const SizedBox(width: 12),
                   Text(

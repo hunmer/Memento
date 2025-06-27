@@ -149,13 +149,13 @@ class BillLocalizationsEn extends BillLocalizations {
   String get noBills => 'No bills';
 
   @override
-  String get todayFinance => 'Today\'s Finance';
+  String get todayFinance => 'Today';
 
   @override
-  String get monthFinance => 'Monthly Finance';
+  String get monthFinance => 'Monthly';
 
   @override
-  String get monthBills => 'Monthly Bills';
+  String get monthBills => 'Monthly';
 
   @override
   String get accountTitle => 'Account';

@@ -55,9 +55,6 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
   String get id => 'chat';
 
   @override
-  String get name => 'Chat';
-
-  @override
   IconData get icon => Icons.chat_bubble;
 
   @override

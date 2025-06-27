@@ -136,10 +136,10 @@ class TodoLocalizationsEn extends TodoLocalizations {
   String get add => 'Add';
 
   @override
-  String get totalTasksCount => 'Total Tasks Count';
+  String get totalTasksCount => 'Total';
 
   @override
-  String get weeklyTasksCount => 'Weekly Tasks Count';
+  String get weeklyTasksCount => 'Weekly';
 
   @override
   String get completedOn => 'Completed on';

@@ -12,13 +12,13 @@ class CalendarLocalizationsEn extends CalendarLocalizations {
   String get calendar => 'Calendar';
 
   @override
-  String get eventCount => 'Total events';
+  String get eventCount => 'Total';
 
   @override
-  String get weekEvents => 'Events in 7 days';
+  String get weekEvents => '7 days';
 
   @override
-  String get expiredEvents => 'Expired events';
+  String get expiredEvents => 'Expired';
 
   @override
   String get allEvents => 'All events';

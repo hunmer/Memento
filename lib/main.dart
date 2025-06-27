@@ -241,7 +241,9 @@ class _MyAppState extends State<MyApp> {
         Locale('zh', ''), // 中文
         Locale('en', ''), // 英文
       ],
-      locale: globalConfigManager.getLocale() ?? const Locale('zh', ''),
+      locale:
+          globalConfigManager.getLocale() ??
+          WidgetsBinding.instance.window.locale,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,

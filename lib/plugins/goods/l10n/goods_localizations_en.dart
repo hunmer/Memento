@@ -253,13 +253,13 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
       "Are you sure you want to delete this item?";
 
   @override
-  String get totalQuantity => "Total Quantity";
+  String get totalQuantity => "Total";
 
   @override
-  String get totalValue => "Total Value";
+  String get totalValue => "Value";
 
   @override
-  String get oneMonthUnused => "Unused for one month";
+  String get oneMonthUnused => "Unused";
 
   @override
   String get subItemsList => "Sub Items List";

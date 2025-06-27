@@ -4,10 +4,7 @@ import '../../../models/checkin_item.dart';
 class CheckinStreakRanking extends StatelessWidget {
   final List<CheckinItem> checkinItems;
 
-  const CheckinStreakRanking({
-    super.key,
-    required this.checkinItems,
-  });
+  const CheckinStreakRanking({super.key, required this.checkinItems});
 
   @override
   Widget build(BuildContext context) {
@@ -18,43 +15,41 @@ class CheckinStreakRanking extends StatelessWidget {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text(
-            '暂无打卡记录',
-            style: theme.textTheme.bodyMedium,
-          ),
+          child: Text('', style: theme.textTheme.bodyMedium),
         ),
       );
     }
 
     return Column(
-      children: rankedItems.asMap().entries.map((entry) {
-        final index = entry.key;
-        final item = entry.value;
-        final rank = index + 1;
-        final streakDays = item.streak;
+      children:
+          rankedItems.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final rank = index + 1;
+            final streakDays = item.streak;
 
-        return ListTile(
-          leading: _buildRankBadge(rank, theme),
-          title: Text(item.name),
-          subtitle: Text(item.group),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.local_fire_department,
-                color: theme.colorScheme.error,
+            return ListTile(
+              leading: _buildRankBadge(rank, theme),
+              title: Text(item.name),
+              subtitle: Text(item.group),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.local_fire_department,
+                    color: theme.colorScheme.error,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$streakDays天',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 4),
-              Text(
-                '$streakDays天',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 
@@ -90,17 +85,15 @@ class CheckinStreakRanking extends StatelessWidget {
     for (var item in checkinItems) {
       final streakDays = _calculateConsecutiveStreak(item);
       if (streakDays > 0) {
-        result.add(_RankedItem(
-          name: item.name,
-          group: item.group,
-          streak: streakDays,
-        ));
+        result.add(
+          _RankedItem(name: item.name, group: item.group, streak: streakDays),
+        );
       }
     }
 
     // 按连续打卡天数排序
     result.sort((a, b) => b.streak.compareTo(a.streak));
-    
+
     // 只返回前10名
     return result.take(10).toList();
   }
@@ -120,7 +113,7 @@ class CheckinStreakRanking extends StatelessWidget {
 
     // 检查最新记录是否是今天或昨天
     final latestDate = _parseDate(sortedDates.first);
-    
+
     // 如果最新记录不是今天或昨天，则不计算连续打卡
     final dayDifference = todayWithoutTime.difference(latestDate).inDays;
     if (dayDifference > 1) {
@@ -142,6 +135,7 @@ class CheckinStreakRanking extends StatelessWidget {
 
     return streak;
   }
+
   // 解析日期字符串为DateTime对象
   DateTime _parseDate(String dateStr) {
     final parts = dateStr.split('-');
@@ -161,9 +155,5 @@ class _RankedItem {
   final String group;
   final int streak;
 
-  _RankedItem({
-    required this.name,
-    required this.group,
-    required this.streak,
-  });
+  _RankedItem({required this.name, required this.group, required this.streak});
 }

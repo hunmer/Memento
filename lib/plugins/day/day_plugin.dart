@@ -42,9 +42,6 @@ class DayPlugin extends BasePlugin {
   final String id = 'day';
 
   @override
-  final String name = 'Day';
-
-  @override
   IconData get icon => Icons.event_outlined;
 
   @override
@@ -157,7 +154,7 @@ class DayPlugin extends BasePlugin {
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(
-                    upcomingDays.isNotEmpty ? upcomingDays.join('，') : '无',
+                    upcomingDays.isNotEmpty ? upcomingDays.join('，') : '',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

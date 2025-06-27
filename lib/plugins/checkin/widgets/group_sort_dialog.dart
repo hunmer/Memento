@@ -39,7 +39,7 @@ class _GroupSortDialogState extends State<GroupSortDialog> {
         children: [
           ...GroupSortType.values.map(
             (type) => RadioListTile<GroupSortType>(
-              title: Text(GroupSortService.getSortTypeName(type)),
+              title: Text(GroupSortService.getSortTypeName(type, context)),
               value: type,
               groupValue: _selectedSortType,
               onChanged: (value) {

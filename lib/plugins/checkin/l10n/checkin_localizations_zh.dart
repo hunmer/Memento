@@ -223,4 +223,19 @@ class CheckinLocalizationsZh extends CheckinLocalizations {
   String get checkinRankingTitle => '连续打卡排行榜';
   @override
   String get checkinGroupPieTitle => '打卡分组占比';
+
+  @override
+  get checkinList => '列表';
+
+  @override
+  get checkinStats => '统计';
+
+  @override
+  String get dateAdded => '按添加日期排序';
+
+  @override
+  String get frequency => '按打卡频率排序';
+
+  @override
+  String get upcoming => '按即将发生排序';
 }

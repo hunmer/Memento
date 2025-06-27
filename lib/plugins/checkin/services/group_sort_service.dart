@@ -1,21 +1,24 @@
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
+
 import '../models/checkin_item.dart';
 
 enum GroupSortType {
-  upcoming,     // 按即将发生排序
-  frequency,    // 按打卡频率排序
-  dateAdded,    // 按添加日期排序
+  upcoming, // 按即将发生排序
+  frequency, // 按打卡频率排序
+  dateAdded, // 按添加日期排序
 }
 
 class GroupSortService {
   // 获取排序方式的显示名称
-  static String getSortTypeName(GroupSortType type) {
+  static String getSortTypeName(GroupSortType type, context) {
     switch (type) {
       case GroupSortType.upcoming:
-        return '按即将发生排序';
+        return CheckinLocalizations.of(context).upcoming;
+
       case GroupSortType.frequency:
-        return '按打卡频率排序';
+        return CheckinLocalizations.of(context).frequency;
       case GroupSortType.dateAdded:
-        return '按添加日期排序';
+        return CheckinLocalizations.of(context).dateAdded;
     }
   }
 
@@ -38,16 +41,16 @@ class GroupSortService {
         sortedGroups = _sortByDateAdded(groups, isReversed);
         break;
     }
-    
+
     // 然后对每个分组内的项目进行排序
     for (var group in sortedGroups) {
       List<CheckinItem> items = group['items'] as List<CheckinItem>;
       group['items'] = sortItems(items, sortType, isReversed);
     }
-    
+
     return sortedGroups;
   }
-  
+
   // 对单个分组内的打卡项目进行排序
   static List<CheckinItem> sortItems(
     List<CheckinItem> items,
@@ -55,62 +58,54 @@ class GroupSortService {
     bool isReversed,
   ) {
     List<CheckinItem> sortedItems = List<CheckinItem>.from(items);
-    
+
     switch (sortType) {
       case GroupSortType.upcoming:
         // 按紧急程度排序（未打卡的排前面）
         sortedItems.sort((a, b) {
           bool aChecked = a.isCheckedToday();
           bool bChecked = b.isCheckedToday();
-          
+
           // 如果打卡状态不同，未打卡的排前面
           if (aChecked != bChecked) {
-            return isReversed
-                ? (aChecked ? -1 : 1)
-                : (aChecked ? 1 : -1);
+            return isReversed ? (aChecked ? -1 : 1) : (aChecked ? 1 : -1);
           }
-          
+
           // 如果打卡状态相同，比较最后打卡时间
           DateTime? lastA = a.lastCheckinDate;
           DateTime? lastB = b.lastCheckinDate;
-          
+
           if (lastA == null && lastB == null) return 0;
           if (lastA == null) return isReversed ? -1 : 1;
           if (lastB == null) return isReversed ? 1 : -1;
-          
-          return isReversed
-              ? lastA.compareTo(lastB)
-              : lastB.compareTo(lastA);
+
+          return isReversed ? lastA.compareTo(lastB) : lastB.compareTo(lastA);
         });
         break;
-        
+
       case GroupSortType.frequency:
         // 按打卡频率排序
         sortedItems.sort((a, b) {
           int freqA = a.frequency.where((day) => day).length;
           int freqB = b.frequency.where((day) => day).length;
-          
+
           if (freqA == freqB) {
             // 频率相同时，按名称排序
             return a.name.compareTo(b.name);
           }
-          
-          return isReversed
-              ? freqB.compareTo(freqA)
-              : freqA.compareTo(freqB);
+
+          return isReversed ? freqB.compareTo(freqA) : freqA.compareTo(freqB);
         });
         break;
-        
+
       case GroupSortType.dateAdded:
         // 按添加日期排序（使用ID，因为ID是基于时间戳创建的）
         sortedItems.sort((a, b) {
-          return isReversed
-              ? b.id.compareTo(a.id)
-              : a.id.compareTo(b.id);
+          return isReversed ? b.id.compareTo(a.id) : a.id.compareTo(b.id);
         });
         break;
     }
-    
+
     return sortedItems;
   }
 
@@ -136,12 +131,10 @@ class GroupSortService {
         if (lastA == null) return isReversed ? -1 : 1;
         if (lastB == null) return isReversed ? 1 : -1;
 
-        return isReversed 
-            ? lastA.compareTo(lastB)
-            : lastB.compareTo(lastA);
+        return isReversed ? lastA.compareTo(lastB) : lastB.compareTo(lastA);
       }
 
-      return isReversed 
+      return isReversed
           ? urgencyA.compareTo(urgencyB)
           : urgencyB.compareTo(urgencyA);
     });
@@ -160,9 +153,7 @@ class GroupSortService {
       double freqA = _calculateAverageFrequency(itemsA);
       double freqB = _calculateAverageFrequency(itemsB);
 
-      return isReversed 
-          ? freqB.compareTo(freqA)
-          : freqA.compareTo(freqB);
+      return isReversed ? freqB.compareTo(freqA) : freqA.compareTo(freqB);
     });
   }
 
@@ -179,7 +170,7 @@ class GroupSortService {
       String earliestIdA = _findEarliestId(itemsA);
       String earliestIdB = _findEarliestId(itemsB);
 
-      return isReversed 
+      return isReversed
           ? earliestIdB.compareTo(earliestIdA)
           : earliestIdA.compareTo(earliestIdB);
     });
@@ -195,7 +186,8 @@ class GroupSortService {
     DateTime? lastDate;
     for (var item in items) {
       DateTime? itemLastDate = item.lastCheckinDate;
-      if (itemLastDate != null && (lastDate == null || itemLastDate.isAfter(lastDate))) {
+      if (itemLastDate != null &&
+          (lastDate == null || itemLastDate.isAfter(lastDate))) {
         lastDate = itemLastDate;
       }
     }
@@ -216,6 +208,8 @@ class GroupSortService {
   // 查找最早的ID（基于时间戳创建）
   static String _findEarliestId(List<CheckinItem> items) {
     if (items.isEmpty) return '';
-    return items.map((item) => item.id).reduce((a, b) => a.compareTo(b) < 0 ? a : b);
+    return items
+        .map((item) => item.id)
+        .reduce((a, b) => a.compareTo(b) < 0 ? a : b);
   }
 }

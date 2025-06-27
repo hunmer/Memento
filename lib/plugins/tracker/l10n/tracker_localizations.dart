@@ -90,7 +90,6 @@ abstract class TrackerLocalizations {
   String get recordDeleted;
   String get todayComplete;
   String get thisMonthComplete;
-  String get thisMonthNew;
   String get quickRecord; // 快速记录
   String get createGroup; // 新建分组
   String get timer;

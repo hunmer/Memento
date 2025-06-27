@@ -71,5 +71,18 @@
 		<string>audio</string>
 		<string>fetch</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.example.flutterApplication1</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>memento</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

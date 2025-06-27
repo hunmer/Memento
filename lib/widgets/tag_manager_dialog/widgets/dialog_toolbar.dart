@@ -40,10 +40,7 @@ class DialogToolbar extends StatelessWidget {
             ...groups
                 .where((group) => group != config.allTagsLabel)
                 .map(
-                  (group) => DropdownMenuItem(
-                    value: group,
-                    child: Text(group),
-                  ),
+                  (group) => DropdownMenuItem(value: group, child: Text(group)),
                 ),
           ],
           onChanged: onGroupChanged,
@@ -54,29 +51,22 @@ class DialogToolbar extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: selectedGroup == config.allTagsLabel
-                    ? null
-                    : onEditGroup,
-                tooltip: '编辑分组',
+                onPressed:
+                    selectedGroup == config.allTagsLabel ? null : onEditGroup,
               ),
               IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: selectedGroup == config.allTagsLabel
-                    ? null
-                    : onDeleteTags,
-                tooltip: '删除选中的标签',
+                onPressed:
+                    selectedGroup == config.allTagsLabel ? null : onDeleteTags,
               ),
               IconButton(
                 icon: const Icon(Icons.add),
-                onPressed: selectedGroup == config.allTagsLabel
-                    ? null
-                    : onAddTag,
-                tooltip: '添加新标签',
+                onPressed:
+                    selectedGroup == config.allTagsLabel ? null : onAddTag,
               ),
               IconButton(
                 icon: const Icon(Icons.create_new_folder),
                 onPressed: onCreateGroup,
-                tooltip: '新建分组',
               ),
             ],
           ),

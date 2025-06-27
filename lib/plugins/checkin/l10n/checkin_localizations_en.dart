@@ -226,4 +226,19 @@ class CheckinLocalizationsEn extends CheckinLocalizations {
   String get checkinRankingTitle => 'Check-in Ranking';
   @override
   String get checkinGroupPieTitle => 'Check-in Group Distribution';
+
+  @override
+  get checkinList => 'List';
+
+  @override
+  get checkinStats => 'Statistics';
+
+  @override
+  String get dateAdded => 'Date';
+
+  @override
+  String get frequency => 'Frequency';
+
+  @override
+  String get upcoming => 'Upcoming';
 }

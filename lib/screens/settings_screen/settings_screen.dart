@@ -102,7 +102,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: Text(
               SettingsScreenLocalizations.of(context).languageSubtitle,
             ),
-            onTap: _controller.toggleLanguage,
+            onTap: () => _controller.toggleLanguage(context),
           ),
           ListTile(
             leading: const Icon(Icons.brightness_4),

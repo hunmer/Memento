@@ -109,8 +109,7 @@ class NotesPlugin extends BasePlugin {
                   Column(
                     children: [
                       Text(
-                        NotesLocalizations.of(context)?.totalNotes ??
-                            'Total Notes',
+                        NotesLocalizations.of(context).totalNotes,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -126,7 +125,7 @@ class NotesPlugin extends BasePlugin {
                   Column(
                     children: [
                       Text(
-                        NotesLocalizations.of(context)!.recentNotes,
+                        NotesLocalizations.of(context).recentNotes,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

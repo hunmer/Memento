@@ -324,7 +324,7 @@ class CalendarPlugin extends BasePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    name,
+                    CalendarLocalizations.of(context).name,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -348,7 +348,7 @@ class CalendarPlugin extends BasePlugin {
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
-                            '${_getEventCount()} 个',
+                            _getEventCount().toString(),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -364,7 +364,7 @@ class CalendarPlugin extends BasePlugin {
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
-                            '${_getUpcomingEventCount()} 个',
+                            _getUpcomingEventCount().toString(),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.orange,
@@ -387,7 +387,7 @@ class CalendarPlugin extends BasePlugin {
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
-                            '${_getExpiredEventCount()} 个',
+                            _getExpiredEventCount().toString(),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.red,

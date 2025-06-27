@@ -51,12 +51,11 @@ class HabitsPlugin extends PluginBase {
     return _instance!;
   }
 
-  final String author = 'Memento Team';
   @override
   String get id => 'habits';
 
   @override
-  String get name => 'Habits';
+  IconData get icon => Icons.auto_awesome;
 
   @override
   Widget buildMainView(BuildContext context) {
@@ -123,11 +122,7 @@ class HabitsPlugin extends PluginBase {
                   color: theme.colorScheme.primary.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  Icons.auto_awesome,
-                  size: 24,
-                  color: theme.colorScheme.primary,
-                ),
+                child: Icon(icon, size: 24, color: theme.colorScheme.primary),
               ),
               const SizedBox(width: 12),
               Text(

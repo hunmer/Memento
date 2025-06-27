@@ -91,8 +91,6 @@ class TrackerLocalizationsZh extends TrackerLocalizations {
   String get thisMonthComplete => '本月完成';
 
   @override
-  String get thisMonthNew => '本月新增';
-  @override
   String get quickRecord => '快速记录';
   @override
   String get createGroup => '新建分组';

@@ -6,7 +6,7 @@ class CalendarAlbumLocalizationsEn extends CalendarAlbumLocalizations {
   CalendarAlbumLocalizationsEn() : super('en');
 
   @override
-  String get name => 'Calendar Album';
+  String get name => 'Album';
   @override
   String get wordCount => "Word Count";
   @override
@@ -131,7 +131,7 @@ class CalendarAlbumLocalizationsEn extends CalendarAlbumLocalizations {
   String get albumList => 'Album List';
 
   @override
-  String get allDiaries => 'All Diaries';
+  String get allDiaries => 'All';
 
   @override
   String get allPhotos => 'All Photos';
@@ -170,10 +170,10 @@ class CalendarAlbumLocalizationsEn extends CalendarAlbumLocalizations {
   String get selectTag => 'Select Tag';
 
   @override
-  String get sevenDayDiary => '7-Day Diary';
+  String get sevenDayDiary => '7-Day';
 
   @override
-  String get tagCount => 'Tag Count';
+  String get tagCount => 'Tags';
 
   @override
   String get tags => 'Tags';
@@ -182,5 +182,5 @@ class CalendarAlbumLocalizationsEn extends CalendarAlbumLocalizations {
   String get title => 'Title';
 
   @override
-  String get todayDiary => "Today's Diary";
+  String get todayDiary => "Today";
 }

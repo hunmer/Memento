@@ -147,11 +147,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                   Column(
                     children: [
                       Text(
-                        TrackerLocalizations.of(context)!.todayComplete,
+                        TrackerLocalizations.of(context).todayComplete,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${controller.getTodayCompletedGoals()} 个',
+                        controller.getTodayCompletedGoals().toString(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
@@ -168,7 +168,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${controller.getMonthCompletedGoals()} 个',
+                        controller.getMonthCompletedGoals().toString(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
@@ -179,27 +179,6 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                 ],
               ),
               const SizedBox(height: 12),
-
-              // 第二行 - 本月新增
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Text(
-                        TrackerLocalizations.of(context)!.thisMonthNew,
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      Text(
-                        '${controller.getMonthAddedGoals()} 个',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
             ],
           ),
         ],

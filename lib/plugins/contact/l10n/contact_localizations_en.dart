@@ -132,7 +132,7 @@ class ContactLocalizationsEn extends ContactLocalizations {
   String get lastContactTime => 'Last Contact Time';
 
   @override
-  String get recentContacts => 'Recent Contacts';
+  String get recentContacts => 'Recent';
 
   @override
   String get saveFailedMessage => 'Save failed: %s';
@@ -141,7 +141,7 @@ class ContactLocalizationsEn extends ContactLocalizations {
   String get sortBy => 'Sort By';
 
   @override
-  String get totalContacts => 'Total Contacts';
+  String get totalContacts => 'Total';
 
   @override
   String get addCustomField => 'Add Custom Field';
