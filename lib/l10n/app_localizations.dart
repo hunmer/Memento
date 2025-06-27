@@ -715,6 +715,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Title is required'**
   String get titleRequired;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Memento is a productivity app designed to help you organize and remember important things.'**
+  String get aboutDescription;
+
+  /// No description provided for @projectLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Link'**
+  String get projectLinkTitle;
+
+  /// No description provided for @projectLink.
+  ///
+  /// In en, this message translates to:
+  /// **'https://github.com/hunmer/memento'**
+  String get projectLink;
 }
 
 class _AppLocalizationsDelegate

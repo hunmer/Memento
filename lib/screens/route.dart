@@ -60,18 +60,6 @@ class AppRoutes extends NavigatorObserver {
   static Route _createRoute(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const curve = Curves.easeInOut;
-        const begin = Offset(0.0, 0.1);
-        const end = Offset.zero;
-        final curveTween = CurveTween(curve: curve);
-
-        var slideAnimation = animation.drive(
-          Tween(begin: begin, end: end).chain(curveTween),
-        );
-
-        return SlideTransition(position: slideAnimation, child: child);
-      },
     );
   }
 

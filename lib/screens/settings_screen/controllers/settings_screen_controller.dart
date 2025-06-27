@@ -96,8 +96,6 @@ class SettingsScreenController extends ChangeNotifier {
   void toggleTheme(context) => ThemeController.toggleTheme(context);
 
   // 语言相关
-  Locale get currentLocale => _baseController.currentLocale;
-  bool get isChineseLocale => _baseController.isChineseLocale;
   Future<void> toggleLanguage(context) =>
       _baseController.toggleLanguage(context);
 

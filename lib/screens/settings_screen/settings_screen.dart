@@ -1,5 +1,6 @@
 import 'package:Memento/core/services/backup_service.dart';
 import 'package:Memento/core/theme_controller.dart';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/screens/settings_screen/log_settings_screen.dart';
 import 'package:flutter/material.dart';
 import './controllers/settings_screen_controller.dart';
@@ -8,6 +9,7 @@ import './controllers/webdav_controller.dart';
 import '../../core/floating_ball/settings_screen.dart';
 import '../../core/floating_ball/floating_ball_manager.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
+import 'package:Memento/screens/about_screen/about_screen.dart';
 import './l10n/settings_screen_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -283,7 +285,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onTap: _controller.checkForUpdates,
           ),
-          const Divider(),
           ListTile(
             leading: const Icon(Icons.assignment),
             title: Text(
@@ -299,6 +300,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 MaterialPageRoute(
                   builder: (context) => const LogSettingsScreen(),
                 ),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: Text(AppLocalizations.of(context)!.aboutTitle),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
               );
             },
           ),

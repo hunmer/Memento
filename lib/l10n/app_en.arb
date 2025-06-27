@@ -103,5 +103,9 @@
   "selectPluginsToImport": "Select Plugins To Import",
   "mergeMode": "Merge Mode",
   "overwriteMode": "Overwrite Mode",
-  "titleRequired": "Title is required"
+  "titleRequired": "Title is required",
+  "aboutTitle": "About",
+  "aboutDescription": "Memento is a productivity app designed to help you organize and remember important things.",
+  "projectLinkTitle": "Project Link",
+  "projectLink": "https://github.com/hunmer/memento"
 }

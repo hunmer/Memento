@@ -106,5 +106,9 @@
   "selectPluginsToImport": "选择插件导入",
   "mergeMode": "合并模式",
   "overwriteMode": "覆盖模式",
-  "titleRequired": "请输入标题"
+  "titleRequired": "请输入标题",
+  "aboutTitle": "关于",
+  "aboutDescription": "Memento是一款生产力应用，旨在帮助您组织和记住重要事项。",
+  "projectLinkTitle": "项目链接",
+  "projectLink": "https://github.com/hunmer/memento"
 }

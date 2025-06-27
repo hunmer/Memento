@@ -48,53 +48,15 @@ class ConfigManager {
   }
 
   /// 获取语言设置
-  Locale? getLocale() {
-    if (!_appConfig.containsKey('locale')) return null;
-
+  Locale getLocale() {
     final localeStr = _appConfig['locale'] as String;
     final parts = localeStr.split('_');
-
     if (parts.length == 1) {
       return Locale(parts[0]);
     } else if (parts.length > 1) {
       return Locale(parts[0], parts[1]);
     }
-
-    return null;
-  }
-
-  /// 获取主题模式
-  ThemeMode getThemeMode() {
-    final dynamic themeMode = _appConfig['themeMode'];
-    if (themeMode is! String) return ThemeMode.system;
-
-    switch (themeMode) {
-      case 'dark':
-        return ThemeMode.dark;
-      case 'light':
-        return ThemeMode.light;
-      default:
-        return ThemeMode.system;
-    }
-  }
-
-  /// 设置主题模式
-  Future<void> setThemeMode(ThemeMode mode) async {
-    String themeModeStr;
-    switch (mode) {
-      case ThemeMode.dark:
-        themeModeStr = 'dark';
-        break;
-      case ThemeMode.light:
-        themeModeStr = 'light';
-        break;
-      case ThemeMode.system:
-        themeModeStr = 'system';
-        break;
-    }
-
-    _appConfig['themeMode'] = themeModeStr;
-    await saveAppConfig();
+    return WidgetsBinding.instance.window.locale;
   }
 
   /// 设置语言
