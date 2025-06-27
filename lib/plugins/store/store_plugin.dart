@@ -13,7 +13,7 @@ class StorePlugin extends BasePlugin {
   String get id => 'store';
 
   @override
-  String get name => '物品兑换';
+  Color get color => Colors.pinkAccent;
 
   @override
   IconData get icon => Icons.store;
@@ -98,10 +98,10 @@ class StorePlugin extends BasePlugin {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withAlpha(30),
+                  color: color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.store, size: 24, color: Colors.blue),
+                child: Icon(icon, size: 24, color: color),
               ),
               const SizedBox(width: 12),
               Text(

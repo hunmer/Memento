@@ -24,9 +24,6 @@ class TodoPlugin extends BasePlugin {
   String get id => 'todo';
 
   @override
-  String get name => 'Todo';
-
-  @override
   IconData get icon => Icons.check_box;
 
   @override
@@ -89,7 +86,7 @@ class TodoPlugin extends BasePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                TodoLocalizations.of(context).name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

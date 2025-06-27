@@ -59,7 +59,7 @@ class NodesPlugin extends PluginBase {
   String get id => 'nodes';
 
   @override
-  String get name => 'Nodes';
+  Color get color => Colors.limeAccent;
 
   @override
   Future<void> initialize() async {
@@ -194,14 +194,14 @@ class NodesPlugin extends PluginBase {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: theme.primaryColor.withAlpha(30),
+                      color: color.withAlpha(30),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(icon, size: 24, color: theme.primaryColor),
+                    child: Icon(icon, size: 24, color: color),
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    name,
+                    NodesLocalizations.of(context).name,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

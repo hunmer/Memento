@@ -70,7 +70,7 @@ class DiaryPlugin extends BasePlugin {
   String get id => 'diary';
 
   @override
-  String get name => 'Diary';
+  Color get color => Colors.indigo;
 
   @override
   IconData get icon => Icons.book;
@@ -206,18 +206,14 @@ class DiaryPlugin extends BasePlugin {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: theme.primaryColor.withAlpha(30),
+                      color: color.withAlpha(30),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
-                      icon,
-                      size: 24,
-                      color: color ?? theme.primaryColor,
-                    ),
+                    child: Icon(icon, size: 24, color: color),
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    name,
+                    DiaryLocalizations.of(context).name,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

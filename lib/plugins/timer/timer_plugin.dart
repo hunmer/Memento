@@ -29,7 +29,7 @@ class TimerPlugin extends BasePlugin {
   String get id => 'timer';
 
   @override
-  String get name => 'Timer';
+  Color get color => Colors.blueGrey;
 
   @override
   IconData get icon => Icons.timer;
@@ -73,14 +73,14 @@ class TimerPlugin extends BasePlugin {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withAlpha(30),
+                  color: color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 24, color: color ?? theme.primaryColor),
+                child: Icon(icon, size: 24, color: color),
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                TimerLocalizations.of(context).name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

@@ -1,3 +1,4 @@
+import 'package:Memento/core/theme_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -92,16 +93,7 @@ class SettingsScreenController extends ChangeNotifier {
     }
   }
 
-  // 主题相关
-  bool get isDarkMode => _baseController.isDarkMode;
-  Future<void> initTheme(BuildContext context) {
-    if (_context == null) {
-      initializeControllers(context);
-    }
-    return _baseController.initTheme(context);
-  }
-
-  Future<void> toggleTheme() => _baseController.toggleTheme();
+  void toggleTheme(context) => ThemeController.toggleTheme(context);
 
   // 语言相关
   Locale get currentLocale => _baseController.currentLocale;

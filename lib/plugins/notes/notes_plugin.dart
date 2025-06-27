@@ -31,7 +31,7 @@ class NotesPlugin extends BasePlugin {
   String get id => 'notes';
 
   @override
-  String get name => 'Notes';
+  Color get color => const Color.fromARGB(255, 61, 204, 185);
 
   @override
   IconData get icon => Icons.note_alt_outlined;
@@ -82,14 +82,15 @@ class NotesPlugin extends BasePlugin {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withAlpha(30),
+                  color: color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 24, color: theme.primaryColor),
+                child: Icon(icon, size: 24, color: color),
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                NotesLocalizations.of(context).name,
+
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

@@ -29,7 +29,7 @@ class OpenAIPlugin extends BasePlugin {
   String get id => 'openai';
 
   @override
-  String get name => 'AI Assistant';
+  Color get color => Colors.deepOrange;
 
   @override
   Future<void> initialize() async {
@@ -171,10 +171,10 @@ class OpenAIPlugin extends BasePlugin {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: theme.primaryColor.withAlpha(30),
+                      color: color.withAlpha(30),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(icon, size: 24, color: theme.primaryColor),
+                    child: Icon(icon, size: 24, color: color),
                   ),
                   const SizedBox(width: 12),
                   Text(

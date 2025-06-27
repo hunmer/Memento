@@ -55,7 +55,7 @@ class _TimerMainViewState extends State<TimerMainView> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => PluginManager.toHomeScreen(context),
           ),
-          title: Text(_plugin.name),
+          title: Text(_plugin.getPluginName(context)!),
           bottom: TabBar(
             isScrollable: true,
             tabs: groups.map((group) => Tab(text: group)).toList(),

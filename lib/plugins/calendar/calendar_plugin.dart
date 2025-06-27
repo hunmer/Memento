@@ -34,7 +34,7 @@ class CalendarPlugin extends BasePlugin {
   String get id => 'calendar';
 
   @override
-  String get name => 'calendar';
+  Color get color => const Color.fromARGB(255, 211, 91, 91);
 
   @override
   IconData get icon => Icons.calendar_month;
@@ -313,14 +313,10 @@ class CalendarPlugin extends BasePlugin {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.blue.withAlpha(30),
+                      color: color.withAlpha(30),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
-                      Icons.calendar_month,
-                      size: 24,
-                      color: Colors.blue,
-                    ),
+                    child: Icon(icon, size: 24, color: color),
                   ),
                   const SizedBox(width: 12),
                   Text(

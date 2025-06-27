@@ -90,6 +90,9 @@ class CheckinPlugin extends BasePlugin {
   String get id => 'checkin';
 
   @override
+  Color get color => Colors.teal;
+
+  @override
   IconData get icon => Icons.checklist;
 
   List<CheckinItem> _checkinItems = [];
@@ -212,10 +215,10 @@ class CheckinPlugin extends BasePlugin {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withAlpha(30),
+                  color: color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 24, color: color ?? theme.primaryColor),
+                child: Icon(icon, size: 24, color: color),
               ),
               const SizedBox(width: 12),
               Text(
