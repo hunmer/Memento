@@ -13,11 +13,15 @@ abstract class CalendarLocalizations {
 
   final String localeName;
 
-  static CalendarLocalizations? of(BuildContext context) {
-    return Localizations.of<CalendarLocalizations>(
+  static CalendarLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<CalendarLocalizations>(
       context,
       CalendarLocalizations,
     );
+    if (localizations == null) {
+      throw FlutterError('No CalendarLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const LocalizationsDelegate<CalendarLocalizations> delegate =
@@ -37,7 +41,7 @@ abstract class CalendarLocalizations {
   ];
 
   // 日历插件的本地化字符串
-  String get pluginName;
+  String get name;
   String get calendar;
   String get eventCount;
   String get weekEvents;

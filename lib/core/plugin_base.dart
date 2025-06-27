@@ -8,9 +8,6 @@ abstract class PluginBase {
   /// 插件唯一标识符
   String get id;
 
-  /// 插件名称
-  String get name;
-
   /// 插件存储目录
   String get storageDir => getPluginStoragePath();
 
@@ -39,8 +36,6 @@ abstract class PluginBase {
   void setStorageManager(StorageManager storageManager) {
     _storage = storageManager;
   }
-
-  String getPluginName(context) => name;
 
   String getPluginSettingPath() => ConfigManager.getPluginConfigPath(id);
 
@@ -119,4 +114,6 @@ abstract class PluginBase {
   String getPluginStoragePath() {
     return storage.getPluginStoragePath(id);
   }
+
+  String? getPluginName(context) {}
 }

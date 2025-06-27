@@ -4,7 +4,7 @@ class DatabaseLocalizationsEn extends DatabaseLocalizations {
   DatabaseLocalizationsEn() : super('en');
 
   @override
-  String get pluginName => 'Database';
+  String get name => 'Database';
 
   @override
   String get pluginDescription => 'A plugin for managing databases';

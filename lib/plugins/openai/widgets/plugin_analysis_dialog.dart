@@ -191,8 +191,6 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog>
               }
             },
             allowMultipleSelection: false,
-            title: localizations.selectAgent,
-            confirmButtonText: localizations.confirm,
           ),
     );
   }

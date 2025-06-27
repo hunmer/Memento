@@ -133,7 +133,7 @@ void main() async {
       try {
         await globalPluginManager.registerPlugin(plugin);
       } catch (e) {
-        logger?.log('插件注册失败: ${plugin.name} - $e', level: 'ERROR');
+        logger?.log('插件注册失败: ${plugin.id} - $e', level: 'ERROR');
       }
     }
 

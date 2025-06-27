@@ -12,11 +12,15 @@ abstract class TrackerLocalizations {
   static const LocalizationsDelegate<TrackerLocalizations> delegate =
       _TrackerLocalizationsDelegate();
 
-  static TrackerLocalizations? of(BuildContext context) {
-    return Localizations.of<TrackerLocalizations>(
+  static TrackerLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<TrackerLocalizations>(
       context,
       TrackerLocalizations,
     );
+    if (localizations == null) {
+      throw FlutterError('No ChatLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
@@ -98,7 +102,7 @@ abstract class TrackerLocalizations {
 
   get recordValueWithUnit;
 
-  String get pluginName;
+  String get name;
 }
 
 class _TrackerLocalizationsDelegate

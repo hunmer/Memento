@@ -5,7 +5,7 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
   ActivityLocalizationsEn() : super('en');
 
   @override
-  String get activityPluginName => 'Activity';
+  String get name => 'Activity';
 
   @override
   String get activityPluginDescription => 'Activity tracking plugin';

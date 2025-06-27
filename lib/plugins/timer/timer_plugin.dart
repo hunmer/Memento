@@ -41,6 +41,11 @@ class TimerPlugin extends BasePlugin {
   }
 
   @override
+  String? getPluginName(context) {
+    return TimerLocalizations.of(context).name;
+  }
+
+  @override
   Future<void> registerToApp(
     PluginManager pluginManager,
     ConfigManager configManager,

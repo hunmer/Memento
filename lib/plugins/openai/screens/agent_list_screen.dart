@@ -138,20 +138,6 @@ class _AgentListScreenState extends State<AgentListScreen>
                 onPressed: () => PluginManager.toHomeScreen(context),
               ),
               title: Text(OpenAILocalizations.of(context).toolsTitle),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    // TODO
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    // TODO
-                  },
-                ),
-              ],
             ),
             body: _buildToolsBody(),
           ),

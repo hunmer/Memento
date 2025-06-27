@@ -99,6 +99,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
   }
 
   @override
+  String? getPluginName(context) {
+    return TrackerLocalizations.of(context).name;
+  }
+
+  @override
   Widget buildCardView(BuildContext context) {
     final theme = Theme.of(context);
     final controller = TrackerController();
@@ -122,7 +127,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
               ),
               const SizedBox(width: 12),
               Text(
-                TrackerLocalizations.of(context)!.pluginName,
+                TrackerLocalizations.of(context)!.name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

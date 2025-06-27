@@ -4,7 +4,7 @@ class BillLocalizationsZh extends BillLocalizations {
   BillLocalizationsZh() : super('zh');
 
   @override
-  String get pluginName => '账单';
+  String get name => '账单';
 
   @override
   String get billList => '账单列表';

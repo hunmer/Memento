@@ -49,7 +49,7 @@ class UIService {
               ),
               const SizedBox(width: 12),
               Text(
-                ChatLocalizations.of(context)!.pluginName,
+                ChatLocalizations.of(context)!.name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

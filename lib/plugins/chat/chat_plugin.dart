@@ -77,15 +77,15 @@ class ChatPlugin extends BasePlugin with ChangeNotifier {
     await uiService.initialize();
   }
 
+  @override
+  String? getPluginName(context) {
+    return ChatLocalizations.of(context).name;
+  }
+
   /// 根据消息ID获取消息
   /// 代理到 channelService.getMessageById
   Future<Message?> getMessage(String messageId) async {
     return channelService.getMessageById(messageId);
-  }
-
-  @override
-  getPluginName(context) {
-    return ChatLocalizations.of(context)!.pluginName;
   }
 
   @override

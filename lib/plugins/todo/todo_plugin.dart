@@ -33,6 +33,11 @@ class TodoPlugin extends BasePlugin {
   Color get color => Colors.blue;
 
   @override
+  String? getPluginName(context) {
+    return TodoLocalizations.of(context).name;
+  }
+
+  @override
   Future<void> initialize() async {
     taskController = TaskController(storageManager, storageDir);
     reminderController = ReminderController();

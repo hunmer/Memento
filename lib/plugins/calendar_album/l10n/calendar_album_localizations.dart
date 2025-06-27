@@ -41,7 +41,7 @@ abstract class CalendarAlbumLocalizations {
   ];
 
   // 日历相册插件的本地化字符串
-  String get pluginName;
+  String get name;
   String get createAlbum;
   String get deleteAlbum;
   String get albumList;

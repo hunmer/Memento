@@ -72,7 +72,6 @@ abstract class SettingsScreenLocalizations {
   String get checkUpdateSubtitle;
   String get logSettingsTitle;
   String get logSettingsSubtitle;
-  String get testForegroundTaskTitle;
 
   String get updateAvailableTitle;
   String get updateAvailableContent;

@@ -97,9 +97,6 @@ class SettingsScreenLocalizationsZh extends SettingsScreenLocalizations {
   String get logSettingsSubtitle => '配置日志记录选项';
 
   @override
-  String get testForegroundTaskTitle => '测试前台服务';
-
-  @override
   String get updateAvailableTitle => '发现新版本';
 
   @override

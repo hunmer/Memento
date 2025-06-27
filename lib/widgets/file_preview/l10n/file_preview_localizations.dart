@@ -41,7 +41,7 @@ abstract class FilePreviewLocalizations {
   ];
 
   // 文件预览插件的本地化字符串
-  String get pluginName;
+  String get name;
   String get errorFilePreviewFailed;
   String get fileNotAccessible;
   String get fileProcessingFailed;

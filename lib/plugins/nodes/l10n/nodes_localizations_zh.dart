@@ -4,7 +4,7 @@ class NodesLocalizationsZh extends NodesLocalizations {
   NodesLocalizationsZh() : super('zh');
 
   @override
-  String get pluginName => '节点';
+  String get name => '节点';
 
   @override
   String get nodesSettings => '节点设置';

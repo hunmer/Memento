@@ -94,7 +94,7 @@ class PluginListDialog extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Text(
-                plugin.name,
+                plugin.getPluginName(context) ?? plugin.id,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,

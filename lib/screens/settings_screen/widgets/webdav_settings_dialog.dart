@@ -2,7 +2,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../controllers/webdav_controller.dart';
 import '../../../core/storage/storage_manager.dart';
-import 'webdav_localizations.dart';
+import 'l10n/webdav_localizations.dart';
 
 class WebDAVSettingsDialog extends StatefulWidget {
   final WebDAVController controller;

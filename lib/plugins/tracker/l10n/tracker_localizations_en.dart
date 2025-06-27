@@ -199,5 +199,5 @@ class TrackerLocalizationsEn extends TrackerLocalizations {
   String get recordValueWithUnit => 'Record Value (\${unit})';
 
   @override
-  String get pluginName => 'Goal Tracker';
+  String get name => 'Goal Tracker';
 }

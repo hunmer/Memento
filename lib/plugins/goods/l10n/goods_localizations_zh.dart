@@ -282,5 +282,5 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
   String get warehouseNameHint => '输入仓库名';
 
   @override
-  String get pluginName => '物品管理';
+  String get name => '物品管理';
 }

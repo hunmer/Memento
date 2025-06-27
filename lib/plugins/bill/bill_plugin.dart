@@ -70,6 +70,11 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     await initialize();
   }
 
+  @override
+  String? getPluginName(context) {
+    return BillLocalizations.of(context).name;
+  }
+
   Future<void> uninstall() async {
     _promptController.unregisterPromptMethods();
   }
@@ -102,7 +107,7 @@ class BillPlugin extends PluginBase with ChangeNotifier {
               ),
               const SizedBox(width: 12),
               Text(
-                BillLocalizations.of(context)!.pluginName,
+                BillLocalizations.of(context)!.name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

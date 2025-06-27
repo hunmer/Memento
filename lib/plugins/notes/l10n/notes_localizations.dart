@@ -13,8 +13,15 @@ abstract class NotesLocalizations {
 
   final String localeName;
 
-  static NotesLocalizations? of(BuildContext context) {
-    return Localizations.of<NotesLocalizations>(context, NotesLocalizations);
+  static NotesLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<NotesLocalizations>(
+      context,
+      NotesLocalizations,
+    );
+    if (localizations == null) {
+      throw FlutterError('No NotesLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const LocalizationsDelegate<NotesLocalizations> delegate =
@@ -34,7 +41,7 @@ abstract class NotesLocalizations {
   ];
 
   // 插件基本信息
-  String get notesPluginName;
+  String get name;
   String get notesPluginDescription;
 
   // 统计信息

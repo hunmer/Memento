@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
@@ -16,15 +17,6 @@ class AgentListDrawer extends StatefulWidget {
   /// 可选的文本控制器，用于处理@符号等特殊情况
   final TextEditingController? textController;
 
-  /// 自定义标题
-  final String? title;
-
-  /// 自定义确认按钮文本
-  final String? confirmButtonText;
-
-  /// 自定义取消按钮文本
-  final String? cancelButtonText;
-
   /// 是否允许多选
   final bool allowMultipleSelection;
 
@@ -36,9 +28,6 @@ class AgentListDrawer extends StatefulWidget {
     required this.selectedAgents,
     required this.onAgentSelected,
     this.textController,
-    this.title = '选择智能体',
-    this.confirmButtonText,
-    this.cancelButtonText = '取消',
     this.allowMultipleSelection = true,
     this.agentFilter,
   });
@@ -208,7 +197,7 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
                 const Icon(Icons.smart_toy),
                 const SizedBox(width: 8),
                 Text(
-                  widget.title ?? '选择智能体',
+                  OpenAILocalizations.of(context).selectAgent,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
@@ -280,14 +269,13 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(widget.cancelButtonText ?? '取消'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 ElevatedButton(
                   onPressed:
                       _selectedAgents.isEmpty ? null : _handleSelectionComplete,
                   child: Text(
-                    widget.confirmButtonText ??
-                        '确认选择 (${_selectedAgents.length})',
+                    '${AppLocalizations.of(context)!.select} (${_selectedAgents.length})',
                   ),
                 ),
               ],

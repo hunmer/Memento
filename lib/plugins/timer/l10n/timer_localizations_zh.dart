@@ -66,4 +66,7 @@ class TimerLocalizationsZh extends TimerLocalizations {
 
   @override
   String get selectGroup => '选择分组';
+
+  @override
+  String get name => '计时器';
 }

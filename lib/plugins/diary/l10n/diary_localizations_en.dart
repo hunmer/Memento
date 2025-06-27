@@ -24,7 +24,7 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
   @override
   String get moodSelectorTooltip => 'Select Mood';
   @override
-  String get diaryPluginName => 'Diary';
+  String get name => 'Diary';
 
   @override
   String get diaryPluginDescription => 'Diary management plugin';

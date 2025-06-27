@@ -5,7 +5,7 @@ class FilePreviewLocalizationsEn extends FilePreviewLocalizations {
   FilePreviewLocalizationsEn() : super('en');
 
   @override
-  String get pluginName => 'File Preview';
+  String get name => 'File Preview';
 
   @override
   String get errorFilePreviewFailed => 'Failed to preview file';

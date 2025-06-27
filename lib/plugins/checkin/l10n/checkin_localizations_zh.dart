@@ -5,7 +5,7 @@ class CheckinLocalizationsZh extends CheckinLocalizations {
   CheckinLocalizationsZh() : super('zh');
 
   @override
-  String get checkinPluginName => '打卡';
+  String get name => '打卡';
 
   @override
   String get checkinPluginDescription => '管理日常打卡项目';

@@ -176,13 +176,13 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
             context: context,
             builder:
                 (context) => AlertDialog(
-                  title: Text(FilePreviewLocalizations.of(context)!.pluginName),
+                  title: Text(FilePreviewLocalizations.of(context)!.name),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        FilePreviewLocalizations.of(context)!.pluginName +
+                        FilePreviewLocalizations.of(context)!.name +
                             ': ' +
                             widget.fileName,
                       ),

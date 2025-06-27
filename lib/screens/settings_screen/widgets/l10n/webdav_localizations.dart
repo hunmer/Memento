@@ -7,7 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'webdav_localizations_en.dart';
 import 'webdav_localizations_zh.dart';
 
-/// WebDAV设置的本地化支持类
+/// WebDAV设置对话框的本地化支持类
 abstract class WebDAVLocalizations {
   WebDAVLocalizations(String locale) : localeName = locale;
 
@@ -40,8 +40,8 @@ abstract class WebDAVLocalizations {
     Locale('zh'),
   ];
 
-  // WebDAV设置相关本地化字符串
-  String get pluginName;
+  // WebDAV设置对话框的本地化字符串
+  String get name;
   String get serverUrl;
   String get serverUrlHint;
   String get username;
@@ -78,28 +78,40 @@ abstract class WebDAVLocalizations {
   String get maxRetriesHint;
   String get retryInterval;
   String get retryIntervalHint;
-
+  String get dataSync;
+  String get downloadAllData;
   String get passwordEmptyError;
-
   String get saveFailed;
-
-  String get title;
-
   String get serverAddress;
-
-  String get serverAddressHint;
-
   String get serverAddressEmptyError;
-
-  String get serverAddressInvalidError;
-
+  String get serverAddressHint;
+  String? get serverAddressInvalidError;
+  String get title;
+  String get uploadAllData;
   String get usernameEmptyError;
 
-  String get dataSync;
+  // 状态消息
+  String get connectingStatus;
+  String get connectionSuccessStatus;
+  String get connectionFailedStatus;
+  String get connectionErrorStatus;
+  String get disconnectingStatus;
+  String get disconnectedStatus;
+  String get uploadingStatus;
+  String get uploadSuccessStatus;
+  String get uploadFailedStatus;
+  String get downloadingStatus;
+  String get downloadSuccessStatus;
+  String get downloadFailedStatus;
+  String get autoSyncEnabledStatus;
+  String get autoSyncDisabledStatus;
+  String get settingsSavedMessage;
 
-  String get uploadAllData;
+  get rootPathEmptyError;
 
-  String get downloadAllData;
+  String? get rootPathInvalidError;
+
+  String get disconnect;
 }
 
 class _WebDAVLocalizationsDelegate

@@ -9,7 +9,7 @@ class CalendarLocalizationsZh extends CalendarLocalizations {
   String get noCompletedEvents => '暂无活动';
 
   @override
-  String get pluginName => '日历';
+  String get name => '日历';
 
   @override
   String get calendar => '日历';

@@ -92,7 +92,7 @@ class PluginCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  plugin.name,
+                  plugin.getPluginName(context) ?? plugin.id,
                   style: Theme.of(context).textTheme.titleMedium,
                   textAlign: TextAlign.center,
                   maxLines: cardSize.height > 1 ? 3 : 2,

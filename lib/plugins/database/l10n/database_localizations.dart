@@ -41,7 +41,7 @@ abstract class DatabaseLocalizations {
   ];
 
   // 插件基本信息
-  String get pluginName;
+  String get name;
   String get pluginDescription;
 
   // 记录相关

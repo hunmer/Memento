@@ -5,7 +5,7 @@ class FilePreviewLocalizationsZh extends FilePreviewLocalizations {
   FilePreviewLocalizationsZh() : super('zh');
 
   @override
-  String get pluginName => '文件预览';
+  String get name => '文件预览';
 
   @override
   String get errorFilePreviewFailed => '文件预览失败';

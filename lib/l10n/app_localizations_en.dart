@@ -39,6 +39,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ok => 'OK';
 
   @override
+  String get select => 'Select';
+
+  @override
   String get no => 'No';
 
   @override

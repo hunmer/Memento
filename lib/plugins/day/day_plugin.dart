@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/day/l10n/day_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
@@ -53,6 +54,11 @@ class DayPlugin extends BasePlugin {
   ) async {
     // 初始化插件
     await initialize();
+  }
+
+  @override
+  String? getPluginName(context) {
+    return DatabaseLocalizations.of(context).name;
   }
 
   @override

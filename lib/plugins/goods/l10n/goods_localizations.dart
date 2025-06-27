@@ -140,7 +140,7 @@ abstract class GoodsLocalizations {
   String get stockHint;
   String get warehouseName;
   String get warehouseNameHint;
-  String get pluginName;
+  String get name;
 }
 
 class _GoodsLocalizationsDelegate

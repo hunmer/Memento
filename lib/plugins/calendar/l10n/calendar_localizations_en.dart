@@ -6,7 +6,7 @@ class CalendarLocalizationsEn extends CalendarLocalizations {
   CalendarLocalizationsEn(super.locale);
 
   @override
-  String get pluginName => 'Calendar';
+  String get name => 'Calendar';
 
   @override
   String get calendar => 'Calendar';

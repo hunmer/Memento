@@ -43,7 +43,7 @@ abstract class NodesLocalizations {
   String get addNotebook;
 
   // Nodes插件的本地化字符串
-  String get pluginName;
+  String get name;
   String get nodesSettings;
   String get notebooksCount;
   String get nodesCount;

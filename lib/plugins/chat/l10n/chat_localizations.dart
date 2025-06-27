@@ -41,7 +41,7 @@ abstract class ChatLocalizations {
   ];
 
   // 聊天插件的本地化字符串
-  String get pluginName;
+  String get name;
   String get showAvatarInChannelList;
   String get channelList;
   String get newChannel;
@@ -52,6 +52,8 @@ abstract class ChatLocalizations {
   String get enterMessage;
   String get justNow;
   String get edit;
+  String get all;
+  String get ungrouped;
   String get copy;
   String get delete;
   String get pin;

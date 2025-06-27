@@ -4,7 +4,7 @@ class BillLocalizationsEn extends BillLocalizations {
   BillLocalizationsEn() : super('en');
 
   @override
-  String get pluginName => 'Bill';
+  String get name => 'Bill';
 
   @override
   String get billList => 'Bill List';

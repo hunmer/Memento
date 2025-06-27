@@ -36,7 +36,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   @override
   void initState() {
     super.initState();
-    _updateDateRange(ActivityLocalizations.of(context)!.todayRange);
+    _updateDateRange('Today');
   }
 
   // 更新日期范围并加载数据
@@ -45,6 +45,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     setState(() {
       _selectedTag = null;
       _selectedTagActivities = [];
+      _selectedRange = range;
     });
 
     final now = DateTime.now();
@@ -82,7 +83,6 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
         }
 
         setState(() {
-          _selectedRange = range;
           _startDate = start;
           _endDate = end;
         });
@@ -182,8 +182,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   List<int> _calculateHourlyDistribution() {
     final hourlyMinutes = List<int>.filled(24, 0);
 
-    if (_selectedRange != ActivityLocalizations.of(context)!.todayRange)
-      return hourlyMinutes;
+    if (_selectedRange != 'Today') return hourlyMinutes;
 
     for (var activity in _activities) {
       final startHour = activity.startTime.hour;
@@ -289,16 +288,30 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     }
   }
 
+  getRangeText(String range, BuildContext context) {
+    switch (range) {
+      case 'Today':
+        return ActivityLocalizations.of(context).today;
+      case 'This Week':
+        return ActivityLocalizations.of(context).weekRange;
+      case 'This Month':
+        return ActivityLocalizations.of(context).monthRange;
+      case 'This Year':
+        return ActivityLocalizations.of(context).yearRange;
+      case 'Custom Range':
+        return ActivityLocalizations.of(context).customRange;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // 时间范围选择
-    _selectedRange = ActivityLocalizations.of(context)!.todayRange;
     _timeRanges = [
-      ActivityLocalizations.of(context)!.todayRange,
-      ActivityLocalizations.of(context)!.weekRange,
-      ActivityLocalizations.of(context)!.monthRange,
-      ActivityLocalizations.of(context)!.yearRange,
-      ActivityLocalizations.of(context)!.customRange,
+      'Today',
+      'This Week',
+      'This Month',
+      'This Year',
+      'Custom Range',
     ];
     return Scaffold(
       body: Column(
@@ -314,7 +327,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: ChoiceChip(
-                          label: Text(range),
+                          label: Text(getRangeText(range, context)),
                           selected: _selectedRange == range,
                           onSelected: (selected) {
                             if (selected) _updateDateRange(range);
@@ -348,8 +361,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
                 child: Column(
                   children: [
                     // 仅在选择"本日"时显示活动时间分布
-                    if (_selectedRange ==
-                        ActivityLocalizations.of(context)!.todayRange) ...[
+                    if (_selectedRange == 'Today') ...[
                       _buildSectionTitle(
                         ActivityLocalizations.of(
                           context,

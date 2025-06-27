@@ -41,12 +41,12 @@ abstract class ContactLocalizations {
   ];
 
   // 联系人插件的本地化字符串
-  String get pluginName;
+  String get name;
+  String get username;
   String get contactList;
   String get newContact;
   String get editContact;
   String get deleteContact;
-  String get name;
   String get phone;
   String get email;
   String get address;

@@ -5,7 +5,7 @@ import 'plugin_analysis_controller.dart';
 class ToolAppController extends ChangeNotifier {
   List<ToolApp> _apps = [];
   bool _isLoading = false;
-  
+
   List<ToolApp> get apps => List.unmodifiable(_apps);
   bool get isLoading => _isLoading;
 
@@ -40,12 +40,7 @@ class ToolAppController extends ChangeNotifier {
   void handleAppClick(BuildContext context, String appId) {
     switch (appId) {
       case 'plugin-analysis':
-        // 打开插件分析应用
         PluginAnalysisController().showPluginAnalysisDialog(context);
-        break;
-      // 可以添加更多应用的处理逻辑
-      default:
-        debugPrint('未知应用ID: $appId');
         break;
     }
   }
@@ -55,7 +50,7 @@ class ToolAppController extends ChangeNotifier {
     if (_apps.any((element) => element.id == app.id)) {
       return;
     }
-    
+
     _apps.add(app);
     notifyListeners();
     // 这里可以添加保存到持久化存储的逻辑

@@ -41,7 +41,7 @@ abstract class HabitsLocalizations {
   ];
 
   // 习惯插件的本地化字符串
-  String get pluginName;
+  String get name;
   String get habitsList;
   String get newHabit;
   String get editHabit;

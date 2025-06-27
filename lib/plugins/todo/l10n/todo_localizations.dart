@@ -9,7 +9,7 @@ abstract class TodoLocalizations {
 
   final String localeName;
 
-  String get todoPluginName;
+  String get name;
   String get todoPluginDescription;
   String get totalTasks;
   String get weeklyTasks;
