@@ -131,7 +131,9 @@ class ActivityTimeline extends StatelessWidget {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
-                                          '这段时间没有被记录',
+                                          ActivityLocalizations.of(
+                                            context,
+                                          ).unrecordedTimeText,
                                           style: const TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
@@ -142,7 +144,9 @@ class ActivityTimeline extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    '点击记录',
+                                    ActivityLocalizations.of(
+                                      context,
+                                    ).tapToRecordText,
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey[600],
@@ -161,7 +165,7 @@ class ActivityTimeline extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                _formatTimeDisplay(gapMinutes),
+                                _formatTimeDisplay(gapMinutes, context),
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontWeight: FontWeight.bold,
@@ -183,16 +187,16 @@ class ActivityTimeline extends StatelessWidget {
     );
   }
 
-  String _formatTimeDisplay(int totalMinutes) {
+  String _formatTimeDisplay(int totalMinutes, context) {
     final hours = totalMinutes ~/ 60;
     final minutes = totalMinutes % 60;
 
     if (hours > 0 && minutes > 0) {
-      return '$hours小时$minutes分钟';
+      return '$hours${ActivityLocalizations.of(context).hour}$minutes${ActivityLocalizations.of(context).minute}';
     } else if (hours > 0) {
-      return '$hours小时';
+      return '$hours${ActivityLocalizations.of(context).hour}';
     } else {
-      return '$minutes分钟';
+      return '$minutes${ActivityLocalizations.of(context).minute}';
     }
   }
 
@@ -286,10 +290,10 @@ class ActivityTimeline extends StatelessWidget {
                 )
                 .inMinutes ==
             0) {
-      return const Center(
+      return Center(
         child: Text(
-          '暂无活动记录',
-          style: TextStyle(color: Colors.grey, fontSize: 16),
+          ActivityLocalizations.of(context).noActivitiesText,
+          style: const TextStyle(color: Colors.grey, fontSize: 16),
         ),
       );
     }

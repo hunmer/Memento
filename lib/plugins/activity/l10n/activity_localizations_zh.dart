@@ -156,4 +156,16 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
 
   @override
   String get hour => '时';
+
+  @override
+  String get unrecordedTimeText => '这段时间没有被记录';
+
+  @override
+  String get tapToRecordText => '点击记录';
+
+  @override
+  String get noActivitiesText => '暂无活动记录';
+
+  @override
+  String get minute => '分';
 }

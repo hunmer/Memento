@@ -17,12 +17,12 @@ class EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            CheckinLocalizations.of(context)?.noRecords ?? '没有打卡项目',
+            CheckinLocalizations.of(context).noRecords,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           Text(
-            CheckinLocalizations.of(context)?.createCheckin ?? '点击下方按钮添加新的打卡项目',
+            CheckinLocalizations.of(context).createCheckin,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).hintColor,
             ),

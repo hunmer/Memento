@@ -129,7 +129,7 @@ class StorePlugin extends BasePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${controller.getGoodsCount()} 件',
+                        controller.getGoodsCount().toString(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -145,7 +145,7 @@ class StorePlugin extends BasePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${controller.getItemsCount()} 件',
+                        controller.getItemsCount().toString(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -168,7 +168,7 @@ class StorePlugin extends BasePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${controller.currentPoints} 分',
+                        controller.currentPoints.toString(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.orange,
@@ -185,7 +185,7 @@ class StorePlugin extends BasePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${controller.getExpiringItemsCount()} 件',
+                        controller.getExpiringItemsCount().toString(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.red,

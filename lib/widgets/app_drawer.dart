@@ -58,7 +58,6 @@ class AppDrawer extends StatelessWidget {
                                     AppLocalizations.of(context)!.settings,
                                   ),
                                   onTap: () {
-                                    // 添加安全检查，防止黑屏
                                     if (context.mounted) {
                                       Navigator.pop(context); // 关闭抽屉
                                       // 添加加载状态管理

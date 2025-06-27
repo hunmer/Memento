@@ -57,9 +57,6 @@ class CalendarAlbumPlugin extends BasePlugin {
   String get id => 'calendar_album';
 
   @override
-  String get name => 'calendar album';
-
-  @override
   IconData get icon => Icons.notes_rounded;
 
   @override
@@ -110,7 +107,8 @@ class CalendarAlbumPlugin extends BasePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                name,
+                CalendarAlbumLocalizations.of(context).name,
+
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -134,7 +132,7 @@ class CalendarAlbumPlugin extends BasePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${calendarController.getTodayEntriesCount()} ${CalendarAlbumLocalizations.of(context).entriesUnit}',
+                        '${calendarController.getTodayEntriesCount()}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -150,7 +148,7 @@ class CalendarAlbumPlugin extends BasePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${calendarController.getLast7DaysEntriesCount()} ${CalendarAlbumLocalizations.of(context).entriesUnit}',
+                        '${calendarController.getLast7DaysEntriesCount()} ',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -173,7 +171,7 @@ class CalendarAlbumPlugin extends BasePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${calendarController.getAllEntriesCount()} ${CalendarAlbumLocalizations.of(context).entriesUnit}',
+                        '${calendarController.getAllEntriesCount()} ',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -189,7 +187,7 @@ class CalendarAlbumPlugin extends BasePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${tagController.tags.length} ${CalendarAlbumLocalizations.of(context).itemsUnit}',
+                        '${tagController.tags.length} ',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

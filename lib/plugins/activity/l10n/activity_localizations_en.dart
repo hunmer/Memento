@@ -74,7 +74,7 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
   String hoursFormat(double hours) => '${hours.toStringAsFixed(1)}H';
 
   @override
-  String minutesFormat(int minutes) => '$minutes min';
+  String minutesFormat(int minutes) => '$minutes M';
 
   @override
   String get loadingFailed => 'Failed to load data';
@@ -101,19 +101,7 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
   String get ungrouped => 'Ungrouped';
 
   @override
-  String get recentlyUsed => 'Recently Used';
-
-  @override
-  String get tagManagement => 'Tag Management';
-
-  @override
-  String get tagsHint => 'Separate tags with commas';
-
-  @override
   String get unnamedActivity => 'Unnamed Activity';
-
-  @override
-  String get contentHint => 'Enter activity description';
 
   @override
   String get grouped => 'Grouped';
@@ -149,5 +137,17 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
   String get to => 'to';
 
   @override
-  String get hour => 'hour';
+  String get hour => 'h';
+
+  @override
+  String get unrecordedTimeText => 'This time period was not recorded';
+
+  @override
+  String get tapToRecordText => 'Tap to record';
+
+  @override
+  String get noActivitiesText => 'No activity records';
+
+  @override
+  String get minute => 'm';
 }

@@ -158,6 +158,16 @@ abstract class CheckinLocalizations {
   String get checkinRankingTitle;
 
   String get checkinGroupPieTitle;
+
+  get checkinList;
+
+  get checkinStats;
+
+  String get upcoming;
+
+  String get frequency;
+
+  String get dateAdded;
 }
 
 class _CheckinLocalizationsDelegate

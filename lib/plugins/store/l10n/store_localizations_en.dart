@@ -16,16 +16,16 @@ class StoreLocalizationsEn extends StoreLocalizations {
   String get pointSettingsSubtitle => 'Set point rewards for various actions';
 
   @override
-  String get productQuantity => 'Product Quantity';
+  String get productQuantity => 'Products';
 
   @override
-  String get itemQuantity => 'Item Quantity';
+  String get itemQuantity => 'Items';
 
   @override
-  String get myPoints => 'My Points';
+  String get myPoints => 'Points';
 
   @override
-  String get expiringIn7Days => 'Expiring in 7 Days';
+  String get expiringIn7Days => 'Expiring';
 
   @override
   String get confirmClearItemsTitle => 'Confirm Clear';

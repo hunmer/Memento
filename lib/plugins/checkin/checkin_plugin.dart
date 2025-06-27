@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations_en.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -58,16 +59,16 @@ class _CheckinMainViewState extends State<CheckinMainView> {
             _currentIndex = index;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
             icon: Icon(Icons.check_circle_outline),
             selectedIcon: Icon(Icons.check_circle),
-            label: '打卡',
+            label: CheckinLocalizations.of(context).checkinList,
           ),
           NavigationDestination(
             icon: Icon(Icons.bar_chart_outlined),
             selectedIcon: Icon(Icons.bar_chart),
-            label: '统计',
+            label: CheckinLocalizations.of(context).checkinStats,
           ),
         ],
       ),
@@ -87,9 +88,6 @@ class CheckinPlugin extends BasePlugin {
 
   @override
   String get id => 'checkin';
-
-  @override
-  String get name => 'checkin';
 
   @override
   IconData get icon => Icons.checklist;
@@ -123,26 +121,22 @@ class CheckinPlugin extends BasePlugin {
 
   @override
   Future<void> initialize() async {
-    try {
-      // 初始化prompt控制器
-      _promptController.initialize();
+    // 初始化prompt控制器
+    _promptController.initialize();
 
-      // 从存储中加载保存的打卡项目
-      final pluginPath = 'checkin/$_storageKey';
-      if (await storage.fileExists(pluginPath)) {
-        final Map<String, dynamic>? storedData = await storage.readJson(
-          pluginPath,
+    // 从存储中加载保存的打卡项目
+    final pluginPath = 'checkin/$_storageKey';
+    if (await storage.fileExists(pluginPath)) {
+      final Map<String, dynamic>? storedData = await storage.readJson(
+        pluginPath,
+      );
+      if (storedData != null && storedData.containsKey('items')) {
+        _checkinItems = List.from(
+          (storedData['items'] as List).map(
+            (item) => CheckinItem.fromJson(item as Map<String, dynamic>),
+          ),
         );
-        if (storedData != null && storedData.containsKey('items')) {
-          _checkinItems = List.from(
-            (storedData['items'] as List).map(
-              (item) => CheckinItem.fromJson(item as Map<String, dynamic>),
-            ),
-          );
-        }
       }
-    } catch (e) {
-      debugPrint('初始化打卡项目失败: $e');
     }
   }
 
@@ -182,15 +176,11 @@ class CheckinPlugin extends BasePlugin {
 
   // 保存打卡项目到存储
   Future<void> _saveCheckinItems() async {
-    try {
-      final itemsJson = _checkinItems.map((item) => item.toJson()).toList();
-      final pluginPath = 'checkin/$_storageKey';
-      await storage.writeJson(pluginPath, {'items': itemsJson});
-      // 通知监听者数据已更新
-      (ValueNotifier(_checkinItems)..value = _checkinItems).notifyListeners();
-    } catch (e) {
-      debugPrint('保存打卡项目失败: $e');
-    }
+    final itemsJson = _checkinItems.map((item) => item.toJson()).toList();
+    final pluginPath = 'checkin/$_storageKey';
+    await storage.writeJson(pluginPath, {'items': itemsJson});
+    // 通知监听者数据已更新
+    (ValueNotifier(_checkinItems)..value = _checkinItems).notifyListeners();
   }
 
   @override

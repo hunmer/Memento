@@ -173,11 +173,11 @@ class BillPlugin extends PluginBase with ChangeNotifier {
                   Column(
                     children: [
                       Text(
-                        BillLocalizations.of(context)!.monthBills,
+                        BillLocalizations.of(context).monthBills,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${_billController.getMonthBillCount()} 笔',
+                        _billController.getMonthBillCount().toString(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

@@ -50,7 +50,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
-        title: Text(CheckinLocalizations.of(context)?.name ?? '打卡'),
+        title: Text(CheckinLocalizations.of(context).name),
         actions: [
           // 排序按钮
           IconButton(
@@ -59,7 +59,6 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
               await controller.showGroupSortDialog();
               if (mounted) setState(() {});
             },
-            tooltip: '排序',
           ),
           IconButton(
             icon: const Icon(Icons.folder),

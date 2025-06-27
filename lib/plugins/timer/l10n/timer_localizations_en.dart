@@ -4,7 +4,7 @@ class TimerLocalizationsEn extends TimerLocalizations {
   TimerLocalizationsEn() : super('en');
 
   @override
-  String get totalTimer => 'Total Timer';
+  String get totalTimer => 'Total';
 
   @override
   String get deleteTimer => 'Delete Timer';

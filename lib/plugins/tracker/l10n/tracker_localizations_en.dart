@@ -88,13 +88,11 @@ class TrackerLocalizationsEn extends TrackerLocalizations {
   String get recordDeleted => 'Record deleted';
 
   @override
-  String get todayComplete => 'Today Complete';
+  String get todayComplete => 'Today';
 
   @override
-  String get thisMonthComplete => 'This Month Complete';
+  String get thisMonthComplete => 'Month';
 
-  @override
-  String get thisMonthNew => 'This Month New';
   @override
   String get quickRecord => 'Quick Record';
   @override

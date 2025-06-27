@@ -102,17 +102,11 @@ abstract class ActivityLocalizations {
   String get to;
   String get hour;
 
-  /// Get text with parameters
-  String getText(String key, [Map<String, dynamic>? params]) {
-    switch (key) {
-      case 'hoursFormat':
-        return hoursFormat(params?['hours'] as double);
-      case 'minutesFormat':
-        return minutesFormat(params?['minutes'] as int);
-      default:
-        throw FlutterError('Localization key "$key" not found');
-    }
-  }
+  // New timeline translations
+  String get unrecordedTimeText;
+  String get tapToRecordText;
+  String get noActivitiesText;
+  String get minute;
 }
 
 class _ActivityLocalizationsDelegate

@@ -259,7 +259,7 @@ class DayLocalizationsEn implements DayLocalizations {
   String get sortOptions => 'Sort Options';
 
   @override
-  String get memorialDaysCount => 'Memorial Days Count';
+  String get memorialDaysCount => 'Days';
   @override
   String get upcoming => 'Upcoming';
   @override

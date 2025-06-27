@@ -6,10 +6,7 @@ import 'dart:math' as math;
 class CheckinGroupPieChart extends StatefulWidget {
   final List<CheckinItem> checkinItems;
 
-  const CheckinGroupPieChart({
-    super.key,
-    required this.checkinItems,
-  });
+  const CheckinGroupPieChart({super.key, required this.checkinItems});
 
   @override
   State<CheckinGroupPieChart> createState() => _CheckinGroupPieChartState();
@@ -24,12 +21,7 @@ class _CheckinGroupPieChartState extends State<CheckinGroupPieChart> {
     final groupData = _prepareGroupData();
 
     if (groupData.isEmpty) {
-      return Center(
-        child: Text(
-          '暂无打卡分组数据',
-          style: theme.textTheme.bodyMedium,
-        ),
-      );
+      return Center(child: Text('', style: theme.textTheme.bodyMedium));
     }
 
     return Row(
@@ -60,48 +52,49 @@ class _CheckinGroupPieChartState extends State<CheckinGroupPieChart> {
             ),
           ),
         ),
-        
+
         // 图例
         Expanded(
           flex: 2,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: groupData.asMap().entries.map((entry) {
-              final index = entry.key;
-              final group = entry.value.group;
-              final count = entry.value.count;
-              final percent = entry.value.percentage;
-              final color = _getGroupColor(index);
-              
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: color,
-                      ),
+            children:
+                groupData.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final group = entry.value.group;
+                  final count = entry.value.count;
+                  final percent = entry.value.percentage;
+                  final color = _getGroupColor(index);
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: color,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            group,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                        Text(
+                          '$count (${(percent * 100).toStringAsFixed(1)}%)',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        group,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ),
-                    Text(
-                      '$count (${(percent * 100).toStringAsFixed(1)}%)',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
           ),
         ),
       ],
@@ -114,7 +107,7 @@ class _CheckinGroupPieChartState extends State<CheckinGroupPieChart> {
       final isSelected = index == touchedIndex;
       final data = entry.value;
       final color = _getGroupColor(index);
-      
+
       return PieChartSectionData(
         color: color,
         value: data.percentage * 100,
@@ -147,7 +140,9 @@ class _CheckinGroupPieChartState extends State<CheckinGroupPieChart> {
 
     // 如果超出预定义颜色范围，则随机生成颜色
     if (index >= colors.length) {
-      return Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+      return Color(
+        (math.Random().nextDouble() * 0xFFFFFF).toInt(),
+      ).withOpacity(1.0);
     }
 
     return colors[index];
@@ -168,13 +163,14 @@ class _CheckinGroupPieChartState extends State<CheckinGroupPieChart> {
     }
 
     // 转换为百分比数据
-    List<GroupData> result = groupCounts.entries.map((entry) {
-      return GroupData(
-        group: entry.key,
-        count: entry.value,
-        percentage: entry.value / totalItems,
-      );
-    }).toList();
+    List<GroupData> result =
+        groupCounts.entries.map((entry) {
+          return GroupData(
+            group: entry.key,
+            count: entry.value,
+            percentage: entry.value / totalItems,
+          );
+        }).toList();
 
     // 按数量排序
     result.sort((a, b) => b.count.compareTo(a.count));

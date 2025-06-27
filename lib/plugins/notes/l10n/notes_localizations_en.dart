@@ -12,10 +12,10 @@ class NotesLocalizationsEn extends NotesLocalizations {
       'A simple note-taking plugin for Memento';
 
   @override
-  String get totalNotes => 'Total Notes';
+  String get totalNotes => 'Total';
 
   @override
-  String get recentNotes => 'Recent Notes (7 days)';
+  String get recentNotes => 'Recent';
 
   @override
   String get newNote => 'New Note';

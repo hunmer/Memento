@@ -24,8 +24,7 @@ class SettingsScreenController extends ChangeNotifier {
 
   bool isInitialized() => _initialized;
 
-  SettingsScreenController()
-    : _baseController = BaseSettingsController() {
+  SettingsScreenController() : _baseController = BaseSettingsController() {
     initPrefs();
   }
 
@@ -52,17 +51,29 @@ class SettingsScreenController extends ChangeNotifier {
     if (type != null) {
       _backupSchedule = BackupSchedule(
         type: BackupScheduleType.values[type],
-        date: _prefs.getString('backup_date') != null
-            ? DateTime.parse(_prefs.getString('backup_date')!)
-            : null,
-        time: _prefs.getString('backup_time') != null
-            ? TimeOfDay(
-                hour: int.parse(_prefs.getString('backup_time')!.split(':')[0]),
-                minute: int.parse(_prefs.getString('backup_time')!.split(':')[1]),
-              )
-            : null,
-        days: _prefs.getStringList('backup_days')?.map(int.parse).toList() ?? [],
-        monthDays: _prefs.getStringList('backup_month_days')?.map(int.parse).toList() ?? [],
+        date:
+            _prefs.getString('backup_date') != null
+                ? DateTime.parse(_prefs.getString('backup_date')!)
+                : null,
+        time:
+            _prefs.getString('backup_time') != null
+                ? TimeOfDay(
+                  hour: int.parse(
+                    _prefs.getString('backup_time')!.split(':')[0],
+                  ),
+                  minute: int.parse(
+                    _prefs.getString('backup_time')!.split(':')[1],
+                  ),
+                )
+                : null,
+        days:
+            _prefs.getStringList('backup_days')?.map(int.parse).toList() ?? [],
+        monthDays:
+            _prefs
+                .getStringList('backup_month_days')
+                ?.map(int.parse)
+                .toList() ??
+            [],
       );
     } else {
       // 设置默认备份计划 - 每天凌晨2点备份
@@ -89,15 +100,18 @@ class SettingsScreenController extends ChangeNotifier {
     }
     return _baseController.initTheme(context);
   }
+
   Future<void> toggleTheme() => _baseController.toggleTheme();
 
   // 语言相关
   Locale get currentLocale => _baseController.currentLocale;
   bool get isChineseLocale => _baseController.isChineseLocale;
-  Future<void> toggleLanguage() => _baseController.toggleLanguage();
+  Future<void> toggleLanguage(context) =>
+      _baseController.toggleLanguage(context);
 
   // 数据导出
-  Future<void> exportData([BuildContext? context]) => _exportController.exportData(context ?? _context);
+  Future<void> exportData([BuildContext? context]) =>
+      _exportController.exportData(context ?? _context);
 
   // 数据导入
   Future<void> importData() => _importController.importData();
@@ -124,7 +138,7 @@ class SettingsScreenController extends ChangeNotifier {
   set autoCheckUpdate(bool value) {
     _autoUpdateController.autoCheckUpdate = value;
   }
-  
+
   bool _enableLogging = false;
   bool get enableLogging => _enableLogging;
   set enableLogging(bool value) {
@@ -143,11 +157,20 @@ class SettingsScreenController extends ChangeNotifier {
       await _prefs.setString('backup_date', schedule.date!.toIso8601String());
     }
     if (schedule.time != null) {
-      await _prefs.setString('backup_time', '${schedule.time!.hour}:${schedule.time!.minute}');
+      await _prefs.setString(
+        'backup_time',
+        '${schedule.time!.hour}:${schedule.time!.minute}',
+      );
     }
-    await _prefs.setStringList('backup_days', schedule.days.map((e) => e.toString()).toList());
-    await _prefs.setStringList('backup_month_days', schedule.monthDays.map((e) => e.toString()).toList());
-    
+    await _prefs.setStringList(
+      'backup_days',
+      schedule.days.map((e) => e.toString()).toList(),
+    );
+    await _prefs.setStringList(
+      'backup_month_days',
+      schedule.monthDays.map((e) => e.toString()).toList(),
+    );
+
     // 设置计划时不立即备份，只更新最后检查时间为现在
     await resetBackupCheckDate();
     notifyListeners();
@@ -157,50 +180,62 @@ class SettingsScreenController extends ChangeNotifier {
     if (_backupSchedule == null) return false;
     if (_lastBackupCheckDate == null) {
       await resetBackupCheckDate(); // 首次设置时初始化检查时间
-      return false; 
+      return false;
     }
 
     final now = DateTime.now();
     final lastCheck = _lastBackupCheckDate!;
-    
+
     switch (_backupSchedule!.type) {
       case BackupScheduleType.specificDate:
         // 只在指定日期当天检查
         return now.year == _backupSchedule!.date!.year &&
-               now.month == _backupSchedule!.date!.month &&
-               now.day == _backupSchedule!.date!.day &&
-               now.isAfter(lastCheck);
+            now.month == _backupSchedule!.date!.month &&
+            now.day == _backupSchedule!.date!.day &&
+            now.isAfter(lastCheck);
       case BackupScheduleType.daily:
         // 每天检查，且时间已过设定的时间点
-        final scheduledTime = _backupSchedule!.time ?? TimeOfDay(hour: 0, minute: 0);
+        final scheduledTime =
+            _backupSchedule!.time ?? TimeOfDay(hour: 0, minute: 0);
         final scheduledDateTime = DateTime(
-          now.year, now.month, now.day, 
-          scheduledTime.hour, scheduledTime.minute
+          now.year,
+          now.month,
+          now.day,
+          scheduledTime.hour,
+          scheduledTime.minute,
         );
-        return now.isAfter(scheduledDateTime) && 
-               now.difference(lastCheck).inDays >= 1;
+        return now.isAfter(scheduledDateTime) &&
+            now.difference(lastCheck).inDays >= 1;
       case BackupScheduleType.weekly:
         // 每周指定日检查，且时间已过设定的时间点
         final currentDay = now.weekday;
-        final scheduledTime = _backupSchedule!.time ?? TimeOfDay(hour: 0, minute: 0);
+        final scheduledTime =
+            _backupSchedule!.time ?? TimeOfDay(hour: 0, minute: 0);
         final scheduledDateTime = DateTime(
-          now.year, now.month, now.day,
-          scheduledTime.hour, scheduledTime.minute
+          now.year,
+          now.month,
+          now.day,
+          scheduledTime.hour,
+          scheduledTime.minute,
         );
         return _backupSchedule!.days.contains(currentDay) &&
-               now.isAfter(scheduledDateTime) &&
-               now.difference(lastCheck).inDays >= 1;
+            now.isAfter(scheduledDateTime) &&
+            now.difference(lastCheck).inDays >= 1;
       case BackupScheduleType.monthly:
         // 每月指定日检查，且时间已过设定的时间点
         final currentDay = now.day;
-        final scheduledTime = _backupSchedule!.time ?? TimeOfDay(hour: 0, minute: 0);
+        final scheduledTime =
+            _backupSchedule!.time ?? TimeOfDay(hour: 0, minute: 0);
         final scheduledDateTime = DateTime(
-          now.year, now.month, now.day,
-          scheduledTime.hour, scheduledTime.minute
+          now.year,
+          now.month,
+          now.day,
+          scheduledTime.hour,
+          scheduledTime.minute,
         );
         return _backupSchedule!.monthDays.contains(currentDay) &&
-               now.isAfter(scheduledDateTime) &&
-               now.difference(lastCheck).inDays >= 1;
+            now.isAfter(scheduledDateTime) &&
+            now.difference(lastCheck).inDays >= 1;
     }
   }
 
