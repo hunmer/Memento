@@ -158,6 +158,12 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get ok;
 
+  /// No description provided for @select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get select;
+
   /// No description provided for @no.
   ///
   /// In en, this message translates to:

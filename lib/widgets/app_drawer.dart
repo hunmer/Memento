@@ -45,7 +45,9 @@ class AppDrawer extends StatelessWidget {
                             headerBuilder: (context, isExpanded) {
                               return ListTile(
                                 leading: Icon(plugin.icon),
-                                title: Text(plugin.getPluginName(context)),
+                                title: Text(
+                                  plugin.getPluginName(context) ?? plugin.id,
+                                ),
                               );
                             },
                             body: Column(
@@ -79,7 +81,12 @@ class AppDrawer extends StatelessWidget {
                                               builder:
                                                   (context) => Scaffold(
                                                     appBar: AppBar(
-                                                      title: Text(plugin.name),
+                                                      title: Text(
+                                                        plugin.getPluginName(
+                                                              context,
+                                                            ) ??
+                                                            plugin.id,
+                                                      ),
                                                     ),
                                                     body: plugin
                                                         .buildSettingsView(

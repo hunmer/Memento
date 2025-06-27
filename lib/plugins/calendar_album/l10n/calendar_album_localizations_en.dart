@@ -6,7 +6,7 @@ class CalendarAlbumLocalizationsEn extends CalendarAlbumLocalizations {
   CalendarAlbumLocalizationsEn() : super('en');
 
   @override
-  String get pluginName => 'Calendar Album';
+  String get name => 'Calendar Album';
   @override
   String get wordCount => "Word Count";
   @override

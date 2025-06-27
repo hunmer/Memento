@@ -139,7 +139,7 @@ abstract class StoreLocalizations {
   String get purchasePriceLabel;
   String get remainingQuantityLabel;
 
-  String get pluginName;
+  String get name;
 }
 
 class _StoreLocalizationsDelegate

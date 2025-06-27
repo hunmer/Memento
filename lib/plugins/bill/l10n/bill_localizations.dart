@@ -39,7 +39,7 @@ abstract class BillLocalizations {
   ];
 
   // 账单插件的本地化字符串
-  String get pluginName;
+  String get name;
   String get billList;
   String get newBill;
   String get editBill;

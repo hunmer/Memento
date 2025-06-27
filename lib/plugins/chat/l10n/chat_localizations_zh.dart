@@ -5,7 +5,13 @@ class ChatLocalizationsZh extends ChatLocalizations {
   ChatLocalizationsZh() : super('zh');
 
   @override
-  String get pluginName => '频道聊天';
+  String get name => '频道聊天';
+
+  @override
+  String get all => '所有';
+
+  @override
+  String get ungrouped => '未分组';
 
   @override
   String get showAvatarInChannelList => '在聊天列表显示头像';

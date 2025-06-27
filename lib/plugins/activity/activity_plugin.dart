@@ -21,6 +21,11 @@ class ActivityPlugin extends BasePlugin {
     return _instance!;
   }
 
+  @override
+  String? getPluginName(context) {
+    return ActivityLocalizations.of(context).name;
+  }
+
   late ActivityService _activityService;
   late ActivityPromptController _promptController;
   bool _isInitialized = false;

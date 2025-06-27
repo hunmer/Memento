@@ -75,6 +75,11 @@ class NodesPlugin extends PluginBase {
   }
 
   @override
+  String? getPluginName(context) {
+    return NodesLocalizations.of(context).name;
+  }
+
+  @override
   Future<void> registerToApp(
     PluginManager pluginManager,
     ConfigManager configManager,

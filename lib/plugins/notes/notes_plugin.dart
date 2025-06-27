@@ -18,6 +18,11 @@ class NotesPlugin extends BasePlugin {
     return _instance!;
   }
 
+  @override
+  String? getPluginName(context) {
+    return NotesLocalizations.of(context).name;
+  }
+
   late NotesController controller;
   late NotesPromptController _promptController;
   bool _isInitialized = false;

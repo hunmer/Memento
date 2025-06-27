@@ -4,7 +4,7 @@ class TodoLocalizationsZh extends TodoLocalizations {
   TodoLocalizationsZh(super.locale);
 
   @override
-  String get todoPluginName => '待办事项';
+  String get name => '待办事项';
 
   @override
   String get todoPluginDescription => 'Memento的简单待办事项插件';

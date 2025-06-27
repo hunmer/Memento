@@ -4,7 +4,7 @@ class ContactLocalizationsEn extends ContactLocalizations {
   ContactLocalizationsEn() : super('en');
 
   @override
-  String get pluginName => 'Contacts';
+  String get name => 'Contacts';
 
   @override
   String get contactList => 'Contact List';
@@ -19,7 +19,7 @@ class ContactLocalizationsEn extends ContactLocalizations {
   String get deleteContact => 'Delete Contact';
 
   @override
-  String get name => 'Name';
+  String get username => 'Name';
 
   @override
   String get phone => 'Phone';

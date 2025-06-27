@@ -4,7 +4,7 @@ class DatabaseLocalizationsZh extends DatabaseLocalizations {
   DatabaseLocalizationsZh() : super('zh');
 
   @override
-  String get pluginName => '数据库';
+  String get name => '数据库';
 
   @override
   String get pluginDescription => '用于管理数据库的插件';

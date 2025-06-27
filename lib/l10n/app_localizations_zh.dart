@@ -39,6 +39,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ok => '确定';
 
   @override
+  String get select => '选择';
+
+  @override
   String get no => '否';
 
   @override

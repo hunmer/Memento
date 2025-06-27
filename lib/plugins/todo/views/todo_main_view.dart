@@ -57,7 +57,7 @@ class _TodoMainViewState extends State<TodoMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(TodoLocalizations.of(context)!.todoPluginName),
+        title: Text(TodoLocalizations.of(context)!.name),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),

@@ -50,7 +50,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
-        title: Text(CheckinLocalizations.of(context)?.checkinPluginName ?? '打卡'),
+        title: Text(CheckinLocalizations.of(context)?.name ?? '打卡'),
         actions: [
           // 排序按钮
           IconButton(
@@ -74,13 +74,14 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
 
           // 分组列表
           Expanded(
-            child: groupListItems.isEmpty
-                ? EmptyState()
-                : GroupListView(
-                    groupListItems: groupListItems,
-                    controller: controller,
-                    onStateChanged: _handleStateChanged,
-                  ),
+            child:
+                groupListItems.isEmpty
+                    ? EmptyState()
+                    : GroupListView(
+                      groupListItems: groupListItems,
+                      controller: controller,
+                      onStateChanged: _handleStateChanged,
+                    ),
           ),
         ],
       ),

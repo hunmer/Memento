@@ -24,7 +24,7 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
   @override
   String get moodSelectorTooltip => '选择心情';
   @override
-  String get diaryPluginName => '日记';
+  String get name => '日记';
 
   @override
   String get diaryPluginDescription => '日记管理插件';

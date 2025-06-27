@@ -4,7 +4,7 @@ class NodesLocalizationsEn extends NodesLocalizations {
   NodesLocalizationsEn() : super('en');
 
   @override
-  String get pluginName => 'Nodes';
+  String get name => 'Nodes';
 
   @override
   String get nodesSettings => 'Nodes Settings';

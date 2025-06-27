@@ -70,6 +70,11 @@ class CalendarAlbumPlugin extends BasePlugin {
   }
 
   @override
+  String? getPluginName(context) {
+    return CalendarAlbumLocalizations.of(context).name;
+  }
+
+  @override
   Future<void> registerToApp(
     PluginManager pluginManager,
     ConfigManager configManager,

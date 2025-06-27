@@ -4,7 +4,7 @@ class CalendarAlbumLocalizationsZh extends CalendarAlbumLocalizations {
   CalendarAlbumLocalizationsZh() : super('zh');
 
   @override
-  String get pluginName => '日历相册';
+  String get name => '日历相册';
 
   @override
   String get entriesUnit => '篇';

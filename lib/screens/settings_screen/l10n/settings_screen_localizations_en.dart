@@ -100,9 +100,6 @@ class SettingsScreenLocalizationsEn extends SettingsScreenLocalizations {
   String get logSettingsSubtitle => 'Configure logging options';
 
   @override
-  String get testForegroundTaskTitle => 'Test Foreground Service';
-
-  @override
   String get updateAvailableTitle => 'New version available';
 
   @override

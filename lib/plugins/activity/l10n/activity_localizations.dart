@@ -13,11 +13,15 @@ abstract class ActivityLocalizations {
 
   final String localeName;
 
-  static ActivityLocalizations? of(BuildContext context) {
-    return Localizations.of<ActivityLocalizations>(
+  static ActivityLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<ActivityLocalizations>(
       context,
       ActivityLocalizations,
     );
+    if (localizations == null) {
+      throw FlutterError('No ActivityLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const LocalizationsDelegate<ActivityLocalizations> delegate =
@@ -37,7 +41,7 @@ abstract class ActivityLocalizations {
   ];
 
   // Plugin information
-  String get activityPluginName;
+  String get name;
   String get activityPluginDescription;
 
   // Navigation and titles

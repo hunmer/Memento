@@ -4,7 +4,7 @@ class ImagePickerLocalizationsEn extends ImagePickerLocalizations {
   ImagePickerLocalizationsEn(super.locale);
 
   @override
-  String get pluginName => 'Image Picker';
+  String get name => 'Image Picker';
 
   @override
   String get takePhoto => 'Take Photo';

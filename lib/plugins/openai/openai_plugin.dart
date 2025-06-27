@@ -147,6 +147,11 @@ class OpenAIPlugin extends BasePlugin {
     );
   }
 
+  @override
+  String? getPluginName(context) {
+    return OpenAILocalizations.of(context).name;
+  }
+
   Widget _buildCardViewContent(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -173,7 +178,7 @@ class OpenAIPlugin extends BasePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    OpenAILocalizations.of(context).pluginName,
+                    OpenAILocalizations.of(context).name,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

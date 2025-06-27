@@ -54,9 +54,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
-        title: Text(
-          ChatLocalizations.of(context)?.channelList ?? 'Channel List',
-        ),
+        title: Text(ChatLocalizations.of(context).channelList),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -106,29 +104,31 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   void _showAddChannelDialog() {
     // 获取当前激活的频道分类，排除"全部"和"未分组"
     String? defaultGroup = _controller.selectedGroup;
-    if (defaultGroup == "全部" || defaultGroup == "未分组") {
+    if (defaultGroup == "all" || defaultGroup == "ungrouped") {
       defaultGroup = null;
     }
-    
+
     showDialog(
       context: context,
-      builder: (context) => ChannelDialog(
-        onAddChannel: (channel) async {
-          await _controller.addChannel(channel);
-        },
-        defaultGroup: defaultGroup,
-      ),
+      builder:
+          (context) => ChannelDialog(
+            onAddChannel: (channel) async {
+              await _controller.addChannel(channel);
+            },
+            defaultGroup: defaultGroup,
+          ),
     );
   }
 
   void _showEditChannelDialog(Channel channel) {
     showDialog(
       context: context,
-      builder: (context) => ChannelDialog(
-        isEditMode: true,
-        channel: channel,
-        onUpdateChannel: _controller.updateChannel,
-      ),
+      builder:
+          (context) => ChannelDialog(
+            isEditMode: true,
+            channel: channel,
+            onUpdateChannel: _controller.updateChannel,
+          ),
     );
   }
 

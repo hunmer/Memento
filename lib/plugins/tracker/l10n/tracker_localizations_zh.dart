@@ -196,5 +196,5 @@ class TrackerLocalizationsZh extends TrackerLocalizations {
   String get recordValueWithUnit => '记录值 (\${unit})';
 
   @override
-  String get pluginName => '进度';
+  String get name => '进度';
 }

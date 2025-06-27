@@ -75,6 +75,11 @@ class DiaryPlugin extends BasePlugin {
   @override
   IconData get icon => Icons.book;
 
+  @override
+  String? getPluginName(context) {
+    return DiaryLocalizations.of(context).name;
+  }
+
   // 获取今日文字数
   Future<int> getTodayWordCount() async {
     final today = DateTime.now();

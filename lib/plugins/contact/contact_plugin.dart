@@ -42,6 +42,11 @@ class ContactPlugin extends BasePlugin {
   }
 
   @override
+  String? getPluginName(context) {
+    return ContactLocalizations.of(context).name;
+  }
+
+  @override
   Widget buildCardView(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>>(
       future: _getCardStats(),
@@ -72,7 +77,7 @@ class ContactPlugin extends BasePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    ContactLocalizations.of(context).pluginName,
+                    ContactLocalizations.of(context).username,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

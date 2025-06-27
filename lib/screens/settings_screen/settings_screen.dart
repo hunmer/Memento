@@ -1,6 +1,5 @@
 import 'package:Memento/core/services/backup_service.dart';
 import 'package:Memento/screens/settings_screen/log_settings_screen.dart';
-import 'package:Memento/test/test_foreground_task_screen.dart';
 import 'package:flutter/material.dart';
 import './controllers/settings_screen_controller.dart';
 import './widgets/webdav_settings_dialog.dart';
@@ -300,20 +299,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const LogSettingsScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.update),
-            title: Text(
-              SettingsScreenLocalizations.of(context).testForegroundTaskTitle,
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TestForegroundTaskScreen(),
                 ),
               );
             },

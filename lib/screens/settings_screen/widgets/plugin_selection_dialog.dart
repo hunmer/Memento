@@ -23,7 +23,7 @@ class _PluginSelectionDialogState extends State<PluginSelectionDialog> {
           children:
               widget.plugins.map((plugin) {
                 return CheckboxListTile(
-                  title: Text(plugin.name),
+                  title: Text(plugin.getPluginName(context) ?? plugin.id),
                   value: _selectedPlugins.contains(plugin.id),
                   onChanged: (bool? value) {
                     setState(() {

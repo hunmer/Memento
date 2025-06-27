@@ -5,7 +5,7 @@ class ChatLocalizationsEn extends ChatLocalizations {
   ChatLocalizationsEn() : super('en');
 
   @override
-  String get pluginName => 'Chat';
+  String get name => 'Chat';
 
   @override
   String get showAvatarInChannelList => 'Show avatars in channel list';
@@ -353,4 +353,10 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   @override
   String get channelGroupHint => 'Optional, leave empty for default group';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get ungrouped => 'Ungrouped';
 }

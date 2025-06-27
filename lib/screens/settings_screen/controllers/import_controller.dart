@@ -79,7 +79,7 @@ class ImportController {
         final availablePlugins =
             installedPlugins
                 .where((p) => availablePluginIds.contains(p.id))
-                .map((p) => {'id': p.id, 'name': p.name})
+                .map((p) => {'id': p.id})
                 .toList();
 
         if (availablePlugins.isEmpty) {

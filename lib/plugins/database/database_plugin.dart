@@ -62,6 +62,11 @@ class DatabasePlugin extends BasePlugin {
   }
 
   @override
+  String? getPluginName(context) {
+    return DatabaseLocalizations.of(context).name;
+  }
+
+  @override
   Widget? buildCardView(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -93,7 +98,7 @@ class DatabasePlugin extends BasePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    DatabaseLocalizations.of(context).pluginName,
+                    DatabaseLocalizations.of(context).name,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

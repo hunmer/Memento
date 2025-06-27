@@ -4,7 +4,7 @@ class ContactLocalizationsZh extends ContactLocalizations {
   ContactLocalizationsZh() : super('zh');
 
   @override
-  String get pluginName => '联系人';
+  String get name => '联系人';
 
   @override
   String get contactList => '联系人列表';
@@ -19,7 +19,7 @@ class ContactLocalizationsZh extends ContactLocalizations {
   String get deleteContact => '删除联系人';
 
   @override
-  String get name => '姓名';
+  String get username => '姓名';
 
   @override
   String get phone => '电话';

@@ -41,7 +41,7 @@ abstract class CheckinLocalizations {
   ];
 
   // 打卡插件的本地化字符串
-  String get checkinPluginName;
+  String get name;
   String get checkinPluginDescription;
   String get todayCheckin;
   String get totalCheckinCount;

@@ -202,6 +202,11 @@ class CheckinPlugin extends BasePlugin {
   }
 
   @override
+  String? getPluginName(context) {
+    return CheckinLocalizations.of(context).name;
+  }
+
+  @override
   Widget? buildCardView(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -224,7 +229,7 @@ class CheckinPlugin extends BasePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                CheckinLocalizations.of(context).checkinPluginName,
+                CheckinLocalizations.of(context).name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

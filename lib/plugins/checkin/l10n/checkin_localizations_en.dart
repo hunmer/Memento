@@ -5,7 +5,7 @@ class CheckinLocalizationsEn extends CheckinLocalizations {
   CheckinLocalizationsEn() : super('en');
 
   @override
-  String get checkinPluginName => 'Check-in';
+  String get name => 'Check-in';
 
   @override
   String get checkinPluginDescription => 'Manage daily check-in items';

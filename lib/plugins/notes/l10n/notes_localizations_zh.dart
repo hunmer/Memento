@@ -5,7 +5,7 @@ class NotesLocalizationsZh extends NotesLocalizations {
   NotesLocalizationsZh() : super('zh');
 
   @override
-  String get notesPluginName => '笔记';
+  String get name => '笔记';
 
   @override
   String get notesPluginDescription => 'Memento的简单笔记插件';

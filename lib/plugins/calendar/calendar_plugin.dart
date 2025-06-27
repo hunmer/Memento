@@ -132,6 +132,11 @@ class CalendarPlugin extends BasePlugin {
     }
   }
 
+  @override
+  String? getPluginName(context) {
+    return CalendarLocalizations.of(context).name;
+  }
+
   void showEventDetails(BuildContext context, CalendarEvent event) {
     showDialog(
       context: context,

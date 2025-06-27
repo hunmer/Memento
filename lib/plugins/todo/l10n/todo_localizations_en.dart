@@ -4,7 +4,7 @@ class TodoLocalizationsEn extends TodoLocalizations {
   TodoLocalizationsEn(super.locale);
 
   @override
-  String get todoPluginName => 'Todo';
+  String get name => 'Todo';
 
   @override
   String get todoPluginDescription => 'A simple todo plugin for Memento';

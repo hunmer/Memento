@@ -4,7 +4,7 @@ class ImagePickerLocalizationsZh extends ImagePickerLocalizations {
   ImagePickerLocalizationsZh(super.locale);
 
   @override
-  String get pluginName => '图片选择器';
+  String get name => '图片选择器';
 
   @override
   String get takePhoto => '拍照';

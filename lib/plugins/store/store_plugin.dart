@@ -73,6 +73,11 @@ class StorePlugin extends BasePlugin {
   }
 
   @override
+  String? getPluginName(context) {
+    return StoreLocalizations.of(context).name;
+  }
+
+  @override
   Widget buildMainView(BuildContext context) {
     return StoreMainView();
   }
@@ -100,7 +105,7 @@ class StorePlugin extends BasePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                StoreLocalizations.of(context).pluginName,
+                StoreLocalizations.of(context).name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

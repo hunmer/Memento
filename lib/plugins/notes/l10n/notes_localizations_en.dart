@@ -5,7 +5,7 @@ class NotesLocalizationsEn extends NotesLocalizations {
   NotesLocalizationsEn() : super('en');
 
   @override
-  String get notesPluginName => 'Notes';
+  String get name => 'Notes';
 
   @override
   String get notesPluginDescription =>

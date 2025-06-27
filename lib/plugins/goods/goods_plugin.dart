@@ -428,6 +428,11 @@ class GoodsPlugin extends BasePlugin {
   }
 
   @override
+  String? getPluginName(context) {
+    return GoodsLocalizations.of(context).name;
+  }
+
+  @override
   Widget buildMainView(BuildContext context) {
     return GoodsMainView();
   }
@@ -455,7 +460,7 @@ class GoodsPlugin extends BasePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                GoodsLocalizations.of(context).pluginName,
+                GoodsLocalizations.of(context).name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

@@ -289,5 +289,5 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
   String get warehouseNameHint => "Enter warehouse name";
 
   @override
-  String get pluginName => 'Warehouse';
+  String get name => 'Warehouse';
 }

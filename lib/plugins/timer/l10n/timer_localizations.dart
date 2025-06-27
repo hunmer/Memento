@@ -32,6 +32,7 @@ abstract class TimerLocalizations {
 
   static const List<Locale> supportedLocales = [Locale('en'), Locale('zh')];
 
+  String get name;
   String get totalTimer;
   String get deleteTimer;
   String get deleteTimerConfirmation;

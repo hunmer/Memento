@@ -12,9 +12,15 @@ abstract class DiaryLocalizations {
   DiaryLocalizations(String locale) : localeName = locale;
 
   final String localeName;
-
-  static DiaryLocalizations? of(BuildContext context) {
-    return Localizations.of<DiaryLocalizations>(context, DiaryLocalizations);
+  static DiaryLocalizations of(BuildContext context) {
+    final localizations = Localizations.of<DiaryLocalizations>(
+      context,
+      DiaryLocalizations,
+    );
+    if (localizations == null) {
+      throw FlutterError('No ChatLocalizations found in context');
+    }
+    return localizations;
   }
 
   static const LocalizationsDelegate<DiaryLocalizations> delegate =
@@ -35,7 +41,7 @@ abstract class DiaryLocalizations {
 
   String get recentlyUsed;
   // 日记插件的本地化字符串
-  String get diaryPluginName;
+  String get name;
   String get diaryPluginDescription;
 
   // 统计信息

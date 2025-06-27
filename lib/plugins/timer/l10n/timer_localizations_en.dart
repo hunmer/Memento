@@ -66,4 +66,7 @@ class TimerLocalizationsEn extends TimerLocalizations {
 
   @override
   String get selectGroup => 'Select Group';
+
+  @override
+  String get name => 'Timer';
 }

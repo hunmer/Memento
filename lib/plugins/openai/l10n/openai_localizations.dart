@@ -17,7 +17,7 @@ abstract class OpenAILocalizations {
   static OpenAILocalizations get defaultLocalizations =>
       OpenAILocalizationsZh();
 
-  String get pluginName;
+  String get name;
   String get pluginDescription;
   String get totalAgents;
   String get defaultAgentName;
@@ -202,7 +202,7 @@ abstract class OpenAILocalizations {
 /// 中文实现
 class OpenAILocalizationsZh implements OpenAILocalizations {
   @override
-  String get pluginName => 'AI 助手';
+  String get name => 'AI 助手';
 
   @override
   String get pluginDescription => 'AI 助手插件，支持多种大语言模型服务商';
@@ -678,7 +678,7 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   String get sendRequest => 'Send Request';
 
   @override
-  String get pluginName => 'AI Assistant';
+  String get name => 'AI Assistant';
 
   @override
   String get pluginDescription =>

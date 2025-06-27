@@ -8,7 +8,7 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
   String get grouped => '已分组';
 
   @override
-  String get activityPluginName => '活动';
+  String get name => '活动';
 
   @override
   String get activityPluginDescription => '活动记录插件';

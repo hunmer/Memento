@@ -54,12 +54,18 @@ class HabitsPlugin extends PluginBase {
   final String author = 'Memento Team';
   @override
   String get id => 'habits';
+
   @override
-  String get name => '习惯管理';
+  String get name => 'Habits';
 
   @override
   Widget buildMainView(BuildContext context) {
     return HabitsMainView();
+  }
+
+  @override
+  String? getPluginName(context) {
+    return HabitsLocalizations.of(context).name;
   }
 
   @override
@@ -125,7 +131,7 @@ class HabitsPlugin extends PluginBase {
               ),
               const SizedBox(width: 12),
               Text(
-                HabitsLocalizations.of(context).pluginName,
+                HabitsLocalizations.of(context).name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

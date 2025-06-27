@@ -4,7 +4,7 @@ class HabitsLocalizationsEn extends HabitsLocalizations {
   HabitsLocalizationsEn() : super('en');
 
   @override
-  String get pluginName => 'Habits';
+  String get name => 'Habits';
 
   @override
   String get habitsList => 'Habits List';

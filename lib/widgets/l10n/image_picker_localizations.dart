@@ -37,7 +37,7 @@ abstract class ImagePickerLocalizations {
   ];
 
   // 图片选择器的本地化字符串
-  String get pluginName;
+  String get name;
   String get takePhoto;
   String get chooseFromGallery;
   String get cancel;
