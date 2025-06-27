@@ -3,21 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../main.dart';
 
 class BaseSettingsController extends ChangeNotifier {
-  final bool _mounted = true;
-  Locale? _currentLocale;
-
+  Locale _currentLocale = globalConfigManager.getLocale();
   BaseSettingsController();
-
-  // 获取当前语言设置
-  Locale get currentLocale => _currentLocale ?? const Locale('en');
-
-  // 判断是否为中文
-  bool get isChineseLocale => currentLocale.languageCode == 'zh';
 
   // 切换语言
   Future<void> toggleLanguage(BuildContext context) async {
-    if (!_mounted) return;
-
     final result = await showDialog<Locale>(
       context: context,
       builder:
@@ -28,7 +18,8 @@ class BaseSettingsController extends ChangeNotifier {
                 onPressed: () => Navigator.pop(context, const Locale('zh')),
                 child: Row(
                   children: [
-                    if (isChineseLocale) Icon(Icons.check, color: Colors.blue),
+                    if (_currentLocale.languageCode == 'zh')
+                      Icon(Icons.check, color: Colors.blue),
                     SizedBox(width: 8),
                     Text('中文'),
                   ],
@@ -38,7 +29,8 @@ class BaseSettingsController extends ChangeNotifier {
                 onPressed: () => Navigator.pop(context, const Locale('en')),
                 child: Row(
                   children: [
-                    if (!isChineseLocale) Icon(Icons.check, color: Colors.blue),
+                    if (_currentLocale.languageCode == 'en')
+                      Icon(Icons.check, color: Colors.blue),
                     SizedBox(width: 8),
                     Text('English'),
                   ],
@@ -48,7 +40,7 @@ class BaseSettingsController extends ChangeNotifier {
           ),
     );
 
-    if (result != null && result != currentLocale) {
+    if (result != null) {
       await globalConfigManager.setLocale(result);
       _currentLocale = result;
       notifyListeners();

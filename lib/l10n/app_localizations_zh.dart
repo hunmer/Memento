@@ -350,4 +350,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get titleRequired => '请输入标题';
+
+  @override
+  String get aboutTitle => '关于';
+
+  @override
+  String get aboutDescription => 'Memento是一款生产力应用，旨在帮助您组织和记住重要事项。';
+
+  @override
+  String get projectLinkTitle => '项目链接';
+
+  @override
+  String get projectLink => 'https://github.com/hunmer/memento';
 }

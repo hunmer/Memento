@@ -355,4 +355,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get titleRequired => 'Title is required';
+
+  @override
+  String get aboutTitle => 'About';
+
+  @override
+  String get aboutDescription =>
+      'Memento is a productivity app designed to help you organize and remember important things.';
+
+  @override
+  String get projectLinkTitle => 'Project Link';
+
+  @override
+  String get projectLink => 'https://github.com/hunmer/memento';
 }
