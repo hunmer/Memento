@@ -56,24 +56,22 @@ class AppRoutes extends NavigatorObserver {
   static const String todo = '/todo';
   static const String tracker = '/tracker';
 
-  // 自定义页面过渡动画
+  // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return child;
+      },
+      transitionDuration: Duration(milliseconds: 0),
+      reverseTransitionDuration: Duration(milliseconds: 0),
     );
   }
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
-        // 根路由特殊处理，不允许返回
-        return PageRouteBuilder(
-          pageBuilder:
-              (context, animation, secondaryAnimation) => const HomeScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return child;
-          },
-        );
+        return _createRoute(const HomeScreen());
       case 'chat':
         return _createRoute(const ChatMainView());
       case 'diary':
