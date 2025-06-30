@@ -20,7 +20,11 @@ import 'package:Memento/screens/settings_screen/l10n/log_settings_localizations.
 import 'package:Memento/screens/settings_screen/l10n/settings_screen_localizations.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_localizations.dart';
 import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_localizations.dart';
+import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
 import 'package:Memento/widgets/l10n/group_selector_localizations.dart';
+import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
+import 'package:Memento/widgets/l10n/location_picker_localizations.dart';
+import 'package:Memento/widgets/tag_manager_dialog/l10n/tag_manager_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,7 +32,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:Memento/core/theme_controller.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/diary/l10n/diary_localizations.dart';
 import 'plugins/day/l10n/day_localizations.dart';
@@ -227,12 +230,15 @@ class _MyAppState extends State<MyApp> {
               ContactLocalizations.delegate,
               TrackerLocalizations.delegate,
               HabitsLocalizations.delegate,
+              ImagePickerLocalizations.delegate,
               SettingsScreenLocalizations.delegate,
               DataManagementLocalizations.delegate,
               LogSettingsLocalizationsDelegate(),
               CalendarLocalizations.delegate,
+              FilePreviewLocalizations.delegate,
               GroupSelectorLocalizations.delegate,
               BillLocalizations.delegate,
+              LocationPickerLocalizations.delegate,
               DayLocalizationsDelegate.delegate,
               OpenAILocalizationsDelegate.delegate,
               NotesLocalizations.delegate,

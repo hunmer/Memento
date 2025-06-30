@@ -32,7 +32,7 @@ class DatabasePlugin extends BasePlugin {
   IconData get icon => Icons.storage;
 
   @override
-  Color get color => Colors.cyanAccent;
+  Color get color => Colors.deepPurple;
 
   static DatabasePlugin? _instance;
   static DatabasePlugin get instance {

@@ -31,7 +31,7 @@ class _AlbumScreenState extends State<AlbumScreen> {
     _images = _calendarController.getAllImages();
     _imageWidgets = List.filled(
       _images.length,
-      Image.asset('assets/images/image_not_found.png', fit: BoxFit.contain),
+      Image.asset('assets/images/image_not_found.jpg', fit: BoxFit.contain),
     );
     _preloadImages();
   }

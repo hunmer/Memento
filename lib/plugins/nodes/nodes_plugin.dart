@@ -59,7 +59,7 @@ class NodesPlugin extends PluginBase {
   String get id => 'nodes';
 
   @override
-  Color get color => Colors.limeAccent;
+  Color get color => Colors.amber;
 
   @override
   Future<void> initialize() async {

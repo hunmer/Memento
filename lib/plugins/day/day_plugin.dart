@@ -42,7 +42,7 @@ class DayPlugin extends BasePlugin {
   final String id = 'day';
 
   @override
-  Color get color => Colors.tealAccent;
+  Color get color => Colors.black87;
 
   @override
   IconData get icon => Icons.event_outlined;
