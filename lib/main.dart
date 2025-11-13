@@ -67,6 +67,22 @@ import 'plugins/database/database_plugin.dart';
 import 'plugins/chat/home_widgets.dart';
 import 'plugins/diary/home_widgets.dart';
 import 'plugins/activity/home_widgets.dart';
+import 'plugins/openai/home_widgets.dart';
+import 'plugins/notes/home_widgets.dart';
+import 'plugins/goods/home_widgets.dart';
+import 'plugins/bill/home_widgets.dart';
+import 'plugins/todo/home_widgets.dart';
+import 'plugins/checkin/home_widgets.dart';
+import 'plugins/calendar/home_widgets.dart';
+import 'plugins/timer/home_widgets.dart';
+import 'plugins/day/home_widgets.dart';
+import 'plugins/tracker/home_widgets.dart';
+import 'plugins/store/home_widgets.dart';
+import 'plugins/nodes/home_widgets.dart';
+import 'plugins/contact/home_widgets.dart';
+import 'plugins/habits/home_widgets.dart';
+import 'plugins/database/home_widgets.dart';
+import 'plugins/calendar_album/home_widgets.dart';
 import 'screens/home_screen/managers/home_layout_manager.dart';
 // 全局导航键
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -183,7 +199,22 @@ Future<void> _initializeHomeWidgets() async {
     ChatHomeWidgets.register();
     DiaryHomeWidgets.register();
     ActivityHomeWidgets.register();
-    // TODO: 其他插件小组件注册...
+    OpenAIHomeWidgets.register();
+    NotesHomeWidgets.register();
+    GoodsHomeWidgets.register();
+    BillHomeWidgets.register();
+    TodoHomeWidgets.register();
+    CheckinHomeWidgets.register();
+    CalendarHomeWidgets.register();
+    TimerHomeWidgets.register();
+    DayHomeWidgets.register();
+    TrackerHomeWidgets.register();
+    StoreHomeWidgets.register();
+    NodesHomeWidgets.register();
+    ContactHomeWidgets.register();
+    HabitsHomeWidgets.register();
+    DatabaseHomeWidgets.register();
+    CalendarAlbumHomeWidgets.register();
 
     // 初始化布局管理器
     final layoutManager = HomeLayoutManager();
