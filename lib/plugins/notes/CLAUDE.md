@@ -623,7 +623,7 @@ OpenAI 插件会自动调用 `NotesPromptReplacements.getNotes()` 并替换占�
 ### Q4: 笔记内容支持哪些格式?
 
 当前支持 Markdown 格式,存储在 `content` 字段。建议在编辑界面集成:
-- `flutter_markdown` - Markdown 渲染
+- `flutter_quill` - Markdown 渲染
 - `markdown_editable_textinput` - Markdown 编辑器
 - 或自定义富文本编辑器
 

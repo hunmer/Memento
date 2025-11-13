@@ -138,7 +138,7 @@ Future<void> updateUser(User user);
 - `file_picker`: 文件选择
 - `audioplayers`: 音频播放
 - `record`: 音频录制
-- `flutter_markdown`: Markdown 渲染
+- `flutter_quill`: Markdown 渲染
 - `photo_view`: 图片查看器
 - `media_kit`: 视频播放
 

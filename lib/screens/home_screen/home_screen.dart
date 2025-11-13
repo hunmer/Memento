@@ -7,6 +7,7 @@ import 'managers/home_layout_manager.dart';
 import 'widgets/home_grid.dart';
 import 'widgets/add_widget_dialog.dart';
 import 'widgets/create_folder_dialog.dart';
+import 'widgets/layout_manager_dialog.dart';
 
 /// 重构后的主屏幕
 ///
@@ -129,6 +130,24 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 _showAddWidgetDialog();
               },
             ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.save),
+              title: const Text('保存当前布局'),
+              onTap: () {
+                Navigator.pop(context);
+                _showSaveLayoutDialog();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.layers),
+              title: const Text('管理布局'),
+              onTap: () {
+                Navigator.pop(context);
+                _showLayoutManagerDialog();
+              },
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.grid_view),
               title: const Text('网格大小'),
@@ -194,6 +213,69 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           ),
         ],
       ),
+    );
+  }
+
+  /// 显示保存布局对话框
+  void _showSaveLayoutDialog() {
+    final TextEditingController nameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('保存当前布局'),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(
+            labelText: '布局名称',
+            hintText: '例如：工作布局、娱乐布局',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final name = nameController.text.trim();
+              if (name.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('请输入布局名称')),
+                );
+                return;
+              }
+
+              Navigator.pop(context);
+
+              try {
+                await _layoutManager.saveCurrentLayoutAs(name);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('布局"$name"已保存')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('保存失败：$e')),
+                  );
+                }
+              }
+            },
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 显示布局管理对话框
+  void _showLayoutManagerDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const LayoutManagerDialog(),
     );
   }
 
