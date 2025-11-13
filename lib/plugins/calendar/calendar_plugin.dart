@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/js_bridge/js_bridge_plugin.dart';
 import '../base_plugin.dart';
 import './controllers/calendar_controller.dart' as app;
 import './models/event.dart';
@@ -13,7 +15,7 @@ import './services/todo_event_service.dart';
 import '../todo/todo_plugin.dart';
 import './l10n/calendar_localizations.dart';
 
-class CalendarPlugin extends BasePlugin {
+class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   // 总控制器，管理所有日历相关服务
   late final app.CalendarController controller;
   // SyncFusion日历控制器
@@ -53,6 +55,9 @@ class CalendarPlugin extends BasePlugin {
     } else {
       sfController.view = syncfusion.CalendarView.month;
     }
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
   }
 
   syncfusion.CalendarView _getCalendarViewFromString(String viewString) {
@@ -406,6 +411,172 @@ class CalendarPlugin extends BasePlugin {
   Future<void> uninstall() async {
     await storageManager.delete('calendar/calendar_events');
     await storageManager.delete('calendar/calendar_last_view');
+  }
+
+  // ==================== JS API 定义 ====================
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 事件查询
+      'getEvents': _jsGetEvents,
+      'getTodayEvents': _jsGetTodayEvents,
+      'getEventsByDateRange': _jsGetEventsByDateRange,
+
+      // 事件操作
+      'createEvent': _jsCreateEvent,
+      'updateEvent': _jsUpdateEvent,
+      'deleteEvent': _jsDeleteEvent,
+      'completeEvent': _jsCompleteEvent,
+
+      // 已完成事件
+      'getCompletedEvents': _jsGetCompletedEvents,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取所有事件（包括 Todo 任务事件）
+  Future<String> _jsGetEvents() async {
+    final events = controller.getAllEvents();
+    final eventsJson = events.map((e) => e.toJson()).toList();
+    return jsonEncode(eventsJson);
+  }
+
+  /// 获取今日事件
+  Future<String> _jsGetTodayEvents() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+
+    final events = controller.getAllEvents().where((event) {
+      return event.startTime.isAfter(today.subtract(const Duration(seconds: 1))) &&
+          event.startTime.isBefore(tomorrow);
+    }).toList();
+
+    final eventsJson = events.map((e) => e.toJson()).toList();
+    return jsonEncode(eventsJson);
+  }
+
+  /// 根据日期范围获取事件
+  /// 参数：startDate (ISO8601), endDate (ISO8601)
+  Future<String> _jsGetEventsByDateRange(String startDateStr, String endDateStr) async {
+    final startDate = DateTime.parse(startDateStr);
+    final endDate = DateTime.parse(endDateStr);
+
+    final events = controller.getAllEvents().where((event) {
+      return event.startTime.isAfter(startDate.subtract(const Duration(seconds: 1))) &&
+          event.startTime.isBefore(endDate.add(const Duration(seconds: 1)));
+    }).toList();
+
+    final eventsJson = events.map((e) => e.toJson()).toList();
+    return jsonEncode(eventsJson);
+  }
+
+  /// 创建事件
+  /// 参数：title, description, startTime (ISO8601), endTime (ISO8601, optional),
+  ///       iconCodePoint (int, optional), colorValue (int, optional), reminderMinutes (int, optional)
+  Future<String> _jsCreateEvent(
+    String title,
+    String description,
+    String startTimeStr, [
+    String? endTimeStr,
+    int? iconCodePoint,
+    int? colorValue,
+    int? reminderMinutes,
+  ]) async {
+    final startTime = DateTime.parse(startTimeStr);
+    final endTime = endTimeStr != null ? DateTime.parse(endTimeStr) : null;
+
+    final event = CalendarEvent(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: title,
+      description: description,
+      startTime: startTime,
+      endTime: endTime,
+      icon: iconCodePoint != null
+          ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+          : Icons.event,
+      color: colorValue != null ? Color(colorValue) : color,
+      source: 'default',
+      reminderMinutes: reminderMinutes,
+    );
+
+    controller.addEvent(event);
+    return jsonEncode(event.toJson());
+  }
+
+  /// 更新事件
+  /// 参数：eventId, title (optional), description (optional), startTime (ISO8601, optional),
+  ///       endTime (ISO8601, optional), iconCodePoint (int, optional),
+  ///       colorValue (int, optional), reminderMinutes (int, optional)
+  Future<String> _jsUpdateEvent(
+    String eventId, [
+    String? title,
+    String? description,
+    String? startTimeStr,
+    String? endTimeStr,
+    int? iconCodePoint,
+    int? colorValue,
+    int? reminderMinutes,
+  ]) async {
+    // 查找事件
+    final existingEvent = controller.events.firstWhere(
+      (e) => e.id == eventId,
+      orElse: () => throw Exception('Event not found: $eventId'),
+    );
+
+    // 构建更新后的事件
+    final updatedEvent = existingEvent.copyWith(
+      title: title,
+      description: description,
+      startTime: startTimeStr != null ? DateTime.parse(startTimeStr) : null,
+      endTime: endTimeStr != null ? DateTime.parse(endTimeStr) : null,
+      icon: iconCodePoint != null
+          ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+          : null,
+      color: colorValue != null ? Color(colorValue) : null,
+      reminderMinutes: reminderMinutes,
+    );
+
+    controller.updateEvent(updatedEvent);
+    return jsonEncode(updatedEvent.toJson());
+  }
+
+  /// 删除事件
+  /// 参数：eventId
+  Future<bool> _jsDeleteEvent(String eventId) async {
+    final event = controller.events.firstWhere(
+      (e) => e.id == eventId,
+      orElse: () => throw Exception('Event not found: $eventId'),
+    );
+
+    controller.deleteEvent(event);
+    return true;
+  }
+
+  /// 完成事件
+  /// 参数：eventId
+  Future<String> _jsCompleteEvent(String eventId) async {
+    final event = controller.events.firstWhere(
+      (e) => e.id == eventId,
+      orElse: () => throw Exception('Event not found: $eventId'),
+    );
+
+    controller.completeEvent(event);
+
+    // 返回完成后的事件（包含 completedTime）
+    final completedEvent = controller.completedEvents.firstWhere(
+      (e) => e.id == eventId,
+    );
+    return jsonEncode(completedEvent.toJson());
+  }
+
+  /// 获取已完成事件
+  Future<String> _jsGetCompletedEvents() async {
+    final events = controller.completedEvents;
+    final eventsJson = events.map((e) => e.toJson()).toList();
+    return jsonEncode(eventsJson);
   }
 }
 
