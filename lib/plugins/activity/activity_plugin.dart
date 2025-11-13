@@ -266,11 +266,11 @@ class _ActivityMainViewState extends State<ActivityMainView> {
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.timeline),
-            label: ActivityLocalizations.of(context).timeline ?? '时间线',
+            label: ActivityLocalizations.of(context).timeline,
           ),
           NavigationDestination(
             icon: const Icon(Icons.bar_chart),
-            label: ActivityLocalizations.of(context).statistics ?? '统计',
+            label: ActivityLocalizations.of(context).statistics,
           ),
         ],
       ),

@@ -137,7 +137,6 @@ abstract class ChatLocalizations {
   String get currentRange;
   String get titleCannotBeEmpty;
 
-  @override
   String get deleteChannelConfirmation =>
       'Are you sure you want to delete channel "\${channel.title}"? This action cannot be undone.';
   String get profileTitle;

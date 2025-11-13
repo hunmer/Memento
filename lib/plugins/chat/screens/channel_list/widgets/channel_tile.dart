@@ -66,7 +66,7 @@ class ChannelTile extends StatelessWidget {
                       children: [
                         const Icon(Icons.edit, size: 20),
                         const SizedBox(width: 8),
-                            Text(ChatLocalizations.of(context).edit ?? 'Edit'),
+                            Text(ChatLocalizations.of(context).edit),
                       ],
                     ),
                   ),
@@ -77,7 +77,7 @@ class ChannelTile extends StatelessWidget {
                         const Icon(Icons.delete, size: 20),
                         const SizedBox(width: 8),
                             Text(
-                              ChatLocalizations.of(context).delete ?? 'Delete',
+                              ChatLocalizations.of(context).delete,
                             ),
                       ],
                     ),
@@ -97,7 +97,7 @@ class ChannelTile extends StatelessWidget {
         text: TextSpan(
           children: [
             TextSpan(
-              text: '[${ChatLocalizations.of(context).draft ?? "Draft"}] ',
+              text: '[${ChatLocalizations.of(context).draft}] ',
               style: const TextStyle(color: Colors.red, fontSize: 13),
             ),
             TextSpan(
@@ -134,7 +134,7 @@ class ChannelTile extends StatelessWidget {
         );
       } else {
         return Text(
-          ChatLocalizations.of(context).enterMessage ?? 'Type a message...',
+          ChatLocalizations.of(context).enterMessage,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(color: Colors.grey[600], fontSize: 13),

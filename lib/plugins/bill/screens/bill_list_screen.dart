@@ -244,7 +244,7 @@ class _BillListScreenState extends State<BillListScreen>
                         Row(
                           children: [
                             Text(
-                              '${BillLocalizations.of(context)!.timeRange}:',
+                              '${BillLocalizations.of(context).timeRange}:',
                             ),
                             const SizedBox(width: 8),
                             SegmentedButton<String>(

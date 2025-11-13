@@ -49,13 +49,11 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
   @override
   String get deleteTag => '删除标签';
 
-  @override
   String get save => '保存';
 
   @override
   String get mood => '心情';
 
-  @override
   String get cancel => '取消';
 
   @override
@@ -109,19 +107,15 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
   @override
   String get ungrouped => '未分组';
 
-  @override
   String get recentlyUsed => '最近使用';
 
-  @override
   String get tagManagement => '标签管理';
 
-  @override
   String get tagsHint => '用逗号分隔标签';
 
   @override
   String get unnamedActivity => '未命名活动';
 
-  @override
   String get contentHint => '输入活动描述';
 
   @override

@@ -1,5 +1,4 @@
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/l10n/app_localizations_en.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/chat_localizations.dart';
 import '../../../models/channel.dart';
@@ -59,7 +58,7 @@ class _FilterDialogState extends State<FilterDialog> {
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: Text(l10n.advancedFilter ?? 'Advanced Filter'),
+      title: Text(l10n.advancedFilter),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView(
@@ -67,13 +66,13 @@ class _FilterDialogState extends State<FilterDialog> {
           children: [
             // 搜索范围选项
             Text(
-              l10n.searchIn ?? 'Search in:',
+              l10n.searchIn,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             CheckboxListTile(
-              title: Text(l10n.channelNames ?? 'Channel names'),
+              title: Text(l10n.channelNames),
               value: _filter.includeChannels,
               onChanged: (value) {
                 setState(() {
@@ -84,7 +83,7 @@ class _FilterDialogState extends State<FilterDialog> {
             ),
 
             CheckboxListTile(
-              title: Text(l10n.usernames ?? 'Usernames'),
+              title: Text(l10n.usernames),
               value: _filter.includeUsernames,
               onChanged: (value) {
                 setState(() {
@@ -95,7 +94,7 @@ class _FilterDialogState extends State<FilterDialog> {
             ),
 
             CheckboxListTile(
-              title: Text(l10n.messageContent ?? 'Message content'),
+              title: Text(l10n.messageContent),
               value: _filter.includeContent,
               onChanged: (value) {
                 setState(() {
@@ -146,7 +145,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 日期范围选择
             Text(
-              l10n.dateRange ?? 'Date range:',
+              l10n.dateRange,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -159,7 +158,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     label: Text(
                       _filter.startDate != null
                           ? '${_filter.startDate!.day}/${_filter.startDate!.month}/${_filter.startDate!.year}'
-                          : l10n.startDate ?? 'Start date',
+                          : l10n.startDate,
                     ),
                     onPressed: () => _selectDate(context, true),
                   ),
@@ -171,7 +170,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     label: Text(
                       _filter.endDate != null
                           ? '${_filter.endDate!.day}/${_filter.endDate!.month}/${_filter.endDate!.year}'
-                          : l10n.endDate ?? 'End date',
+                          : l10n.endDate,
                     ),
                     onPressed: () => _selectDate(context, false),
                   ),
@@ -189,7 +188,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       _filter.endDate = null;
                     });
                   },
-                  child: Text(l10n.clearDates ?? 'Clear dates'),
+                  child: Text(l10n.clearDates),
                 ),
               ),
 
@@ -197,13 +196,13 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 频道选择
             Text(
-              l10n.selectChannels ?? 'Select channels:',
+              l10n.selectChannels,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             if (_availableChannels.isEmpty)
-              Text(l10n.noChannelsAvailable ?? 'No channels available')
+              Text(l10n.noChannelsAvailable)
             else
               Wrap(
                 spacing: 8,
@@ -233,13 +232,13 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 用户选择
             Text(
-              l10n.selectUsers ?? 'Select users:',
+              l10n.selectUsers,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             if (_availableUsers.isEmpty)
-              Text(l10n.noUsersAvailable ?? 'No users available')
+              Text(l10n.noUsersAvailable)
             else
               Wrap(
                 spacing: 8,

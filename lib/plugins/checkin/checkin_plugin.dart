@@ -1,4 +1,3 @@
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations_en.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';

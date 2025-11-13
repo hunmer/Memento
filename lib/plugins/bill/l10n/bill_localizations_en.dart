@@ -142,7 +142,6 @@ class BillLocalizationsEn extends BillLocalizations {
   @override
   String get accountDeleted => 'Account deleted';
 
-  @override
   String get undo => 'Undo';
 
   @override

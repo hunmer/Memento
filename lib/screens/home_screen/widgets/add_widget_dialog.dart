@@ -3,7 +3,6 @@ import '../managers/home_widget_registry.dart';
 import '../managers/home_layout_manager.dart';
 import '../widgets/home_widget.dart';
 import '../models/home_widget_item.dart';
-import '../models/home_widget_size.dart';
 
 /// 添加小组件对话框
 class AddWidgetDialog extends StatefulWidget {
