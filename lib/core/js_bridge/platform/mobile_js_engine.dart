@@ -29,6 +29,10 @@ class MobileJSEngine implements JSEngine {
         globalThis.__PENDING_CALLS__ = {};
       }
 
+      if (!globalThis.__DART_RESULTS__) {
+        globalThis.__DART_RESULTS__ = {};
+      }
+
       // 定义 console 对象
       var console = {
         log: function() {
@@ -153,18 +157,31 @@ class MobileJSEngine implements JSEngine {
         // 处理待处理的 Promise 调用
         _runtime.evaluate('''
           (function() {
-            var keys = Object.keys(globalThis.__PENDING_CALLS__ || {});
-            for (var i = 0; i < keys.length; i++) {
-              var key = keys[i];
+            var pendingKeys = Object.keys(globalThis.__PENDING_CALLS__ || {});
+            var resultKeys = Object.keys(globalThis.__DART_RESULTS__ || {});
+
+            if (pendingKeys.length > 0) {
+              console.log('[轮询] 待处理调用:', pendingKeys.length, '个');
+              console.log('[轮询] 待处理 keys:', pendingKeys);
+              console.log('[轮询] 结果 keys:', resultKeys);
+            }
+
+            for (var i = 0; i < pendingKeys.length; i++) {
+              var key = pendingKeys[i];
               var pending = globalThis.__PENDING_CALLS__[key];
 
+              console.log('[轮询] 检查 key:', key);
+              console.log('[轮询] 结果中是否有此 key:', key in globalThis.__DART_RESULTS__);
+
               if (globalThis.__DART_RESULTS__[key]) {
+                console.log('[轮询] ✓ 找到结果！');
                 var resultJson = globalThis.__DART_RESULTS__[key];
                 delete globalThis.__DART_RESULTS__[key];
                 delete globalThis.__PENDING_CALLS__[key];
 
                 try {
                   var parsed = JSON.parse(resultJson);
+                  console.log('[轮询] 调用 resolve');
                   if (parsed && parsed.error) {
                     pending.reject(new Error(parsed.error));
                   } else {
@@ -173,6 +190,8 @@ class MobileJSEngine implements JSEngine {
                 } catch (e) {
                   pending.resolve(resultJson);
                 }
+              } else {
+                console.log('[轮询] ✗ 未找到匹配结果');
               }
             }
           })();
@@ -192,18 +211,21 @@ class MobileJSEngine implements JSEngine {
         _runtime.evaluate('''
           (function() {
             var keys = Object.keys(globalThis.__PENDING_CALLS__ || {});
+
             for (var i = 0; i < keys.length; i++) {
               var key = keys[i];
               var pending = globalThis.__PENDING_CALLS__[key];
 
               // 检查 Dart 是否已返回结果
               if (globalThis.__DART_RESULTS__[key]) {
+                console.log('[主轮询] 找到结果，key:', key);
                 var resultJson = globalThis.__DART_RESULTS__[key];
                 delete globalThis.__DART_RESULTS__[key];
                 delete globalThis.__PENDING_CALLS__[key];
 
                 try {
                   var parsed = JSON.parse(resultJson);
+                  console.log('[主轮询] 调用 resolve');
                   if (parsed && parsed.error) {
                     pending.reject(new Error(parsed.error));
                   } else {
@@ -344,6 +366,10 @@ class MobileJSEngine implements JSEngine {
         if (!globalThis.__PENDING_CALLS__) {
           globalThis.__PENDING_CALLS__ = {};
         }
+
+        if (!globalThis.__DART_RESULTS__) {
+          globalThis.__DART_RESULTS__ = {};
+        }
         globalThis.__PENDING_CALLS__[resultKey] = {
           resolve: null,
           reject: null,
@@ -375,18 +401,29 @@ class MobileJSEngine implements JSEngine {
 
         // 辅助函数：将结果写入全局变量
         void setJsResult(String jsonResult) {
-          // 转义 JSON 字符串中的特殊字符
-          final escapedJson = jsonResult
-              .replaceAll('\\', '\\\\')  // 反斜杠
-              .replaceAll("'", "\\'")    // 单引号
-              .replaceAll('\n', '\\n')   // 换行
-              .replaceAll('\r', '\\r');  // 回车
-
-          // 将结果写入全局变量
           final resultKey = '${callbackChannel}_${callId}';
-          final jsCode = "globalThis.__DART_RESULTS__['$resultKey'] = '$escapedJson';";
-          print('[JS Bridge] 设置结果: $jsCode');
-          _runtime.evaluate(jsCode);  // 使用 _runtime.evaluate 避免创建新上下文
+
+          try {
+            _runtime.evaluate(
+              'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }'
+            );
+
+            // 先将结果设置到临时全局变量（避免转义问题）
+            _runtime.evaluate(
+              'globalThis.__TEMP_RESULT__ = ${jsonResult};'
+            );
+
+            // 然后移动到目标位置
+            _runtime.evaluate(
+              "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
+              "delete globalThis.__TEMP_RESULT__;"
+            );
+
+            print('[JS Bridge] ✓ 结果已写入: $resultKey');
+          } catch (e) {
+            print('[JS Bridge] ✗ 写入失败: $e');
+            print('[JS Bridge] JSON 内容: $jsonResult');
+          }
         }
 
         // 处理结果（同步或异步）
@@ -412,13 +449,15 @@ class MobileJSEngine implements JSEngine {
         final callId = data['callId'];
         final resultKey = '${callbackChannel}_${callId}';
 
-        final escapedJson = errorJson
-            .replaceAll('\\', '\\\\')
-            .replaceAll("'", "\\'")
-            .replaceAll('\n', '\\n')
-            .replaceAll('\r', '\\r');
-
-        _runtime.evaluate("globalThis.__DART_RESULTS__['$resultKey'] = '$escapedJson';");
+        try {
+          _runtime.evaluate('globalThis.__TEMP_RESULT__ = $errorJson;');
+          _runtime.evaluate(
+            "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
+            "delete globalThis.__TEMP_RESULT__;"
+          );
+        } catch (writeError) {
+          print('[JS Bridge] 写入错误失败: $writeError');
+        }
       }
     });
   }
