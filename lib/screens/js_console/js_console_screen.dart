@@ -11,7 +11,12 @@ class JSConsoleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => JSConsoleController(),
+      create: (_) {
+        final controller = JSConsoleController();
+        // 异步加载示例（不阻塞 UI）
+        controller.loadExamples();
+        return controller;
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text('JS Console'),
