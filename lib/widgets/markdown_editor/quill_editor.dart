@@ -148,39 +148,83 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
           actions: _buildActions(),
         ),
         // Quill 工具栏
-        quill.QuillSimpleToolbar(
-          controller: _contentController,
-          configurations: const quill.QuillSimpleToolbarConfigurations(
-            showAlignmentButtons: true,
-            showBackgroundColorButton: true,
-            showBoldButton: true,
-            showCenterAlignment: true,
-            showClearFormat: true,
-            showCodeBlock: true,
-            showColorButton: true,
-            showDirection: false,
-            showDividers: true,
-            showFontFamily: false,
-            showFontSize: true,
-            showHeaderStyle: true,
-            showInlineCode: true,
-            showItalicButton: true,
-            showJustifyAlignment: true,
-            showLeftAlignment: true,
-            showLink: true,
-            showListBullets: true,
-            showListCheck: true,
-            showListNumbers: true,
-            showQuote: true,
-            showRedo: true,
-            showRightAlignment: true,
-            showSearchButton: false,
-            showSmallButton: false,
-            showStrikeThrough: true,
-            showSubscript: false,
-            showSuperscript: false,
-            showUnderLineButton: true,
-            showUndo: true,
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Wrap(
+            children: [
+              quill.QuillToolbarHistoryButton(
+                isUndo: true,
+                controller: _contentController,
+              ),
+              quill.QuillToolbarHistoryButton(
+                isUndo: false,
+                controller: _contentController,
+              ),
+              quill.QuillToolbarToggleStyleButton(
+                controller: _contentController,
+                attribute: quill.Attribute.bold,
+              ),
+              quill.QuillToolbarToggleStyleButton(
+                controller: _contentController,
+                attribute: quill.Attribute.italic,
+              ),
+              quill.QuillToolbarToggleStyleButton(
+                controller: _contentController,
+                attribute: quill.Attribute.underline,
+              ),
+              quill.QuillToolbarToggleStyleButton(
+                controller: _contentController,
+                attribute: quill.Attribute.strikeThrough,
+              ),
+              quill.QuillToolbarClearFormatButton(
+                controller: _contentController,
+              ),
+              const VerticalDivider(),
+              quill.QuillToolbarColorButton(
+                controller: _contentController,
+                isBackground: false,
+              ),
+              quill.QuillToolbarColorButton(
+                controller: _contentController,
+                isBackground: true,
+              ),
+              const VerticalDivider(),
+              quill.QuillToolbarSelectHeaderStyleDropdownButton(
+                controller: _contentController,
+              ),
+              const VerticalDivider(),
+              quill.QuillToolbarToggleCheckListButton(
+                controller: _contentController,
+              ),
+              quill.QuillToolbarToggleStyleButton(
+                controller: _contentController,
+                attribute: quill.Attribute.ol,
+              ),
+              quill.QuillToolbarToggleStyleButton(
+                controller: _contentController,
+                attribute: quill.Attribute.ul,
+              ),
+              quill.QuillToolbarToggleStyleButton(
+                controller: _contentController,
+                attribute: quill.Attribute.inlineCode,
+              ),
+              quill.QuillToolbarToggleStyleButton(
+                controller: _contentController,
+                attribute: quill.Attribute.blockQuote,
+              ),
+              quill.QuillToolbarIndentButton(
+                controller: _contentController,
+                isIncrease: true,
+              ),
+              quill.QuillToolbarIndentButton(
+                controller: _contentController,
+                isIncrease: false,
+              ),
+              const VerticalDivider(),
+              quill.QuillToolbarLinkStyleButton(
+                controller: _contentController,
+              ),
+            ],
           ),
         ),
         // Quill 编辑器
@@ -190,13 +234,6 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
             child: quill.QuillEditor.basic(
               controller: _contentController,
               focusNode: _contentFocusNode,
-              configurations: quill.QuillEditorConfigurations(
-                padding: EdgeInsets.zero,
-                placeholder: widget.contentHint,
-                readOnly: false,
-                autoFocus: widget.autofocus,
-                expands: true,
-              ),
             ),
           ),
         ),
@@ -204,3 +241,6 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
     );
   }
 }
+
+// 为了向后兼容,提供 MarkdownEditor 别名
+typedef MarkdownEditor = QuillEditorWidget;

@@ -49,12 +49,6 @@ class QuillViewer extends StatelessWidget {
 
     return quill.QuillEditor.basic(
       controller: controller,
-      configurations: quill.QuillEditorConfigurations(
-        padding: EdgeInsets.zero,
-        readOnly: true,
-        showCursor: false,
-        customStyles: customStyles,
-      ),
     );
   }
 }

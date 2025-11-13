@@ -1,7 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../core/storage/storage_manager.dart';
-import '../../../widgets/markdown_editor/markdown_editor.dart';
+import '../../../widgets/markdown_editor/quill_editor.dart';
 import '../utils/diary_utils.dart';
 import '../l10n/diary_localizations.dart';
 

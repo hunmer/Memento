@@ -14,8 +14,7 @@ Future<void> handleAdvancedEditor({
         height: MediaQuery.of(context).size.height * 0.8,
         child: MarkdownEditor(
           showTitle: false,
-          contentHint: '在此输入消息内容...',
-          showPreviewButton: true,
+              contentHint: '在此输入消息内容...',
           onSave: (_, content) {
             if (content.isNotEmpty) {
               // 发送消息

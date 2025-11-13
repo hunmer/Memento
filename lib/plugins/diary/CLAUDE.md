@@ -126,7 +126,7 @@ Future<String> getDiaries(Map<String, dynamic> params);
 - `table_calendar`: 日历组件
 - `intl`: 日期格式化
 - `path`: 路径处理
-- `flutter_markdown`: Markdown 渲染（通过 MarkdownEditor 组件）
+- `flutter_quill`: Markdown 渲染（通过 MarkdownEditor 组件）
 
 ### 插件依赖
 

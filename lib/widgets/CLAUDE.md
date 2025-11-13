@@ -83,7 +83,7 @@ Markdown 编辑器组件，提供完整的 Markdown 编辑和预览功能。
 - **双模式切换**：编辑模式和预览模式无缝切换
 - **富工具栏**：提供粗体、斜体、列表、代码块等常用格式
 - **语法插入**：支持 Markdown 语法快速插入
-- **实时预览**：使用 flutter_markdown 渲染预览内容
+- **实时预览**：使用 flutter_quill 渲染预览内容
 
 #### 使用示例
 
@@ -625,9 +625,10 @@ lib/widgets/
 ├── app_bar_widget.dart                         # 应用栏组件
 ├── app_drawer.dart                             # 应用抽屉
 │
-├── markdown_editor/                            # Markdown 编辑器模块
+├── markdown_editor/                            # Quill 富文本编辑器模块
 │   ├── index.dart                              # 导出文件
-│   └── markdown_editor.dart                    # 编辑器实现
+│   ├── quill_editor.dart                       # 编辑器实现
+│   └── quill_viewer.dart                       # 查看器实现
 │
 ├── file_preview/                               # 文件预览模块
 │   ├── index.dart                              # 导出文件
@@ -690,7 +691,7 @@ lib/widgets/
 
 | 包名 | 用途 | 使用组件 |
 |-----|------|---------|
-| flutter_markdown | Markdown 渲染 | MarkdownEditor |
+| flutter_quill | Markdown 渲染 | MarkdownEditor |
 | photo_view | 图片缩放预览 | FilePreviewScreen |
 | share_plus | 文件分享 | FilePreviewScreen |
 | image_picker | 图片选择 | ImagePickerDialog, AvatarPicker |

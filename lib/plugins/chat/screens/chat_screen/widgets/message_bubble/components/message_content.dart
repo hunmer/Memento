@@ -83,7 +83,7 @@ class MessageContent extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color:  Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            color:  Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
@@ -176,7 +176,7 @@ class MessageContent extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: iconColor.withOpacity(0.1),
+                      color: iconColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
@@ -301,10 +301,16 @@ class MessageContent extends StatelessWidget {
             const quill.VerticalSpacing(0, 0),
             null,
           ),
-          code: TextStyle(
-            backgroundColor: Colors.grey[200],
-            color: Colors.black87,
-            fontFamily: 'monospace',
+          code: quill.DefaultTextBlockStyle(
+            TextStyle(
+              backgroundColor: Colors.grey[200],
+              color: Colors.black87,
+              fontFamily: 'monospace',
+            ),
+            const quill.HorizontalSpacing(0, 0),
+            const quill.VerticalSpacing(0, 0),
+            const quill.VerticalSpacing(0, 0),
+            null,
           ),
           inlineCode: quill.InlineCodeStyle(
             backgroundColor: Colors.grey[200],

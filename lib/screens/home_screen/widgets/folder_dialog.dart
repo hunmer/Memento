@@ -1,6 +1,8 @@
+import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:flutter/material.dart';
 import '../models/home_folder_item.dart';
 import '../managers/home_layout_manager.dart';
+import '../managers/home_widget_registry.dart';
 import '../models/home_item.dart';
 import 'home_grid.dart';
 import 'add_widget_dialog.dart';
@@ -314,6 +316,25 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
                   final item = widget.items[index];
                   final isSelected = _selectedIds.contains(item.id);
 
+                  Widget? leadingIcon;
+                  String displayName;
+
+                  if (item is HomeWidgetItem) {
+                    final registry = HomeWidgetRegistry();
+                    final widget = registry.getWidget(item.widgetId);
+                    if (widget != null) {
+                      leadingIcon = Icon(widget.icon, color: widget.color, size: 20);
+                      displayName = widget.name;
+                    } else {
+                      displayName = item.widgetId;
+                    }
+                  } else if (item is HomeFolderItem) {
+                    leadingIcon = Icon(item.icon, color: item.color, size: 20);
+                    displayName = item.name;
+                  } else {
+                    displayName = 'Unknown';
+                  }
+
                   return CheckboxListTile(
                     value: isSelected,
                     onChanged: (bool? value) {
@@ -327,16 +348,11 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
                     },
                     title: Row(
                       children: [
-                        if (item is HomeWidgetItem)
-                          Icon(item.icon, color: item.color, size: 20)
-                        else if (item is HomeFolderItem)
-                          Icon(item.icon, color: item.color, size: 20),
+                        if (leadingIcon != null) leadingIcon,
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            item is HomeWidgetItem
-                                ? item.pluginId
-                                : (item as HomeFolderItem).name,
+                            displayName,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -489,7 +505,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
                       height: 48,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? _selectedColor.withOpacity(0.2)
+                            ? _selectedColor.withValues(alpha: 0.2)
                             : Colors.transparent,
                         border: Border.all(
                           color: isSelected
@@ -521,7 +537,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
                 spacing: 8,
                 runSpacing: 8,
                 children: _commonColors.map((color) {
-                  final isSelected = color.value == _selectedColor.value;
+                  final isSelected = color.toARGB32() == _selectedColor.toARGB32();
                   return InkWell(
                     onTap: () {
                       setState(() {

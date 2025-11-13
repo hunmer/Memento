@@ -63,22 +63,6 @@ import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 import 'plugins/database/database_plugin.dart';
 
-// 无动画的页面过渡构建器 - 解决键盘弹出时的卡顿问题
-class NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
-  const NoAnimationPageTransitionsBuilder();
-
-  @override
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    // 直接返回子组件,不添加任何过渡动画
-    return child;
-  }
-}
 
 // 主页小组件注册
 import 'plugins/chat/home_widgets.dart';
@@ -101,6 +85,24 @@ import 'plugins/habits/home_widgets.dart';
 import 'plugins/database/home_widgets.dart';
 import 'plugins/calendar_album/home_widgets.dart';
 import 'screens/home_screen/managers/home_layout_manager.dart';
+
+// 无动画的页面过渡构建器 - 解决键盘弹出时的卡顿问题
+class NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
+  const NoAnimationPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    // 直接返回子组件,不添加任何过渡动画
+    return child;
+  }
+}
+
 // 全局导航键
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 // 全局单例实例
@@ -297,7 +299,8 @@ class _MyAppState extends State<MyApp> {
           },
         ),
       ),
-      dark: ThemeData.dark(
+      dark: ThemeData(
+        brightness: Brightness.dark,
         useMaterial3: true,
         // 使用无动画构建器以提升性能,特别是键盘弹出时
         pageTransitionsTheme: const PageTransitionsTheme(

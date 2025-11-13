@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/note.dart';
-import '../../../widgets/markdown_editor/markdown_editor.dart';
+import '../../../widgets/markdown_editor/quill_editor.dart';
 
 class NoteEditScreen extends StatelessWidget {
   final Note? note;

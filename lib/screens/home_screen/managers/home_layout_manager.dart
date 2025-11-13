@@ -4,6 +4,7 @@ import '../../../main.dart';
 import '../models/home_item.dart';
 import '../models/home_widget_item.dart';
 import '../models/home_folder_item.dart';
+import '../models/layout_config.dart';
 
 /// 主页布局管理器
 ///
@@ -26,9 +27,18 @@ class HomeLayoutManager extends ChangeNotifier {
   /// 配置键名
   static const String _configKey = 'home_layout';
 
+  /// 布局配置列表的键名
+  static const String _layoutConfigsKey = 'home_layout_configs';
+
+  /// 当前活动的布局配置ID
+  static const String _activeLayoutIdKey = 'home_active_layout_id';
+
   /// 是否已初始化
   bool _initialized = false;
   bool get initialized => _initialized;
+
+  /// 当前活动的布局ID
+  String? _activeLayoutId;
 
   /// 是否有未保存的更改
   bool _isDirty = false;
@@ -152,7 +162,11 @@ class HomeLayoutManager extends ChangeNotifier {
 
   /// 根据ID查找项目
   HomeItem? findItem(String itemId) {
-    return _items.firstWhere((item) => item.id == itemId, orElse: () => null as HomeItem);
+    try {
+      return _items.firstWhere((item) => item.id == itemId);
+    } catch (e) {
+      return null;
+    }
   }
 
   /// 重新排序
@@ -217,10 +231,12 @@ class HomeLayoutManager extends ChangeNotifier {
     }
 
     // 找到要移出的项目
-    final item = folder.children.firstWhere(
-      (child) => child.id == itemId,
-      orElse: () => null as HomeItem,
-    );
+    HomeItem? item;
+    try {
+      item = folder.children.firstWhere((child) => child.id == itemId);
+    } catch (e) {
+      return;
+    }
 
     if (item == null) return;
 
@@ -312,6 +328,210 @@ class HomeLayoutManager extends ChangeNotifier {
       }
     }
     return count;
+  }
+
+  // ==================== 多布局管理 ====================
+
+  /// 获取所有保存的布局配置
+  Future<List<LayoutConfig>> getSavedLayouts() async {
+    try {
+      final configs = await globalConfigManager.getPluginConfig(_layoutConfigsKey);
+      if (configs == null || configs['layouts'] == null) {
+        return [];
+      }
+
+      final layoutsList = configs['layouts'] as List;
+      return layoutsList
+          .map((json) => LayoutConfig.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint('Error loading saved layouts: $e');
+      return [];
+    }
+  }
+
+  /// 保存当前布局为新的配置
+  Future<void> saveCurrentLayoutAs(String name) async {
+    try {
+      // 生成新的布局ID
+      final layoutId = 'layout_${DateTime.now().millisecondsSinceEpoch}';
+      final now = DateTime.now();
+
+      // 创建布局配置
+      final config = LayoutConfig(
+        id: layoutId,
+        name: name,
+        items: _items.map((item) => item.toJson()).toList(),
+        gridCrossAxisCount: _gridCrossAxisCount,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      // 获取现有的布局列表
+      final layouts = await getSavedLayouts();
+      layouts.add(config);
+
+      // 保存布局列表
+      await globalConfigManager.savePluginConfig(_layoutConfigsKey, {
+        'layouts': layouts.map((l) => l.toJson()).toList(),
+      });
+
+      // 设置为当前活动的布局
+      _activeLayoutId = layoutId;
+      await globalConfigManager.savePluginConfig(_activeLayoutIdKey, {
+        'activeLayoutId': layoutId,
+      });
+
+      debugPrint('Layout saved: $name');
+    } catch (e) {
+      debugPrint('Error saving layout: $e');
+      rethrow;
+    }
+  }
+
+  /// 加载指定的布局配置
+  Future<void> loadLayoutConfig(String layoutId) async {
+    try {
+      final layouts = await getSavedLayouts();
+      final config = layouts.firstWhere(
+        (l) => l.id == layoutId,
+        orElse: () => throw Exception('Layout not found: $layoutId'),
+      );
+
+      // 应用布局配置
+      _items = config.items
+          .map((json) => HomeItem.fromJson(json))
+          .toList();
+      _gridCrossAxisCount = config.gridCrossAxisCount;
+
+      // 更新当前活动的布局ID
+      _activeLayoutId = layoutId;
+      await globalConfigManager.savePluginConfig(_activeLayoutIdKey, {
+        'activeLayoutId': layoutId,
+      });
+
+      // 同时更新默认布局（保持向后兼容）
+      await saveLayout();
+
+      _isDirty = false;
+      notifyListeners();
+
+      debugPrint('Layout loaded: ${config.name}');
+    } catch (e) {
+      debugPrint('Error loading layout config: $e');
+      rethrow;
+    }
+  }
+
+  /// 删除指定的布局配置
+  Future<void> deleteLayoutConfig(String layoutId) async {
+    try {
+      final layouts = await getSavedLayouts();
+      layouts.removeWhere((l) => l.id == layoutId);
+
+      // 保存更新后的布局列表
+      await globalConfigManager.savePluginConfig(_layoutConfigsKey, {
+        'layouts': layouts.map((l) => l.toJson()).toList(),
+      });
+
+      // 如果删除的是当前活动的布局，清除活动布局ID
+      if (_activeLayoutId == layoutId) {
+        _activeLayoutId = null;
+        await globalConfigManager.savePluginConfig(_activeLayoutIdKey, {
+          'activeLayoutId': null,
+        });
+      }
+
+      debugPrint('Layout deleted: $layoutId');
+    } catch (e) {
+      debugPrint('Error deleting layout: $e');
+      rethrow;
+    }
+  }
+
+  /// 重命名布局配置
+  Future<void> renameLayoutConfig(String layoutId, String newName) async {
+    try {
+      final layouts = await getSavedLayouts();
+      final index = layouts.indexWhere((l) => l.id == layoutId);
+
+      if (index == -1) {
+        throw Exception('Layout not found: $layoutId');
+      }
+
+      // 更新布局名称和修改时间
+      layouts[index] = layouts[index].copyWith(
+        name: newName,
+        updatedAt: DateTime.now(),
+      );
+
+      // 保存更新后的布局列表
+      await globalConfigManager.savePluginConfig(_layoutConfigsKey, {
+        'layouts': layouts.map((l) => l.toJson()).toList(),
+      });
+
+      debugPrint('Layout renamed: $newName');
+    } catch (e) {
+      debugPrint('Error renaming layout: $e');
+      rethrow;
+    }
+  }
+
+  /// 更新当前活动布局的配置（覆盖保存）
+  Future<void> updateCurrentLayout() async {
+    if (_activeLayoutId == null) {
+      debugPrint('No active layout to update');
+      return;
+    }
+
+    try {
+      final layouts = await getSavedLayouts();
+      final index = layouts.indexWhere((l) => l.id == _activeLayoutId);
+
+      if (index == -1) {
+        debugPrint('Active layout not found, saving as new');
+        return;
+      }
+
+      // 更新布局配置
+      layouts[index] = layouts[index].copyWith(
+        items: _items.map((item) => item.toJson()).toList(),
+        gridCrossAxisCount: _gridCrossAxisCount,
+        updatedAt: DateTime.now(),
+      );
+
+      // 保存更新后的布局列表
+      await globalConfigManager.savePluginConfig(_layoutConfigsKey, {
+        'layouts': layouts.map((l) => l.toJson()).toList(),
+      });
+
+      // 同时更新默认布局
+      await saveLayout();
+
+      debugPrint('Layout updated: $_activeLayoutId');
+    } catch (e) {
+      debugPrint('Error updating layout: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取当前活动的布局配置
+  Future<LayoutConfig?> getCurrentLayoutConfig() async {
+    if (_activeLayoutId == null) {
+      return null;
+    }
+
+    try {
+      final layouts = await getSavedLayouts();
+      try {
+        return layouts.firstWhere((l) => l.id == _activeLayoutId);
+      } catch (e) {
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error getting current layout: $e');
+      return null;
+    }
   }
 
   @override

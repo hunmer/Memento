@@ -27,13 +27,13 @@ class ContactCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         child: InkWell(
           onTap: onTap,
-          child: isListView ? _buildListView(context) : _buildCardView(),
+          child: isListView ? _buildListView(context) : _buildCardView(context),
         ),
       ),
     );
   }
 
-  Widget _buildCardView() {
+  Widget _buildCardView(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Column(
@@ -109,7 +109,7 @@ class ContactCard extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: contact.iconColor.withOpacity(0.5),
+              color: contact.iconColor.withValues(alpha: 0.5),
               width: 2,
             ),
           ),
