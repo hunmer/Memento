@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/quill_viewer/index.dart';
@@ -18,6 +19,68 @@ class MessageContent extends StatelessWidget {
     required this.message,
     required this.textColor,
   });
+
+  /// 判断内容是否为纯文本（没有任何 Quill 格式）
+  bool _isPlainText(String content) {
+    if (content.isEmpty) return true;
+
+    try {
+      // 尝试解析为 JSON
+      final json = jsonDecode(content);
+
+      // 检查是否为 Quill Delta 格式
+      if (json is! List) return true;
+
+      // 遍历所有操作
+      for (var op in json) {
+        if (op is! Map<String, dynamic>) continue;
+
+        // 检查是否有格式属性
+        if (op.containsKey('attributes')) {
+          final attributes = op['attributes'];
+          if (attributes != null && attributes is Map && attributes.isNotEmpty) {
+            return false; // 包含格式属性，不是纯文本
+          }
+        }
+
+        // 检查 insert 的内容类型
+        if (op.containsKey('insert')) {
+          final insert = op['insert'];
+          // 如果 insert 是 Map（如嵌入的图片、视频等），不是纯文本
+          if (insert is Map) {
+            return false;
+          }
+        }
+      }
+
+      return true; // 没有任何格式属性，是纯文本
+    } catch (e) {
+      // JSON 解析失败，说明是纯文本
+      return true;
+    }
+  }
+
+  /// 从 Quill Delta 格式中提取纯文本内容
+  String _extractPlainText(String content) {
+    try {
+      final json = jsonDecode(content);
+      if (json is! List) return content;
+
+      final buffer = StringBuffer();
+      for (var op in json) {
+        if (op is Map<String, dynamic> && op.containsKey('insert')) {
+          final insert = op['insert'];
+          if (insert is String) {
+            buffer.write(insert);
+          }
+        }
+      }
+
+      return buffer.toString();
+    } catch (e) {
+      return content;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -257,70 +320,84 @@ class MessageContent extends StatelessWidget {
       }
     } else {
       // 普通文本消息
-      return QuillViewer(
-        data: message.content,
-        selectable: true,
-        customStyles: quill.DefaultStyles(
-          paragraph: quill.DefaultTextBlockStyle(
-            TextStyle(color: textColor),
-            const quill.HorizontalSpacing(0, 0),
-            const quill.VerticalSpacing(0, 0),
-            const quill.VerticalSpacing(0, 0),
-            null,
+      // 判断是否为纯文本（无 Quill 格式）
+      if (_isPlainText(message.content)) {
+        // 纯文本，使用 SelectableText 显示
+        final plainText = _extractPlainText(message.content);
+        return SelectableText(
+          plainText,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 15,
           ),
-          h1: quill.DefaultTextBlockStyle(
-            TextStyle(
-              color: textColor,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+        );
+      } else {
+        // 包含 Quill 格式，使用 QuillViewer 显示
+        return QuillViewer(
+          data: message.content,
+          selectable: true,
+          customStyles: quill.DefaultStyles(
+            paragraph: quill.DefaultTextBlockStyle(
+              TextStyle(color: textColor),
+              const quill.HorizontalSpacing(0, 0),
+              const quill.VerticalSpacing(0, 0),
+              const quill.VerticalSpacing(0, 0),
+              null,
             ),
-            const quill.HorizontalSpacing(0, 0),
-            const quill.VerticalSpacing(8, 4),
-            const quill.VerticalSpacing(0, 0),
-            null,
-          ),
-          h2: quill.DefaultTextBlockStyle(
-            TextStyle(
-              color: textColor,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+            h1: quill.DefaultTextBlockStyle(
+              TextStyle(
+                color: textColor,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              const quill.HorizontalSpacing(0, 0),
+              const quill.VerticalSpacing(8, 4),
+              const quill.VerticalSpacing(0, 0),
+              null,
             ),
-            const quill.HorizontalSpacing(0, 0),
-            const quill.VerticalSpacing(6, 4),
-            const quill.VerticalSpacing(0, 0),
-            null,
-          ),
-          h3: quill.DefaultTextBlockStyle(
-            TextStyle(
-              color: textColor,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+            h2: quill.DefaultTextBlockStyle(
+              TextStyle(
+                color: textColor,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              const quill.HorizontalSpacing(0, 0),
+              const quill.VerticalSpacing(6, 4),
+              const quill.VerticalSpacing(0, 0),
+              null,
             ),
-            const quill.HorizontalSpacing(0, 0),
-            const quill.VerticalSpacing(4, 4),
-            const quill.VerticalSpacing(0, 0),
-            null,
-          ),
-          code: quill.DefaultTextBlockStyle(
-            TextStyle(
+            h3: quill.DefaultTextBlockStyle(
+              TextStyle(
+                color: textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              const quill.HorizontalSpacing(0, 0),
+              const quill.VerticalSpacing(4, 4),
+              const quill.VerticalSpacing(0, 0),
+              null,
+            ),
+            code: quill.DefaultTextBlockStyle(
+              TextStyle(
+                backgroundColor: Colors.grey[200],
+                color: Colors.black87,
+                fontFamily: 'monospace',
+              ),
+              const quill.HorizontalSpacing(0, 0),
+              const quill.VerticalSpacing(0, 0),
+              const quill.VerticalSpacing(0, 0),
+              null,
+            ),
+            inlineCode: quill.InlineCodeStyle(
               backgroundColor: Colors.grey[200],
-              color: Colors.black87,
-              fontFamily: 'monospace',
-            ),
-            const quill.HorizontalSpacing(0, 0),
-            const quill.VerticalSpacing(0, 0),
-            const quill.VerticalSpacing(0, 0),
-            null,
-          ),
-          inlineCode: quill.InlineCodeStyle(
-            backgroundColor: Colors.grey[200],
-            style: const TextStyle(
-              color: Colors.black87,
-              fontFamily: 'monospace',
+              style: const TextStyle(
+                color: Colors.black87,
+                fontFamily: 'monospace',
+              ),
             ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 }

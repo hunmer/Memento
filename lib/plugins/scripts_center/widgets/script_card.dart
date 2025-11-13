@@ -8,12 +8,14 @@ class ScriptCard extends StatelessWidget {
   final ScriptInfo script;
   final VoidCallback? onTap;
   final ValueChanged<bool>? onToggle;
+  final VoidCallback? onRun;
 
   const ScriptCard({
     super.key,
     required this.script,
     this.onTap,
     this.onToggle,
+    this.onRun,
   });
 
   @override
@@ -114,7 +116,7 @@ class ScriptCard extends StatelessWidget {
                         trigger.event,
                         style: const TextStyle(fontSize: 11),
                       ),
-                      backgroundColor: Colors.deepPurple.withOpacity(0.1),
+                      backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
                       padding: EdgeInsets.zero,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       visualDensity: VisualDensity.compact,
@@ -123,7 +125,7 @@ class ScriptCard extends StatelessWidget {
                 ),
               ],
 
-              // 类型和更新时间
+              // 类型、更新时间和运行按钮
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -135,8 +137,8 @@ class ScriptCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: script.isModule
-                          ? Colors.blue.withOpacity(0.1)
-                          : Colors.orange.withOpacity(0.1),
+                          ? Colors.blue.withValues(alpha: 0.1)
+                          : Colors.orange.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -152,13 +154,35 @@ class ScriptCard extends StatelessWidget {
 
                   // 更新时间
                   if (script.updatedAt != null)
-                    Text(
-                      _formatDateTime(script.updatedAt!),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[500],
-                        fontSize: 11,
+                    Expanded(
+                      child: Text(
+                        _formatDateTime(script.updatedAt!),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[500],
+                          fontSize: 11,
+                        ),
                       ),
                     ),
+
+                  // 运行按钮（仅当脚本启用时显示）
+                  if (script.enabled && onRun != null) ...[
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: onRun,
+                      icon: const Icon(Icons.play_arrow, size: 18),
+                      label: const Text('运行'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
