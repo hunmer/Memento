@@ -68,59 +68,6 @@ class JSConsoleController extends ChangeNotifier {
 
   // 预设示例
   static const Map<String, String> examples = {
-    '基础测试': '''
-// 测试基础功能
-var result = '测试成功！';
-result;
-''',
-    '同步 setResult 测试': '''
-// 测试同步代码的 setResult
-console.log('开始同步测试');
-setResult({
-  message: '同步测试成功',
-  timestamp: new Date().toISOString()
-});
-console.log('同步测试完成');
-''',
-    '异步 setResult 测试': '''
-// 测试异步代码的 setResult（不调用 API）
-(async function() {
-  console.log('开始异步测试');
-
-  // 模拟异步操作
-  await new Promise(resolve => {
-    console.log('创建 Promise，设置 setTimeout...');
-    setTimeout(() => {
-      console.log('setTimeout 回调被触发！');
-      resolve('ok');
-    }, 100);
-  });
-
-  console.log('Promise resolved');
-
-  setResult({
-    message: '异步测试成功',
-    timestamp: new Date().toISOString()
-  });
-
-  console.log('异步测试完成');
-})();
-''',
-    'API测试（基础）': '''
-// 方式1：使用 setResult 显式设置返回值
-(async function() {
-  var result = await Memento.chat.testSync();
-  console.log('测试结果:', result);
-  setResult(result);  // 显式设置返回值
-})();
-''',
-    'API测试（Promise）': '''
-// 方式2：使用 .then() 链式调用
-Memento.chat.testSync().then(result => {
-  console.log('测试结果:', result);
-  return result;  // 自动捕获返回值
-});
-''',
     '异步API测试': '''
 // 方式3：async/await，自动捕获 return 值
 (async function() {
