@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:Memento/widgets/quill_viewer/index.dart';
 import '../../models/calendar_entry.dart';
 import 'entry_detail_image_viewer.dart';
 
@@ -106,7 +106,7 @@ class EntryDetailContent extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
-          MarkdownBody(data: entry.content, selectable: true),
+          QuillViewer(data: entry.content, selectable: true),
         ],
       ),
     );

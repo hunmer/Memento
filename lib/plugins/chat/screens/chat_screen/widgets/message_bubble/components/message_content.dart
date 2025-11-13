@@ -1,6 +1,7 @@
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:Memento/widgets/quill_viewer/index.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '../../../../../../../plugins/chat/models/message.dart';
 import '../../../../../../../plugins/chat/widgets/image_message_widget.dart';
 import '../../../../../../../widgets/file_preview/index.dart';
@@ -256,25 +257,61 @@ class MessageContent extends StatelessWidget {
       }
     } else {
       // 普通文本消息
-      return MarkdownBody(
+      return QuillViewer(
         data: message.content,
-        styleSheet: MarkdownStyleSheet(
-          p: TextStyle(color: textColor),
-          h1: TextStyle(color: textColor),
-          h2: TextStyle(color: textColor),
-          h3: TextStyle(color: textColor),
-          h4: TextStyle(color: textColor),
-          h5: TextStyle(color: textColor),
-          h6: TextStyle(color: textColor),
-          em: TextStyle(color: textColor),
-          strong: TextStyle(color: textColor),
+        selectable: true,
+        customStyles: quill.DefaultStyles(
+          paragraph: quill.DefaultTextBlockStyle(
+            TextStyle(color: textColor),
+            const quill.HorizontalSpacing(0, 0),
+            const quill.VerticalSpacing(0, 0),
+            const quill.VerticalSpacing(0, 0),
+            null,
+          ),
+          h1: quill.DefaultTextBlockStyle(
+            TextStyle(
+              color: textColor,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+            const quill.HorizontalSpacing(0, 0),
+            const quill.VerticalSpacing(8, 4),
+            const quill.VerticalSpacing(0, 0),
+            null,
+          ),
+          h2: quill.DefaultTextBlockStyle(
+            TextStyle(
+              color: textColor,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            const quill.HorizontalSpacing(0, 0),
+            const quill.VerticalSpacing(6, 4),
+            const quill.VerticalSpacing(0, 0),
+            null,
+          ),
+          h3: quill.DefaultTextBlockStyle(
+            TextStyle(
+              color: textColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            const quill.HorizontalSpacing(0, 0),
+            const quill.VerticalSpacing(4, 4),
+            const quill.VerticalSpacing(0, 0),
+            null,
+          ),
           code: TextStyle(
             backgroundColor: Colors.grey[200],
             color: Colors.black87,
+            fontFamily: 'monospace',
           ),
-          codeblockDecoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(4),
+          inlineCode: quill.InlineCodeStyle(
+            backgroundColor: Colors.grey[200],
+            style: const TextStyle(
+              color: Colors.black87,
+              fontFamily: 'monospace',
+            ),
           ),
         ),
       );

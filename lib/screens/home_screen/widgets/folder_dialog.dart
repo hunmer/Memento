@@ -144,17 +144,36 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 显示从主页移入选项
   void _showMoveFromHomeOptions() {
-    // TODO: 实现从主页选择项目移入文件夹
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('功能开发中...')),
+    // 获取主页上的所有项目（排除当前文件夹）
+    final homeItems = _layoutManager.items
+        .where((item) => item.id != widget.folder.id)
+        .toList();
+
+    if (homeItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('主页上没有可移入的项目')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => _MoveFromHomeDialog(
+        items: homeItems,
+        folderId: widget.folder.id,
+        layoutManager: _layoutManager,
+      ),
     );
   }
 
   /// 编辑文件夹
   void _editFolder() {
-    // TODO: 实现编辑文件夹
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('编辑文件夹功能开发中...')),
+    showDialog(
+      context: context,
+      builder: (context) => _EditFolderDialog(
+        folder: widget.folder,
+        layoutManager: _layoutManager,
+      ),
     );
   }
 
@@ -250,6 +269,329 @@ class _FolderDialogState extends State<FolderDialog> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 从主页移入对话框
+class _MoveFromHomeDialog extends StatefulWidget {
+  final List<HomeItem> items;
+  final String folderId;
+  final HomeLayoutManager layoutManager;
+
+  const _MoveFromHomeDialog({
+    required this.items,
+    required this.folderId,
+    required this.layoutManager,
+  });
+
+  @override
+  State<_MoveFromHomeDialog> createState() => _MoveFromHomeDialogState();
+}
+
+class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
+  final Set<String> _selectedIds = {};
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('从主页移入'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '选择要移入文件夹的项目',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.items.length,
+                itemBuilder: (context, index) {
+                  final item = widget.items[index];
+                  final isSelected = _selectedIds.contains(item.id);
+
+                  return CheckboxListTile(
+                    value: isSelected,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedIds.add(item.id);
+                        } else {
+                          _selectedIds.remove(item.id);
+                        }
+                      });
+                    },
+                    title: Row(
+                      children: [
+                        if (item is HomeWidgetItem)
+                          Icon(item.icon, color: item.color, size: 20)
+                        else if (item is HomeFolderItem)
+                          Icon(item.icon, color: item.color, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            item is HomeWidgetItem
+                                ? item.pluginId
+                                : (item as HomeFolderItem).name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
+        FilledButton(
+          onPressed: _selectedIds.isEmpty
+              ? null
+              : () {
+                  _moveSelectedItems();
+                  Navigator.pop(context);
+                },
+          child: Text('移入 (${_selectedIds.length})'),
+        ),
+      ],
+    );
+  }
+
+  /// 移动选中的项目
+  void _moveSelectedItems() {
+    for (final itemId in _selectedIds) {
+      widget.layoutManager.moveToFolder(itemId, widget.folderId);
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('已移入 ${_selectedIds.length} 个项目')),
+    );
+  }
+}
+
+/// 编辑文件夹对话框
+class _EditFolderDialog extends StatefulWidget {
+  final HomeFolderItem folder;
+  final HomeLayoutManager layoutManager;
+
+  const _EditFolderDialog({
+    required this.folder,
+    required this.layoutManager,
+  });
+
+  @override
+  State<_EditFolderDialog> createState() => _EditFolderDialogState();
+}
+
+class _EditFolderDialogState extends State<_EditFolderDialog> {
+  late TextEditingController _nameController;
+  late IconData _selectedIcon;
+  late Color _selectedColor;
+
+  // 常用图标列表
+  static const List<IconData> _commonIcons = [
+    Icons.folder,
+    Icons.folder_special,
+    Icons.work,
+    Icons.school,
+    Icons.home,
+    Icons.favorite,
+    Icons.star,
+    Icons.bookmark,
+    Icons.category,
+    Icons.dashboard,
+    Icons.widgets,
+    Icons.apps,
+  ];
+
+  // 常用颜色列表
+  static const List<Color> _commonColors = [
+    Colors.blue,
+    Colors.red,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.pink,
+    Colors.teal,
+    Colors.amber,
+    Colors.indigo,
+    Colors.cyan,
+    Colors.lime,
+    Colors.brown,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.folder.name);
+    _selectedIcon = widget.folder.icon;
+    _selectedColor = widget.folder.color;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('编辑文件夹'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 文件夹名称
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: '文件夹名称',
+                  border: OutlineInputBorder(),
+                ),
+                autofocus: true,
+              ),
+              const SizedBox(height: 24),
+
+              // 图标选择
+              Text(
+                '选择图标',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _commonIcons.map((icon) {
+                  final isSelected = icon == _selectedIcon;
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedIcon = icon;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? _selectedColor.withOpacity(0.2)
+                            : Colors.transparent,
+                        border: Border.all(
+                          color: isSelected
+                              ? _selectedColor
+                              : Theme.of(context).dividerColor,
+                          width: isSelected ? 2 : 1,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: isSelected
+                            ? _selectedColor
+                            : Theme.of(context).iconTheme.color,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 24),
+
+              // 颜色选择
+              Text(
+                '选择颜色',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _commonColors.map((color) {
+                  final isSelected = color.value == _selectedColor.value;
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedColor = color;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(24),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                        border: isSelected
+                            ? Border.all(
+                                color: Theme.of(context).colorScheme.primary,
+                                width: 3,
+                              )
+                            : null,
+                      ),
+                      child: isSelected
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                            )
+                          : null,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
+        FilledButton(
+          onPressed: _saveFolderChanges,
+          child: const Text('保存'),
+        ),
+      ],
+    );
+  }
+
+  /// 保存文件夹修改
+  void _saveFolderChanges() {
+    final newName = _nameController.text.trim();
+    if (newName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请输入文件夹名称')),
+      );
+      return;
+    }
+
+    // 创建更新后的文件夹
+    final updatedFolder = widget.folder.copyWith(
+      name: newName,
+      icon: _selectedIcon,
+      color: _selectedColor,
+    );
+
+    // 更新文件夹
+    widget.layoutManager.updateItem(widget.folder.id, updatedFolder);
+
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('文件夹已更新')),
     );
   }
 }
