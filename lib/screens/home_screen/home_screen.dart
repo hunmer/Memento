@@ -130,6 +130,15 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.grid_view),
+              title: const Text('网格大小'),
+              subtitle: Text('当前：${_layoutManager.gridCrossAxisCount} 列'),
+              onTap: () {
+                Navigator.pop(context);
+                _showGridSizeDialog();
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.delete_sweep),
               title: const Text('清空布局'),
               onTap: () {
@@ -148,6 +157,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     showDialog(
       context: context,
       builder: (context) => const CreateFolderDialog(),
+    );
+  }
+
+  /// 显示网格大小调节对话框
+  void _showGridSizeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => _GridSizeDialog(layoutManager: _layoutManager),
     );
   }
 
@@ -226,12 +243,104 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               builder: (context, child) {
                 return HomeGrid(
                   items: _layoutManager.items,
+                  crossAxisCount: _layoutManager.gridCrossAxisCount,
                   onReorder: (oldIndex, newIndex) {
                     _layoutManager.reorder(oldIndex, newIndex);
                   },
                 );
               },
             ),
+    );
+  }
+}
+
+/// 网格大小调节对话框
+class _GridSizeDialog extends StatefulWidget {
+  final HomeLayoutManager layoutManager;
+
+  const _GridSizeDialog({required this.layoutManager});
+
+  @override
+  State<_GridSizeDialog> createState() => _GridSizeDialogState();
+}
+
+class _GridSizeDialogState extends State<_GridSizeDialog> {
+  late int _currentSize;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentSize = widget.layoutManager.gridCrossAxisCount;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('网格大小'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '选择主页网格的列数 (1-10)',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Text('$_currentSize 列', style: Theme.of(context).textTheme.titleLarge),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.remove),
+                onPressed: _currentSize > 1
+                    ? () {
+                        setState(() {
+                          _currentSize--;
+                          widget.layoutManager.setGridCrossAxisCount(_currentSize);
+                        });
+                      }
+                    : null,
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: _currentSize < 10
+                    ? () {
+                        setState(() {
+                          _currentSize++;
+                          widget.layoutManager.setGridCrossAxisCount(_currentSize);
+                        });
+                      }
+                    : null,
+              ),
+            ],
+          ),
+          Slider(
+            value: _currentSize.toDouble(),
+            min: 1,
+            max: 10,
+            divisions: 9,
+            label: '$_currentSize',
+            onChanged: (value) {
+              setState(() {
+                _currentSize = value.round();
+                widget.layoutManager.setGridCrossAxisCount(_currentSize);
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '提示：数字越大，每行显示的组件越多',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).hintColor,
+                ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('完成'),
+        ),
+      ],
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../models/home_item.dart';
 import '../models/home_widget_item.dart';
@@ -7,8 +8,8 @@ import 'home_card.dart';
 
 /// 主页网格布局组件
 ///
-/// 使用 StaggeredGridView 支持不同尺寸的卡片
-class HomeGrid extends StatelessWidget {
+/// 支持长按拖拽排序
+class HomeGrid extends StatefulWidget {
   final List<HomeItem> items;
   final Function(int oldIndex, int newIndex)? onReorder;
   final Function(HomeItem item)? onItemTap;
@@ -25,24 +26,34 @@ class HomeGrid extends StatelessWidget {
   });
 
   @override
+  State<HomeGrid> createState() => _HomeGridState();
+}
+
+class _HomeGridState extends State<HomeGrid> {
+  int? _draggingIndex;
+  int? _hoveringIndex;
+
+  @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) {
+    if (widget.items.isEmpty) {
       return _buildEmptyState(context);
     }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(8),
       child: StaggeredGrid.count(
-        crossAxisCount: crossAxisCount,
+        crossAxisCount: widget.crossAxisCount,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
-        children: items.map((item) => _buildGridTile(context, item)).toList(),
+        children: List.generate(widget.items.length, (index) {
+          return _buildDraggableTile(context, widget.items[index], index);
+        }),
       ),
     );
   }
 
-  /// 构建单个网格瓦片
-  Widget _buildGridTile(BuildContext context, HomeItem item) {
+  /// 构建可拖拽的网格瓦片
+  Widget _buildDraggableTile(BuildContext context, HomeItem item, int index) {
     // 获取卡片尺寸
     int crossAxisCellCount = 1;
     int mainAxisCellCount = 1;
@@ -56,14 +67,102 @@ class HomeGrid extends StatelessWidget {
       mainAxisCellCount = 1;
     }
 
+    final isBeingDragged = _draggingIndex == index;
+    final isHovering = _hoveringIndex == index;
+
     return StaggeredGridTile.count(
       crossAxisCellCount: crossAxisCellCount,
       mainAxisCellCount: mainAxisCellCount,
-      child: HomeCard(
-        key: ValueKey(item.id),
-        item: item,
-        onTap: onItemTap != null ? () => onItemTap!(item) : null,
-        onLongPress: onItemLongPress != null ? () => onItemLongPress!(item) : null,
+      child: DragTarget<int>(
+        onWillAcceptWithDetails: (details) {
+          setState(() {
+            _hoveringIndex = index;
+          });
+          return details.data != index;
+        },
+        onLeave: (_) {
+          setState(() {
+            _hoveringIndex = null;
+          });
+        },
+        onAcceptWithDetails: (details) {
+          final oldIndex = details.data;
+          final newIndex = index;
+
+          setState(() {
+            _hoveringIndex = null;
+            _draggingIndex = null;
+          });
+
+          if (oldIndex != newIndex && widget.onReorder != null) {
+            widget.onReorder!(oldIndex, newIndex);
+          }
+        },
+        builder: (context, candidateData, rejectedData) {
+          return LongPressDraggable<int>(
+            data: index,
+            feedback: Material(
+              elevation: 8,
+              borderRadius: BorderRadius.circular(12),
+              child: Opacity(
+                opacity: 0.8,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Theme.of(context).cardColor,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.drag_indicator,
+                      size: 48,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            childWhenDragging: Opacity(
+              opacity: 0.3,
+              child: HomeCard(
+                key: ValueKey(item.id),
+                item: item,
+              ),
+            ),
+            onDragStarted: () {
+              setState(() {
+                _draggingIndex = index;
+              });
+              // 提供触觉反馈
+              HapticFeedback.mediumImpact();
+            },
+            onDragEnd: (_) {
+              setState(() {
+                _draggingIndex = null;
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: isHovering
+                    ? Border.all(
+                        color: Theme.of(context).primaryColor,
+                        width: 2,
+                      )
+                    : null,
+              ),
+              child: HomeCard(
+                key: ValueKey(item.id),
+                item: item,
+                isSelected: isBeingDragged || isHovering,
+                onTap: widget.onItemTap != null ? () => widget.onItemTap!(item) : null,
+                onLongPress: widget.onItemLongPress != null ? () => widget.onItemLongPress!(item) : null,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

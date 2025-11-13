@@ -6,7 +6,10 @@ import '../models/home_widget_item.dart';
 
 /// 添加小组件对话框
 class AddWidgetDialog extends StatefulWidget {
-  const AddWidgetDialog({super.key});
+  /// 可选的文件夹ID，如果提供则将组件添加到该文件夹
+  final String? folderId;
+
+  const AddWidgetDialog({super.key, this.folderId});
 
   @override
   State<AddWidgetDialog> createState() => _AddWidgetDialogState();
@@ -37,48 +40,41 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: 500,
-          maxHeight: MediaQuery.of(context).size.height * 0.8,
-        ),
-        child: Column(
-          children: [
-            // 标题栏
-            AppBar(
-              title: const Text('添加组件'),
-              automaticallyImplyLeading: false,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-              bottom: _categories.isNotEmpty
-                  ? TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      tabs: _categories
-                          .map((category) => Tab(text: category))
-                          .toList(),
-                    )
-                  : null,
-            ),
+    final dialogHeight = MediaQuery.of(context).size.height * 0.8;
 
-            // 小组件列表
-            Expanded(
-              child: _categories.isEmpty
-                  ? _buildEmptyState()
-                  : TabBarView(
-                      controller: _tabController,
-                      children: _categories
-                          .map((category) =>
-                              _buildCategoryView(_widgetsByCategory[category]!))
-                          .toList(),
-                    ),
-            ),
-          ],
+    return Dialog(
+      child: SizedBox(
+        width: 500,
+        height: dialogHeight,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('添加组件'),
+            automaticallyImplyLeading: false,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+            bottom: _categories.isNotEmpty
+                ? TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    tabs: _categories
+                        .map((category) => Tab(text: category))
+                        .toList(),
+                  )
+                : null,
+          ),
+          body: _categories.isEmpty
+              ? _buildEmptyState()
+              : TabBarView(
+                  controller: _tabController,
+                  children: _categories
+                      .map((category) =>
+                          _buildCategoryView(_widgetsByCategory[category]!))
+                      .toList(),
+                ),
         ),
       ),
     );
@@ -184,15 +180,22 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
       size: widget.defaultSize,
     );
 
-    // 添加到布局
-    layoutManager.addItem(widgetItem);
+    // 添加到布局或文件夹
+    if (this.widget.folderId != null) {
+      // 添加到文件夹
+      layoutManager.addItemToFolder(widgetItem, this.widget.folderId!);
+    } else {
+      // 添加到主页
+      layoutManager.addItem(widgetItem);
+    }
 
     // 关闭对话框
     Navigator.of(context).pop();
 
     // 显示提示
+    final location = this.widget.folderId != null ? '文件夹' : '主页';
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('已添加 ${widget.name}')),
+      SnackBar(content: Text('已添加 ${widget.name} 到$location')),
     );
   }
 
