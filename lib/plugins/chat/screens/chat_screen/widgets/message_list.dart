@@ -178,7 +178,7 @@ class _MessageListState extends State<MessageList> {
                                     content: Text(
                                       ChatLocalizations.of(
                                         context,
-                                      )!.errorFilePreviewFailed,
+                                      ).errorFilePreviewFailed,
                                     ),
                                   ),
                                 );

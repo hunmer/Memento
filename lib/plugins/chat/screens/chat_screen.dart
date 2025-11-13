@@ -46,7 +46,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ChatLocalizations.of(context)!;
+    final l10n = ChatLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.chatRoom), centerTitle: true),
       body: Column(

@@ -96,7 +96,7 @@ class _VideoPreviewState extends State<VideoPreview> {
               ),
               const SizedBox(height: 16),
               Text(
-                FilePreviewLocalizations.of(context)!.videoLoadFailed,
+                FilePreviewLocalizations.of(context).videoLoadFailed,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),

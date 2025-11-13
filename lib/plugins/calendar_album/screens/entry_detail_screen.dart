@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_detail/entry_detail_image_viewer.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart';
 import 'package:Memento/utils/image_utils.dart';

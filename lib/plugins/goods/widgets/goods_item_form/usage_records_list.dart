@@ -37,12 +37,12 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              GoodsLocalizations.of(context)!.usageRecords,
+              GoodsLocalizations.of(context).usageRecords,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               icon: const Icon(Icons.add),
-              label: Text(GoodsLocalizations.of(context)!.addUsageRecord),
+              label: Text(GoodsLocalizations.of(context).addUsageRecord),
               onPressed: _addNewRecord,
             ),
           ],
@@ -53,7 +53,7 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                GoodsLocalizations.of(context)!.noUsageRecords,
+                GoodsLocalizations.of(context).noUsageRecords,
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
@@ -102,23 +102,23 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(GoodsLocalizations.of(context)!.addUsageRecordTitle),
+            title: Text(GoodsLocalizations.of(context).addUsageRecordTitle),
             content: TextField(
               controller: noteController,
               decoration: InputDecoration(
-                labelText: GoodsLocalizations.of(context)!.optionalNote,
-                hintText: GoodsLocalizations.of(context)!.enterUsageNote,
+                labelText: GoodsLocalizations.of(context).optionalNote,
+                hintText: GoodsLocalizations.of(context).enterUsageNote,
               ),
               maxLines: 2,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(GoodsLocalizations.of(context)!.cancel),
+                child: Text(GoodsLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(GoodsLocalizations.of(context)!.confirm),
+                child: Text(GoodsLocalizations.of(context).confirm),
               ),
             ],
           );
@@ -159,23 +159,23 @@ class _UsageRecordsListState extends State<UsageRecordsList> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(GoodsLocalizations.of(context)!.editUsageRecordTitle),
+            title: Text(GoodsLocalizations.of(context).editUsageRecordTitle),
             content: TextField(
               controller: noteController,
               decoration: InputDecoration(
-                labelText: GoodsLocalizations.of(context)!.optionalNote,
-                hintText: GoodsLocalizations.of(context)!.enterUsageNote,
+                labelText: GoodsLocalizations.of(context).optionalNote,
+                hintText: GoodsLocalizations.of(context).enterUsageNote,
               ),
               maxLines: 2,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(GoodsLocalizations.of(context)!.cancel),
+                child: Text(GoodsLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(GoodsLocalizations.of(context)!.confirm),
+                child: Text(GoodsLocalizations.of(context).confirm),
               ),
             ],
           );

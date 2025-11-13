@@ -67,14 +67,14 @@ class NotesAppBar extends StatelessWidget implements PreferredSizeWidget {
                   value: 'new_note',
                   child: ListTile(
                     leading: const Icon(Icons.note_add),
-                    title: Text(NotesLocalizations.of(context)!.newNote),
+                    title: Text(NotesLocalizations.of(context).newNote),
                   ),
                 ),
                 PopupMenuItem(
                   value: 'new_folder',
                   child: ListTile(
                     leading: const Icon(Icons.create_new_folder),
-                    title: Text(NotesLocalizations.of(context)!.newFolder),
+                    title: Text(NotesLocalizations.of(context).newFolder),
                   ),
                 ),
               ],

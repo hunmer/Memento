@@ -74,7 +74,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
     final title =
         widget.isEditMode
             ? '编辑频道'
-            : (ChatLocalizations.of(context)?.newChannel ?? '新建频道');
+            : (ChatLocalizations.of(context).newChannel ?? '新建频道');
 
     return AlertDialog(
       title: Text(title),

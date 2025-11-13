@@ -268,7 +268,7 @@ class _ChatScreenState extends State<ChatScreen> {
     Clipboard.setData(ClipboardData(text: textToCopy));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(ChatLocalizations.of(context)!.copiedSelectedMessages),
+        content: Text(ChatLocalizations.of(context).copiedSelectedMessages),
       ),
     );
 
@@ -580,7 +580,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                             content: Text(
                                               ChatLocalizations.of(
                                                 context,
-                                              )!.aiAssistantNotFound,
+                                              ).aiAssistantNotFound,
                                             ),
                                           ),
                                         );

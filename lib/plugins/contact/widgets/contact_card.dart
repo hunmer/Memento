@@ -203,7 +203,7 @@ class ContactCard extends StatelessWidget {
     return Text(
       compact
           ? lastContactText
-          : '${ContactLocalizations.of(context)!.lastContactTime}: $lastContactText',
+          : '${ContactLocalizations.of(context).lastContactTime}: $lastContactText',
       style: TextStyle(fontSize: compact ? 12 : 14, color: Colors.grey),
     );
   }

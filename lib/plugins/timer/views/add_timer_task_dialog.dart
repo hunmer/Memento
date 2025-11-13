@@ -202,13 +202,13 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
               // 添加计时器按钮
               OutlinedButton.icon(
                 icon: const Icon(Icons.add),
-                label: Text(TimerLocalizations.of(context)!.addTimer),
+                label: Text(TimerLocalizations.of(context).addTimer),
                 onPressed: _showAddTimerDialog,
               ),
               const SizedBox(height: 16),
 
               SwitchListTile(
-                title: Text(TimerLocalizations.of(context)!.enableNotification),
+                title: Text(TimerLocalizations.of(context).enableNotification),
                 value: _enableNotification,
                 onChanged: (value) {
                   setState(() {
@@ -247,15 +247,15 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
     switch (timer.type) {
       case TimerType.countUp:
         icon = Icons.timer;
-        typeText = TimerLocalizations.of(context)!.countUpTimer;
+        typeText = TimerLocalizations.of(context).countUpTimer;
         break;
       case TimerType.countDown:
         icon = Icons.hourglass_empty;
-        typeText = TimerLocalizations.of(context)!.countDownTimer;
+        typeText = TimerLocalizations.of(context).countDownTimer;
         break;
       case TimerType.pomodoro:
         icon = Icons.local_cafe;
-        typeText = TimerLocalizations.of(context)!.pomodoroTimer;
+        typeText = TimerLocalizations.of(context).pomodoroTimer;
         break;
     }
 

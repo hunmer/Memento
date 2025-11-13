@@ -51,7 +51,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
     final timeFormat = DateFormat('HH:mm');
     return Scaffold(
       appBar: AppBar(
-        title: Text(TodoLocalizations.of(context)!.taskDetailsTitle),
+        title: Text(TodoLocalizations.of(context).taskDetailsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -77,10 +77,10 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                 builder:
                     (context) => AlertDialog(
                       title: Text(
-                        TodoLocalizations.of(context)!.deleteTaskTitle,
+                        TodoLocalizations.of(context).deleteTaskTitle,
                       ),
                       content: Text(
-                        TodoLocalizations.of(context)!.deleteTaskMessage,
+                        TodoLocalizations.of(context).deleteTaskMessage,
                       ),
                       actions: [
                         TextButton(
@@ -156,7 +156,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             if (widget.task.description != null &&
                 widget.task.description!.isNotEmpty) ...[
               Text(
-                TodoLocalizations.of(context)!.description,
+                TodoLocalizations.of(context).description,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -167,7 +167,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             // 标签
             if (widget.task.tags.isNotEmpty) ...[
               Text(
-                TodoLocalizations.of(context)!.tags,
+                TodoLocalizations.of(context).tags,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -189,7 +189,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
 
             // 计时器信息
             Text(
-              TodoLocalizations.of(context)!.timer,
+              TodoLocalizations.of(context).timer,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -203,7 +203,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          TodoLocalizations.of(context)!.duration,
+                          TodoLocalizations.of(context).duration,
                           style: theme.textTheme.titleSmall,
                         ),
                         Text(
@@ -225,7 +225,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                       children: [
                         ElevatedButton.icon(
                           icon: const Icon(Icons.play_arrow),
-                          label: Text(TodoLocalizations.of(context)!.start),
+                          label: Text(TodoLocalizations.of(context).start),
                           onPressed:
                               widget.task.status != TaskStatus.inProgress
                                   ? () {
@@ -239,7 +239,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                         ),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.pause),
-                          label: Text(TodoLocalizations.of(context)!.pause),
+                          label: Text(TodoLocalizations.of(context).pause),
                           onPressed:
                               widget.task.status == TaskStatus.inProgress
                                   ? () {
@@ -253,7 +253,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
                         ),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.check),
-                          label: Text(TodoLocalizations.of(context)!.complete),
+                          label: Text(TodoLocalizations.of(context).complete),
                           onPressed:
                               widget.task.status != TaskStatus.done
                                   ? () {
@@ -275,7 +275,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
 
             // 日期信息
             Text(
-              TodoLocalizations.of(context)!.dates,
+              TodoLocalizations.of(context).dates,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -283,13 +283,13 @@ class _TaskDetailViewState extends State<TaskDetailView> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
-                  title: Text(TodoLocalizations.of(context)!.created),
+                  title: Text(TodoLocalizations.of(context).created),
                   subtitle: Text(dateFormat.format(widget.task.createdAt)),
                 ),
                 if (widget.task.dueDate != null)
                   ListTile(
                     leading: const Icon(Icons.event),
-                    title: Text(TodoLocalizations.of(context)!.dueDate),
+                    title: Text(TodoLocalizations.of(context).dueDate),
                     subtitle: Text(dateFormat.format(widget.task.dueDate!)),
                   ),
                 const SizedBox(height: 16),
@@ -299,7 +299,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             // 子任务
             if (widget.task.subtasks.isNotEmpty) ...[
               Text(
-                TodoLocalizations.of(context)!.subtasks,
+                TodoLocalizations.of(context).subtasks,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -338,7 +338,7 @@ class _TaskDetailViewState extends State<TaskDetailView> {
             // 提醒
             if (widget.task.reminders.isNotEmpty) ...[
               Text(
-                TodoLocalizations.of(context)!.reminders,
+                TodoLocalizations.of(context).reminders,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),

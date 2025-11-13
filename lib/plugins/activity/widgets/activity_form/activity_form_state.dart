@@ -22,8 +22,8 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = DiaryLocalizations.of(context)!;
-    final app_l10n = AppLocalizations.of(context)!;
+    final l10n = DiaryLocalizations.of(context);
+    final appL10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,7 +31,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
           widget.activity == null ? l10n.addActivity : l10n.editActivity,
         ),
         actions: [
-          TextButton(onPressed: _handleSave, child: Text(app_l10n.save)),
+          TextButton(onPressed: _handleSave, child: Text(appL10n.save)),
         ],
       ),
       body: SingleChildScrollView(
@@ -80,7 +80,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                 TextField(
                   controller: _tagsController,
                   decoration: InputDecoration(
-                    labelText: app_l10n.tags,
+                    labelText: appL10n.tags,
                     hintText: l10n.tagsHint,
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
@@ -276,7 +276,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
   Future<void> _handleSave() async {
     if (!mounted) return;
-    final l10n = ActivityLocalizations.of(context)!;
+    final l10n = ActivityLocalizations.of(context);
     // 创建DateTime对象
     final now = widget.selectedDate;
     final startDateTime = DateTime(
@@ -299,9 +299,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            ActivityLocalizations.of(context)!.endTime +
-                '必须晚于' +
-                ActivityLocalizations.of(context)!.startTime,
+            '${ActivityLocalizations.of(context)!.endTime}必须晚于${ActivityLocalizations.of(context)!.startTime}',
           ),
         ),
       );
@@ -314,10 +312,9 @@ class ActivityFormState extends State<ActivityFormWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '活动时间必须至少为1' +
-                ActivityLocalizations.of(
+            '活动时间必须至少为1${ActivityLocalizations.of(
                   context,
-                )!.minutesFormat(1).replaceAll('1 ', ''),
+                )!.minutesFormat(1).replaceAll('1 ', '')}',
           ),
         ),
       );
@@ -330,7 +327,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            ActivityLocalizations.of(context)!.endTime + '不能超过当天23:59',
+            '${ActivityLocalizations.of(context)!.endTime}不能超过当天23:59',
           ),
         ),
       );

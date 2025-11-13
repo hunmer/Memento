@@ -78,7 +78,7 @@ Future<void> moveNoteDialog(
           content: Text(
             NotesLocalizations.of(
               context,
-            )!.movedToFolder.replaceFirst('{folderName}', targetFolder.name),
+            ).movedToFolder.replaceFirst('{folderName}', targetFolder.name),
           ),
         ),
       );

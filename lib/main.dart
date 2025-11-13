@@ -24,7 +24,6 @@ import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dar
 import 'package:Memento/widgets/l10n/group_selector_localizations.dart';
 import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
 import 'package:Memento/widgets/l10n/location_picker_localizations.dart';
-import 'package:Memento/widgets/tag_manager_dialog/l10n/tag_manager_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

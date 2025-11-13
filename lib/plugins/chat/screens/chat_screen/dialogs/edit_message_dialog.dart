@@ -20,7 +20,7 @@ class EditMessageDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(ChatLocalizations.of(context)!.editMessageTitle),
+      title: Text(ChatLocalizations.of(context).editMessageTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -29,7 +29,7 @@ class EditMessageDialog extends StatelessWidget {
             autofocus: true,
             maxLines: null,
             decoration: InputDecoration(
-              hintText: ChatLocalizations.of(context)!.messageHintText,
+              hintText: ChatLocalizations.of(context).messageHintText,
             ),
           ),
           const SizedBox(height: 10),

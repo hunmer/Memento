@@ -115,11 +115,11 @@ class _GoalEditPageState extends State<GoalEditPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(TrackerLocalizations.of(context)!.createGroup),
+            title: Text(TrackerLocalizations.of(context).createGroup),
             content: TextField(
               controller: newGroupController,
               decoration: InputDecoration(
-                labelText: TrackerLocalizations.of(context)!.createGroup,
+                labelText: TrackerLocalizations.of(context).createGroup,
               ),
               autofocus: true,
             ),
@@ -301,7 +301,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
                 Expanded(
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: TrackerLocalizations.of(context)!.selectGroup,
+                      labelText: TrackerLocalizations.of(context).selectGroup,
                       border: OutlineInputBorder(),
                     ),
                     child: DropdownButtonHideUnderline(
@@ -323,7 +323,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
                                 const Icon(Icons.add, size: 16),
                                 const SizedBox(width: 8),
                                 Text(
-                                  TrackerLocalizations.of(context)!.createGroup,
+                                  TrackerLocalizations.of(context).createGroup,
                                 ),
                               ],
                             ),
@@ -346,7 +346,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
             TextFormField(
               initialValue: _name,
               decoration: InputDecoration(
-                labelText: TrackerLocalizations.of(context)!.goalName,
+                labelText: TrackerLocalizations.of(context).goalName,
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -360,7 +360,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
             TextFormField(
               initialValue: _unitType,
               decoration: InputDecoration(
-                labelText: TrackerLocalizations.of(context)!.unitType,
+                labelText: TrackerLocalizations.of(context).unitType,
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -374,7 +374,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
             TextFormField(
               initialValue: _targetValue.toString(),
               decoration: InputDecoration(
-                labelText: TrackerLocalizations.of(context)!.targetValue,
+                labelText: TrackerLocalizations.of(context).targetValue,
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
@@ -414,7 +414,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
             DropdownButtonFormField<String>(
               value: _dateType,
               decoration: InputDecoration(
-                labelText: TrackerLocalizations.of(context)!.dateSettings,
+                labelText: TrackerLocalizations.of(context).dateSettings,
               ),
               items:
                   ['none', 'daily', 'weekly', 'monthly', 'custom']

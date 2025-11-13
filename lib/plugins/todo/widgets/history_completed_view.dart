@@ -23,7 +23,7 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(TodoLocalizations.of(context)!.completedTasksHistoryTitle),
+        title: Text(TodoLocalizations.of(context).completedTasksHistoryTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -45,7 +45,7 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
             child: ListTile(
               title: Text(task.title),
               subtitle: Text(
-                '${TodoLocalizations.of(context)!.completedOn}: ${task.completedDate?.toLocal()}',
+                '${TodoLocalizations.of(context).completedOn}: ${task.completedDate?.toLocal()}',
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.delete),

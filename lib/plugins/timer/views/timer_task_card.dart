@@ -300,7 +300,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
               ),
               ListTile(
                 leading: const Icon(Icons.refresh),
-                title: Text(TimerLocalizations.of(context)!.reset),
+                title: Text(TimerLocalizations.of(context).reset),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onReset(task);

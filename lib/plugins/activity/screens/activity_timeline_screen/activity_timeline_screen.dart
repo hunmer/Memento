@@ -144,7 +144,8 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
           null,
           _tagController.updateRecentTags,
         ),
-        tooltip: ActivityLocalizations.of(context)?.addActivity ?? 'Add Activity',
+        tooltip:
+            ActivityLocalizations.of(context).addActivity ?? 'Add Activity',
         child: const Icon(Icons.add),
       ),
     );

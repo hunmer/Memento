@@ -18,12 +18,12 @@ class HomeFolderItem extends HomeItem {
   final List<HomeItem> children;
 
   HomeFolderItem({
-    required String id,
+    required super.id,
     required this.name,
     required this.icon,
     required this.color,
     this.children = const [],
-  }) : super(id: id, type: HomeItemType.folder);
+  }) : super(type: HomeItemType.folder);
 
   @override
   Map<String, dynamic> toJson() => {

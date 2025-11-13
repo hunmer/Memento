@@ -127,7 +127,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
               ),
               const SizedBox(width: 12),
               Text(
-                TrackerLocalizations.of(context)!.name,
+                TrackerLocalizations.of(context).name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -164,7 +164,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
                   Column(
                     children: [
                       Text(
-                        TrackerLocalizations.of(context)!.thisMonthComplete,
+                        TrackerLocalizations.of(context).thisMonthComplete,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

@@ -75,7 +75,7 @@ class MessageOptionsDialog extends StatelessWidget {
     }
 
     return AlertDialog(
-      title: Text(ChatLocalizations.of(context)!.messageOptions),
+      title: Text(ChatLocalizations.of(context).messageOptions),
       contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -275,7 +275,7 @@ class MessageOptionsDialog extends StatelessWidget {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(ChatLocalizations.of(context)!.addEmoji),
+            title: Text(ChatLocalizations.of(context).addEmoji),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -329,7 +329,7 @@ class MessageOptionsDialog extends StatelessWidget {
                   onSetFixedSymbol(message, symbol);
                   Navigator.pop(context);
                 },
-                child: Text(ChatLocalizations.of(context)!.settings),
+                child: Text(ChatLocalizations.of(context).settings),
               ),
             ],
           ),

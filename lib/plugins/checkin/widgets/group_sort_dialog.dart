@@ -33,7 +33,7 @@ class _GroupSortDialogState extends State<GroupSortDialog> {
   Widget build(BuildContext context) {
     final l10n = CheckinLocalizations.of(context);
     return AlertDialog(
-      title: Text(l10n!.groupSortTitle),
+      title: Text(l10n.groupSortTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

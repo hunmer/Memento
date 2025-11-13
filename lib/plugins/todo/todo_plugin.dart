@@ -101,7 +101,7 @@ class TodoPlugin extends BasePlugin {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    TodoLocalizations.of(context)!.totalTasksCount,
+                    TodoLocalizations.of(context).totalTasksCount,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(
@@ -116,7 +116,7 @@ class TodoPlugin extends BasePlugin {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    TodoLocalizations.of(context)!.weeklyTasksCount,
+                    TodoLocalizations.of(context).weeklyTasksCount,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(

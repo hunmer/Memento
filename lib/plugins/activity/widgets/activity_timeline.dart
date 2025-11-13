@@ -397,10 +397,10 @@ class ActivityTimeline extends StatelessWidget {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: Text(
-                          ActivityLocalizations.of(context)!.confirmDelete,
+                          ActivityLocalizations.of(context).confirmDelete,
                         ),
                         content: Text(
-                          '${ActivityLocalizations.of(context)!.confirmDelete.replaceFirst('确定要删除', '确定要删除活动')}"${activity.title}"吗？',
+                          '${ActivityLocalizations.of(context).confirmDelete.replaceFirst('确定要删除', '确定要删除活动')}"${activity.title}"吗？',
                         ),
                         actions: <Widget>[
                           TextButton(
@@ -410,7 +410,7 @@ class ActivityTimeline extends StatelessWidget {
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
                             child: Text(
-                              ActivityLocalizations.of(context)!.deleteActivity,
+                              ActivityLocalizations.of(context).deleteActivity,
                             ),
                           ),
                         ],

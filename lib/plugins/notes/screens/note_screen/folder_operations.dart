@@ -18,7 +18,7 @@ Future<void> createNewFolder(
           TextEditingController();
 
       return AlertDialog(
-        title: Text(NotesLocalizations.of(context)!.newFolder),
+        title: Text(NotesLocalizations.of(context).newFolder),
         content: TextField(
           controller: folderNameController,
           autofocus: true,
@@ -66,7 +66,7 @@ Future<void> renameFolderDialog(
       );
 
       return AlertDialog(
-        title: Text(NotesLocalizations.of(context)!.renameFolder),
+        title: Text(NotesLocalizations.of(context).renameFolder),
         content: TextField(
           controller: renameController,
           autofocus: true,
@@ -107,8 +107,8 @@ Future<void> deleteFolderDialog(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: Text(NotesLocalizations.of(context)!.deleteFolder),
-          content: Text(NotesLocalizations.of(context)!.deleteFolderConfirm),
+          title: Text(NotesLocalizations.of(context).deleteFolder),
+          content: Text(NotesLocalizations.of(context).deleteFolderConfirm),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),

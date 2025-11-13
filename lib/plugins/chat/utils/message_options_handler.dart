@@ -45,7 +45,7 @@ class MessageOptionsHandler {
       Clipboard.setData(ClipboardData(text: message.content));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(ChatLocalizations.of(context)!.copiedToClipboard),
+          content: Text(ChatLocalizations.of(context).copiedToClipboard),
         ),
       );
     }

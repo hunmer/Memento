@@ -335,7 +335,7 @@ class FullBackupController {
                 content: Text(AppLocalizations.of(context)!.restartMessage),
               ),
         );
-      } catch (e, stackTrace) {
+      } catch (e) {
         // 确保关闭所有可能的对话框
         if (!_mounted) return;
         final errorContext = _safeContext;
@@ -351,7 +351,7 @@ class FullBackupController {
           ),
         );
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       // 确保关闭所有可能的对话框
       if (!_mounted) return;
       final finalErrorContext = _safeContext;
@@ -371,7 +371,7 @@ class FullBackupController {
         errorMessage = AppLocalizations.of(context)!.invalidBackupFile;
       } else {
         errorMessage =
-            AppLocalizations.of(context)!.importFailed + ': ${e.toString()}';
+            '${AppLocalizations.of(context)!.importFailed}: ${e.toString()}';
       }
 
       ScaffoldMessenger.of(finalErrorContext).showSnackBar(

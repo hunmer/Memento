@@ -38,14 +38,14 @@ class UIService {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: _plugin.color?.withAlpha(30),
+                  color: _plugin.color.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(_plugin.icon, size: 24, color: _plugin.color),
               ),
               const SizedBox(width: 12),
               Text(
-                ChatLocalizations.of(context)!.name,
+                ChatLocalizations.of(context).name,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -64,7 +64,7 @@ class UIService {
                   Column(
                     children: [
                       Text(
-                        ChatLocalizations.of(context)!.channelCount,
+                        ChatLocalizations.of(context).channelCount,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -79,7 +79,7 @@ class UIService {
                   Column(
                     children: [
                       Text(
-                        ChatLocalizations.of(context)!.totalMessages,
+                        ChatLocalizations.of(context).totalMessages,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -101,7 +101,7 @@ class UIService {
                   Column(
                     children: [
                       Text(
-                        ChatLocalizations.of(context)!.totalMessages,
+                        ChatLocalizations.of(context).totalMessages,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -147,11 +147,11 @@ class UIService {
           tabs: [
             Tab(
               icon: const Icon(Icons.chat_bubble_outline),
-              text: l10n?.channelsTab ?? 'Channels',
+              text: l10n.channelsTab ?? 'Channels',
             ),
             Tab(
               icon: const Icon(Icons.timeline),
-              text: l10n?.timelineTab ?? 'Timeline',
+              text: l10n.timelineTab ?? 'Timeline',
             ),
           ],
         ),
@@ -167,7 +167,7 @@ class UIService {
         child: Column(
           children: [
             Text(
-              ChatLocalizations.of(context)!.profileTitle,
+              ChatLocalizations.of(context).profileTitle,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -278,12 +278,12 @@ class UIService {
           Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              ChatLocalizations.of(context)!.chatSettings,
+              ChatLocalizations.of(context).chatSettings,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           SwitchListTile(
-            title: Text(ChatLocalizations.of(context)!.showAvatarInChat),
+            title: Text(ChatLocalizations.of(context).showAvatarInChat),
             value: _settingsService.showAvatarInChat,
             onChanged: (bool value) {
               setState(() {
@@ -292,7 +292,7 @@ class UIService {
             },
           ),
           SwitchListTile(
-            title: Text(ChatLocalizations.of(context)!.playSoundOnSend),
+            title: Text(ChatLocalizations.of(context).playSoundOnSend),
             value: _settingsService.playSoundOnSend,
             onChanged: (bool value) {
               setState(() {
@@ -301,7 +301,7 @@ class UIService {
             },
           ),
           SwitchListTile(
-            title: Text(ChatLocalizations.of(context)!.showAvatarInTimeline),
+            title: Text(ChatLocalizations.of(context).showAvatarInTimeline),
             value: _settingsService.showAvatarInTimeline,
             onChanged: (bool value) {
               setState(() {

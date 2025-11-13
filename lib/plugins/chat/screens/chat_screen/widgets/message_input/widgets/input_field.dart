@@ -44,7 +44,7 @@ class InputField extends StatelessWidget {
                     : Colors.black87,
           ),
           decoration: InputDecoration(
-            hintText: ChatLocalizations.of(context)?.enterMessage,
+            hintText: ChatLocalizations.of(context).enterMessage,
             hintStyle: TextStyle(
               color:
                   Theme.of(context).brightness == Brightness.dark

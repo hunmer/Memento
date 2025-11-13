@@ -1,5 +1,4 @@
 import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
-import 'package:flutter/widgets.dart';
 
 class FilePreviewLocalizationsZh extends FilePreviewLocalizations {
   FilePreviewLocalizationsZh() : super('zh');

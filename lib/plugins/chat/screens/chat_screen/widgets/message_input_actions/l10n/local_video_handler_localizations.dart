@@ -7,7 +7,7 @@ class LocalVideoHandlerLocalizations {
   static const String videoSelectionFailed = 'videoSelectionFailed';
   static const String videoCantBeSelectedOnWeb = 'videoCantBeSelectedOnWeb';
 
-  static Map<String, Map<String, String>> _localizedValues = {
+  static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
       videoCantBeSelectedOnWeb: 'Video cannot be selected on web',
       videoFileNotExist: 'Video file does not exist',

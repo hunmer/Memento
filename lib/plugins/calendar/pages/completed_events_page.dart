@@ -12,13 +12,13 @@ class CompletedEventsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(CalendarLocalizations.of(context)!.completedEvents),
+        title: Text(CalendarLocalizations.of(context).completedEvents),
       ),
       body:
           completedEvents.isEmpty
               ? Center(
                 child: Text(
-                  CalendarLocalizations.of(context)!.noCompletedEvents,
+                  CalendarLocalizations.of(context).noCompletedEvents,
                 ),
               )
               : ListView.builder(

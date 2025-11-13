@@ -210,9 +210,9 @@ class StorePlugin extends BasePlugin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            title: Text(StoreLocalizations.of(context)!.pointSettingsTitle),
+            title: Text(StoreLocalizations.of(context).pointSettingsTitle),
             subtitle: Text(
-              StoreLocalizations.of(context)!.pointSettingsSubtitle,
+              StoreLocalizations.of(context).pointSettingsSubtitle,
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {

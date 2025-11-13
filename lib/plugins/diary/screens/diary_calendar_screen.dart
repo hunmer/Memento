@@ -59,7 +59,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
     if (selectedDay.isAfter(DateTime.now())) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(DiaryLocalizations.of(context)!.cannotSelectFutureDate),
+          content: Text(DiaryLocalizations.of(context).cannotSelectFutureDate),
           duration: Duration(seconds: 2),
         ),
       );
@@ -104,7 +104,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
-        title: Text(DiaryLocalizations.of(context)!.myDiary),
+        title: Text(DiaryLocalizations.of(context).myDiary),
         actions: [],
       ),
       body: Column(

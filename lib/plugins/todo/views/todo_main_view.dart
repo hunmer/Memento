@@ -57,7 +57,7 @@ class _TodoMainViewState extends State<TodoMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(TodoLocalizations.of(context)!.name),
+        title: Text(TodoLocalizations.of(context).name),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
@@ -118,15 +118,15 @@ class _TodoMainViewState extends State<TodoMainView> {
                 (context) => [
                   PopupMenuItem(
                     value: SortBy.dueDate,
-                    child: Text(TodoLocalizations.of(context)!.sortByDueDate),
+                    child: Text(TodoLocalizations.of(context).sortByDueDate),
                   ),
                   PopupMenuItem(
                     value: SortBy.priority,
-                    child: Text(TodoLocalizations.of(context)!.sortByPriority),
+                    child: Text(TodoLocalizations.of(context).sortByPriority),
                   ),
                   PopupMenuItem(
                     value: SortBy.custom,
-                    child: Text(TodoLocalizations.of(context)!.customSort),
+                    child: Text(TodoLocalizations.of(context).customSort),
                   ),
                 ],
           ),

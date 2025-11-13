@@ -16,13 +16,13 @@ class HomeGrid extends StatelessWidget {
   final int crossAxisCount;
 
   const HomeGrid({
-    Key? key,
+    super.key,
     required this.items,
     this.onReorder,
     this.onItemTap,
     this.onItemLongPress,
     this.crossAxisCount = 2,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -110,13 +110,13 @@ class ReorderableHomeGrid extends StatefulWidget {
   final int crossAxisCount;
 
   const ReorderableHomeGrid({
-    Key? key,
+    super.key,
     required this.items,
     required this.onReorder,
     this.onItemTap,
     this.onItemLongPress,
     this.crossAxisCount = 2,
-  }) : super(key: key);
+  });
 
   @override
   State<ReorderableHomeGrid> createState() => _ReorderableHomeGridState();

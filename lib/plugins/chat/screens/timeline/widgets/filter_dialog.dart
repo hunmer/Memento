@@ -55,11 +55,11 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = ChatLocalizations.of(context);
-    final app_l10n = AppLocalizations.of(context);
+    final appL10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: Text(l10n?.advancedFilter ?? 'Advanced Filter'),
+      title: Text(l10n.advancedFilter ?? 'Advanced Filter'),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView(
@@ -67,13 +67,13 @@ class _FilterDialogState extends State<FilterDialog> {
           children: [
             // 搜索范围选项
             Text(
-              l10n?.searchIn ?? 'Search in:',
+              l10n.searchIn ?? 'Search in:',
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             CheckboxListTile(
-              title: Text(l10n?.channelNames ?? 'Channel names'),
+              title: Text(l10n.channelNames ?? 'Channel names'),
               value: _filter.includeChannels,
               onChanged: (value) {
                 setState(() {
@@ -84,7 +84,7 @@ class _FilterDialogState extends State<FilterDialog> {
             ),
 
             CheckboxListTile(
-              title: Text(l10n?.usernames ?? 'Usernames'),
+              title: Text(l10n.usernames ?? 'Usernames'),
               value: _filter.includeUsernames,
               onChanged: (value) {
                 setState(() {
@@ -95,7 +95,7 @@ class _FilterDialogState extends State<FilterDialog> {
             ),
 
             CheckboxListTile(
-              title: Text(l10n?.messageContent ?? 'Message content'),
+              title: Text(l10n.messageContent ?? 'Message content'),
               value: _filter.includeContent,
               onChanged: (value) {
                 setState(() {
@@ -109,15 +109,15 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 元数据过滤选项
             Text(
-              ChatLocalizations.of(context)!.metadataFilters,
+              ChatLocalizations.of(context).metadataFilters,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             // AI 消息过滤选项
             CheckboxListTile(
-              title: Text(ChatLocalizations.of(context)!.aiMessages),
-              subtitle: Text(ChatLocalizations.of(context)!.filterAiMessages),
+              title: Text(ChatLocalizations.of(context).aiMessages),
+              subtitle: Text(ChatLocalizations.of(context).filterAiMessages),
               value: _filter.isAI,
               tristate: true,
               onChanged: (value) {
@@ -130,8 +130,8 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 收藏消息过滤选项
             CheckboxListTile(
-              title: Text(ChatLocalizations.of(context)!.favoriteMessages),
-              subtitle: Text(ChatLocalizations.of(context)!.showOnlyFavorites),
+              title: Text(ChatLocalizations.of(context).favoriteMessages),
+              subtitle: Text(ChatLocalizations.of(context).showOnlyFavorites),
               value: _filter.isFavorite,
               tristate: true,
               onChanged: (value) {
@@ -146,7 +146,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 日期范围选择
             Text(
-              l10n?.dateRange ?? 'Date range:',
+              l10n.dateRange ?? 'Date range:',
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -159,7 +159,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     label: Text(
                       _filter.startDate != null
                           ? '${_filter.startDate!.day}/${_filter.startDate!.month}/${_filter.startDate!.year}'
-                          : l10n?.startDate ?? 'Start date',
+                          : l10n.startDate ?? 'Start date',
                     ),
                     onPressed: () => _selectDate(context, true),
                   ),
@@ -171,7 +171,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     label: Text(
                       _filter.endDate != null
                           ? '${_filter.endDate!.day}/${_filter.endDate!.month}/${_filter.endDate!.year}'
-                          : l10n?.endDate ?? 'End date',
+                          : l10n.endDate ?? 'End date',
                     ),
                     onPressed: () => _selectDate(context, false),
                   ),
@@ -189,7 +189,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       _filter.endDate = null;
                     });
                   },
-                  child: Text(l10n?.clearDates ?? 'Clear dates'),
+                  child: Text(l10n.clearDates ?? 'Clear dates'),
                 ),
               ),
 
@@ -197,13 +197,13 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 频道选择
             Text(
-              l10n?.selectChannels ?? 'Select channels:',
+              l10n.selectChannels ?? 'Select channels:',
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             if (_availableChannels.isEmpty)
-              Text(l10n?.noChannelsAvailable ?? 'No channels available')
+              Text(l10n.noChannelsAvailable ?? 'No channels available')
             else
               Wrap(
                 spacing: 8,
@@ -233,13 +233,13 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 用户选择
             Text(
-              l10n?.selectUsers ?? 'Select users:',
+              l10n.selectUsers ?? 'Select users:',
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             if (_availableUsers.isEmpty)
-              Text(l10n?.noUsersAvailable ?? 'No users available')
+              Text(l10n.noUsersAvailable ?? 'No users available')
             else
               Wrap(
                 spacing: 8,
@@ -275,20 +275,20 @@ class _FilterDialogState extends State<FilterDialog> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text(app_l10n!.cancel),
+          child: Text(appL10n!.cancel),
         ),
         TextButton(
           onPressed: () {
             _filter.reset();
             setState(() {});
           },
-          child: Text(app_l10n.reset),
+          child: Text(appL10n.reset),
         ),
         FilledButton(
           onPressed: () {
             Navigator.of(context).pop(_filter);
           },
-          child: Text(app_l10n.apply),
+          child: Text(appL10n.apply),
         ),
       ],
     );

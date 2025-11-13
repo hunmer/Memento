@@ -36,12 +36,12 @@ class GoalDetailScreen extends StatelessWidget {
                     builder:
                         (context) => AlertDialog(
                           title: Text(
-                            TrackerLocalizations.of(context)!.confirmClear,
+                            TrackerLocalizations.of(context).confirmClear,
                           ),
                           content: Text(
                             TrackerLocalizations.of(
                               context,
-                            )!.confirmClearMessage,
+                            ).confirmClearMessage,
                           ),
                           actions: [
                             TextButton(
@@ -61,7 +61,7 @@ class GoalDetailScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            TrackerLocalizations.of(context)!.recordsCleared,
+                            TrackerLocalizations.of(context).recordsCleared,
                           ),
                         ),
                       );
@@ -90,7 +90,7 @@ class GoalDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${TrackerLocalizations.of(context)!.goalsTitle}: ${goal.name}',
+                  '${TrackerLocalizations.of(context).goalsTitle}: ${goal.name}',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const flutter.SizedBox(height: 16),
@@ -106,7 +106,7 @@ class GoalDetailScreen extends StatelessWidget {
                 ),
                 const flutter.SizedBox(height: 16),
                 Text(
-                  TrackerLocalizations.of(context)!.currentProgress
+                  TrackerLocalizations.of(context).currentProgress
                       .replaceFirst('{currentValue}', currentValue.toString())
                       .replaceFirst(
                         '{targetValue}',
@@ -116,14 +116,14 @@ class GoalDetailScreen extends StatelessWidget {
                 const flutter.SizedBox(height: 16),
                 if (goal.reminderTime != null)
                   Text(
-                    TrackerLocalizations.of(context)!.reminderTime.replaceFirst(
+                    TrackerLocalizations.of(context).reminderTime.replaceFirst(
                       '{reminderTime}',
                       goal.reminderTime.toString(),
                     ),
                   ),
                 const flutter.SizedBox(height: 16),
                 Text(
-                  TrackerLocalizations.of(context)!.recordHistory,
+                  TrackerLocalizations.of(context).recordHistory,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const flutter.SizedBox(height: 8),
@@ -146,7 +146,7 @@ class GoalDetailScreen extends StatelessWidget {
                           if (records.isEmpty) {
                             return flutter.Center(
                               child: Text(
-                                TrackerLocalizations.of(context)!.noRecords,
+                                TrackerLocalizations.of(context).noRecords,
                               ),
                             );
                           }
@@ -179,12 +179,12 @@ class GoalDetailScreen extends StatelessWidget {
                                                 title: Text(
                                                   TrackerLocalizations.of(
                                                     context,
-                                                  )!.confirmDelete,
+                                                  ).confirmDelete,
                                                 ),
                                                 content: Text(
                                                   TrackerLocalizations.of(
                                                     context,
-                                                  )!.confirmDeleteRecordMessage,
+                                                  ).confirmDeleteRecordMessage,
                                                 ),
                                                 actions: [
                                                   TextButton(
@@ -226,7 +226,7 @@ class GoalDetailScreen extends StatelessWidget {
                                                 content: Text(
                                                   TrackerLocalizations.of(
                                                     context,
-                                                  )!.recordDeleted,
+                                                  ).recordDeleted,
                                                 ),
                                               ),
                                             );

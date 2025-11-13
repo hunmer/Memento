@@ -78,7 +78,7 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(ChatLocalizations.of(context)!.recordingFailed),
+                title: Text(ChatLocalizations.of(context).recordingFailed),
                 content: Text(e.toString()),
                 actions: [
                   TextButton(
@@ -120,9 +120,9 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(ChatLocalizations.of(context)!.recordingFailed),
+                title: Text(ChatLocalizations.of(context).recordingFailed),
                 content: Text(
-                  ChatLocalizations.of(context)!.recordingStopError,
+                  ChatLocalizations.of(context).recordingStopError,
                 ),
                 actions: [
                   TextButton(
@@ -156,7 +156,7 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              ChatLocalizations.of(context)!.audioRecording,
+              ChatLocalizations.of(context).audioRecording,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -182,7 +182,7 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              ChatLocalizations.of(context)!.stopRecordingHint,
+              ChatLocalizations.of(context).stopRecordingHint,
               style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ],

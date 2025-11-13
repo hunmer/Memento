@@ -90,7 +90,7 @@ class ContactFormState extends State<ContactForm> {
       builder: (context) {
         final controller = TextEditingController();
         return AlertDialog(
-          title: Text(ContactLocalizations.of(context)!.addTag),
+          title: Text(ContactLocalizations.of(context).addTag),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(hintText: '输入标签名称'),
@@ -98,7 +98,7 @@ class ContactFormState extends State<ContactForm> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(ContactLocalizations.of(context)!.cancel),
+              child: Text(ContactLocalizations.of(context).cancel),
             ),
             TextButton(
               onPressed: () {
@@ -109,7 +109,7 @@ class ContactFormState extends State<ContactForm> {
                   Navigator.pop(context);
                 }
               },
-              child: Text(ContactLocalizations.of(context)!.save),
+              child: Text(ContactLocalizations.of(context).save),
             ),
           ],
         );
@@ -130,7 +130,7 @@ class ContactFormState extends State<ContactForm> {
         final keyController = TextEditingController();
         final valueController = TextEditingController();
         return AlertDialog(
-          title: Text(ContactLocalizations.of(context)!.addCustomField),
+          title: Text(ContactLocalizations.of(context).addCustomField),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -148,7 +148,7 @@ class ContactFormState extends State<ContactForm> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(ContactLocalizations.of(context)!.cancel),
+              child: Text(ContactLocalizations.of(context).cancel),
             ),
             TextButton(
               onPressed: () {
@@ -160,7 +160,7 @@ class ContactFormState extends State<ContactForm> {
                   Navigator.pop(context);
                 }
               },
-              child: Text(ContactLocalizations.of(context)!.save),
+              child: Text(ContactLocalizations.of(context).save),
             ),
           ],
         );
@@ -221,7 +221,7 @@ class ContactFormState extends State<ContactForm> {
     if (widget.contact == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(ContactLocalizations.of(context)!.saveFirstMessage),
+          content: Text(ContactLocalizations.of(context).saveFirstMessage),
         ),
       );
       return;
@@ -252,7 +252,7 @@ class ContactFormState extends State<ContactForm> {
           (context) => AlertDialog(
             title: Text(AppLocalizations.of(context)!.confirmDelete),
             content: Text(
-              ContactLocalizations.of(context)!.deleteConfirmMessage,
+              ContactLocalizations.of(context).deleteConfirmMessage,
             ),
             actions: [
               TextButton(
@@ -281,8 +281,8 @@ class ContactFormState extends State<ContactForm> {
         children: [
           TabBar(
             tabs: [
-              Tab(text: ContactLocalizations.of(context)!.basicInfoTab),
-              Tab(text: ContactLocalizations.of(context)!.recordsTab),
+              Tab(text: ContactLocalizations.of(context).basicInfoTab),
+              Tab(text: ContactLocalizations.of(context).recordsTab),
             ],
           ),
           Expanded(
@@ -340,7 +340,7 @@ class ContactFormState extends State<ContactForm> {
                                                     child: Text(
                                                       ContactLocalizations.of(
                                                         context,
-                                                      )!.upload,
+                                                      ).upload,
                                                       style: const TextStyle(
                                                         color: Colors.black54,
                                                         fontSize: 14,
@@ -378,14 +378,14 @@ class ContactFormState extends State<ContactForm> {
                           controller: _nameController,
                           decoration: InputDecoration(
                             labelText:
-                                ContactLocalizations.of(context)!.nameLabel,
+                                ContactLocalizations.of(context).nameLabel,
                             border: const OutlineInputBorder(),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return ContactLocalizations.of(
                                 context,
-                              )!.nameRequiredError;
+                              ).nameRequiredError;
                             }
                             return null;
                           },
@@ -395,7 +395,7 @@ class ContactFormState extends State<ContactForm> {
                           controller: _phoneController,
                           decoration: InputDecoration(
                             labelText:
-                                ContactLocalizations.of(context)!.phoneLabel,
+                                ContactLocalizations.of(context).phoneLabel,
                             border: const OutlineInputBorder(),
                           ),
                         ),
@@ -404,7 +404,7 @@ class ContactFormState extends State<ContactForm> {
                           controller: _addressController,
                           decoration: InputDecoration(
                             labelText:
-                                ContactLocalizations.of(context)!.addressLabel,
+                                ContactLocalizations.of(context).addressLabel,
                             border: const OutlineInputBorder(),
                           ),
                         ),
@@ -413,7 +413,7 @@ class ContactFormState extends State<ContactForm> {
                           controller: _notesController,
                           decoration: InputDecoration(
                             labelText:
-                                ContactLocalizations.of(context)!.notesLabel,
+                                ContactLocalizations.of(context).notesLabel,
                             border: const OutlineInputBorder(),
                           ),
                           maxLines: 3,
@@ -434,7 +434,7 @@ class ContactFormState extends State<ContactForm> {
                               tooltip:
                                   ContactLocalizations.of(
                                     context,
-                                  )!.addTagTooltip,
+                                  ).addTagTooltip,
                             ),
                           ],
                         ),
@@ -466,7 +466,7 @@ class ContactFormState extends State<ContactForm> {
                               tooltip:
                                   ContactLocalizations.of(
                                     context,
-                                  )!.addCustomFieldTooltip,
+                                  ).addCustomFieldTooltip,
                             ),
                           ],
                         ),
@@ -489,7 +489,7 @@ class ContactFormState extends State<ContactForm> {
                                   tooltip:
                                       ContactLocalizations.of(
                                         context,
-                                      )!.deleteFieldTooltip,
+                                      ).deleteFieldTooltip,
                                 ),
                               ],
                             ),

@@ -1,5 +1,4 @@
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
-import 'package:flutter/widgets.dart';
 
 class GoodsLocalizationsZh extends GoodsLocalizations {
   GoodsLocalizationsZh() : super('zh');

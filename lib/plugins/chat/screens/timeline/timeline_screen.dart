@@ -101,7 +101,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ChatLocalizations.of(context)!;
+    final l10n = ChatLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(

@@ -128,7 +128,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
               children: [
                 Expanded(
                   child: Text(
-                    GoodsLocalizations.of(context)!.selectItem,
+                    GoodsLocalizations.of(context).selectItem,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
@@ -142,7 +142,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
             // 分类选择器
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: GoodsLocalizations.of(context)!.filterByCategory,
+                labelText: GoodsLocalizations.of(context).filterByCategory,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.category),
               ),
@@ -150,7 +150,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
               items: [
                 DropdownMenuItem<String>(
                   value: null,
-                  child: Text(GoodsLocalizations.of(context)!.allCategories),
+                  child: Text(GoodsLocalizations.of(context).allCategories),
                 ),
                 ..._availableCategories.map(
                   (category) => DropdownMenuItem<String>(
@@ -169,7 +169,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: GoodsLocalizations.of(context)!.searchItems,
+                hintText: GoodsLocalizations.of(context).searchItems,
                 prefixIcon: const Icon(Icons.search),
                 border: const OutlineInputBorder(),
               ),

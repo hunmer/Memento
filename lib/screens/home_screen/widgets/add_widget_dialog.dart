@@ -7,7 +7,7 @@ import '../models/home_widget_size.dart';
 
 /// 添加小组件对话框
 class AddWidgetDialog extends StatefulWidget {
-  const AddWidgetDialog({Key? key}) : super(key: key);
+  const AddWidgetDialog({super.key});
 
   @override
   State<AddWidgetDialog> createState() => _AddWidgetDialogState();

@@ -129,15 +129,15 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                 items: [
                   DropdownMenuItem(
                     value: TimerType.countUp,
-                    child: Text(TimerLocalizations.of(context)!.countUpTimer),
+                    child: Text(TimerLocalizations.of(context).countUpTimer),
                   ),
                   DropdownMenuItem(
                     value: TimerType.countDown,
-                    child: Text(TimerLocalizations.of(context)!.countDownTimer),
+                    child: Text(TimerLocalizations.of(context).countDownTimer),
                   ),
                   DropdownMenuItem(
                     value: TimerType.pomodoro,
-                    child: Text(TimerLocalizations.of(context)!.pomodoroTimer),
+                    child: Text(TimerLocalizations.of(context).pomodoroTimer),
                   ),
                 ],
                 onChanged: (value) {
@@ -253,7 +253,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               const SizedBox(height: 16),
 
               SwitchListTile(
-                title: Text(TimerLocalizations.of(context)!.enableNotification),
+                title: Text(TimerLocalizations.of(context).enableNotification),
                 value: _enableNotification,
                 onChanged: (value) {
                   setState(() {
@@ -335,11 +335,11 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
   String _getTimerTypeName(TimerType type) {
     switch (type) {
       case TimerType.countUp:
-        return TimerLocalizations.of(context)!.countUpTimer;
+        return TimerLocalizations.of(context).countUpTimer;
       case TimerType.countDown:
-        return TimerLocalizations.of(context)!.countDownTimer;
+        return TimerLocalizations.of(context).countDownTimer;
       case TimerType.pomodoro:
-        return TimerLocalizations.of(context)!.pomodoroTimer;
+        return TimerLocalizations.of(context).pomodoroTimer;
     }
   }
 }

@@ -56,19 +56,19 @@ class BackupService {
       builder:
           (context) => AlertDialog(
             title: Text(l10n!.backupOptions),
-            content: Text(l10n!.selectBackupMethod),
+            content: Text(l10n.selectBackupMethod),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, 'export'),
-                child: Text(l10n!.exportAppData),
+                child: Text(l10n.exportAppData),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, 'full'),
-                child: Text(l10n!.fullBackup),
+                child: Text(l10n.fullBackup),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, 'webdav'),
-                child: Text(l10n!.webdavSync),
+                child: Text(l10n.webdavSync),
               ),
             ],
           ),
