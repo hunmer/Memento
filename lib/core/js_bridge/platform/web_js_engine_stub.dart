@@ -17,6 +17,11 @@ class WebJSEngine implements JSEngine {
   }
 
   @override
+  Future<void> evaluateDirect(String code) async {
+    throw UnsupportedError('WebJSEngine is only available on web platform');
+  }
+
+  @override
   Future<void> setGlobal(String name, dynamic value) async {
     throw UnsupportedError('WebJSEngine is only available on web platform');
   }

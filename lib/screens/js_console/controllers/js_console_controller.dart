@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../../../core/js_bridge/js_bridge_manager.dart';
 
@@ -28,10 +29,13 @@ class JSConsoleController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // 执行代码（evaluate 方法会自动处理 Promise）
       final result = await JSBridgeManager.instance.evaluate(_code);
 
       if (result.success) {
-        _output += '✓ 成功:\n${result.result}\n';
+        // 格式化输出结果
+        final resultStr = _formatResult(result.result);
+        _output += '✓ 成功:\n$resultStr\n';
       } else {
         _output += '✗ 错误:\n${result.error}\n';
       }
@@ -43,77 +47,194 @@ class JSConsoleController extends ChangeNotifier {
     }
   }
 
+  /// 格式化结果以便显示
+  String _formatResult(dynamic result) {
+    if (result == null) {
+      return 'null';
+    } else if (result is String) {
+      return result;
+    } else if (result is Map || result is List) {
+      // 格式化 JSON 对象
+      try {
+        const encoder = JsonEncoder.withIndent('  ');
+        return encoder.convert(result);
+      } catch (e) {
+        return result.toString();
+      }
+    } else {
+      return result.toString();
+    }
+  }
+
   // 预设示例
   static const Map<String, String> examples = {
+    '基础测试': '''
+// 测试基础功能
+var result = '测试成功！';
+result;
+''',
+    '同步 setResult 测试': '''
+// 测试同步代码的 setResult
+console.log('开始同步测试');
+setResult({
+  message: '同步测试成功',
+  timestamp: new Date().toISOString()
+});
+console.log('同步测试完成');
+''',
+    '异步 setResult 测试': '''
+// 测试异步代码的 setResult（不调用 API）
+(async function() {
+  console.log('开始异步测试');
+
+  // 模拟异步操作
+  await new Promise(resolve => {
+    console.log('创建 Promise，设置 setTimeout...');
+    setTimeout(() => {
+      console.log('setTimeout 回调被触发！');
+      resolve('ok');
+    }, 100);
+  });
+
+  console.log('Promise resolved');
+
+  setResult({
+    message: '异步测试成功',
+    timestamp: new Date().toISOString()
+  });
+
+  console.log('异步测试完成');
+})();
+''',
+    'API测试（基础）': '''
+// 方式1：使用 setResult 显式设置返回值
+(async function() {
+  var result = await Memento.chat.testSync();
+  console.log('测试结果:', result);
+  setResult(result);  // 显式设置返回值
+})();
+''',
+    'API测试（Promise）': '''
+// 方式2：使用 .then() 链式调用
+Memento.chat.testSync().then(result => {
+  console.log('测试结果:', result);
+  return result;  // 自动捕获返回值
+});
+''',
+    '异步API测试': '''
+// 方式3：async/await，自动捕获 return 值
+(async function() {
+  var result = await Memento.chat.testSync();
+  console.log('结果:', result);
+  return result;  // 自动捕获
+})();
+''',
     '获取所有频道': '''
 // 获取所有聊天频道
-var channels = Memento.chat.getChannels();
-console.log('频道列表:', channels);
-channels;
+(async function() {
+  var channels = await Memento.chat.getChannels();
+  setResult(channels);  // 使用 setResult 返回
+})();
+''',
+    'setResult 高级用法': '''
+// 演示 setResult 的多种用法
+(async function() {
+  console.log('开始测试...');
+
+  // 1. 调用 API
+  var result = await Memento.chat.testSync();
+  console.log('API 返回:', result);
+
+  // 2. 处理数据
+  var processed = {
+    original: result,
+    timestamp: new Date().toISOString(),
+    processed: true
+  };
+
+  // 3. 显式设置返回值
+  setResult(processed);
+
+  console.log('完成！');
+})();
 ''',
     '创建新频道': '''
-// 创建一个新的聊天频道
-var channel = Memento.chat.createChannel('测试频道');
-console.log('创建成功:', channel);
-channel;
+// 创建一个新的聊天频道（使用 await）
+async function test() {
+  var channel = await Memento.chat.createChannel('测试频道');
+  console.log('创建成功:', channel);
+  return channel;
+}
+test();
 ''',
     '发送消息': '''
-// 先获取频道列表
-var channelsJson = Memento.chat.getChannels();
-var channels = JSON.parse(channelsJson);
+// 先获取频道列表，然后发送消息（使用 await）
+async function test() {
+  var channels = await Memento.chat.getChannels();
 
-if (channels.length > 0) {
-  var channelId = channels[0].id;
+  if (channels.length > 0) {
+    var channelId = channels[0].id;
 
-  // 发送消息
-  var message = Memento.chat.sendMessage(
-    channelId,
-    'Hello from JS!',
-    'text'
-  );
+    // 发送消息
+    var message = await Memento.chat.sendMessage(
+      channelId,
+      'Hello from JS!',
+      'text'
+    );
 
-  console.log('消息已发送:', message);
-  message;
-} else {
-  '没有可用频道，请先创建';
+    console.log('消息已发送:', message);
+    return message;
+  } else {
+    return '没有可用频道，请先创建';
+  }
 }
+test();
 ''',
     '获取当前用户': '''
-// 获取当前登录用户
-var user = Memento.chat.getCurrentUser();
-console.log('当前用户:', user);
-user;
+// 获取当前登录用户（使用 await）
+async function test() {
+  var user = await Memento.chat.getCurrentUser();
+  console.log('当前用户:', user);
+  return user;
+}
+test();
 ''',
     '获取频道消息': '''
-// 获取第一个频道的消息
-var channelsJson = Memento.chat.getChannels();
-var channels = JSON.parse(channelsJson);
+// 获取第一个频道的消息（使用 await）
+async function test() {
+  var channels = await Memento.chat.getChannels();
 
-if (channels.length > 0) {
-  var channelId = channels[0].id;
-  var messages = Memento.chat.getMessages(channelId, 5);
-  console.log('最新5条消息:', messages);
-  messages;
-} else {
-  '没有可用频道';
+  if (channels.length > 0) {
+    var channelId = channels[0].id;
+    var messages = await Memento.chat.getMessages(channelId, 5);
+    console.log('最新5条消息:', messages);
+    return messages;
+  } else {
+    return '没有可用频道';
+  }
 }
+test();
 ''',
     '复杂操作示例': '''
-// 1. 创建频道
-var channelJson = Memento.chat.createChannel('JS测试频道');
-var channel = JSON.parse(channelJson);
+// 复杂操作：创建频道并发送多条消息（使用 await）
+async function test() {
+  // 1. 创建频道
+  var channel = await Memento.chat.createChannel('JS测试频道');
+  console.log('频道已创建:', channel);
 
-// 2. 发送多条消息
-Memento.chat.sendMessage(channel.id, '第一条消息', 'text');
-Memento.chat.sendMessage(channel.id, '第二条消息', 'text');
-Memento.chat.sendMessage(channel.id, '第三条消息', 'text');
+  // 2. 发送多条消息
+  await Memento.chat.sendMessage(channel.id, '第一条消息', 'text');
+  await Memento.chat.sendMessage(channel.id, '第二条消息', 'text');
+  await Memento.chat.sendMessage(channel.id, '第三条消息', 'text');
 
-// 3. 获取消息
-var messagesJson = Memento.chat.getMessages(channel.id, 10);
-var messages = JSON.parse(messagesJson);
+  // 3. 获取消息
+  var messages = await Memento.chat.getMessages(channel.id, 10);
+  console.log('消息列表:', messages);
 
-// 4. 返回结果
-'频道: ' + channel.name + ', 消息数: ' + messages.length;
+  // 4. 返回结果
+  return '频道: ' + channel.name + ', 消息数: ' + messages.length;
+}
+test();
 ''',
   };
 

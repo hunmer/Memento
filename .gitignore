@@ -70,3 +70,4 @@ app.*.map.json
 !linux/**
 !analysis_options.yaml
 !README.md
+flutter-js/
