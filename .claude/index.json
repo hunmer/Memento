@@ -1,0 +1,483 @@
+{
+  "projectName": "Memento",
+  "projectDescription": "跨平台个人助手应用，集成聊天、日记、活动追踪等18+功能插件",
+  "lastScanTimestamp": "2025-11-13T04:06:10+00:00",
+  "framework": "Flutter 3.7+",
+  "language": "Dart",
+  "platforms": ["Android", "iOS", "Web", "Windows", "macOS", "Linux"],
+  "architecture": "插件化架构 (Plugin-based)",
+  "coverage": {
+    "totalFiles": 500,
+    "scannedFiles": 350,
+    "coveragePercentage": 70,
+    "status": "initial_scan_completed"
+  },
+  "modules": [
+    {
+      "name": "core",
+      "path": "lib/core",
+      "type": "infrastructure",
+      "description": "核心基础设施：插件系统、存储、配置、事件",
+      "entryPoints": [
+        "lib/core/plugin_manager.dart",
+        "lib/core/storage/storage_manager.dart",
+        "lib/core/config_manager.dart"
+      ],
+      "keyFiles": [
+        "lib/core/plugin_base.dart",
+        "lib/core/event/event.dart"
+      ],
+      "documentation": "lib/core/CLAUDE.md",
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": true,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "chat",
+      "path": "lib/plugins/chat",
+      "type": "plugin",
+      "description": "频道聊天插件：多频道、消息管理、AI对话",
+      "entryPoints": ["lib/plugins/chat/chat_plugin.dart"],
+      "interfaces": [
+        "ChannelService",
+        "MessageService",
+        "UserService"
+      ],
+      "models": [
+        "Channel",
+        "Message",
+        "User"
+      ],
+      "documentation": "lib/plugins/chat/CLAUDE.md",
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": true,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "openai",
+      "path": "lib/plugins/openai",
+      "type": "plugin",
+      "description": "AI助手插件：多服务商集成、数据分析、工具调用",
+      "entryPoints": ["lib/plugins/openai/openai_plugin.dart"],
+      "interfaces": [
+        "RequestService",
+        "PluginAnalysisService",
+        "TestService"
+      ],
+      "models": [
+        "AIAgent",
+        "ServiceProvider",
+        "ToolApp",
+        "LLMModel"
+      ],
+      "documentation": "lib/plugins/openai/CLAUDE.md",
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": true,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "diary",
+      "path": "lib/plugins/diary",
+      "type": "plugin",
+      "description": "日记插件：日历视图、Markdown编辑",
+      "entryPoints": ["lib/plugins/diary/diary_plugin.dart"],
+      "models": ["DiaryEntry"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "activity",
+      "path": "lib/plugins/activity",
+      "type": "plugin",
+      "description": "活动记录插件：时间轴、标签、统计",
+      "entryPoints": ["lib/plugins/activity/activity_plugin.dart"],
+      "interfaces": ["ActivityService"],
+      "models": ["ActivityRecord", "TagGroup"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "notes",
+      "path": "lib/plugins/notes",
+      "type": "plugin",
+      "description": "笔记插件：无限层级、Markdown",
+      "entryPoints": ["lib/plugins/notes/notes_plugin.dart"],
+      "models": ["Note", "Folder"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "goods",
+      "path": "lib/plugins/goods",
+      "type": "plugin",
+      "description": "物品管理插件：分类、自定义字段、使用记录",
+      "entryPoints": ["lib/plugins/goods/goods_plugin.dart"],
+      "models": ["GoodsItem", "Warehouse", "CustomField", "UsageRecord"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "bill",
+      "path": "lib/plugins/bill",
+      "type": "plugin",
+      "description": "账单插件：多账户、收支统计",
+      "entryPoints": ["lib/plugins/bill/bill_plugin.dart"],
+      "models": ["Bill", "Account", "BillStatistics"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "checkin",
+      "path": "lib/plugins/checkin",
+      "type": "plugin",
+      "description": "签到插件：分组、统计、连续签到",
+      "entryPoints": ["lib/plugins/checkin/checkin_plugin.dart"],
+      "models": ["CheckinItem"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "calendar",
+      "path": "lib/plugins/calendar",
+      "type": "plugin",
+      "description": "日历插件：事件聚合、多视图",
+      "entryPoints": ["lib/plugins/calendar/calendar_plugin.dart"],
+      "models": ["Event"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "day",
+      "path": "lib/plugins/day",
+      "type": "plugin",
+      "description": "纪念日插件：倒计时/正计时",
+      "entryPoints": ["lib/plugins/day/day_plugin.dart"],
+      "models": ["MemorialDay"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "todo",
+      "path": "lib/plugins/todo",
+      "type": "plugin",
+      "description": "任务插件：子任务、优先级、日期范围",
+      "entryPoints": ["lib/plugins/todo/todo_plugin.dart"],
+      "models": ["Task", "Subtask", "Category"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "tracker",
+      "path": "lib/plugins/tracker",
+      "type": "plugin",
+      "description": "目标追踪插件：量化目标、数据记录",
+      "entryPoints": ["lib/plugins/tracker/tracker_plugin.dart"],
+      "models": ["Goal", "Record"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "contact",
+      "path": "lib/plugins/contact",
+      "type": "plugin",
+      "description": "联系人插件：信息管理、互动历史",
+      "entryPoints": ["lib/plugins/contact/contact_plugin.dart"],
+      "models": ["ContactModel", "InteractionRecordModel"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "timer",
+      "path": "lib/plugins/timer",
+      "type": "plugin",
+      "description": "计时器插件：多种计时方式",
+      "entryPoints": ["lib/plugins/timer/timer_plugin.dart"],
+      "models": ["TimerTask", "TimerItem"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "store",
+      "path": "lib/plugins/store",
+      "type": "plugin",
+      "description": "物品兑换插件：积分系统",
+      "entryPoints": ["lib/plugins/store/store_plugin.dart"],
+      "models": ["Product", "UserItem", "PointsLog"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "nodes",
+      "path": "lib/plugins/nodes",
+      "type": "plugin",
+      "description": "节点插件：笔记本树结构",
+      "entryPoints": ["lib/plugins/nodes/nodes_plugin.dart"],
+      "models": ["Node", "Notebook"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "calendar_album",
+      "path": "lib/plugins/calendar_album",
+      "type": "plugin",
+      "description": "日记相册插件：照片标签、日期记录",
+      "entryPoints": ["lib/plugins/calendar_album/calendar_album_plugin.dart"],
+      "models": ["CalendarEntry"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "habits",
+      "path": "lib/plugins/habits",
+      "type": "plugin",
+      "description": "习惯管理插件：技能关联、一万小时",
+      "entryPoints": ["lib/plugins/habits/habits_plugin.dart"],
+      "models": ["Habit", "Skill", "CompletionRecord"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "database",
+      "path": "lib/plugins/database",
+      "type": "plugin",
+      "description": "自定义数据库插件：灵活字段定义",
+      "entryPoints": ["lib/plugins/database/database_plugin.dart"],
+      "models": ["DatabaseModel", "FieldModel", "Record"],
+      "services": ["DatabaseService"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "screens",
+      "path": "lib/screens",
+      "type": "ui_layer",
+      "description": "全局界面层：主屏幕、设置屏幕、路由",
+      "entryPoints": [
+        "lib/screens/home_screen/home_screen.dart",
+        "lib/screens/settings_screen/settings_screen.dart",
+        "lib/screens/route.dart"
+      ],
+      "keyComponents": [
+        "plugin_grid.dart",
+        "webdav_sync_controller.dart",
+        "auto_update_controller.dart"
+      ],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": false
+      }
+    },
+    {
+      "name": "widgets",
+      "path": "lib/widgets",
+      "type": "shared_components",
+      "description": "通用UI组件：Markdown编辑器、文件预览、标签管理",
+      "keyComponents": [
+        "markdown_editor/",
+        "file_preview/",
+        "tag_manager_dialog/",
+        "location_picker.dart",
+        "image_picker_dialog.dart"
+      ],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": false
+      }
+    },
+    {
+      "name": "scripts",
+      "path": "scripts",
+      "type": "build_tools",
+      "description": "构建与发布脚本",
+      "entryPoints": [
+        "scripts/build.sh",
+        "scripts/release.sh"
+      ],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": false,
+        "dataMapped": false
+      }
+    }
+  ],
+  "ignoredPaths": {
+    "patterns": [
+      "build/**",
+      ".dart_tool/**",
+      "node_modules/**",
+      ".git/**",
+      "*.log",
+      "*.lock",
+      "*.bin"
+    ],
+    "ignoredDirectories": [
+      "build/windows/x64",
+      "build/flutter_assets",
+      ".dart_tool"
+    ],
+    "totalIgnored": 150
+  },
+  "gaps": [
+    {
+      "module": "core",
+      "type": "missing_tests",
+      "priority": "high",
+      "description": "核心层缺少单元测试，建议优先为 PluginManager, StorageManager, ConfigManager 添加测试"
+    },
+    {
+      "module": "all_plugins",
+      "type": "missing_documentation",
+      "priority": "medium",
+      "description": "除 chat 和 openai 外，其他 16 个插件缺少模块级文档"
+    },
+    {
+      "module": "screens",
+      "type": "missing_documentation",
+      "priority": "medium",
+      "description": "界面层缺少架构文档，建议补充主屏幕和设置屏幕的详细说明"
+    },
+    {
+      "module": "widgets",
+      "type": "missing_documentation",
+      "priority": "low",
+      "description": "通用组件缺少使用文档，建议为 markdown_editor 和 file_preview 添加 API 说明"
+    },
+    {
+      "module": "all",
+      "type": "missing_integration_tests",
+      "priority": "medium",
+      "description": "项目缺少集成测试，建议为关键用户流程（创建频道、发送消息、AI对话）添加测试"
+    }
+  ],
+  "nextSteps": [
+    {
+      "priority": 1,
+      "action": "为剩余 16 个插件生成 CLAUDE.md 模块文档",
+      "estimatedFiles": 16
+    },
+    {
+      "priority": 2,
+      "action": "补充 lib/screens 和 lib/widgets 的架构文档",
+      "estimatedFiles": 2
+    },
+    {
+      "priority": 3,
+      "action": "深度扫描各插件的 screens/ 和 services/ 目录，补充关键接口说明",
+      "estimatedFiles": 50
+    },
+    {
+      "priority": 4,
+      "action": "为核心层添加单元测试框架和示例测试",
+      "estimatedFiles": 5
+    }
+  ],
+  "metadata": {
+    "scanMethod": "adaptive_3_phase",
+    "truncated": false,
+    "reasonForStop": "completed_initial_scan",
+    "toolCallsUsed": 30,
+    "estimatedRemainingWork": "20% - 需补充插件文档和测试"
+  }
+}
