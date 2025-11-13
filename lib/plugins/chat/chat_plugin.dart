@@ -123,6 +123,9 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   @override
   Map<String, Function> defineJSAPI() {
     return {
+      // 测试API（同步）
+      'testSync': _jsTestSync,
+
       // 频道相关
       'getChannels': _jsGetChannels,
       'createChannel': _jsCreateChannel,
@@ -140,6 +143,15 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   // ==================== JS API 实现 ====================
+
+  /// 同步测试 API
+  String _jsTestSync() {
+    return jsonEncode({
+      'status': 'ok',
+      'message': '同步测试成功！',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
 
   /// 获取所有频道
   Future<String> _jsGetChannels() async {

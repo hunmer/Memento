@@ -49,14 +49,25 @@ class JSBridgeManager {
     _registeredPlugins[plugin.id] = plugin;
 
     // 为每个插件创建命名空间
-    await _engine!.evaluate('''
-      if (typeof window !== 'undefined') {
-        window.Memento = window.Memento || {};
-        window.Memento.${plugin.id} = {};
-      } else {
-        var Memento = Memento || {};
-        Memento.${plugin.id} = {};
-      }
+    // 使用 globalThis 确保跨平台兼容性（Web/QuickJS）
+    await _engine!.evaluateDirect('''
+      (function() {
+        // 确保全局命名空间存在
+        if (typeof globalThis.Memento === 'undefined') {
+          globalThis.Memento = {
+            version: '1.0.0',
+            plugins: {}
+          };
+        }
+
+        // 创建插件命名空间
+        globalThis.Memento.${plugin.id} = {};
+
+        // 兼容浏览器环境
+        if (typeof window !== 'undefined') {
+          window.Memento = globalThis.Memento;
+        }
+      })();
     ''');
 
     // 注册 API
@@ -64,21 +75,27 @@ class JSBridgeManager {
       final apiName = entry.key;
       final dartFunction = entry.value;
 
-      // 包装函数以处理异步和错误
-      Future<String> wrappedFunction(
-          [dynamic a, dynamic b, dynamic c, dynamic d, dynamic e]) async {
+      // 包装函数：直接返回原始结果或 Future
+      // 不使用 async，让 mobile_js_engine 统一处理异步
+      dynamic wrappedFunction(
+          [dynamic a, dynamic b, dynamic c, dynamic d, dynamic e]) {
         try {
           final args = [a, b, c, d, e].where((arg) => arg != null).toList();
 
-          // 调用 Dart 函数
+          // 直接调用 Dart 函数并返回（可能是同步值或 Future）
           final result = Function.apply(dartFunction, args);
 
-          // 处理 Future 返回值
+          // 如果是 Future，包装为返回序列化结果的 Future
           if (result is Future) {
-            final awaitedResult = await result;
-            return _serializeResult(awaitedResult);
+            return result.then((awaitedResult) {
+              return _serializeResult(awaitedResult);
+            }).catchError((e) {
+              print('JS API Error [${plugin.id}.$apiName]: $e');
+              return jsonEncode({'error': e.toString()});
+            });
           }
 
+          // 同步结果直接序列化
           return _serializeResult(result);
         } catch (e) {
           print('JS API Error [${plugin.id}.$apiName]: $e');
@@ -90,32 +107,17 @@ class JSBridgeManager {
       await _engine!
           .registerFunction('Memento_${plugin.id}_$apiName', wrappedFunction);
 
-      // 在插件命名空间下创建代理（支持异步）
-      await _engine!.evaluate('''
+      // 在插件命名空间下创建代理
+      // 直接返回内层 Promise，不使用 await（避免事件循环阻塞）
+      await _engine!.evaluateDirect('''
         (function() {
-          var namespace = typeof window !== 'undefined' ? window.Memento : Memento;
+          var namespace = globalThis.Memento;
+
+          // 直接返回 Promise，让调用者处理
           namespace.${plugin.id}.$apiName = function() {
             var args = Array.prototype.slice.call(arguments);
-            var result = Memento_${plugin.id}_$apiName.apply(null, args);
-
-            // 如果结果是字符串，尝试解析为 JSON
-            if (typeof result === 'string') {
-              try {
-                var parsed = JSON.parse(result);
-                if (parsed && parsed.error) {
-                  throw new Error(parsed.error);
-                }
-                return parsed;
-              } catch (e) {
-                // 如果不是 JSON，返回原始字符串
-                if (e.message && e.message.indexOf('Unexpected') === -1) {
-                  throw e;
-                }
-                return result;
-              }
-            }
-
-            return result;
+            // 直接返回 Promise（不 await）
+            return Memento_${plugin.id}_$apiName.apply(null, args);
           };
         })();
       ''');
@@ -136,19 +138,20 @@ class JSBridgeManager {
   Future<void> _registerGlobalAPI() async {
     if (_engine == null) return;
 
-    // 注册全局命名空间
-    await _engine!.evaluate('''
+    // 注册全局命名空间（使用 globalThis 确保跨平台）
+    await _engine!.evaluateDirect('''
       (function() {
+        // 确保全局命名空间存在
+        if (typeof globalThis.Memento === 'undefined') {
+          globalThis.Memento = {
+            version: '1.0.0',
+            plugins: {}
+          };
+        }
+
+        // 兼容浏览器环境
         if (typeof window !== 'undefined') {
-          window.Memento = window.Memento || {
-            version: '1.0.0',
-            plugins: {}
-          };
-        } else {
-          var Memento = Memento || {
-            version: '1.0.0',
-            plugins: {}
-          };
+          window.Memento = globalThis.Memento;
         }
       })();
     ''');

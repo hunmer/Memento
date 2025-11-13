@@ -27,6 +27,16 @@ class WebJSEngine implements JSEngine {
   }
 
   @override
+  Future<void> evaluateDirect(String code) async {
+    // Web 平台直接执行代码，不返回结果
+    try {
+      js.context.callMethod('eval', [code]);
+    } catch (e) {
+      print('WebJSEngine evaluateDirect error: $e');
+    }
+  }
+
+  @override
   Future<void> setGlobal(String name, dynamic value) async {
     js.context[name] = _convertDartValue(value);
   }

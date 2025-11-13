@@ -3,8 +3,12 @@ abstract class JSEngine {
   /// 初始化 JS 引擎
   Future<void> initialize();
 
-  /// 执行 JS 代码
+  /// 执行 JS 代码（用户代码，包装后等待结果）
   Future<JSResult> evaluate(String code);
+
+  /// 直接执行 JS 代码（内部使用，不包装，不等待结果）
+  /// 用于注册函数、创建命名空间等操作
+  Future<void> evaluateDirect(String code);
 
   /// 设置全局变量
   Future<void> setGlobal(String name, dynamic value);
