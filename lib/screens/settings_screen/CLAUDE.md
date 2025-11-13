@@ -12,7 +12,6 @@
 - **插件设置**：各插件的独立设置界面
 - **应用设置**：主题、语言、通知、权限
 - **自动更新**：检查新版本并下载更新
-- **日志管理**：查看和导出应用日志
 - **关于信息**：版本号、开源协议、贡献者
 
 ---
@@ -42,7 +41,6 @@ SettingsScreen
 │   │   └── 权限管理
 │   ├── 高级设置
 │   │   ├── 自动更新
-│   │   ├── 日志查看
 │   │   └── 清理缓存
 │   └── 关于
 └── Footer
@@ -269,23 +267,6 @@ Future<void> checkAndRequestPermissions() async {
 
 ---
 
-### 日志管理
-
-**界面**: `log_settings_screen.dart`
-
-**功能**:
-- 查看应用日志（ERROR, WARNING, INFO, DEBUG）
-- 按级别筛选
-- 导出日志文件
-- 清空日志
-
-**日志来源**:
-- 全局 `LoggerUtil` (lib/core/utils/logger_util.dart)
-- 插件错误捕获
-- Flutter 错误钩子 (`FlutterError.onError`)
-
----
-
 ## 数据模型
 
 ### WebDAVConfig
@@ -403,7 +384,6 @@ Future<void> checkAndRequestPermissions() async {
 
 ### 界面
 - `settings_screen.dart`
-- `log_settings_screen.dart`
 - `screens/data_management_screen.dart`
 
 ### 组件
@@ -415,7 +395,6 @@ Future<void> checkAndRequestPermissions() async {
 
 ### 国际化
 - `l10n/settings_screen_localizations.dart`
-- `l10n/log_settings_localizations.dart`
 - `screens/data_management_localizations.dart`
 - `widgets/l10n/webdav_localizations.dart`
 
@@ -423,6 +402,7 @@ Future<void> checkAndRequestPermissions() async {
 
 ## 变更记录
 
+- **2025-11-14**: 移除日志系统相关功能和文件
 - **2025-11-13T04:06:10+00:00**: 初始化设置屏幕文档
 
 ---

@@ -70,8 +70,6 @@ abstract class SettingsScreenLocalizations {
   String get autoCheckUpdateSubtitle;
   String get checkUpdateTitle;
   String get checkUpdateSubtitle;
-  String get logSettingsTitle;
-  String get logSettingsSubtitle;
 
   String get updateAvailableTitle;
   String get updateAvailableContent;

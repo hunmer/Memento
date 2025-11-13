@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/core/services/shortcut_manager.dart';
-import 'package:Memento/core/utils/logger_util.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
@@ -16,7 +15,6 @@ import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
-import 'package:Memento/screens/settings_screen/l10n/log_settings_localizations.dart';
 import 'package:Memento/screens/settings_screen/l10n/settings_screen_localizations.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_localizations.dart';
 import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_localizations.dart';
@@ -65,6 +63,7 @@ import 'plugins/store/store_plugin.dart'; // store插件
 import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 import 'plugins/database/database_plugin.dart';
+import 'plugins/scripts_center/scripts_center_plugin.dart'; // 脚本中心插件
 
 
 // 主页小组件注册
@@ -114,7 +113,6 @@ late final ConfigManager globalConfigManager;
 late final PluginManager globalPluginManager;
 late final AppShortcutManager globalShortcutManager;
 AdaptiveThemeMode? _savedThemeMode;
-LoggerUtil? logger;
 late PermissionController _permissionController;
 
 void main() async {
@@ -145,10 +143,8 @@ void main() async {
     globalPluginManager = PluginManager();
     await globalPluginManager.setStorageManager(globalStorage);
 
-    logger = LoggerUtil();
     // 设置全局错误处理器
     FlutterError.onError = (details) {
-      logger?.log(details.exceptionAsString(), level: 'ERROR');
       debugPrint(details.toString());
     };
 
@@ -158,9 +154,9 @@ void main() async {
     // 初始化 JS Bridge（在插件注册前）
     try {
       await JSBridgeManager.instance.initialize();
-      logger?.log('JS Bridge 初始化成功', level: 'INFO');
+      debugPrint('JS Bridge 初始化成功');
     } catch (e) {
-      logger?.log('JS Bridge 初始化失败: $e', level: 'WARN');
+      debugPrint('JS Bridge 初始化失败: $e');
     }
 
     // 注册内置插件
@@ -184,6 +180,7 @@ void main() async {
       BillPlugin(),
       CalendarPlugin(),
       CalendarAlbumPlugin(),
+      ScriptsCenterPlugin(), // 脚本中心插件
     ];
 
     // 遍历并注册插件
@@ -191,7 +188,7 @@ void main() async {
       try {
         await globalPluginManager.registerPlugin(plugin);
       } catch (e) {
-        logger?.log('插件注册失败: ${plugin.id} - $e', level: 'ERROR');
+        debugPrint('插件注册失败: ${plugin.id} - $e');
       }
     }
 
@@ -215,7 +212,6 @@ void main() async {
       );
     });
   } catch (e) {
-    logger?.log('初始化失败: $e', level: 'ERROR');
     debugPrint('初始化失败: $e');
   }
 
@@ -250,9 +246,8 @@ Future<void> _initializeHomeWidgets() async {
     final layoutManager = HomeLayoutManager();
     await layoutManager.initialize();
 
-    logger?.log('主页小组件系统初始化完成', level: 'INFO');
+    debugPrint('主页小组件系统初始化完成');
   } catch (e) {
-    logger?.log('主页小组件系统初始化失败: $e', level: 'ERROR');
     debugPrint('主页小组件系统初始化失败: $e');
   }
 }
@@ -346,7 +341,6 @@ class _MyAppState extends State<MyApp> {
               ImagePickerLocalizations.delegate,
               SettingsScreenLocalizations.delegate,
               DataManagementLocalizations.delegate,
-              LogSettingsLocalizationsDelegate(),
               CalendarLocalizations.delegate,
               FilePreviewLocalizations.delegate,
               GroupSelectorLocalizations.delegate,
