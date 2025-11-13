@@ -6,7 +6,7 @@ import '../services/request_service.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:flutter/material.dart';
 import '../controllers/prompt_replacement_controller.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:Memento/widgets/quill_viewer/index.dart';
 import '../models/ai_agent.dart';
 import '../widgets/agent_list_drawer.dart';
 import '../widgets/plugin_method_selection_dialog.dart';
@@ -385,7 +385,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MarkdownBody(data: _responseMessage, selectable: true),
+                  QuillViewer(data: _responseMessage, selectable: true),
                   if (_isLoading)
                     const Padding(
                       padding: EdgeInsets.only(top: 8.0),

@@ -63,6 +63,23 @@ import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 import 'plugins/database/database_plugin.dart';
 
+// 无动画的页面过渡构建器 - 解决键盘弹出时的卡顿问题
+class NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
+  const NoAnimationPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    // 直接返回子组件,不添加任何过渡动画
+    return child;
+  }
+}
+
 // 主页小组件注册
 import 'plugins/chat/home_widgets.dart';
 import 'plugins/diary/home_widgets.dart';
@@ -266,8 +283,33 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveTheme(
-      light: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      dark: ThemeData.dark(useMaterial3: true),
+      light: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        // 使用无动画构建器以提升性能,特别是键盘弹出时
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: NoAnimationPageTransitionsBuilder(),
+            TargetPlatform.iOS: NoAnimationPageTransitionsBuilder(),
+            TargetPlatform.linux: NoAnimationPageTransitionsBuilder(),
+            TargetPlatform.macOS: NoAnimationPageTransitionsBuilder(),
+            TargetPlatform.windows: NoAnimationPageTransitionsBuilder(),
+          },
+        ),
+      ),
+      dark: ThemeData.dark(
+        useMaterial3: true,
+        // 使用无动画构建器以提升性能,特别是键盘弹出时
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: NoAnimationPageTransitionsBuilder(),
+            TargetPlatform.iOS: NoAnimationPageTransitionsBuilder(),
+            TargetPlatform.linux: NoAnimationPageTransitionsBuilder(),
+            TargetPlatform.macOS: NoAnimationPageTransitionsBuilder(),
+            TargetPlatform.windows: NoAnimationPageTransitionsBuilder(),
+          },
+        ),
+      ),
       initial: _savedThemeMode ?? AdaptiveThemeMode.light,
       builder:
           (theme, darkTheme) => MaterialApp(

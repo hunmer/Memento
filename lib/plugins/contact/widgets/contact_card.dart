@@ -194,7 +194,7 @@ class ContactCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLastContactInfo(context, {bool compact = false}) {
+  Widget _buildLastContactInfo(BuildContext context, {bool compact = false}) {
     final lastContactText = timeago.format(
       contact.lastContactTime,
       locale: 'zh',
