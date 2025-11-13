@@ -283,8 +283,7 @@ class _MyAppState extends State<MyApp> {
               Locale('en', ''), // 英文
             ],
             locale:
-                globalConfigManager.getLocale() ??
-                WidgetsBinding.instance.window.locale,
+                globalConfigManager.getLocale(),
             theme: theme,
             darkTheme: darkTheme,
             builder: (context, child) {

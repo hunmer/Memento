@@ -52,13 +52,10 @@ class CalendarLocalizationsEn extends CalendarLocalizations {
   @override
   String get endTime => 'End time';
 
-  @override
   String get save => 'Save';
 
-  @override
   String get cancel => 'Cancel';
 
-  @override
   String get delete => 'Delete';
 
   @override

@@ -8,7 +8,6 @@ import '../../../utils/image_utils.dart';
 import '../models/contact_model.dart';
 import '../models/interaction_record_model.dart';
 import '../controllers/contact_controller.dart';
-import '../l10n/contact_localizations.dart';
 import 'interaction_form.dart';
 import 'package:uuid/uuid.dart';
 

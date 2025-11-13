@@ -299,7 +299,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ActivityLocalizations.of(context)!.endTime}必须晚于${ActivityLocalizations.of(context)!.startTime}',
+            '${ActivityLocalizations.of(context).endTime}必须晚于${ActivityLocalizations.of(context).startTime}',
           ),
         ),
       );
@@ -314,7 +314,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
           content: Text(
             '活动时间必须至少为1${ActivityLocalizations.of(
                   context,
-                )!.minutesFormat(1).replaceAll('1 ', '')}',
+                ).minutesFormat(1).replaceAll('1 ', '')}',
           ),
         ),
       );
@@ -327,7 +327,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${ActivityLocalizations.of(context)!.endTime}不能超过当天23:59',
+            '${ActivityLocalizations.of(context).endTime}不能超过当天23:59',
           ),
         ),
       );

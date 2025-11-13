@@ -143,10 +143,6 @@ class _EventEditPageState extends State<EventEditPage> {
       });
     }
 
-    @override
-    Widget build(BuildContext context) {
-      throw UnimplementedError();
-    }
   }
 
   Future<void> _selectEndTime() async {

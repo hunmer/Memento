@@ -182,14 +182,14 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${FilePreviewLocalizations.of(context)!.name}: ${widget.fileName}',
+                        '${FilePreviewLocalizations.of(context).name}: ${widget.fileName}',
                       ),
                       Text(_absoluteFilePath),
                       Text(
-                        '${FilePreviewLocalizations.of(context)!.fileSize}: ${_formatFileSize(widget.fileSize)}',
+                        '${FilePreviewLocalizations.of(context).fileSize}: ${_formatFileSize(widget.fileSize)}',
                       ),
                       Text(
-                        '${FilePreviewLocalizations.of(context)!.fileType}: ${widget.mimeType}',
+                        '${FilePreviewLocalizations.of(context).fileType}: ${widget.mimeType}',
                       ),
                     ],
                   ),

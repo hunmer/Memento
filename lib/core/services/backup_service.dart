@@ -1,5 +1,3 @@
-import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart'
-    show FloatingBallLocalizations;
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/backup_time_picker.dart';
 import 'package:flutter/material.dart';

@@ -55,13 +55,10 @@ class CalendarLocalizationsZh extends CalendarLocalizations {
   @override
   String get endTime => '结束时间';
 
-  @override
   String get save => '保存';
 
-  @override
   String get cancel => '取消';
 
-  @override
   String get delete => '删除';
 
   @override
