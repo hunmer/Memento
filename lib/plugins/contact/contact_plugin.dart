@@ -14,6 +14,10 @@ import 'widgets/filter_dialog.dart';
 
 class ContactPlugin extends BasePlugin {
   late ContactController _controller;
+
+  // 暴露控制器供外部访问
+  ContactController get controller => _controller;
+
   @override
   String get id => 'contact';
 
