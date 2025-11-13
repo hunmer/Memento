@@ -1,0 +1,30 @@
+{
+  "category": "Store 插件示例",
+  "description": "积分商店相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取当前积分",
+      "code": "// 获取当前积分余额\nvar points = await Memento.store.getPoints();\nconsole.log('当前积分:', points);\nreturn points;"
+    },
+    {
+      "title": "获取商品列表",
+      "code": "// 获取所有商品\nvar products = await Memento.store.getProducts();\nconsole.log('商品列表:', products);\nreturn products;"
+    },
+    {
+      "title": "兑换商品",
+      "code": "// 兑换商品\nvar products = await Memento.store.getProducts();\n\nif (products.length > 0) {\n  var productId = products[0].id;\n  \n  // 参数: productId\n  var result = await Memento.store.redeem(productId);\n  \n  if (result.success) {\n    console.log('兑换成功！剩余积分:', result.currentPoints);\n  } else {\n    console.log('兑换失败:', result.message);\n  }\n  \n  return result;\n} else {\n  return '没有可用商品';\n}"
+    },
+    {
+      "title": "增加积分",
+      "code": "// 增加或减少积分\n// 参数: points(正数增加, 负数减少), reason\nvar result = await Memento.store.addPoints(\n  100,              // 积分数量\n  '完成每日任务'    // 原因\n);\n\nconsole.log('操作成功:', result);\nreturn result;"
+    },
+    {
+      "title": "获取兑换历史",
+      "code": "// 获取兑换历史记录\nvar history = await Memento.store.getRedeemHistory();\nconsole.log('兑换历史:', history);\nreturn history;"
+    },
+    {
+      "title": "获取积分历史",
+      "code": "// 获取积分变动历史\nvar history = await Memento.store.getPointsHistory();\nconsole.log('积分历史:', history);\nreturn history;"
+    }
+  ]
+}

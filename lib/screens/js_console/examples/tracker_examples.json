@@ -1,0 +1,26 @@
+{
+  "category": "Tracker 插件示例",
+  "description": "目标追踪相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取所有目标",
+      "code": "// 获取所有目标\n// 参数: status(可选), group(可选)\nvar goals = await Memento.tracker.getGoals();\nconsole.log('目标列表:', goals);\nreturn goals;"
+    },
+    {
+      "title": "创建新目标",
+      "code": "// 创建一个目标\n// 参数: name, unitType, targetValue, group, icon, dateType\nvar goal = await Memento.tracker.createGoal(\n  '每日阅读',     // 名称\n  '分钟',         // 单位类型\n  30,             // 目标值\n  '学习',         // 分组(可选)\n  null,           // 图标(可选)\n  null            // 日期类型(可选)\n);\n\nconsole.log('创建成功:', goal);\nreturn goal;"
+    },
+    {
+      "title": "记录数据",
+      "code": "// 为目标记录数据\nvar goals = await Memento.tracker.getGoals();\n\nif (goals.length > 0) {\n  var goalId = goals[0].id;\n  \n  // 参数: goalId, value, note(可选), dateTime(可选)\n  var record = await Memento.tracker.recordData(\n    goalId,\n    30,                  // 完成值\n    '阅读技术文档'       // 备注(可选)\n  );\n  \n  console.log('记录成功:', record);\n  return record;\n} else {\n  return '请先创建目标';\n}"
+    },
+    {
+      "title": "获取进度",
+      "code": "// 获取目标完成进度\nvar goals = await Memento.tracker.getGoals();\n\nif (goals.length > 0) {\n  var goalId = goals[0].id;\n  \n  var progress = await Memento.tracker.getProgress(goalId);\n  console.log('进度信息:', progress);\n  // 包含: currentValue, targetValue, percentage\n  return progress;\n} else {\n  return '没有目标';\n}"
+    },
+    {
+      "title": "获取统计信息",
+      "code": "// 获取全局统计\nvar stats = await Memento.tracker.getStats();\nconsole.log('全局统计:', stats);\n// 包含: totalGoals, todayCompleted, monthCompleted 等\nreturn stats;"
+    }
+  ]
+}

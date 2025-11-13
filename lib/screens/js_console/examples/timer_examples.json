@@ -1,0 +1,26 @@
+{
+  "category": "Timer 插件示例",
+  "description": "计时器相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取所有计时器",
+      "code": "// 获取所有计时器任务\nvar timers = await Memento.timer.getTimers();\nconsole.log('计时器列表:', timers);\nreturn timers;"
+    },
+    {
+      "title": "创建计时器",
+      "code": "// 创建一个新的计时器任务\n// 参数: name, duration(秒), type, group(可选)\nvar timer = await Memento.timer.createTimer(\n  '学习时间',      // 名称\n  1800,           // 时长(秒), 30分钟\n  'countDown',    // 类型: countUp/countDown/stopwatch\n  '学习'          // 分组(可选)\n);\n\nconsole.log('创建成功:', timer);\nreturn timer;"
+    },
+    {
+      "title": "启动计时器",
+      "code": "// 启动计时器\nvar timers = await Memento.timer.getTimers();\n\nif (timers.length > 0) {\n  var timerId = timers[0].id;\n  \n  // 启动计时器\n  var result = await Memento.timer.startTimer(timerId);\n  console.log('已启动:', result);\n  return result;\n} else {\n  return '请先创建计时器';\n}"
+    },
+    {
+      "title": "获取计时器状态",
+      "code": "// 获取计时器的详细状态\nvar timers = await Memento.timer.getTimers();\n\nif (timers.length > 0) {\n  var timerId = timers[0].id;\n  \n  var status = await Memento.timer.getTimerStatus(timerId);\n  console.log('状态信息:', status);\n  // 包含: isRunning, elapsedSeconds, formattedTime 等\n  return status;\n} else {\n  return '没有计时器';\n}"
+    },
+    {
+      "title": "获取历史记录",
+      "code": "// 获取所有已完成的计时历史\nvar history = await Memento.timer.getHistory();\nconsole.log('历史记录:', history);\nreturn history;"
+    }
+  ]
+}

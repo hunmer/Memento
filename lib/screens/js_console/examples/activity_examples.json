@@ -1,0 +1,26 @@
+{
+  "category": "Activity 插件示例",
+  "description": "活动记录相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取今天的活动",
+      "code": "// 获取今天的活动列表\nvar today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD\nvar activities = await Memento.activity.getActivities(today);\nconsole.log('今日活动:', activities);\nreturn activities;"
+    },
+    {
+      "title": "创建新活动",
+      "code": "// 创建一个活动记录\n// 参数: startTime, endTime, title, tags, description, mood\nvar activity = await Memento.activity.createActivity(\n  '2025-11-14T09:00:00.000Z',  // 开始时间\n  '2025-11-14T10:30:00.000Z',  // 结束时间\n  '晨间会议',                  // 标题\n  '[\"工作\", \"会议\"]',          // 标签 (JSON数组)\n  '讨论项目进度',              // 描述\n  '😊'                         // 心情\n);\nconsole.log('创建成功:', activity);\nreturn activity;"
+    },
+    {
+      "title": "获取今日统计",
+      "code": "// 获取今日活动统计信息\nvar stats = await Memento.activity.getTodayStats();\nconsole.log('今日统计:', stats);\n// 包含: activityCount, durationMinutes, durationHours, remainingMinutes, remainingHours\nreturn stats;"
+    },
+    {
+      "title": "获取标签分组",
+      "code": "// 获取所有标签分组\nvar tagGroups = await Memento.activity.getTagGroups();\nconsole.log('标签分组:', tagGroups);\nreturn tagGroups;"
+    },
+    {
+      "title": "删除活动",
+      "code": "// 先获取今天的活动\nvar today = new Date().toISOString().split('T')[0];\nvar activities = await Memento.activity.getActivities(today);\n\nif (activities.length > 0) {\n  var activityId = activities[0].id;\n  \n  // 删除活动 (需要活动ID和日期)\n  var result = await Memento.activity.deleteActivity(activityId, today);\n  console.log('删除结果:', result);\n  return result;\n} else {\n  return '今天没有活动记录';\n}"
+    }
+  ]
+}
