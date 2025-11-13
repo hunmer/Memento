@@ -1,0 +1,26 @@
+{
+  "category": "Contact 插件示例",
+  "description": "联系人管理相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取所有联系人",
+      "code": "// 获取所有联系人列表\nvar contacts = await Memento.contact.getContacts();\nconsole.log('联系人列表:', contacts);\nreturn contacts;"
+    },
+    {
+      "title": "创建新联系人",
+      "code": "// 创建一个新联系人\n// 参数: name, phone, avatar, address, notes, tags, customFields\nvar contact = await Memento.contact.createContact(\n  '张三',                    // 姓名\n  '13800138000',            // 电话\n  null,                     // 头像(可选)\n  '北京市海淀区',           // 地址(可选)\n  '重要客户',               // 备注(可选)\n  '[\"朋友\", \"同事\"]',       // 标签(可选)\n  '{\"公司\": \"科技公司\"}'   // 自定义字段(可选)\n);\n\nconsole.log('创建成功:', contact);\nreturn contact;"
+    },
+    {
+      "title": "添加交互记录",
+      "code": "// 为联系人添加交互记录\nvar contacts = await Memento.contact.getContacts();\n\nif (contacts.length > 0) {\n  var contactId = contacts[0].id;\n  \n  // 参数: contactId, notes, date(可选), participants(可选)\n  var interaction = await Memento.contact.addInteraction(\n    contactId,\n    '今天一起讨论了项目进展',  // 内容\n    null,                       // 日期(可选)\n    null                        // 参与者(可选)\n  );\n  \n  console.log('记录成功:', interaction);\n  return interaction;\n} else {\n  return '请先创建联系人';\n}"
+    },
+    {
+      "title": "获取交互记录",
+      "code": "// 获取联系人的交互历史\nvar contacts = await Memento.contact.getContacts();\n\nif (contacts.length > 0) {\n  var contactId = contacts[0].id;\n  \n  var interactions = await Memento.contact.getInteractions(contactId);\n  console.log('交互记录:', interactions);\n  return interactions;\n} else {\n  return '没有联系人';\n}"
+    },
+    {
+      "title": "获取所有标签",
+      "code": "// 获取所有已使用的标签\nvar tags = await Memento.contact.getAllTags();\nconsole.log('标签列表:', tags);\nreturn tags;"
+    }
+  ]
+}

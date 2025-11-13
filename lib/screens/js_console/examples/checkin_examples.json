@@ -1,0 +1,26 @@
+{
+  "category": "Checkin 插件示例",
+  "description": "签到相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取所有签到项目",
+      "code": "// 获取所有签到项目\nvar items = await Memento.checkin.getCheckinItems();\nconsole.log('签到项目:', items);\nreturn items;"
+    },
+    {
+      "title": "创建签到项目",
+      "code": "// 创建一个新的签到项目\n// 参数: name, group(可选), description(可选)\nvar item = await Memento.checkin.createCheckinItem(\n  '早起',          // 名称\n  '健康习惯',      // 分组(可选)\n  '每天6点起床'    // 描述(可选)\n);\n\nconsole.log('创建成功:', item);\nreturn item;"
+    },
+    {
+      "title": "执行签到",
+      "code": "// 执行签到操作\nvar items = await Memento.checkin.getCheckinItems();\n\nif (items.length > 0) {\n  var itemId = items[0].id;\n  \n  // 参数: itemId, note(可选)\n  var result = await Memento.checkin.checkin(\n    itemId,\n    '今天状态很好!'  // 备注(可选)\n  );\n  \n  console.log('签到结果:', result);\n  return result;\n} else {\n  return '请先创建签到项目';\n}"
+    },
+    {
+      "title": "获取签到历史",
+      "code": "// 获取签到历史记录\nvar items = await Memento.checkin.getCheckinItems();\n\nif (items.length > 0) {\n  var itemId = items[0].id;\n  \n  // 参数: itemId, startDate(可选), endDate(可选)\n  var history = await Memento.checkin.getCheckinHistory(\n    itemId,\n    '2025-11-01',  // 开始日期(可选)\n    '2025-11-14'   // 结束日期(可选)\n  );\n  \n  console.log('历史记录:', history);\n  return history;\n} else {\n  return '没有签到项目';\n}"
+    },
+    {
+      "title": "获取统计信息",
+      "code": "// 获取全局统计或单项统计\n// 参数: itemId(可选)\nvar stats = await Memento.checkin.getStats();\nconsole.log('全局统计:', stats);\n// 包含: totalItems, todayCheckins, totalCheckins, completionRate\nreturn stats;"
+    }
+  ]
+}

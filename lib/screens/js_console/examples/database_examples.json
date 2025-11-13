@@ -1,0 +1,26 @@
+{
+  "category": "Database 插件示例",
+  "description": "自定义数据库相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取所有数据库",
+      "code": "// 获取所有数据库列表\nvar databases = await Memento.database.getDatabases();\nconsole.log('数据库列表:', databases);\nreturn databases;"
+    },
+    {
+      "title": "创建数据库",
+      "code": "// 创建一个自定义数据库\n// 参数: name, description(可选), fieldsJson(可选)\nvar fieldsJson = JSON.stringify([\n  {id: 'f1', name: '项目名称', type: 'Text', isRequired: true},\n  {id: 'f2', name: '截止日期', type: 'Date', isRequired: false}\n]);\n\nvar database = await Memento.database.createDatabase(\n  '项目管理',              // 名称\n  '用于跟踪项目进度',      // 描述(可选)\n  fieldsJson               // 字段定义(可选)\n);\n\nconsole.log('创建成功:', database);\nreturn database;"
+    },
+    {
+      "title": "获取记录列表",
+      "code": "// 获取数据库的所有记录\nvar databases = await Memento.database.getDatabases();\n\nif (databases.length > 0) {\n  var databaseId = databases[0].id;\n  \n  // 参数: databaseId, limit(可选)\n  var records = await Memento.database.getRecords(databaseId, 20);\n  console.log('记录列表:', records);\n  return records;\n} else {\n  return '请先创建数据库';\n}"
+    },
+    {
+      "title": "创建记录",
+      "code": "// 在数据库中创建记录\nvar databases = await Memento.database.getDatabases();\n\nif (databases.length > 0) {\n  var databaseId = databases[0].id;\n  \n  // 参数: databaseId, fieldsJson\n  var fieldsJson = JSON.stringify({\n    '项目名称': 'Memento 应用开发',\n    '截止日期': '2025-03-01T00:00:00.000Z'\n  });\n  \n  var record = await Memento.database.createRecord(databaseId, fieldsJson);\n  console.log('创建成功:', record);\n  return record;\n} else {\n  return '请先创建数据库';\n}"
+    },
+    {
+      "title": "查询记录",
+      "code": "// 按条件查询记录\nvar databases = await Memento.database.getDatabases();\n\nif (databases.length > 0) {\n  var databaseId = databases[0].id;\n  \n  // 参数: databaseId, filtersJson(可选)\n  var filtersJson = JSON.stringify({\n    'status': 'active'\n  });\n  \n  var records = await Memento.database.query(databaseId, filtersJson);\n  console.log('查询结果:', records);\n  return records;\n} else {\n  return '请先创建数据库';\n}"
+    }
+  ]
+}
