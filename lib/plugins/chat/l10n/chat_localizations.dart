@@ -165,6 +165,7 @@ abstract class ChatLocalizations {
   String get smartAgent;
   String get channelCount;
   String get totalMessages;
+  String get todayMessages;
 
   String get editMessageTitle;
 
