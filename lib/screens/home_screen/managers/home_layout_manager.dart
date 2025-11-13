@@ -19,6 +19,10 @@ class HomeLayoutManager extends ChangeNotifier {
   List<HomeItem> _items = [];
   List<HomeItem> get items => List.unmodifiable(_items);
 
+  /// 网格列数（默认为4）
+  int _gridCrossAxisCount = 4;
+  int get gridCrossAxisCount => _gridCrossAxisCount;
+
   /// 配置键名
   static const String _configKey = 'home_layout';
 
@@ -47,11 +51,25 @@ class HomeLayoutManager extends ChangeNotifier {
     try {
       final config = await globalConfigManager.getPluginConfig(_configKey);
 
-      if (config != null && config['items'] != null) {
-        final itemsList = config['items'] as List;
-        _items = itemsList
-            .map((json) => HomeItem.fromJson(json as Map<String, dynamic>))
-            .toList();
+      if (config != null) {
+        // 加载项目列表
+        if (config['items'] != null) {
+          final itemsList = config['items'] as List;
+          _items = itemsList
+              .map((json) => HomeItem.fromJson(json as Map<String, dynamic>))
+              .toList();
+        } else {
+          // 没有配置，初始化空布局
+          _items = [];
+        }
+
+        // 加载网格列数配置
+        if (config['gridCrossAxisCount'] != null) {
+          _gridCrossAxisCount = config['gridCrossAxisCount'] as int;
+          // 确保在1-10范围内
+          if (_gridCrossAxisCount < 1) _gridCrossAxisCount = 1;
+          if (_gridCrossAxisCount > 10) _gridCrossAxisCount = 10;
+        }
       } else {
         // 没有配置，初始化空布局
         _items = [];
@@ -70,9 +88,10 @@ class HomeLayoutManager extends ChangeNotifier {
     try {
       await globalConfigManager.savePluginConfig(_configKey, {
         'items': _items.map((item) => item.toJson()).toList(),
+        'gridCrossAxisCount': _gridCrossAxisCount,
       });
       _isDirty = false;
-      debugPrint('Home layout saved: ${_items.length} items');
+      debugPrint('Home layout saved: ${_items.length} items, grid: $_gridCrossAxisCount');
     } catch (e) {
       debugPrint('Error saving home layout: $e');
     }
@@ -172,6 +191,24 @@ class HomeLayoutManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 直接添加项目到文件夹
+  void addItemToFolder(HomeItem item, String folderId) {
+    final folder = findItem(folderId);
+    if (folder is! HomeFolderItem) {
+      debugPrint('Folder not found: $folderId');
+      return;
+    }
+
+    // 添加到文件夹
+    final updatedFolder = folder.copyWith(
+      children: [...folder.children, item],
+    );
+    updateItem(folderId, updatedFolder);
+
+    _markDirty();
+    notifyListeners();
+  }
+
   /// 从文件夹中移出项目
   void removeFromFolder(String itemId, String folderId) {
     final folder = findItem(folderId);
@@ -217,6 +254,19 @@ class HomeLayoutManager extends ChangeNotifier {
     final updatedFolder = folder.copyWith(children: children);
     updateItem(folderId, updatedFolder);
 
+    _markDirty();
+    notifyListeners();
+  }
+
+  // ==================== 网格配置管理 ====================
+
+  /// 设置网格列数
+  void setGridCrossAxisCount(int count) {
+    if (count < 1 || count > 10) {
+      debugPrint('Grid cross axis count must be between 1 and 10');
+      return;
+    }
+    _gridCrossAxisCount = count;
     _markDirty();
     notifyListeners();
   }

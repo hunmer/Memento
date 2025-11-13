@@ -136,14 +136,10 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 显示添加小组件到文件夹
   void _showAddWidgetToFolder() {
-    // TODO: 实现添加小组件到文件夹
     showDialog(
       context: context,
-      builder: (context) => const AddWidgetDialog(),
-    ).then((_) {
-      // 添加后需要将小组件移到文件夹
-      // 暂时简化处理
-    });
+      builder: (context) => AddWidgetDialog(folderId: widget.folder.id),
+    );
   }
 
   /// 显示从主页移入选项
