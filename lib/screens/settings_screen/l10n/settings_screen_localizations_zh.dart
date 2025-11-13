@@ -91,12 +91,6 @@ class SettingsScreenLocalizationsZh extends SettingsScreenLocalizations {
   String get checkUpdateSubtitle => '立即检查应用新版本';
 
   @override
-  String get logSettingsTitle => '日志设置';
-
-  @override
-  String get logSettingsSubtitle => '配置日志记录选项';
-
-  @override
   String get updateAvailableTitle => '发现新版本';
 
   @override

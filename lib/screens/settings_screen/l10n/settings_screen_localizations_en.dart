@@ -94,12 +94,6 @@ class SettingsScreenLocalizationsEn extends SettingsScreenLocalizations {
   String get checkUpdateSubtitle => 'Check for new app versions now';
 
   @override
-  String get logSettingsTitle => 'Log Settings';
-
-  @override
-  String get logSettingsSubtitle => 'Configure logging options';
-
-  @override
   String get updateAvailableTitle => 'New version available';
 
   @override
