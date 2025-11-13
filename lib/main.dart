@@ -64,6 +64,11 @@ import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 import 'plugins/database/database_plugin.dart';
 
+// 主页小组件注册
+import 'plugins/chat/home_widgets.dart';
+import 'plugins/diary/home_widgets.dart';
+import 'plugins/activity/home_widgets.dart';
+import 'screens/home_screen/managers/home_layout_manager.dart';
 // 全局导航键
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 // 全局单例实例
@@ -145,6 +150,8 @@ void main() async {
       }
     }
 
+    // 初始化主页小组件系统
+    await _initializeHomeWidgets();
     final updateController = AutoUpdateController.instance;
     updateController.initialize();
 
@@ -168,6 +175,26 @@ void main() async {
   }
 
   runApp(const MyApp());
+}
+
+/// 初始化主页小组件系统
+Future<void> _initializeHomeWidgets() async {
+  try {
+    // 注册所有插件的小组件
+    ChatHomeWidgets.register();
+    DiaryHomeWidgets.register();
+    ActivityHomeWidgets.register();
+    // TODO: 其他插件小组件注册...
+
+    // 初始化布局管理器
+    final layoutManager = HomeLayoutManager();
+    await layoutManager.initialize();
+
+    logger?.log('主页小组件系统初始化完成', level: 'INFO');
+  } catch (e) {
+    logger?.log('主页小组件系统初始化失败: $e', level: 'ERROR');
+    debugPrint('主页小组件系统初始化失败: $e');
+  }
 }
 
 class MyApp extends StatefulWidget {
