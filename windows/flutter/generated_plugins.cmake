@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
   file_selector_windows
+  flutter_js
   media_kit_libs_windows_video
   media_kit_video
   permission_handler_windows
