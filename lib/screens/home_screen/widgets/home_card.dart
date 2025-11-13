@@ -17,12 +17,12 @@ class HomeCard extends StatelessWidget {
   final bool isSelected;
 
   const HomeCard({
-    Key? key,
+    super.key,
     required this.item,
     this.onTap,
     this.onLongPress,
     this.isSelected = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

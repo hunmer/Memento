@@ -239,7 +239,7 @@ class CheckinPlugin extends BasePlugin {
               Column(
                 children: [
                   Text(
-                    CheckinLocalizations.of(context)!.todayCheckin,
+                    CheckinLocalizations.of(context).todayCheckin,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(
@@ -255,7 +255,7 @@ class CheckinPlugin extends BasePlugin {
               Column(
                 children: [
                   Text(
-                    CheckinLocalizations.of(context)!.totalCheckinCount,
+                    CheckinLocalizations.of(context).totalCheckinCount,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(

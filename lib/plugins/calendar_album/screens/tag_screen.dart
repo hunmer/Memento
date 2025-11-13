@@ -19,7 +19,7 @@ class _TagItem {
   final String tag;
   bool active;
 
-  _TagItem(this.tag, {this.active = false});
+  _TagItem(this.tag);
 }
 
 class _TagScreenState extends State<TagScreen> {
@@ -155,20 +155,20 @@ class _TagScreenState extends State<TagScreen> {
                       },
                       onDelete: (entry) {
                         final l10n = CalendarAlbumLocalizations.of(context);
-                        final app_l10n = AppLocalizations.of(context);
+                        final appL10n = AppLocalizations.of(context);
                         showDialog<void>(
                           context: context,
                           builder:
                               (context) => AlertDialog(
                                 title: Text(l10n.deleteEntry),
                                 content: Text(
-                                  '${app_l10n!.delete} "${entry.title}"?',
+                                  '${appL10n!.delete} "${entry.title}"?',
                                 ),
                                 actions: [
                                   TextButton(
                                     onPressed:
                                         () => Navigator.of(context).pop(),
-                                    child: Text(app_l10n!.cancel),
+                                    child: Text(appL10n.cancel),
                                   ),
                                   TextButton(
                                     onPressed: () {
@@ -176,7 +176,7 @@ class _TagScreenState extends State<TagScreen> {
                                       Navigator.of(context).pop();
                                       setState(() {}); // 强制刷新界面
                                     },
-                                    child: Text(app_l10n!.delete),
+                                    child: Text(appL10n.delete),
                                   ),
                                 ],
                               ),

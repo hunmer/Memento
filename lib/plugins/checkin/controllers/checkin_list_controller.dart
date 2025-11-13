@@ -205,10 +205,10 @@ class CheckinListController {
       builder:
           (context) => AlertDialog(
             title: Text(
-              CheckinLocalizations.of(context)!.deleteCheckinItemTitle,
+              CheckinLocalizations.of(context).deleteCheckinItemTitle,
             ),
             content: Text(
-              '${CheckinLocalizations.of(context)!.deleteConfirmMessage}"${item.name}"?',
+              '${CheckinLocalizations.of(context).deleteConfirmMessage}"${item.name}"?',
             ),
             actions: [
               TextButton(
@@ -249,7 +249,7 @@ class CheckinListController {
                 ListTile(
                   leading: const Icon(Icons.edit),
                   title: Text(
-                    CheckinLocalizations.of(context)!.editCheckinItem,
+                    CheckinLocalizations.of(context).editCheckinItem,
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -259,7 +259,7 @@ class CheckinListController {
                 ListTile(
                   leading: const Icon(Icons.refresh),
                   title: Text(
-                    CheckinLocalizations.of(context)!.resetCheckinRecords,
+                    CheckinLocalizations.of(context).resetCheckinRecords,
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -312,10 +312,10 @@ class CheckinListController {
       builder:
           (context) => AlertDialog(
             title: Text(
-              CheckinLocalizations.of(context)!.resetCheckinRecordsTitle,
+              CheckinLocalizations.of(context).resetCheckinRecordsTitle,
             ),
             content: Text(
-              '${CheckinLocalizations.of(context)!.resetCheckinRecordsMessage}"${item.name}"',
+              '${CheckinLocalizations.of(context).resetCheckinRecordsMessage}"${item.name}"',
             ),
             actions: [
               TextButton(
@@ -332,13 +332,13 @@ class CheckinListController {
                       content: Text(
                         CheckinLocalizations.of(
                           context,
-                        )!.resetSuccessMessage.replaceFirst('%s', item.name),
+                        ).resetSuccessMessage.replaceFirst('%s', item.name),
                       ),
                     ),
                   );
                 },
                 child: Text(
-                  CheckinLocalizations.of(context)!.confirmReset,
+                  CheckinLocalizations.of(context).confirmReset,
                   style: TextStyle(color: Colors.red),
                 ),
               ),
@@ -354,10 +354,10 @@ class CheckinListController {
       builder:
           (context) => AlertDialog(
             title: Text(
-              CheckinLocalizations.of(context)!.deleteCheckinItemTitle,
+              CheckinLocalizations.of(context).deleteCheckinItemTitle,
             ),
             content: Text(
-              '${CheckinLocalizations.of(context)!.deleteConfirmMessage}"${item.name}"?',
+              '${CheckinLocalizations.of(context).deleteConfirmMessage}"${item.name}"?',
             ),
             actions: [
               TextButton(
@@ -377,13 +377,13 @@ class CheckinListController {
                       content: Text(
                         CheckinLocalizations.of(
                           context,
-                        )!.deleteSuccessMessage.replaceFirst('%s', item.name),
+                        ).deleteSuccessMessage.replaceFirst('%s', item.name),
                       ),
                     ),
                   );
                 },
                 child: Text(
-                  CheckinLocalizations.of(context)!.confirmDelete,
+                  CheckinLocalizations.of(context).confirmDelete,
                   style: TextStyle(color: Colors.red),
                 ),
               ),
@@ -405,7 +405,7 @@ class CheckinListController {
               children: [
                 const Icon(Icons.check_circle, color: Colors.green),
                 const SizedBox(width: 8),
-                Text(CheckinLocalizations.of(context)!.checkinSuccessTitle),
+                Text(CheckinLocalizations.of(context).checkinSuccessTitle),
               ],
             ),
             content: Column(
@@ -413,24 +413,24 @@ class CheckinListController {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${CheckinLocalizations.of(context)!.checkinSuccessTitle} ${item.name}',
+                  '${CheckinLocalizations.of(context).checkinSuccessTitle} ${item.name}',
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${CheckinLocalizations.of(context)!.timeRangeLabel}: ${timeFormat.format(record.startTime)} - ${timeFormat.format(record.endTime)}',
+                  '${CheckinLocalizations.of(context).timeRangeLabel}: ${timeFormat.format(record.startTime)} - ${timeFormat.format(record.endTime)}',
                   style: const TextStyle(fontSize: 14),
                 ),
                 if (record.note != null) ...[
                   const SizedBox(height: 4),
                   Text(
-                    '${CheckinLocalizations.of(context)!.noteLabel}: ${record.note}',
+                    '${CheckinLocalizations.of(context).noteLabel}: ${record.note}',
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
                 const SizedBox(height: 8),
                 if (streak > 1)
                   Text(
-                    '${CheckinLocalizations.of(context)!.consecutiveDaysLabel}: $streak',
+                    '${CheckinLocalizations.of(context).consecutiveDaysLabel}: $streak',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.orange,
@@ -550,12 +550,12 @@ class CheckinListController {
               return getCurrentTagGroups();
             },
             config: TagManagerConfig(
-              title: CheckinLocalizations.of(context)!.manageGroupsTitle,
-              addGroupHint: CheckinLocalizations.of(context)!.addGroupHint,
-              addTagHint: CheckinLocalizations.of(context)!.addTagHint,
-              editGroupHint: CheckinLocalizations.of(context)!.editGroupHint,
-              allTagsLabel: CheckinLocalizations.of(context)!.allTagsLabel,
-              newGroupLabel: CheckinLocalizations.of(context)!.newGroupLabel,
+              title: CheckinLocalizations.of(context).manageGroupsTitle,
+              addGroupHint: CheckinLocalizations.of(context).addGroupHint,
+              addTagHint: CheckinLocalizations.of(context).addTagHint,
+              editGroupHint: CheckinLocalizations.of(context).editGroupHint,
+              allTagsLabel: CheckinLocalizations.of(context).allTagsLabel,
+              newGroupLabel: CheckinLocalizations.of(context).newGroupLabel,
             ),
           ),
     ).then((_) {

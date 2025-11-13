@@ -36,7 +36,7 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(TodoLocalizations.of(context)!.filterTasksTitle),
+      title: Text(TodoLocalizations.of(context).filterTasksTitle),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -77,7 +77,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
               // 标签选择
               InputChip(
-                label: Text(TodoLocalizations.of(context)!.tags),
+                label: Text(TodoLocalizations.of(context).tags),
                 onSelected: (_) => _showTagSelector(context),
                 selected: _selectedTags.isNotEmpty,
               ),
@@ -162,7 +162,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       });
                     },
                   ),
-                  Text(TodoLocalizations.of(context)!.showCompleted),
+                  Text(TodoLocalizations.of(context).showCompleted),
                   const SizedBox(width: 16),
                   Checkbox(
                     value: _showIncomplete,
@@ -172,7 +172,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       });
                     },
                   ),
-                  Text(TodoLocalizations.of(context)!.showIncomplete),
+                  Text(TodoLocalizations.of(context).showIncomplete),
                 ],
               ),
             ],
@@ -197,7 +197,7 @@ class _FilterDialogState extends State<FilterDialog> {
             };
             widget.onFilter(filter);
           },
-          child: Text(TodoLocalizations.of(context)!.ok),
+          child: Text(TodoLocalizations.of(context).ok),
         ),
       ],
     );
@@ -246,7 +246,7 @@ class _MultiSelectDialogState extends State<MultiSelectDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(TodoLocalizations.of(context)!.selectTagsTitle),
+      title: Text(TodoLocalizations.of(context).selectTagsTitle),
       content: SingleChildScrollView(
         child: Column(
           children:

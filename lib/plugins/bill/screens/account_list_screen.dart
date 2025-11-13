@@ -37,7 +37,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(BillLocalizations.of(context)!.accountManagement),
+        title: Text(BillLocalizations.of(context).accountManagement),
         // 添加返回按钮
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -62,7 +62,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
 
   Widget _buildAccountList() {
     if (widget.billPlugin.accounts.isEmpty) {
-      return Center(child: Text(BillLocalizations.of(context)!.noAccounts));
+      return Center(child: Text(BillLocalizations.of(context).noAccounts));
     }
 
     return ListView.builder(
@@ -83,14 +83,14 @@ class _AccountListScreenState extends State<AccountListScreen> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text(BillLocalizations.of(context)!.confirmDelete),
+                  title: Text(BillLocalizations.of(context).confirmDelete),
                   content: Text(
                     '确定要删除账户"${account.title}"吗？\n删除后该账户下的所有账单记录都将被删除！',
                   ),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
-                      child: Text(BillLocalizations.of(context)!.cancel),
+                      child: Text(BillLocalizations.of(context).cancel),
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
@@ -109,7 +109,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  '${BillLocalizations.of(context)!.accountDeleted} "${account.title}"',
+                  '${BillLocalizations.of(context).accountDeleted} "${account.title}"',
                 ),
               ),
             );

@@ -1,5 +1,4 @@
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations_en.dart';
 import 'package:flutter/material.dart';
 
 class ChannelGroupSelector extends StatelessWidget {

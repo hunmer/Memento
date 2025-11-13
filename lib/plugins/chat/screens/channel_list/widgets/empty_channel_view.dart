@@ -22,14 +22,16 @@ class EmptyChannelView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            ChatLocalizations.of(context)?.channelList ?? "Channel List",
+            ChatLocalizations.of(context).channelList ?? "Channel List",
             style: const TextStyle(fontSize: 18, color: Colors.grey),
           ),
           const SizedBox(height: 8),
           TextButton.icon(
             onPressed: onAddChannel,
             icon: const Icon(Icons.add),
-            label: Text(ChatLocalizations.of(context)?.newChannel ?? "New Channel"),
+            label: Text(
+              ChatLocalizations.of(context).newChannel ?? "New Channel",
+            ),
           ),
         ],
       ),

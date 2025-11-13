@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TagManagerDialogLocalizations {
   static const String editGroup = '编辑分组';
 
-  static Map<String, Map<String, String>> _localizedValues = {
+  static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'editGroup': 'Edit Group',
     },

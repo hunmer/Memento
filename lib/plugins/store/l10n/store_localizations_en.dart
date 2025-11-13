@@ -146,6 +146,7 @@ class StoreLocalizationsEn extends StoreLocalizations {
   @override
   String get points => 'Points';
 
+  @override
   String get clear => 'Clear';
   @override
   String get dateRangeTitle => 'Date Range';

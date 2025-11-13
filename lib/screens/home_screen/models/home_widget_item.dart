@@ -16,11 +16,11 @@ class HomeWidgetItem extends HomeItem {
   final Map<String, dynamic> config;
 
   HomeWidgetItem({
-    required String id,
+    required super.id,
     required this.widgetId,
     required this.size,
     this.config = const {},
-  }) : super(id: id, type: HomeItemType.widget);
+  }) : super(type: HomeItemType.widget);
 
   @override
   Map<String, dynamic> toJson() => {

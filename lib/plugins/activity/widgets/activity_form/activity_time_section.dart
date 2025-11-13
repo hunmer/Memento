@@ -23,8 +23,8 @@ class ActivityTimeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = DiaryLocalizations.of(context)!;
-    final app_l10n = AppLocalizations.of(context)!;
+    final l10n = DiaryLocalizations.of(context);
+    final appL10n = AppLocalizations.of(context)!;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -43,7 +43,7 @@ class ActivityTimeSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    app_l10n.startTime,
+                    appL10n.startTime,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
@@ -73,8 +73,8 @@ class ActivityTimeSection extends StatelessWidget {
                           controller: durationController,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            labelText: app_l10n.interval,
-                            suffixText: app_l10n.minutes,
+                            labelText: appL10n.interval,
+                            suffixText: appL10n.minutes,
                           ),
                         ),
                         actions: [
@@ -109,13 +109,13 @@ class ActivityTimeSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    app_l10n.interval,
+                    appL10n.interval,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${calculateDuration(selectedDate, startTime, endTime)}${app_l10n.minutes}',
+                    '${calculateDuration(selectedDate, startTime, endTime)}${appL10n.minutes}',
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
                       fontWeight: FontWeight.bold,
@@ -141,7 +141,7 @@ class ActivityTimeSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    app_l10n.endTime,
+                    appL10n.endTime,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),

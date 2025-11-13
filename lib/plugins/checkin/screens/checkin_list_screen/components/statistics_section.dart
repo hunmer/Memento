@@ -19,12 +19,12 @@ class StatisticsSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           StatCard(
-            title: CheckinLocalizations.of(context)?.totalCheckinCount ?? '总项目',
+            title: CheckinLocalizations.of(context).totalCheckinCount ?? '总项目',
             value: '${statistics['totalItems']}',
             icon: Icons.list_alt,
           ),
           StatCard(
-            title: CheckinLocalizations.of(context)?.todayCheckin ?? '今日打卡数',
+            title: CheckinLocalizations.of(context).todayCheckin ?? '今日打卡数',
             value: '${statistics['todayCheckins'] ?? 0}',
             icon: Icons.today,
             color: Colors.green,

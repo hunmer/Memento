@@ -16,7 +16,7 @@ class HistoryTaskDetailView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(TodoLocalizations.of(context)!.completedTaskDetailsTitle),
+        title: Text(TodoLocalizations.of(context).completedTaskDetailsTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -49,7 +49,7 @@ class HistoryTaskDetailView extends StatelessWidget {
             // 描述
             if (task.description != null && task.description!.isNotEmpty) ...[
               Text(
-                TodoLocalizations.of(context)!.description,
+                TodoLocalizations.of(context).description,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -60,7 +60,7 @@ class HistoryTaskDetailView extends StatelessWidget {
             // 标签
             if (task.tags.isNotEmpty) ...[
               Text(
-                TodoLocalizations.of(context)!.tags,
+                TodoLocalizations.of(context).tags,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -82,7 +82,7 @@ class HistoryTaskDetailView extends StatelessWidget {
 
             // 日期信息
             Text(
-              TodoLocalizations.of(context)!.dates,
+              TodoLocalizations.of(context).dates,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -90,13 +90,13 @@ class HistoryTaskDetailView extends StatelessWidget {
               children: [
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
-                  title: Text(TodoLocalizations.of(context)!.created),
+                  title: Text(TodoLocalizations.of(context).created),
                   subtitle: Text(dateFormat.format(task.createdAt)),
                 ),
                 if (task.dueDate != null)
                   ListTile(
                     leading: const Icon(Icons.event),
-                    title: Text(TodoLocalizations.of(context)!.dueDate),
+                    title: Text(TodoLocalizations.of(context).dueDate),
                     subtitle: Text(dateFormat.format(task.dueDate!)),
                   ),
                 const SizedBox(height: 16),
@@ -106,7 +106,7 @@ class HistoryTaskDetailView extends StatelessWidget {
             // 子任务
             if (task.subtasks.isNotEmpty) ...[
               Text(
-                TodoLocalizations.of(context)!.subtasks,
+                TodoLocalizations.of(context).subtasks,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -144,7 +144,7 @@ class HistoryTaskDetailView extends StatelessWidget {
             // 提醒
             if (task.reminders.isNotEmpty) ...[
               Text(
-                TodoLocalizations.of(context)!.reminders,
+                TodoLocalizations.of(context).reminders,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),

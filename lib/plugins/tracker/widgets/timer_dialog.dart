@@ -98,7 +98,7 @@ class _TimerDialogState extends State<TimerDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        '${TrackerLocalizations.of(context)!.timer} - ${widget.goal.name}',
+        '${TrackerLocalizations.of(context).timer} - ${widget.goal.name}',
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -122,7 +122,7 @@ class _TimerDialogState extends State<TimerDialog> {
           TextField(
             controller: _valueController,
             decoration: InputDecoration(
-              labelText: TrackerLocalizations.of(context)!.recordValueWithUnit
+              labelText: TrackerLocalizations.of(context).recordValueWithUnit
                   .replaceFirst('\${unit}', widget.goal.unitType),
               border: const OutlineInputBorder(),
             ),
@@ -133,7 +133,7 @@ class _TimerDialogState extends State<TimerDialog> {
             controller: _noteController,
             decoration: InputDecoration(
               labelText:
-                  '${TrackerLocalizations.of(context)!.note} (${TrackerLocalizations.of(context)!.noteHint})',
+                  '${TrackerLocalizations.of(context).note} (${TrackerLocalizations.of(context).noteHint})',
               border: OutlineInputBorder(),
             ),
             maxLines: 2,

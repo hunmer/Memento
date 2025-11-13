@@ -34,7 +34,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(GroupSelectorLocalizations.of(context)!.selectGroup),
+      title: Text(GroupSelectorLocalizations.of(context).selectGroup),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView.builder(
@@ -70,11 +70,11 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(GroupSelectorLocalizations.of(context)!.cancel),
+          child: Text(GroupSelectorLocalizations.of(context).cancel),
         ),
         TextButton(
           onPressed: () => _showCreateDialog(),
-          child: Text(GroupSelectorLocalizations.of(context)!.newGroup),
+          child: Text(GroupSelectorLocalizations.of(context).newGroup),
         ),
       ],
     );
@@ -86,18 +86,18 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(GroupSelectorLocalizations.of(context)!.renameGroup),
+            title: Text(GroupSelectorLocalizations.of(context).renameGroup),
             content: TextField(
               controller: controller,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: GroupSelectorLocalizations.of(context)!.groupName,
+                labelText: GroupSelectorLocalizations.of(context).groupName,
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(GroupSelectorLocalizations.of(context)!.cancel),
+                child: Text(GroupSelectorLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -109,7 +109,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
                     Navigator.of(context).pop();
                   }
                 },
-                child: Text(GroupSelectorLocalizations.of(context)!.ok),
+                child: Text(GroupSelectorLocalizations.of(context).ok),
               ),
             ],
           ),
@@ -121,16 +121,16 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(GroupSelectorLocalizations.of(context)!.deleteGroup),
+            title: Text(GroupSelectorLocalizations.of(context).deleteGroup),
             content: Text(
               GroupSelectorLocalizations.of(
                 context,
-              )!.deleteGroupConfirmation.replaceFirst('%s', groupName),
+              ).deleteGroupConfirmation.replaceFirst('%s', groupName),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(GroupSelectorLocalizations.of(context)!.cancel),
+                child: Text(GroupSelectorLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -139,7 +139,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
                   setState(() {}); // 刷新列表
                   Navigator.of(context).pop();
                 },
-                child: Text(GroupSelectorLocalizations.of(context)!.ok),
+                child: Text(GroupSelectorLocalizations.of(context).ok),
               ),
             ],
           ),
@@ -152,18 +152,18 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(GroupSelectorLocalizations.of(context)!.createGroup),
+            title: Text(GroupSelectorLocalizations.of(context).createGroup),
             content: TextField(
               controller: controller,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: GroupSelectorLocalizations.of(context)!.groupName,
+                labelText: GroupSelectorLocalizations.of(context).groupName,
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(GroupSelectorLocalizations.of(context)!.cancel),
+                child: Text(GroupSelectorLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -176,7 +176,7 @@ class _GroupSelectorDialogState extends State<GroupSelectorDialog> {
                     Navigator.of(context).pop(_selectedGroup);
                   }
                 },
-                child: Text(GroupSelectorLocalizations.of(context)!.ok),
+                child: Text(GroupSelectorLocalizations.of(context).ok),
               ),
             ],
           ),

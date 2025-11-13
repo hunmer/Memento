@@ -101,7 +101,7 @@ class TimerPlugin extends BasePlugin {
                   child: Column(
                     children: [
                       Text(
-                        TimerLocalizations.of(context)!.totalTimer,
+                        TimerLocalizations.of(context).totalTimer,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

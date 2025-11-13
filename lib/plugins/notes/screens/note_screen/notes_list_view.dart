@@ -28,7 +28,7 @@ class NotesListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (subFolders.isEmpty && notes.isEmpty) {
-      return Center(child: Text(NotesLocalizations.of(context)!.emptyFolder));
+      return Center(child: Text(NotesLocalizations.of(context).emptyFolder));
     }
 
     return ReorderableListView.builder(

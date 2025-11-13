@@ -60,13 +60,13 @@ class _SearchScreenState extends State<SearchScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(NotesLocalizations.of(context)!.filter),
+            title: Text(NotesLocalizations.of(context).filter),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(NotesLocalizations.of(context)!.tags),
+                  Text(NotesLocalizations.of(context).tags),
                   Wrap(
                     spacing: 8,
                     children: [
@@ -78,12 +78,12 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text(NotesLocalizations.of(context)!.dateRange),
+                  Text(NotesLocalizations.of(context).dateRange),
                   ListTile(
                     title: Text(
                       _startDate != null
                           ? 'From: ${_formatDate(_startDate!)}'
-                          : NotesLocalizations.of(context)!.typeToSearch,
+                          : NotesLocalizations.of(context).typeToSearch,
                     ),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {
@@ -105,7 +105,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     title: Text(
                       _endDate != null
                           ? 'To: ${_formatDate(_endDate!)}'
-                          : NotesLocalizations.of(context)!.typeToSearch,
+                          : NotesLocalizations.of(context).typeToSearch,
                     ),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {
@@ -137,13 +137,13 @@ class _SearchScreenState extends State<SearchScreen> {
                   _onSearchChanged();
                   Navigator.pop(context);
                 },
-                child: Text(NotesLocalizations.of(context)!.clearAll),
+                child: Text(NotesLocalizations.of(context).clearAll),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: Text(NotesLocalizations.of(context)!.apply),
+                child: Text(NotesLocalizations.of(context).apply),
               ),
             ],
           ),
@@ -183,7 +183,7 @@ class _SearchScreenState extends State<SearchScreen> {
         title: TextField(
           controller: _searchController,
           decoration: InputDecoration(
-            hintText: NotesLocalizations.of(context)!.searchHint,
+            hintText: NotesLocalizations.of(context).searchHint,
             border: InputBorder.none,
           ),
           autofocus: true,
@@ -200,8 +200,8 @@ class _SearchScreenState extends State<SearchScreen> {
               ? Center(
                 child:
                     _query.isEmpty
-                        ? Text(NotesLocalizations.of(context)!.typeToSearch)
-                        : Text(NotesLocalizations.of(context)!.noResultsFound),
+                        ? Text(NotesLocalizations.of(context).typeToSearch)
+                        : Text(NotesLocalizations.of(context).noResultsFound),
               )
               : ListView.builder(
                 itemCount: _searchResults.length,
@@ -212,7 +212,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     note: note,
                     folderName:
                         folder?.name ??
-                        NotesLocalizations.of(context)!.noResultsFound,
+                        NotesLocalizations.of(context).noResultsFound,
                     query: _query,
                   );
                 },

@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 
 import 'calendar_album_localizations.dart';
 

@@ -191,7 +191,7 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(32),
-                      child: Text(BillLocalizations.of(context)!.noBills),
+                      child: Text(BillLocalizations.of(context).noBills),
                     ),
                   ),
                 ],

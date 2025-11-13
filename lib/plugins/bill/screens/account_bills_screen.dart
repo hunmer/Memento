@@ -49,23 +49,23 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
               return [
                 PopupMenuItem(
                   value: StatisticRange.week,
-                  child: Text(BillLocalizations.of(context)!.thisWeek),
+                  child: Text(BillLocalizations.of(context).thisWeek),
                 ),
                 PopupMenuItem(
                   value: StatisticRange.month,
-                  child: Text(BillLocalizations.of(context)!.thisMonth),
+                  child: Text(BillLocalizations.of(context).thisMonth),
                 ),
                 PopupMenuItem(
                   value: StatisticRange.year,
-                  child: Text(BillLocalizations.of(context)!.thisYear),
+                  child: Text(BillLocalizations.of(context).thisYear),
                 ),
                 PopupMenuItem(
                   value: StatisticRange.all,
-                  child: Text(BillLocalizations.of(context)!.all),
+                  child: Text(BillLocalizations.of(context).all),
                 ),
                 PopupMenuItem(
                   value: StatisticRange.custom,
-                  child: Text(BillLocalizations.of(context)!.custom),
+                  child: Text(BillLocalizations.of(context).custom),
                 ),
               ];
             },
@@ -139,7 +139,7 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
 
   Widget _buildBillsList(List<Bill> bills) {
     if (bills.isEmpty) {
-      return Center(child: Text(BillLocalizations.of(context)!.noBillsYet));
+      return Center(child: Text(BillLocalizations.of(context).noBillsYet));
     }
 
     // 对账单按日期排序
@@ -173,17 +173,17 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(BillLocalizations.of(context)!.confirmDelete),
+                title: Text(BillLocalizations.of(context).confirmDelete),
                 content: Text(
-                  BillLocalizations.of(context)!.deleteBillConfirmation,
+                  BillLocalizations.of(context).deleteBillConfirmation,
                 ),
                 actions: [
                   TextButton(
-                    child: Text(BillLocalizations.of(context)!.cancel),
+                    child: Text(BillLocalizations.of(context).cancel),
                     onPressed: () => Navigator.pop(context, false),
                   ),
                   TextButton(
-                    child: Text(BillLocalizations.of(context)!.delete),
+                    child: Text(BillLocalizations.of(context).delete),
                     onPressed: () => Navigator.pop(context, true),
                   ),
                 ],

@@ -54,13 +54,13 @@ class BasicInfoTab extends StatelessWidget {
             TextFormField(
               controller: controller.nameController,
               decoration: InputDecoration(
-                labelText: GoodsLocalizations.of(context)!.productName,
-                hintText: GoodsLocalizations.of(context)!.enterProductName,
+                labelText: GoodsLocalizations.of(context).productName,
+                hintText: GoodsLocalizations.of(context).enterProductName,
                 border: const OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return GoodsLocalizations.of(context)!.pleaseEnterProductName;
+                  return GoodsLocalizations.of(context).pleaseEnterProductName;
                 }
                 return null;
               },
@@ -69,9 +69,9 @@ class BasicInfoTab extends StatelessWidget {
             TextFormField(
               controller: controller.descriptionController,
               decoration: InputDecoration(
-                labelText: GoodsLocalizations.of(context)!.productDescription,
+                labelText: GoodsLocalizations.of(context).productDescription,
                 hintText:
-                    GoodsLocalizations.of(context)!.enterProductDescription,
+                    GoodsLocalizations.of(context).enterProductDescription,
                 border: const OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -230,18 +230,18 @@ class BasicInfoTab extends StatelessWidget {
           barrierDismissible: false,
           builder:
               (context) => AlertDialog(
-                title: Text(GoodsLocalizations.of(context)!.confirmDelete),
+                title: Text(GoodsLocalizations.of(context).confirmDelete),
                 content: Text(
-                  GoodsLocalizations.of(context)!.confirmDeleteItem,
+                  GoodsLocalizations.of(context).confirmDeleteItem,
                 ),
                 actions: [
                   TextButton(
-                    child: Text(GoodsLocalizations.of(context)!.cancel),
+                    child: Text(GoodsLocalizations.of(context).cancel),
                     onPressed: () => Navigator.pop(context),
                   ),
                   TextButton(
                     child: Text(
-                      GoodsLocalizations.of(context)!.delete,
+                      GoodsLocalizations.of(context).delete,
                       style: const TextStyle(color: Colors.red),
                     ),
                     onPressed: () {
@@ -258,7 +258,7 @@ class BasicInfoTab extends StatelessWidget {
         foregroundColor: Colors.red,
         side: const BorderSide(color: Colors.red),
       ),
-      child: Text(GoodsLocalizations.of(context)!.deleteProduct),
+      child: Text(GoodsLocalizations.of(context).deleteProduct),
     );
   }
 
@@ -326,7 +326,7 @@ class BasicInfoTab extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(GoodsLocalizations.of(context)!.selectImageFailed),
+            content: Text(GoodsLocalizations.of(context).selectImageFailed),
             backgroundColor: Colors.red,
           ),
         );

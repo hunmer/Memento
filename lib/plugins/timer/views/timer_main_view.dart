@@ -169,9 +169,9 @@ class _TimerMainViewState extends State<TimerMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(TimerLocalizations.of(context)!.deleteTimer),
+            title: Text(TimerLocalizations.of(context).deleteTimer),
             content: Text(
-              '${TimerLocalizations.of(context)!.deleteTimerConfirmation} "${task.name}"',
+              '${TimerLocalizations.of(context).deleteTimerConfirmation} "${task.name}"',
             ),
             actions: [
               TextButton(

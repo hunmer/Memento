@@ -125,7 +125,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            BillLocalizations.of(context)!.billSaved,
+                            BillLocalizations.of(context).billSaved,
                           ),
                           backgroundColor: Colors.green,
                         ),
@@ -140,7 +140,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${BillLocalizations.of(context)!.billSaveFailed}: $e',
+                            '${BillLocalizations.of(context).billSaveFailed}: $e',
                           ),
                           backgroundColor: Colors.red,
                         ),
@@ -191,12 +191,12 @@ class _BillEditScreenState extends State<BillEditScreen> {
             segments: [
               ButtonSegment<bool>(
                 value: true,
-                label: Text(BillLocalizations.of(context)!.expense),
+                label: Text(BillLocalizations.of(context).expense),
                 icon: const Icon(Icons.arrow_upward),
               ),
               ButtonSegment<bool>(
                 value: false,
-                label: Text(BillLocalizations.of(context)!.income),
+                label: Text(BillLocalizations.of(context).income),
                 icon: const Icon(Icons.arrow_downward),
               ),
             ],

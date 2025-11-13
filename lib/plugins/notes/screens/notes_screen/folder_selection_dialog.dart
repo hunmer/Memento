@@ -70,8 +70,8 @@ mixin FolderSelectionDialog on NotesMainViewState {
           (context) => AlertDialog(
             title: Text(
               parentFolder != null
-                  ? NotesLocalizations.of(context)!.selectSubfolder
-                  : NotesLocalizations.of(context)!.moveTo,
+                  ? NotesLocalizations.of(context).selectSubfolder
+                  : NotesLocalizations.of(context).moveTo,
             ),
             content: SingleChildScrollView(
               child: Column(
@@ -112,7 +112,7 @@ mixin FolderSelectionDialog on NotesMainViewState {
             content: Text(
               NotesLocalizations.of(
                 context,
-              )!.movedToFolder.replaceFirst('{folderName}', targetFolder.name),
+              ).movedToFolder.replaceFirst('{folderName}', targetFolder.name),
             ),
           ),
         );

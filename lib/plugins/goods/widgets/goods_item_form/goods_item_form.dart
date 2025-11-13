@@ -63,25 +63,25 @@ class _GoodsItemFormState extends State<GoodsItemForm>
           automaticallyImplyLeading: false,
           title: Text(
             widget.initialData == null
-                ? GoodsLocalizations.of(context)!.addItem
-                : GoodsLocalizations.of(context)!.editItem,
+                ? GoodsLocalizations.of(context).addItem
+                : GoodsLocalizations.of(context).editItem,
           ),
           centerTitle: true,
           leading: TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(GoodsLocalizations.of(context)!.cancel),
+            child: Text(GoodsLocalizations.of(context).cancel),
           ),
           actions: [
             TextButton(
               onPressed: _submitForm,
-              child: Text(GoodsLocalizations.of(context)!.save),
+              child: Text(GoodsLocalizations.of(context).save),
             ),
           ],
           bottom: TabBar(
             tabs: [
-              Tab(text: GoodsLocalizations.of(context)!.basicInfo),
-              Tab(text: GoodsLocalizations.of(context)!.usageRecords),
-              Tab(text: GoodsLocalizations.of(context)!.subItems),
+              Tab(text: GoodsLocalizations.of(context).basicInfo),
+              Tab(text: GoodsLocalizations.of(context).usageRecords),
+              Tab(text: GoodsLocalizations.of(context).subItems),
             ],
           ),
         ),

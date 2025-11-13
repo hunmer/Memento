@@ -10,9 +10,9 @@ class FolderDialog extends StatefulWidget {
   final HomeFolderItem folder;
 
   const FolderDialog({
-    Key? key,
+    super.key,
     required this.folder,
-  }) : super(key: key);
+  });
 
   @override
   State<FolderDialog> createState() => _FolderDialogState();

@@ -83,7 +83,7 @@ Future<void> handleAudioRecording({
                     scaffoldMessenger.showSnackBar(
                       SnackBar(
                         content: Text(
-                          '${ChatLocalizations.of(context)!.audioRecording}: ${formatDuration(duration)}',
+                          '${ChatLocalizations.of(context).audioRecording}: ${formatDuration(duration)}',
                         ),
                         duration: const Duration(seconds: 2),
                         behavior: SnackBarBehavior.floating,
@@ -96,7 +96,7 @@ Future<void> handleAudioRecording({
                     scaffoldMessenger.showSnackBar(
                       SnackBar(
                         content: Text(
-                          '${ChatLocalizations.of(context)!.recordingFailed}: $e',
+                          '${ChatLocalizations.of(context).recordingFailed}: $e',
                         ),
                         backgroundColor: Colors.red,
                         behavior: SnackBarBehavior.floating,
@@ -111,7 +111,7 @@ Future<void> handleAudioRecording({
   } else {
     scaffoldMessenger.showSnackBar(
       SnackBar(
-        content: Text(ChatLocalizations.of(context)!.recordingFailed),
+        content: Text(ChatLocalizations.of(context).recordingFailed),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
       ),

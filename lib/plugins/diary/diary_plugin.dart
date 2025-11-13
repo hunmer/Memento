@@ -232,7 +232,7 @@ class DiaryPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            DiaryLocalizations.of(context)!.todayWordCount,
+                            DiaryLocalizations.of(context).todayWordCount,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -251,7 +251,7 @@ class DiaryPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            DiaryLocalizations.of(context)!.monthWordCount,
+                            DiaryLocalizations.of(context).monthWordCount,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -273,7 +273,7 @@ class DiaryPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            DiaryLocalizations.of(context)!.monthProgress,
+                            DiaryLocalizations.of(context).monthProgress,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(

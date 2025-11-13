@@ -15,8 +15,8 @@ class ClearMessagesDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(ChatLocalizations.of(context)!.clearAllMessages),
-      content: Text(ChatLocalizations.of(context)!.confirmClearAllMessages),
+      title: Text(ChatLocalizations.of(context).clearAllMessages),
+      content: Text(ChatLocalizations.of(context).confirmClearAllMessages),
       actions: [
         TextButton(
           onPressed: onCancel,

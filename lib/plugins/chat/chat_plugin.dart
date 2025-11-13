@@ -1,7 +1,6 @@
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:flutter/material.dart';
-import '../../l10n/app_localizations.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';

@@ -185,15 +185,15 @@ class _FilterDialogState extends State<FilterDialog> {
       actions: [
         TextButton(
           onPressed: _resetFilters,
-          child: Text(ContactLocalizations.of(context)?.reset ?? 'Reset'),
+          child: Text(ContactLocalizations.of(context).reset ?? 'Reset'),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(ContactLocalizations.of(context)?.cancel ?? 'Cancel'),
+          child: Text(ContactLocalizations.of(context).cancel ?? 'Cancel'),
         ),
         ElevatedButton(
           onPressed: _applyFilters,
-          child: Text(ContactLocalizations.of(context)?.save ?? 'Save'),
+          child: Text(ContactLocalizations.of(context).save ?? 'Save'),
         ),
       ],
     );

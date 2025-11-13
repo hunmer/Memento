@@ -4,7 +4,7 @@ import '../models/home_folder_item.dart';
 
 /// 创建文件夹对话框
 class CreateFolderDialog extends StatefulWidget {
-  const CreateFolderDialog({Key? key}) : super(key: key);
+  const CreateFolderDialog({super.key});
 
   @override
   State<CreateFolderDialog> createState() => _CreateFolderDialogState();

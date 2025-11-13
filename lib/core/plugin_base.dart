@@ -115,5 +115,7 @@ abstract class PluginBase {
     return storage.getPluginStoragePath(id);
   }
 
-  String? getPluginName(context) {}
+  String? getPluginName(context) {
+    return null;
+  }
 }

@@ -170,7 +170,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${ActivityLocalizations.of(context)!.loadingFailed}: $e',
+              '${ActivityLocalizations.of(context).loadingFailed}: $e',
             ),
           ),
         );
@@ -222,8 +222,8 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
 
       if (activity.tags.isEmpty) {
         // 无标签的活动归类为"其他"
-        tagMinutes[ActivityLocalizations.of(context)!.unnamedActivity] =
-            (tagMinutes[ActivityLocalizations.of(context)!.unnamedActivity] ??
+        tagMinutes[ActivityLocalizations.of(context).unnamedActivity] =
+            (tagMinutes[ActivityLocalizations.of(context).unnamedActivity] ??
                 0) +
             duration;
       } else {
@@ -247,7 +247,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
           .fold(0, (sum, entry) => sum + entry.value);
       topEntries.add(
         MapEntry(
-          ActivityLocalizations.of(context)!.unnamedActivity,
+          ActivityLocalizations.of(context).unnamedActivity,
           otherMinutes,
         ),
       );
@@ -259,7 +259,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
 
   // 根据标签筛选活动
   List<ActivityRecord> _getActivitiesByTag(String tag) {
-    if (tag == ActivityLocalizations.of(context)!.unnamedActivity) {
+    if (tag == ActivityLocalizations.of(context).unnamedActivity) {
       // 查找没有标签的活动
       return _activities.where((activity) => activity.tags.isEmpty).toList();
     } else {
@@ -343,7 +343,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              '${DateFormat('yyyy-MM-dd').format(_startDate!)} ${ActivityLocalizations.of(context)!.to} ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
+              '${DateFormat('yyyy-MM-dd').format(_startDate!)} ${ActivityLocalizations.of(context).to} ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ),
@@ -365,7 +365,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
                       _buildSectionTitle(
                         ActivityLocalizations.of(
                           context,
-                        )!.timeDistributionTitle,
+                        ).timeDistributionTitle,
                       ),
                       SizedBox(
                         height: 200,
@@ -378,7 +378,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
                     _buildSectionTitle(
                       ActivityLocalizations.of(
                         context,
-                      )!.activityDistributionTitle,
+                      ).activityDistributionTitle,
                     ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,7 +450,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
             tooltipBgColor: Colors.black87,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               return BarTooltipItem(
-                '${group.x}${ActivityLocalizations.of(context)!.hour}: ${rod.toY.toInt()}${ActivityLocalizations.of(context)!.minutesFormat(1).replaceAll('1 ', '')}',
+                '${group.x}${ActivityLocalizations.of(context).hour}: ${rod.toY.toInt()}${ActivityLocalizations.of(context).minutesFormat(1).replaceAll('1 ', '')}',
                 const TextStyle(color: Colors.white),
               );
             },
@@ -474,7 +474,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
               showTitles: true,
               getTitlesWidget: (value, meta) {
                 return Text(
-                  '${value.toInt()}${ActivityLocalizations.of(context)!.minutesFormat(1).replaceAll('1 ', '')}',
+                  '${value.toInt()}${ActivityLocalizations.of(context).minutesFormat(1).replaceAll('1 ', '')}',
                 );
               },
               reservedSize: 40,
@@ -505,7 +505,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   Widget _buildActivityPieChart() {
     final activityData = _calculateActivityDistribution();
     if (activityData.isEmpty) {
-      return Center(child: Text(ActivityLocalizations.of(context)!.noData));
+      return Center(child: Text(ActivityLocalizations.of(context).noData));
     }
 
     final totalMinutes = activityData.fold(
@@ -514,7 +514,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     );
     if (totalMinutes <= 0) {
       return Center(
-        child: Text(ActivityLocalizations.of(context)!.noActivityTimeData),
+        child: Text(ActivityLocalizations.of(context).noActivityTimeData),
       );
     }
 
@@ -575,7 +575,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   Widget _buildPieChartLegend() {
     final activityData = _calculateActivityDistribution();
     if (activityData.isEmpty) {
-      return Center(child: Text(ActivityLocalizations.of(context)!.noData));
+      return Center(child: Text(ActivityLocalizations.of(context).noData));
     }
 
     final totalMinutes = activityData.fold(
@@ -606,7 +606,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  ActivityLocalizations.of(context)!.totalDuration,
+                  ActivityLocalizations.of(context).totalDuration,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -632,7 +632,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
             child:
                 activityData.isEmpty
                     ? Center(
-                      child: Text(ActivityLocalizations.of(context)!.noData),
+                      child: Text(ActivityLocalizations.of(context).noData),
                     )
                     : ListView.builder(
                       itemCount: activityData.length,
@@ -731,7 +731,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Center(
           child: Text(
-            '${ActivityLocalizations.of(context)!.loadingFailed.replaceAll('数据', '活动记录')} "$_selectedTag"',
+            '${ActivityLocalizations.of(context).loadingFailed.replaceAll('数据', '活动记录')} "$_selectedTag"',
           ),
         ),
       );
@@ -746,7 +746,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
             children: [
               Expanded(
                 child: Text(
-                  '${ActivityLocalizations.of(context)!.activityRecords} "$_selectedTag"',
+                  '${ActivityLocalizations.of(context).activityRecords} "$_selectedTag"',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -756,7 +756,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
               ),
               TextButton.icon(
                 icon: const Icon(Icons.close),
-                label: Text(ActivityLocalizations.of(context)!.close),
+                label: Text(ActivityLocalizations.of(context).close),
                 onPressed: () {
                   setState(() {
                     _selectedTag = null;

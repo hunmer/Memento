@@ -26,7 +26,7 @@ Future<void> handleFileSelection({
         if (!await file.exists()) {
           scaffoldMessenger.showSnackBar(
             SnackBar(
-              content: Text(ChatLocalizations.of(context)!.fileNotAccessible),
+              content: Text(ChatLocalizations.of(context).fileNotAccessible),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
@@ -55,7 +55,7 @@ Future<void> handleFileSelection({
         scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(
-              '${ChatLocalizations.of(context)!.fileSelected}: ${fileMessage.originalFileName}',
+              '${ChatLocalizations.of(context).fileSelected}: ${fileMessage.originalFileName}',
             ),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
@@ -65,7 +65,7 @@ Future<void> handleFileSelection({
         scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(
-              '${ChatLocalizations.of(context)!.fileProcessingFailed}: $processingError',
+              '${ChatLocalizations.of(context).fileProcessingFailed}: $processingError',
             ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
@@ -77,7 +77,7 @@ Future<void> handleFileSelection({
     scaffoldMessenger.showSnackBar(
       SnackBar(
         content: Text(
-          '${ChatLocalizations.of(context)!.fileSelectionFailed}: $e',
+          '${ChatLocalizations.of(context).fileSelectionFailed}: $e',
         ),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,

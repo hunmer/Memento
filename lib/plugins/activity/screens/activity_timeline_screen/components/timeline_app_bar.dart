@@ -26,27 +26,31 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
       title: Text(viewModeController.isGridMode && viewModeController.selectedMinutes > 0
-          ? DiaryLocalizations.of(context)!.minutesSelected.replaceAll('{minutes}', viewModeController.selectedMinutes.toString())
-          : DiaryLocalizations.of(context)!.activityTimeline),
+            ? DiaryLocalizations.of(context).minutesSelected.replaceAll(
+              '{minutes}',
+              viewModeController.selectedMinutes.toString(),
+            )
+            : DiaryLocalizations.of(context).activityTimeline,
+      ),
       actions: [
         // 视图切换按钮
         IconButton(
           icon: Icon(viewModeController.isGridMode ? Icons.timeline : Icons.grid_on),
           onPressed: viewModeController.toggleViewMode,
           tooltip: viewModeController.isGridMode 
-              ? DiaryLocalizations.of(context)!.switchToTimelineView 
-              : DiaryLocalizations.of(context)!.switchToGridView,
+                  ? DiaryLocalizations.of(context).switchToTimelineView
+                  : DiaryLocalizations.of(context).switchToGridView,
         ),
         // 标签管理按钮
         IconButton(
           icon: const Icon(Icons.label),
           onPressed: () => tagController.showTagManagerDialog(context),
-          tooltip: DiaryLocalizations.of(context)!.tagManagement,
+          tooltip: DiaryLocalizations.of(context).tagManagement,
         ),
         // 排序下拉菜单
         PopupMenuButton<int>(
           icon: const Icon(Icons.sort),
-          tooltip: DiaryLocalizations.of(context)!.sortBy,
+          tooltip: DiaryLocalizations.of(context).sortBy,
           initialValue: activityController.sortMode,
           onSelected: (int index) {
             activityController.setSortMode(index);
@@ -59,7 +63,7 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const Icon(Icons.arrow_upward, size: 16),
                       const SizedBox(width: 8),
-                      Text(DiaryLocalizations.of(context)!.sortByStartTimeAsc),
+                      Text(DiaryLocalizations.of(context).sortByStartTimeAsc),
                     ],
                   ),
                 ),
@@ -69,7 +73,7 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const Icon(Icons.timer, size: 16),
                       const SizedBox(width: 8),
-                      Text(DiaryLocalizations.of(context)!.sortByDuration),
+                      Text(DiaryLocalizations.of(context).sortByDuration),
                     ],
                   ),
                 ),
@@ -79,7 +83,7 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const Icon(Icons.arrow_downward, size: 16),
                       const SizedBox(width: 8),
-                      Text(DiaryLocalizations.of(context)!.sortByStartTimeDesc),
+                      Text(DiaryLocalizations.of(context).sortByStartTimeDesc),
                     ],
                   ),
                 ),

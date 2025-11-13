@@ -5,7 +5,6 @@ import '../../controllers/calendar_controller.dart';
 import '../../controllers/tag_controller.dart';
 import '../../models/calendar_entry.dart';
 import 'entry_detail_editor_launcher.dart';
-import '../../l10n/calendar_album_localizations.dart';
 
 class EntryDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
   final CalendarEntry entry;

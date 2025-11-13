@@ -273,7 +273,7 @@ class GoalCard extends StatelessWidget {
           key: formKey,
           child: AlertDialog(
             title: Text(
-              '${TrackerLocalizations.of(context)!.quickRecord} - ${goal.name}',
+              '${TrackerLocalizations.of(context).quickRecord} - ${goal.name}',
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -282,7 +282,7 @@ class GoalCard extends StatelessWidget {
                   controller: recordController,
                   decoration: InputDecoration(
                     labelText:
-                        '${TrackerLocalizations.of(context)!.recordValue} (${goal.unitType})',
+                        '${TrackerLocalizations.of(context).recordValue} (${goal.unitType})',
                     hintText: '请输入要增加的数值',
                   ),
                   keyboardType: TextInputType.number,

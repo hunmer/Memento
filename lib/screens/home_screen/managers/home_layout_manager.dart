@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../../main.dart';
-import '../../../core/config_manager.dart';
 import '../models/home_item.dart';
 import '../models/home_widget_item.dart';
 import '../models/home_folder_item.dart';
-import 'home_widget_registry.dart';
 
 /// 主页布局管理器
 ///

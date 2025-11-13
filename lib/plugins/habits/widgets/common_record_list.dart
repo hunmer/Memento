@@ -1,5 +1,4 @@
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:flutter/material.dart';
 
 class CommonRecordList<T> extends StatelessWidget {

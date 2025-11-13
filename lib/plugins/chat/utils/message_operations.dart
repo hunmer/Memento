@@ -21,7 +21,7 @@ class MessageOperations {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(ChatLocalizations.of(context)!.editMessage),
+            title: Text(ChatLocalizations.of(context).editMessage),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -88,9 +88,9 @@ class MessageOperations {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(ChatLocalizations.of(context)!.deleteMessage),
+            title: Text(ChatLocalizations.of(context).deleteMessage),
             content: Text(
-              ChatLocalizations.of(context)!.deleteMessageConfirmation,
+              ChatLocalizations.of(context).deleteMessageConfirmation,
             ),
             actions: [
               TextButton(
@@ -99,7 +99,7 @@ class MessageOperations {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(ChatLocalizations.of(context)!.delete),
+                child: Text(ChatLocalizations.of(context).delete),
               ),
             ],
           ),
@@ -137,7 +137,7 @@ class MessageOperations {
       Clipboard.setData(ClipboardData(text: message.content));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(ChatLocalizations.of(context)!.copiedToClipboard),
+          content: Text(ChatLocalizations.of(context).copiedToClipboard),
         ),
       );
     }

@@ -154,10 +154,10 @@ class ProductCard extends StatelessWidget {
                   builder:
                       (context) => AlertDialog(
                         title: Text(
-                          StoreLocalizations.of(context)!.redeemConfirmation,
+                          StoreLocalizations.of(context).redeemConfirmation,
                         ),
                         content: Text(
-                          '${StoreLocalizations.of(context)!.confirmUseItem}\n${product.name} 需要消耗 ${product.price} 积分',
+                          '${StoreLocalizations.of(context).confirmUseItem}\n${product.name} 需要消耗 ${product.price} 积分',
                         ),
                         actions: [
                           TextButton(

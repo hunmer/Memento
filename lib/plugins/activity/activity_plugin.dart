@@ -152,7 +152,7 @@ class ActivityPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            ActivityLocalizations.of(context)!.todayActivities,
+                            ActivityLocalizations.of(context).todayActivities,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -172,7 +172,7 @@ class ActivityPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            ActivityLocalizations.of(context)!.todayDuration,
+                            ActivityLocalizations.of(context).todayDuration,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -195,7 +195,7 @@ class ActivityPlugin extends BasePlugin {
                       Column(
                         children: [
                           Text(
-                            ActivityLocalizations.of(context)!.remainingTime,
+                            ActivityLocalizations.of(context).remainingTime,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -266,11 +266,11 @@ class _ActivityMainViewState extends State<ActivityMainView> {
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.timeline),
-            label: ActivityLocalizations.of(context)?.timeline ?? '时间线',
+            label: ActivityLocalizations.of(context).timeline ?? '时间线',
           ),
           NavigationDestination(
             icon: const Icon(Icons.bar_chart),
-            label: ActivityLocalizations.of(context)?.statistics ?? '统计',
+            label: ActivityLocalizations.of(context).statistics ?? '统计',
           ),
         ],
       ),

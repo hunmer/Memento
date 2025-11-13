@@ -150,7 +150,7 @@ class _TaskFormState extends State<TaskForm> {
     if (_titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(TodoLocalizations.of(context)!.pleaseEnterTitle),
+          content: Text(TodoLocalizations.of(context).pleaseEnterTitle),
         ),
       );
       return;
@@ -203,8 +203,8 @@ class _TaskFormState extends State<TaskForm> {
       appBar: AppBar(
         title: Text(
           widget.task == null
-              ? TodoLocalizations.of(context)!.newTask
-              : TodoLocalizations.of(context)!.editTask,
+              ? TodoLocalizations.of(context).newTask
+              : TodoLocalizations.of(context).editTask,
         ),
         actions: [
           IconButton(icon: const Icon(Icons.check), onPressed: _saveTask),
@@ -219,7 +219,7 @@ class _TaskFormState extends State<TaskForm> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                labelText: TodoLocalizations.of(context)!.title,
+                labelText: TodoLocalizations.of(context).title,
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -229,7 +229,7 @@ class _TaskFormState extends State<TaskForm> {
             TextField(
               controller: _descriptionController,
               decoration: InputDecoration(
-                labelText: TodoLocalizations.of(context)!.description,
+                labelText: TodoLocalizations.of(context).description,
                 border: const OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -244,18 +244,18 @@ class _TaskFormState extends State<TaskForm> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${TodoLocalizations.of(context)!.startDate}: ${_startDate == null ? TodoLocalizations.of(context)!.notSet : '${_startDate!.year}/${_startDate!.month}/${_startDate!.day}'}',
+                        '${TodoLocalizations.of(context).startDate}: ${_startDate == null ? TodoLocalizations.of(context).notSet : '${_startDate!.year}/${_startDate!.month}/${_startDate!.day}'}',
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${TodoLocalizations.of(context)!.dueDate}: ${_dueDate == null ? TodoLocalizations.of(context)!.notSet : '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}'}',
+                        '${TodoLocalizations.of(context).dueDate}: ${_dueDate == null ? TodoLocalizations.of(context).notSet : '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}'}',
                       ),
                     ],
                   ),
                 ),
                 TextButton(
                   onPressed: () => _selectDateRange(context),
-                  child: Text(TodoLocalizations.of(context)!.selectDates),
+                  child: Text(TodoLocalizations.of(context).selectDates),
                 ),
                 if (_startDate != null || _dueDate != null)
                   IconButton(
@@ -267,23 +267,23 @@ class _TaskFormState extends State<TaskForm> {
             const SizedBox(height: 16),
 
             // 优先级
-            Text(TodoLocalizations.of(context)!.priority),
+            Text(TodoLocalizations.of(context).priority),
             const SizedBox(height: 8),
             SegmentedButton<TaskPriority>(
               segments: [
                 ButtonSegment<TaskPriority>(
                   value: TaskPriority.low,
-                  label: Text(TodoLocalizations.of(context)!.low),
+                  label: Text(TodoLocalizations.of(context).low),
                   icon: const Icon(Icons.arrow_downward),
                 ),
                 ButtonSegment<TaskPriority>(
                   value: TaskPriority.medium,
-                  label: Text(TodoLocalizations.of(context)!.medium),
+                  label: Text(TodoLocalizations.of(context).medium),
                   icon: const Icon(Icons.remove),
                 ),
                 ButtonSegment<TaskPriority>(
                   value: TaskPriority.high,
-                  label: Text(TodoLocalizations.of(context)!.high),
+                  label: Text(TodoLocalizations.of(context).high),
                   icon: const Icon(Icons.arrow_upward),
                 ),
               ],
@@ -297,7 +297,7 @@ class _TaskFormState extends State<TaskForm> {
             const SizedBox(height: 16),
 
             // 标签
-            Text(TodoLocalizations.of(context)!.tags),
+            Text(TodoLocalizations.of(context).tags),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8.0,
@@ -316,7 +316,7 @@ class _TaskFormState extends State<TaskForm> {
                 ),
                 ActionChip(
                   avatar: const Icon(Icons.add, size: 18),
-                  label: Text(TodoLocalizations.of(context)!.addTag),
+                  label: Text(TodoLocalizations.of(context).addTag),
                   onPressed: () {
                     _showAddTagDialog();
                   },
@@ -327,7 +327,7 @@ class _TaskFormState extends State<TaskForm> {
 
             // 子任务
             Text(
-              TodoLocalizations.of(context)!.subtasks,
+              TodoLocalizations.of(context).subtasks,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -338,7 +338,7 @@ class _TaskFormState extends State<TaskForm> {
                     controller: _subtaskController,
                     decoration: InputDecoration(
                       labelText:
-                          '${TodoLocalizations.of(context)!.add} ${TodoLocalizations.of(context)!.subtasks.toLowerCase()}',
+                          '${TodoLocalizations.of(context).add} ${TodoLocalizations.of(context).subtasks.toLowerCase()}',
                       border: const OutlineInputBorder(),
                     ),
                     onSubmitted: (_) => _addSubtask(),
@@ -379,13 +379,13 @@ class _TaskFormState extends State<TaskForm> {
 
             // 提醒
             Text(
-              TodoLocalizations.of(context)!.reminders,
+              TodoLocalizations.of(context).reminders,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             TextButton.icon(
               icon: const Icon(Icons.add_alarm),
-              label: Text(TodoLocalizations.of(context)!.addReminder),
+              label: Text(TodoLocalizations.of(context).addReminder),
               onPressed: _addReminder,
             ),
             ListView.builder(
@@ -420,14 +420,14 @@ class _TaskFormState extends State<TaskForm> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(TodoLocalizations.of(context)!.addTag),
+            title: Text(TodoLocalizations.of(context).addTag),
             content: TextField(
               controller: tagController,
               decoration: InputDecoration(
                 labelText:
-                    '${TodoLocalizations.of(context)!.tags} ${TodoLocalizations.of(context)!.title.toLowerCase()}',
+                    '${TodoLocalizations.of(context).tags} ${TodoLocalizations.of(context).title.toLowerCase()}',
                 hintText:
-                    '${TodoLocalizations.of(context)!.pleaseEnterTitle.toLowerCase()} ${TodoLocalizations.of(context)!.tags.toLowerCase()}',
+                    '${TodoLocalizations.of(context).pleaseEnterTitle.toLowerCase()} ${TodoLocalizations.of(context).tags.toLowerCase()}',
               ),
               autofocus: true,
             ),
@@ -448,7 +448,7 @@ class _TaskFormState extends State<TaskForm> {
                   }
                   Navigator.of(context).pop();
                 },
-                child: Text(TodoLocalizations.of(context)!.add),
+                child: Text(TodoLocalizations.of(context).add),
               ),
             ],
           ),

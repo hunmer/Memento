@@ -52,7 +52,7 @@ class MoodSelector extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
           child: Text(
-            DiaryLocalizations.of(context)!.mood,
+            DiaryLocalizations.of(context).mood,
             style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ),
@@ -98,7 +98,7 @@ class MoodSelector extends StatelessWidget {
                   builder:
                       (context) => AlertDialog(
                         title: Text(
-                          ActivityLocalizations.of(context)!.inputMood,
+                          ActivityLocalizations.of(context).inputMood,
                         ),
                         content: TextField(
                           controller: controller,

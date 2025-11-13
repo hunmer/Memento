@@ -30,7 +30,7 @@ Future<void> handleImageSelection({
           scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text(
-                ChatLocalizations.of(context)?.imageNotExist ?? '图片文件不存在',
+                ChatLocalizations.of(context).imageNotExist ?? '图片文件不存在',
               ),
               backgroundColor: Colors.red,
             ),
@@ -70,7 +70,7 @@ Future<void> handleImageSelection({
         scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(
-              '${ChatLocalizations.of(context)?.imageProcessingFailed ?? '处理图片失败'}: $e',
+              '${ChatLocalizations.of(context).imageProcessingFailed ?? '处理图片失败'}: $e',
             ),
           ),
         );
@@ -80,7 +80,7 @@ Future<void> handleImageSelection({
     scaffoldMessenger.showSnackBar(
       SnackBar(
         content: Text(
-          '${ChatLocalizations.of(context)?.imageSelectionFailed ?? '选择图片失败'}: $e',
+          '${ChatLocalizations.of(context).imageSelectionFailed ?? '选择图片失败'}: $e',
         ),
       ),
     );

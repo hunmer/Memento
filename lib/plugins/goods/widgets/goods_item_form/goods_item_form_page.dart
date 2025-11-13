@@ -84,7 +84,7 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
     } catch (e) {
       debugPrint('Error updating item: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(GoodsLocalizations.of(context)!.saveFailed)),
+        SnackBar(content: Text(GoodsLocalizations.of(context).saveFailed)),
       );
     }
   }
@@ -94,16 +94,16 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(GoodsLocalizations.of(context)!.confirmDelete),
-            content: Text(GoodsLocalizations.of(context)!.confirmDeleteItem),
+            title: Text(GoodsLocalizations.of(context).confirmDelete),
+            content: Text(GoodsLocalizations.of(context).confirmDeleteItem),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(GoodsLocalizations.of(context)!.cancel),
+                child: Text(GoodsLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(GoodsLocalizations.of(context)!.delete),
+                child: Text(GoodsLocalizations.of(context).delete),
               ),
             ],
           ),
@@ -126,7 +126,7 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
         debugPrint('Error deleting item: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(GoodsLocalizations.of(context)!.saveFailed)),
+            SnackBar(content: Text(GoodsLocalizations.of(context).saveFailed)),
           );
         }
       }
@@ -142,9 +142,9 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
     if (_item == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(GoodsLocalizations.of(context)!.itemNotFound),
+          title: Text(GoodsLocalizations.of(context).itemNotFound),
         ),
-        body: Center(child: Text(GoodsLocalizations.of(context)!.itemNotExist)),
+        body: Center(child: Text(GoodsLocalizations.of(context).itemNotExist)),
       );
     }
 

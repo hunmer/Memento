@@ -64,14 +64,14 @@ class _FloatingBallSettingsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n!.floatingBallSettings,
+                    l10n.floatingBallSettings,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(l10n!.enableFloatingBall),
+                      Text(l10n.enableFloatingBall),
                       Switch(
                         value: _isEnabled,
                         onChanged: (value) async {
@@ -103,13 +103,13 @@ class _FloatingBallSettingsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n!.floatingBallSettings,
+                    l10n.floatingBallSettings,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Text(l10n!.small),
+                      Text(l10n.small),
                       Expanded(
                         child: Slider(
                           value: _sizeScale,
@@ -125,7 +125,7 @@ class _FloatingBallSettingsScreenState
                           },
                         ),
                       ),
-                      Text(l10n!.large),
+                      Text(l10n.large),
                     ],
                   ),
                 ],
@@ -143,7 +143,7 @@ class _FloatingBallSettingsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n!.floatingBallSettings,
+                    l10n.floatingBallSettings,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -165,7 +165,7 @@ class _FloatingBallSettingsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n!.resetPosition,
+                    l10n.resetPosition,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -173,10 +173,10 @@ class _FloatingBallSettingsScreenState
                     onPressed: () {
                       _manager.resetPosition();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n!.positionReset)),
+                        SnackBar(content: Text(l10n.positionReset)),
                       );
                     },
-                    child: Text(l10n!.resetPosition),
+                    child: Text(l10n.resetPosition),
                   ),
                 ],
               ),
@@ -207,7 +207,7 @@ class _FloatingBallSettingsScreenState
                   items: [
                     DropdownMenuItem<String?>(
                       value: null,
-                      child: Text(l10n!.noAction),
+                      child: Text(l10n.noAction),
                     ),
                     ..._availableActions.map((action) {
                       return DropdownMenuItem<String?>(

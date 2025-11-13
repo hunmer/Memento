@@ -69,7 +69,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                labelText: BillLocalizations.of(context)!.accountName,
+                labelText: BillLocalizations.of(context).accountName,
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -81,7 +81,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
                   foregroundColor: Colors.white,
                 ),
                 icon: const Icon(Icons.delete),
-                label: Text(BillLocalizations.of(context)!.deleteAccount),
+                label: Text(BillLocalizations.of(context).deleteAccount),
                 onPressed: _deleteAccount,
               ),
             ],
@@ -96,7 +96,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
     if (title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(BillLocalizations.of(context)!.enterAccountName),
+          content: Text(BillLocalizations.of(context).enterAccountName),
         ),
       );
       return;
@@ -147,7 +147,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
           (context) => AlertDialog(
             title: Text(AppLocalizations.of(context)!.confirmDelete),
             content: Text(
-              BillLocalizations.of(context)!.confirmDeleteAccountWithBills,
+              BillLocalizations.of(context).confirmDeleteAccountWithBills,
             ),
             actions: [
               TextButton(

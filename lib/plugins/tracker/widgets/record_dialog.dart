@@ -34,7 +34,7 @@ class _RecordDialogState extends State<RecordDialog> {
       title: Text(
         TrackerLocalizations.of(
           context,
-        )!.recordTitle.replaceFirst('{goalName}', widget.goal.name),
+        ).recordTitle.replaceFirst('{goalName}', widget.goal.name),
       ),
       content: Form(
         key: _formKey,
@@ -44,7 +44,7 @@ class _RecordDialogState extends State<RecordDialog> {
             children: [
               ListTile(
                 leading: const Icon(Icons.access_time),
-                title: Text(TrackerLocalizations.of(context)!.recordTitle),
+                title: Text(TrackerLocalizations.of(context).recordTitle),
                 subtitle: Text(_formatDateTime(_recordedAt)),
                 trailing: const Icon(Icons.edit),
                 onTap: () => _pickDateTime(),
@@ -60,7 +60,7 @@ class _RecordDialogState extends State<RecordDialog> {
                       ),
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: TrackerLocalizations.of(context)!
+                        labelText: TrackerLocalizations.of(context)
                             .incrementValueWithUnit
                             .replaceFirst('\${unit}', widget.goal.unitType),
                         border: const OutlineInputBorder(),
@@ -82,7 +82,7 @@ class _RecordDialogState extends State<RecordDialog> {
                   ElevatedButton(
                     onPressed: _calculateDifference,
                     child: Text(
-                      TrackerLocalizations.of(context)!.calculateDifference,
+                      TrackerLocalizations.of(context).calculateDifference,
                     ),
                   ),
                 ],
@@ -91,7 +91,7 @@ class _RecordDialogState extends State<RecordDialog> {
               TextFormField(
                 decoration: InputDecoration(
                   labelText:
-                      '${TrackerLocalizations.of(context)!.note} (${TrackerLocalizations.of(context)!.noteHint})',
+                      '${TrackerLocalizations.of(context).note} (${TrackerLocalizations.of(context).noteHint})',
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 2,
@@ -104,11 +104,11 @@ class _RecordDialogState extends State<RecordDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(TrackerLocalizations.of(context)!.cancel),
+          child: Text(TrackerLocalizations.of(context).cancel),
         ),
         ElevatedButton(
           onPressed: _submit,
-          child: Text(TrackerLocalizations.of(context)!.confirm),
+          child: Text(TrackerLocalizations.of(context).confirm),
         ),
       ],
     );
@@ -150,18 +150,18 @@ class _RecordDialogState extends State<RecordDialog> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(TrackerLocalizations.of(context)!.calculateDifference),
+          title: Text(TrackerLocalizations.of(context).calculateDifference),
           content: TextFormField(
             controller: textController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              labelText: TrackerLocalizations.of(context)!.inputTargetValue,
+              labelText: TrackerLocalizations.of(context).inputTargetValue,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(TrackerLocalizations.of(context)!.cancel),
+              child: Text(TrackerLocalizations.of(context).cancel),
             ),
             TextButton(
               onPressed: () {
@@ -170,7 +170,7 @@ class _RecordDialogState extends State<RecordDialog> {
                   Navigator.pop(context, value);
                 }
               },
-              child: Text(TrackerLocalizations.of(context)!.confirm),
+              child: Text(TrackerLocalizations.of(context).confirm),
             ),
           ],
         );

@@ -283,7 +283,7 @@ class ContactMainViewState extends State<ContactMainView> {
                                 content: Text(
                                   ContactLocalizations.of(
                                         context,
-                                      )?.saveFailedMessage ??
+                                      ).saveFailedMessage ??
                                       'Save failed',
                                 ),
                               ),
@@ -362,7 +362,7 @@ class ContactMainViewState extends State<ContactMainView> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
-        title: Text(ContactLocalizations.of(context)!.contacts),
+        title: Text(ContactLocalizations.of(context).contacts),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
@@ -388,7 +388,7 @@ class ContactMainViewState extends State<ContactMainView> {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text(ContactLocalizations.of(context)!.errorMessage),
+              child: Text(ContactLocalizations.of(context).errorMessage),
             );
           }
 
@@ -406,7 +406,7 @@ class ContactMainViewState extends State<ContactMainView> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    ContactLocalizations.of(context)!.noContacts,
+                    ContactLocalizations.of(context).noContacts,
                     style: Theme.of(
                       context,
                     ).textTheme.titleLarge?.copyWith(color: Colors.grey),

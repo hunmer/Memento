@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(TrackerLocalizations.of(context)!.goalTracking),
+        title: Text(TrackerLocalizations.of(context).goalTracking),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => PluginManager.toHomeScreen(context),
@@ -36,15 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 (context) => [
                   PopupMenuItem(
                     value: '全部',
-                    child: Text(TrackerLocalizations.of(context)!.all),
+                    child: Text(TrackerLocalizations.of(context).all),
                   ),
                   PopupMenuItem(
                     value: '进行中',
-                    child: Text(TrackerLocalizations.of(context)!.inProgress),
+                    child: Text(TrackerLocalizations.of(context).inProgress),
                   ),
                   PopupMenuItem(
                     value: '已完成',
-                    child: Text(TrackerLocalizations.of(context)!.completed),
+                    child: Text(TrackerLocalizations.of(context).completed),
                   ),
                 ],
             icon: const Icon(Icons.filter_list),
@@ -55,15 +55,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 (context) => [
                   PopupMenuItem(
                     value: '最近',
-                    child: Text(TrackerLocalizations.of(context)!.recent),
+                    child: Text(TrackerLocalizations.of(context).recent),
                   ),
                   PopupMenuItem(
                     value: '本周',
-                    child: Text(TrackerLocalizations.of(context)!.thisWeek),
+                    child: Text(TrackerLocalizations.of(context).thisWeek),
                   ),
                   PopupMenuItem(
                     value: '本月',
-                    child: Text(TrackerLocalizations.of(context)!.thisMonth),
+                    child: Text(TrackerLocalizations.of(context).thisMonth),
                   ),
                 ],
             icon: const Icon(Icons.calendar_today),
@@ -170,10 +170,10 @@ class _HomeScreenState extends State<HomeScreen> {
               builder:
                   (context) => AlertDialog(
                     title: Text(
-                      TrackerLocalizations.of(context)!.confirmDeletion,
+                      TrackerLocalizations.of(context).confirmDeletion,
                     ),
                     content: Text(
-                      '${TrackerLocalizations.of(context)!.confirmDeletion} "${goal.name}"',
+                      '${TrackerLocalizations.of(context).confirmDeletion} "${goal.name}"',
                     ),
                     actions: [
                       TextButton(
@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  '${TrackerLocalizations.of(context)!.goalDeleted} "${goal.name}"',
+                  '${TrackerLocalizations.of(context).goalDeleted} "${goal.name}"',
                 ),
               ),
             );

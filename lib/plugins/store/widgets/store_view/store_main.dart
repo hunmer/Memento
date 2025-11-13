@@ -64,10 +64,10 @@ class _StoreMainState extends State<StoreMainView> {
         ),
         title: Text(
           _selectedIndex == 0
-              ? StoreLocalizations.of(context)!.storeTitle
+              ? StoreLocalizations.of(context).storeTitle
               : _selectedIndex == 1
-              ? StoreLocalizations.of(context)!.myItems
-              : StoreLocalizations.of(context)!.pointsHistory,
+              ? StoreLocalizations.of(context).myItems
+              : StoreLocalizations.of(context).pointsHistory,
         ),
         actions: [
           if (_selectedIndex == 1)
@@ -136,7 +136,7 @@ class _StoreMainState extends State<StoreMainView> {
                       if (mounted) setState(() {});
                     });
                   },
-                  tooltip: StoreLocalizations.of(context)!.viewArchivedProducts,
+                  tooltip: StoreLocalizations.of(context).viewArchivedProducts,
                 ),
               ],
             ),
@@ -170,7 +170,7 @@ class _StoreMainState extends State<StoreMainView> {
                 );
               },
             ),
-            label: StoreLocalizations.of(context)!.productList,
+            label: StoreLocalizations.of(context).productList,
           ),
           BottomNavigationBarItem(
             icon: StreamBuilder<int>(
@@ -183,7 +183,7 @@ class _StoreMainState extends State<StoreMainView> {
                 );
               },
             ),
-            label: StoreLocalizations.of(context)!.myItems,
+            label: StoreLocalizations.of(context).myItems,
           ),
           BottomNavigationBarItem(
             icon: StreamBuilder<int>(
@@ -197,7 +197,7 @@ class _StoreMainState extends State<StoreMainView> {
                 );
               },
             ),
-            label: StoreLocalizations.of(context)!.pointsHistory,
+            label: StoreLocalizations.of(context).pointsHistory,
           ),
         ],
       ),
@@ -251,7 +251,7 @@ class _StoreMainState extends State<StoreMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(StoreLocalizations.of(context)!.addPointsDialogTitle),
+            title: Text(StoreLocalizations.of(context).addPointsDialogTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -259,14 +259,14 @@ class _StoreMainState extends State<StoreMainView> {
                   controller: pointsController,
                   decoration: InputDecoration(
                     labelText:
-                        StoreLocalizations.of(context)!.pointsAmountLabel,
+                        StoreLocalizations.of(context).pointsAmountLabel,
                   ),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
                   controller: reasonController,
                   decoration: InputDecoration(
-                    labelText: StoreLocalizations.of(context)!.reasonLabel,
+                    labelText: StoreLocalizations.of(context).reasonLabel,
                   ),
                 ),
               ],
@@ -286,7 +286,7 @@ class _StoreMainState extends State<StoreMainView> {
                         reasonController.text.isEmpty
                             ? StoreLocalizations.of(
                               context,
-                            )!.pointsAdjustmentDefaultReason
+                            ).pointsAdjustmentDefaultReason
                             : reasonController.text,
                       );
                       await _plugin.controller.saveToStorage();
@@ -322,9 +322,9 @@ class _StoreMainState extends State<StoreMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(StoreLocalizations.of(context)!.confirmClearTitle),
+            title: Text(StoreLocalizations.of(context).confirmClearTitle),
             content: Text(
-              StoreLocalizations.of(context)!.confirmClearItemsMessage,
+              StoreLocalizations.of(context).confirmClearItemsMessage,
             ),
             actions: [
               TextButton(
@@ -339,7 +339,7 @@ class _StoreMainState extends State<StoreMainView> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        StoreLocalizations.of(context)!.itemsCleared,
+                        StoreLocalizations.of(context).itemsCleared,
                       ),
                     ),
                   );
@@ -359,9 +359,9 @@ class _StoreMainState extends State<StoreMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(StoreLocalizations.of(context)!.confirmClearTitle),
+            title: Text(StoreLocalizations.of(context).confirmClearTitle),
             content: Text(
-              StoreLocalizations.of(context)!.confirmClearPointsMessage,
+              StoreLocalizations.of(context).confirmClearPointsMessage,
             ),
             actions: [
               TextButton(
@@ -376,7 +376,7 @@ class _StoreMainState extends State<StoreMainView> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        StoreLocalizations.of(context)!.pointsCleared,
+                        StoreLocalizations.of(context).pointsCleared,
                       ),
                     ),
                   );
@@ -405,7 +405,7 @@ class _StoreMainState extends State<StoreMainView> {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            StoreLocalizations.of(context)!.itemFilter,
+            StoreLocalizations.of(context).itemFilter,
             textAlign: TextAlign.left,
           ),
           content: SingleChildScrollView(
@@ -414,7 +414,7 @@ class _StoreMainState extends State<StoreMainView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  StoreLocalizations.of(context)!.itemStatus,
+                  StoreLocalizations.of(context).itemStatus,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
@@ -423,7 +423,7 @@ class _StoreMainState extends State<StoreMainView> {
                     return Column(
                       children: [
                         RadioListTile<int>(
-                          title: Text(StoreLocalizations.of(context)!.all),
+                          title: Text(StoreLocalizations.of(context).all),
                           value: 0,
                           groupValue: statusIndex,
                           onChanged: (value) {
@@ -431,7 +431,7 @@ class _StoreMainState extends State<StoreMainView> {
                           },
                         ),
                         RadioListTile<int>(
-                          title: Text(StoreLocalizations.of(context)!.usable),
+                          title: Text(StoreLocalizations.of(context).usable),
                           value: 1,
                           groupValue: statusIndex,
                           onChanged: (value) {
@@ -439,7 +439,7 @@ class _StoreMainState extends State<StoreMainView> {
                           },
                         ),
                         RadioListTile<int>(
-                          title: Text(StoreLocalizations.of(context)!.expired),
+                          title: Text(StoreLocalizations.of(context).expired),
                           value: 2,
                           groupValue: statusIndex,
                           onChanged: (value) {
@@ -452,13 +452,13 @@ class _StoreMainState extends State<StoreMainView> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  StoreLocalizations.of(context)!.nameFilter,
+                  StoreLocalizations.of(context).nameFilter,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   decoration: InputDecoration(
-                    hintText: StoreLocalizations.of(context)!.nameFilterHint,
+                    hintText: StoreLocalizations.of(context).nameFilterHint,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
@@ -468,7 +468,7 @@ class _StoreMainState extends State<StoreMainView> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  StoreLocalizations.of(context)!.priceRange,
+                  StoreLocalizations.of(context).priceRange,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
@@ -479,7 +479,7 @@ class _StoreMainState extends State<StoreMainView> {
                         controller: priceMinController,
                         decoration: InputDecoration(
                           hintText:
-                              StoreLocalizations.of(context)!.priceRangeHint,
+                              StoreLocalizations.of(context).priceRangeHint,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 10,
@@ -494,7 +494,7 @@ class _StoreMainState extends State<StoreMainView> {
                         controller: priceMaxController,
                         decoration: InputDecoration(
                           hintText:
-                              StoreLocalizations.of(context)!.priceRangeHint,
+                              StoreLocalizations.of(context).priceRangeHint,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 10,
@@ -507,18 +507,18 @@ class _StoreMainState extends State<StoreMainView> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  StoreLocalizations.of(context)!.dateRange,
+                  StoreLocalizations.of(context).dateRange,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(
-                    StoreLocalizations.of(context)!.dateRangeSelectionHint,
+                    StoreLocalizations.of(context).dateRangeSelectionHint,
                   ),
                   subtitle: Text(
                     dateRange == null
-                        ? StoreLocalizations.of(context)!.all
+                        ? StoreLocalizations.of(context).all
                         : '${dateRange!.start.toLocal().toString().split(' ')[0]} 至 ${dateRange!.end.toLocal().toString().split(' ')[0]}',
                   ),
                   onTap: () async {
@@ -583,29 +583,29 @@ class _StoreMainState extends State<StoreMainView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(StoreLocalizations.of(context)!.sortAndFilter),
+          title: Text(StoreLocalizations.of(context).sortAndFilter),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  StoreLocalizations.of(context)!.sortMethod,
+                  StoreLocalizations.of(context).sortMethod,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 RadioListTile<String>(
-                  title: Text(StoreLocalizations.of(context)!.byStock),
+                  title: Text(StoreLocalizations.of(context).byStock),
                   value: 'stock',
                   groupValue: selectedSort,
                   onChanged: (value) => setState(() => selectedSort = value),
                 ),
                 RadioListTile<String>(
-                  title: Text(StoreLocalizations.of(context)!.byPrice),
+                  title: Text(StoreLocalizations.of(context).byPrice),
                   value: 'price',
                   groupValue: selectedSort,
                   onChanged: (value) => setState(() => selectedSort = value),
                 ),
                 RadioListTile<String>(
-                  title: Text(StoreLocalizations.of(context)!.byExpiry),
+                  title: Text(StoreLocalizations.of(context).byExpiry),
                   value: 'exchangeEnd',
                   groupValue: selectedSort,
                   onChanged: (value) => setState(() => selectedSort = value),

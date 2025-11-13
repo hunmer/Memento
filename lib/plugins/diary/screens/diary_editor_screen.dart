@@ -60,7 +60,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(DiaryLocalizations.of(context)!.selectMood),
+            title: Text(DiaryLocalizations.of(context).selectMood),
             content: Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -94,7 +94,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
                     setState(() => _selectedMood = null);
                     Navigator.pop(context);
                   },
-                  child: Text(DiaryLocalizations.of(context)!.clearSelection),
+                  child: Text(DiaryLocalizations.of(context).clearSelection),
                 ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -111,8 +111,8 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
       body: MarkdownEditor(
         initialTitle: widget.initialTitle,
         initialContent: widget.initialContent,
-        titleHint: DiaryLocalizations.of(context)!.titleHint,
-        contentHint: DiaryLocalizations.of(context)!.contentHint,
+        titleHint: DiaryLocalizations.of(context).titleHint,
+        contentHint: DiaryLocalizations.of(context).contentHint,
         showTitle: true,
         onSave: (title, content) async {
           // 保存前捕获当前上下文
@@ -136,7 +136,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
                     ? Text(_selectedMood!, style: const TextStyle(fontSize: 24))
                     : const Icon(Icons.mood),
             onPressed: _showMoodSelector,
-            tooltip: DiaryLocalizations.of(context)?.moodSelectorTooltip,
+            tooltip: DiaryLocalizations.of(context).moodSelectorTooltip,
           ),
         ],
       ),
