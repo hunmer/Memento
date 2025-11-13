@@ -4,6 +4,7 @@ import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
+import 'package:Memento/screens/js_console/js_console_screen.dart';
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -38,6 +39,7 @@ class AppRoutes extends NavigatorObserver {
   static const String activity = '/activity';
   static const String checkin = '/checkin';
   static const String settings = '/settings';
+  static const String jsConsole = '/js_console';
 
   // 插件路由路径
   static const String bill = '/bill';
@@ -112,6 +114,8 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const TodoMainView());
       case 'tracker':
         return _createRoute(const TrackerMainView());
+      case 'js_console':
+        return _createRoute(const JSConsoleScreen());
       default:
         return _createRoute(
           Scaffold(
@@ -143,6 +147,7 @@ class AppRoutes extends NavigatorObserver {
     timer: (context) => const TimerMainView(),
     todo: (context) => const TodoMainView(),
     tracker: (context) => const TrackerMainView(),
+    jsConsole: (context) => const JSConsoleScreen(),
   };
 
   static String get initialRoute => home;

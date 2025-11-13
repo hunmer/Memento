@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 
 class QuillEditorWidget extends StatefulWidget {
   final String? initialTitle;
@@ -39,6 +42,7 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
   late TextEditingController _titleController;
   late quill.QuillController _contentController;
   final FocusNode _contentFocusNode = FocusNode();
+  final ScrollController _toolbarScrollController = ScrollController();
 
   @override
   void initState() {
@@ -81,6 +85,7 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
+    _toolbarScrollController.dispose();
     super.dispose();
   }
 
@@ -148,83 +153,170 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
           actions: _buildActions(),
         ),
         // Quill 工具栏
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Wrap(
-            children: [
-              quill.QuillToolbarHistoryButton(
-                isUndo: true,
-                controller: _contentController,
+        Container(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Listener(
+            // 监听鼠标滚轮事件，将垂直滚动转换为水平滚动
+            onPointerSignal: (event) {
+              if (event is PointerScrollEvent) {
+                // 计算滚动偏移量
+                final offset = _toolbarScrollController.offset +
+                    event.scrollDelta.dy;
+                // 应用水平滚动
+                _toolbarScrollController.jumpTo(
+                  offset.clamp(
+                    0.0,
+                    _toolbarScrollController.position.maxScrollExtent,
+                  ),
+                );
+              }
+            },
+            child: Scrollbar(
+              controller: _toolbarScrollController,
+              thumbVisibility: true, // 始终显示滚动条（桌面平台）
+              child: SingleChildScrollView(
+                controller: _toolbarScrollController,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  children: [
+                // 历史操作
+                quill.QuillToolbarHistoryButton(
+                  isUndo: true,
+                  controller: _contentController,
+                ),
+                quill.QuillToolbarHistoryButton(
+                  isUndo: false,
+                  controller: _contentController,
+                ),
+                const VerticalDivider(),
+
+                // 文本样式
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.bold,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.italic,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.underline,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.strikeThrough,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.subscript,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.superscript,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.small,
+                ),
+                quill.QuillToolbarClearFormatButton(
+                  controller: _contentController,
+                ),
+                const VerticalDivider(),
+
+                // 字体和大小
+                quill.QuillToolbarFontFamilyButton(
+                  controller: _contentController,
+                ),
+                quill.QuillToolbarFontSizeButton(
+                  controller: _contentController,
+                ),
+                const VerticalDivider(),
+
+                // 颜色
+                quill.QuillToolbarColorButton(
+                  controller: _contentController,
+                  isBackground: false,
+                ),
+                quill.QuillToolbarColorButton(
+                  controller: _contentController,
+                  isBackground: true,
+                ),
+                const VerticalDivider(),
+
+                // 标题样式
+                quill.QuillToolbarSelectHeaderStyleDropdownButton(
+                  controller: _contentController,
+                ),
+                const VerticalDivider(),
+
+                // 对齐方式
+                quill.QuillToolbarSelectAlignmentButton(
+                  controller: _contentController,
+                ),
+                const VerticalDivider(),
+
+                // 列表
+                quill.QuillToolbarToggleCheckListButton(
+                  controller: _contentController,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.ul,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.ol,
+                ),
+                const VerticalDivider(),
+
+                // 代码和引用
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.inlineCode,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.codeBlock,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _contentController,
+                  attribute: quill.Attribute.blockQuote,
+                ),
+                const VerticalDivider(),
+
+                // 缩进
+                quill.QuillToolbarIndentButton(
+                  controller: _contentController,
+                  isIncrease: true,
+                ),
+                quill.QuillToolbarIndentButton(
+                  controller: _contentController,
+                  isIncrease: false,
+                ),
+                const VerticalDivider(),
+
+                // 链接和媒体
+                quill.QuillToolbarLinkStyleButton(
+                  controller: _contentController,
+                ),
+                QuillToolbarImageButton(
+                  controller: _contentController,
+                ),
+                QuillToolbarVideoButton(
+                  controller: _contentController,
+                ),
+                const VerticalDivider(),
+
+                    // 搜索
+                    quill.QuillToolbarSearchButton(
+                      controller: _contentController,
+                    ),
+                  ],
+                ),
               ),
-              quill.QuillToolbarHistoryButton(
-                isUndo: false,
-                controller: _contentController,
-              ),
-              quill.QuillToolbarToggleStyleButton(
-                controller: _contentController,
-                attribute: quill.Attribute.bold,
-              ),
-              quill.QuillToolbarToggleStyleButton(
-                controller: _contentController,
-                attribute: quill.Attribute.italic,
-              ),
-              quill.QuillToolbarToggleStyleButton(
-                controller: _contentController,
-                attribute: quill.Attribute.underline,
-              ),
-              quill.QuillToolbarToggleStyleButton(
-                controller: _contentController,
-                attribute: quill.Attribute.strikeThrough,
-              ),
-              quill.QuillToolbarClearFormatButton(
-                controller: _contentController,
-              ),
-              const VerticalDivider(),
-              quill.QuillToolbarColorButton(
-                controller: _contentController,
-                isBackground: false,
-              ),
-              quill.QuillToolbarColorButton(
-                controller: _contentController,
-                isBackground: true,
-              ),
-              const VerticalDivider(),
-              quill.QuillToolbarSelectHeaderStyleDropdownButton(
-                controller: _contentController,
-              ),
-              const VerticalDivider(),
-              quill.QuillToolbarToggleCheckListButton(
-                controller: _contentController,
-              ),
-              quill.QuillToolbarToggleStyleButton(
-                controller: _contentController,
-                attribute: quill.Attribute.ol,
-              ),
-              quill.QuillToolbarToggleStyleButton(
-                controller: _contentController,
-                attribute: quill.Attribute.ul,
-              ),
-              quill.QuillToolbarToggleStyleButton(
-                controller: _contentController,
-                attribute: quill.Attribute.inlineCode,
-              ),
-              quill.QuillToolbarToggleStyleButton(
-                controller: _contentController,
-                attribute: quill.Attribute.blockQuote,
-              ),
-              quill.QuillToolbarIndentButton(
-                controller: _contentController,
-                isIncrease: true,
-              ),
-              quill.QuillToolbarIndentButton(
-                controller: _contentController,
-                isIncrease: false,
-              ),
-              const VerticalDivider(),
-              quill.QuillToolbarLinkStyleButton(
-                controller: _contentController,
-              ),
-            ],
+            ),
           ),
         ),
         // Quill 编辑器
@@ -234,6 +326,12 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
             child: quill.QuillEditor.basic(
               controller: _contentController,
               focusNode: _contentFocusNode,
+              config: quill.QuillEditorConfig(
+                placeholder: widget.contentHint,
+                embedBuilders: kIsWeb
+                    ? FlutterQuillEmbeds.editorWebBuilders()
+                    : FlutterQuillEmbeds.editorBuilders(),
+              ),
             ),
           ),
         ),

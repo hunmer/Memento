@@ -24,11 +24,13 @@ import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dar
 import 'package:Memento/widgets/l10n/group_selector_localizations.dart';
 import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
 import 'package:Memento/widgets/l10n/location_picker_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
@@ -43,6 +45,7 @@ import 'plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
+import 'core/js_bridge/js_bridge_manager.dart';
 import 'screens/route.dart';
 
 import 'plugins/chat/chat_plugin.dart'; // 聊天插件
@@ -151,6 +154,14 @@ void main() async {
 
     globalShortcutManager = AppShortcutManager();
     globalShortcutManager.initialize();
+
+    // 初始化 JS Bridge（在插件注册前）
+    try {
+      await JSBridgeManager.instance.initialize();
+      logger?.log('JS Bridge 初始化成功', level: 'INFO');
+    } catch (e) {
+      logger?.log('JS Bridge 初始化失败: $e', level: 'WARN');
+    }
 
     // 注册内置插件
     final plugins = [
@@ -353,6 +364,7 @@ class _MyAppState extends State<MyApp> {
               GlobalWidgetsLocalizations.delegate,
               WebDAVLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
+              FlutterQuillLocalizations.delegate,
             ],
             supportedLocales: const [
               Locale('zh', ''), // 中文

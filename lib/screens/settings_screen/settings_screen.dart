@@ -303,6 +303,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.code),
+            title: const Text('JS Console'),
+            subtitle: const Text('测试 JavaScript API 功能'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/js_console');
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.info),
