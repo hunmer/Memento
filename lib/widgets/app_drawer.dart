@@ -33,77 +33,101 @@ class AppDrawer extends StatelessWidget {
 
                 final plugins = snapshot.data ?? [];
 
-                return SingleChildScrollView(
-                  child: ExpansionPanelList.radio(
-                    elevation: 0,
-                    expandedHeaderPadding: EdgeInsets.zero,
-                    dividerColor: Colors.transparent,
-                    children:
-                        plugins.map((plugin) {
-                          return ExpansionPanelRadio(
-                            value: plugin, // 使用插件对象作为唯一标识
-                            headerBuilder: (context, isExpanded) {
-                              return ListTile(
-                                leading: Icon(plugin.icon),
-                                title: Text(
-                                  plugin.getPluginName(context) ?? plugin.id,
-                                ),
-                              );
-                            },
-                            body: Column(
-                              children: [
-                                ListTile(
-                                  leading: const Icon(Icons.settings),
-                                  title: Text(
-                                    AppLocalizations.of(context)!.settings,
+                return ListView.builder(
+                  itemCount: plugins.length,
+                  itemBuilder: (context, index) {
+                    final plugin = plugins[index];
+                    return ListTile(
+                      leading: Icon(plugin.icon),
+                      title: Text(
+                        plugin.getPluginName(context) ?? plugin.id,
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.settings),
+                        tooltip: AppLocalizations.of(context)!.settings,
+                        onPressed: () {
+                          if (context.mounted) {
+                            Navigator.pop(context); // 关闭抽屉
+                            // 添加加载状态管理
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                            // 延迟确保加载动画显示
+                            Future.microtask(() {
+                              if (context.mounted) {
+                                Navigator.of(context).pop(); // 关闭加载
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Scaffold(
+                                      appBar: AppBar(
+                                        title: Text(
+                                          plugin.getPluginName(context) ??
+                                              plugin.id,
+                                        ),
+                                      ),
+                                      body: plugin.buildSettingsView(context),
+                                    ),
                                   ),
-                                  onTap: () {
-                                    if (context.mounted) {
-                                      Navigator.pop(context); // 关闭抽屉
-                                      // 添加加载状态管理
-                                      showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder:
-                                            (context) => const Center(
-                                              child:
-                                                  CircularProgressIndicator(),
+                                );
+                              }
+                            });
+                          }
+                        },
+                      ),
+                      onTap: () {
+                        if (context.mounted) {
+                          Navigator.pop(context); // 关闭抽屉
+                          // 导航到插件主页面
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Scaffold(
+                                appBar: AppBar(
+                                  title: Text(
+                                    plugin.getPluginName(context) ?? plugin.id,
+                                  ),
+                                  actions: [
+                                    // 在主页面也提供设置按钮快捷方式
+                                    IconButton(
+                                      icon: const Icon(Icons.settings),
+                                      tooltip:
+                                          AppLocalizations.of(context)!.settings,
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => Scaffold(
+                                              appBar: AppBar(
+                                                title: Text(
+                                                  plugin.getPluginName(
+                                                        context,
+                                                      ) ??
+                                                      plugin.id,
+                                                ),
+                                              ),
+                                              body: plugin.buildSettingsView(
+                                                context,
+                                              ),
                                             ),
-                                      );
-                                      // 延迟确保加载动画显示
-                                      Future.microtask(() {
-                                        if (context.mounted) {
-                                          Navigator.of(context).pop(); // 关闭加载
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (context) => Scaffold(
-                                                    appBar: AppBar(
-                                                      title: Text(
-                                                        plugin.getPluginName(
-                                                              context,
-                                                            ) ??
-                                                            plugin.id,
-                                                      ),
-                                                    ),
-                                                    body: plugin
-                                                        .buildSettingsView(
-                                                          context,
-                                                        ),
-                                                  ),
-                                            ),
-                                          );
-                                        }
-                                      });
-                                    }
-                                  },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
-                              ],
+                                body: plugin.buildMainView(context),
+                              ),
                             ),
                           );
-                        }).toList(),
-                  ),
+                        }
+                      },
+                    );
+                  },
                 );
               },
             ),

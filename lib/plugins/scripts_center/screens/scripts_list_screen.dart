@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/script_manager.dart';
+import '../services/script_executor.dart';
 import '../models/script_info.dart';
 import '../widgets/script_card.dart';
+import '../widgets/script_edit_dialog.dart';
 
 /// 脚本列表界面
 ///
 /// 展示所有脚本，支持启用/禁用切换、搜索、刷新
 class ScriptsListScreen extends StatefulWidget {
   final ScriptManager scriptManager;
+  final ScriptExecutor? scriptExecutor;
 
   const ScriptsListScreen({
     super.key,
     required this.scriptManager,
+    this.scriptExecutor,
   });
 
   @override
@@ -91,91 +95,155 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
     }
   }
 
-  /// 创建新脚本对话框
-  Future<void> _showCreateScriptDialog() async {
-    final nameController = TextEditingController();
-    final idController = TextEditingController();
-    final descController = TextEditingController();
-
-    final result = await showDialog<bool>(
+  /// 显示创建/编辑脚本对话框
+  Future<void> _showScriptDialog({ScriptInfo? script}) async {
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('创建新脚本'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: '脚本名称',
-                  hintText: '例如：自动备份助手',
-                ),
-                autofocus: true,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: idController,
-                decoration: const InputDecoration(
-                  labelText: '脚本ID',
-                  hintText: '例如：auto_backup（仅小写字母、数字、下划线）',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descController,
-                decoration: const InputDecoration(
-                  labelText: '描述',
-                  hintText: '简短描述脚本功能',
-                ),
-                maxLines: 3,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isEmpty || idController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('请填写脚本名称和ID')),
-                );
-                return;
-              }
-              Navigator.pop(context, true);
-            },
-            child: const Text('创建'),
-          ),
-        ],
-      ),
+      builder: (context) => ScriptEditDialog(script: script),
     );
 
-    if (result == true && mounted) {
-      try {
+    if (result == null || !mounted) return;
+
+    try {
+      if (script == null) {
+        // 创建新脚本
         await widget.scriptManager.createScript(
-          scriptId: idController.text.trim(),
-          name: nameController.text.trim(),
-          description: descController.text.trim(),
+          scriptId: result['id'] as String,
+          name: result['name'] as String,
+          description: result['description'] as String,
+          version: result['version'] as String,
+          icon: result['icon'] as String,
+          author: result['author'] as String,
         );
+
+        // 更新启用状态和其他属性
+        final newScript = widget.scriptManager.getScriptById(result['id'] as String);
+        if (newScript != null) {
+          await widget.scriptManager.saveScriptMetadata(
+            newScript.id,
+            newScript.copyWith(
+              enabled: result['enabled'] as bool,
+              type: result['type'] as String,
+              updateUrl: result['updateUrl'] as String?,
+            ),
+          );
+        }
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('脚本创建成功！')),
           );
         }
-      } catch (e) {
+      } else {
+        // 编辑现有脚本
+        final updatedScript = script.copyWith(
+          name: result['name'] as String,
+          description: result['description'] as String,
+          version: result['version'] as String,
+          icon: result['icon'] as String,
+          author: result['author'] as String,
+          enabled: result['enabled'] as bool,
+          type: result['type'] as String,
+          updateUrl: result['updateUrl'] as String?,
+          updatedAt: DateTime.now(),
+        );
+
+        await widget.scriptManager.saveScriptMetadata(script.id, updatedScript);
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('创建失败: $e'),
-              backgroundColor: Colors.red,
-            ),
+            const SnackBar(content: Text('脚本更新成功！')),
           );
         }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('操作失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// 运行脚本
+  Future<void> _runScript(ScriptInfo script) async {
+    if (widget.scriptExecutor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('脚本执行器未初始化'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // 显示加载提示
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text('正在运行脚本: ${script.name}...'),
+            ],
+          ),
+          duration: const Duration(seconds: 30),
+        ),
+      );
+    }
+
+    try {
+      final result = await widget.scriptExecutor!.execute(script.id);
+
+      if (mounted) {
+        // 清除加载提示
+        ScaffoldMessenger.of(context).clearSnackBars();
+
+        // 显示结果
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  result.success ? '✅ 脚本执行成功' : '❌ 脚本执行失败',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text('脚本: ${script.name}'),
+                Text('耗时: ${result.duration.inMilliseconds}ms'),
+                if (!result.success && result.error != null)
+                  Text('错误: ${result.error}'),
+                if (result.result != null)
+                  Text('结果: ${result.result}'),
+              ],
+            ),
+            backgroundColor: result.success ? Colors.green : Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('执行异常: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -286,15 +354,9 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
                         final script = scripts[index];
                         return ScriptCard(
                           script: script,
-                          onTap: () {
-                            // TODO: 打开脚本详情页
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('详情页面开发中: ${script.name}'),
-                              ),
-                            );
-                          },
+                          onTap: () => _showScriptDialog(script: script),
                           onToggle: (enabled) => _toggleScript(script),
+                          onRun: () => _runScript(script),
                         );
                       },
                     ),
@@ -346,7 +408,7 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
 
         // FAB - 创建新脚本
         floatingActionButton: FloatingActionButton(
-          onPressed: _showCreateScriptDialog,
+          onPressed: () => _showScriptDialog(),
           backgroundColor: Colors.deepPurple,
           child: const Icon(Icons.add, color: Colors.white),
         ),
