@@ -1,15 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import '../../../core/js_bridge/js_bridge_manager.dart';
 
 class JSConsoleController extends ChangeNotifier {
   String _code = '';
   String _output = '';
   bool _isRunning = false;
+  Map<String, String> _examples = {};
+  bool _examplesLoaded = false;
 
   String get code => _code;
   String get output => _output;
   bool get isRunning => _isRunning;
+  Map<String, String> get examples => _examples;
+  bool get examplesLoaded => _examplesLoaded;
 
   void setCode(String code) {
     _code = code;
@@ -66,127 +71,63 @@ class JSConsoleController extends ChangeNotifier {
     }
   }
 
-  // 预设示例
-  static const Map<String, String> examples = {
-    '异步API测试': '''
-// 方式3：async/await，自动捕获 return 值
-(async function() {
-  var result = await Memento.chat.testSync();
-  console.log('结果:', result);
-  return result;  // 自动捕获
-})();
-''',
-    '获取所有频道': '''
-// 获取所有聊天频道
-(async function() {
-  var channels = await Memento.chat.getChannels();
-  setResult(channels);  // 使用 setResult 返回
-})();
-''',
-    'setResult 高级用法': '''
-// 演示 setResult 的多种用法
-(async function() {
-  console.log('开始测试...');
+  /// 从 JSON 文件加载示例代码
+  ///
+  /// 示例文件位于 lib/screens/js_console/examples/
+  /// 每个 JSON 文件包含一组相关的示例代码
+  Future<void> loadExamples() async {
+    if (_examplesLoaded) return;
 
-  // 1. 调用 API
-  var result = await Memento.chat.testSync();
-  console.log('API 返回:', result);
+    try {
+      // 需要加载的示例文件列表
+      final exampleFiles = [
+        'lib/screens/js_console/examples/basic_examples.json',
+        'lib/screens/js_console/examples/chat_examples.json',
+      ];
 
-  // 2. 处理数据
-  var processed = {
-    original: result,
-    timestamp: new Date().toISOString(),
-    processed: true
-  };
+      _examples = {};
 
-  // 3. 显式设置返回值
-  setResult(processed);
+      for (final filePath in exampleFiles) {
+        try {
+          // 加载 JSON 文件
+          final jsonString = await rootBundle.loadString(filePath);
+          final jsonData = jsonDecode(jsonString) as Map<String, dynamic>;
 
-  console.log('完成！');
-})();
-''',
-    '创建新频道': '''
-// 创建一个新的聊天频道（使用 await）
-async function test() {
-  var channel = await Memento.chat.createChannel('测试频道');
-  console.log('创建成功:', channel);
-  return channel;
-}
-test();
-''',
-    '发送消息': '''
-// 先获取频道列表，然后发送消息（使用 await）
-async function test() {
-  var channels = await Memento.chat.getChannels();
+          // 解析示例
+          final category = jsonData['category'] as String? ?? '未分类';
+          final examples = jsonData['examples'] as List<dynamic>? ?? [];
 
-  if (channels.length > 0) {
-    var channelId = channels[0].id;
+          // 添加到 examples Map
+          for (final example in examples) {
+            if (example is Map<String, dynamic>) {
+              final title = example['title'] as String?;
+              final code = example['code'] as String?;
 
-    // 发送消息
-    var message = await Memento.chat.sendMessage(
-      channelId,
-      'Hello from JS!',
-      'text'
-    );
+              if (title != null && code != null) {
+                // 使用 "分类 - 标题" 作为键
+                final key = category == '未分类' ? title : '$category - $title';
+                _examples[key] = code;
+              }
+            }
+          }
 
-    console.log('消息已发送:', message);
-    return message;
-  } else {
-    return '没有可用频道，请先创建';
+          print('✓ 已加载示例文件: $filePath (${examples.length} 个)');
+        } catch (e) {
+          print('✗ 加载示例文件失败: $filePath - $e');
+        }
+      }
+
+      _examplesLoaded = true;
+      print('✓ 示例加载完成，共 ${_examples.length} 个示例');
+      notifyListeners();
+    } catch (e) {
+      print('✗ 加载示例失败: $e');
+    }
   }
-}
-test();
-''',
-    '获取当前用户': '''
-// 获取当前登录用户（使用 await）
-async function test() {
-  var user = await Memento.chat.getCurrentUser();
-  console.log('当前用户:', user);
-  return user;
-}
-test();
-''',
-    '获取频道消息': '''
-// 获取第一个频道的消息（使用 await）
-async function test() {
-  var channels = await Memento.chat.getChannels();
 
-  if (channels.length > 0) {
-    var channelId = channels[0].id;
-    var messages = await Memento.chat.getMessages(channelId, 5);
-    console.log('最新5条消息:', messages);
-    return messages;
-  } else {
-    return '没有可用频道';
-  }
-}
-test();
-''',
-    '复杂操作示例': '''
-// 复杂操作：创建频道并发送多条消息（使用 await）
-async function test() {
-  // 1. 创建频道
-  var channel = await Memento.chat.createChannel('JS测试频道');
-  console.log('频道已创建:', channel);
-
-  // 2. 发送多条消息
-  await Memento.chat.sendMessage(channel.id, '第一条消息', 'text');
-  await Memento.chat.sendMessage(channel.id, '第二条消息', 'text');
-  await Memento.chat.sendMessage(channel.id, '第三条消息', 'text');
-
-  // 3. 获取消息
-  var messages = await Memento.chat.getMessages(channel.id, 10);
-  console.log('消息列表:', messages);
-
-  // 4. 返回结果
-  return '频道: ' + channel.name + ', 消息数: ' + messages.length;
-}
-test();
-''',
-  };
-
+  /// 加载指定示例代码到编辑器
   void loadExample(String exampleKey) {
-    _code = examples[exampleKey] ?? '';
+    _code = _examples[exampleKey] ?? '';
     notifyListeners();
   }
 }

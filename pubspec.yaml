@@ -137,6 +137,7 @@ flutter:
     - assets/audio/msg_sended.mp3
     - assets/icon/icon.png
     - assets/images/image_not_found.jpg
+    - lib/screens/js_console/examples/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

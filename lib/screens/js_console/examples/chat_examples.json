@@ -1,0 +1,38 @@
+{
+  "category": "Chat 插件示例",
+  "description": "聊天插件相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "异步API测试 (推荐写法)",
+      "code": "// ✅ 推荐：直接顶层 await，自动捕获 return 值\nvar result = await Memento.chat.testSync();\nconsole.log('结果:', result);\nreturn result;  // 外层自动捕获"
+    },
+    {
+      "title": "获取所有频道",
+      "code": "// ✅ 推荐：直接顶层 await + return\nvar channels = await Memento.chat.getChannels();\nconsole.log('频道列表:', channels);\nreturn channels;"
+    },
+    {
+      "title": "setResult 高级用法",
+      "code": "// 演示 setResult 的正确用法\nconsole.log('开始测试...');\n\n// 1. 调用 API\nvar result = await Memento.chat.testSync();\nconsole.log('API 返回:', result);\n\n// 2. 处理数据\nvar processed = {\n  original: result,\n  timestamp: new Date().toISOString(),\n  processed: true\n};\n\n// 3. 使用 setResult 显式设置返回值\nsetResult(processed);\nconsole.log('完成！');"
+    },
+    {
+      "title": "创建新频道",
+      "code": "// 创建一个新的聊天频道\nvar channel = await Memento.chat.createChannel('测试频道');\nconsole.log('创建成功:', channel);\nreturn channel;"
+    },
+    {
+      "title": "发送消息",
+      "code": "// 先获取频道列表，然后发送消息\nvar channels = await Memento.chat.getChannels();\n\nif (channels.length > 0) {\n  var channelId = channels[0].id;\n\n  // 发送消息\n  var message = await Memento.chat.sendMessage(\n    channelId,\n    'Hello from JS!',\n    'text'\n  );\n\n  console.log('消息已发送:', message);\n  return message;\n} else {\n  return '没有可用频道，请先创建';\n}"
+    },
+    {
+      "title": "获取当前用户",
+      "code": "// 获取当前登录用户\nvar user = await Memento.chat.getCurrentUser();\nconsole.log('当前用户:', user);\nreturn user;"
+    },
+    {
+      "title": "获取频道消息",
+      "code": "// 获取第一个频道的消息\nvar channels = await Memento.chat.getChannels();\n\nif (channels.length > 0) {\n  var channelId = channels[0].id;\n  var messages = await Memento.chat.getMessages(channelId, 5);\n  console.log('最新5条消息:', messages);\n  return messages;\n} else {\n  return '没有可用频道';\n}"
+    },
+    {
+      "title": "复杂操作示例",
+      "code": "// 复杂操作：创建频道并发送多条消息\n// 1. 创建频道\nvar channel = await Memento.chat.createChannel('JS测试频道');\nconsole.log('频道已创建:', channel);\n\n// 2. 发送多条消息\nawait Memento.chat.sendMessage(channel.id, '第一条消息', 'text');\nawait Memento.chat.sendMessage(channel.id, '第二条消息', 'text');\nawait Memento.chat.sendMessage(channel.id, '第三条消息', 'text');\n\n// 3. 获取消息\nvar messages = await Memento.chat.getMessages(channel.id, 10);\nconsole.log('消息列表:', messages);\n\n// 4. 返回结果\nreturn '频道: ' + channel.name + ', 消息数: ' + messages.length;"
+    }
+  ]
+}
