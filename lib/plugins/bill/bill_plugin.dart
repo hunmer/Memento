@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
@@ -13,7 +15,7 @@ import 'models/bill.dart';
 import 'models/bill_statistics.dart';
 import 'models/statistic_range.dart';
 
-class BillPlugin extends PluginBase with ChangeNotifier {
+class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   static BillPlugin? _instance;
   static BillPlugin get instance {
     if (_instance == null) {
@@ -56,6 +58,9 @@ class BillPlugin extends PluginBase with ChangeNotifier {
     _billController.setPlugin(this);
     _billController.initialize();
     _promptController.initialize();
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
   }
 
   @override
@@ -230,6 +235,366 @@ class BillPlugin extends PluginBase with ChangeNotifier {
   Future<void> updateSettings(Map<String, dynamic> newSettings) async {
     _settings.addAll(newSettings);
     await saveSettings();
+  }
+
+  // ==================== JS API 定义 ====================
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 账户相关
+      'getAccounts': _jsGetAccounts,
+      'createAccount': _jsCreateAccount,
+      'updateAccount': _jsUpdateAccount,
+      'deleteAccount': _jsDeleteAccount,
+
+      // 账单相关
+      'getBills': _jsGetBills,
+      'createBill': _jsCreateBill,
+      'updateBill': _jsUpdateBill,
+      'deleteBill': _jsDeleteBill,
+
+      // 统计相关
+      'getStats': _jsGetStats,
+      'getCategoryStats': _jsGetCategoryStats,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取所有账户
+  Future<String> _jsGetAccounts() async {
+    final accounts = _billController.accounts;
+    return jsonEncode(accounts.map((a) => a.toJson()).toList());
+  }
+
+  /// 创建账户
+  /// @param title 账户名称
+  /// @param iconCodePoint 图标代码点 (可选，默认 Icons.account_balance_wallet)
+  /// @param backgroundColor 背景颜色值 (可选，默认绿色)
+  Future<String> _jsCreateAccount(
+    String title, [
+    int? iconCodePoint,
+    int? backgroundColor,
+  ]) async {
+    final account = Account(
+      title: title,
+      icon: iconCodePoint != null
+          ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+          : Icons.account_balance_wallet,
+      backgroundColor:
+          backgroundColor != null ? Color(backgroundColor) : Colors.green,
+    );
+
+    await _billController.createAccount(account);
+    return jsonEncode(account.toJson());
+  }
+
+  /// 更新账户
+  /// @param accountId 账户ID
+  /// @param title 新账户名称 (可选)
+  /// @param iconCodePoint 新图标代码点 (可选)
+  /// @param backgroundColor 新背景颜色值 (可选)
+  Future<String> _jsUpdateAccount(
+    String accountId, [
+    String? title,
+    int? iconCodePoint,
+    int? backgroundColor,
+  ]) async {
+    final account = _billController.accounts.firstWhere(
+      (a) => a.id == accountId,
+      orElse: () => throw '账户不存在',
+    );
+
+    final updatedAccount = account.copyWith(
+      title: title,
+      icon:
+          iconCodePoint != null
+              ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+              : null,
+      backgroundColor: backgroundColor != null ? Color(backgroundColor) : null,
+    );
+
+    await _billController.saveAccount(updatedAccount);
+    return jsonEncode(updatedAccount.toJson());
+  }
+
+  /// 删除账户
+  /// @param accountId 账户ID
+  Future<bool> _jsDeleteAccount(String accountId) async {
+    await _billController.deleteAccount(accountId);
+    return true;
+  }
+
+  /// 获取账单列表
+  /// @param accountId 账户ID (可选，不传则返回所有账户的账单)
+  /// @param startDate 开始日期 (可选，格式: YYYY-MM-DD)
+  /// @param endDate 结束日期 (可选，格式: YYYY-MM-DD)
+  Future<String> _jsGetBills([
+    String? accountId,
+    String? startDate,
+    String? endDate,
+  ]) async {
+    // 解析日期参数
+    DateTime? start;
+    DateTime? end;
+
+    if (startDate != null && startDate.isNotEmpty) {
+      try {
+        start = DateTime.parse(startDate);
+      } catch (e) {
+        throw '日期格式错误: $startDate，应为 YYYY-MM-DD 格式';
+      }
+    }
+
+    if (endDate != null && endDate.isNotEmpty) {
+      try {
+        end = DateTime.parse(endDate);
+      } catch (e) {
+        throw '日期格式错误: $endDate，应为 YYYY-MM-DD 格式';
+      }
+    }
+
+    // 获取账单列表
+    final bills = await _billController.getBills(
+      startDate: start,
+      endDate: end,
+    );
+
+    // 如果指定了 accountId，只返回该账户的账单
+    final filteredBills =
+        accountId != null && accountId.isNotEmpty
+            ? bills.where((b) => b.accountId == accountId).toList()
+            : bills;
+
+    return jsonEncode(filteredBills.map((b) => b.toJson()).toList());
+  }
+
+  /// 创建账单
+  /// @param accountId 账户ID
+  /// @param amount 金额 (正数=收入，负数=支出)
+  /// @param category 分类
+  /// @param title 标题
+  /// @param date 日期 (可选，格式: YYYY-MM-DD，默认今天)
+  /// @param note 备注 (可选)
+  /// @param tag 标签 (可选)
+  Future<String> _jsCreateBill(
+    String accountId,
+    double amount,
+    String category,
+    String title, [
+    String? date,
+    String? note,
+    String? tag,
+  ]) async {
+    // 解析日期
+    DateTime billDate;
+    if (date != null && date.isNotEmpty) {
+      try {
+        billDate = DateTime.parse(date);
+      } catch (e) {
+        throw '日期格式错误: $date，应为 YYYY-MM-DD 格式';
+      }
+    } else {
+      billDate = DateTime.now();
+    }
+
+    // 创建账单
+    final bill = Bill(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: title,
+      amount: amount,
+      category: category,
+      date: billDate,
+      accountId: accountId,
+      note: note ?? '',
+      tag: tag,
+      icon: amount >= 0 ? Icons.arrow_downward : Icons.arrow_upward,
+      iconColor: amount >= 0 ? Colors.green : Colors.red,
+    );
+
+    await _billController.saveBill(bill);
+    return jsonEncode(bill.toJson());
+  }
+
+  /// 更新账单
+  /// @param billId 账单ID
+  /// @param accountId 账户ID
+  /// @param amount 新金额 (可选)
+  /// @param category 新分类 (可选)
+  /// @param title 新标题 (可选)
+  /// @param date 新日期 (可选，格式: YYYY-MM-DD)
+  /// @param note 新备注 (可选)
+  /// @param tag 新标签 (可选)
+  Future<String> _jsUpdateBill(
+    String billId,
+    String accountId, [
+    double? amount,
+    String? category,
+    String? title,
+    String? date,
+    String? note,
+    String? tag,
+  ]) async {
+    // 查找账户
+    final account = _billController.accounts.firstWhere(
+      (a) => a.id == accountId,
+      orElse: () => throw '账户不存在',
+    );
+
+    // 查找账单
+    final bill = account.bills.firstWhere(
+      (b) => b.id == billId,
+      orElse: () => throw '账单不存在',
+    );
+
+    // 解析日期
+    DateTime? billDate;
+    if (date != null && date.isNotEmpty) {
+      try {
+        billDate = DateTime.parse(date);
+      } catch (e) {
+        throw '日期格式错误: $date，应为 YYYY-MM-DD 格式';
+      }
+    }
+
+    // 更新账单
+    final updatedBill = bill.copyWith(
+      amount: amount,
+      category: category,
+      title: title,
+      date: billDate,
+      note: note,
+      tag: tag,
+      updatedAt: DateTime.now(),
+    );
+
+    await _billController.saveBill(updatedBill);
+    return jsonEncode(updatedBill.toJson());
+  }
+
+  /// 删除账单
+  /// @param accountId 账户ID
+  /// @param billId 账单ID
+  Future<bool> _jsDeleteBill(String accountId, String billId) async {
+    await _billController.deleteBill(accountId, billId);
+    return true;
+  }
+
+  /// 获取统计信息
+  /// @param startDate 开始日期 (可选，格式: YYYY-MM-DD)
+  /// @param endDate 结束日期 (可选，格式: YYYY-MM-DD)
+  /// @param accountId 账户ID (可选，不传则统计所有账户)
+  Future<String> _jsGetStats([
+    String? startDate,
+    String? endDate,
+    String? accountId,
+  ]) async {
+    // 解析日期参数
+    DateTime? start;
+    DateTime? end;
+
+    if (startDate != null && startDate.isNotEmpty) {
+      try {
+        start = DateTime.parse(startDate);
+      } catch (e) {
+        throw '日期格式错误: $startDate，应为 YYYY-MM-DD 格式';
+      }
+    }
+
+    if (endDate != null && endDate.isNotEmpty) {
+      try {
+        end = DateTime.parse(endDate);
+      } catch (e) {
+        throw '日期格式错误: $endDate，应为 YYYY-MM-DD 格式';
+      }
+    }
+
+    // 获取账单列表
+    final bills = await _billController.getBills(
+      startDate: start,
+      endDate: end,
+    );
+
+    // 如果指定了 accountId，只统计该账户的账单
+    final filteredBills =
+        accountId != null && accountId.isNotEmpty
+            ? bills.where((b) => b.accountId == accountId).toList()
+            : bills;
+
+    // 计算统计信息
+    final totalIncome = await _billController.getTotalIncome(
+      startDate: start,
+      endDate: end,
+    );
+    final totalExpense = await _billController.getTotalExpense(
+      startDate: start,
+      endDate: end,
+    );
+
+    return jsonEncode({
+      'totalIncome': totalIncome,
+      'totalExpense': totalExpense,
+      'balance': totalIncome - totalExpense,
+      'billCount': filteredBills.length,
+      'todayFinance': _billController.getTodayFinance(),
+      'monthFinance': _billController.getMonthFinance(),
+      'monthBillCount': _billController.getMonthBillCount(),
+    });
+  }
+
+  /// 获取分类统计
+  /// @param startDate 开始日期 (可选，格式: YYYY-MM-DD)
+  /// @param endDate 结束日期 (可选，格式: YYYY-MM-DD)
+  /// @param accountId 账户ID (可选，不传则统计所有账户)
+  Future<String> _jsGetCategoryStats([
+    String? startDate,
+    String? endDate,
+    String? accountId,
+  ]) async {
+    // 解析日期参数
+    DateTime? start;
+    DateTime? end;
+
+    if (startDate != null && startDate.isNotEmpty) {
+      try {
+        start = DateTime.parse(startDate);
+      } catch (e) {
+        throw '日期格式错误: $startDate，应为 YYYY-MM-DD 格式';
+      }
+    }
+
+    if (endDate != null && endDate.isNotEmpty) {
+      try {
+        end = DateTime.parse(endDate);
+      } catch (e) {
+        throw '日期格式错误: $endDate，应为 YYYY-MM-DD 格式';
+      }
+    }
+
+    // 获取分类统计
+    final categoryStats = await _billController.getCategoryStatistics(
+      startDate: start,
+      endDate: end,
+    );
+
+    // 如果指定了 accountId，只统计该账户的账单
+    if (accountId != null && accountId.isNotEmpty) {
+      final bills = await _billController.getBills(
+        startDate: start,
+        endDate: end,
+      );
+      final filteredBills = bills.where((b) => b.accountId == accountId);
+
+      final Map<String, double> filteredStats = {};
+      for (final bill in filteredBills) {
+        filteredStats[bill.category] =
+            (filteredStats[bill.category] ?? 0) + bill.amount;
+      }
+      return jsonEncode(filteredStats);
+    }
+
+    return jsonEncode(categoryStats);
   }
 }
 

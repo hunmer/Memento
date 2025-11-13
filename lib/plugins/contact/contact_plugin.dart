@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
@@ -5,14 +6,17 @@ import '../base_plugin.dart';
 
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'controllers/contact_controller.dart';
 import 'models/contact_model.dart';
+import 'models/interaction_record_model.dart';
 import 'models/filter_sort_config.dart';
 import 'widgets/contact_card.dart';
 import 'widgets/contact_form.dart';
 import 'widgets/filter_dialog.dart';
+import 'package:uuid/uuid.dart';
 
-class ContactPlugin extends BasePlugin {
+class ContactPlugin extends BasePlugin with JSBridgePlugin {
   late ContactController _controller;
 
   // 暴露控制器供外部访问
@@ -30,6 +34,9 @@ class ContactPlugin extends BasePlugin {
   @override
   Future<void> initialize() async {
     _controller = ContactController(this);
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
   }
 
   @override
@@ -145,6 +152,174 @@ class ContactPlugin extends BasePlugin {
     final contacts = await _controller.getAllContacts();
     final recentContacts = await _controller.getRecentlyContactedCount();
     return {'totalContacts': contacts.length, 'recentContacts': recentContacts};
+  }
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 联系人相关
+      'getContacts': _jsGetContacts,
+      'getContact': _jsGetContact,
+      'createContact': _jsCreateContact,
+      'updateContact': _jsUpdateContact,
+      'deleteContact': _jsDeleteContact,
+
+      // 交���记录相关
+      'addInteraction': _jsAddInteraction,
+      'getInteractions': _jsGetInteractions,
+      'deleteInteraction': _jsDeleteInteraction,
+
+      // 筛选与统计
+      'getRecentContacts': _jsGetRecentContacts,
+      'getAllTags': _jsGetAllTags,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取所有联系人
+  Future<String> _jsGetContacts() async {
+    final contacts = await _controller.getAllContacts();
+    return jsonEncode(contacts.map((c) => c.toJson()).toList());
+  }
+
+  /// 获取联系人详情
+  /// 参数: contactId
+  Future<String> _jsGetContact(String contactId) async {
+    final contact = await _controller.getContact(contactId);
+    if (contact == null) {
+      return jsonEncode({'error': 'Contact not found'});
+    }
+    return jsonEncode(contact.toJson());
+  }
+
+  /// 创建联系人
+  /// 参数: name, phone, [avatar], [address], [notes], [tags], [customFields]
+  Future<String> _jsCreateContact(
+    String name,
+    String phone, [
+    String? avatar,
+    String? address,
+    String? notes,
+    List<dynamic>? tags,
+    Map<dynamic, dynamic>? customFields,
+  ]) async {
+    final uuid = const Uuid();
+    final contact = Contact(
+      id: uuid.v4(),
+      name: name,
+      phone: phone,
+      avatar: avatar,
+      address: address,
+      notes: notes,
+      icon: Icons.person,
+      iconColor: color,
+      tags: tags?.map((t) => t.toString()).toList() ?? [],
+      customFields: customFields?.map(
+            (key, value) => MapEntry(key.toString(), value.toString()),
+          ) ??
+          {},
+    );
+
+    await _controller.addContact(contact);
+    return jsonEncode(contact.toJson());
+  }
+
+  /// 更新联系人
+  /// 参数: contactId, [name], [phone], [avatar], [address], [notes], [tags], [customFields]
+  Future<String> _jsUpdateContact(
+    String contactId, {
+    String? name,
+    String? phone,
+    String? avatar,
+    String? address,
+    String? notes,
+    List<dynamic>? tags,
+    Map<dynamic, dynamic>? customFields,
+  }) async {
+    final contact = await _controller.getContact(contactId);
+    if (contact == null) {
+      return jsonEncode({'error': 'Contact not found'});
+    }
+
+    final updatedContact = contact.copyWith(
+      name: name,
+      phone: phone,
+      avatar: avatar,
+      address: address,
+      notes: notes,
+      tags: tags?.map((t) => t.toString()).toList(),
+      customFields: customFields?.map(
+        (key, value) => MapEntry(key.toString(), value.toString()),
+      ),
+    );
+
+    await _controller.updateContact(updatedContact);
+    return jsonEncode(updatedContact.toJson());
+  }
+
+  /// 删除联系人
+  /// 参数: contactId
+  Future<bool> _jsDeleteContact(String contactId) async {
+    try {
+      await _controller.deleteContact(contactId);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 添加交互记录
+  /// 参数: contactId, notes, [date], [participants]
+  Future<String> _jsAddInteraction(
+    String contactId,
+    String notes, [
+    String? dateStr,
+    List<dynamic>? participants,
+  ]) async {
+    final uuid = const Uuid();
+    final date = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
+
+    final interaction = InteractionRecord(
+      id: uuid.v4(),
+      contactId: contactId,
+      date: date,
+      notes: notes,
+      participants: participants?.map((p) => p.toString()).toList() ?? [],
+    );
+
+    await _controller.addInteraction(interaction);
+    return jsonEncode(interaction.toJson());
+  }
+
+  /// 获取交互记录
+  /// 参数: contactId
+  Future<String> _jsGetInteractions(String contactId) async {
+    final interactions =
+        await _controller.getInteractionsByContactId(contactId);
+    return jsonEncode(interactions.map((i) => i.toJson()).toList());
+  }
+
+  /// 删除交互记录
+  /// 参数: interactionId
+  Future<bool> _jsDeleteInteraction(String interactionId) async {
+    try {
+      await _controller.deleteInteraction(interactionId);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 获取最近联系的联系人数量
+  Future<int> _jsGetRecentContacts() async {
+    return await _controller.getRecentlyContactedCount();
+  }
+
+  /// 获取所有标签
+  Future<String> _jsGetAllTags() async {
+    final tags = await _controller.getAllTags();
+    return jsonEncode(tags);
   }
 }
 

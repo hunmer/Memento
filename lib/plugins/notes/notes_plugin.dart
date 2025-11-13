@@ -1,12 +1,14 @@
+import 'dart:convert';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
+import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
 import 'l10n/notes_localizations.dart';
 import 'controls/prompt_controller.dart';
 
-class NotesPlugin extends BasePlugin {
+class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   static NotesPlugin? _instance;
   static NotesPlugin get instance {
     if (_instance == null) {
@@ -43,6 +45,9 @@ class NotesPlugin extends BasePlugin {
     await controller.initialize();
     _promptController.initialize(controller);
     _isInitialized = true;
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
   }
 
   // 获取总笔记数
@@ -166,5 +171,250 @@ class NotesPlugin extends BasePlugin {
   @override
   String getPluginStoragePath() {
     return storage.getPluginStoragePath(id);
+  }
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 测试API（同步）
+      'testSync': _jsTestSync,
+
+      // 笔记相关
+      'getNotes': _jsGetNotes,
+      'getNote': _jsGetNote,
+      'createNote': _jsCreateNote,
+      'updateNote': _jsUpdateNote,
+      'deleteNote': _jsDeleteNote,
+      'searchNotes': _jsSearchNotes,
+
+      // 文件夹相关
+      'getFolders': _jsGetFolders,
+      'getFolder': _jsGetFolder,
+      'createFolder': _jsCreateFolder,
+      'renameFolder': _jsRenameFolder,
+      'deleteFolder': _jsDeleteFolder,
+      'getFolderNotes': _jsGetFolderNotes,
+      'moveNote': _jsMoveNote,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 同步测试 API
+  String _jsTestSync() {
+    return jsonEncode({
+      'status': 'ok',
+      'message': '笔记插件 JS API 测试成功！',
+      'timestamp': DateTime.now().toIso8601String(),
+      'plugin': id,
+    });
+  }
+
+  /// 获取笔记列表（可选参数：folderId）
+  Future<String> _jsGetNotes([String? folderId]) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    List<dynamic> notesJson;
+    if (folderId != null) {
+      // 获取指定文件夹的笔记
+      final notes = controller.getFolderNotes(folderId);
+      notesJson = notes.map((n) => n.toJson()).toList();
+    } else {
+      // 获取所有笔记
+      final allNotes = controller.searchNotes(query: '');
+      notesJson = allNotes.map((n) => n.toJson()).toList();
+    }
+
+    return jsonEncode(notesJson);
+  }
+
+  /// 获取单个笔记详情
+  Future<String> _jsGetNote(String noteId) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    // 在所有笔记中查找
+    final allNotes = controller.searchNotes(query: '');
+    final note = allNotes.firstWhere(
+      (n) => n.id == noteId,
+      orElse: () => throw Exception('笔记不存在'),
+    );
+
+    return jsonEncode(note.toJson());
+  }
+
+  /// 创建新笔记
+  Future<String> _jsCreateNote(
+    String title,
+    String content, [
+    String? folderId,
+    List<String>? tags,
+  ]) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    // 如果没有指定文件夹，使用根文件夹
+    final targetFolderId = folderId ?? 'root';
+
+    // 创建笔记
+    var note = await controller.createNote(title, content, targetFolderId);
+
+    // 如果有标签，更新笔记
+    if (tags != null && tags.isNotEmpty) {
+      note = note.copyWith(tags: tags, updatedAt: DateTime.now());
+      await controller.updateNote(note);
+    }
+
+    return jsonEncode(note.toJson());
+  }
+
+  /// 更新笔记
+  Future<String> _jsUpdateNote(
+    String noteId,
+    String title,
+    String content, [
+    List<String>? tags,
+  ]) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    // 查找笔记
+    final allNotes = controller.searchNotes(query: '');
+    final note = allNotes.firstWhere(
+      (n) => n.id == noteId,
+      orElse: () => throw Exception('笔记不存在'),
+    );
+
+    // 更新笔记
+    final updatedNote = note.copyWith(
+      title: title,
+      content: content,
+      tags: tags,
+      updatedAt: DateTime.now(),
+    );
+
+    await controller.updateNote(updatedNote);
+    return jsonEncode(updatedNote.toJson());
+  }
+
+  /// 删除笔记
+  Future<bool> _jsDeleteNote(String noteId) async {
+    if (!_isInitialized) {
+      return false;
+    }
+
+    await controller.deleteNote(noteId);
+    return true;
+  }
+
+  /// 搜索笔记
+  Future<String> _jsSearchNotes(
+    String keyword, [
+    List<String>? tags,
+    String? startDate,
+    String? endDate,
+  ]) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    // 解析日期
+    DateTime? start;
+    DateTime? end;
+    if (startDate != null) {
+      start = DateTime.tryParse(startDate);
+    }
+    if (endDate != null) {
+      end = DateTime.tryParse(endDate);
+    }
+
+    // 搜索笔记
+    final notes = controller.searchNotes(
+      query: keyword,
+      tags: tags,
+      startDate: start,
+      endDate: end,
+    );
+
+    return jsonEncode(notes.map((n) => n.toJson()).toList());
+  }
+
+  /// 获取所有文件夹
+  Future<String> _jsGetFolders() async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final folders = controller.getAllFolders();
+    return jsonEncode(folders.map((f) => f.toJson()).toList());
+  }
+
+  /// 获取单个文件夹详情
+  Future<String> _jsGetFolder(String folderId) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final folder = controller.getFolder(folderId);
+    if (folder == null) {
+      throw Exception('文件夹不存在');
+    }
+
+    return jsonEncode(folder.toJson());
+  }
+
+  /// 创建文件夹
+  Future<String> _jsCreateFolder(String name, [String? parentId]) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final folder = await controller.createFolder(name, parentId);
+    return jsonEncode(folder.toJson());
+  }
+
+  /// 重命名文件夹
+  Future<bool> _jsRenameFolder(String folderId, String newName) async {
+    if (!_isInitialized) {
+      return false;
+    }
+
+    await controller.renameFolder(folderId, newName);
+    return true;
+  }
+
+  /// 删除文件夹（递归删除子文件夹和笔记）
+  Future<bool> _jsDeleteFolder(String folderId) async {
+    if (!_isInitialized) {
+      return false;
+    }
+
+    await controller.deleteFolder(folderId);
+    return true;
+  }
+
+  /// 获取文件夹中的笔记
+  Future<String> _jsGetFolderNotes(String folderId) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final notes = controller.getFolderNotes(folderId);
+    return jsonEncode(notes.map((n) => n.toJson()).toList());
+  }
+
+  /// 移动笔记到其他文件夹
+  Future<bool> _jsMoveNote(String noteId, String targetFolderId) async {
+    if (!_isInitialized) {
+      return false;
+    }
+
+    await controller.moveNote(noteId, targetFolderId);
+    return true;
   }
 }

@@ -1,14 +1,17 @@
+import 'dart:convert';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
+import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/widgets/point_settings_view.dart';
+import 'package:Memento/plugins/store/models/product.dart';
 
 /// 物品兑换插件
-class StorePlugin extends BasePlugin {
+class StorePlugin extends BasePlugin with JSBridgePlugin {
   @override
   String get id => 'store';
 
@@ -69,6 +72,9 @@ class StorePlugin extends BasePlugin {
       // 初始化积分奖励事件处理器
 
       _isInitialized = true;
+
+      // 注册 JS API（最后一步）
+      await registerJSAPI();
     }
   }
 
@@ -252,5 +258,220 @@ class StorePlugin extends BasePlugin {
       default:
         return eventKey;
     }
+  }
+
+  // ==================== JS API 定义 ====================
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 商品相关
+      'getProducts': _jsGetProducts,
+      'getProduct': _jsGetProduct,
+      'createProduct': _jsCreateProduct,
+      'updateProduct': _jsUpdateProduct,
+      'deleteProduct': _jsDeleteProduct,
+
+      // 兑换相关
+      'redeem': _jsRedeem,
+
+      // 积分相关
+      'getPoints': _jsGetPoints,
+      'addPoints': _jsAddPoints,
+
+      // 历史记录
+      'getRedeemHistory': _jsGetRedeemHistory,
+      'getPointsHistory': _jsGetPointsHistory,
+
+      // 用户物品
+      'getUserItems': _jsGetUserItems,
+      'useItem': _jsUseItem,
+
+      // 归档管理
+      'archiveProduct': _jsArchiveProduct,
+      'restoreProduct': _jsRestoreProduct,
+      'getArchivedProducts': _jsGetArchivedProducts,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取所有商品列表
+  Future<String> _jsGetProducts() async {
+    final products = controller.products;
+    return jsonEncode(products.map((p) => p.toJson()).toList());
+  }
+
+  /// 获取商品详情
+  Future<String> _jsGetProduct(String productId) async {
+    final product = controller.products.firstWhere(
+      (p) => p.id == productId,
+      orElse: () => throw Exception('商品不存在: $productId'),
+    );
+    return jsonEncode(product.toJson());
+  }
+
+  /// 创建商品
+  Future<String> _jsCreateProduct(
+    String name,
+    String description,
+    int price,
+    int stock,
+    String exchangeStart,
+    String exchangeEnd,
+    int useDuration, [
+    String? image,
+  ]) async {
+    final product = Product(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      description: description,
+      image: image ?? '',
+      stock: stock,
+      price: price,
+      exchangeStart: DateTime.parse(exchangeStart),
+      exchangeEnd: DateTime.parse(exchangeEnd),
+      useDuration: useDuration,
+    );
+
+    await controller.addProduct(product);
+    await controller.saveProducts();
+    return jsonEncode(product.toJson());
+  }
+
+  /// 更新商品
+  Future<String> _jsUpdateProduct(
+    String productId,
+    String name,
+    String description,
+    int price,
+    int stock,
+    String exchangeStart,
+    String exchangeEnd,
+    int useDuration, [
+    String? image,
+  ]) async {
+    final products = controller.products;
+    final index = products.indexWhere((p) => p.id == productId);
+    if (index == -1) {
+      throw Exception('商品不存在: $productId');
+    }
+
+    final updatedProduct = Product(
+      id: productId,
+      name: name,
+      description: description,
+      image: image ?? products[index].image,
+      stock: stock,
+      price: price,
+      exchangeStart: DateTime.parse(exchangeStart),
+      exchangeEnd: DateTime.parse(exchangeEnd),
+      useDuration: useDuration,
+    );
+
+    products[index] = updatedProduct;
+    await controller.saveProducts();
+    return jsonEncode(updatedProduct.toJson());
+  }
+
+  /// 删除商品（归档）
+  Future<bool> _jsDeleteProduct(String productId) async {
+    final product = controller.products.firstWhere(
+      (p) => p.id == productId,
+      orElse: () => throw Exception('商品不存在: $productId'),
+    );
+
+    await controller.archiveProduct(product);
+    return true;
+  }
+
+  /// 兑换商品
+  Future<String> _jsRedeem(String productId) async {
+    final product = controller.products.firstWhere(
+      (p) => p.id == productId,
+      orElse: () => throw Exception('商品不存在: $productId'),
+    );
+
+    final success = await controller.exchangeProduct(product);
+    return jsonEncode({
+      'success': success,
+      'message': success ? '兑换成功' : '兑换失败（积分不足或库存不足）',
+      'currentPoints': controller.currentPoints,
+    });
+  }
+
+  /// 获取当前积分
+  Future<int> _jsGetPoints() async {
+    return controller.currentPoints;
+  }
+
+  /// 添加积分
+  Future<String> _jsAddPoints(int points, String reason) async {
+    await controller.addPoints(points, reason);
+    return jsonEncode({
+      'success': true,
+      'currentPoints': controller.currentPoints,
+      'message': '积分已${points > 0 ? "增加" : "减少"}: $points',
+    });
+  }
+
+  /// 获取兑换历史（用户物品）
+  Future<String> _jsGetRedeemHistory() async {
+    final items = controller.userItems;
+    return jsonEncode(items.map((item) => item.toJson()).toList());
+  }
+
+  /// 获取积分历史
+  Future<String> _jsGetPointsHistory() async {
+    final logs = controller.pointsLogs;
+    return jsonEncode(logs.map((log) => log.toJson()).toList());
+  }
+
+  /// 获取用户物品
+  Future<String> _jsGetUserItems() async {
+    final items = controller.userItems;
+    return jsonEncode(items.map((item) => item.toJson()).toList());
+  }
+
+  /// 使用物品
+  Future<String> _jsUseItem(String itemId) async {
+    final item = controller.userItems.firstWhere(
+      (i) => i.id == itemId,
+      orElse: () => throw Exception('物品不存在: $itemId'),
+    );
+
+    final success = await controller.useItem(item);
+    return jsonEncode({
+      'success': success,
+      'message': success ? '使用成功' : '使用失败（物品已过期）',
+    });
+  }
+
+  /// 归档商品
+  Future<bool> _jsArchiveProduct(String productId) async {
+    final product = controller.products.firstWhere(
+      (p) => p.id == productId,
+      orElse: () => throw Exception('商品不存在: $productId'),
+    );
+
+    await controller.archiveProduct(product);
+    return true;
+  }
+
+  /// 恢复归档商品
+  Future<bool> _jsRestoreProduct(String productId) async {
+    final product = controller.archivedProducts.firstWhere(
+      (p) => p.id == productId,
+      orElse: () => throw Exception('归档商品不存在: $productId'),
+    );
+
+    await controller.restoreProduct(product);
+    return true;
+  }
+
+  /// 获取归档商品列表
+  Future<String> _jsGetArchivedProducts() async {
+    final products = controller.archivedProducts;
+    return jsonEncode(products.map((p) => p.toJson()).toList());
   }
 }

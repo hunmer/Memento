@@ -1,15 +1,19 @@
+import 'dart:convert';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'screens/agent_list_screen.dart';
 import 'screens/plugin_settings_screen.dart';
 import 'handlers/chat_event_handler.dart';
 import 'controllers/prompt_replacement_controller.dart';
 import 'controllers/agent_controller.dart';
+import 'controllers/service_provider_controller.dart';
+import 'services/request_service.dart';
 
-class OpenAIPlugin extends BasePlugin {
+class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   static OpenAIPlugin? _instance;
   static OpenAIPlugin get instance {
     if (_instance == null) {
@@ -39,6 +43,9 @@ class OpenAIPlugin extends BasePlugin {
     // 初始化聊天事件处理器
     _chatEventHandler.initialize();
     // 初始化prompt替换控制器已在构造函数中完成
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
   }
 
   @override
@@ -150,6 +157,176 @@ class OpenAIPlugin extends BasePlugin {
   @override
   String? getPluginName(context) {
     return OpenAILocalizations.of(context).name;
+  }
+
+  // ==================== JS API 定义 ====================
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 助手管理
+      'getAgents': _jsGetAgents,
+      'getAgent': _jsGetAgent,
+
+      // 消息发送（带超时处理）
+      'sendMessage': _jsSendMessage,
+
+      // 服务商管理
+      'getProviders': _jsGetProviders,
+      'testProvider': _jsTestProvider,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取所有 AI 助手列表
+  Future<String> _jsGetAgents() async {
+    try {
+      final controller = AgentController();
+      final agents = await controller.loadAgents();
+      return jsonEncode(agents.map((a) => a.toJson()).toList());
+    } catch (e) {
+      return jsonEncode({'error': e.toString()});
+    }
+  }
+
+  /// 获取指定助手信息
+  /// @param agentId 助手ID
+  Future<String> _jsGetAgent(String agentId) async {
+    try {
+      final controller = AgentController();
+      final agent = await controller.getAgent(agentId);
+      if (agent == null) {
+        return jsonEncode({'error': 'Agent not found: $agentId'});
+      }
+      return jsonEncode(agent.toJson());
+    } catch (e) {
+      return jsonEncode({'error': e.toString()});
+    }
+  }
+
+  /// 发送消息给 AI
+  /// @param agentId 助手ID
+  /// @param message 消息内容
+  /// @param context (可选) 上下文消息数组 (JSON 字符串)
+  Future<String> _jsSendMessage(
+    String agentId,
+    String message, [
+    String? contextJson,
+  ]) async {
+    try {
+      // 获取助手信息
+      final controller = AgentController();
+      final agent = await controller.getAgent(agentId);
+      if (agent == null) {
+        return jsonEncode({'error': 'Agent not found: $agentId'});
+      }
+
+      // 解析上下文消息（如果有）
+      // 这里使用简化的流式响应收集完整结果
+      final StringBuffer responseBuffer = StringBuffer();
+      bool hasError = false;
+      String? errorMessage;
+
+      // 使用流式 API，设置 30 秒超时
+      await RequestService.streamResponse(
+        agent: agent,
+        prompt: message,
+        onToken: (token) {
+          responseBuffer.write(token);
+        },
+        onError: (error) {
+          hasError = true;
+          errorMessage = error;
+        },
+        onComplete: () {
+          // 完成回调
+        },
+        replacePrompt: false, // JS API 不自动替换 prompt
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          hasError = true;
+          errorMessage = 'Request timeout (30s)';
+        },
+      );
+
+      if (hasError) {
+        return jsonEncode({
+          'error': errorMessage ?? 'Unknown error',
+          'partial_response': responseBuffer.toString(),
+        });
+      }
+
+      return jsonEncode({
+        'success': true,
+        'response': responseBuffer.toString(),
+        'agent': agent.name,
+      });
+    } catch (e) {
+      return jsonEncode({
+        'error': e.toString(),
+        'stack': e is Error ? e.stackTrace.toString() : null,
+      });
+    }
+  }
+
+  /// 获取所有服务商
+  Future<String> _jsGetProviders() async {
+    try {
+      final controller = ServiceProviderController();
+      final providers = await controller.loadProviders();
+      return jsonEncode(providers.map((p) => p.toJson()).toList());
+    } catch (e) {
+      return jsonEncode({'error': e.toString()});
+    }
+  }
+
+  /// 测试服务商连接
+  /// @param providerId 服务商ID（实际上是 label）
+  Future<String> _jsTestProvider(String providerId) async {
+    try {
+      final controller = ServiceProviderController();
+      await controller.loadProviders();
+
+      // 根据 ID/label 查找服务商
+      final provider = controller.providers.firstWhere(
+        (p) => p.id == providerId || p.label == providerId,
+        orElse: () => throw Exception('Provider not found: $providerId'),
+      );
+
+      // 获取该服务商的任意一个 agent 进行测试
+      final agentController = AgentController();
+      await agentController.loadAgents();
+
+      final testAgent = agentController.agents.firstWhere(
+        (a) => a.serviceProviderId == provider.id,
+        orElse: () => throw Exception(
+            'No agent configured for provider: ${provider.label}'),
+      );
+
+      // 发送简单的测试消息
+      final response = await RequestService.chat(
+        'Hello',
+        testAgent,
+        replacePrompt: false,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception('Connection timeout'),
+      );
+
+      final success = !response.startsWith('Error:');
+      return jsonEncode({
+        'success': success,
+        'provider': provider.label,
+        'response': response.substring(0, response.length > 100 ? 100 : response.length),
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': e.toString(),
+      });
+    }
   }
 
   Widget _buildCardViewContent(BuildContext context) {

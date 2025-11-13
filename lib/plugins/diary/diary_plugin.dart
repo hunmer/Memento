@@ -3,12 +3,15 @@ import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/event/event.dart';
+import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'l10n/diary_localizations.dart';
 import 'controls/prompt_controller.dart';
 import 'screens/diary_calendar_screen.dart';
 import 'dart:io';
+import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'models/diary_entry.dart';
+import 'utils/diary_utils.dart';
 
 /// 日记创建事件参数
 class DiaryEntryCreatedEventArgs extends EventArgs {
@@ -53,7 +56,7 @@ class _DiaryMainViewState extends State<DiaryMainView> {
   }
 }
 
-class DiaryPlugin extends BasePlugin {
+class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   final DiaryPromptController _promptController = DiaryPromptController();
   static DiaryPlugin? _instance;
   static DiaryPlugin get instance {
@@ -157,6 +160,9 @@ class DiaryPlugin extends BasePlugin {
 
     // 初始化 prompt 控制器
     _promptController.initialize();
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
   }
 
   @override
@@ -297,5 +303,200 @@ class DiaryPlugin extends BasePlugin {
         );
       },
     );
+  }
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 日记查询接口
+      'getDiaries': _jsGetDiaries,
+      'getDiary': _jsGetDiary,
+
+      // 日记操作接口
+      'saveDiary': _jsSaveDiary,
+      'deleteDiary': _jsDeleteDiary,
+
+      // 统计接口
+      'getTodayStats': _jsGetTodayStats,
+      'getMonthStats': _jsGetMonthStats,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取指定日期范围的日记
+  /// 参数: {"startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD"}
+  /// 返回: JSON 字符串，包含日记列表
+  Future<String> _jsGetDiaries(String startDate, String endDate) async {
+    try {
+      final start = DateTime.parse(startDate);
+      final end = DateTime.parse(endDate);
+
+      final allEntries = await DiaryUtils.loadDiaryEntries();
+
+      // 过滤日期范围
+      final filteredEntries = allEntries.entries
+          .where((entry) =>
+              !entry.key.isBefore(start) && !entry.key.isAfter(end))
+          .toList()
+        ..sort((a, b) => a.key.compareTo(b.key)); // 按日期排序
+
+      final result = {
+        'total': filteredEntries.length,
+        'diaries': filteredEntries
+            .map((entry) => {
+                  'date': entry.key.toIso8601String().split('T')[0],
+                  'title': entry.value.title,
+                  'content': entry.value.content,
+                  'mood': entry.value.mood,
+                  'wordCount': entry.value.content.length,
+                  'createdAt': entry.value.createdAt.toIso8601String(),
+                  'updatedAt': entry.value.updatedAt.toIso8601String(),
+                })
+            .toList(),
+      };
+
+      return jsonEncode(result);
+    } catch (e) {
+      return jsonEncode({
+        'error': '获取日记失败: $e',
+        'total': 0,
+        'diaries': [],
+      });
+    }
+  }
+
+  /// 获取指定日期的日记
+  /// 参数: date (YYYY-MM-DD 格式)
+  /// 返回: JSON 字符串，包含日记内容
+  Future<String> _jsGetDiary(String date) async {
+    try {
+      final dateTime = DateTime.parse(date);
+      final entry = await DiaryUtils.loadDiaryEntry(dateTime);
+
+      if (entry == null) {
+        return jsonEncode({
+          'exists': false,
+          'error': '该日期没有日记',
+        });
+      }
+
+      return jsonEncode({
+        'exists': true,
+        'date': dateTime.toIso8601String().split('T')[0],
+        'title': entry.title,
+        'content': entry.content,
+        'mood': entry.mood,
+        'wordCount': entry.content.length,
+        'createdAt': entry.createdAt.toIso8601String(),
+        'updatedAt': entry.updatedAt.toIso8601String(),
+      });
+    } catch (e) {
+      return jsonEncode({
+        'exists': false,
+        'error': '获取日记失败: $e',
+      });
+    }
+  }
+
+  /// 保存日记
+  /// 参数: date, title, content, mood (可选)
+  /// 返回: JSON 字符串，包含成功状态
+  Future<String> _jsSaveDiary(
+    String date,
+    String title,
+    String content, [
+    String? mood,
+  ]) async {
+    try {
+      final dateTime = DateTime.parse(date);
+
+      await DiaryUtils.saveDiaryEntry(
+        dateTime,
+        content,
+        title: title,
+        mood: mood,
+      );
+
+      return jsonEncode({
+        'success': true,
+        'message': '日记保存成功',
+        'date': date,
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': '保存日记失败: $e',
+      });
+    }
+  }
+
+  /// 删除日记
+  /// 参数: date (YYYY-MM-DD 格式)
+  /// 返回: JSON 字符串，包含成功状态
+  Future<String> _jsDeleteDiary(String date) async {
+    try {
+      final dateTime = DateTime.parse(date);
+      final success = await DiaryUtils.deleteDiaryEntry(dateTime);
+
+      return jsonEncode({
+        'success': success,
+        'message': success ? '日记删除成功' : '该日期没有日记',
+        'date': date,
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': '删除日记失败: $e',
+      });
+    }
+  }
+
+  /// 获取今日统计
+  /// 返回: JSON 字符串，包含今日字数
+  Future<String> _jsGetTodayStats() async {
+    try {
+      final wordCount = await getTodayWordCount();
+      final today = DateTime.now();
+
+      return jsonEncode({
+        'date': today.toIso8601String().split('T')[0],
+        'wordCount': wordCount,
+      });
+    } catch (e) {
+      return jsonEncode({
+        'error': '获取今日统计失败: $e',
+        'wordCount': 0,
+      });
+    }
+  }
+
+  /// 获取本月统计
+  /// 返回: JSON 字符串，包含本月字数和进度
+  Future<String> _jsGetMonthStats() async {
+    try {
+      final monthWordCount = await getMonthWordCount();
+      final progress = await getMonthProgress();
+      final now = DateTime.now();
+
+      return jsonEncode({
+        'year': now.year,
+        'month': now.month,
+        'wordCount': monthWordCount,
+        'completedDays': progress.$1,
+        'totalDays': progress.$2,
+        'progress': progress.$2 > 0
+            ? (progress.$1 / progress.$2 * 100).toStringAsFixed(1)
+            : '0.0',
+      });
+    } catch (e) {
+      return jsonEncode({
+        'error': '获取本月统计失败: $e',
+        'wordCount': 0,
+        'completedDays': 0,
+        'totalDays': 0,
+        'progress': '0.0',
+      });
+    }
   }
 }

@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/js_bridge/js_bridge_plugin.dart';
 import '../base_plugin.dart';
 import 'l10n/checkin_localizations.dart';
 import 'models/checkin_item.dart';
@@ -75,7 +77,7 @@ class _CheckinMainViewState extends State<CheckinMainView> {
   }
 }
 
-class CheckinPlugin extends BasePlugin {
+class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   static final CheckinPlugin _instance = CheckinPlugin._internal();
   factory CheckinPlugin() => _instance;
   CheckinPlugin._internal() {
@@ -140,6 +142,9 @@ class CheckinPlugin extends BasePlugin {
         );
       }
     }
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
   }
 
   @override
@@ -270,5 +275,202 @@ class CheckinPlugin extends BasePlugin {
         ],
       ),
     );
+  }
+
+  // ==================== JS API 定义 ====================
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 获取签到项目列表
+      'getCheckinItems': _jsGetCheckinItems,
+
+      // 执行签到
+      'checkin': _jsCheckin,
+
+      // 获取签到历史
+      'getCheckinHistory': _jsGetCheckinHistory,
+
+      // 获取统计信息
+      'getStats': _jsGetStats,
+
+      // 创建签到项目
+      'createCheckinItem': _jsCreateCheckinItem,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取签到项目列表
+  Future<String> _jsGetCheckinItems() async {
+    final items = _checkinItems.map((item) => {
+      'id': item.id,
+      'name': item.name,
+      'group': item.group,
+      'description': item.description,
+      'icon': item.icon.codePoint,
+      'color': '0x${item.color.value.toRadixString(16).padLeft(8, '0')}',
+      'frequency': item.frequency,
+      'consecutiveDays': item.getConsecutiveDays(),
+      'isCheckedToday': item.isCheckedToday(),
+      'lastCheckinDate': item.lastCheckinDate?.toIso8601String(),
+    }).toList();
+
+    return jsonEncode(items);
+  }
+
+  /// 执行签到
+  Future<String> _jsCheckin(String itemId, [String? note]) async {
+    final item = _checkinItems.firstWhere(
+      (item) => item.id == itemId,
+      orElse: () => throw Exception('签到项目不存在: $itemId'),
+    );
+
+    // 检查今天是否已签到
+    if (item.isCheckedToday()) {
+      return jsonEncode({
+        'success': false,
+        'message': '今天已经签到过了',
+      });
+    }
+
+    // 创建签到记录
+    final now = DateTime.now();
+    final record = CheckinRecord(
+      startTime: now,
+      endTime: now,
+      checkinTime: now,
+      note: note,
+    );
+
+    await item.addCheckinRecord(record);
+    await _saveCheckinItems();
+
+    return jsonEncode({
+      'success': true,
+      'message': '签到成功',
+      'consecutiveDays': item.getConsecutiveDays(),
+      'checkinTime': now.toIso8601String(),
+    });
+  }
+
+  /// 获取签到历史
+  Future<String> _jsGetCheckinHistory(
+    String itemId, [
+    String? startDate,
+    String? endDate,
+  ]) async {
+    final item = _checkinItems.firstWhere(
+      (item) => item.id == itemId,
+      orElse: () => throw Exception('签到项目不存在: $itemId'),
+    );
+
+    // 解析日期范围
+    DateTime? start;
+    DateTime? end;
+    if (startDate != null) {
+      start = DateTime.parse(startDate);
+    }
+    if (endDate != null) {
+      end = DateTime.parse(endDate);
+    }
+
+    // 收集符合日期范围的记录
+    final List<Map<String, dynamic>> history = [];
+
+    item.checkInRecords.forEach((dateStr, records) {
+      final date = DateTime.parse(dateStr);
+
+      // 检查是否在日期范围内
+      if (start != null && date.isBefore(start)) return;
+      if (end != null && date.isAfter(end)) return;
+
+      for (final record in records) {
+        history.add({
+          'date': dateStr,
+          'checkinTime': record.checkinTime.toIso8601String(),
+          'startTime': record.startTime.toIso8601String(),
+          'endTime': record.endTime.toIso8601String(),
+          'note': record.note,
+        });
+      }
+    });
+
+    // 按签到时间倒序排序
+    history.sort((a, b) => b['checkinTime'].compareTo(a['checkinTime']));
+
+    return jsonEncode({
+      'itemId': itemId,
+      'itemName': item.name,
+      'history': history,
+      'totalCount': history.length,
+    });
+  }
+
+  /// 获取统计信息
+  Future<String> _jsGetStats([String? itemId]) async {
+    if (itemId != null) {
+      // 获取单个项目的统计信息
+      final item = _checkinItems.firstWhere(
+        (item) => item.id == itemId,
+        orElse: () => throw Exception('签到项目不存在: $itemId'),
+      );
+
+      return jsonEncode({
+        'itemId': itemId,
+        'itemName': item.name,
+        'totalCheckins': item.checkInRecords.values
+            .fold<int>(0, (sum, records) => sum + records.length),
+        'consecutiveDays': item.getConsecutiveDays(),
+        'isCheckedToday': item.isCheckedToday(),
+        'lastCheckinDate': item.lastCheckinDate?.toIso8601String(),
+      });
+    } else {
+      // 获取全局统计信息
+      return jsonEncode({
+        'totalItems': _checkinItems.length,
+        'todayCheckins': getTodayCheckins(),
+        'totalCheckins': getTotalCheckins(),
+        'completionRate': _checkinItems.isEmpty
+            ? 0.0
+            : getTodayCheckins() / _checkinItems.length,
+      });
+    }
+  }
+
+  /// 创建签到项目
+  Future<String> _jsCreateCheckinItem(
+    String name, [
+    String? group,
+    String? description,
+  ]) async {
+    // 检查名称是否重复
+    if (_checkinItems.any((item) => item.name == name)) {
+      return jsonEncode({
+        'success': false,
+        'message': '签到项目名称已存在: $name',
+      });
+    }
+
+    // 创建新项目
+    final item = CheckinItem(
+      name: name,
+      icon: Icons.check_circle,
+      group: group ?? '默认分组',
+      description: description ?? '',
+    );
+
+    await addCheckinItem(item);
+
+    return jsonEncode({
+      'success': true,
+      'message': '创建成功',
+      'item': {
+        'id': item.id,
+        'name': item.name,
+        'group': item.group,
+        'description': item.description,
+      },
+    });
   }
 }

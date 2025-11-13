@@ -1,14 +1,18 @@
+import 'dart:convert';
 import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
+import '../../core/js_bridge/js_bridge_plugin.dart';
 import '../openai/openai_plugin.dart';
 import 'services/prompt_replacements.dart';
 import 'controllers/nodes_controller.dart';
 import 'screens/notebooks_screen.dart';
 import 'l10n/nodes_localizations.dart';
 import 'models/node.dart';
+import 'models/notebook.dart';
 
 class NodesMainView extends StatefulWidget {
   const NodesMainView({super.key});
@@ -35,7 +39,7 @@ class _NodesMainViewState extends State<NodesMainView> {
   }
 }
 
-class NodesPlugin extends PluginBase {
+class NodesPlugin extends PluginBase with JSBridgePlugin {
   static NodesPlugin? _instance;
   static NodesPlugin get instance {
     if (_instance == null) {
@@ -72,6 +76,9 @@ class NodesPlugin extends PluginBase {
     });
 
     _isInitialized = true;
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
   }
 
   @override
@@ -136,6 +143,343 @@ class NodesPlugin extends PluginBase {
   /// 清理资源
   void dispose() {
     _promptReplacements.dispose();
+  }
+
+  // ==================== JS API 定义 ====================
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 笔记本相关
+      'getNotebooks': _jsGetNotebooks,
+      'getNotebook': _jsGetNotebook,
+      'createNotebook': _jsCreateNotebook,
+      'updateNotebook': _jsUpdateNotebook,
+      'deleteNotebook': _jsDeleteNotebook,
+
+      // 节点相关
+      'getNodes': _jsGetNodes,
+      'getNode': _jsGetNode,
+      'createNode': _jsCreateNode,
+      'updateNode': _jsUpdateNode,
+      'deleteNode': _jsDeleteNode,
+      'moveNode': _jsMoveNode,
+
+      // 树结构相关
+      'getNodeTree': _jsGetNodeTree,
+      'getNodePath': _jsGetNodePath,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取所有笔记本列表
+  Future<String> _jsGetNotebooks() async {
+    final notebooks = _controller.notebooks;
+    return jsonEncode(notebooks.map((nb) => {
+      'id': nb.id,
+      'title': nb.title,
+      'icon': nb.icon.codePoint,
+      'color': nb.color.value,
+      'nodeCount': _countAllNodes(nb.nodes),
+    }).toList());
+  }
+
+  /// 获取指定笔记本详情
+  Future<String> _jsGetNotebook(String notebookId) async {
+    final notebook = _controller.getNotebook(notebookId);
+    if (notebook == null || notebook.id.isEmpty) {
+      return jsonEncode({'error': '笔记本不存在'});
+    }
+
+    return jsonEncode({
+      'id': notebook.id,
+      'title': notebook.title,
+      'icon': notebook.icon.codePoint,
+      'color': notebook.color.value,
+      'nodeCount': _countAllNodes(notebook.nodes),
+      'nodes': notebook.nodes.map((n) => _nodeToJson(n)).toList(),
+    });
+  }
+
+  /// 创建笔记本
+  Future<String> _jsCreateNotebook(String title, [int? iconCodePoint, int? colorValue]) async {
+    final icon = iconCodePoint != null
+        ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+        : Icons.book;
+    final color = colorValue != null ? Color(colorValue) : Colors.blue;
+
+    await _controller.addNotebook(title, icon, color: color);
+
+    // 查找刚创建的笔记本
+    final notebook = _controller.notebooks.firstWhere(
+      (nb) => nb.title == title,
+      orElse: () => Notebook(id: '', title: ''),
+    );
+
+    return jsonEncode({
+      'id': notebook.id,
+      'title': notebook.title,
+      'icon': notebook.icon.codePoint,
+      'color': notebook.color.value,
+    });
+  }
+
+  /// 更新笔记本
+  Future<String> _jsUpdateNotebook(String notebookId, Map<String, dynamic> updates) async {
+    final notebook = _controller.getNotebook(notebookId);
+    if (notebook == null || notebook.id.isEmpty) {
+      return jsonEncode({'error': '笔记本不存在'});
+    }
+
+    // 应用更新
+    final updatedNotebook = Notebook(
+      id: notebook.id,
+      title: updates['title'] ?? notebook.title,
+      icon: updates['icon'] != null
+          ? IconData(updates['icon'] as int, fontFamily: 'MaterialIcons')
+          : notebook.icon,
+      color: updates['color'] != null ? Color(updates['color'] as int) : notebook.color,
+      nodes: notebook.nodes,
+    );
+
+    await _controller.updateNotebook(updatedNotebook);
+    return jsonEncode({'success': true});
+  }
+
+  /// 删除笔记本
+  Future<String> _jsDeleteNotebook(String notebookId) async {
+    await _controller.deleteNotebook(notebookId);
+    return jsonEncode({'success': true});
+  }
+
+  /// 获取节点列表（可选父节点ID）
+  Future<String> _jsGetNodes(String notebookId, [String? parentId]) async {
+    final notebook = _controller.getNotebook(notebookId);
+    if (notebook == null || notebook.id.isEmpty) {
+      return jsonEncode({'error': '笔记本不存在'});
+    }
+
+    List<Node> nodes;
+    if (parentId == null || parentId.isEmpty) {
+      // 获取根节点
+      nodes = notebook.nodes;
+    } else {
+      // 获取指定父节点的子节点
+      final parentNode = _controller.findNodeById(notebookId, parentId);
+      if (parentNode == null) {
+        return jsonEncode({'error': '父节点不存在'});
+      }
+      nodes = parentNode.children;
+    }
+
+    return jsonEncode(nodes.map((n) => _nodeToJson(n, includeChildren: false)).toList());
+  }
+
+  /// 获取节点详情
+  Future<String> _jsGetNode(String notebookId, String nodeId) async {
+    final node = _controller.findNodeById(notebookId, nodeId);
+    if (node == null) {
+      return jsonEncode({'error': '节点不存在'});
+    }
+
+    return jsonEncode(_nodeToJson(node, includeChildren: true));
+  }
+
+  /// 创建节点
+  Future<String> _jsCreateNode(String notebookId, Map<String, dynamic> nodeData) async {
+    final newNode = Node(
+      id: const Uuid().v4(),
+      title: nodeData['title'] ?? '新节点',
+      createdAt: DateTime.now(),
+      tags: (nodeData['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      status: _parseNodeStatus(nodeData['status']),
+      startDate: nodeData['startDate'] != null
+          ? DateTime.parse(nodeData['startDate'])
+          : null,
+      endDate: nodeData['endDate'] != null
+          ? DateTime.parse(nodeData['endDate'])
+          : null,
+      customFields: (nodeData['customFields'] as List<dynamic>?)
+          ?.map((f) => CustomField(
+                key: f['key'] ?? '',
+                value: f['value'] ?? '',
+              ))
+          .toList() ?? [],
+      notes: nodeData['notes'] ?? '',
+      parentId: nodeData['parentId'] ?? '',
+      color: nodeData['color'] != null ? Color(nodeData['color'] as int) : Colors.grey,
+      pathValue: nodeData['title'] ?? '新节点',
+    );
+
+    await _controller.addNode(notebookId, newNode, parentId: newNode.parentId.isNotEmpty ? newNode.parentId : null);
+
+    return jsonEncode({
+      'id': newNode.id,
+      'title': newNode.title,
+      'status': newNode.status.toString().split('.').last,
+    });
+  }
+
+  /// 更新节点
+  Future<String> _jsUpdateNode(String notebookId, String nodeId, Map<String, dynamic> updates) async {
+    final node = _controller.findNodeById(notebookId, nodeId);
+    if (node == null) {
+      return jsonEncode({'error': '节点不存在'});
+    }
+
+    // 应用更新
+    final updatedNode = Node(
+      id: node.id,
+      title: updates['title'] ?? node.title,
+      createdAt: node.createdAt,
+      tags: updates['tags'] != null
+          ? (updates['tags'] as List<dynamic>).map((e) => e.toString()).toList()
+          : node.tags,
+      status: updates['status'] != null ? _parseNodeStatus(updates['status']) : node.status,
+      startDate: updates['startDate'] != null
+          ? DateTime.parse(updates['startDate'])
+          : node.startDate,
+      endDate: updates['endDate'] != null
+          ? DateTime.parse(updates['endDate'])
+          : node.endDate,
+      customFields: updates['customFields'] != null
+          ? (updates['customFields'] as List<dynamic>)
+              .map((f) => CustomField(
+                    key: f['key'] ?? '',
+                    value: f['value'] ?? '',
+                  ))
+              .toList()
+          : node.customFields,
+      notes: updates['notes'] ?? node.notes,
+      parentId: node.parentId,
+      color: updates['color'] != null ? Color(updates['color'] as int) : node.color,
+      pathValue: node.pathValue,
+      children: node.children,
+      isExpanded: node.isExpanded,
+    );
+
+    await _controller.updateNode(notebookId, updatedNode);
+    return jsonEncode({'success': true});
+  }
+
+  /// 删除节点
+  Future<String> _jsDeleteNode(String notebookId, String nodeId) async {
+    await _controller.deleteNode(notebookId, nodeId);
+    return jsonEncode({'success': true});
+  }
+
+  /// 移动节点到新的父节点下
+  Future<String> _jsMoveNode(String notebookId, String nodeId, String newParentId) async {
+    final node = _controller.findNodeById(notebookId, nodeId);
+    if (node == null) {
+      return jsonEncode({'error': '节点不存在'});
+    }
+
+    // 创建更新后的节点（更改 parentId）
+    final movedNode = Node(
+      id: node.id,
+      title: node.title,
+      createdAt: node.createdAt,
+      tags: node.tags,
+      status: node.status,
+      startDate: node.startDate,
+      endDate: node.endDate,
+      customFields: node.customFields,
+      notes: node.notes,
+      parentId: newParentId,
+      color: node.color,
+      pathValue: node.pathValue,
+      children: node.children,
+      isExpanded: node.isExpanded,
+    );
+
+    // 先删除原位置的节点
+    await _controller.deleteNode(notebookId, nodeId);
+
+    // 在新位置添加节点
+    await _controller.addNode(
+      notebookId,
+      movedNode,
+      parentId: newParentId.isNotEmpty ? newParentId : null,
+    );
+
+    return jsonEncode({'success': true});
+  }
+
+  /// 获取完整节点树
+  Future<String> _jsGetNodeTree(String notebookId) async {
+    final notebook = _controller.getNotebook(notebookId);
+    if (notebook == null || notebook.id.isEmpty) {
+      return jsonEncode({'error': '笔记本不存在'});
+    }
+
+    return jsonEncode({
+      'notebookId': notebook.id,
+      'notebookTitle': notebook.title,
+      'tree': notebook.nodes.map((n) => _nodeToJson(n, includeChildren: true)).toList(),
+    });
+  }
+
+  /// 获取节点路径
+  Future<String> _jsGetNodePath(String notebookId, String nodeId) async {
+    final pathTitles = _controller.getNodePath(notebookId, nodeId);
+    final pathIds = _controller.getNodePathIds(notebookId, nodeId);
+
+    return jsonEncode({
+      'titles': pathTitles,
+      'ids': pathIds,
+      'fullPath': pathTitles.join(' / '),
+    });
+  }
+
+  // ==================== 辅助方法 ====================
+
+  /// 将节点转换为 JSON（可选包含子节点）
+  Map<String, dynamic> _nodeToJson(Node node, {bool includeChildren = false}) {
+    final json = {
+      'id': node.id,
+      'title': node.title,
+      'createdAt': node.createdAt.toIso8601String(),
+      'tags': node.tags,
+      'status': node.status.toString().split('.').last,
+      'startDate': node.startDate?.toIso8601String(),
+      'endDate': node.endDate?.toIso8601String(),
+      'customFields': node.customFields.map((f) => {
+        'key': f.key,
+        'value': f.value,
+      }).toList(),
+      'notes': node.notes,
+      'parentId': node.parentId,
+      'color': node.color.value,
+      'pathValue': node.pathValue,
+      'childrenCount': node.children.length,
+    };
+
+    if (includeChildren && node.children.isNotEmpty) {
+      json['children'] = node.children.map((c) => _nodeToJson(c, includeChildren: true)).toList();
+    }
+
+    return json;
+  }
+
+  /// 解析节点状态
+  NodeStatus _parseNodeStatus(dynamic status) {
+    if (status is String) {
+      switch (status.toLowerCase()) {
+        case 'todo':
+          return NodeStatus.todo;
+        case 'doing':
+          return NodeStatus.doing;
+        case 'done':
+          return NodeStatus.done;
+        default:
+          return NodeStatus.none;
+      }
+    } else if (status is int && status >= 0 && status < NodeStatus.values.length) {
+      return NodeStatus.values[status];
+    }
+    return NodeStatus.none;
   }
 
   // 计算所有笔记本中的节点总数

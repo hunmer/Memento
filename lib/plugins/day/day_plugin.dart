@@ -1,12 +1,15 @@
+import 'dart:convert';
 import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/day/l10n/day_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/js_bridge/js_bridge_plugin.dart';
 import '../base_plugin.dart';
 import 'screens/day_home_screen.dart';
 import 'controllers/day_controller.dart';
 import 'controls/prompt_controller.dart';
+import 'models/memorial_day.dart';
 
 /// 纪念日插件主视图
 class DayMainView extends StatefulWidget {
@@ -22,7 +25,7 @@ class _DayMainViewState extends State<DayMainView> {
   }
 }
 
-class DayPlugin extends BasePlugin {
+class DayPlugin extends BasePlugin with JSBridgePlugin {
   static DayPlugin? _instance;
   static DayPlugin get instance {
     if (_instance == null) {
@@ -73,6 +76,9 @@ class DayPlugin extends BasePlugin {
     _promptController.initialize();
 
     _isInitialized = true;
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
   }
 
   // 获取纪念日总数
@@ -178,6 +184,210 @@ class DayPlugin extends BasePlugin {
   @override
   Widget buildMainView(BuildContext context) {
     return DayMainView();
+  }
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 纪念日管理
+      'getMemorialDays': _jsGetMemorialDays,
+      'createMemorialDay': _jsCreateMemorialDay,
+      'updateMemorialDay': _jsUpdateMemorialDay,
+      'deleteMemorialDay': _jsDeleteMemorialDay,
+
+      // 工具方法
+      'getDaysUntil': _jsGetDaysUntil,
+      'getUpcomingDays': _jsGetUpcomingDays,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取所有纪念日
+  Future<String> _jsGetMemorialDays() async {
+    final days = _controller.memorialDays;
+    return jsonEncode(days.map((d) => d.toJson()).toList());
+  }
+
+  /// 创建纪念日
+  /// @param name 纪念日名称
+  /// @param date 目标日期 (格式: YYYY-MM-DD)
+  /// @param notes 笔记列表 (可选,JSON 数组字符串)
+  /// @param backgroundColor 背景颜色值 (可选,整数)
+  Future<String> _jsCreateMemorialDay(
+    String name,
+    String date, [
+    String? notesJson,
+    int? backgroundColor,
+  ]) async {
+    try {
+      // 解析日期
+      final targetDate = DateTime.parse(date);
+
+      // 解析笔记
+      List<String> notes = [];
+      if (notesJson != null && notesJson.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(notesJson);
+          if (decoded is List) {
+            notes = decoded.map((e) => e.toString()).toList();
+          }
+        } catch (e) {
+          // 如果解析失败,当作单个笔记处理
+          notes = [notesJson];
+        }
+      }
+
+      // 创建纪念日
+      final memorialDay = MemorialDay(
+        title: name,
+        targetDate: targetDate,
+        notes: notes,
+        backgroundColor: backgroundColor != null
+            ? Color(backgroundColor)
+            : null,
+      );
+
+      // 添加到控制器
+      await _controller.addMemorialDay(memorialDay);
+
+      return jsonEncode({
+        'success': true,
+        'data': memorialDay.toJson(),
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
+
+  /// 更新纪念日
+  /// @param id 纪念日 ID
+  /// @param name 新名称 (可选)
+  /// @param date 新目标日期 (可选,格式: YYYY-MM-DD)
+  /// @param notesJson 新笔记列表 (可选,JSON 数组字符串)
+  /// @param backgroundColor 新背景颜色值 (可选,整数)
+  Future<String> _jsUpdateMemorialDay(
+    String id, [
+    String? name,
+    String? date,
+    String? notesJson,
+    int? backgroundColor,
+  ]) async {
+    try {
+      // 查找现有纪念日
+      final existingDay = _controller.memorialDays
+          .firstWhere((d) => d.id == id, orElse: () => throw Exception('未找到 ID 为 $id 的纪念日'));
+
+      // 解析新日期
+      DateTime? targetDate;
+      if (date != null && date.isNotEmpty) {
+        targetDate = DateTime.parse(date);
+      }
+
+      // 解析新笔记
+      List<String>? notes;
+      if (notesJson != null && notesJson.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(notesJson);
+          if (decoded is List) {
+            notes = decoded.map((e) => e.toString()).toList();
+          }
+        } catch (e) {
+          notes = [notesJson];
+        }
+      }
+
+      // 更新纪念日
+      final updatedDay = existingDay.copyWith(
+        title: name,
+        targetDate: targetDate,
+        notes: notes,
+        backgroundColor: backgroundColor != null
+            ? Color(backgroundColor)
+            : null,
+      );
+
+      await _controller.updateMemorialDay(updatedDay);
+
+      return jsonEncode({
+        'success': true,
+        'data': updatedDay.toJson(),
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
+
+  /// 删除纪念日
+  /// @param id 纪念日 ID
+  Future<String> _jsDeleteMemorialDay(String id) async {
+    try {
+      await _controller.deleteMemorialDay(id);
+      return jsonEncode({
+        'success': true,
+        'message': '纪念日已删除',
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
+
+  /// 获取距离指定日期的天数
+  /// @param date 目标日期 (格式: YYYY-MM-DD)
+  /// @return 天数 (负数表示已过期)
+  Future<String> _jsGetDaysUntil(String date) async {
+    try {
+      final targetDate = DateTime.parse(date);
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final target = DateTime(targetDate.year, targetDate.month, targetDate.day);
+      final days = target.difference(today).inDays;
+
+      return jsonEncode({
+        'success': true,
+        'days': days,
+        'isExpired': days < 0,
+        'isToday': days == 0,
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
+
+  /// 获取即将到来的纪念日
+  /// @param withinDays 天数范围 (默认 7 天)
+  Future<String> _jsGetUpcomingDays([int withinDays = 7]) async {
+    try {
+      final upcomingDays = _controller.memorialDays
+          .where((day) {
+            final daysRemaining = day.daysRemaining;
+            return daysRemaining >= 0 && daysRemaining <= withinDays;
+          })
+          .toList();
+
+      return jsonEncode({
+        'success': true,
+        'count': upcomingDays.length,
+        'days': upcomingDays.map((d) => d.toJson()).toList(),
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': e.toString(),
+      });
+    }
   }
 
   void dispose() {

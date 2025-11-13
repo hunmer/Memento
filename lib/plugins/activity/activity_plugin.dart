@@ -1,14 +1,17 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'l10n/activity_localizations.dart';
 import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_statistics_screen.dart';
 import 'services/activity_service.dart';
 import 'controls/prompt_controller.dart';
+import 'models/activity_record.dart';
 
-class ActivityPlugin extends BasePlugin {
+class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   static ActivityPlugin? _instance;
   static ActivityPlugin get instance {
     if (_instance == null) {
@@ -67,6 +70,195 @@ class ActivityPlugin extends BasePlugin {
     _promptController.initialize();
 
     _isInitialized = true;
+
+    // 注册 JS API（最后一步）
+    await registerJSAPI();
+  }
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 活动查询
+      'getActivities': _jsGetActivities,
+
+      // 活动管理
+      'createActivity': _jsCreateActivity,
+      'updateActivity': _jsUpdateActivity,
+      'deleteActivity': _jsDeleteActivity,
+
+      // 统计信息
+      'getTodayStats': _jsGetTodayStats,
+
+      // 标签管理
+      'getTagGroups': _jsGetTagGroups,
+      'getRecentTags': _jsGetRecentTags,
+    };
+  }
+
+  // ==================== JS API 实现 ====================
+
+  /// 获取指定日期的活动列表
+  /// 参数: date (可选, YYYY-MM-DD 格式, 默认今天)
+  Future<String> _jsGetActivities([String? dateStr]) async {
+    try {
+      final date = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
+      final activities = await _activityService.getActivitiesForDate(date);
+      return jsonEncode(activities.map((a) => a.toJson()).toList());
+    } catch (e) {
+      return jsonEncode({'error': '获取活动失败: $e'});
+    }
+  }
+
+  /// 创建活动
+  /// 参数: startTime, endTime, title, tags (JSON数组字符串), description, mood
+  Future<String> _jsCreateActivity(
+    String startTimeStr,
+    String endTimeStr,
+    String title, [
+    String? tagsJson,
+    String? description,
+    String? mood,
+  ]) async {
+    try {
+      final startTime = DateTime.parse(startTimeStr);
+      final endTime = DateTime.parse(endTimeStr);
+
+      // 解析标签
+      List<String> tags = [];
+      if (tagsJson != null && tagsJson.isNotEmpty) {
+        try {
+          tags = List<String>.from(jsonDecode(tagsJson));
+        } catch (e) {
+          // 如果解析失败,尝试按逗号分割
+          tags = tagsJson.split(',').map((t) => t.trim()).toList();
+        }
+      }
+
+      final activity = ActivityRecord(
+        startTime: startTime,
+        endTime: endTime,
+        title: title,
+        tags: tags,
+        description: description,
+        mood: mood,
+      );
+
+      await _activityService.saveActivity(activity);
+      return jsonEncode({'success': true, 'activity': activity.toJson()});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '创建活动失败: $e'});
+    }
+  }
+
+  /// 更新活动
+  /// 参数: activityId, startTime, endTime, title, tags, description, mood
+  Future<String> _jsUpdateActivity(
+    String activityId,
+    String startTimeStr,
+    String endTimeStr,
+    String title, [
+    String? tagsJson,
+    String? description,
+    String? mood,
+  ]) async {
+    try {
+      final startTime = DateTime.parse(startTimeStr);
+      final endTime = DateTime.parse(endTimeStr);
+
+      // 解析标签
+      List<String> tags = [];
+      if (tagsJson != null && tagsJson.isNotEmpty) {
+        try {
+          tags = List<String>.from(jsonDecode(tagsJson));
+        } catch (e) {
+          tags = tagsJson.split(',').map((t) => t.trim()).toList();
+        }
+      }
+
+      // 查找旧活动
+      final activities = await _activityService.getActivitiesForDate(startTime);
+      final oldActivity = activities.firstWhere(
+        (a) => a.id == activityId,
+        orElse: () => throw Exception('未找到活动 ID: $activityId'),
+      );
+
+      // 创建新活动
+      final newActivity = ActivityRecord(
+        id: activityId,
+        startTime: startTime,
+        endTime: endTime,
+        title: title,
+        tags: tags,
+        description: description,
+        mood: mood,
+      );
+
+      await _activityService.updateActivity(oldActivity, newActivity);
+      return jsonEncode({'success': true, 'activity': newActivity.toJson()});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '更新活动失败: $e'});
+    }
+  }
+
+  /// 删除活动
+  /// 参数: activityId, date (YYYY-MM-DD 格式)
+  Future<String> _jsDeleteActivity(String activityId, String dateStr) async {
+    try {
+      final date = DateTime.parse(dateStr);
+      final activities = await _activityService.getActivitiesForDate(date);
+
+      final activity = activities.firstWhere(
+        (a) => a.id == activityId,
+        orElse: () => throw Exception('未找到活动 ID: $activityId'),
+      );
+
+      await _activityService.deleteActivity(activity);
+      return jsonEncode({'success': true});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '删除活动失败: $e'});
+    }
+  }
+
+  /// 获取今日统计
+  /// 返回: { activityCount, durationMinutes, remainingMinutes }
+  Future<String> _jsGetTodayStats() async {
+    try {
+      final activityCount = await getTodayActivityCount();
+      final durationMinutes = await getTodayActivityDuration();
+      final remainingMinutes = getTodayRemainingTime();
+
+      return jsonEncode({
+        'activityCount': activityCount,
+        'durationMinutes': durationMinutes,
+        'durationHours': (durationMinutes / 60).toStringAsFixed(1),
+        'remainingMinutes': remainingMinutes,
+        'remainingHours': (remainingMinutes / 60).toStringAsFixed(1),
+      });
+    } catch (e) {
+      return jsonEncode({'error': '获取统计失败: $e'});
+    }
+  }
+
+  /// 获取标签分组
+  Future<String> _jsGetTagGroups() async {
+    try {
+      final tagGroups = await _activityService.getTagGroups();
+      return jsonEncode(
+        tagGroups.map((g) => {'name': g.name, 'tags': g.tags}).toList(),
+      );
+    } catch (e) {
+      return jsonEncode({'error': '获取标签分组失败: $e'});
+    }
+  }
+
+  /// 获取最近使用的标签
+  Future<String> _jsGetRecentTags() async {
+    try {
+      final recentTags = await _activityService.getRecentTags();
+      return jsonEncode(recentTags);
+    } catch (e) {
+      return jsonEncode({'error': '获取最近标签失败: $e'});
+    }
   }
 
   // 获取今日活动数
