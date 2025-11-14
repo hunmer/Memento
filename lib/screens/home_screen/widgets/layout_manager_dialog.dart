@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../managers/home_layout_manager.dart';
+import '../managers/home_widget_registry.dart';
 import '../models/layout_config.dart';
+import '../models/home_widget_item.dart';
+import '../models/home_widget_size.dart';
 
 /// 布局管理对话框
 ///
@@ -166,6 +169,19 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
     );
   }
 
+  /// 显示新建布局对话框
+  void _showCreateLayoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => _CreateLayoutDialog(
+        onLayoutCreated: () {
+          _loadLayouts();
+          Navigator.pop(context); // 关闭布局管理对话框
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -285,9 +301,173 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                   ),
       ),
       actions: [
+        TextButton.icon(
+          onPressed: _showCreateLayoutDialog,
+          icon: const Icon(Icons.add),
+          label: const Text('新建布局'),
+        ),
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text('关闭'),
+        ),
+      ],
+    );
+  }
+}
+
+/// 新建布局对话框
+class _CreateLayoutDialog extends StatefulWidget {
+  final VoidCallback onLayoutCreated;
+
+  const _CreateLayoutDialog({required this.onLayoutCreated});
+
+  @override
+  State<_CreateLayoutDialog> createState() => _CreateLayoutDialogState();
+}
+
+class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
+  final TextEditingController _nameController = TextEditingController();
+  final HomeLayoutManager _layoutManager = HomeLayoutManager();
+  String _selectedLayoutType = 'empty';
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  /// 创建布局
+  Future<void> _createLayout() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请输入布局名称')),
+      );
+      return;
+    }
+
+    try {
+      // 清空当前布局
+      _layoutManager.clear();
+
+      // 根据选择的类型添加小组件
+      if (_selectedLayoutType == '1x1') {
+        await _addAllWidgetsOfSize(HomeWidgetSize.small);
+      } else if (_selectedLayoutType == '2x2') {
+        await _addAllWidgetsOfSize(HomeWidgetSize.large);
+      }
+      // 空白布局不添加任何内容
+
+      // 保存布局
+      await _layoutManager.saveCurrentLayoutAs(name);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('布局"$name"已创建')),
+        );
+        Navigator.pop(context);
+        widget.onLayoutCreated();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('创建失败：$e')),
+        );
+      }
+    }
+  }
+
+  /// 添加所有指定尺寸的小组件
+  Future<void> _addAllWidgetsOfSize(HomeWidgetSize size) async {
+    final registry = HomeWidgetRegistry();
+    final allWidgets = registry.getAllWidgets();
+
+    // 筛选支持指定尺寸的小组件
+    final widgets = allWidgets
+        .where((widget) => widget.supportedSizes.contains(size))
+        .toList();
+
+    // 添加到布局
+    for (final widget in widgets) {
+      final item = HomeWidgetItem(
+        id: _layoutManager.generateId(),
+        widgetId: widget.id,
+        size: size,
+        config: {},
+      );
+      _layoutManager.addItem(item);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('新建布局'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: '布局名称',
+                hintText: '例如：工作布局、娱乐布局',
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              '布局类型',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            RadioListTile<String>(
+              title: const Text('空白布局'),
+              subtitle: const Text('不包含任何小组件的空白布局'),
+              value: 'empty',
+              groupValue: _selectedLayoutType,
+              onChanged: (value) {
+                setState(() {
+                  _selectedLayoutType = value!;
+                });
+              },
+            ),
+            RadioListTile<String>(
+              title: const Text('所有 1x1 小组件'),
+              subtitle: const Text('添加所有支持 1x1 尺寸的小组件'),
+              value: '1x1',
+              groupValue: _selectedLayoutType,
+              onChanged: (value) {
+                setState(() {
+                  _selectedLayoutType = value!;
+                });
+              },
+            ),
+            RadioListTile<String>(
+              title: const Text('所有 2x2 小组件'),
+              subtitle: const Text('添加所有支持 2x2 尺寸的小组件'),
+              value: '2x2',
+              groupValue: _selectedLayoutType,
+              onChanged: (value) {
+                setState(() {
+                  _selectedLayoutType = value!;
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
+        TextButton(
+          onPressed: _createLayout,
+          child: const Text('创建'),
         ),
       ],
     );
