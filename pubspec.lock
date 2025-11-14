@@ -261,10 +261,10 @@ packages:
     dependency: transitive
     description:
       name: dynamic_widget_annotation
-      sha256: "767ee2bed8b84f8482e1cb1dbcff75493ce74740449a3926ca2cf211c44bfd2e"
+      sha256: "8b2bd5c7495ec1438091701e0267f926cb73d4bd566b4bcb2c0bbf964819d4f6"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   encrypt:
     dependency: transitive
     description:
@@ -847,7 +847,7 @@ packages:
     source: hosted
     version: "5.2.2"
   json_theme:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: json_theme
       sha256: a984e1aaae7e116e5e6cc604c359f391a371cfac9ed4c7c2e6b754c28e7a4df5
