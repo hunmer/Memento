@@ -63,6 +63,7 @@ import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 import 'plugins/database/database_plugin.dart';
 import 'plugins/scripts_center/scripts_center_plugin.dart'; // 脚本中心插件
+import 'utils/image_utils.dart'; // 图片工具类
 
 
 // 主页小组件注册
@@ -137,6 +138,9 @@ void main() async {
     // 初始化配置管理器
     globalConfigManager = ConfigManager(globalStorage);
     await globalConfigManager.initialize();
+
+    // 初始化 ImageUtils 的同步方法缓存
+    await ImageUtils.initializeSync();
 
     // 获取插件管理器单例实例并初始化
     globalPluginManager = PluginManager();

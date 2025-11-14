@@ -5,6 +5,9 @@ import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
 class ImageUtils {
+  /// 缓存的应用文档目录路径，用于同步方法
+  static String? _appDocumentDirectoryPath;
+
   /// 将图片保存到应用数据目录，并返回相对路径
   /// [imageFile] 源图片文件
   /// [saveDirectory] 保存目录（相对于应用数据目录的路径）
@@ -87,12 +90,16 @@ class ImageUtils {
     if (!relativePath.startsWith('./')) {
       // 不是相对路径格式，可能是旧数据，尝试处理
       final appDir = await StorageManager.getApplicationDocumentsDirectory();
+      // 缓存应用目录路径
+      _appDocumentDirectoryPath = appDir.path;
       // 确保使用正确的路径分隔符
       final normalizedPath = relativePath.replaceAll('/', path.separator);
       return path.join(appDir.path, normalizedPath);
     }
 
     final appDir = await StorageManager.getApplicationDocumentsDirectory();
+    // 缓存应用目录路径
+    _appDocumentDirectoryPath = appDir.path;
     // 移除 './' 前缀并规范化路径分隔符
     final pathWithoutPrefix = relativePath
         .substring(2)
@@ -166,6 +173,73 @@ class ImageUtils {
     }
 
     return relativePath;
+  }
+
+  /// 获取图片的绝对路径（同步版本）
+  ///
+  /// 注意：此方法依赖于缓存的应用目录路径。
+  /// 请确保在应用启动后已至少调用过一次异步的 getAbsolutePath 方法，
+  /// 或者在应用初始化时调用 initializeSync 方法。
+  /// 如果缓存未初始化，此方法会尝试使用相对路径，但可能无法正确工作。
+  ///
+  /// [relativePath] 相对路径
+  static String getAbsolutePathSync(String? relativePath) {
+    if (relativePath == null || relativePath.isEmpty) {
+      return '';
+    }
+
+    // 如果已经是绝对路径，直接返回
+    if (path.isAbsolute(relativePath)) {
+      return relativePath;
+    }
+
+    // 如果是网络路径，直接返回
+    if (relativePath.startsWith('http://') ||
+        relativePath.startsWith('https://')) {
+      return relativePath;
+    }
+
+    // 如果缓存的应用目录路径不存在，返回相对路径（可能无法工作）
+    if (_appDocumentDirectoryPath == null) {
+      debugPrint('警告: 应用目录路径未缓存，getAbsolutePathSync 可能无法正确工作');
+      return relativePath;
+    }
+
+    // 处理相对路径
+    if (!relativePath.startsWith('./')) {
+      // 不是相对路径格式，可能是旧数据
+      final normalizedPath = relativePath.replaceAll('/', path.separator);
+      return path.join(_appDocumentDirectoryPath!, normalizedPath);
+    }
+
+    // 移除 './' 前缀并规范化路径分隔符
+    final pathWithoutPrefix = relativePath
+        .substring(2)
+        .replaceAll('/', path.separator);
+
+    // 检查路径是否已经包含 app_data
+    if (pathWithoutPrefix.contains('app_data')) {
+      final index = pathWithoutPrefix.indexOf('app_data') + 'app_data'.length;
+      final remainingPath = pathWithoutPrefix.substring(index);
+      final cleanPath =
+          remainingPath.startsWith(path.separator) ||
+                  remainingPath.startsWith('/')
+              ? remainingPath.substring(1)
+              : remainingPath;
+      return path.join(_appDocumentDirectoryPath!, 'app_data', cleanPath);
+    } else {
+      // 添加 app_data 前缀
+      return path.join(_appDocumentDirectoryPath!, 'app_data', pathWithoutPrefix);
+    }
+  }
+
+  /// 初始化同步方法所需的缓存
+  ///
+  /// 建议在应用启动时调用此方法，以确保同步方法能够正常工作
+  static Future<void> initializeSync() async {
+    final appDir = await StorageManager.getApplicationDocumentsDirectory();
+    _appDocumentDirectoryPath = appDir.path;
+    debugPrint('ImageUtils: 应用目录路径已缓存: $_appDocumentDirectoryPath');
   }
 
   static Future<String> toRelativePath(String absolutePath) async {

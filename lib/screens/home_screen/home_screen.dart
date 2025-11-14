@@ -6,7 +6,12 @@ import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/layout_config.dart';
+import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../widgets/app_drawer.dart';
 import '../../main.dart';
 import '../../core/floating_ball/floating_ball_service.dart';
@@ -16,6 +21,7 @@ import 'widgets/add_widget_dialog.dart';
 import 'widgets/create_folder_dialog.dart';
 import 'widgets/layout_manager_dialog.dart';
 import 'widgets/background_settings_page.dart';
+import 'widgets/widget_settings_dialog.dart';
 
 /// 重构后的主屏幕
 ///
@@ -212,8 +218,59 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   /// 创建默认小组件（从已注册的小组件中选择）
   Future<void> _createDefaultWidgets() async {
-    // TODO: 根据用户配置或插件优先级创建默认小组件
-    // 暂时留空，用户可以通过"添加组件"按钮手动添加
+    final registry = HomeWidgetRegistry();
+    final allWidgets = registry.getAllWidgets();
+
+    if (allWidgets.isEmpty) {
+      debugPrint('没有注册任何小组件,跳过创建默认布局');
+      return;
+    }
+
+    // 优先创建的插件顺序
+    final priorityPlugins = [
+      'chat',
+      'openai',
+      'diary',
+      'activity',
+      'notes',
+      'todo',
+      'calendar',
+      'bill',
+    ];
+
+    // 收集要添加的默认小组件(每个插件选择一个图标组件)
+    final defaultWidgets = <HomeWidget>[];
+
+    for (final pluginId in priorityPlugins) {
+      final pluginWidgets = registry.getWidgetsByPlugin(pluginId);
+      if (pluginWidgets.isEmpty) continue;
+
+      // 优先选择 small 尺寸的图标组件
+      final iconWidget = pluginWidgets.firstWhere(
+        (w) => w.defaultSize == HomeWidgetSize.small,
+        orElse: () => pluginWidgets.first,
+      );
+
+      defaultWidgets.add(iconWidget);
+    }
+
+    // 如果优先插件都没有,从所有注册的小组件中选择前8个
+    if (defaultWidgets.isEmpty) {
+      defaultWidgets.addAll(allWidgets.take(8));
+    }
+
+    // 创建小组件实例并添加到布局
+    for (final widget in defaultWidgets) {
+      final item = HomeWidgetItem(
+        id: _layoutManager.generateId(),
+        widgetId: widget.id,
+        size: widget.defaultSize,
+        config: {},
+      );
+      _layoutManager.addItem(item);
+    }
+
+    debugPrint('创建了 ${defaultWidgets.length} 个默认小组件');
   }
 
   /// 打开最后使用的插件
@@ -496,6 +553,15 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (item is HomeWidgetItem)
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('小组件设置'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showWidgetSettings(item);
+                    },
+                  ),
                 ListTile(
                   leading: const Icon(Icons.palette),
                   title: const Text('设置背景颜色'),
@@ -537,28 +603,278 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     );
   }
 
+  /// 显示小组件设置对话框
+  void _showWidgetSettings(HomeWidgetItem item) async {
+    // 导入所需的类
+    final registry = HomeWidgetRegistry();
+    final widget = registry.getWidget(item.widgetId);
+
+    if (widget == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('未找到小组件定义')));
+      return;
+    }
+
+    // 检查是否提供了统计项
+    if (widget.availableStatsProvider == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('该小组件不支持自定义设置')));
+      return;
+    }
+
+    // 获取可用的统计项
+    final availableItems = widget.availableStatsProvider!();
+
+    if (availableItems.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('该小组件没有可配置的项目')));
+      return;
+    }
+
+    // 从 config 解析现有配置
+    PluginWidgetConfig currentConfig;
+    try {
+      if (item.config.containsKey('pluginWidgetConfig')) {
+        currentConfig = PluginWidgetConfig.fromJson(
+          item.config['pluginWidgetConfig'] as Map<String, dynamic>,
+        );
+      } else {
+        currentConfig = PluginWidgetConfig();
+      }
+    } catch (e) {
+      currentConfig = PluginWidgetConfig();
+    }
+
+    // 显示设置对话框
+    final result = await showDialog<PluginWidgetConfig>(
+      context: context,
+      builder:
+          (context) => WidgetSettingsDialog(
+            initialConfig: currentConfig,
+            availableItems: availableItems,
+          ),
+    );
+
+    if (result != null) {
+      // 更新配置
+      final updatedConfig = Map<String, dynamic>.from(item.config);
+      updatedConfig['pluginWidgetConfig'] = result.toJson();
+
+      final updatedItem = item.copyWith(config: updatedConfig);
+
+      // 保存到布局
+      final itemIndex = _layoutManager.items.indexWhere((i) => i.id == item.id);
+      if (itemIndex != -1) {
+        _layoutManager.items[itemIndex] = updatedItem;
+        await _layoutManager.saveLayout();
+        setState(() {});
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('设置已保存')));
+    }
+  }
+
   /// 显示颜色选择器
   void _showColorPicker(HomeItem item) {
-    // TODO: 实现背景颜色选择功能
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('背景颜色功能开发中...')));
+    if (item is! HomeWidgetItem) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('文件夹不支持背景颜色设置')));
+      return;
+    }
+
+    // 获取当前背景颜色
+    Color currentColor =
+        item.config['backgroundColor'] != null
+            ? Color(item.config['backgroundColor'] as int)
+            : Colors.white;
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('选择背景颜色'),
+            content: SingleChildScrollView(
+              child: ColorPicker(
+                pickerColor: currentColor,
+                onColorChanged: (Color color) {
+                  currentColor = color;
+                },
+                pickerAreaHeightPercent: 0.8,
+                enableAlpha: true,
+                displayThumbColor: true,
+                labelTypes: const [],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // 保存颜色
+                  _saveBackgroundColor(item, currentColor);
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  /// 保存背景颜色
+  void _saveBackgroundColor(HomeWidgetItem item, Color color) async {
+    final updatedConfig = Map<String, dynamic>.from(item.config);
+    updatedConfig['backgroundColor'] = color.value;
+
+    final updatedItem = item.copyWith(config: updatedConfig);
+
+    final itemIndex = _layoutManager.items.indexWhere((i) => i.id == item.id);
+    if (itemIndex != -1) {
+      _layoutManager.items[itemIndex] = updatedItem;
+      await _layoutManager.saveLayout();
+      setState(() {});
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('背景颜色已保存')));
+    }
   }
 
   /// 显示背景图选择器
-  void _showBackgroundImagePicker(HomeWidgetItem item) {
-    // TODO: 实现背景图选择功能
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('背景图功能开发中...')));
+  void _showBackgroundImagePicker(HomeWidgetItem item) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final imagePath = result.files.single.path!;
+        await _saveBackgroundImage(item, imagePath);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('选择图片失败: $e')));
+      }
+    }
+  }
+
+  /// 保存背景图
+  Future<void> _saveBackgroundImage(
+    HomeWidgetItem item,
+    String imagePath,
+  ) async {
+    final updatedConfig = Map<String, dynamic>.from(item.config);
+    updatedConfig['backgroundImage'] = imagePath;
+
+    final updatedItem = item.copyWith(config: updatedConfig);
+
+    final itemIndex = _layoutManager.items.indexWhere((i) => i.id == item.id);
+    if (itemIndex != -1) {
+      _layoutManager.items[itemIndex] = updatedItem;
+      await _layoutManager.saveLayout();
+      setState(() {});
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('背景图已保存')));
+    }
   }
 
   /// 显示大小调整器
   void _showSizeAdjuster(HomeWidgetItem item) {
-    // TODO: 实现组件大小调整功能
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('大小调整功能开发中...')));
+    final registry = HomeWidgetRegistry();
+    final widget = registry.getWidget(item.widgetId);
+
+    if (widget == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('未找到小组件定义')));
+      return;
+    }
+
+    final supportedSizes = widget.supportedSizes;
+
+    if (supportedSizes.length <= 1) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('该小组件不支持调整大小')));
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('选择组件大小'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children:
+                  supportedSizes.map((size) {
+                    final isSelected = size == item.size;
+                    final sizeLabel = _getSizeLabel(size);
+
+                    return RadioListTile<HomeWidgetSize>(
+                      title: Text(sizeLabel),
+                      subtitle: Text('${size.width}x${size.height}'),
+                      value: size,
+                      groupValue: item.size,
+                      selected: isSelected,
+                      onChanged: (HomeWidgetSize? newSize) {
+                        if (newSize != null) {
+                          Navigator.pop(context);
+                          _saveWidgetSize(item, newSize);
+                        }
+                      },
+                    );
+                  }).toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  /// 获取尺寸标签
+  String _getSizeLabel(HomeWidgetSize size) {
+    switch (size) {
+      case HomeWidgetSize.small:
+        return '小 (图标)';
+      case HomeWidgetSize.medium:
+        return '中 (横向卡片)';
+      case HomeWidgetSize.large:
+        return '大 (方形卡片)';
+    }
+  }
+
+  /// 保存组件大小
+  Future<void> _saveWidgetSize(
+    HomeWidgetItem item,
+    HomeWidgetSize newSize,
+  ) async {
+    final updatedItem = item.copyWith(size: newSize);
+
+    final itemIndex = _layoutManager.items.indexWhere((i) => i.id == item.id);
+    if (itemIndex != -1) {
+      _layoutManager.items[itemIndex] = updatedItem;
+      await _layoutManager.saveLayout();
+      setState(() {});
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('组件大小已更新')));
+    }
   }
 
   /// 确认删除项目

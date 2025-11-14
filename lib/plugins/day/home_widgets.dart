@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'day_plugin.dart';
@@ -37,8 +39,38 @@ class DayHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '记录',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
+  }
+
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
+    try {
+      final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
+      if (plugin == null) return [];
+
+      final totalCount = plugin.getMemorialDayCount();
+      final upcomingDays = plugin.getUpcomingMemorialDays();
+
+      return [
+        StatItemData(
+          id: 'total_count',
+          label: '纪念日数',
+          value: '$totalCount',
+          highlight: false,
+        ),
+        StatItemData(
+          id: 'upcoming',
+          label: '即将到来',
+          value: upcomingDays.isNotEmpty ? upcomingDays.join('、') : '暂无',
+          highlight: upcomingDays.isNotEmpty,
+          color: Colors.black87,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
   }
 
   /// 构建 1x1 图标组件
@@ -53,107 +85,34 @@ class DayHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
+      final l10n = DayLocalizations.of(context);
+
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
+          );
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
       }
 
-      final theme = Theme.of(context);
-      final l10n = DayLocalizations.of(context);
-      final totalCount = plugin.getMemorialDayCount();
-      final upcomingDays = plugin.getUpcomingMemorialDays();
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图标和标题
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.black87.withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.event_outlined,
-                    size: 24,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 统计信息
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 第一行：纪念日数和即将到来
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _StatItem(
-                        label: l10n.memorialDaysCount,
-                        value: '$totalCount',
-                        theme: theme,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: theme.dividerColor,
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              l10n.upcoming,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.textTheme.bodySmall?.color,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              upcomingDays.isNotEmpty
-                                  ? upcomingDays.join('、')
-                                  : '暂无',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: upcomingDays.isNotEmpty
-                                    ? Colors.black87
-                                    : theme.textTheme.bodySmall?.color,
-                              ),
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.event_outlined,
+        pluginDefaultColor: Colors.black87,
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -174,46 +133,6 @@ class DayHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }
