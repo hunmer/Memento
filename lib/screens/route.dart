@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
 import 'package:Memento/screens/js_console/js_console_screen.dart';
+import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart';
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -41,6 +42,7 @@ class AppRoutes extends NavigatorObserver {
   static const String checkin = '/checkin';
   static const String settings = '/settings';
   static const String jsConsole = '/js_console';
+  static const String jsonDynamicTest = '/json_dynamic_test';
 
   // 插件路由路径
   static const String bill = '/bill';
@@ -120,6 +122,8 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const TrackerMainView());
       case 'js_console':
         return _createRoute(const JSConsoleScreen());
+      case 'json_dynamic_test':
+        return _createRoute(const JsonDynamicTestScreen());
       default:
         return _createRoute(
           Scaffold(
@@ -153,6 +157,7 @@ class AppRoutes extends NavigatorObserver {
     todo: (context) => const TodoMainView(),
     tracker: (context) => const TrackerMainView(),
     jsConsole: (context) => const JSConsoleScreen(),
+    jsonDynamicTest: (context) => const JsonDynamicTestScreen(),
   };
 
   static String get initialRoute => home;

@@ -30,7 +30,8 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
   @override
   void didUpdateWidget(GoodsItemCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.item.imageUrl != widget.item.imageUrl) {
+    if (oldWidget.item.imageUrl != widget.item.imageUrl ||
+        oldWidget.item.thumbUrl != widget.item.thumbUrl) {
       _resolveImageUrl();
     }
   }
@@ -38,7 +39,8 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
   Future<void> _resolveImageUrl() async {
     if (widget.item.imageUrl != null) {
       try {
-        final url = await widget.item.getImageUrl();
+        // 优先使用缩略图进行预览
+        final url = await widget.item.getThumbUrl() ?? await widget.item.getImageUrl();
         if (mounted) {
           setState(() {
             _resolvedImageUrl = url;

@@ -16,6 +16,7 @@ class EntryEditorController {
   String? weather;
   List<String> selectedTags = [];
   List<String> imageUrls = [];
+  List<String> thumbUrls = [];
   bool isPreview = false;
 
   EntryEditorController({
@@ -29,6 +30,7 @@ class EntryEditorController {
     mood = entry?.mood;
     weather = entry?.weather;
     imageUrls = entry?.imageUrls.toList() ?? [];
+    thumbUrls = entry?.thumbUrls.toList() ?? [];
   }
 
   void dispose() {
@@ -61,6 +63,7 @@ class EntryEditorController {
         mood: mood,
         weather: weather,
         imageUrls: imageUrls,
+        thumbUrls: thumbUrls,
       );
       calendarController.updateEntry(updatedEntry);
       return updatedEntry;
@@ -74,6 +77,7 @@ class EntryEditorController {
         mood: mood,
         weather: weather,
         imageUrls: imageUrls,
+        thumbUrls: thumbUrls,
         createdAt: initialDate ?? DateTime.now(),
       );
       calendarController.addEntry(newEntry);

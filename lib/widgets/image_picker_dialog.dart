@@ -6,7 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:crop_your_image/crop_your_image.dart';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:path/path.dart' as path;
 import '../utils/image_utils.dart';
+import '../core/services/image_compression_service.dart';
 
 class ImagePickerDialog extends StatefulWidget {
   final String? initialUrl;
@@ -23,6 +25,15 @@ class ImagePickerDialog extends StatefulWidget {
   /// 是否允许多图片选择
   final bool multiple;
 
+  /// 是否启用图片压缩（默认关闭）
+  final bool enableCompression;
+
+  /// 缩略图保存路径（如果不指定则是保存的文件名+.thumb）
+  final String? thumbnailPath;
+
+  /// 压缩质量 0-100（默认 85）
+  final int compressionQuality;
+
   const ImagePickerDialog({
     super.key,
     this.initialUrl,
@@ -30,6 +41,9 @@ class ImagePickerDialog extends StatefulWidget {
     this.enableCrop = false,
     this.cropAspectRatio,
     this.multiple = false,
+    this.enableCompression = false,
+    this.thumbnailPath,
+    this.compressionQuality = 85,
   });
 
   @override
@@ -60,6 +74,57 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
           url.isNotEmpty &&
           (url.startsWith('http://') || url.startsWith('https://'));
     });
+  }
+
+  /// 处理图片压缩和缩略图生成
+  ///
+  /// [savedImagePath] 保存后的图片绝对路径
+  /// [relativePath] 相对路径
+  /// 返回包含原图和缩略图信息的 Map
+  Future<Map<String, dynamic>> _processImageCompression(
+    String savedImagePath,
+    String relativePath,
+  ) async {
+    if (!widget.enableCompression) {
+      // 不压缩，直接返回原图
+      return {'url': relativePath, 'thumbUrl': null};
+    }
+
+    try {
+      // 生成缩略图路径
+      String thumbPath;
+      if (widget.thumbnailPath != null && widget.thumbnailPath!.isNotEmpty) {
+        thumbPath = widget.thumbnailPath!;
+      } else {
+        // 默认在原文件名后加 .thumb
+        final dir = path.dirname(savedImagePath);
+        final filename = path.basenameWithoutExtension(savedImagePath);
+        final ext = path.extension(savedImagePath);
+        thumbPath = path.join(dir, '$filename.thumb$ext');
+      }
+
+      // 使用压缩服务生成缩略图
+      final compressionService = ImageCompressionService();
+      final compressedPath = await compressionService.compressImage(
+        sourcePath: savedImagePath,
+        targetPath: thumbPath,
+        quality: widget.compressionQuality,
+      );
+
+      debugPrint('缩略图已生成: $compressedPath');
+
+      // 计算缩略图的相对路径
+      final thumbRelativePath = await ImageUtils.toRelativePath(thumbPath);
+
+      return {
+        'url': relativePath,
+        'thumbUrl': thumbRelativePath,
+      };
+    } catch (e) {
+      debugPrint('生成缩略图失败: $e');
+      // 失败时返回原图
+      return {'url': relativePath, 'thumbUrl': null};
+    }
   }
 
   @override
@@ -135,12 +200,21 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                               context,
                               bytes,
                               savedImage.path,
+                              relativePath,
                             );
                             if (result != null) {
                               results.add(result);
                             }
                           } else {
-                            results.add({'url': relativePath, 'bytes': bytes});
+                            // 处理压缩和缩略图
+                            final compressionResult = await _processImageCompression(
+                              savedImagePath,
+                              relativePath,
+                            );
+                            results.add({
+                              ...compressionResult,
+                              'bytes': bytes,
+                            });
                           }
                         }
 
@@ -206,12 +280,21 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                             context,
                             bytes,
                             savedImage.path,
+                            relativePath,
                           );
                           if (result != null) {
                             results.add(result);
                           }
                         } else {
-                          results.add({'url': relativePath, 'bytes': bytes});
+                          // 处理压缩和缩略图
+                          final compressionResult = await _processImageCompression(
+                            savedImagePath,
+                            relativePath,
+                          );
+                          results.add({
+                            ...compressionResult,
+                            'bytes': bytes,
+                          });
                         }
 
                         if (results.isNotEmpty && context.mounted) {
@@ -260,6 +343,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
     BuildContext context,
     Uint8List imageBytes,
     String originalImagePath,
+    String originalRelativePath,
   ) async {
     final cropController = CropController();
     final completer = Completer<Map<String, dynamic>?>();
@@ -314,10 +398,19 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                       widget.saveDirectory,
                                     );
 
+                                // 处理压缩和缩略图
+                                final savedImagePath = await ImageUtils.getAbsolutePath(
+                                  relativePath,
+                                );
+                                final compressionResult = await _processImageCompression(
+                                  savedImagePath,
+                                  relativePath,
+                                );
+
                                 if (context.mounted) {
                                   Navigator.of(context).pop();
                                   completer.complete({
-                                    'url': relativePath,
+                                    ...compressionResult,
                                     'bytes': croppedImage,
                                   });
                                 }

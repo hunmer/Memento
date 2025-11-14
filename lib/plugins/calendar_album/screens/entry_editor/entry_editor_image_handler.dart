@@ -5,12 +5,14 @@ import 'dart:io';
 
 class EntryEditorImageHandler extends StatefulWidget {
   final List<String> imageUrls;
-  final Function(String) onImageAdded;
-  final Function(String) onImageRemoved;
+  final List<String> thumbUrls;
+  final Function(String url, String? thumbUrl) onImageAdded;
+  final Function(int index) onImageRemoved;
 
   const EntryEditorImageHandler({
     super.key,
     required this.imageUrls,
+    required this.thumbUrls,
     required this.onImageAdded,
     required this.onImageRemoved,
   });
@@ -29,17 +31,20 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
     );
   }
 
-  Widget _buildImage(String url, {bool showDelete = true}) {
+  Widget _buildImage(int index, String url, String? thumbUrl, {bool showDelete = true}) {
     if (url.isEmpty) return _buildDefaultCover();
 
-    if (url.startsWith('http://') || url.startsWith('https://')) {
+    // 优先使用缩略图进行预览
+    final displayUrl = thumbUrl ?? url;
+
+    if (displayUrl.startsWith('http://') || displayUrl.startsWith('https://')) {
       return SizedBox(
         height: 100,
         width: 100,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Image.network(
-            url,
+            displayUrl,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) => _buildDefaultCover(),
           ),
@@ -48,7 +53,7 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
     }
 
     return FutureBuilder<String>(
-      future: ImageUtils.getAbsolutePath(url),
+      future: ImageUtils.getAbsolutePath(displayUrl),
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           final file = File(snapshot.data!);
@@ -83,27 +88,32 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              ...widget.imageUrls.map(
-                (url) => Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Stack(
-                    children: [
-                      _buildImage(url, showDelete: widget.imageUrls.length > 1),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              widget.onImageRemoved(url);
-                            });
-                          },
+              ...List.generate(
+                widget.imageUrls.length,
+                (index) {
+                  final url = widget.imageUrls[index];
+                  final thumbUrl = index < widget.thumbUrls.length ? widget.thumbUrls[index] : null;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Stack(
+                      children: [
+                        _buildImage(index, url, thumbUrl, showDelete: widget.imageUrls.length > 1),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                widget.onImageRemoved(index);
+                              });
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+                      ],
+                    ),
+                  );
+                },
               ),
               GestureDetector(
                 onTap: () async {
@@ -113,13 +123,18 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
                         (context) => ImagePickerDialog(
                           saveDirectory: 'calendar_album/images',
                           multiple: true,
+                          enableCompression: true,
+                          compressionQuality: 85,
                         ),
                   );
                   if (results != null && results.isNotEmpty) {
                     setState(() {
                       for (final result in results) {
                         if (result['url'] != null) {
-                          widget.onImageAdded(result['url'] as String);
+                          widget.onImageAdded(
+                            result['url'] as String,
+                            result['thumbUrl'] as String?,
+                          );
                         }
                       }
                     });

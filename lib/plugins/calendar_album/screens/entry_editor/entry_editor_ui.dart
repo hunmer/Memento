@@ -70,8 +70,17 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
         children: [
           EntryEditorImageHandler(
             imageUrls: controller.imageUrls,
-            onImageAdded: (url) => controller.imageUrls.add(url),
-            onImageRemoved: (url) => controller.imageUrls.remove(url),
+            thumbUrls: controller.thumbUrls,
+            onImageAdded: (url, thumbUrl) {
+              controller.imageUrls.add(url);
+              controller.thumbUrls.add(thumbUrl ?? '');
+            },
+            onImageRemoved: (index) {
+              controller.imageUrls.removeAt(index);
+              if (index < controller.thumbUrls.length) {
+                controller.thumbUrls.removeAt(index);
+              }
+            },
           ),
           const SizedBox(height: 16),
           _buildTitleField(l10n),

@@ -11,6 +11,7 @@ class CalendarEntry {
   final String? mood;
   final String? weather;
   final List<String> imageUrls;
+  final List<String> thumbUrls;
 
   CalendarEntry({
     required this.id,
@@ -23,6 +24,7 @@ class CalendarEntry {
     this.mood,
     this.weather,
     this.imageUrls = const [],
+    this.thumbUrls = const [],
   });
 
   factory CalendarEntry.create({
@@ -34,6 +36,7 @@ class CalendarEntry {
     String? mood,
     String? weather,
     List<String> imageUrls = const [],
+    List<String> thumbUrls = const [],
   }) {
     return CalendarEntry(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -46,6 +49,7 @@ class CalendarEntry {
       mood: mood,
       weather: weather,
       imageUrls: imageUrls,
+      thumbUrls: thumbUrls,
     );
   }
 
@@ -58,6 +62,7 @@ class CalendarEntry {
     String? mood,
     String? weather,
     List<String>? imageUrls,
+    List<String>? thumbUrls,
   }) {
     return CalendarEntry(
       id: id,
@@ -70,6 +75,7 @@ class CalendarEntry {
       mood: mood ?? this.mood,
       weather: weather ?? this.weather,
       imageUrls: imageUrls ?? this.imageUrls,
+      thumbUrls: thumbUrls ?? this.thumbUrls,
     );
   }
 
@@ -85,6 +91,7 @@ class CalendarEntry {
       'mood': mood,
       'weather': weather,
       'imageUrls': imageUrls,
+      'thumbUrls': thumbUrls,
     };
   }
 
@@ -100,6 +107,7 @@ class CalendarEntry {
       mood: json['mood'],
       weather: json['weather'],
       imageUrls: List<String>.from(json['imageUrls'] ?? []),
+      thumbUrls: List<String>.from(json['thumbUrls'] ?? []),
     );
   }
 

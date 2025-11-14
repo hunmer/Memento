@@ -263,15 +263,16 @@ class BasicInfoTab extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    final imagePath = controller.imagePath;
-    if (imagePath == null) {
+    // 优先使用缩略图进行预览,如果没有缩略图则使用原图
+    final displayPath = controller.thumbPath ?? controller.imagePath;
+    if (displayPath == null) {
       return const Icon(Icons.broken_image);
     }
 
     // 处理网络图片
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    if (displayPath.startsWith('http://') || displayPath.startsWith('https://')) {
       return Image.network(
-        imagePath,
+        displayPath,
         fit: BoxFit.cover,
         errorBuilder:
             (context, error, stackTrace) => const Icon(Icons.broken_image),
@@ -280,7 +281,7 @@ class BasicInfoTab extends StatelessWidget {
 
     // 处理本地图片，使用 ImageUtils 获取绝对路径
     return FutureBuilder<String>(
-      future: ImageUtils.getAbsolutePath(imagePath),
+      future: ImageUtils.getAbsolutePath(displayPath),
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           return Image.file(
@@ -297,7 +298,7 @@ class BasicInfoTab extends StatelessWidget {
 
   Future<void> _pickAndCropImage(BuildContext context) async {
     try {
-      // 弹出图片选择对话框
+      // 弹出图片选择对话框,启用压缩功能
       final result = await showDialog<Map<String, dynamic>>(
         context: context,
         builder:
@@ -306,19 +307,27 @@ class BasicInfoTab extends StatelessWidget {
               saveDirectory: 'goods/goods_images', // 使用专门的目录存储商品图片
               enableCrop: true,
               cropAspectRatio: 1, // 使用1:1的裁剪比例
+              enableCompression: true, // 启用压缩
+              compressionQuality: 85, // 压缩质量
             ),
       );
 
       if (result != null && result['url'] != null) {
         final path = result['url'];
+        final thumbPath = result['thumbUrl'] as String?;
         if (path.isNotEmpty) {
           // 删除旧图片
           if (controller.imagePath != null) {
             await ImageUtils.deleteImage(controller.imagePath);
           }
+          // 删除旧缩略图
+          if (controller.thumbPath != null) {
+            await ImageUtils.deleteImage(controller.thumbPath);
+          }
 
-          // 更新图片路径
+          // 更新图片路径和缩略图路径
           controller.imagePath = path;
+          controller.thumbPath = thumbPath;
           onStateChanged();
         }
       }
