@@ -26,15 +26,15 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   "type": "container",
   "args": {
     "padding": {
-      "type": "edgeInsets",
+      "type": "edge_insets",
       "args": {"all": 20.0}
     },
     "decoration": {
-      "type": "boxDecoration",
+      "type": "box_decoration",
       "args": {
         "color": "#E3F2FD",
         "borderRadius": {
-          "type": "borderRadius",
+          "type": "border_radius",
           "args": {"all": {"radius": 12.0}}
         }
       }
@@ -57,17 +57,16 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
             }
           },
           {
-            "type": "sizedBox",
+            "type": "sized_box",
             "args": {"height": 16.0}
           },
           {
-            "type": "elevatedButton",
+            "type": "elevated_button",
             "args": {
               "child": {
                 "type": "text",
                 "args": {"data": "点击我"}
-              },
-              "onPressed": {}
+              }
             }
           }
         ]
@@ -85,16 +84,19 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   "type": "card",
   "args": {
     "margin": {
-      "type": "edgeInsets",
+      "type": "edge_insets",
       "args": {"all": 8.0}
     },
     "child": {
-      "type": "listTile",
+      "type": "list_tile",
       "args": {
         "leading": {
           "type": "icon",
           "args": {
-            "icon": "star",
+            "icon": {
+              "codePoint": 59470,
+              "fontFamily": "MaterialIcons"
+            },
             "color": "#FFC107",
             "size": 32.0
           }
@@ -116,7 +118,10 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
         "trailing": {
           "type": "icon",
           "args": {
-            "icon": "chevron_right",
+            "icon": {
+              "codePoint": 58370,
+              "fontFamily": "MaterialIcons"
+            },
             "color": "#757575"
           }
         }
@@ -134,7 +139,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   "type": "container",
   "args": {
     "padding": {
-      "type": "edgeInsets",
+      "type": "edge_insets",
       "args": {"all": 16.0}
     },
     "child": {
@@ -143,7 +148,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
         "mainAxisSize": "min",
         "children": [
           {
-            "type": "textFormField",
+            "type": "text_form_field",
             "args": {
               "decoration": {
                 "labelText": "用户名",
@@ -153,11 +158,11 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
             }
           },
           {
-            "type": "sizedBox",
+            "type": "sized_box",
             "args": {"height": 16.0}
           },
           {
-            "type": "textFormField",
+            "type": "text_form_field",
             "args": {
               "decoration": {
                 "labelText": "密码",
@@ -168,11 +173,11 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
             }
           },
           {
-            "type": "sizedBox",
+            "type": "sized_box",
             "args": {"height": 16.0}
           },
           {
-            "type": "switchListTile",
+            "type": "switch_list_tile",
             "args": {
               "title": {
                 "type": "text",
@@ -251,7 +256,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   "type": "container",
   "args": {
     "padding": {
-      "type": "edgeInsets",
+      "type": "edge_insets",
       "args": {"all": 16.0}
     },
     "child": {
@@ -264,14 +269,14 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
             "type": "container",
             "args": {
               "padding": {
-                "type": "edgeInsets",
+                "type": "edge_insets",
                 "args": {"all": 16.0}
               },
               "decoration": {
-                "type": "boxDecoration",
+                "type": "box_decoration",
                 "args": {
                   "gradient": {
-                    "type": "linearGradient",
+                    "type": "linear_gradient",
                     "args": {
                       "colors": ["#2196F3", "#1976D2"],
                       "begin": "topLeft",
@@ -279,7 +284,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                     }
                   },
                   "borderRadius": {
-                    "type": "borderRadius",
+                    "type": "border_radius",
                     "args": {"all": {"radius": 12.0}}
                   }
                 }
@@ -301,7 +306,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                       }
                     },
                     {
-                      "type": "sizedBox",
+                      "type": "sized_box",
                       "args": {"height": 8.0}
                     },
                     {
@@ -320,7 +325,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
             }
           },
           {
-            "type": "sizedBox",
+            "type": "sized_box",
             "args": {"height": 16.0}
           },
           {
@@ -336,13 +341,16 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                       {
                         "type": "icon",
                         "args": {
-                          "icon": "favorite",
+                          "icon": {
+                            "codePoint": 59512,
+                            "fontFamily": "MaterialIcons"
+                          },
                           "color": "#E91E63",
                           "size": 32.0
                         }
                       },
                       {
-                        "type": "sizedBox",
+                        "type": "sized_box",
                         "args": {"height": 4.0}
                       },
                       {
@@ -360,13 +368,16 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                       {
                         "type": "icon",
                         "args": {
-                          "icon": "share",
+                          "icon": {
+                            "codePoint": 59405,
+                            "fontFamily": "MaterialIcons"
+                          },
                           "color": "#2196F3",
                           "size": 32.0
                         }
                       },
                       {
-                        "type": "sizedBox",
+                        "type": "sized_box",
                         "args": {"height": 4.0}
                       },
                       {
@@ -384,13 +395,16 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                       {
                         "type": "icon",
                         "args": {
-                          "icon": "settings",
+                          "icon": {
+                            "codePoint": 59576,
+                            "fontFamily": "MaterialIcons"
+                          },
                           "color": "#757575",
                           "size": 32.0
                         }
                       },
                       {
-                        "type": "sizedBox",
+                        "type": "sized_box",
                         "args": {"height": 4.0}
                       },
                       {
@@ -443,7 +457,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
     }
   }
 
-  // 显示预览对话框
+  // 显示预览页面
   void _showPreviewDialog() {
     final jsonString = _jsonController.text.trim();
     if (jsonString.isEmpty) {
@@ -457,55 +471,11 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
       return;
     }
 
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        child: Container(
-          constraints: const BoxConstraints(
-            maxWidth: 600,
-            maxHeight: 700,
-          ),
-          child: Column(
-            children: [
-              // 标题栏
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.preview,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'UI 预览',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-              ),
-              // 预览内容
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: widgetData.build(context: context),
-                ),
-              ),
-            ],
-          ),
+    // 导航到预览页面
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => JsonDynamicPreviewScreen(
+          widgetData: widgetData,
         ),
       ),
     );
@@ -824,4 +794,39 @@ class JsonTemplate {
     required this.description,
     required this.json,
   });
+}
+
+/// JSON 动态 UI 预览页面
+class JsonDynamicPreviewScreen extends StatelessWidget {
+  final JsonWidgetData widgetData;
+
+  const JsonDynamicPreviewScreen({
+    super.key,
+    required this.widgetData,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back),
+          tooltip: '返回',
+        ),
+        title: const Text('UI 预览'),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.close),
+            tooltip: '关闭',
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: widgetData.build(context: context),
+      ),
+    );
+  }
 }
