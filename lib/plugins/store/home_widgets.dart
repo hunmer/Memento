@@ -28,6 +28,7 @@ class StoreHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.store,
         color: Colors.pinkAccent,
+        name: '商店',
       ),
     ));
 

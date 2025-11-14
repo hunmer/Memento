@@ -28,6 +28,7 @@ class TrackerHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.track_changes,
         color: Colors.red,
+        name: '追踪器',
       ),
     ));
 

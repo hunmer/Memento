@@ -28,6 +28,7 @@ class CheckinHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.checklist,
         color: Colors.teal,
+        name: '签到',
       ),
     ));
 

@@ -27,7 +27,11 @@ class DiaryHomeWidgets {
       category: '记录',
         builder:
             (context, config) =>
-                const GenericIconWidget(icon: Icons.book, color: Colors.indigo),
+                const GenericIconWidget(
+                  icon: Icons.book,
+                  color: Colors.indigo,
+                  name: '日记',
+                ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息

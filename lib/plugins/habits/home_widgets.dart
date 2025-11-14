@@ -28,6 +28,7 @@ class HabitsHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.auto_awesome,
         color: Colors.amber,
+        name: '习惯',
       ),
     ));
 

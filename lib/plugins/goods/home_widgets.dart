@@ -30,6 +30,7 @@ class GoodsHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.inventory_2,
         color: _goodsColor,
+        name: '物品',
       ),
     ));
 

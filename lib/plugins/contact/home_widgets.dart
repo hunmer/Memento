@@ -28,6 +28,7 @@ class ContactHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.contacts,
         color: Colors.deepPurple,
+        name: '联系人',
       ),
     ));
 

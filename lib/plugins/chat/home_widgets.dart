@@ -28,6 +28,7 @@ class ChatHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.chat_bubble,
         color: Colors.indigoAccent,
+        name: '聊天',
       ),
     ));
 

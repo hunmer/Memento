@@ -28,6 +28,7 @@ class NodesHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.account_tree,
         color: Colors.amber,
+        name: '节点',
       ),
     ));
 

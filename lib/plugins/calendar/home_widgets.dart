@@ -28,6 +28,7 @@ class CalendarHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.calendar_month,
         color: Color.fromARGB(255, 211, 91, 91),
+        name: '日历',
       ),
     ));
 
