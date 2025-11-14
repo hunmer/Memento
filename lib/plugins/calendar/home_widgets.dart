@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'calendar_plugin.dart';
@@ -23,7 +25,10 @@ class CalendarHomeWidgets {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '工具',
-      builder: (context, config) => _buildIconWidget(context),
+      builder: (context, config) => const GenericIconWidget(
+        icon: Icons.calendar_month,
+        color: Color.fromARGB(255, 211, 91, 91),
+      ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -37,126 +42,89 @@ class CalendarHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '工具',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.calendar_month,
-        size: 48,
-        color: const Color.fromARGB(255, 211, 91, 91),
-      ),
-    );
-  }
-
-  /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
     try {
       final plugin = PluginManager.instance.getPlugin('calendar') as CalendarPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
+      if (plugin == null) return [];
 
-      final theme = Theme.of(context);
-      final l10n = CalendarLocalizations.of(context);
-
-      // 获取所有活动数量
-      final eventCount = plugin.controller.getAllEvents().length;
+      final allEvents = plugin.controller.getAllEvents();
+      final eventCount = allEvents.length;
 
       // 获取7天内的活动数量
       final now = DateTime.now();
       final sevenDaysLater = now.add(const Duration(days: 7));
-      final upcomingEventCount = plugin.controller.getAllEvents().where((event) {
+      final upcomingEventCount = allEvents.where((event) {
         return event.startTime.isAfter(now) &&
             event.startTime.isBefore(sevenDaysLater);
       }).length;
 
       // 获取过期活动数量
-      final expiredEventCount = plugin.controller.getAllEvents().where((event) {
+      final expiredEventCount = allEvents.where((event) {
         return event.startTime.isBefore(now);
       }).length;
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图标和标题
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 211, 91, 91).withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.calendar_month,
-                    size: 24,
-                    color: Color.fromARGB(255, 211, 91, 91),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 统计信息
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 第一行：活动数量和7天活动
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _StatItem(
-                        label: l10n.eventCount,
-                        value: '$eventCount',
-                        theme: theme,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: theme.dividerColor,
-                      ),
-                      _StatItem(
-                        label: l10n.weekEvents,
-                        value: '$upcomingEventCount',
-                        theme: theme,
-                        highlight: upcomingEventCount > 0,
-                        color: Colors.orange,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 第二行：过期活动
-                  _StatItem(
-                    label: l10n.expiredEvents,
-                    value: '$expiredEventCount',
-                    theme: theme,
-                    highlight: expiredEventCount > 0,
-                    color: Colors.red,
-                  ),
-                ],
-              ),
-            ),
-          ],
+      return [
+        StatItemData(
+          id: 'event_count',
+          label: '活动数量',
+          value: '$eventCount',
+          highlight: false,
         ),
+        StatItemData(
+          id: 'week_events',
+          label: '7天活动',
+          value: '$upcomingEventCount',
+          highlight: upcomingEventCount > 0,
+          color: Colors.orange,
+        ),
+        StatItemData(
+          id: 'expired_events',
+          label: '过期活动',
+          value: '$expiredEventCount',
+          highlight: expiredEventCount > 0,
+          color: Colors.red,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// 构建 2x2 详细卡片组件
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+    try {
+      final l10n = CalendarLocalizations.of(context);
+
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
+          );
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
+      }
+
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
+
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.calendar_month,
+        pluginDefaultColor: const Color.fromARGB(255, 211, 91, 91),
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -177,46 +145,6 @@ class CalendarHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

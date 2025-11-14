@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'openai_plugin.dart';
@@ -23,7 +25,10 @@ class OpenAIHomeWidgets {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '工具',
-      builder: (context, config) => _buildIconWidget(context),
+      builder: (context, config) => const GenericIconWidget(
+        icon: Icons.smart_toy,
+        color: Colors.deepOrange,
+      ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -37,105 +42,69 @@ class OpenAIHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '工具',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.smart_toy,
-        size: 48,
-        color: Colors.deepOrange,
-      ),
-    );
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
+    try {
+      final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      if (plugin == null) return [];
+
+      // 从存储中读取智能体列表
+      int agentsCount = 0;
+      plugin.storage.read('openai/agents.json').then((data) {
+        if (data is Map<String, dynamic>) {
+          final agentsList = data['agents'] as List? ?? [];
+          agentsCount = agentsList.length;
+        }
+      });
+
+      return [
+        StatItemData(
+          id: 'total_agents',
+          label: 'AI助手数',
+          value: '$agentsCount',
+          highlight: agentsCount > 0,
+          color: Colors.deepOrange,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
-
-      final theme = Theme.of(context);
       final l10n = OpenAILocalizations.of(context);
 
-      return FutureBuilder<Map<String, dynamic>>(
-        future: plugin.storage.read('openai/agents.json').then((data) {
-          if (data is Map<String, dynamic>) {
-            return data;
-          }
-          return <String, dynamic>{};
-        }),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          final agentsData = snapshot.data ?? {};
-          final agentsList = agentsData['agents'] as List? ?? [];
-          final agentsCount = agentsList.length;
-
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 顶部图标和标题
-                Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.deepOrange.withAlpha(30),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.smart_toy,
-                        size: 24,
-                        color: Colors.deepOrange,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        l10n.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // 统计信息
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // 智能体总数
-                      _StatItem(
-                        label: l10n.totalAgents,
-                        value: '$agentsCount',
-                        theme: theme,
-                        highlight: agentsCount > 0,
-                        color: Colors.deepOrange,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
           );
-        },
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
+      }
+
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
+
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.smart_toy,
+        pluginDefaultColor: Colors.deepOrange,
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -156,46 +125,6 @@ class OpenAIHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

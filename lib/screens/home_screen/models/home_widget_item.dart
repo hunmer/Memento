@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'home_item.dart';
 import 'home_widget_size.dart';
 
@@ -33,12 +34,32 @@ class HomeWidgetItem extends HomeItem {
 
   /// 从 JSON 加载
   factory HomeWidgetItem.fromJson(Map<String, dynamic> json) {
-    return HomeWidgetItem(
+    // 调试：打印原始 JSON 中的 config
+    final widgetId = json['widgetId'] as String;
+
+    // 更安全的 config 处理
+    Map<String, dynamic> configMap = {};
+    if (json['config'] != null) {
+      try {
+        // 尝试直接转换
+        if (json['config'] is Map) {
+          configMap = Map<String, dynamic>.from(json['config'] as Map);
+        }
+      } catch (e) {
+        debugPrint(
+          '[HomeWidgetItem] fromJson - widgetId: $widgetId, config 转换失败: $e',
+        );
+      }
+    }
+
+    final item = HomeWidgetItem(
       id: json['id'] as String,
-      widgetId: json['widgetId'] as String,
+      widgetId: widgetId,
       size: HomeWidgetSize.fromJson(json['size'] as Map<String, dynamic>),
-      config: (json['config'] as Map<String, dynamic>?) ?? {},
+      config: configMap,
     );
+
+    return item;
   }
 
   /// 创建副本，允许修改部分字段

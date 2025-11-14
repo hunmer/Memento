@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'bill_plugin.dart';
@@ -23,7 +25,10 @@ class BillHomeWidgets {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '记录',
-      builder: (context, config) => _buildIconWidget(context),
+      builder: (context, config) => const GenericIconWidget(
+        icon: Icons.account_balance_wallet,
+        color: Colors.green,
+      ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -37,113 +42,77 @@ class BillHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '记录',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.account_balance_wallet,
-        size: 48,
-        color: Colors.green,
-      ),
-    );
-  }
-
-  /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
     try {
       final plugin = PluginManager.instance.getPlugin('bill') as BillPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
+      if (plugin == null) return [];
 
-      final theme = Theme.of(context);
-      final l10n = BillLocalizations.of(context);
       final todayFinance = plugin.controller.getTodayFinance();
       final monthFinance = plugin.controller.getMonthFinance();
       final monthBillCount = plugin.controller.getMonthBillCount();
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图标和标题
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.green.withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance_wallet,
-                    size: 24,
-                    color: Colors.green,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 统计信息
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 第一行：今日财务和本月财务
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _StatItem(
-                        label: l10n.todayFinance,
-                        value: '¥${todayFinance.toStringAsFixed(2)}',
-                        theme: theme,
-                        highlight: todayFinance != 0,
-                        color: todayFinance >= 0 ? Colors.green : Colors.red,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: theme.dividerColor,
-                      ),
-                      _StatItem(
-                        label: l10n.monthFinance,
-                        value: '¥${monthFinance.toStringAsFixed(2)}',
-                        theme: theme,
-                        highlight: monthFinance != 0,
-                        color: monthFinance >= 0 ? Colors.green : Colors.red,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 第二行：本月记账
-                  _StatItem(
-                    label: l10n.monthBills,
-                    value: '$monthBillCount',
-                    theme: theme,
-                  ),
-                ],
-              ),
-            ),
-          ],
+      return [
+        StatItemData(
+          id: 'today_finance',
+          label: '今日财务',
+          value: '¥${todayFinance.toStringAsFixed(2)}',
+          highlight: todayFinance != 0,
+          color: todayFinance >= 0 ? Colors.green : Colors.red,
         ),
+        StatItemData(
+          id: 'month_finance',
+          label: '本月财务',
+          value: '¥${monthFinance.toStringAsFixed(2)}',
+          highlight: monthFinance != 0,
+          color: monthFinance >= 0 ? Colors.green : Colors.red,
+        ),
+        StatItemData(
+          id: 'month_bills',
+          label: '本月记账',
+          value: '$monthBillCount',
+          highlight: false,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// 构建 2x2 详细卡片组件
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+    try {
+      final l10n = BillLocalizations.of(context);
+
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
+          );
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
+      }
+
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
+
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.account_balance_wallet,
+        pluginDefaultColor: Colors.green,
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -164,46 +133,6 @@ class BillHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

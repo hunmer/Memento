@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'chat_plugin.dart';
@@ -23,7 +25,10 @@ class ChatHomeWidgets {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '通讯',
-      builder: (context, config) => _buildIconWidget(context),
+      builder: (context, config) => const GenericIconWidget(
+        icon: Icons.chat_bubble,
+        color: Colors.indigoAccent,
+      ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -37,111 +42,76 @@ class ChatHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '通讯',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.chat_bubble,
-        size: 48,
-        color: Colors.indigoAccent,
-      ),
-    );
-  }
-
-  /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
     try {
       final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
+      if (plugin == null) return [];
 
-      final theme = Theme.of(context);
-      final l10n = ChatLocalizations.of(context);
       final channels = plugin.channelService.channels;
       final totalMessages = plugin.channelService.getTotalMessageCount();
       final todayMessages = plugin.channelService.getTodayMessageCount();
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图标和标题
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.indigoAccent.withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.chat_bubble,
-                    size: 24,
-                    color: Colors.indigoAccent,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 统计信息
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 第一行：频道数和总消息数
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _StatItem(
-                        label: l10n.channelCount,
-                        value: '${channels.length}',
-                        theme: theme,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: theme.dividerColor,
-                      ),
-                      _StatItem(
-                        label: l10n.totalMessages,
-                        value: '$totalMessages',
-                        theme: theme,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 第二行：今日消息数
-                  _StatItem(
-                    label: l10n.todayMessages,
-                    value: '$todayMessages',
-                    theme: theme,
-                    highlight: todayMessages > 0,
-                    color: Colors.indigoAccent,
-                  ),
-                ],
-              ),
-            ),
-          ],
+      return [
+        StatItemData(
+          id: 'channel_count',
+          label: '频道数',
+          value: '${channels.length}',
+          highlight: false,
         ),
+        StatItemData(
+          id: 'total_messages',
+          label: '总消息数',
+          value: '$totalMessages',
+          highlight: false,
+        ),
+        StatItemData(
+          id: 'today_messages',
+          label: '今日消息',
+          value: '$todayMessages',
+          highlight: todayMessages > 0,
+          color: Colors.indigoAccent,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// 构建 2x2 详细卡片组件
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+    try {
+      final l10n = ChatLocalizations.of(context);
+
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
+          );
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
+      }
+
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
+
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.chat_bubble,
+        pluginDefaultColor: Colors.indigoAccent,
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -162,46 +132,6 @@ class ChatHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

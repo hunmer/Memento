@@ -4,28 +4,35 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../models/home_item.dart';
 import '../models/home_widget_item.dart';
 import '../models/home_folder_item.dart';
+import '../managers/home_widget_registry.dart';
 import 'home_card.dart';
 
 /// 主页网格布局组件
 ///
-/// 支持长按拖拽排序
+/// 支持长按拖拽排序和批量选择
 class HomeGrid extends StatefulWidget {
   final List<HomeItem> items;
   final Function(int oldIndex, int newIndex)? onReorder;
+  final Function(String itemId, String folderId)? onAddToFolder;
   final Function(HomeItem item)? onItemTap;
   final Function(HomeItem item)? onItemLongPress;
   final int crossAxisCount;
   final bool isEditMode;
+  final bool isBatchMode;
+  final Set<String> selectedItemIds;
   final Alignment alignment;
 
   const HomeGrid({
     super.key,
     required this.items,
     this.onReorder,
+    this.onAddToFolder,
     this.onItemTap,
     this.onItemLongPress,
     this.crossAxisCount = 2,
     this.isEditMode = false,
+    this.isBatchMode = false,
+    this.selectedItemIds = const {},
     this.alignment = Alignment.topCenter,
   });
 
@@ -36,6 +43,13 @@ class HomeGrid extends StatefulWidget {
 class _HomeGridState extends State<HomeGrid> {
   int? _draggingIndex;
   int? _hoveringIndex;
+
+  /// 处理添加到文件夹的操作
+  void _handleAddToFolder(String itemId, String folderId) {
+    if (widget.onAddToFolder != null) {
+      widget.onAddToFolder!(itemId, folderId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,14 +121,18 @@ class _HomeGridState extends State<HomeGrid> {
     final isBeingDragged = _draggingIndex == index;
     final isHovering = _hoveringIndex == index;
 
-    // 如果不是编辑模式，返回普通卡片
+    // 如果不是编辑模式，返回普通卡片（包括批量选择模式）
     if (!widget.isEditMode) {
+      final isSelected = widget.isBatchMode && widget.selectedItemIds.contains(item.id);
+
       return StaggeredGridTile.count(
         crossAxisCellCount: crossAxisCellCount,
         mainAxisCellCount: mainAxisCellCount,
         child: HomeCard(
           key: ValueKey(item.id),
           item: item,
+          isSelected: isSelected,
+          isBatchMode: widget.isBatchMode,
           onTap: widget.onItemTap != null ? () => widget.onItemTap!(item) : null,
           onLongPress: widget.onItemLongPress != null ? () => widget.onItemLongPress!(item) : null,
         ),
@@ -137,16 +155,38 @@ class _HomeGridState extends State<HomeGrid> {
             _hoveringIndex = null;
           });
         },
-        onAcceptWithDetails: (details) {
+        onAcceptWithDetails: (details) async {
           final oldIndex = details.data;
           final newIndex = index;
+          final targetItem = widget.items[newIndex];
 
           setState(() {
             _hoveringIndex = null;
             _draggingIndex = null;
           });
 
-          if (oldIndex != newIndex && widget.onReorder != null) {
+          if (oldIndex == newIndex) return;
+
+          // 如果目标是文件夹，显示对话框
+          if (targetItem is HomeFolderItem && widget.onReorder != null) {
+            final draggedItem = widget.items[oldIndex];
+            final result = await _showDragToFolderDialog(
+              context,
+              draggedItem,
+              targetItem,
+            );
+
+            if (result == _DragToFolderAction.replace) {
+              // 替换位置：执行正常的重排序
+              widget.onReorder!(oldIndex, newIndex);
+            } else if (result == _DragToFolderAction.addToFolder) {
+              // 添加到文件夹：需要通过回调通知父组件
+              // 这里我们通过特殊的索引值来标记这个操作
+              // 父组件需要处理这种情况
+              _handleAddToFolder(draggedItem.id, targetItem.id);
+            }
+          } else if (widget.onReorder != null) {
+            // 普通重排序
             widget.onReorder!(oldIndex, newIndex);
           }
         },
@@ -279,6 +319,61 @@ class _HomeGridState extends State<HomeGrid> {
       ),
     );
   }
+}
+
+/// 拖拽到文件夹的操作枚举
+enum _DragToFolderAction {
+  replace,      // 替换位置
+  addToFolder,  // 添加到文件夹
+  cancel,       // 取消
+}
+
+/// 显示拖拽到文件夹的对话框
+Future<_DragToFolderAction?> _showDragToFolderDialog(
+  BuildContext context,
+  HomeItem draggedItem,
+  HomeFolderItem targetFolder,
+) async {
+  // 获取拖拽项的名称
+  String itemName;
+  if (draggedItem is HomeWidgetItem) {
+    final registry = HomeWidgetRegistry();
+    itemName = registry.getWidget(draggedItem.widgetId)?.name ?? '组件';
+  } else if (draggedItem is HomeFolderItem) {
+    itemName = draggedItem.name;
+  } else {
+    itemName = '项目';
+  }
+
+  return showDialog<_DragToFolderAction>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('拖拽到文件夹'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('将 "$itemName" 拖拽到文件夹 "${targetFolder.name}"'),
+          const SizedBox(height: 16),
+          const Text('请选择操作：'),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, _DragToFolderAction.cancel),
+          child: const Text('取消'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, _DragToFolderAction.replace),
+          child: const Text('替换位置'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, _DragToFolderAction.addToFolder),
+          child: const Text('添加到文件夹'),
+        ),
+      ],
+    ),
+  );
 }
 
 /// 可重新排序的主页网格（支持拖拽）

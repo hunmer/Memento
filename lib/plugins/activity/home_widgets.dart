@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'activity_plugin.dart';
@@ -23,7 +25,10 @@ class ActivityHomeWidgets {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '记录',
-      builder: (context, config) => _buildIconWidget(context),
+      builder: (context, config) => const GenericIconWidget(
+        icon: Icons.timeline,
+        color: Colors.pink,
+      ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -37,130 +42,82 @@ class ActivityHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '记录',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.timeline,
-        size: 48,
-        color: Colors.pink,
-      ),
-    );
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
+    try {
+      final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+      if (plugin == null) return [];
+
+      final activityCount = plugin.getTodayActivityCountSync();
+      final activityDuration = plugin.getTodayActivityDurationSync();
+      final remainingTime = plugin.getTodayRemainingTime();
+
+      return [
+        StatItemData(
+          id: 'today_activities',
+          label: '今日活动',
+          value: '$activityCount',
+          highlight: activityCount > 0,
+          color: Colors.pink,
+        ),
+        StatItemData(
+          id: 'today_duration',
+          label: '今日时长',
+          value: '${(activityDuration / 60).toStringAsFixed(1)}H',
+          highlight: false,
+        ),
+        StatItemData(
+          id: 'remaining_time',
+          label: '剩余时间',
+          value: '${(remainingTime / 60).toStringAsFixed(1)}H',
+          highlight: remainingTime < 120,
+          color: Colors.red,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
-
-      final theme = Theme.of(context);
       final l10n = ActivityLocalizations.of(context);
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图标和标题
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.pink.withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.timeline,
-                    size: 24,
-                    color: Colors.pink,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        debugPrint('[Activity Widget] 收到的 config: $config');
+        if (config.containsKey('pluginWidgetConfig')) {
+          debugPrint('[Activity Widget] 找到 pluginWidgetConfig: ${config['pluginWidgetConfig']}');
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
+          );
+          debugPrint('[Activity Widget] 解析成功，displayStyle: ${widgetConfig.displayStyle}');
+        } else {
+          debugPrint('[Activity Widget] 未找到 pluginWidgetConfig，使用默认配置');
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        debugPrint('[Activity Widget] 解析配置失败: $e');
+        widgetConfig = PluginWidgetConfig();
+      }
 
-            // 统计信息
-            Expanded(
-              child: FutureBuilder<List<int>>(
-                future: Future.wait([
-                  plugin.getTodayActivityCount(),
-                  plugin.getTodayActivityDuration(),
-                  Future.value(plugin.getTodayRemainingTime()),
-                ]),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
 
-                  final data = snapshot.data ?? [0, 0, 0];
-                  final activityCount = data[0];
-                  final activityDuration = data[1];
-                  final remainingTime = data[2];
-
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // 第一行：活动数和时长
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _StatItem(
-                            label: l10n.todayActivities,
-                            value: '$activityCount',
-                            theme: theme,
-                            highlight: activityCount > 0,
-                            color: Colors.pink,
-                          ),
-                          Container(
-                            width: 1,
-                            height: 30,
-                            color: theme.dividerColor,
-                          ),
-                          _StatItem(
-                            label: l10n.todayDuration,
-                            value: '${(activityDuration / 60).toStringAsFixed(1)}H',
-                            theme: theme,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 第二行：剩余时间
-                      _StatItem(
-                        label: l10n.remainingTime,
-                        value: '${(remainingTime / 60).toStringAsFixed(1)}H',
-                        theme: theme,
-                        highlight: remainingTime < 120,
-                        color: theme.colorScheme.error,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.access_time,
+        pluginDefaultColor: Colors.pink,
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -181,46 +138,6 @@ class ActivityHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

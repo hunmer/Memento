@@ -53,6 +53,9 @@ class HomeLayoutManager extends ChangeNotifier {
   /// 自动保存定时器
   Timer? _saveTimer;
 
+  /// 是否处于加载状态（加载时禁用自动保存）
+  bool _isLoading = false;
+
   /// 初始化布局管理器
   ///
   /// 从配置文件加载布局，如果不存在则初始化默认布局
@@ -64,7 +67,6 @@ class HomeLayoutManager extends ChangeNotifier {
       final activeConfig = await globalConfigManager.getPluginConfig(_activeLayoutIdKey);
       if (activeConfig != null && activeConfig['activeLayoutId'] != null) {
         _activeLayoutId = activeConfig['activeLayoutId'] as String;
-        debugPrint('初始化：活动布局ID = $_activeLayoutId');
       }
     } catch (e) {
       debugPrint('加载活动布局ID失败: $e');
@@ -76,6 +78,7 @@ class HomeLayoutManager extends ChangeNotifier {
 
   /// 从配置加载布局
   Future<void> loadLayout() async {
+    _isLoading = true; // 开始加载，禁用自动保存
     try {
       final config = await globalConfigManager.getPluginConfig(_configKey);
 
@@ -84,7 +87,10 @@ class HomeLayoutManager extends ChangeNotifier {
         if (config['items'] != null) {
           final itemsList = config['items'] as List;
           _items = itemsList
-              .map((json) => HomeItem.fromJson(json as Map<String, dynamic>))
+              .map((json) {
+                final item = HomeItem.fromJson(json as Map<String, dynamic>);
+                return item;
+              })
               .toList();
         } else {
           // 没有配置，初始化空布局
@@ -117,30 +123,70 @@ class HomeLayoutManager extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error loading home layout: $e');
       _items = [];
+    } finally {
+      // 延迟解除加载状态，给小组件足够的时间初始化
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _isLoading = false;
+      });
     }
   }
 
   /// 保存布局到配置
   Future<void> saveLayout() async {
+    final serializedItems = _items.map((item) => item.toJson()).toList();
     try {
       await globalConfigManager.savePluginConfig(_configKey, {
-        'items': _items.map((item) => item.toJson()).toList(),
+        'items': serializedItems,
         'gridCrossAxisCount': _gridCrossAxisCount,
         'gridAlignment': _gridAlignment,
       });
+      await _syncActiveLayout(serializedItems);
       _isDirty = false;
-      debugPrint('Home layout saved: ${_items.length} items, grid: $_gridCrossAxisCount, alignment: $_gridAlignment');
     } catch (e) {
       debugPrint('Error saving home layout: $e');
     }
   }
 
+  Future<void> _syncActiveLayout(
+    List<Map<String, dynamic>> serializedItems,
+  ) async {
+    if (_activeLayoutId == null) {
+      return;
+    }
+
+    try {
+      final layouts = await getSavedLayouts();
+      final index = layouts.indexWhere((l) => l.id == _activeLayoutId);
+
+      if (index == -1) {
+        return;
+      }
+
+      layouts[index] = layouts[index].copyWith(
+        items: serializedItems,
+        gridCrossAxisCount: _gridCrossAxisCount,
+        updatedAt: DateTime.now(),
+      );
+
+      await globalConfigManager.savePluginConfig(_layoutConfigsKey, {
+        'layouts': layouts.map((l) => l.toJson()).toList(),
+      });
+    } catch (e) {
+      debugPrint('Error syncing active layout: $e');
+    }
+  }
+
   /// 标记为脏数据并延迟保存
   void _markDirty() {
+    // 如果正在加载，不触发自动保存
+    if (_isLoading) {
+      return;
+    }
+
     _isDirty = true;
     _saveTimer?.cancel();
     _saveTimer = Timer(const Duration(seconds: 1), () {
-      if (_isDirty) {
+      if (_isDirty && !_isLoading) {
         saveLayout();
       }
     });
@@ -182,9 +228,18 @@ class HomeLayoutManager extends ChangeNotifier {
   void updateItem(String itemId, HomeItem newItem) {
     final index = _items.indexWhere((item) => item.id == itemId);
     if (index != -1) {
-      _items[index] = newItem;
-      _markDirty();
-      notifyListeners();
+      final oldItem = _items[index];
+
+      // 只有当项目真的改变时才更新和保存
+      // 通过比较 JSON 序列化结果来判断是否有变化
+      final oldJson = oldItem.toJson();
+      final newJson = newItem.toJson();
+
+      if (oldJson.toString() != newJson.toString()) {
+        _items[index] = newItem;
+        _markDirty();
+        notifyListeners();
+      }
     }
   }
 
@@ -237,7 +292,6 @@ class HomeLayoutManager extends ChangeNotifier {
   void addItemToFolder(HomeItem item, String folderId) {
     final folder = findItem(folderId);
     if (folder is! HomeFolderItem) {
-      debugPrint('Folder not found: $folderId');
       return;
     }
 
@@ -307,7 +361,6 @@ class HomeLayoutManager extends ChangeNotifier {
   /// 设置网格列数
   void setGridCrossAxisCount(int count) {
     if (count < 1 || count > 10) {
-      debugPrint('Grid cross axis count must be between 1 and 10');
       return;
     }
     _gridCrossAxisCount = count;
@@ -318,7 +371,6 @@ class HomeLayoutManager extends ChangeNotifier {
   /// 设置网格显示位置
   void setGridAlignment(String alignment) {
     if (alignment != 'top' && alignment != 'center') {
-      debugPrint('Grid alignment must be "top" or "center"');
       return;
     }
     _gridAlignment = alignment;
@@ -420,8 +472,6 @@ class HomeLayoutManager extends ChangeNotifier {
       await globalConfigManager.savePluginConfig(_activeLayoutIdKey, {
         'activeLayoutId': layoutId,
       });
-
-      debugPrint('Layout saved: $name');
     } catch (e) {
       debugPrint('Error saving layout: $e');
       rethrow;
@@ -455,7 +505,6 @@ class HomeLayoutManager extends ChangeNotifier {
       _isDirty = false;
       notifyListeners();
 
-      debugPrint('Layout loaded: ${config.name}');
     } catch (e) {
       debugPrint('Error loading layout config: $e');
       rethrow;
@@ -481,7 +530,6 @@ class HomeLayoutManager extends ChangeNotifier {
         });
       }
 
-      debugPrint('Layout deleted: $layoutId');
     } catch (e) {
       debugPrint('Error deleting layout: $e');
       rethrow;
@@ -509,7 +557,6 @@ class HomeLayoutManager extends ChangeNotifier {
         'layouts': layouts.map((l) => l.toJson()).toList(),
       });
 
-      debugPrint('Layout renamed: $newName');
     } catch (e) {
       debugPrint('Error renaming layout: $e');
       rethrow;
@@ -518,41 +565,9 @@ class HomeLayoutManager extends ChangeNotifier {
 
   /// 更新当前活动布局的配置（覆盖保存）
   Future<void> updateCurrentLayout() async {
-    if (_activeLayoutId == null) {
-      debugPrint('No active layout to update');
-      return;
-    }
-
-    try {
-      final layouts = await getSavedLayouts();
-      final index = layouts.indexWhere((l) => l.id == _activeLayoutId);
-
-      if (index == -1) {
-        debugPrint('Active layout not found, saving as new');
-        return;
-      }
-
-      // 更新布局配置
-      layouts[index] = layouts[index].copyWith(
-        items: _items.map((item) => item.toJson()).toList(),
-        gridCrossAxisCount: _gridCrossAxisCount,
-        updatedAt: DateTime.now(),
-      );
-
-      // 保存更新后的布局列表
-      await globalConfigManager.savePluginConfig(_layoutConfigsKey, {
-        'layouts': layouts.map((l) => l.toJson()).toList(),
-      });
-
-      // 同时更新默认布局
-      await saveLayout();
-
-      debugPrint('Layout updated: $_activeLayoutId');
-    } catch (e) {
-      debugPrint('Error updating layout: $e');
-      rethrow;
-    }
+    await _syncActiveLayout(_items.map((item) => item.toJson()).toList());
   }
+
 
   /// 获取当前活动的布局配置
   Future<LayoutConfig?> getCurrentLayoutConfig() async {
@@ -591,7 +606,6 @@ class HomeLayoutManager extends ChangeNotifier {
     try {
       await globalConfigManager.savePluginConfig(_globalBackgroundKey, config);
       notifyListeners();
-      debugPrint('Global background config saved');
     } catch (e) {
       debugPrint('Error saving global background config: $e');
       rethrow;
@@ -605,7 +619,6 @@ class HomeLayoutManager extends ChangeNotifier {
         'layouts': layouts.map((l) => l.toJson()).toList(),
       });
       notifyListeners();
-      debugPrint('Layout configs saved: ${layouts.length} layouts');
     } catch (e) {
       debugPrint('Error saving layout configs: $e');
       rethrow;

@@ -75,12 +75,9 @@ class DayHomeWidgets {
 
   /// 构建 1x1 图标组件
   static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.event_outlined,
-        size: 48,
-        color: Colors.black87,
-      ),
+    return const GenericIconWidget(
+      icon: Icons.event_outlined,
+      color: Colors.black87,
     );
   }
 

@@ -10,8 +10,6 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:file_picker/file_picker.dart';
 import '../../widgets/app_drawer.dart';
 import '../../main.dart';
 import '../../core/floating_ball/floating_ball_service.dart';
@@ -37,8 +35,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   final HomeLayoutManager _layoutManager = HomeLayoutManager();
   bool _isLoading = true;
 
-  // 编辑模式标志
+  // 编辑模式标志（拖拽排序）
   bool _isEditMode = false;
+
+  // 批量编辑模式标志
+  bool _isBatchMode = false;
+
+  // 批量选中的项目ID列表
+  final Set<String> _selectedItemIds = {};
 
   // 是否是首次加载，使用静态变量确保在热重载时保持状态
   static bool _hasInitialized = false;
@@ -562,23 +566,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                       _showWidgetSettings(item);
                     },
                   ),
-                ListTile(
-                  leading: const Icon(Icons.palette),
-                  title: const Text('设置背景颜色'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showColorPicker(item);
-                  },
-                ),
-                if (item is HomeWidgetItem)
-                  ListTile(
-                    leading: const Icon(Icons.photo),
-                    title: const Text('设置背景图'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showBackgroundImagePicker(item);
-                    },
-                  ),
                 if (item is HomeWidgetItem)
                   ListTile(
                     leading: const Icon(Icons.aspect_ratio),
@@ -663,129 +650,22 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       final updatedConfig = Map<String, dynamic>.from(item.config);
       updatedConfig['pluginWidgetConfig'] = result.toJson();
 
+      debugPrint('[Home Screen] 保存配置：');
+      debugPrint('[Home Screen] - widgetId: ${item.widgetId}');
+      debugPrint('[Home Screen] - displayStyle: ${result.displayStyle}');
+      debugPrint('[Home Screen] - config JSON: ${result.toJson()}');
+      debugPrint('[Home Screen] - updatedConfig: $updatedConfig');
+
       final updatedItem = item.copyWith(config: updatedConfig);
 
       // 保存到布局
-      final itemIndex = _layoutManager.items.indexWhere((i) => i.id == item.id);
-      if (itemIndex != -1) {
-        _layoutManager.items[itemIndex] = updatedItem;
-        await _layoutManager.saveLayout();
-        setState(() {});
-      }
+      _layoutManager.updateItem(item.id, updatedItem);
+      await _layoutManager.saveLayout();
+      setState(() {});
 
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('设置已保存')));
-    }
-  }
-
-  /// 显示颜色选择器
-  void _showColorPicker(HomeItem item) {
-    if (item is! HomeWidgetItem) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('文件夹不支持背景颜色设置')));
-      return;
-    }
-
-    // 获取当前背景颜色
-    Color currentColor =
-        item.config['backgroundColor'] != null
-            ? Color(item.config['backgroundColor'] as int)
-            : Colors.white;
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('选择背景颜色'),
-            content: SingleChildScrollView(
-              child: ColorPicker(
-                pickerColor: currentColor,
-                onColorChanged: (Color color) {
-                  currentColor = color;
-                },
-                pickerAreaHeightPercent: 0.8,
-                enableAlpha: true,
-                displayThumbColor: true,
-                labelTypes: const [],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // 保存颜色
-                  _saveBackgroundColor(item, currentColor);
-                },
-                child: const Text('确定'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  /// 保存背景颜色
-  void _saveBackgroundColor(HomeWidgetItem item, Color color) async {
-    final updatedConfig = Map<String, dynamic>.from(item.config);
-    updatedConfig['backgroundColor'] = color.value;
-
-    final updatedItem = item.copyWith(config: updatedConfig);
-
-    final itemIndex = _layoutManager.items.indexWhere((i) => i.id == item.id);
-    if (itemIndex != -1) {
-      _layoutManager.items[itemIndex] = updatedItem;
-      await _layoutManager.saveLayout();
-      setState(() {});
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('背景颜色已保存')));
-    }
-  }
-
-  /// 显示背景图选择器
-  void _showBackgroundImagePicker(HomeWidgetItem item) async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-      );
-
-      if (result != null && result.files.single.path != null) {
-        final imagePath = result.files.single.path!;
-        await _saveBackgroundImage(item, imagePath);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('选择图片失败: $e')));
-      }
-    }
-  }
-
-  /// 保存背景图
-  Future<void> _saveBackgroundImage(
-    HomeWidgetItem item,
-    String imagePath,
-  ) async {
-    final updatedConfig = Map<String, dynamic>.from(item.config);
-    updatedConfig['backgroundImage'] = imagePath;
-
-    final updatedItem = item.copyWith(config: updatedConfig);
-
-    final itemIndex = _layoutManager.items.indexWhere((i) => i.id == item.id);
-    if (itemIndex != -1) {
-      _layoutManager.items[itemIndex] = updatedItem;
-      await _layoutManager.saveLayout();
-      setState(() {});
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('背景图已保存')));
     }
   }
 
@@ -866,15 +746,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   ) async {
     final updatedItem = item.copyWith(size: newSize);
 
-    final itemIndex = _layoutManager.items.indexWhere((i) => i.id == item.id);
-    if (itemIndex != -1) {
-      _layoutManager.items[itemIndex] = updatedItem;
-      await _layoutManager.saveLayout();
-      setState(() {});
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('组件大小已更新')));
-    }
+    _layoutManager.updateItem(item.id, updatedItem);
+    await _layoutManager.saveLayout();
+    setState(() {});
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('组件大小已更新')));
   }
 
   /// 确认删除项目
@@ -910,6 +787,129 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     );
   }
 
+  /// 切换批量编辑模式
+  void _toggleBatchMode() {
+    setState(() {
+      _isBatchMode = !_isBatchMode;
+      if (!_isBatchMode) {
+        _selectedItemIds.clear();
+      }
+      // 退出拖拽编辑模式
+      if (_isBatchMode) {
+        _isEditMode = false;
+      }
+    });
+  }
+
+  /// 退出批量编辑模式
+  void _exitBatchMode() {
+    setState(() {
+      _isBatchMode = false;
+      _selectedItemIds.clear();
+    });
+  }
+
+  /// 切换项目选中状态
+  void _toggleItemSelection(String itemId) {
+    setState(() {
+      if (_selectedItemIds.contains(itemId)) {
+        _selectedItemIds.remove(itemId);
+      } else {
+        _selectedItemIds.add(itemId);
+      }
+    });
+  }
+
+  /// 批量删除
+  void _confirmBatchDelete() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认删除'),
+        content: Text('确定要删除选中的 ${_selectedItemIds.length} 个项目吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // 删除所有选中的项目
+              for (final itemId in _selectedItemIds) {
+                _layoutManager.removeItem(itemId);
+              }
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('已删除 ${_selectedItemIds.length} 个项目')),
+              );
+              _exitBatchMode();
+            },
+            child: const Text('删除', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 显示移动到文件夹对话框
+  void _showMoveToFolderDialog() {
+    // 获取所有文件夹
+    final folders = _layoutManager.items
+        .whereType<HomeFolderItem>()
+        .where((folder) => !_selectedItemIds.contains(folder.id))
+        .toList();
+
+    if (folders.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('没有可用的文件夹，请先创建文件夹')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('移动到文件夹'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: folders.length,
+            itemBuilder: (context, index) {
+              final folder = folders[index];
+              return ListTile(
+                leading: Icon(folder.icon, color: folder.color),
+                title: Text(folder.name),
+                subtitle: Text('${folder.children.length} 个项目'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _moveSelectedItemsToFolder(folder.id);
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 将选中的项目移动到文件夹
+  void _moveSelectedItemsToFolder(String folderId) {
+    for (final itemId in _selectedItemIds) {
+      _layoutManager.moveToFolder(itemId, folderId);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('已将 ${_selectedItemIds.length} 个项目移动到文件夹')),
+    );
+    _exitBatchMode();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -934,16 +934,43 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           },
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _showAddWidgetDialog,
-            tooltip: '添加组件',
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: _showOptionsMenu,
-            tooltip: '更多选项',
-          ),
+          // 批量编辑模式下的操作按钮
+          if (_isBatchMode) ...[
+            if (_selectedItemIds.isNotEmpty) ...[
+              IconButton(
+                icon: const Icon(Icons.drive_file_move),
+                onPressed: _showMoveToFolderDialog,
+                tooltip: '移动到',
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: _confirmBatchDelete,
+                tooltip: '删除',
+              ),
+            ],
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: _exitBatchMode,
+              tooltip: '退出选择',
+            ),
+          ] else ...[
+            // 批量编辑模式开关
+            IconButton(
+              icon: Icon(_isBatchMode ? Icons.check_box : Icons.check_box_outline_blank),
+              onPressed: _toggleBatchMode,
+              tooltip: _isBatchMode ? '退出批量编辑' : '批量编辑',
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _showAddWidgetDialog,
+              tooltip: '添加组件',
+            ),
+            IconButton(
+              icon: const Icon(Icons.more_vert),
+              onPressed: _showOptionsMenu,
+              tooltip: '更多选项',
+            ),
+          ],
         ],
       ),
       extendBodyBehindAppBar: _currentBackgroundPath != null,
@@ -1106,10 +1133,21 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               items: _layoutManager.items,
               crossAxisCount: _layoutManager.gridCrossAxisCount,
               isEditMode: _isEditMode,
+              isBatchMode: _isBatchMode,
+              selectedItemIds: _selectedItemIds,
               alignment: alignment,
               onReorder: (oldIndex, newIndex) {
                 _layoutManager.reorder(oldIndex, newIndex);
               },
+              onAddToFolder: (itemId, folderId) {
+                _layoutManager.moveToFolder(itemId, folderId);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('已添加到文件夹')),
+                );
+              },
+              onItemTap: _isBatchMode
+                  ? (item) => _toggleItemSelection(item.id)
+                  : null,
               onItemLongPress: _handleCardLongPress,
             ),
           );
