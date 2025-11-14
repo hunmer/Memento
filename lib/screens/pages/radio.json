@@ -1,0 +1,69 @@
+{
+  "type": "scaffold",
+  "args": {
+    "appBar": {
+      "type": "app_bar",
+      "args": {
+        "title": {
+          "type": "text",
+          "args": {
+            "text": "Test"
+          }
+        }
+      }
+    },
+    "body": {
+      "type": "set_value",
+      "args": {
+        "values": {
+          "radioGroupValue": "radioValue1"
+        },
+        "child": {
+          "type": "radio_group",
+          "id": "radioGroupValue",
+          "args": {
+            "groupValue": "${radioGroupValue}",
+            "child": {
+              "type": "column",
+              "args": {
+                "crossAxisAlignment": "start",
+                "children": [
+                  {
+                    "type": "text",
+                    "listen": [
+                      "radioGroupValue"
+                    ],
+                    "args": {
+                      "text": "${'Selected radio group value: ' + radioGroupValue ?? ''}"
+                    }
+                  },
+                  {
+                    "type": "radio",
+                    "id": "radioValue1",
+                    "args": {
+                      "value": "radioValue1"
+                    }
+                  },
+                  {
+                    "type": "radio",
+                    "id": "radioValue2",
+                    "args": {
+                      "value": "radioValue2"
+                    }
+                  },
+                  {
+                    "type": "radio",
+                    "id": "radioValue3",
+                    "args": {
+                      "value": "radioValue3"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

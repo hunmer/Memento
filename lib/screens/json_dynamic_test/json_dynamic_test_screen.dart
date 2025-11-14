@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:json_dynamic_widget/json_dynamic_widget.dart';
+import 'package:path/path.dart' as path;
 
 /// JSON 动态 UI 测试页面
 /// 用于快速测试和预览 json_dynamic_widget 配置
@@ -15,423 +16,81 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   final TextEditingController _jsonController = TextEditingController();
   final JsonWidgetRegistry _registry = JsonWidgetRegistry.instance;
   String? _errorMessage;
+  List<JsonFileInfo> _jsonFiles = [];
+  bool _isLoadingFiles = false;
 
-  // 预设示例 JSON 模板
-  final List<JsonTemplate> _templates = [
-    JsonTemplate(
-      name: '简单容器',
-      description: '包含文本和按钮的容器',
-      json: '''
-{
-  "type": "container",
-  "args": {
-    "padding": {
-      "type": "edge_insets",
-      "args": {"all": 20.0}
-    },
-    "decoration": {
-      "type": "box_decoration",
-      "args": {
-        "color": "#E3F2FD",
-        "borderRadius": {
-          "type": "border_radius",
-          "args": {"all": {"radius": 12.0}}
-        }
-      }
-    },
-    "child": {
-      "type": "column",
-      "args": {
-        "mainAxisSize": "min",
-        "crossAxisAlignment": "center",
-        "children": [
-          {
-            "type": "text",
-            "args": {
-              "data": "Hello, Dynamic Widget!",
-              "style": {
-                "fontSize": 20.0,
-                "fontWeight": "bold",
-                "color": "#1976D2"
-              }
-            }
-          },
-          {
-            "type": "sized_box",
-            "args": {"height": 16.0}
-          },
-          {
-            "type": "elevated_button",
-            "args": {
-              "child": {
-                "type": "text",
-                "args": {"data": "点击我"}
-              }
-            }
-          }
-        ]
-      }
-    }
-  }
-}
-'''
-    ),
-    JsonTemplate(
-      name: '列表卡片',
-      description: '带图标的列表项',
-      json: '''
-{
-  "type": "card",
-  "args": {
-    "margin": {
-      "type": "edge_insets",
-      "args": {"all": 8.0}
-    },
-    "child": {
-      "type": "list_tile",
-      "args": {
-        "leading": {
-          "type": "icon",
-          "args": {
-            "icon": {
-              "codePoint": 59470,
-              "fontFamily": "MaterialIcons"
-            },
-            "color": "#FFC107",
-            "size": 32.0
-          }
-        },
-        "title": {
-          "type": "text",
-          "args": {
-            "data": "卡片标题",
-            "style": {
-              "fontSize": 18.0,
-              "fontWeight": "bold"
-            }
-          }
-        },
-        "subtitle": {
-          "type": "text",
-          "args": {"data": "这是卡片的描述信息"}
-        },
-        "trailing": {
-          "type": "icon",
-          "args": {
-            "icon": {
-              "codePoint": 58370,
-              "fontFamily": "MaterialIcons"
-            },
-            "color": "#757575"
-          }
-        }
-      }
-    }
-  }
-}
-'''
-    ),
-    JsonTemplate(
-      name: '表单输入',
-      description: '包含输入框和开关的表单',
-      json: '''
-{
-  "type": "container",
-  "args": {
-    "padding": {
-      "type": "edge_insets",
-      "args": {"all": 16.0}
-    },
-    "child": {
-      "type": "column",
-      "args": {
-        "mainAxisSize": "min",
-        "children": [
-          {
-            "type": "text_form_field",
-            "args": {
-              "decoration": {
-                "labelText": "用户名",
-                "hintText": "请输入用户名",
-                "border": "outline"
-              }
-            }
-          },
-          {
-            "type": "sized_box",
-            "args": {"height": 16.0}
-          },
-          {
-            "type": "text_form_field",
-            "args": {
-              "decoration": {
-                "labelText": "密码",
-                "hintText": "请输入密码",
-                "border": "outline"
-              },
-              "obscureText": true
-            }
-          },
-          {
-            "type": "sized_box",
-            "args": {"height": 16.0}
-          },
-          {
-            "type": "switch_list_tile",
-            "args": {
-              "title": {
-                "type": "text",
-                "args": {"data": "记住我"}
-              },
-              "value": false
-            }
-          }
-        ]
-      }
-    }
-  }
-}
-'''
-    ),
-    JsonTemplate(
-      name: '网格布局',
-      description: '使用 Wrap 实现的网格',
-      json: '''
-{
-  "type": "wrap",
-  "args": {
-    "spacing": 8.0,
-    "runSpacing": 8.0,
-    "children": [
-      {
-        "type": "chip",
-        "args": {
-          "label": {
-            "type": "text",
-            "args": {"data": "标签 1"}
-          },
-          "backgroundColor": "#E3F2FD"
-        }
-      },
-      {
-        "type": "chip",
-        "args": {
-          "label": {
-            "type": "text",
-            "args": {"data": "标签 2"}
-          },
-          "backgroundColor": "#F3E5F5"
-        }
-      },
-      {
-        "type": "chip",
-        "args": {
-          "label": {
-            "type": "text",
-            "args": {"data": "标签 3"}
-          },
-          "backgroundColor": "#E8F5E9"
-        }
-      },
-      {
-        "type": "chip",
-        "args": {
-          "label": {
-            "type": "text",
-            "args": {"data": "标签 4"}
-          },
-          "backgroundColor": "#FFF3E0"
-        }
-      }
-    ]
-  }
-}
-'''
-    ),
-    JsonTemplate(
-      name: '复杂布局',
-      description: '组合使用多种组件',
-      json: '''
-{
-  "type": "container",
-  "args": {
-    "padding": {
-      "type": "edge_insets",
-      "args": {"all": 16.0}
-    },
-    "child": {
-      "type": "column",
-      "args": {
-        "mainAxisSize": "min",
-        "crossAxisAlignment": "stretch",
-        "children": [
-          {
-            "type": "container",
-            "args": {
-              "padding": {
-                "type": "edge_insets",
-                "args": {"all": 16.0}
-              },
-              "decoration": {
-                "type": "box_decoration",
-                "args": {
-                  "gradient": {
-                    "type": "linear_gradient",
-                    "args": {
-                      "colors": ["#2196F3", "#1976D2"],
-                      "begin": "topLeft",
-                      "end": "bottomRight"
-                    }
-                  },
-                  "borderRadius": {
-                    "type": "border_radius",
-                    "args": {"all": {"radius": 12.0}}
-                  }
-                }
-              },
-              "child": {
-                "type": "column",
-                "args": {
-                  "mainAxisSize": "min",
-                  "children": [
-                    {
-                      "type": "text",
-                      "args": {
-                        "data": "欢迎使用",
-                        "style": {
-                          "fontSize": 24.0,
-                          "fontWeight": "bold",
-                          "color": "#FFFFFF"
-                        }
-                      }
-                    },
-                    {
-                      "type": "sized_box",
-                      "args": {"height": 8.0}
-                    },
-                    {
-                      "type": "text",
-                      "args": {
-                        "data": "JSON 动态 UI 测试工具",
-                        "style": {
-                          "fontSize": 16.0,
-                          "color": "#E3F2FD"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          {
-            "type": "sized_box",
-            "args": {"height": 16.0}
-          },
-          {
-            "type": "row",
-            "args": {
-              "mainAxisAlignment": "spaceAround",
-              "children": [
-                {
-                  "type": "column",
-                  "args": {
-                    "mainAxisSize": "min",
-                    "children": [
-                      {
-                        "type": "icon",
-                        "args": {
-                          "icon": {
-                            "codePoint": 59512,
-                            "fontFamily": "MaterialIcons"
-                          },
-                          "color": "#E91E63",
-                          "size": 32.0
-                        }
-                      },
-                      {
-                        "type": "sized_box",
-                        "args": {"height": 4.0}
-                      },
-                      {
-                        "type": "text",
-                        "args": {"data": "收藏"}
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "column",
-                  "args": {
-                    "mainAxisSize": "min",
-                    "children": [
-                      {
-                        "type": "icon",
-                        "args": {
-                          "icon": {
-                            "codePoint": 59405,
-                            "fontFamily": "MaterialIcons"
-                          },
-                          "color": "#2196F3",
-                          "size": 32.0
-                        }
-                      },
-                      {
-                        "type": "sized_box",
-                        "args": {"height": 4.0}
-                      },
-                      {
-                        "type": "text",
-                        "args": {"data": "分享"}
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "column",
-                  "args": {
-                    "mainAxisSize": "min",
-                    "children": [
-                      {
-                        "type": "icon",
-                        "args": {
-                          "icon": {
-                            "codePoint": 59576,
-                            "fontFamily": "MaterialIcons"
-                          },
-                          "color": "#757575",
-                          "size": 32.0
-                        }
-                      },
-                      {
-                        "type": "sized_box",
-                        "args": {"height": 4.0}
-                      },
-                      {
-                        "type": "text",
-                        "args": {"data": "设置"}
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  }
-}
-'''
-    ),
-  ];
+  // JSON 文件目录路径
+  static const String _jsonPagesPath = 'lib/screens/pages';
 
   @override
   void initState() {
     super.initState();
-    // 默认加载第一个模板
-    if (_templates.isNotEmpty) {
-      _jsonController.text = _templates.first.json.trim();
+    _loadJsonFiles();
+  }
+
+  // 从文件系统加载 JSON 文件列表
+  Future<void> _loadJsonFiles() async {
+    setState(() {
+      _isLoadingFiles = true;
+    });
+
+    try {
+      final directory = Directory(_jsonPagesPath);
+      if (!await directory.exists()) {
+        _showErrorSnackBar('目录不存在: $_jsonPagesPath');
+        setState(() {
+          _isLoadingFiles = false;
+        });
+        return;
+      }
+
+      final files =
+          await directory
+              .list()
+              .where(
+                (entity) =>
+                    entity is File &&
+                    (entity.path.endsWith('.json') ||
+                        entity.path.endsWith('.yaml')),
+              )
+              .asyncMap((entity) async {
+                final file = entity as File;
+                final fileName = path.basename(file.path);
+                final stats = await file.stat();
+                return JsonFileInfo(
+                  name: fileName,
+                  path: file.path,
+                  size: stats.size,
+                  modified: stats.modified,
+                );
+              })
+              .toList();
+
+      setState(() {
+        _jsonFiles = files;
+        _jsonFiles.sort((a, b) => a.name.compareTo(b.name));
+        _isLoadingFiles = false;
+      });
+    } catch (e) {
+      _showErrorSnackBar('加载文件失败: $e');
+      setState(() {
+        _isLoadingFiles = false;
+      });
+    }
+  }
+
+  // 从文件加载 JSON 内容
+  Future<void> _loadJsonFromFile(JsonFileInfo fileInfo) async {
+    try {
+      final file = File(fileInfo.path);
+      final content = await file.readAsString();
+
+      setState(() {
+        _jsonController.text = content;
+        _errorMessage = null;
+      });
+    } catch (e) {
+      _showErrorSnackBar('读取文件失败: $e');
     }
   }
 
@@ -481,26 +140,17 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
     );
   }
 
-  // 加载模板
-  void _loadTemplate(JsonTemplate template) {
-    setState(() {
-      _jsonController.text = template.json.trim();
-      _errorMessage = null;
-    });
-    _showSuccessSnackBar('已加载模板: ${template.name}');
-  }
-
-  // 显示模板选择对话框
+  // 显示文件选择对话框
   void _showTemplateDialog() {
     showDialog(
       context: context,
       builder: (context) => Dialog(
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
+              constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 标题
+                  // 标题栏
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -512,40 +162,111 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 child: Row(
                   children: [
                     Icon(
-                      Icons.snippet_folder,
+                          Icons.folder_open,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      '选择模板',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '选择 JSON 文件',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleLarge?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '共 ${_jsonFiles.length} 个文件',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.copyWith(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            Navigator.of(context).pop();
+                            await _loadJsonFiles();
+                            _showTemplateDialog();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          tooltip: '刷新列表',
                     ),
                   ],
                 ),
               ),
-              // 模板列表
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _templates.length,
-                  itemBuilder: (context, index) {
-                    final template = _templates[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text('${index + 1}'),
-                      ),
-                      title: Text(template.name),
-                      subtitle: Text(template.description),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        _loadTemplate(template);
-                      },
-                    );
-                  },
-                ),
+                  // 文件列表
+                  Expanded(
+                    child:
+                        _isLoadingFiles
+                            ? const Center(child: CircularProgressIndicator())
+                            : _jsonFiles.isEmpty
+                            ? Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.folder_off,
+                                    size: 64,
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    '未找到 JSON 文件',
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '目录: $_jsonPagesPath',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                ],
+                              ),
+                            )
+                            : ListView.builder(
+                              itemCount: _jsonFiles.length,
+                              itemBuilder: (context, index) {
+                                final fileInfo = _jsonFiles[index];
+                                return ListTile(
+                                  leading: Icon(
+                                    fileInfo.name.endsWith('.json')
+                                        ? Icons.description
+                                        : Icons.code,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  title: Text(fileInfo.name),
+                                  subtitle: Text(
+                                    '${_formatFileSize(fileInfo.size)} • ${_formatDateTime(fileInfo.modified)}',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                  trailing: const Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
+                                  ),
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    _loadJsonFromFile(fileInfo);
+                                  },
+                                );
+                              },
+                            ),
               ),
               // 关闭按钮
               Padding(
@@ -560,6 +281,29 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
         ),
       ),
     );
+  }
+
+  // 格式化文件大小
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  // 格式化日期时间
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays == 0) {
+      return '今天 ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    } else if (difference.inDays == 1) {
+      return '昨天';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} 天前';
+    } else {
+      return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
+    }
   }
 
   // 清空编辑器
@@ -632,8 +376,8 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
         actions: [
           IconButton(
             onPressed: _showTemplateDialog,
-            icon: const Icon(Icons.snippet_folder),
-            tooltip: '选择模板',
+            icon: const Icon(Icons.folder_open),
+            tooltip: '加载文件',
           ),
           IconButton(
             onPressed: _formatJson,
@@ -754,7 +498,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 ElevatedButton.icon(
                   onPressed: _showTemplateDialog,
                   icon: const Icon(Icons.folder_open),
-                  label: const Text('加载模板'),
+                  label: const Text('加载文件'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -783,27 +527,66 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   }
 }
 
-/// JSON 模板数据类
-class JsonTemplate {
+/// JSON 文件信息
+class JsonFileInfo {
   final String name;
-  final String description;
-  final String json;
+  final String path;
+  final int size;
+  final DateTime modified;
 
-  const JsonTemplate({
+  const JsonFileInfo({
     required this.name,
-    required this.description,
-    required this.json,
+    required this.path,
+    required this.size,
+    required this.modified,
   });
 }
 
 /// JSON 动态 UI 预览页面
-class JsonDynamicPreviewScreen extends StatelessWidget {
+class JsonDynamicPreviewScreen extends StatefulWidget {
   final JsonWidgetData widgetData;
 
   const JsonDynamicPreviewScreen({
     super.key,
     required this.widgetData,
   });
+
+  @override
+  State<JsonDynamicPreviewScreen> createState() =>
+      _JsonDynamicPreviewScreenState();
+}
+
+class _JsonDynamicPreviewScreenState extends State<JsonDynamicPreviewScreen> {
+  Widget? _builtWidget;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _buildWidget();
+  }
+
+  void _buildWidget() {
+    try {
+      // 延迟构建，确保上下文准备好
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            try {
+              _builtWidget = widget.widgetData.build(context: context);
+              _errorMessage = null;
+            } catch (e) {
+              _errorMessage = '构建失败: $e';
+            }
+          });
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = '初始化失败: $e';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -823,10 +606,41 @@ class JsonDynamicPreviewScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: widgetData.build(context: context),
-      ),
+      body: _errorMessage != null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '预览失败',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _errorMessage!,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : _builtWidget == null
+              ? const Center(child: CircularProgressIndicator())
+              : SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: _builtWidget,
+                  ),
+                ),
     );
   }
 }
