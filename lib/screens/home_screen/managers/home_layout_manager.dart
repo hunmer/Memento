@@ -24,6 +24,10 @@ class HomeLayoutManager extends ChangeNotifier {
   int _gridCrossAxisCount = 4;
   int get gridCrossAxisCount => _gridCrossAxisCount;
 
+  /// 网格显示位置（'top' 顶部显示, 'center' 居中显示）
+  String _gridAlignment = 'top';
+  String get gridAlignment => _gridAlignment;
+
   /// 配置键名
   static const String _configKey = 'home_layout';
 
@@ -32,6 +36,9 @@ class HomeLayoutManager extends ChangeNotifier {
 
   /// 当前活动的布局配置ID
   static const String _activeLayoutIdKey = 'home_active_layout_id';
+
+  /// 全局背景图配置键名
+  static const String _globalBackgroundKey = 'home_global_background';
 
   /// 是否已初始化
   bool _initialized = false;
@@ -51,6 +58,17 @@ class HomeLayoutManager extends ChangeNotifier {
   /// 从配置文件加载布局，如果不存在则初始化默认布局
   Future<void> initialize() async {
     if (_initialized) return;
+
+    // 加载活动布局ID
+    try {
+      final activeConfig = await globalConfigManager.getPluginConfig(_activeLayoutIdKey);
+      if (activeConfig != null && activeConfig['activeLayoutId'] != null) {
+        _activeLayoutId = activeConfig['activeLayoutId'] as String;
+        debugPrint('初始化：活动布局ID = $_activeLayoutId');
+      }
+    } catch (e) {
+      debugPrint('加载活动布局ID失败: $e');
+    }
 
     await loadLayout();
     _initialized = true;
@@ -80,6 +98,15 @@ class HomeLayoutManager extends ChangeNotifier {
           if (_gridCrossAxisCount < 1) _gridCrossAxisCount = 1;
           if (_gridCrossAxisCount > 10) _gridCrossAxisCount = 10;
         }
+
+        // 加载网格显示位置配置
+        if (config['gridAlignment'] != null) {
+          _gridAlignment = config['gridAlignment'] as String;
+          // 确保值有效
+          if (_gridAlignment != 'top' && _gridAlignment != 'center') {
+            _gridAlignment = 'top';
+          }
+        }
       } else {
         // 没有配置，初始化空布局
         _items = [];
@@ -99,9 +126,10 @@ class HomeLayoutManager extends ChangeNotifier {
       await globalConfigManager.savePluginConfig(_configKey, {
         'items': _items.map((item) => item.toJson()).toList(),
         'gridCrossAxisCount': _gridCrossAxisCount,
+        'gridAlignment': _gridAlignment,
       });
       _isDirty = false;
-      debugPrint('Home layout saved: ${_items.length} items, grid: $_gridCrossAxisCount');
+      debugPrint('Home layout saved: ${_items.length} items, grid: $_gridCrossAxisCount, alignment: $_gridAlignment');
     } catch (e) {
       debugPrint('Error saving home layout: $e');
     }
@@ -283,6 +311,17 @@ class HomeLayoutManager extends ChangeNotifier {
       return;
     }
     _gridCrossAxisCount = count;
+    _markDirty();
+    notifyListeners();
+  }
+
+  /// 设置网格显示位置
+  void setGridAlignment(String alignment) {
+    if (alignment != 'top' && alignment != 'center') {
+      debugPrint('Grid alignment must be "top" or "center"');
+      return;
+    }
+    _gridAlignment = alignment;
     _markDirty();
     notifyListeners();
   }
@@ -531,6 +570,45 @@ class HomeLayoutManager extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error getting current layout: $e');
       return null;
+    }
+  }
+
+  // ==================== 背景图管理 ====================
+
+  /// 获取全局背景图配置
+  Future<Map<String, dynamic>> getGlobalBackgroundConfig() async {
+    try {
+      final config = await globalConfigManager.getPluginConfig(_globalBackgroundKey);
+      return config ?? {};
+    } catch (e) {
+      debugPrint('Error getting global background config: $e');
+      return {};
+    }
+  }
+
+  /// 保存全局背景图配置
+  Future<void> saveGlobalBackgroundConfig(Map<String, dynamic> config) async {
+    try {
+      await globalConfigManager.savePluginConfig(_globalBackgroundKey, config);
+      notifyListeners();
+      debugPrint('Global background config saved');
+    } catch (e) {
+      debugPrint('Error saving global background config: $e');
+      rethrow;
+    }
+  }
+
+  /// 保存布局配置列表
+  Future<void> saveLayoutConfigs(List<LayoutConfig> layouts) async {
+    try {
+      await globalConfigManager.savePluginConfig(_layoutConfigsKey, {
+        'layouts': layouts.map((l) => l.toJson()).toList(),
+      });
+      notifyListeners();
+      debugPrint('Layout configs saved: ${layouts.length} layouts');
+    } catch (e) {
+      debugPrint('Error saving layout configs: $e');
+      rethrow;
     }
   }
 

@@ -40,11 +40,14 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
 
   @override
   Widget build(BuildContext context) {
-    final dialogHeight = MediaQuery.of(context).size.height * 0.8;
+    final screenSize = MediaQuery.of(context).size;
+    final dialogHeight = screenSize.height * 0.8;
+    // 在小屏幕下使用全宽，否则限制为500
+    final dialogWidth = screenSize.width < 600 ? screenSize.width * 0.9 : 500.0;
 
     return Dialog(
       child: SizedBox(
-        width: 500,
+        width: dialogWidth,
         height: dialogHeight,
         child: Scaffold(
           appBar: AppBar(
@@ -82,13 +85,18 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
 
   /// 构建分类视图
   Widget _buildCategoryView(List<HomeWidget> widgets) {
+    // 根据屏幕宽度动态调整列数和宽高比
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = screenWidth < 400 ? 1 : 2;
+    final childAspectRatio = screenWidth < 400 ? 1.2 : 0.85;
+
     return GridView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 0.9,
+        childAspectRatio: childAspectRatio,
       ),
       itemCount: widgets.length,
       itemBuilder: (context, index) => _buildWidgetPreviewCard(widgets[index]),
@@ -103,64 +111,77 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _addWidget(widget),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
           children: [
-            // 图标和标题
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: widget.color?.withOpacity(0.1),
-              child: Column(
-                children: [
-                  Icon(
-                    widget.icon,
-                    size: 48,
-                    color: widget.color,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-
-            // 描述
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.description != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 图标和标题
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: widget.color?.withOpacity(0.1),
+                  child: Column(
+                    children: [
+                      Icon(
+                        widget.icon,
+                        size: 48,
+                        color: widget.color,
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        widget.description!,
-                        style: theme.textTheme.bodySmall,
-                        maxLines: 2,
+                        widget.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    const Spacer(),
-                    // 尺寸标签
-                    Wrap(
-                      spacing: 4,
-                      children: widget.supportedSizes
-                          .map((size) => Chip(
-                                label: Text(
-                                  '${size.width}x${size.height}',
-                                  style: theme.textTheme.labelSmall,
-                                ),
-                                visualDensity: VisualDensity.compact,
-                              ))
-                          .toList(),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+
+                // 描述文本
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: widget.description != null
+                        ? Text(
+                            widget.description!,
+                            style: theme.textTheme.bodySmall,
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ),
+              ],
+            ),
+
+            // 尺寸标签 - 右上角
+            Positioned(
+              top: 4,
+              right: 4,
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: widget.supportedSizes
+                    .map((size) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '${size.width}×${size.height}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ))
+                    .toList(),
               ),
             ),
           ],
