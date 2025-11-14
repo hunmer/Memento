@@ -14,6 +14,8 @@ class HomeCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final bool isSelected;
+  final bool isEditMode;
+  final Widget? dragHandle;
 
   const HomeCard({
     super.key,
@@ -21,25 +23,45 @@ class HomeCard extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.isSelected = false,
+    this.isEditMode = false,
+    this.dragHandle,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cardContent = Stack(
+      children: [
+        Card(
+          elevation: isSelected ? 8 : 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: isSelected
+                ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
+                : BorderSide.none,
+          ),
+          child: item is HomeWidgetItem
+              ? _buildWidgetCard(context, item as HomeWidgetItem)
+              : _buildFolderCard(context, item as HomeFolderItem),
+        ),
+        // 编辑模式下显示拖拽手柄
+        if (isEditMode && dragHandle != null)
+          Positioned(
+            top: 4,
+            right: 4,
+            child: dragHandle!,
+          ),
+      ],
+    );
+
+    // 编辑模式下不添加手势检测器，避免与拖拽冲突
+    if (isEditMode) {
+      return cardContent;
+    }
+
     return GestureDetector(
       onTap: onTap ?? () => _handleTap(context),
       onLongPress: onLongPress,
-      child: Card(
-        elevation: isSelected ? 8 : 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: isSelected
-              ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
-              : BorderSide.none,
-        ),
-        child: item is HomeWidgetItem
-            ? _buildWidgetCard(context, item as HomeWidgetItem)
-            : _buildFolderCard(context, item as HomeFolderItem),
-      ),
+      child: cardContent,
     );
   }
 
@@ -66,48 +88,61 @@ class HomeCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Icon(
-                folder.icon,
-                size: 48,
-                color: folder.color,
-              ),
-              if (folder.children.isNotEmpty)
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '${folder.children.length}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontSize: 10,
+          Flexible(
+            flex: 2,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  folder.icon,
+                  size: 40,
+                  color: folder.color,
+                ),
+                if (folder.children.isNotEmpty)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${folder.children.length}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onPrimary,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            folder.name,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+              ],
             ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Flexible(
+            flex: 1,
+            child: Text(
+              folder.name,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
