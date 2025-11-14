@@ -1,10 +1,11 @@
+import 'dart:io';
+import 'dart:ui';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/layout_config.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/app_drawer.dart';
 import '../../main.dart';
@@ -14,6 +15,7 @@ import 'widgets/home_grid.dart';
 import 'widgets/add_widget_dialog.dart';
 import 'widgets/create_folder_dialog.dart';
 import 'widgets/layout_manager_dialog.dart';
+import 'widgets/background_settings_page.dart';
 
 /// 重构后的主屏幕
 ///
@@ -49,6 +51,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   // 当前页索引
   int _currentPageIndex = 0;
 
+  // 当前背景图配置
+  String? _currentBackgroundPath;
+  BoxFit _currentBackgroundFit = BoxFit.cover;
+  double _currentBackgroundBlur = 0.0;
+
+  // 全局小组件透明度
+  double _globalWidgetOpacity = 1.0;
+
   @override
   void initState() {
     super.initState();
@@ -79,16 +89,29 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     try {
       await _layoutManager.initialize();
 
+      // 加载所有保存的布局
+      await _loadSavedLayouts();
+
+      // 如果有保存的布局，尝试加载最后活动的布局
+      if (_savedLayouts.isNotEmpty) {
+        final currentConfig = await _layoutManager.getCurrentLayoutConfig();
+        if (currentConfig != null) {
+          // 加载活动布局
+          await _layoutManager.loadLayoutConfig(currentConfig.id);
+          debugPrint('首次加载布局: ${currentConfig.name}');
+        }
+      }
+
       // 如果是空布局，创建默认小组件
       if (_layoutManager.items.isEmpty) {
         await _createDefaultWidgets();
       }
 
-      // 加载所有保存的布局
-      await _loadSavedLayouts();
-
       // 获取当前活动布局名称
       await _updateCurrentLayoutName();
+
+      // 加载当前背景图
+      await _loadCurrentBackground();
     } catch (e) {
       debugPrint('初始化布局失败: $e');
     } finally {
@@ -138,6 +161,52 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       }
     } catch (e) {
       debugPrint('获取当前布局名称失败: $e');
+    }
+  }
+
+  /// 加载当前背景图配置
+  Future<void> _loadCurrentBackground() async {
+    try {
+      // 先加载全局配置
+      final globalConfig = await _layoutManager.getGlobalBackgroundConfig();
+
+      String? backgroundPath = globalConfig['backgroundImagePath'] as String?;
+      BoxFit backgroundFit = LayoutConfig.boxFitFromString(
+        globalConfig['backgroundFit'] as String?,
+      );
+      double backgroundBlur =
+          (globalConfig['backgroundBlur'] as num?)?.toDouble() ?? 0.0;
+      final widgetOpacity =
+          (globalConfig['widgetOpacity'] as num?)?.toDouble() ?? 1.0;
+
+      // 如果有当前布局配置且设置了独立背景，则覆盖全局背景
+      final currentConfig = await _layoutManager.getCurrentLayoutConfig();
+      if (currentConfig?.backgroundImagePath != null) {
+        backgroundPath = currentConfig!.backgroundImagePath;
+        backgroundFit = currentConfig.backgroundFit;
+        backgroundBlur = currentConfig.backgroundBlur;
+      }
+
+      if (mounted) {
+        setState(() {
+          _currentBackgroundPath = backgroundPath;
+          _currentBackgroundFit = backgroundFit;
+          _currentBackgroundBlur = backgroundBlur;
+          _globalWidgetOpacity = widgetOpacity;
+        });
+
+        // 强制刷新一次，确保 AnimatedSwitcher 正确触发
+        // 在下一帧再次 setState，触发重建
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {});
+          }
+        });
+      }
+
+      debugPrint('背景图加载完成: path=$backgroundPath, opacity=$widgetOpacity');
+    } catch (e) {
+      debugPrint('加载背景图失败: $e');
     }
   }
 
@@ -238,11 +307,21 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 _showLayoutManagerDialog();
               },
             ),
+                ListTile(
+                  leading: const Icon(Icons.palette),
+                  title: const Text('主题设置'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showThemeSettings();
+                  },
+                ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.grid_view),
-              title: const Text('网格大小'),
-              subtitle: Text('当前：${_layoutManager.gridCrossAxisCount} 列'),
+                  title: const Text('网格设置'),
+                  subtitle: Text(
+                    '${_layoutManager.gridCrossAxisCount} 列 · ${_layoutManager.gridAlignment == "top" ? "顶部显示" : "居中显示"}',
+                  ),
               onTap: () {
                 Navigator.pop(context);
                 _showGridSizeDialog();
@@ -377,6 +456,17 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     await _updateCurrentLayoutName();
   }
 
+  /// 显示主题设置页面
+  void _showThemeSettings() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const BackgroundSettingsPage()),
+    );
+
+    // 返回后刷新背景图和透明度
+    await _loadCurrentBackground();
+  }
+
   @override
   void didPopNext() {
     // 当从其他页面返回到HomeScreen时触发
@@ -509,6 +599,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               : _currentLayoutName,
         ),
         centerTitle: true,
+        backgroundColor:
+            _currentBackgroundPath != null ? Colors.transparent : null,
+        elevation: _currentBackgroundPath != null ? 0 : null,
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
@@ -532,32 +625,60 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           ),
         ],
       ),
+      extendBodyBehindAppBar: _currentBackgroundPath != null,
       drawer: const AppDrawer(),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _savedLayouts.isEmpty
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // 背景图（带淡入淡出动画）
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            switchInCurve: Curves.easeIn,
+            switchOutCurve: Curves.easeOut,
+            child:
+                _currentBackgroundPath != null
+                    ? _buildBackgroundImage()
+                    : const SizedBox.expand(key: ValueKey('no_background')),
+          ),
+
+          // 主内容
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _savedLayouts.isEmpty
               ? _buildHomeContent()
               : Stack(
-                  children: [
-                    // 使用 ScrollConfiguration 让桌面端支持鼠标拖拽
-                    ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(
-                        dragDevices: {
-                          PointerDeviceKind.touch,
-                          PointerDeviceKind.mouse,
-                          PointerDeviceKind.stylus,
-                          PointerDeviceKind.trackpad,
-                        },
-                      ),
-                      child: PageView.builder(
-                        controller: _pageController,
-                        itemCount: _savedLayouts.length,
-                        onPageChanged: _onPageChanged,
-                        itemBuilder: (context, index) {
-                          return _buildHomeContent();
-                        },
-                      ),
+                children: [
+                  // 使用 ScrollConfiguration 让桌面端支持鼠标拖拽
+                  ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context).copyWith(
+                      dragDevices: {
+                        PointerDeviceKind.touch,
+                        PointerDeviceKind.mouse,
+                        PointerDeviceKind.stylus,
+                        PointerDeviceKind.trackpad,
+                      },
                     ),
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: _savedLayouts.length,
+                      onPageChanged: _onPageChanged,
+                      itemBuilder: (context, index) {
+                        // 使用当前布局ID作为key，确保只在布局切换时触发动画
+                        final layoutId =
+                            index < _savedLayouts.length
+                                ? _savedLayouts[index].id
+                                : 'default';
+
+                        // 使用 AnimatedSwitcher 为小组件添加淡入淡出动画
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          switchInCurve: Curves.easeIn,
+                          switchOutCurve: Curves.easeOut,
+                          child: _buildHomeContent(key: ValueKey(layoutId)),
+                        );
+                      },
+                    ),
+                  ),
                     // 底部圆点指示器
                     if (_savedLayouts.length > 1)
                       Positioned(
@@ -610,26 +731,68 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                           ),
                         ),
                       ),
-                  ],
-                ),
+                ],
+              ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建背景图
+  Widget _buildBackgroundImage() {
+    // 使用背景图路径作为key，确保切换背景时触发动画
+    return Stack(
+      key: ValueKey(_currentBackgroundPath),
+      fit: StackFit.expand,
+      children: [
+        // 背景图片
+        Image.file(File(_currentBackgroundPath!), fit: _currentBackgroundFit),
+        // 模糊效果
+        if (_currentBackgroundBlur > 0)
+          BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: _currentBackgroundBlur,
+              sigmaY: _currentBackgroundBlur,
+            ),
+            child: Container(color: Colors.transparent),
+          ),
+      ],
     );
   }
 
   /// 构建主页内容
-  Widget _buildHomeContent() {
-    return ListenableBuilder(
-      listenable: _layoutManager,
-      builder: (context, child) {
-        return HomeGrid(
-          items: _layoutManager.items,
-          crossAxisCount: _layoutManager.gridCrossAxisCount,
-          isEditMode: _isEditMode,
-          onReorder: (oldIndex, newIndex) {
-            _layoutManager.reorder(oldIndex, newIndex);
+  Widget _buildHomeContent({Key? key}) {
+    final isCenter = _layoutManager.gridAlignment == 'center';
+    final alignment = isCenter ? Alignment.center : Alignment.topCenter;
+
+    return Opacity(
+      key: key,
+      opacity: _globalWidgetOpacity,
+      child: Padding(
+        // 当有背景图且顶部对齐时，添加顶部padding避免小组件被AppBar遮挡
+        // 居中对齐时不需要顶部padding
+        padding: EdgeInsets.only(
+          top:
+              !isCenter && _currentBackgroundPath != null
+                  ? kToolbarHeight + MediaQuery.of(context).padding.top
+                  : 0,
+        ),
+        child: ListenableBuilder(
+          listenable: _layoutManager,
+          builder: (context, child) {
+            return HomeGrid(
+              items: _layoutManager.items,
+              crossAxisCount: _layoutManager.gridCrossAxisCount,
+              isEditMode: _isEditMode,
+              alignment: alignment,
+              onReorder: (oldIndex, newIndex) {
+                _layoutManager.reorder(oldIndex, newIndex);
+              },
+              onItemLongPress: _handleCardLongPress,
+            );
           },
-          onItemLongPress: _handleCardLongPress,
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -648,6 +811,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     // 加载对应的布局配置
     try {
       await _layoutManager.loadLayoutConfig(layout.id);
+      // 加载对应的背景图
+      await _loadCurrentBackground();
     } catch (e) {
       debugPrint('切换布局失败: $e');
       if (mounted) {
@@ -672,74 +837,135 @@ class _GridSizeDialog extends StatefulWidget {
 
 class _GridSizeDialogState extends State<_GridSizeDialog> {
   late int _currentSize;
+  late String _currentAlignment;
 
   @override
   void initState() {
     super.initState();
     _currentSize = widget.layoutManager.gridCrossAxisCount;
+    _currentAlignment = widget.layoutManager.gridAlignment;
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('网格大小'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '选择主页网格的列数 (1-10)',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Text('$_currentSize 列', style: Theme.of(context).textTheme.titleLarge),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.remove),
-                onPressed: _currentSize > 1
-                    ? () {
-                        setState(() {
-                          _currentSize--;
-                          widget.layoutManager.setGridCrossAxisCount(_currentSize);
-                        });
-                      }
-                    : null,
-              ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: _currentSize < 10
-                    ? () {
-                        setState(() {
-                          _currentSize++;
-                          widget.layoutManager.setGridCrossAxisCount(_currentSize);
-                        });
-                      }
-                    : null,
-              ),
-            ],
-          ),
-          Slider(
-            value: _currentSize.toDouble(),
-            min: 1,
-            max: 10,
-            divisions: 9,
-            label: '$_currentSize',
-            onChanged: (value) {
-              setState(() {
-                _currentSize = value.round();
-                widget.layoutManager.setGridCrossAxisCount(_currentSize);
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '提示：数字越大，每行显示的组件越多',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).hintColor,
+      title: const Text('网格设置'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 网格大小设置
+            Text(
+              '网格大小',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '选择主页网格的列数 (1-10)',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Text(
+                  '$_currentSize 列',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-          ),
-        ],
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.remove),
+                  onPressed:
+                      _currentSize > 1
+                          ? () {
+                            setState(() {
+                              _currentSize--;
+                              widget.layoutManager.setGridCrossAxisCount(
+                                _currentSize,
+                              );
+                            });
+                          }
+                          : null,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed:
+                      _currentSize < 10
+                          ? () {
+                            setState(() {
+                              _currentSize++;
+                              widget.layoutManager.setGridCrossAxisCount(
+                                _currentSize,
+                              );
+                            });
+                          }
+                          : null,
+                ),
+              ],
+            ),
+            Slider(
+              value: _currentSize.toDouble(),
+              min: 1,
+              max: 10,
+              divisions: 9,
+              label: '$_currentSize',
+              onChanged: (value) {
+                setState(() {
+                  _currentSize = value.round();
+                  widget.layoutManager.setGridCrossAxisCount(_currentSize);
+                });
+              },
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '提示：数字越大，每行显示的组件越多',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).hintColor,
+              ),
+            ),
+
+            const SizedBox(height: 32),
+            const Divider(),
+            const SizedBox(height: 16),
+
+            // 显示位置设置
+            Text(
+              '显示位置',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '选择小组件在屏幕上的对齐方式',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment<String>(
+                  value: 'top',
+                  label: Text('顶部显示'),
+                  icon: Icon(Icons.vertical_align_top),
+                ),
+                ButtonSegment<String>(
+                  value: 'center',
+                  label: Text('居中显示'),
+                  icon: Icon(Icons.vertical_align_center),
+                ),
+              ],
+              selected: {_currentAlignment},
+              onSelectionChanged: (Set<String> newSelection) {
+                setState(() {
+                  _currentAlignment = newSelection.first;
+                  widget.layoutManager.setGridAlignment(_currentAlignment);
+                });
+              },
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
