@@ -4,7 +4,6 @@ import '../../screens/home_screen/widgets/home_widget.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'tracker_plugin.dart';
-import 'l10n/tracker_localizations.dart';
 
 /// 目标追踪插件的主页小组件注册
 class TrackerHomeWidgets {

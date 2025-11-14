@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import '../l10n/contact_localizations.dart';
 import 'dart:io';
 import '../models/contact_model.dart';
