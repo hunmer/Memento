@@ -82,7 +82,7 @@ dependencies:
   adaptive_theme: ^3.7.0
   flutter_js: ^0.8.1
   image_compression_flutter: ^1.0.4
-  json_dynamic_widget: ^10.0.2
+  json_dynamic_widget: ^12.0.0
 
 dev_dependencies:
   flutter_test:
@@ -97,7 +97,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
 
 dependency_overrides:
-  # Waiting for https://github.com/Lyokone/flutterlocation/issues/1031  
+  # Waiting for https://github.com/Lyokone/flutterlocation/issues/1031
   location_web:
     git:
       url: https://github.com/Lyokone/flutterlocation
@@ -108,6 +108,8 @@ dependency_overrides:
     git:
       url: https://github.com/miguelpruivo/flutter_file_picker.git
       ref: master
+  # Fix json_theme compatibility with Flutter 3.27+
+  json_theme: ^11.0.0
   # media_kit: 
   #   git:
   #     url: https://github.com/media-kit/media-kit

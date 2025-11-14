@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:js' as js;
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'js_engine_interface.dart';
 
 class WebJSEngine implements JSEngine {
@@ -19,7 +20,7 @@ class WebJSEngine implements JSEngine {
   @override
   Future<JSResult> evaluate(String code) async {
     try {
-      final result = js.context.callMethod('eval', [code]);
+      final result = globalContext.callMethod('eval'.toJS, code.toJS);
       return JSResult.success(_convertJSValue(result));
     } catch (e) {
       return JSResult.error(e.toString());
@@ -30,7 +31,7 @@ class WebJSEngine implements JSEngine {
   Future<void> evaluateDirect(String code) async {
     // Web 平台直接执行代码，不返回结果
     try {
-      js.context.callMethod('eval', [code]);
+      globalContext.callMethod('eval'.toJS, code.toJS);
     } catch (e) {
       print('WebJSEngine evaluateDirect error: $e');
     }
@@ -38,18 +39,29 @@ class WebJSEngine implements JSEngine {
 
   @override
   Future<void> setGlobal(String name, dynamic value) async {
-    js.context[name] = _convertDartValue(value);
+    globalContext.setProperty(name.toJS, _convertDartValue(value));
   }
 
   @override
   Future<dynamic> getGlobal(String name) async {
-    return _convertJSValue(js.context[name]);
+    return _convertJSValue(globalContext.getProperty(name.toJS));
   }
 
   @override
   Future<void> registerFunction(String name, Function dartFunction) async {
-    // 包装函数以处理参数
-    js.context[name] = js.allowInterop(([a, b, c, d, e, f, g, h, i, j]) {
+    // 创建一个包装函数，接受可变数量的参数
+    JSFunction jsFunction = ((
+      JSAny? a,
+      JSAny? b,
+      JSAny? c,
+      JSAny? d,
+      JSAny? e,
+      JSAny? f,
+      JSAny? g,
+      JSAny? h,
+      JSAny? i,
+      JSAny? j,
+    ) {
       // 收集所有非 null 的参数
       final args = [a, b, c, d, e, f, g, h, i, j]
           .where((arg) => arg != null)
@@ -61,7 +73,7 @@ class WebJSEngine implements JSEngine {
 
         // 处理 Future 返回值
         if (result is Future) {
-          return result.then((value) => _convertDartValue(value));
+          return result.then((value) => _convertDartValue(value)).toJS;
         }
 
         return _convertDartValue(result);
@@ -69,7 +81,9 @@ class WebJSEngine implements JSEngine {
         print('JS bridge error: $e');
         rethrow;
       }
-    });
+    }).toJS;
+
+    globalContext.setProperty(name.toJS, jsFunction);
   }
 
   @override
@@ -79,17 +93,35 @@ class WebJSEngine implements JSEngine {
   }
 
   // 转换 JS 值到 Dart
-  dynamic _convertJSValue(dynamic value) {
+  dynamic _convertJSValue(JSAny? value) {
     if (value == null) return null;
-    if (value is String || value is num || value is bool) return value;
 
-    // 尝试转换对象和数组
+    // 尝试转换为基本类型
     try {
-      if (value is js.JsObject) {
-        // 尝试将 JS 对象转换为 JSON 字符串
-        final jsonString = js.context.callMethod('JSON.stringify', [value]);
-        return jsonString;
+      // 检查是否是字符串
+      if (value.typeofEquals('string')) {
+        return (value as JSString).toDart;
       }
+
+      // 检查是否是数字
+      if (value.typeofEquals('number')) {
+        return (value as JSNumber).toDartDouble;
+      }
+
+      // 检查是否是布尔值
+      if (value.typeofEquals('boolean')) {
+        return (value as JSBoolean).toDart;
+      }
+
+      // 对于对象，尝试转换为 JSON 字符串
+      final jsonString = globalContext.callMethod(
+        'JSON.stringify'.toJS,
+        value,
+      );
+      if (jsonString != null) {
+        return (jsonString as JSString).toDart;
+      }
+
       return value.toString();
     } catch (e) {
       return value.toString();
@@ -97,21 +129,27 @@ class WebJSEngine implements JSEngine {
   }
 
   // 转换 Dart 值到 JS
-  dynamic _convertDartValue(dynamic value) {
+  JSAny? _convertDartValue(dynamic value) {
     if (value == null) return null;
-    if (value is String || value is num || value is bool) return value;
+
+    if (value is String) return value.toJS;
+    if (value is num) return value.toJS;
+    if (value is bool) return value.toJS;
 
     if (value is Map || value is List) {
       try {
         // 先转换为 JSON 字符串，然后解析为 JS 对象
         final jsonString = jsonEncode(value);
-        return js.context.callMethod('JSON.parse', [jsonString]);
+        return globalContext.callMethod(
+          'JSON.parse'.toJS,
+          jsonString.toJS,
+        );
       } catch (e) {
         print('Failed to convert Dart value to JS: $e');
-        return value.toString();
+        return value.toString().toJS;
       }
     }
 
-    return value;
+    return value.toString().toJS;
   }
 }
