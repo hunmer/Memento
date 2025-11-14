@@ -30,6 +30,7 @@ class NotesHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.note_alt_outlined,
         color: _notesColor,
+        name: '笔记',
       ),
     ));
 

@@ -28,6 +28,7 @@ class TimerHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.timer,
         color: Colors.blueGrey,
+        name: '计时器',
       ),
     ));
 

@@ -28,6 +28,7 @@ class TodoHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.check_box,
         color: Colors.blue,
+        name: '任务',
       ),
     ));
 

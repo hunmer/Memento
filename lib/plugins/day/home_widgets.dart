@@ -78,6 +78,7 @@ class DayHomeWidgets {
     return const GenericIconWidget(
       icon: Icons.event_outlined,
       color: Colors.black87,
+      name: '纪念日',
     );
   }
 

@@ -30,6 +30,7 @@ class CalendarAlbumHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.notes_rounded,
         color: _pluginColor,
+        name: '日记相册',
       ),
     ));
 

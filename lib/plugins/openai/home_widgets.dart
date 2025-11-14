@@ -28,6 +28,7 @@ class OpenAIHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.smart_toy,
         color: Colors.deepOrange,
+        name: 'AI助手',
       ),
     ));
 

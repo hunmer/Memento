@@ -28,6 +28,7 @@ class BillHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.account_balance_wallet,
         color: Colors.green,
+        name: '账单',
       ),
     ));
 

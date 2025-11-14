@@ -28,6 +28,7 @@ class ActivityHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.timeline,
         color: Colors.pink,
+        name: '活动',
       ),
     ));
 
@@ -92,19 +93,14 @@ class ActivityHomeWidgets {
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
-        debugPrint('[Activity Widget] 收到的 config: $config');
         if (config.containsKey('pluginWidgetConfig')) {
-          debugPrint('[Activity Widget] 找到 pluginWidgetConfig: ${config['pluginWidgetConfig']}');
           widgetConfig = PluginWidgetConfig.fromJson(
             config['pluginWidgetConfig'] as Map<String, dynamic>,
           );
-          debugPrint('[Activity Widget] 解析成功，displayStyle: ${widgetConfig.displayStyle}');
         } else {
-          debugPrint('[Activity Widget] 未找到 pluginWidgetConfig，使用默认配置');
           widgetConfig = PluginWidgetConfig();
         }
       } catch (e) {
-        debugPrint('[Activity Widget] 解析配置失败: $e');
         widgetConfig = PluginWidgetConfig();
       }
 

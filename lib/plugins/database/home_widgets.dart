@@ -28,6 +28,7 @@ class DatabaseHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.storage,
         color: Colors.deepPurple,
+        name: '数据库',
       ),
     ));
 

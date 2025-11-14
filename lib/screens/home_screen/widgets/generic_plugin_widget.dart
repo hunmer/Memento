@@ -9,26 +9,51 @@ import '../../../utils/image_utils.dart';
 class GenericIconWidget extends StatelessWidget {
   final IconData icon;
   final Color color;
+  final String? name;  // 可选的插件名称
 
   const GenericIconWidget({
     super.key,
     required this.icon,
     required this.color,
+    this.name,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // 根据可用空间计算图标大小
         final size = constraints.maxWidth.clamp(0.0, constraints.maxHeight);
-        final iconSize = size * 0.5; // 图标占容器的50%
+        final iconSize = size * 0.4; // 图标占容器的40%（为文字留出空间）
+        final fontSize = (size * 0.12).clamp(10.0, 14.0); // 字体大小
 
         return Center(
-          child: Icon(
-            icon,
-            size: iconSize,
-            color: color,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: iconSize,
+                color: color,
+              ),
+              if (name != null) ...[
+                SizedBox(height: size * 0.05),
+                Text(
+                  name!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w500,
+                    color: theme.textTheme.bodyMedium?.color,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
           ),
         );
       },
@@ -160,7 +185,7 @@ class GenericPluginWidget extends StatelessWidget {
 
   /// 构建头部（图标和标题）
   Widget _buildHeader(ThemeData theme, Color iconColor, double iconSize, double fontSize) {
-    final containerSize = iconSize + 16; // 图标 + padding
+    final containerSize = iconSize + 8; // 图标 + padding
 
     return Row(
       children: [
@@ -348,7 +373,7 @@ class _StatItem extends StatelessWidget {
             data.value,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: fontSize * 1.5, // 数值字体较大
+              fontSize: fontSize, // 数值字体较大
               color: displayColor,
             ),
             textAlign: TextAlign.right,
