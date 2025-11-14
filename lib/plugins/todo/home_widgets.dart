@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'todo_plugin.dart';
@@ -23,7 +25,10 @@ class TodoHomeWidgets {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '工具',
-      builder: (context, config) => _buildIconWidget(context),
+      builder: (context, config) => const GenericIconWidget(
+        icon: Icons.check_box,
+        color: Colors.blue,
+      ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -37,102 +42,69 @@ class TodoHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '工具',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.check_box,
-        size: 48,
-        color: Colors.blue,
-      ),
-    );
-  }
-
-  /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
     try {
       final plugin = PluginManager.instance.getPlugin('todo') as TodoPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
+      if (plugin == null) return [];
 
-      final theme = Theme.of(context);
-      final l10n = TodoLocalizations.of(context);
       final totalTasks = plugin.taskController.getTotalTaskCount();
       final weeklyTasks = plugin.taskController.getWeeklyTaskCount();
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图标和标题
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.check_box,
-                    size: 24,
-                    color: Colors.blue,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 统计信息
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 第一行：总任务数和七日任务数
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _StatItem(
-                        label: l10n.totalTasksCount,
-                        value: '$totalTasks',
-                        theme: theme,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: theme.dividerColor,
-                      ),
-                      _StatItem(
-                        label: l10n.weeklyTasksCount,
-                        value: '$weeklyTasks',
-                        theme: theme,
-                        highlight: weeklyTasks > 0,
-                        color: Colors.orange,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+      return [
+        StatItemData(
+          id: 'total_tasks',
+          label: '总任务数',
+          value: '$totalTasks',
+          highlight: false,
         ),
+        StatItemData(
+          id: 'weekly_tasks',
+          label: '七日任务数',
+          value: '$weeklyTasks',
+          highlight: weeklyTasks > 0,
+          color: Colors.orange,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// 构建 2x2 详细卡片组件
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+    try {
+      final l10n = TodoLocalizations.of(context);
+
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
+          );
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
+      }
+
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
+
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.check_box,
+        pluginDefaultColor: Colors.blue,
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -153,46 +125,6 @@ class TodoHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

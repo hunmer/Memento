@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'contact_plugin.dart';
@@ -23,7 +25,10 @@ class ContactHomeWidgets {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '工具',
-      builder: (context, config) => _buildIconWidget(context),
+      builder: (context, config) => const GenericIconWidget(
+        icon: Icons.contacts,
+        color: Colors.deepPurple,
+      ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -37,141 +42,99 @@ class ContactHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '工具',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.contacts,
-        size: 48,
-        color: Colors.deepPurple,
+  /// 获取可用的统计项
+  /// 返回联系人插件支持的所有统计项类型定义
+  /// 实际数据值由 _buildOverviewWidget 在 FutureBuilder 中异步获取并更新
+  static List<StatItemData> _getAvailableStats() {
+    return [
+      StatItemData(
+        id: 'total_contacts',
+        label: '联系人总数',
+        value: '0', // 占位符，实际值由 _buildOverviewWidget 异步获取
+        highlight: false,
       ),
-    );
+      StatItemData(
+        id: 'recent_contacts',
+        label: '最近联系',
+        value: '0', // 占位符，实际值由 _buildOverviewWidget 异步获取
+        highlight: false,
+        color: Colors.green,
+      ),
+    ];
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final plugin =
-          PluginManager.instance.getPlugin('contact') as ContactPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
-
-      final theme = Theme.of(context);
       final l10n = ContactLocalizations.of(context);
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图标和标题
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple.withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.contacts,
-                    size: 24,
-                    color: Colors.deepPurple,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
+          );
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
+      }
 
-            // 统计信息
-            Expanded(
-              child: FutureBuilder<Map<String, int>>(
-                future: _getCardStats(plugin),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
+      // 异步加载实际的统计数据
+      return FutureBuilder<List<StatItemData>>(
+        future: _loadContactStats(),
+        builder: (context, snapshot) {
+          final availableItems = snapshot.data ?? _getAvailableStats();
 
-                  final stats = snapshot.data ?? {
-                    'totalContacts': 0,
-                    'recentContacts': 0,
-                  };
-
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // 第一行：总联系人和最近联系人
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _StatItem(
-                            label: l10n.totalContacts,
-                            value: '${stats['totalContacts']}',
-                            theme: theme,
-                            highlight: stats['totalContacts']! > 0,
-                            color: Colors.deepPurple,
-                          ),
-                          Container(
-                            width: 1,
-                            height: 30,
-                            color: theme.dividerColor,
-                          ),
-                          _StatItem(
-                            label: l10n.recentContacts,
-                            value: '${stats['recentContacts']}',
-                            theme: theme,
-                            highlight: stats['recentContacts']! > 0,
-                            color: Colors.green,
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          // 使用通用小组件
+          return GenericPluginWidget(
+            pluginName: l10n.name,
+            pluginIcon: Icons.contacts,
+            pluginDefaultColor: Colors.deepPurple,
+            availableItems: availableItems,
+            config: widgetConfig,
+          );
+        },
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
     }
   }
 
-  /// 获取卡片统计数据
-  static Future<Map<String, int>> _getCardStats(ContactPlugin plugin) async {
+  /// 异步加载联系人统计数据
+  static Future<List<StatItemData>> _loadContactStats() async {
     try {
+      final plugin = PluginManager.instance.getPlugin('contact') as ContactPlugin?;
+      if (plugin == null) return _getAvailableStats();
+
       final controller = plugin.controller;
       final contacts = await controller.getAllContacts();
-      final recentContacts = await controller.getRecentlyContactedCount();
+      final recentCount = await controller.getRecentlyContactedCount();
 
-      return {
-        'totalContacts': contacts.length,
-        'recentContacts': recentContacts,
-      };
+      return [
+        StatItemData(
+          id: 'total_contacts',
+          label: '联系人总数',
+          value: '${contacts.length}',
+          highlight: false,
+        ),
+        StatItemData(
+          id: 'recent_contacts',
+          label: '最近联系',
+          value: '$recentCount',
+          highlight: recentCount > 0,
+          color: Colors.green,
+        ),
+      ];
     } catch (e) {
-      return {
-        'totalContacts': 0,
-        'recentContacts': 0,
-      };
+      return _getAvailableStats();
     }
   }
 
@@ -189,46 +152,6 @@ class ContactHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

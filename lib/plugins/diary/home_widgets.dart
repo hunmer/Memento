@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'diary_plugin.dart';
@@ -23,7 +25,9 @@ class DiaryHomeWidgets {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '记录',
-      builder: (context, config) => _buildIconWidget(context),
+        builder:
+            (context, config) =>
+                const GenericIconWidget(icon: Icons.book, color: Colors.indigo),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -37,131 +41,81 @@ class DiaryHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '记录',
-      builder: (context, config) => _buildOverviewWidget(context),
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.book,
-        size: 48,
-        color: Colors.indigo,
-      ),
-    );
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
+    try {
+      final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
+      if (plugin == null) return [];
+
+      // 同步获取统计数据
+      final todayCount = plugin.getTodayWordCountSync();
+      final monthCount = plugin.getMonthWordCountSync();
+      final monthProgress = plugin.getMonthProgressSync();
+
+      return [
+        StatItemData(
+          id: 'today_word_count',
+          label: '今日字数',
+          value: '$todayCount',
+          highlight: todayCount > 0,
+          color: Colors.indigo,
+        ),
+        StatItemData(
+          id: 'month_word_count',
+          label: '本月字数',
+          value: '$monthCount',
+          highlight: false,
+        ),
+        StatItemData(
+          id: 'month_progress',
+          label: '本月进度',
+          value: '${monthProgress.$1}/${monthProgress.$2}',
+          highlight: monthProgress.$1 > 0,
+          color: Colors.indigo,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-      final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
-
-      final theme = Theme.of(context);
       final l10n = DiaryLocalizations.of(context);
 
-      return FutureBuilder<(int, int, int, int)>(
-        future: Future.wait([
-          plugin.getTodayWordCount(),
-          plugin.getMonthWordCount(),
-          plugin.getMonthProgress().then((value) => value.$1),
-          plugin.getMonthProgress().then((value) => value.$2),
-        ]).then((values) => (values[0], values[1], values[2], values[3])),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          final todayCount = snapshot.data?.$1 ?? 0;
-          final monthCount = snapshot.data?.$2 ?? 0;
-          final completedDays = snapshot.data?.$3 ?? 0;
-          final totalDays = snapshot.data?.$4 ?? DateTime.now().day;
-
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 顶部图标和标题
-                Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.indigo.withAlpha(30),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.book,
-                        size: 24,
-                        color: Colors.indigo,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        l10n.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // 统计信息
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // 第一行：今日字数和本月字数
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _StatItem(
-                            label: l10n.todayWordCount,
-                            value: '$todayCount',
-                            theme: theme,
-                            highlight: todayCount > 0,
-                            color: Colors.indigo,
-                          ),
-                          Container(
-                            width: 1,
-                            height: 30,
-                            color: theme.dividerColor,
-                          ),
-                          _StatItem(
-                            label: l10n.monthWordCount,
-                            value: '$monthCount',
-                            theme: theme,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 第二行：本月进度
-                      _StatItem(
-                        label: l10n.monthProgress,
-                        value: '$completedDays/$totalDays',
-                        theme: theme,
-                        highlight: completedDays > 0,
-                        color: Colors.indigo,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
           );
-        },
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
+      }
+
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
+
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.menu_book,
+        pluginDefaultColor: Colors.indigo,
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -182,46 +136,6 @@ class DiaryHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

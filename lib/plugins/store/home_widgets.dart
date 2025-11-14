@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'store_plugin.dart';
@@ -23,7 +25,10 @@ class StoreHomeWidgets {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '工具',
-      builder: (context, config) => _buildIconWidget(context),
+      builder: (context, config) => const GenericIconWidget(
+        icon: Icons.store,
+        color: Colors.pinkAccent,
+      ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -37,130 +42,85 @@ class StoreHomeWidgets {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '工具',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.store,
-        size: 48,
-        color: Colors.pinkAccent,
-      ),
-    );
-  }
-
-  /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
     try {
       final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
+      if (plugin == null) return [];
 
-      final theme = Theme.of(context);
-      final l10n = StoreLocalizations.of(context);
       final controller = plugin.controller;
       final goodsCount = controller.getGoodsCount();
       final itemsCount = controller.getItemsCount();
       final currentPoints = controller.currentPoints;
       final expiringCount = controller.getExpiringItemsCount();
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图标和标题
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.pinkAccent.withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.store,
-                    size: 24,
-                    color: Colors.pinkAccent,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 统计信息
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 第一行：商品数量和物品数量
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _StatItem(
-                        label: l10n.productQuantity,
-                        value: '$goodsCount',
-                        theme: theme,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: theme.dividerColor,
-                      ),
-                      _StatItem(
-                        label: l10n.itemQuantity,
-                        value: '$itemsCount',
-                        theme: theme,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 第二行：我的积分和七天到期
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _StatItem(
-                        label: l10n.myPoints,
-                        value: '$currentPoints',
-                        theme: theme,
-                        highlight: currentPoints > 0,
-                        color: Colors.orange,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: theme.dividerColor,
-                      ),
-                      _StatItem(
-                        label: l10n.expiringIn7Days,
-                        value: '$expiringCount',
-                        theme: theme,
-                        highlight: expiringCount > 0,
-                        color: Colors.red,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+      return [
+        StatItemData(
+          id: 'goods_count',
+          label: '商品数量',
+          value: '$goodsCount',
+          highlight: false,
         ),
+        StatItemData(
+          id: 'items_count',
+          label: '物品数量',
+          value: '$itemsCount',
+          highlight: false,
+        ),
+        StatItemData(
+          id: 'current_points',
+          label: '我的积分',
+          value: '$currentPoints',
+          highlight: currentPoints > 0,
+          color: Colors.orange,
+        ),
+        StatItemData(
+          id: 'expiring_count',
+          label: '七天到期',
+          value: '$expiringCount',
+          highlight: expiringCount > 0,
+          color: Colors.red,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// 构建 2x2 详细卡片组件
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+    try {
+      final l10n = StoreLocalizations.of(context);
+
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
+          );
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
+      }
+
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
+
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.store,
+        pluginDefaultColor: Colors.pinkAccent,
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -181,46 +141,6 @@ class StoreHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

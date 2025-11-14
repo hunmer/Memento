@@ -69,6 +69,13 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     return _instance!;
   }
 
+  // 缓存统计数据（用于同步访问）
+  int _cachedTodayWordCount = 0;
+  int _cachedMonthWordCount = 0;
+  (int, int) _cachedMonthProgress = (0, 0);
+  DateTime? _cacheDateToday;
+  DateTime? _cacheDateMonth;
+
   @override
   String get id => 'diary';
 
@@ -91,15 +98,20 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
       '${today.year}/${today.month}/${today.day}.md',
     );
 
+    int wordCount = 0;
     try {
       if (await File(todayFile).exists()) {
         final content = await storage.readFile(todayFile);
-        return content.trim().length;
+        wordCount = content.trim().length;
       }
     } catch (e) {
       debugPrint('Error reading today\'s diary: $e');
     }
-    return 0;
+
+    // 更新缓存
+    _updateTodayCache(today, wordCount);
+
+    return wordCount;
   }
 
   // 获取本月文字数
@@ -124,6 +136,10 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     } catch (e) {
       debugPrint('Error calculating month word count: $e');
     }
+
+    // 更新缓存
+    _updateMonthCache(now, totalCount, null);
+
     return totalCount;
   }
 
@@ -150,7 +166,106 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     } catch (e) {
       debugPrint('Error calculating month progress: $e');
     }
-    return (completedDays, totalDays);
+
+    final progress = (completedDays, totalDays);
+
+    // 更新缓存
+    _updateMonthCache(now, null, progress);
+
+    return progress;
+  }
+
+  // 更新今日缓存
+  void _updateTodayCache(DateTime date, int wordCount) {
+    final today = DateTime(date.year, date.month, date.day);
+    final cachedDay = _cacheDateToday != null
+        ? DateTime(_cacheDateToday!.year, _cacheDateToday!.month, _cacheDateToday!.day)
+        : null;
+
+    // 如果是新的一天，重置缓存
+    if (cachedDay == null || !cachedDay.isAtSameMomentAs(today)) {
+      _cachedTodayWordCount = 0;
+      _cacheDateToday = today;
+    }
+
+    // 更新缓存值
+    _cachedTodayWordCount = wordCount;
+  }
+
+  // 更新本月缓存
+  void _updateMonthCache(DateTime date, int? wordCount, (int, int)? progress) {
+    final month = DateTime(date.year, date.month);
+    final cachedMonth = _cacheDateMonth != null
+        ? DateTime(_cacheDateMonth!.year, _cacheDateMonth!.month)
+        : null;
+
+    // 如果是新的月份，重置缓存
+    if (cachedMonth == null || !cachedMonth.isAtSameMomentAs(month)) {
+      _cachedMonthWordCount = 0;
+      _cachedMonthProgress = (0, 0);
+      _cacheDateMonth = month;
+    }
+
+    // 更新缓存值
+    if (wordCount != null) _cachedMonthWordCount = wordCount;
+    if (progress != null) _cachedMonthProgress = progress;
+  }
+
+  // 同步获取今日文字数（从缓存）
+  int getTodayWordCountSync() {
+    // 检查缓存是否是今天的
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final cachedDay = _cacheDateToday != null
+        ? DateTime(_cacheDateToday!.year, _cacheDateToday!.month, _cacheDateToday!.day)
+        : null;
+
+    if (cachedDay != null && cachedDay.isAtSameMomentAs(today)) {
+      return _cachedTodayWordCount;
+    }
+
+    // 如果缓存不可用，异步刷新缓存（不等待）
+    getTodayWordCount();
+
+    return 0;
+  }
+
+  // 同步获取本月文字数（从缓存）
+  int getMonthWordCountSync() {
+    // 检查缓存是否是本月的
+    final now = DateTime.now();
+    final month = DateTime(now.year, now.month);
+    final cachedMonth = _cacheDateMonth != null
+        ? DateTime(_cacheDateMonth!.year, _cacheDateMonth!.month)
+        : null;
+
+    if (cachedMonth != null && cachedMonth.isAtSameMomentAs(month)) {
+      return _cachedMonthWordCount;
+    }
+
+    // 如果缓存不可用，异步刷新缓存（不等待）
+    getMonthWordCount();
+
+    return 0;
+  }
+
+  // 同步获取本月完成进度（从缓存）
+  (int, int) getMonthProgressSync() {
+    // 检查缓存是否是本月的
+    final now = DateTime.now();
+    final month = DateTime(now.year, now.month);
+    final cachedMonth = _cacheDateMonth != null
+        ? DateTime(_cacheDateMonth!.year, _cacheDateMonth!.month)
+        : null;
+
+    if (cachedMonth != null && cachedMonth.isAtSameMomentAs(month)) {
+      return _cachedMonthProgress;
+    }
+
+    // 如果缓存不可用，异步刷新缓存（不等待）
+    getMonthProgress();
+
+    return (0, DateTime(now.year, now.month + 1, 0).day);
   }
 
   @override

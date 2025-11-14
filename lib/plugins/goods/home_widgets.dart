@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../screens/home_screen/models/home_widget_size.dart';
 import '../../screens/home_screen/widgets/home_widget.dart';
+import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
+import '../../screens/home_screen/models/plugin_widget_config.dart';
 import '../../screens/home_screen/managers/home_widget_registry.dart';
 import '../../core/plugin_manager.dart';
 import 'goods_plugin.dart';
 import 'l10n/goods_localizations.dart';
+
+const Color _goodsColor = Color.fromARGB(255, 207, 77, 116);
 
 /// 物品管理插件的主页小组件注册
 class GoodsHomeWidgets {
@@ -19,11 +23,14 @@ class GoodsHomeWidgets {
       name: '物品',
       description: '快速打开物品管理',
       icon: Icons.inventory_2,
-      color: const Color.fromARGB(255, 207, 77, 116),
+      color: _goodsColor,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: '记录',
-      builder: (context, config) => _buildIconWidget(context),
+      builder: (context, config) => const GenericIconWidget(
+        icon: Icons.inventory_2,
+        color: _goodsColor,
+      ),
     ));
 
     // 2x2 详细卡片 - 显示统计信息
@@ -33,115 +40,80 @@ class GoodsHomeWidgets {
       name: '物品概览',
       description: '显示物品数量、价值和使用情况',
       icon: Icons.dashboard,
-      color: const Color.fromARGB(255, 207, 77, 116),
+      color: _goodsColor,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
       category: '记录',
-      builder: (context, config) => _buildOverviewWidget(context),
+      builder: (context, config) => _buildOverviewWidget(context, config),
+      availableStatsProvider: _getAvailableStats,
     ));
   }
 
-  /// 构建 1x1 图标组件
-  static Widget _buildIconWidget(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.inventory_2,
-        size: 48,
-        color: const Color.fromARGB(255, 207, 77, 116),
-      ),
-    );
-  }
-
-  /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context) {
+  /// 获取可用的统计项
+  static List<StatItemData> _getAvailableStats() {
     try {
       final plugin = PluginManager.instance.getPlugin('goods') as GoodsPlugin?;
-      if (plugin == null) {
-        return _buildErrorWidget(context, '插件未加载');
-      }
+      if (plugin == null) return [];
 
-      final theme = Theme.of(context);
-      final l10n = GoodsLocalizations.of(context);
       final totalItems = plugin.getTotalItemsCount();
       final totalValue = plugin.getTotalItemsValue();
       final unusedItems = plugin.getUnusedItemsCount();
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图标和标题
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 207, 77, 116).withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.inventory_2,
-                    size: 24,
-                    color: Color.fromARGB(255, 207, 77, 116),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 统计信息
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 第一行：物品总数和总价值
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _StatItem(
-                        label: l10n.totalQuantity,
-                        value: '$totalItems',
-                        theme: theme,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: theme.dividerColor,
-                      ),
-                      _StatItem(
-                        label: l10n.totalValue,
-                        value: '¥${totalValue.toStringAsFixed(0)}',
-                        theme: theme,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 第二行：未使用物品数
-                  _StatItem(
-                    label: l10n.oneMonthUnused,
-                    value: '$unusedItems',
-                    theme: theme,
-                    highlight: unusedItems > 0,
-                    color: theme.colorScheme.error,
-                  ),
-                ],
-              ),
-            ),
-          ],
+      return [
+        StatItemData(
+          id: 'total_quantity',
+          label: '物品总数',
+          value: '$totalItems',
+          highlight: false,
         ),
+        StatItemData(
+          id: 'total_value',
+          label: '物品总价值',
+          value: '¥${totalValue.toStringAsFixed(0)}',
+          highlight: false,
+        ),
+        StatItemData(
+          id: 'one_month_unused',
+          label: '一个月未使用',
+          value: '$unusedItems',
+          highlight: unusedItems > 0,
+          color: Colors.red,
+        ),
+      ];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// 构建 2x2 详细卡片组件
+  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+    try {
+      final l10n = GoodsLocalizations.of(context);
+
+      // 解析插件配置
+      PluginWidgetConfig widgetConfig;
+      try {
+        if (config.containsKey('pluginWidgetConfig')) {
+          widgetConfig = PluginWidgetConfig.fromJson(
+            config['pluginWidgetConfig'] as Map<String, dynamic>,
+          );
+        } else {
+          widgetConfig = PluginWidgetConfig();
+        }
+      } catch (e) {
+        widgetConfig = PluginWidgetConfig();
+      }
+
+      // 获取可用的统计项数据
+      final availableItems = _getAvailableStats();
+
+      // 使用通用小组件
+      return GenericPluginWidget(
+        pluginName: l10n.name,
+        pluginIcon: Icons.dashboard,
+        pluginDefaultColor: _goodsColor,
+        availableItems: availableItems,
+        config: widgetConfig,
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
@@ -162,46 +134,6 @@ class GoodsHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 统计项组件
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final ThemeData theme;
-  final bool highlight;
-  final Color? color;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.highlight = false,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodySmall?.color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight && color != null ? color : null,
-          ),
-        ),
-      ],
     );
   }
 }

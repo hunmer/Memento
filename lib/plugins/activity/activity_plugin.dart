@@ -33,6 +33,11 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   late ActivityPromptController _promptController;
   bool _isInitialized = false;
 
+  // 缓存今日统计数据（用于同步访问）
+  int _cachedTodayActivityCount = 0;
+  int _cachedTodayActivityDuration = 0;
+  DateTime? _cacheDate;
+
   // 获取活动服务实例
   ActivityService get activityService {
     if (!_isInitialized) {
@@ -266,6 +271,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     if (!_isInitialized) return 0;
     final now = DateTime.now();
     final activities = await _activityService.getActivitiesForDate(now);
+
+    // 更新缓存
+    _updateCache(now, activities.length, null);
+
     return activities.length;
   }
 
@@ -279,6 +288,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     for (var activity in activities) {
       totalMinutes += activity.endTime.difference(activity.startTime).inMinutes;
     }
+
+    // 更新缓存
+    _updateCache(now, null, totalMinutes);
+
     return totalMinutes;
   }
 
@@ -287,6 +300,67 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     final now = DateTime.now();
     final endOfDay = DateTime(now.year, now.month, now.day, 23, 59);
     return endOfDay.difference(now).inMinutes;
+  }
+
+  // 更新缓存
+  void _updateCache(DateTime date, int? count, int? duration) {
+    final today = DateTime(date.year, date.month, date.day);
+    final cachedDay = _cacheDate != null
+        ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
+        : null;
+
+    // 如果是新的一天，重置缓存
+    if (cachedDay == null || !cachedDay.isAtSameMomentAs(today)) {
+      _cachedTodayActivityCount = 0;
+      _cachedTodayActivityDuration = 0;
+      _cacheDate = today;
+    }
+
+    // 更新缓存值
+    if (count != null) _cachedTodayActivityCount = count;
+    if (duration != null) _cachedTodayActivityDuration = duration;
+  }
+
+  // 同步获取今日活动数（从缓存）
+  int getTodayActivityCountSync() {
+    if (!_isInitialized) return 0;
+
+    // 检查缓存是否是今天的
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final cachedDay = _cacheDate != null
+        ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
+        : null;
+
+    if (cachedDay != null && cachedDay.isAtSameMomentAs(today)) {
+      return _cachedTodayActivityCount;
+    }
+
+    // 如果缓存不可用，异步刷新缓存（不等待）
+    getTodayActivityCount();
+
+    return 0;
+  }
+
+  // 同步获取今日活动总时长（分钟，从缓存）
+  int getTodayActivityDurationSync() {
+    if (!_isInitialized) return 0;
+
+    // 检查缓存是否是今天的
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final cachedDay = _cacheDate != null
+        ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
+        : null;
+
+    if (cachedDay != null && cachedDay.isAtSameMomentAs(today)) {
+      return _cachedTodayActivityDuration;
+    }
+
+    // 如果缓存不可用，异步刷新缓存（不等待）
+    getTodayActivityDuration();
+
+    return 0;
   }
 
   @override

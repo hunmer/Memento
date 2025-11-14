@@ -49,10 +49,20 @@ class LayoutConfig {
 
   /// 从 JSON 反序列化
   factory LayoutConfig.fromJson(Map<String, dynamic> json) {
+    // 深拷贝 items 列表，确保嵌套的 config 字段被保留
+    final itemsList = (json['items'] as List)
+        .map((item) {
+          if (item is Map) {
+            return _deepCopyMap(item);
+          }
+          return item as Map<String, dynamic>;
+        })
+        .toList();
+
     return LayoutConfig(
       id: json['id'] as String,
       name: json['name'] as String,
-      items: (json['items'] as List).cast<Map<String, dynamic>>(),
+      items: itemsList,
       gridCrossAxisCount: json['gridCrossAxisCount'] as int? ?? 4,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
@@ -61,6 +71,26 @@ class LayoutConfig {
       backgroundFit: boxFitFromString(json['backgroundFit'] as String?),
       backgroundBlur: (json['backgroundBlur'] as num?)?.toDouble() ?? 0.0,
     );
+  }
+
+  /// 深拷贝 Map，确保嵌套结构被正确保留
+  static Map<String, dynamic> _deepCopyMap(Map map) {
+    final result = <String, dynamic>{};
+    map.forEach((key, value) {
+      if (value is Map) {
+        result[key.toString()] = _deepCopyMap(value);
+      } else if (value is List) {
+        result[key.toString()] = value.map((item) {
+          if (item is Map) {
+            return _deepCopyMap(item);
+          }
+          return item;
+        }).toList();
+      } else {
+        result[key.toString()] = value;
+      }
+    });
+    return result;
   }
 
   /// 将字符串转换为 BoxFit

@@ -16,6 +16,7 @@ class HomeCard extends StatelessWidget {
   final VoidCallback? onLongPress;
   final bool isSelected;
   final bool isEditMode;
+  final bool isBatchMode;
   final Widget? dragHandle;
 
   const HomeCard({
@@ -25,6 +26,7 @@ class HomeCard extends StatelessWidget {
     this.onLongPress,
     this.isSelected = false,
     this.isEditMode = false,
+    this.isBatchMode = false,
     this.dragHandle,
   });
 
@@ -50,6 +52,38 @@ class HomeCard extends StatelessWidget {
             top: 4,
             right: 4,
             child: dragHandle!,
+          ),
+        // 批量选择模式下显示选中标记
+        if (isBatchMode)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color:
+                    isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).cardColor.withOpacity(0.8),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color:
+                      isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).dividerColor,
+                  width: 2,
+                ),
+              ),
+              child:
+                  isSelected
+                      ? Icon(
+                        Icons.check,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      )
+                      : null,
+            ),
           ),
       ],
     );
