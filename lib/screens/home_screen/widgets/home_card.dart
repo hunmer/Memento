@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../main.dart';
 import '../models/home_item.dart';
@@ -74,9 +75,34 @@ class HomeCard extends StatelessWidget {
     }
 
     try {
+      // 获取背景配置
+      final backgroundColor = widgetItem.config['backgroundColor'] != null
+          ? Color(widgetItem.config['backgroundColor'] as int)
+          : null;
+      final backgroundImagePath = widgetItem.config['backgroundImage'] as String?;
+
+      Widget content = widgetDef.build(context, widgetItem.config);
+
+      // 如果有背景颜色或背景图,添加装饰容器
+      if (backgroundColor != null || backgroundImagePath != null) {
+        content = Container(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            image: backgroundImagePath != null && File(backgroundImagePath).existsSync()
+                ? DecorationImage(
+                    image: FileImage(File(backgroundImagePath)),
+                    fit: BoxFit.cover,
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: content,
+        );
+      }
+
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: widgetDef.build(context, widgetItem.config),
+        child: content,
       );
     } catch (e) {
       return _buildErrorCard(context, '加载失败: $e');

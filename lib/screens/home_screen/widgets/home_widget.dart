@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/home_widget_size.dart';
+import '../models/plugin_widget_config.dart';
 
 /// 小组件构建器函数类型
 typedef HomeWidgetBuilder = Widget Function(BuildContext context, Map<String, dynamic> config);
+
+/// 可用统计项提供者函数类型
+typedef AvailableStatsProvider = List<StatItemData> Function();
 
 /// 主页小组件定义
 ///
@@ -43,6 +47,11 @@ class HomeWidget {
   /// - config: 小组件实例的配置数据（来自 HomeWidgetItem.config）
   final HomeWidgetBuilder builder;
 
+  /// 可用统计项提供者（可选）
+  ///
+  /// 用于小组件设置对话框，提供可选择的统计项列表
+  final AvailableStatsProvider? availableStatsProvider;
+
   const HomeWidget({
     required this.id,
     required this.pluginId,
@@ -54,6 +63,7 @@ class HomeWidget {
     required this.supportedSizes,
     required this.category,
     required this.builder,
+    this.availableStatsProvider,
   });
 
   /// 构建小组件
