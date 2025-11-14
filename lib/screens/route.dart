@@ -147,6 +147,7 @@ class AppRoutes extends NavigatorObserver {
     nodes: (context) => const NodesMainView(),
     notes: (context) => const NotesMainView(),
     openai: (context) => const OpenAIMainView(),
+    scriptsCenter: (context) => const ScriptsCenterMainView(),
     store: (context) => const StoreMainView(),
     timer: (context) => const TimerMainView(),
     todo: (context) => const TodoMainView(),

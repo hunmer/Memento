@@ -171,9 +171,10 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
                 );
               }
             },
-            child: Scrollbar(
-              controller: _toolbarScrollController,
-              thumbVisibility: true, // 始终显示滚动条（桌面平台）
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: false, // 隐藏滚动条
+              ),
               child: SingleChildScrollView(
                 controller: _toolbarScrollController,
                 scrollDirection: Axis.horizontal,

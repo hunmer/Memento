@@ -558,63 +558,58 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                         },
                       ),
                     ),
-                    // 左右切换按钮
-                    if (_savedLayouts.length > 1) ...[
-                      // 左箭头
-                      if (_currentPageIndex > 0)
-                        Positioned(
-                          left: 16,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                    // 底部圆点指示器
+                    if (_savedLayouts.length > 1)
+                      Positioned(
+                        bottom: 16,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(
+                                _savedLayouts.length,
+                                (index) => GestureDetector(
+                                  onTap: () {
+                                    _pageController?.animateToPage(
+                                      index,
+                                      duration: const Duration(milliseconds: 300),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                                    width: index == _currentPageIndex ? 24 : 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: index == _currentPageIndex
+                                          ? Theme.of(context).colorScheme.primary
+                                          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
                                   ),
-                                ],
-                              ),
-                              child: IconButton(
-                                icon: const Icon(Icons.chevron_left),
-                                onPressed: _previousPage,
-                                tooltip: '上一个布局',
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      // 右箭头
-                      if (_currentPageIndex < _savedLayouts.length - 1)
-                        Positioned(
-                          right: 16,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: IconButton(
-                                icon: const Icon(Icons.chevron_right),
-                                onPressed: _nextPage,
-                                tooltip: '下一个布局',
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
+                      ),
                   ],
                 ),
     );
@@ -663,25 +658,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
   }
 
-  /// 切换到上一个布局
-  void _previousPage() {
-    if (_pageController != null && _currentPageIndex > 0) {
-      _pageController!.previousPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  /// 切换到下一个布局
-  void _nextPage() {
-    if (_pageController != null && _currentPageIndex < _savedLayouts.length - 1) {
-      _pageController!.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
 }
 
 /// 网格大小调节对话框
