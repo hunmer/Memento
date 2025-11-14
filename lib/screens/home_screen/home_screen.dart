@@ -912,8 +912,24 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return PopScope(
+      canPop: !_isEditMode, // 编辑模式下不允许直接返回
+      onPopInvokedWithResult: (didPop, result) {
+        // 如果处于编辑模式，先退出编辑模式
+        if (_isEditMode && !didPop) {
+          setState(() {
+            _isEditMode = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('已退出编辑模式'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
         title: Text(
           _currentLayoutName.isEmpty
               ? AppLocalizations.of(context)!.home
@@ -1083,6 +1099,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               ),
         ],
       ),
+    ),
     );
   }
 
