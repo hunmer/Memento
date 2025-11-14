@@ -3,6 +3,8 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
+import 'package:Memento/screens/home_screen/models/layout_config.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/app_drawer.dart';
 import '../../main.dart';
@@ -35,6 +37,18 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   // 是否正在打开插件
   bool _isOpeningPlugin = false;
 
+  // 当前布局名称
+  String _currentLayoutName = '';
+
+  // 所有保存的布局列表
+  List<LayoutConfig> _savedLayouts = [];
+
+  // PageView 控制器
+  PageController? _pageController;
+
+  // 当前页索引
+  int _currentPageIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +68,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     });
   }
 
+  @override
+  void dispose() {
+    _pageController?.dispose();
+    super.dispose();
+  }
+
   /// 初始化布局
   Future<void> _initializeLayout() async {
     try {
@@ -63,6 +83,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       if (_layoutManager.items.isEmpty) {
         await _createDefaultWidgets();
       }
+
+      // 加载所有保存的布局
+      await _loadSavedLayouts();
+
+      // 获取当前活动布局名称
+      await _updateCurrentLayoutName();
     } catch (e) {
       debugPrint('初始化布局失败: $e');
     } finally {
@@ -71,6 +97,47 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  /// 加载所有保存的布局
+  Future<void> _loadSavedLayouts() async {
+    try {
+      final layouts = await _layoutManager.getSavedLayouts();
+      final currentConfig = await _layoutManager.getCurrentLayoutConfig();
+
+      if (mounted) {
+        setState(() {
+          _savedLayouts = layouts;
+          // 初始化 PageController
+          if (layouts.isNotEmpty && currentConfig != null) {
+            // 找到当前活动布局的索引
+            _currentPageIndex = layouts.indexWhere(
+              (layout) => layout.id == currentConfig.id,
+            );
+            if (_currentPageIndex == -1) {
+              _currentPageIndex = 0;
+            }
+            _pageController = PageController(initialPage: _currentPageIndex);
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('加载保存的布局失败: $e');
+    }
+  }
+
+  /// 更新当前布局名称
+  Future<void> _updateCurrentLayoutName() async {
+    try {
+      final currentConfig = await _layoutManager.getCurrentLayoutConfig();
+      if (mounted) {
+        setState(() {
+          _currentLayoutName = currentConfig?.name ?? '';
+        });
+      }
+    } catch (e) {
+      debugPrint('获取当前布局名称失败: $e');
     }
   }
 
@@ -275,6 +342,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
               try {
                 await _layoutManager.saveCurrentLayoutAs(name);
+                // 刷新布局列表和名称
+                await _loadSavedLayouts();
+                await _updateCurrentLayoutName();
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('布局"$name"已保存')),
@@ -296,11 +366,15 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   }
 
   /// 显示布局管理对话框
-  void _showLayoutManagerDialog() {
-    showDialog(
+  void _showLayoutManagerDialog() async {
+    await showDialog(
       context: context,
       builder: (context) => const LayoutManagerDialog(),
     );
+
+    // 对话框关闭后刷新布局列表和名称
+    await _loadSavedLayouts();
+    await _updateCurrentLayoutName();
   }
 
   @override
@@ -429,7 +503,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.home),
+        title: Text(
+          _currentLayoutName.isEmpty
+              ? AppLocalizations.of(context)!.home
+              : _currentLayoutName,
+        ),
         centerTitle: true,
         leading: Builder(
           builder: (BuildContext context) {
@@ -457,21 +535,152 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       drawer: const AppDrawer(),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListenableBuilder(
-              listenable: _layoutManager,
-              builder: (context, child) {
-                return HomeGrid(
-                  items: _layoutManager.items,
-                  crossAxisCount: _layoutManager.gridCrossAxisCount,
-                    isEditMode: _isEditMode,
-                  onReorder: (oldIndex, newIndex) {
-                    _layoutManager.reorder(oldIndex, newIndex);
-                  },
-                    onItemLongPress: _handleCardLongPress,
-                );
-              },
-            ),
+          : _savedLayouts.isEmpty
+              ? _buildHomeContent()
+              : Stack(
+                  children: [
+                    // 使用 ScrollConfiguration 让桌面端支持鼠标拖拽
+                    ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context).copyWith(
+                        dragDevices: {
+                          PointerDeviceKind.touch,
+                          PointerDeviceKind.mouse,
+                          PointerDeviceKind.stylus,
+                          PointerDeviceKind.trackpad,
+                        },
+                      ),
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: _savedLayouts.length,
+                        onPageChanged: _onPageChanged,
+                        itemBuilder: (context, index) {
+                          return _buildHomeContent();
+                        },
+                      ),
+                    ),
+                    // 左右切换按钮
+                    if (_savedLayouts.length > 1) ...[
+                      // 左箭头
+                      if (_currentPageIndex > 0)
+                        Positioned(
+                          left: 16,
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.chevron_left),
+                                onPressed: _previousPage,
+                                tooltip: '上一个布局',
+                              ),
+                            ),
+                          ),
+                        ),
+                      // 右箭头
+                      if (_currentPageIndex < _savedLayouts.length - 1)
+                        Positioned(
+                          right: 16,
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.chevron_right),
+                                onPressed: _nextPage,
+                                tooltip: '下一个布局',
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ],
+                ),
     );
+  }
+
+  /// 构建主页内容
+  Widget _buildHomeContent() {
+    return ListenableBuilder(
+      listenable: _layoutManager,
+      builder: (context, child) {
+        return HomeGrid(
+          items: _layoutManager.items,
+          crossAxisCount: _layoutManager.gridCrossAxisCount,
+          isEditMode: _isEditMode,
+          onReorder: (oldIndex, newIndex) {
+            _layoutManager.reorder(oldIndex, newIndex);
+          },
+          onItemLongPress: _handleCardLongPress,
+        );
+      },
+    );
+  }
+
+  /// 页面切换回调
+  void _onPageChanged(int index) async {
+    if (index < 0 || index >= _savedLayouts.length) {
+      return;
+    }
+
+    final layout = _savedLayouts[index];
+    setState(() {
+      _currentPageIndex = index;
+      _currentLayoutName = layout.name;
+    });
+
+    // 加载对应的布局配置
+    try {
+      await _layoutManager.loadLayoutConfig(layout.id);
+    } catch (e) {
+      debugPrint('切换布局失败: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('切换布局失败：$e')),
+        );
+      }
+    }
+  }
+
+  /// 切换到上一个布局
+  void _previousPage() {
+    if (_pageController != null && _currentPageIndex > 0) {
+      _pageController!.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  /// 切换到下一个布局
+  void _nextPage() {
+    if (_pageController != null && _currentPageIndex < _savedLayouts.length - 1) {
+      _pageController!.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 }
 

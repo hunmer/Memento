@@ -322,9 +322,9 @@ class MessageContent extends StatelessWidget {
       // 普通文本消息
       // 判断是否为纯文本（无 Quill 格式）
       if (_isPlainText(message.content)) {
-        // 纯文本，使用 SelectableText 显示
+        // 纯文本，使用 Text 显示（禁用选择功能以避免与长按菜单冲突）
         final plainText = _extractPlainText(message.content);
-        return SelectableText(
+        return Text(
           plainText,
           style: TextStyle(
             color: textColor,
@@ -332,10 +332,10 @@ class MessageContent extends StatelessWidget {
           ),
         );
       } else {
-        // 包含 Quill 格式，使用 QuillViewer 显示
+        // 包含 Quill 格式，使用 QuillViewer 显示（禁用选择功能以避免与长按菜单冲突）
         return QuillViewer(
           data: message.content,
-          selectable: true,
+          selectable: false,
           customStyles: quill.DefaultStyles(
             paragraph: quill.DefaultTextBlockStyle(
               TextStyle(color: textColor),

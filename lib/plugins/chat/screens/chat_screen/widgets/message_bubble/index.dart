@@ -95,10 +95,10 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   void _handleMessageUpdated(EventArgs args) {
-    if (args is! Values<Message, String>) {
+    if (args is! Value<Message>) {
       return;
     }
-    final updatedMessage = args.value1;
+    final updatedMessage = args.value;
 
     if (!mounted) return;
 

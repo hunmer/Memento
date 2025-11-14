@@ -20,6 +20,7 @@ import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
+import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';
 import 'package:Memento/plugins/timer/views/timer_main_view.dart';
 import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
@@ -53,6 +54,7 @@ class AppRoutes extends NavigatorObserver {
   static const String nodes = '/nodes';
   static const String notes = '/notes';
   static const String openai = '/openai';
+  static const String scriptsCenter = '/scripts_center';
   static const String store = '/store';
   static const String timer = '/timer';
   static const String todo = '/todo';
@@ -106,6 +108,8 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const NotesMainView());
       case 'openai':
         return _createRoute(const OpenAIMainView());
+      case 'scripts_center':
+        return _createRoute(const ScriptsCenterMainView());
       case 'store':
         return _createRoute(const StoreMainView());
       case 'timer':
