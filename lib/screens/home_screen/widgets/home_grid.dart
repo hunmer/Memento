@@ -43,44 +43,49 @@ class _HomeGridState extends State<HomeGrid> {
       return _buildEmptyState(context);
     }
 
-    final gridWidget = StaggeredGrid.count(
-      crossAxisCount: widget.crossAxisCount,
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      children: List.generate(widget.items.length, (index) {
-        return _buildDraggableTile(context, widget.items[index], index);
-      }),
+    final gridWidget = Padding(
+      padding: const EdgeInsets.all(8),
+      child: StaggeredGrid.count(
+        crossAxisCount: widget.crossAxisCount,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        children: List.generate(widget.items.length, (index) {
+          return _buildDraggableTile(context, widget.items[index], index);
+        }),
+      ),
     );
 
     // 根据对齐方式选择不同的布局
-    if (widget.alignment == Alignment.center) {
-      // 居中模式：使用 LayoutBuilder 获取可用空间，居中显示
-      return LayoutBuilder(
-        builder: (context, constraints) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (widget.alignment == Alignment.center) {
+          // 居中模式：内容在可用空间中垂直居中
           return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: constraints.maxHeight,
               ),
-              child: IntrinsicHeight(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: gridWidget,
-                  ),
-                ),
+              child: Center(
+                child: gridWidget,
               ),
             ),
           );
-        },
-      );
-    }
+        }
 
-    // 顶部模式：普通滚动视图
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: gridWidget,
+        // 顶部模式：内容从顶部开始
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight,
+            ),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: gridWidget,
+            ),
+          ),
+        );
+      },
     );
   }
 
