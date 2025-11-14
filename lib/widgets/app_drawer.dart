@@ -48,82 +48,29 @@ class AppDrawer extends StatelessWidget {
                         onPressed: () {
                           if (context.mounted) {
                             Navigator.pop(context); // 关闭抽屉
-                            // 添加加载状态管理
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                            // 延迟确保加载动画显示
-                            Future.microtask(() {
-                              if (context.mounted) {
-                                Navigator.of(context).pop(); // 关闭加载
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Scaffold(
-                                      appBar: AppBar(
-                                        title: Text(
-                                          plugin.getPluginName(context) ??
-                                              plugin.id,
-                                        ),
-                                      ),
-                                      body: plugin.buildSettingsView(context),
+                            // 导航到插件设置页面
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Scaffold(
+                                  appBar: AppBar(
+                                    title: Text(
+                                      plugin.getPluginName(context) ??
+                                          plugin.id,
                                     ),
                                   ),
-                                );
-                              }
-                            });
+                                  body: plugin.buildSettingsView(context),
+                                ),
+                              ),
+                            );
                           }
                         },
                       ),
                       onTap: () {
                         if (context.mounted) {
                           Navigator.pop(context); // 关闭抽屉
-                          // 导航到插件主页面
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Scaffold(
-                                appBar: AppBar(
-                                  title: Text(
-                                    plugin.getPluginName(context) ?? plugin.id,
-                                  ),
-                                  actions: [
-                                    // 在主页面也提供设置按钮快捷方式
-                                    IconButton(
-                                      icon: const Icon(Icons.settings),
-                                      tooltip:
-                                          AppLocalizations.of(context)!.settings,
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => Scaffold(
-                                              appBar: AppBar(
-                                                title: Text(
-                                                  plugin.getPluginName(
-                                                        context,
-                                                      ) ??
-                                                      plugin.id,
-                                                ),
-                                              ),
-                                              body: plugin.buildSettingsView(
-                                                context,
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                body: plugin.buildMainView(context),
-                              ),
-                            ),
-                          );
+                          // 使用 PluginManager 统一的打开插件方法
+                          globalPluginManager.openPlugin(context, plugin);
                         }
                       },
                     );

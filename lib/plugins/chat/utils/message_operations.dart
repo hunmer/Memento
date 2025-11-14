@@ -127,6 +127,9 @@ class MessageOperations {
 
       // 保存更新后的消息列表
       await _chatPlugin.channelService.saveMessages(channelId, updatedMessages);
+
+      // 触发 UI 更新
+      _chatPlugin.notifyListeners();
     }
   }
 

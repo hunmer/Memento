@@ -1,21 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter_js/flutter_js.dart';
+import 'package:flutter/material.dart';
 import '../../../core/event/event_manager.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/js_bridge/js_bridge_manager.dart';
+import '../../../core/plugin_base.dart';
 import '../models/script_execution_result.dart';
 import 'script_manager.dart';
 
 /// 脚本执行器服务
 ///
-/// 封装flutter_js引擎，提供安全的JavaScript执行环境
+/// 使用 JSBridgeManager 提供的统一 JS 执行环境
+/// 脚本可以直接调用 Memento 的插件 API（如 Memento.chat.sendMessage() 等）
 class ScriptExecutor {
   final ScriptManager scriptManager;
   final StorageManager storage;
   final EventManager eventManager;
 
-  /// JavaScriptRuntime实例
-  late JavascriptRuntime _jsRuntime;
+  /// JS Bridge Manager 实例
+  final JSBridgeManager _jsBridge = JSBridgeManager.instance;
 
   /// 是否已初始化
   bool _isInitialized = false;
@@ -45,183 +48,62 @@ class ScriptExecutor {
     }
 
     try {
-      // 创建JS运行时
-      _jsRuntime = getJavascriptRuntime();
+      // 确保 JSBridgeManager 已初始化
+      if (!_jsBridge.isSupported) {
+        throw Exception('JSBridgeManager 未初始化或不支持');
+      }
 
-      // 注入全局API
-      _injectGlobalAPI();
+      // 注入脚本中心特有的全局API（runScript 等）
+      await _injectScriptCenterAPI();
 
       _isInitialized = true;
-      print('✅ ScriptExecutor初始化成功');
+      print('✅ ScriptExecutor初始化成功（使用 JSBridgeManager）');
     } catch (e) {
       print('❌ ScriptExecutor初始化失败: $e');
       rethrow;
     }
   }
 
-  /// 注入全局API到JS环境
-  void _injectGlobalAPI() {
-    // 注入全局对象
-    final globalAPIs = '''
-    // 全局日志函数
-    function log(message, level) {
-      level = level || 'info';
-      sendMessage('log', JSON.stringify({ message: message, level: level }));
-    }
+  /// 注入脚本中心特有的 API 到 JS 环境
+  ///
+  /// 注意：Memento 的插件 API（如 Memento.chat.* 等）已由 JSBridgeManager 自动注册
+  /// 这里只需要注入脚本中心特有的功能
+  Future<void> _injectScriptCenterAPI() async {
+    // 创建一个临时的"插件"来注册 runScript API
+    // 这样可以利用 JSBridgeManager 的标准 API 注册机制
+    final _ScriptExecutorPlugin tempPlugin = _ScriptExecutorPlugin(this);
 
-    // 全局存储对象
-    const storage = {
-      get: async function(key) {
-        const result = sendMessage('storage.get', key);
-        return JSON.parse(result || 'null');
-      },
-      set: async function(key, value) {
-        sendMessage('storage.set', JSON.stringify({ key: key, value: value }));
-      },
-      remove: async function(key) {
-        sendMessage('storage.remove', key);
-      }
+    final apis = {
+      'runScript': _handleRunScript,
     };
 
-    // 全局事件触发函数
-    function emit(eventName, data) {
-      sendMessage('emit', JSON.stringify({ event: eventName, data: data }));
-    }
+    // 使用 JSBridgeManager 的标准 API 注册机制
+    await _jsBridge.registerPlugin(tempPlugin, apis);
 
-    // 全局脚本调用函数
-    async function runScript(scriptId, ...params) {
-      const argsJson = JSON.stringify({ scriptId: scriptId, params: params });
-      const result = sendMessage('runScript', argsJson);
-      return JSON.parse(result || 'null');
-    }
+    // 在全局作用域也提供 runScript（便于脚本使用）
+    await _jsBridge.evaluate('''
+      (function() {
+        // 将 Memento.script_executor.runScript 映射到全局 runScript
+        if (typeof globalThis.Memento !== 'undefined' &&
+            typeof globalThis.Memento.script_executor !== 'undefined') {
+          globalThis.runScript = globalThis.Memento.script_executor.runScript;
 
-    // 工具函数
-    const utils = {
-      sleep: function(ms) {
-        const start = Date.now();
-        while (Date.now() - start < ms) {}
-      },
-      formatDate: function(date, format) {
-        // 简单的日期格式化
-        const d = new Date(date);
-        format = format || 'YYYY-MM-DD';
-        return format
-          .replace('YYYY', d.getFullYear())
-          .replace('MM', String(d.getMonth() + 1).padStart(2, '0'))
-          .replace('DD', String(d.getDate()).padStart(2, '0'))
-          .replace('HH', String(d.getHours()).padStart(2, '0'))
-          .replace('mm', String(d.getMinutes()).padStart(2, '0'))
-          .replace('ss', String(d.getSeconds()).padStart(2, '0'));
-      }
-    };
-    ''';
+          // 兼容浏览器环境
+          if (typeof window !== 'undefined') {
+            window.runScript = globalThis.runScript;
+          }
+        }
+      })();
+    ''');
 
-    try {
-      _jsRuntime.evaluate(globalAPIs);
-      print('✅ 全局API注入成功');
-    } catch (e) {
-      print('❌ 全局API注入失败: $e');
-    }
+    print('✅ 脚本中心 API 注入成功');
   }
 
-  /// 处理JS发送的消息
-  String? _handleMessage(String channel, String message) {
-    try {
-      switch (channel) {
-        case 'log':
-          final data = jsonDecode(message) as Map<String, dynamic>;
-          _handleLog(data['message'] as String, data['level'] as String);
-          return null;
-
-        case 'storage.get':
-          return _handleStorageGet(message);
-
-        case 'storage.set':
-          final data = jsonDecode(message) as Map<String, dynamic>;
-          _handleStorageSet(
-            data['key'] as String,
-            data['value'],
-          );
-          return null;
-
-        case 'storage.remove':
-          _handleStorageRemove(message);
-          return null;
-
-        case 'emit':
-          final data = jsonDecode(message) as Map<String, dynamic>;
-          _handleEmit(
-            data['event'] as String,
-            data['data'],
-          );
-          return null;
-
-        case 'runScript':
-          final data = jsonDecode(message) as Map<String, dynamic>;
-          return _handleRunScript(
-            data['scriptId'] as String,
-            data['params'] as List,
-          );
-
-        default:
-          print('⚠️ 未知的消息通道: $channel');
-          return null;
-      }
-    } catch (e) {
-      print('❌ 处理消息失败 [$channel]: $e');
-      return null;
-    }
-  }
-
-  /// 处理日志
-  void _handleLog(String message, String level) {
-    final timestamp = DateTime.now().toIso8601String();
-    print('[$timestamp] [$level] $message');
-
-    // 调用外部日志回调
-    onLog?.call(message, level);
-  }
-
-  /// 处理存储读取
-  String? _handleStorageGet(String key) {
-    // 由于flutter_js不支持真正的异步，这里使用同步方式
-    // 实际应用中可能需要预加载数据
-    try {
-      // 这里需要使用同步读取或者预加载的缓存
-      // 简化实现：返回null，实际应该从缓存读取
-      return null;
-    } catch (e) {
-      print('❌ 存储读取失败: $e');
-      return null;
-    }
-  }
-
-  /// 处理存储写入
-  void _handleStorageSet(String key, dynamic value) {
-    storage.write(key, value).catchError((e) {
-      print('❌ 存储写入失败: $e');
-    });
-  }
-
-  /// 处理存储删除
-  void _handleStorageRemove(String key) {
-    storage.delete(key).catchError((e) {
-      print('❌ 存储删除失败: $e');
-    });
-  }
-
-  /// 处理事件触发
-  void _handleEmit(String eventName, dynamic data) {
-    try {
-      eventManager.broadcast(eventName, EventArgs(eventName));
-      print('📡 触发事件: $eventName');
-    } catch (e) {
-      print('❌ 触发事件失败: $e');
-    }
-  }
-
-  /// 处理脚本调用
-  String? _handleRunScript(String scriptId, List params) {
+  /// 处理脚本互调
+  ///
+  /// 此方法由 JS 环境中的 runScript() 函数调用
+  /// 支持真正的异步执行和脚本间调用
+  Future<dynamic> _handleRunScript(String scriptId, [dynamic params]) async {
     // 检测循环调用
     if (_executingScripts.contains(scriptId)) {
       print('❌ 检测到循环调用: $scriptId');
@@ -231,13 +113,36 @@ class ScriptExecutor {
       });
     }
 
-    // 由于flutter_js的限制，这里无法实现真正的脚本互调
-    // 实际应用中需要使用队列或者其他异步机制
-    print('⚠️ runScript功能需要异步支持，当前版本暂不支持');
-    return jsonEncode({
-      'success': false,
-      'error': 'runScript功能暂不支持（需要异步支持）',
-    });
+    try {
+      print('📞 脚本互调: $scriptId');
+
+      // 准备参数
+      final Map<String, dynamic> args = {
+        'params': params ?? [],
+        'calledFrom': 'runScript',
+      };
+
+      // 执行目标脚本
+      final result = await execute(scriptId, args: args);
+
+      // 返回结果
+      if (result.success) {
+        print('✅ 脚本互调成功: $scriptId');
+        return result.result;
+      } else {
+        print('⚠️ 脚本互调失败: $scriptId - ${result.error}');
+        return jsonEncode({
+          'success': false,
+          'error': result.error,
+        });
+      }
+    } catch (e) {
+      print('❌ 脚本互调异常: $scriptId - $e');
+      return jsonEncode({
+        'success': false,
+        'error': e.toString(),
+      });
+    }
   }
 
   /// 执行脚本
@@ -285,20 +190,35 @@ class ScriptExecutor {
         // 准备参数
         final argsJson = jsonEncode(args ?? {});
 
-        // 包装代码（注入args参数）
+        // 包装代码（注入 args 参数和脚本信息）
         final wrappedCode = '''
-        (function() {
+        (async function() {
           const args = $argsJson;
+          const scriptInfo = {
+            id: '${script.id}',
+            name: '${script.name}',
+            version: '${script.version}'
+          };
+
           try {
-            return $code
+            // 执行脚本代码
+            const result = await (async function() {
+              $code
+            })();
+
+            return result;
           } catch (error) {
-            log('脚本执行错误: ' + error.toString(), 'error');
-            return { success: false, error: error.toString() };
+            console.error('[Script Error]', error);
+            return {
+              success: false,
+              error: error.toString(),
+              stack: error.stack
+            };
           }
         })();
         ''';
 
-        // 执行脚本（带超时控制）
+        // 使用 JSBridgeManager 执行脚本（带超时控制）
         dynamic result;
         try {
           result = await _executeWithTimeout(wrappedCode);
@@ -307,6 +227,12 @@ class ScriptExecutor {
         }
 
         final duration = DateTime.now().difference(startTime);
+
+        // 记录执行日志
+        onLog?.call(
+          '脚本 ${script.name} 执行成功，耗时 ${duration.inMilliseconds}ms',
+          'info',
+        );
 
         return ScriptExecutionResult.success(
           result: result,
@@ -319,6 +245,13 @@ class ScriptExecutor {
       }
     } catch (e) {
       final duration = DateTime.now().difference(startTime);
+
+      // 记录错误日志
+      onLog?.call(
+        '脚本执行失败: $e',
+        'error',
+      );
+
       return ScriptExecutionResult.failure(
         error: e.toString(),
         duration: duration,
@@ -334,29 +267,17 @@ class ScriptExecutor {
         Duration(milliseconds: timeoutMilliseconds),
         () => throw TimeoutException('执行超时'),
       ),
-      Future(() {
+      Future(() async {
         try {
-          // 执行JS代码
-          final jsResult = _jsRuntime.evaluate(code);
+          // 使用 JSBridgeManager 执行代码
+          final jsResult = await _jsBridge.evaluate(code);
 
           // 处理返回值
-          if (jsResult.isError) {
-            throw Exception(jsResult.stringResult);
+          if (!jsResult.success) {
+            throw Exception(jsResult.error ?? '未知错误');
           }
 
-          // 解析返回值
-          final resultStr = jsResult.stringResult;
-          if (resultStr == 'undefined' || resultStr == 'null') {
-            return null;
-          }
-
-          // 尝试解析JSON
-          try {
-            return jsonDecode(resultStr);
-          } catch (e) {
-            // 如果不是JSON，直接返回字符串
-            return resultStr;
-          }
+          return jsResult.result;
         } catch (e) {
           throw Exception('JS执行错误: $e');
         }
@@ -365,15 +286,19 @@ class ScriptExecutor {
   }
 
   /// 评估表达式（用于调试）
-  String? evaluateExpression(String expression) {
+  Future<String?> evaluateExpression(String expression) async {
     if (!_isInitialized) return null;
 
     try {
-      final result = _jsRuntime.evaluate(expression);
-      return result.stringResult;
+      final result = await _jsBridge.evaluate(expression);
+      if (result.success) {
+        return result.result?.toString();
+      } else {
+        return 'Error: ${result.error}';
+      }
     } catch (e) {
       print('❌ 表达式评估失败: $e');
-      return null;
+      return 'Exception: $e';
     }
   }
 
@@ -382,5 +307,35 @@ class ScriptExecutor {
     _executingScripts.clear();
     _isInitialized = false;
     print('✅ ScriptExecutor已清理');
+  }
+}
+
+/// 临时插件类，用于向 JSBridgeManager 注册 ScriptExecutor 的 API
+///
+/// 这是一个轻量级的适配器，使 ScriptExecutor 能够利用 JSBridgeManager 的
+/// 标准 API 注册机制来暴露 runScript 等函数
+class _ScriptExecutorPlugin extends PluginBase {
+  final ScriptExecutor executor;
+
+  _ScriptExecutorPlugin(this.executor);
+
+  @override
+  String get id => 'script_executor';
+
+  @override
+  IconData? get icon => null;
+
+  @override
+  Color? get color => null;
+
+  @override
+  Future<void> initialize() async {
+    // 无需初始化，ScriptExecutor 已经初始化
+  }
+
+  @override
+  Widget buildMainView(BuildContext context) {
+    // 这个插件不需要 UI
+    return Container();
   }
 }
