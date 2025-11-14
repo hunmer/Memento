@@ -293,6 +293,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/js_console');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.widgets),
+            title: const Text('JSON Dynamic Widget 测试'),
+            subtitle: const Text('测试和预览动态 UI 组件'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/json_dynamic_test');
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.info),

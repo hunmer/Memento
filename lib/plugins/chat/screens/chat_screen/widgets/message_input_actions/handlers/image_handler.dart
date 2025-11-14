@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import '../../../../../models/file_message.dart';
 import '../../../../../services/file_service.dart';
+import '../../../../../../../utils/image_utils.dart';
+import '../../../../../../../widgets/image_picker_dialog.dart';
 import '../types.dart';
 
 Future<void> handleImageSelection({
@@ -14,18 +15,28 @@ Future<void> handleImageSelection({
   required bool fromCamera,
 }) async {
   final scaffoldMessenger = ScaffoldMessenger.of(context);
-  final ImagePicker picker = ImagePicker();
 
   try {
-    final XFile? image = await picker.pickImage(
-      source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+    // 使用 ImagePickerDialog 并启用压缩
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder:
+          (context) => ImagePickerDialog(
+            saveDirectory: 'chat/chat_files',
+            enableCompression: true,
+            compressionQuality: 85,
+          ),
     );
 
-    if (image != null) {
-      debugPrint('图片选择完成: ${image.path}');
+    if (result != null && result['url'] != null) {
+      debugPrint('图片选择完成: ${result['url']}');
 
       try {
-        final File imageFile = File(image.path);
+        final String relativePath = result['url'] as String;
+        final String? thumbUrl = result['thumbUrl'] as String?;
+        final absolutePath = await ImageUtils.getAbsolutePath(relativePath);
+        final File imageFile = File(absolutePath);
+
         if (!await imageFile.exists()) {
           scaffoldMessenger.showSnackBar(
             SnackBar(
@@ -38,11 +49,11 @@ Future<void> handleImageSelection({
           return;
         }
 
-        final originalFileName = path.basename(image.path);
-        final savedFile = await fileService.saveImage(imageFile);
+        final originalFileName = path.basename(absolutePath);
         final fileMessage = await FileMessage.fromFile(
-          savedFile,
+          imageFile,
           originalFileName: originalFileName,
+          thumbPath: thumbUrl,
         );
 
         // 详细的metadata结构
@@ -52,6 +63,7 @@ Future<void> handleImageSelection({
             'name': fileMessage.fileName,
             'originalName': fileMessage.originalFileName,
             'path': fileMessage.filePath,
+            'thumbPath': fileMessage.thumbPath,
             'size': fileMessage.fileSize,
             'extension': fileMessage.extension,
             'mimeType': 'image/${fileMessage.extension.replaceAll('.', '')}',

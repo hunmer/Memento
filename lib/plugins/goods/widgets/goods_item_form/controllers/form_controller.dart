@@ -27,6 +27,7 @@ class GoodsItemFormController {
   IconData? icon;
   Color? iconColor;
   String? imagePath;
+  String? thumbPath;
   List<String> tags = [];
   List<UsageRecord> usageRecords = [];
   List<CustomField> customFields = [];
@@ -50,6 +51,7 @@ class GoodsItemFormController {
       icon = item.icon;
       iconColor = item.iconColor;
       imagePath = item.imageUrl;
+      thumbPath = item.thumbUrl;
       tags = List<String>.from(item.tags);
       usageRecords = List<UsageRecord>.from(item.usageRecords);
       customFields = List<CustomField>.from(item.customFields);
@@ -81,6 +83,7 @@ class GoodsItemFormController {
       icon: item.icon,
       iconColor: item.iconColor,
       imageUrl: item.imageUrl,
+      thumbUrl: item.thumbUrl,
       tags: item.tags,
       purchaseDate: item.purchaseDate,
       usageRecords: [], // 清空使用记录
@@ -135,6 +138,7 @@ class GoodsItemFormController {
       icon: icon ?? Icons.image,
       iconColor: iconColor ?? Colors.blue,
       imageUrl: imagePath,
+      thumbUrl: thumbPath,
       tags: tags,
       purchaseDate: DateTime.now(),
       usageRecords: usageRecords,

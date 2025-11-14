@@ -11,6 +11,7 @@ class FileMessage {
   final String fileName; // 存储系统中的文件名（UUID）
   final String originalFileName; // 原始上传时的文件名
   final String filePath;
+  final String? thumbPath; // 缩略图路径
   final int fileSize;
   final DateTime timestamp;
   final String? mimeType;
@@ -21,6 +22,7 @@ class FileMessage {
     required this.fileName,
     required this.originalFileName,
     required this.filePath,
+    this.thumbPath,
     required this.fileSize,
     required this.timestamp,
     this.mimeType,
@@ -88,6 +90,7 @@ class FileMessage {
     File file, {
     String? systemFileName,
     String? originalFileName,
+    String? thumbPath,
   }) async {
     final stats = await file.stat();
     final fileService = FileService();
@@ -108,6 +111,7 @@ class FileMessage {
       fileName: systemFileName ?? path.basename(file.path), // 系统文件名（UUID）
       originalFileName: fileName, // 保存原始文件名
       filePath: relativePath, // 使用相对路径
+      thumbPath: thumbPath, // 缩略图路径
       fileSize: stats.size,
       timestamp: DateTime.now(),
       mimeType: mimeType,
@@ -131,6 +135,7 @@ class FileMessage {
       'fileName': fileName,
       'originalFileName': originalFileName, // 添加原始文件名
       'filePath': filePath, // 存储相对路径
+      'thumbPath': thumbPath, // 缩略图路径
       'fileSize': fileSize,
       'timestamp': timestamp.toIso8601String(),
       'mimeType': mimeType,
@@ -186,6 +191,7 @@ class FileMessage {
       fileName: fileName,
       originalFileName: json['originalFileName'] ?? json['originalName'] ?? fileName,
       filePath: filePath,
+      thumbPath: json['thumbPath'] as String?,
       fileSize: fileSize,
       timestamp:
           json.containsKey('timestamp') && json['timestamp'] != null

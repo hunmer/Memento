@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_js/flutter_js.dart';
 import 'js_engine_interface.dart';
 
@@ -7,8 +8,54 @@ class MobileJSEngine implements JSEngine {
   bool _initialized = false;
   final Map<String, Function> _registeredFunctions = {};
 
+  // UI 回调函数（由外部注入，用于显示 Toast/Alert/Dialog）
+  Function(String message, String duration, String gravity)? _onToast;
+  Future<bool> Function(
+    String message, {
+    String? title,
+    String? confirmText,
+    String? cancelText,
+    bool showCancel,
+  })? _onAlert;
+  Future<String?> Function(
+    String? title,
+    String? content,
+    List<Map<String, dynamic>> actions,
+  )? _onDialog;
+
   @override
   bool get isSupported => true; // Android/iOS/Desktop 都支持
+
+  /// 设置 Toast 回调
+  void setToastHandler(Function(String, String, String) handler) {
+    _onToast = handler;
+  }
+
+  /// 设置 Alert 回调
+  void setAlertHandler(
+    Future<bool> Function(
+      String, {
+      String? title,
+      String? confirmText,
+      String? cancelText,
+      bool showCancel,
+    })
+        handler,
+  ) {
+    _onAlert = handler;
+  }
+
+  /// 设置 Dialog 回调
+  void setDialogHandler(
+    Future<String?> Function(
+      String?,
+      String?,
+      List<Map<String, dynamic>>,
+    )
+        handler,
+  ) {
+    _onDialog = handler;
+  }
 
   @override
   Future<void> initialize() async {
@@ -60,6 +107,86 @@ class MobileJSEngine implements JSEngine {
           return undefined;  // 明确返回 undefined
         }
       };
+
+      // 定义 flutter 对象，提供原生 UI 交互 API
+      var flutter = {
+        // Toast 提示
+        toast: function(message, options) {
+          var callId = Date.now() + '_' + Math.floor(Math.random() * 1000000);
+          var resultKey = '_flutterToast_callback_' + callId;
+
+          var config = {
+            message: String(message),
+            duration: (options && options.duration) || 'short',
+            gravity: (options && options.gravity) || 'bottom'
+          };
+
+          sendMessage('_flutterToast', JSON.stringify({ callId: callId, config: config }));
+
+          // Toast 不需要返回值，但为了一致性返回 Promise
+          return Promise.resolve();
+        },
+
+        // Alert 对话框
+        alert: function(message, options) {
+          var callId = Date.now() + '_' + Math.floor(Math.random() * 1000000);
+          var resultKey = '_flutterAlert_callback_' + callId;
+
+          var config = {
+            message: String(message),
+            title: (options && options.title) || null,
+            confirmText: (options && options.confirmText) || null,
+            cancelText: (options && options.cancelText) || null,
+            showCancel: (options && options.showCancel) || false
+          };
+
+          sendMessage('_flutterAlert', JSON.stringify({ callId: callId, config: config }));
+
+          // 标记此 Promise 正在等待
+          if (!globalThis.__PENDING_CALLS__) {
+            globalThis.__PENDING_CALLS__ = {};
+          }
+          globalThis.__PENDING_CALLS__[resultKey] = {
+            resolve: null,
+            reject: null,
+            timestamp: Date.now()
+          };
+
+          return new Promise(function(resolve, reject) {
+            globalThis.__PENDING_CALLS__[resultKey].resolve = resolve;
+            globalThis.__PENDING_CALLS__[resultKey].reject = reject;
+          });
+        },
+
+        // Dialog 自定义对话框
+        dialog: function(options) {
+          var callId = Date.now() + '_' + Math.floor(Math.random() * 1000000);
+          var resultKey = '_flutterDialog_callback_' + callId;
+
+          var config = {
+            title: (options && options.title) || null,
+            content: (options && options.content) || null,
+            actions: (options && options.actions) || []
+          };
+
+          sendMessage('_flutterDialog', JSON.stringify({ callId: callId, config: config }));
+
+          // 标记此 Promise 正在等待
+          if (!globalThis.__PENDING_CALLS__) {
+            globalThis.__PENDING_CALLS__ = {};
+          }
+          globalThis.__PENDING_CALLS__[resultKey] = {
+            resolve: null,
+            reject: null,
+            timestamp: Date.now()
+          };
+
+          return new Promise(function(resolve, reject) {
+            globalThis.__PENDING_CALLS__[resultKey].resolve = resolve;
+            globalThis.__PENDING_CALLS__[resultKey].reject = reject;
+          });
+        }
+      };
     ''');
 
     // 设置消息处理器（QuickJS 期望返回 undefined 而不是 null）
@@ -83,6 +210,74 @@ class MobileJSEngine implements JSEngine {
         print('[JS Error] (解析失败) $data');
       }
       // 不返回任何值（自动返回 undefined）
+    });
+
+    // Toast 处理器
+    _runtime.onMessage('_flutterToast', (dynamic data) {
+      try {
+        final callId = data['callId'];
+        final config = data['config'];
+        final message = config['message'] as String;
+        final duration = config['duration'] as String;
+        final gravity = config['gravity'] as String;
+
+        print('[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity)');
+
+        // 调用 Flutter Toast（需要在 UI 线程执行）
+        _showToast(message, duration, gravity);
+      } catch (e) {
+        print('[JS Bridge] Toast 错误: $e');
+      }
+    });
+
+    // Alert 处理器
+    _runtime.onMessage('_flutterAlert', (dynamic data) {
+      try {
+        final callId = data['callId'];
+        final config = data['config'];
+        final message = config['message'] as String;
+        final title = config['title'] as String?;
+        final confirmText = config['confirmText'] as String?;
+        final cancelText = config['cancelText'] as String?;
+        final showCancel = config['showCancel'] as bool? ?? false;
+
+        print('[JS Bridge] Alert: $message (showCancel: $showCancel)');
+
+        // 调用 Flutter Alert 对话框
+        _showAlert(
+          callId,
+          message,
+          title: title,
+          confirmText: confirmText,
+          cancelText: cancelText,
+          showCancel: showCancel,
+        );
+      } catch (e) {
+        print('[JS Bridge] Alert 错误: $e');
+      }
+    });
+
+    // Dialog 处理器
+    _runtime.onMessage('_flutterDialog', (dynamic data) {
+      try {
+        final callId = data['callId'];
+        final config = data['config'];
+        final title = config['title'] as String?;
+        final content = config['content'] as String?;
+        final actions = (config['actions'] as List<dynamic>?) ?? [];
+
+        print('[JS Bridge] Dialog: $title (${actions.length} actions)');
+
+        // 调用 Flutter Dialog
+        _showDialog(
+          callId,
+          title: title,
+          content: content,
+          actions: actions.cast<Map<String, dynamic>>(),
+        );
+      } catch (e) {
+        print('[JS Bridge] Dialog 错误: $e');
+      }
     });
   }
 
@@ -467,5 +662,90 @@ class MobileJSEngine implements JSEngine {
     // flutter_js 不需要显式释放
     _registeredFunctions.clear();
     _initialized = false;
+  }
+
+  // ==================== UI 显示方法 ====================
+
+  /// 显示 Toast
+  void _showToast(String message, String duration, String gravity) {
+    if (_onToast != null) {
+      _onToast!(message, duration, gravity);
+    } else {
+      print('[JS Bridge] Toast 未设置处理器: $message');
+    }
+  }
+
+  /// 显示 Alert 对话框
+  Future<void> _showAlert(
+    String callId,
+    String message, {
+    String? title,
+    String? confirmText,
+    String? cancelText,
+    bool showCancel = false,
+  }) async {
+    if (_onAlert != null) {
+      try {
+        final confirmed = await _onAlert!(
+          message,
+          title: title,
+          confirmText: confirmText,
+          cancelText: cancelText,
+          showCancel: showCancel,
+        );
+
+        // 将结果返回给 JavaScript
+        final resultKey = '_flutterAlert_callback_$callId';
+        final resultJson = jsonEncode({'confirmed': confirmed});
+
+        _runtime.evaluate(
+          'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
+        );
+        _runtime.evaluate('globalThis.__TEMP_RESULT__ = $resultJson;');
+        _runtime.evaluate(
+          "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
+          "delete globalThis.__TEMP_RESULT__;",
+        );
+
+        print('[JS Bridge] Alert 结果已返回: $resultJson');
+      } catch (e) {
+        print('[JS Bridge] Alert 执行错误: $e');
+      }
+    } else {
+      print('[JS Bridge] Alert 未设置处理器');
+    }
+  }
+
+  /// 显示自定义 Dialog
+  Future<void> _showDialog(
+    String callId, {
+    String? title,
+    String? content,
+    required List<Map<String, dynamic>> actions,
+  }) async {
+    if (_onDialog != null) {
+      try {
+        final result = await _onDialog!(title, content, actions);
+
+        // 将结果返回给 JavaScript
+        final resultKey = '_flutterDialog_callback_$callId';
+        final resultJson = jsonEncode(result);
+
+        _runtime.evaluate(
+          'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
+        );
+        _runtime.evaluate('globalThis.__TEMP_RESULT__ = $resultJson;');
+        _runtime.evaluate(
+          "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
+          "delete globalThis.__TEMP_RESULT__;",
+        );
+
+        print('[JS Bridge] Dialog 结果已返回: $resultJson');
+      } catch (e) {
+        print('[JS Bridge] Dialog 执行错误: $e');
+      }
+    } else {
+      print('[JS Bridge] Dialog 未设置处理器');
+    }
   }
 }

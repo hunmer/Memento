@@ -8,6 +8,7 @@ class GoodsItem {
   final String id;
   final String title;
   String? _imageUrl;
+  String? _thumbUrl;
   final IconData? icon;
 
   // 获取图片URL，如果是相对路径则转换为绝对路径
@@ -20,12 +21,27 @@ class GoodsItem {
     );
   }
 
+  // 获取缩略图URL，如果是相对路径则转换为绝对路径
+  Future<String?> getThumbUrl() async {
+    if (_thumbUrl == null || _thumbUrl == "") return null;
+    final appDir = await StorageManager.getApplicationDocumentsDirectory();
+    return GoodsPathConstants.cleanPath(
+      GoodsPathConstants.toAbsolutePath(appDir.path, _thumbUrl),
+    );
+  }
+
   // 同步获取相对路径
   String? get imageUrl => _imageUrl;
+  String? get thumbUrl => _thumbUrl;
 
   // 设置图片URL，如果是绝对路径则转换为相对路径
   set imageUrl(String? value) {
     _imageUrl = value == "" ? "" : GoodsPathConstants.toRelativePath(value);
+  }
+
+  // 设置缩略图URL，如果是绝对路径则转换为相对路径
+  set thumbUrl(String? value) {
+    _thumbUrl = value == "" ? "" : GoodsPathConstants.toRelativePath(value);
   }
 
   final Color? iconColor;
@@ -53,6 +69,7 @@ class GoodsItem {
     required this.id,
     required this.title,
     String? imageUrl,
+    String? thumbUrl,
     this.icon,
     this.iconColor,
     List<String>? tags,
@@ -67,6 +84,7 @@ class GoodsItem {
        customFields = customFields ?? [],
        subItems = subItems ?? [] {
     this.imageUrl = imageUrl; // 使用setter来设置图片路径
+    this.thumbUrl = thumbUrl; // 使用setter来设置缩略图路径
   }
 
   DateTime? get lastUsedDate {
@@ -84,6 +102,7 @@ class GoodsItem {
       id: json['id'] as String,
       title: json['title'] as String,
       imageUrl: json['imageUrl'] as String?, // 通过setter设置
+      thumbUrl: json['thumbUrl'] as String?, // 通过setter设置
       icon:
           json['iconData'] != null
               ? IconData(json['iconData'] as int, fontFamily: 'MaterialIcons')
@@ -120,6 +139,7 @@ class GoodsItem {
       'id': id,
       'title': title,
       'imageUrl': _imageUrl, // 已经是相对路径
+      'thumbUrl': _thumbUrl, // 已经是相对路径
       'iconData': icon?.codePoint,
       'iconColor': iconColor?.value,
       'tags': tags,
@@ -135,6 +155,7 @@ class GoodsItem {
   GoodsItem copyWith({
     String? title,
     String? imageUrl,
+    String? thumbUrl,
     IconData? icon,
     Color? iconColor,
     List<String>? tags,
@@ -149,6 +170,7 @@ class GoodsItem {
       id: id,
       title: title ?? this.title,
       imageUrl: imageUrl ?? _imageUrl, // 使用已存储的相对路径
+      thumbUrl: thumbUrl ?? _thumbUrl, // 使用已存储的相对路径
       icon: icon ?? this.icon,
       iconColor: iconColor ?? this.iconColor,
       tags: tags ?? List.from(this.tags),
