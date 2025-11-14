@@ -190,6 +190,8 @@ class _StatItem extends StatelessWidget {
     required this.label,
     required this.value,
     required this.theme,
+    this.highlight = false,
+    this.color,
   });
 
   @override

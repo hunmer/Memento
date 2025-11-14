@@ -3,8 +3,9 @@ import 'package:provider/provider.dart';
 import '../services/script_manager.dart';
 import '../services/script_executor.dart';
 import '../models/script_info.dart';
+import '../models/script_trigger.dart';
 import '../widgets/script_card.dart';
-import '../widgets/script_edit_dialog.dart';
+import 'script_edit_screen.dart';
 
 /// 脚本列表界面
 ///
@@ -95,11 +96,16 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
     }
   }
 
-  /// 显示创建/编辑脚本对话框
+  /// 显示创建/编辑脚本屏幕
   Future<void> _showScriptDialog({ScriptInfo? script}) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => ScriptEditDialog(script: script),
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ScriptEditScreen(
+          script: script,
+          scriptManager: widget.scriptManager,
+        ),
+      ),
     );
 
     if (result == null || !mounted) return;
@@ -116,17 +122,30 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
           author: result['author'] as String,
         );
 
-        // 更新启用状态和其他属性
+        // 更新启用状态和其他属性（包括代码和触发器）
         final newScript = widget.scriptManager.getScriptById(result['id'] as String);
         if (newScript != null) {
+          // 解析触发器数据
+          final triggersData = result['triggers'] as List<dynamic>? ?? [];
+          final triggers = triggersData
+              .map((t) => ScriptTrigger.fromJson(t as Map<String, dynamic>))
+              .toList();
+
           await widget.scriptManager.saveScriptMetadata(
             newScript.id,
             newScript.copyWith(
               enabled: result['enabled'] as bool,
               type: result['type'] as String,
               updateUrl: result['updateUrl'] as String?,
+              triggers: triggers,
             ),
           );
+
+          // 保存代码
+          final code = result['code'] as String? ?? '';
+          if (code.isNotEmpty) {
+            await widget.scriptManager.saveScriptCode(newScript.id, code);
+          }
         }
 
         if (mounted) {
@@ -135,6 +154,12 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
           );
         }
       } else {
+        // 解析触发器数据
+        final triggersData = result['triggers'] as List<dynamic>? ?? [];
+        final triggers = triggersData
+            .map((t) => ScriptTrigger.fromJson(t as Map<String, dynamic>))
+            .toList();
+
         // 编辑现有脚本
         final updatedScript = script.copyWith(
           name: result['name'] as String,
@@ -145,10 +170,15 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
           enabled: result['enabled'] as bool,
           type: result['type'] as String,
           updateUrl: result['updateUrl'] as String?,
+          triggers: triggers,
           updatedAt: DateTime.now(),
         );
 
         await widget.scriptManager.saveScriptMetadata(script.id, updatedScript);
+
+        // 保存代码
+        final code = result['code'] as String? ?? '';
+        await widget.scriptManager.saveScriptCode(script.id, code);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -423,7 +453,7 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(

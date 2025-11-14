@@ -15,6 +15,7 @@ class HomeGrid extends StatefulWidget {
   final Function(HomeItem item)? onItemTap;
   final Function(HomeItem item)? onItemLongPress;
   final int crossAxisCount;
+  final bool isEditMode;
 
   const HomeGrid({
     super.key,
@@ -23,6 +24,7 @@ class HomeGrid extends StatefulWidget {
     this.onItemTap,
     this.onItemLongPress,
     this.crossAxisCount = 2,
+    this.isEditMode = false,
   });
 
   @override
@@ -70,6 +72,21 @@ class _HomeGridState extends State<HomeGrid> {
     final isBeingDragged = _draggingIndex == index;
     final isHovering = _hoveringIndex == index;
 
+    // 如果不是编辑模式，返回普通卡片
+    if (!widget.isEditMode) {
+      return StaggeredGridTile.count(
+        crossAxisCellCount: crossAxisCellCount,
+        mainAxisCellCount: mainAxisCellCount,
+        child: HomeCard(
+          key: ValueKey(item.id),
+          item: item,
+          onTap: widget.onItemTap != null ? () => widget.onItemTap!(item) : null,
+          onLongPress: widget.onItemLongPress != null ? () => widget.onItemLongPress!(item) : null,
+        ),
+      );
+    }
+
+    // 编辑模式下启用拖拽
     return StaggeredGridTile.count(
       crossAxisCellCount: crossAxisCellCount,
       mainAxisCellCount: mainAxisCellCount,
@@ -99,7 +116,29 @@ class _HomeGridState extends State<HomeGrid> {
           }
         },
         builder: (context, candidateData, rejectedData) {
-          return LongPressDraggable<int>(
+          // 创建拖拽手柄（不包裹在 Draggable 中，只是视觉提示）
+          final dragHandleWidget = Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.drag_indicator,
+              size: 20,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          );
+
+          // 整个卡片可拖拽
+          return Draggable<int>(
             data: index,
             feedback: Material(
               elevation: 8,
@@ -125,16 +164,23 @@ class _HomeGridState extends State<HomeGrid> {
             ),
             childWhenDragging: Opacity(
               opacity: 0.3,
-              child: HomeCard(
-                key: ValueKey(item.id),
-                item: item,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: HomeCard(
+                  key: ValueKey('${item.id}_dragging'),
+                  item: item,
+                  isEditMode: true,
+                  dragHandle: dragHandleWidget,
+                ),
               ),
             ),
             onDragStarted: () {
               setState(() {
                 _draggingIndex = index;
               });
-              // 提供触觉反馈
               HapticFeedback.mediumImpact();
             },
             onDragEnd: (_) {
@@ -157,8 +203,10 @@ class _HomeGridState extends State<HomeGrid> {
                 key: ValueKey(item.id),
                 item: item,
                 isSelected: isBeingDragged || isHovering,
-                onTap: widget.onItemTap != null ? () => widget.onItemTap!(item) : null,
-                onLongPress: widget.onItemLongPress != null ? () => widget.onItemLongPress!(item) : null,
+                isEditMode: true,
+                onTap: null,
+                onLongPress: null,
+                dragHandle: dragHandleWidget,
               ),
             ),
           );

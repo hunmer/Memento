@@ -19,7 +19,7 @@ class _TagItem {
   final String tag;
   bool active;
 
-  _TagItem(this.tag);
+  _TagItem(this.tag, {this.active = false});
 }
 
 class _TagScreenState extends State<TagScreen> {

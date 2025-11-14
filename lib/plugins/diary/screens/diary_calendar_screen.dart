@@ -19,24 +19,14 @@ class DiaryCalendarScreen extends StatefulWidget {
 
 class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   late DateTime _focusedDay;
-  late DateTime _selectedDay;
   Map<DateTime, DiaryEntry> _diaryEntries = {};
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _focusedDay = DateTime.now();
-    _selectedDay = DateTime.now();
-    _scrollController = ScrollController();
     _loadDiaryEntries();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadDiaryEntries() async {
@@ -44,23 +34,17 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
     if (mounted) {
       setState(() {
         _diaryEntries = entries;
-        // 确保选中日期也是标准化的
-        _selectedDay = DateTime(
-          _selectedDay.year,
-          _selectedDay.month,
-          _selectedDay.day,
-        );
       });
     }
   }
 
-  void _onDayDoubleClicked(DateTime selectedDay, DateTime focusedDay) {
+  void _onDayClicked(DateTime selectedDay, DateTime focusedDay) {
     // 检查选择的日期是否大于今天
     if (selectedDay.isAfter(DateTime.now())) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(DiaryLocalizations.of(context).cannotSelectFutureDate),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -72,11 +56,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       selectedDay.month,
       selectedDay.day,
     );
-
-    setState(() {
-      _selectedDay = normalizedSelectedDay;
-      _focusedDay = focusedDay;
-    });
 
     // 导航到日记编辑界面
     Navigator.of(context)
@@ -107,32 +86,14 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
         title: Text(DiaryLocalizations.of(context).myDiary),
         actions: [],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 2, // 日历区域占2份空间
-            child: TableCalendar<DiaryEntry>(
+      body: TableCalendar<DiaryEntry>(
               firstDay: DateTime.utc(2020, 1, 1),
-              daysOfWeekHeight: 40, // 设置星期行的高度
-              rowHeight: 85, // 设置日期行的高度
+        daysOfWeekHeight: 45,
+        rowHeight: 95,
               lastDay: DateTime.now(),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+        focusedDay: _focusedDay,
               onDaySelected: (selectedDay, focusedDay) {
-                if (isSameDay(_selectedDay, selectedDay)) {
-                  // 如果点击的是已选中的日期，直接打开编辑器
-                  _onDayDoubleClicked(selectedDay, focusedDay);
-                } else {
-                  // 否则只更新选中状态
-                  setState(() {
-                    _selectedDay = DateTime(
-                      selectedDay.year,
-                      selectedDay.month,
-                      selectedDay.day,
-                    );
-                    _focusedDay = focusedDay;
-                  });
-                }
+          _onDayClicked(selectedDay, focusedDay);
               },
               calendarFormat: _calendarFormat,
               onFormatChanged: (format) {
@@ -149,23 +110,14 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
               },
               calendarStyle: CalendarStyle(
                 outsideDaysVisible: false,
-                weekendTextStyle: const TextStyle(color: Colors.red),
-                holidayTextStyle: const TextStyle(color: Colors.red),
-                cellMargin: const EdgeInsets.all(4),
-                // 使用新的方式控制单元格大小
-                cellPadding: const EdgeInsets.all(8),
-                todayDecoration: BoxDecoration(
-                  color: Colors.transparent,
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.6),
-                    width: 1.5,
-                    style: BorderStyle.solid,
-                  ),
+          weekendTextStyle: TextStyle(color: Colors.red.shade400, fontSize: 16),
+          holidayTextStyle: TextStyle(color: Colors.red.shade400, fontSize: 16,
                 ),
-                selectedDecoration: BoxDecoration(
-                  color: Colors.transparent,
+          cellMargin: const EdgeInsets.all(2),
+          cellPadding: const EdgeInsets.all(4),
+          todayDecoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
                   border: Border.all(
                     color: Theme.of(context).colorScheme.primary,
                     width: 2,
@@ -174,11 +126,9 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                 todayTextStyle: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
+            fontSize: 16,
                 ),
-                selectedTextStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+          defaultTextStyle: const TextStyle(fontSize: 16),
               ),
               headerStyle: const HeaderStyle(
                 formatButtonVisible: true,
@@ -189,22 +139,34 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                   if (events.isEmpty) return null;
                   final entry = events.first;
                   return Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    padding: const EdgeInsets.all(1),
+              margin: const EdgeInsets.only(top: 4),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (entry.mood != null)
                           Text(
                             entry.mood!,
-                            style: const TextStyle(fontSize: 20),
+                            style: const TextStyle(fontSize: 24),
                           ),
                         const SizedBox(height: 2),
-                        Text(
-                          '${entry.content.length}字',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Theme.of(context).colorScheme.primary,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${entry.content.length}字',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                           ),
                         ),
                       ],
@@ -212,119 +174,39 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                   );
                 },
                 dowBuilder: (context, day) {
+            bool isWeekend =
+                day.weekday == DateTime.saturday ||
+                day.weekday == DateTime.sunday;
                   return Center(
                     child: Text(
                       DateFormat.E().format(day),
                       style: TextStyle(
-                        color:
-                            day.weekday == DateTime.saturday ||
-                                    day.weekday == DateTime.sunday
-                                ? Colors.red
-                                : null,
+                  color: isWeekend ? Colors.red.shade400 : null,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                       ),
                     ),
                   );
                 },
                 defaultBuilder: (context, day, focusedDay) {
-                  DateTime normalizedDay = DateTime(
-                    day.year,
-                    day.month,
-                    day.day,
-                  );
-                  bool isSelected = isSameDay(_selectedDay, normalizedDay);
-                  bool isToday = isSameDay(DateTime.now(), normalizedDay);
+            bool isWeekend =
+                day.weekday == DateTime.saturday ||
+                day.weekday == DateTime.sunday;
 
-                  return GestureDetector(
-                    onDoubleTap: () => _onDayDoubleClicked(day, focusedDay),
-                    child: Container(
-                      margin: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color:
-                            isSelected
-                                ? Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.2)
-                                : null,
-                        border:
-                            isToday
-                                ? Border.all(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.primary.withOpacity(0.6),
-                                  width: 1.5,
-                                )
-                                : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${day.day}',
-                          style: TextStyle(
-                            color:
-                                isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : day.weekday == DateTime.saturday ||
-                                        day.weekday == DateTime.sunday
-                                    ? Colors.red
-                                    : null,
-                            fontWeight:
-                                isSelected || isToday ? FontWeight.bold : null,
-                          ),
+            return Container(
+              margin: const EdgeInsets.all(2),
+              child: Center(
+                child: Text(
+                  '${day.day}',
+                  style: TextStyle(
+                    color: isWeekend ? Colors.red.shade400 : null,
+                    fontSize: 16,
                         ),
                       ),
                     ),
                   );
                 },
-              ),
-            ),
-          ),
-          if (_diaryEntries.containsKey(_selectedDay))
-            Expanded(
-              flex: 1, // 预览区域占1份空间
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          DateFormat('yyyy年MM月dd日').format(_selectedDay),
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(width: 8),
-                        if (_diaryEntries[_selectedDay]?.title.isNotEmpty ??
-                            false)
-                          Text(
-                            ' - ${_diaryEntries[_selectedDay]!.title}',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        const SizedBox(width: 8),
-                        if (_diaryEntries[_selectedDay]?.mood != null)
-                          Text(
-                            _diaryEntries[_selectedDay]!.mood!,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: Scrollbar(
-                        thumbVisibility: true, // 始终显示滚动条
-                        controller: _scrollController,
-                        child: SingleChildScrollView(
-                          controller: _scrollController,
-                          child: Text(
-                            _diaryEntries[_selectedDay]?.content ?? '',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }

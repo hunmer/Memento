@@ -1,4 +1,8 @@
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
+import 'package:Memento/screens/home_screen/models/home_item.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/app_drawer.dart';
 import '../../main.dart';
@@ -22,6 +26,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with RouteAware {
   final HomeLayoutManager _layoutManager = HomeLayoutManager();
   bool _isLoading = true;
+
+  // 编辑模式标志
+  bool _isEditMode = false;
 
   // 是否是首次加载，使用静态变量确保在热重载时保持状态
   static bool _hasInitialized = false;
@@ -115,6 +122,23 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
+                  leading: Icon(_isEditMode ? Icons.check : Icons.edit),
+                  title: Text(_isEditMode ? '完成排序' : '自定义排序'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _isEditMode = !_isEditMode;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(_isEditMode ? '长按拖拽可调整顺序' : '已退出编辑模式'),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                ),
+                const Divider(),
+                ListTile(
               leading: const Icon(Icons.create_new_folder),
               title: const Text('新建文件夹'),
               onTap: () {
@@ -288,6 +312,119 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     });
   }
 
+  /// 处理卡片长按事件
+  void _handleCardLongPress(HomeItem item) {
+    if (_isEditMode) {
+      // 编辑模式下不显示菜单，由拖拽处理
+      return;
+    }
+
+    // 非编辑模式下显示操作菜单
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.palette),
+                  title: const Text('设置背景颜色'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showColorPicker(item);
+                  },
+                ),
+                if (item is HomeWidgetItem)
+                  ListTile(
+                    leading: const Icon(Icons.photo),
+                    title: const Text('设置背景图'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showBackgroundImagePicker(item);
+                    },
+                  ),
+                if (item is HomeWidgetItem)
+                  ListTile(
+                    leading: const Icon(Icons.aspect_ratio),
+                    title: const Text('调整大小'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showSizeAdjuster(item);
+                    },
+                  ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: const Text('删除', style: TextStyle(color: Colors.red)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmDeleteItem(item);
+                  },
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  /// 显示颜色选择器
+  void _showColorPicker(HomeItem item) {
+    // TODO: 实现背景颜色选择功能
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('背景颜色功能开发中...')));
+  }
+
+  /// 显示背景图选择器
+  void _showBackgroundImagePicker(HomeWidgetItem item) {
+    // TODO: 实现背景图选择功能
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('背景图功能开发中...')));
+  }
+
+  /// 显示大小调整器
+  void _showSizeAdjuster(HomeWidgetItem item) {
+    // TODO: 实现组件大小调整功能
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('大小调整功能开发中...')));
+  }
+
+  /// 确认删除项目
+  void _confirmDeleteItem(HomeItem item) {
+    final itemName =
+        item is HomeWidgetItem
+            ? HomeWidgetRegistry().getWidget(item.widgetId)?.name ?? '组件'
+            : (item as HomeFolderItem).name;
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('确认删除'),
+            content: Text('确定要删除 "$itemName" 吗？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _layoutManager.removeItem(item.id);
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('"$itemName" 已删除')));
+                },
+                child: const Text('删除', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -326,9 +463,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 return HomeGrid(
                   items: _layoutManager.items,
                   crossAxisCount: _layoutManager.gridCrossAxisCount,
+                    isEditMode: _isEditMode,
                   onReorder: (oldIndex, newIndex) {
                     _layoutManager.reorder(oldIndex, newIndex);
                   },
+                    onItemLongPress: _handleCardLongPress,
                 );
               },
             ),
