@@ -98,8 +98,8 @@ class MobileJSEngine implements JSEngine {
       print('[JS Debug] ========== 开始执行代码 ==========');
 
       // 生成唯一的执行 ID
-      final executionId = DateTime.now().millisecondsSinceEpoch.toString() +
-          '_${DateTime.now().microsecond}';
+      final executionId =
+          '${DateTime.now().millisecondsSinceEpoch}_${DateTime.now().microsecond}';
 
       // 包装用户代码：提供 setResult 函数并自动捕获返回值
       final wrappedCode = '''
@@ -123,7 +123,7 @@ class MobileJSEngine implements JSEngine {
             // 执行用户代码并等待完成
             console.log('[Wrapper] 执行用户代码...');
             var result = await (async function() {
-              ${code}
+              $code
             })();
 
             console.log('[Wrapper] 用户代码执行完成，结果类型:', typeof result);
@@ -401,7 +401,7 @@ class MobileJSEngine implements JSEngine {
 
         // 辅助函数：将结果写入全局变量
         void setJsResult(String jsonResult) {
-          final resultKey = '${callbackChannel}_${callId}';
+          final resultKey = '${callbackChannel}_$callId';
 
           try {
             _runtime.evaluate(
@@ -410,7 +410,7 @@ class MobileJSEngine implements JSEngine {
 
             // 先将结果设置到临时全局变量（避免转义问题）
             _runtime.evaluate(
-              'globalThis.__TEMP_RESULT__ = ${jsonResult};'
+              'globalThis.__TEMP_RESULT__ = $jsonResult;'
             );
 
             // 然后移动到目标位置
@@ -447,7 +447,7 @@ class MobileJSEngine implements JSEngine {
         // 发送错误给 JS
         final errorJson = jsonEncode({'error': e.toString()});
         final callId = data['callId'];
-        final resultKey = '${callbackChannel}_${callId}';
+        final resultKey = '${callbackChannel}_$callId';
 
         try {
           _runtime.evaluate('globalThis.__TEMP_RESULT__ = $errorJson;');

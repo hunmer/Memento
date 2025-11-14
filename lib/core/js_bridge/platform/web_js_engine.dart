@@ -67,7 +67,7 @@ class WebJSEngine implements JSEngine {
         return _convertDartValue(result);
       } catch (e) {
         print('JS bridge error: $e');
-        throw e;
+        rethrow;
       }
     });
   }

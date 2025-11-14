@@ -354,12 +354,18 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
         });
       }
 
-      final tags = tagsStr != null
-          ? tagsStr.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList()
-          : null;
-      final imageUrls = imageUrlsStr != null
-          ? imageUrlsStr.split(',').map((u) => u.trim()).where((u) => u.isNotEmpty).toList()
-          : null;
+      final tags =
+          tagsStr
+              ?.split(',')
+              .map((t) => t.trim())
+              .where((t) => t.isNotEmpty)
+              .toList();
+      final imageUrls =
+          imageUrlsStr
+              ?.split(',')
+              .map((u) => u.trim())
+              .where((u) => u.isNotEmpty)
+              .toList();
 
       final updatedEntry = entry.copyWith(
         title: title,
