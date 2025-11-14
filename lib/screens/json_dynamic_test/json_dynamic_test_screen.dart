@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:json_dynamic_widget/json_dynamic_widget.dart';
 import 'package:path/path.dart' as path;
 
@@ -18,6 +20,9 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   String? _errorMessage;
   List<JsonFileInfo> _jsonFiles = [];
   bool _isLoadingFiles = false;
+
+  // 用于防抖的 Timer
+  Timer? _debounceTimer;
 
   // JSON 文件目录路径
   static const String _jsonPagesPath = 'lib/screens/pages';
@@ -96,6 +101,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _jsonController.dispose();
     super.dispose();
   }
@@ -452,10 +458,20 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                         contentPadding: EdgeInsets.all(16),
                       ),
                       onChanged: (value) {
-                        // 实时验证
-                        if (value.trim().isNotEmpty) {
-                          _buildJsonWidget(value);
-                        }
+                        // 使用防抖避免频繁验证
+                        _debounceTimer?.cancel();
+                        _debounceTimer = Timer(
+                          const Duration(milliseconds: 500),
+                          () {
+                            if (value.trim().isNotEmpty) {
+                              _buildJsonWidget(value);
+                            } else {
+                              setState(() {
+                                _errorMessage = null;
+                              });
+                            }
+                          },
+                        );
                       },
                     ),
                   ),
@@ -563,27 +579,24 @@ class _JsonDynamicPreviewScreenState extends State<JsonDynamicPreviewScreen> {
   @override
   void initState() {
     super.initState();
-    _buildWidget();
+    // 延迟到下一帧构建，确保布局完成
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _buildWidget();
+    });
   }
 
   void _buildWidget() {
+    if (!mounted) return;
+
     try {
-      // 延迟构建，确保上下文准备好
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            try {
-              _builtWidget = widget.widgetData.build(context: context);
-              _errorMessage = null;
-            } catch (e) {
-              _errorMessage = '构建失败: $e';
-            }
-          });
-        }
+      final builtWidget = widget.widgetData.build(context: context);
+      setState(() {
+        _builtWidget = builtWidget;
+        _errorMessage = null;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = '初始化失败: $e';
+        _errorMessage = '构建失败: $e';
       });
     }
   }
@@ -635,12 +648,7 @@ class _JsonDynamicPreviewScreenState extends State<JsonDynamicPreviewScreen> {
             )
           : _builtWidget == null
               ? const Center(child: CircularProgressIndicator())
-              : SafeArea(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: _builtWidget,
-                  ),
-                ),
+              : _builtWidget!,
     );
   }
 }
