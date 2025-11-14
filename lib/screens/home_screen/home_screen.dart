@@ -350,11 +350,16 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   }
 
   /// 显示网格大小调节对话框
-  void _showGridSizeDialog() {
-    showDialog(
+  void _showGridSizeDialog() async {
+    await showDialog(
       context: context,
       builder: (context) => _GridSizeDialog(layoutManager: _layoutManager),
     );
+
+    // 对话框关闭后强制刷新界面，确保显示位置设置生效
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   /// 确认清空布局
@@ -762,25 +767,26 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   /// 构建主页内容
   Widget _buildHomeContent({Key? key}) {
-    final isCenter = _layoutManager.gridAlignment == 'center';
-    final alignment = isCenter ? Alignment.center : Alignment.topCenter;
-
     return Opacity(
       key: key,
       opacity: _globalWidgetOpacity,
-      child: Padding(
-        // 当有背景图且顶部对齐时，添加顶部padding避免小组件被AppBar遮挡
-        // 居中对齐时不需要顶部padding
-        padding: EdgeInsets.only(
-          top:
-              !isCenter && _currentBackgroundPath != null
-                  ? kToolbarHeight + MediaQuery.of(context).padding.top
-                  : 0,
-        ),
-        child: ListenableBuilder(
-          listenable: _layoutManager,
-          builder: (context, child) {
-            return HomeGrid(
+      child: ListenableBuilder(
+        listenable: _layoutManager,
+        builder: (context, child) {
+          // 在 ListenableBuilder 内部计算，确保配置改变时会重新计算
+          final isCenter = _layoutManager.gridAlignment == 'center';
+          final alignment = isCenter ? Alignment.center : Alignment.topCenter;
+
+          return Padding(
+            // 当有背景图且顶部对齐时，添加顶部padding避免小组件被AppBar遮挡
+            // 居中对齐时不需要顶部padding
+            padding: EdgeInsets.only(
+              top:
+                  !isCenter && _currentBackgroundPath != null
+                      ? MediaQuery.of(context).padding.top
+                      : 0,
+            ),
+            child: HomeGrid(
               items: _layoutManager.items,
               crossAxisCount: _layoutManager.gridCrossAxisCount,
               isEditMode: _isEditMode,
@@ -789,9 +795,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 _layoutManager.reorder(oldIndex, newIndex);
               },
               onItemLongPress: _handleCardLongPress,
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
