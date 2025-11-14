@@ -71,3 +71,4 @@ app.*.map.json
 !analysis_options.yaml
 !README.md
 flutter-js/
+nul

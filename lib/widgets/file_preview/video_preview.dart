@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
+import 'package:video_player/video_player.dart';
 import '../../../utils/image_utils.dart';
 
 class VideoPreview extends StatefulWidget {
@@ -17,16 +16,13 @@ class VideoPreview extends StatefulWidget {
 }
 
 class _VideoPreviewState extends State<VideoPreview> {
-  late final Player _player;
-  late final VideoController _controller;
+  late VideoPlayerController _controller;
   bool _isInitialized = false;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _player = Player();
-    _controller = VideoController(_player);
     _initializePlayer();
   }
 
@@ -45,8 +41,18 @@ class _VideoPreviewState extends State<VideoPreview> {
 
       debugPrint('正在初始化视频播放器，文件路径: $absolutePath');
 
-      // 打开视频文件
-      await _player.open(Media(absolutePath));
+      // 创建视频控制器
+      _controller = VideoPlayerController.file(videoFile);
+
+      // 初始化控制器
+      await _controller.initialize();
+
+      // 添加监听器以更新UI
+      _controller.addListener(() {
+        if (mounted) {
+          setState(() {});
+        }
+      });
 
       if (mounted) {
         setState(() {
@@ -76,7 +82,7 @@ class _VideoPreviewState extends State<VideoPreview> {
 
   @override
   void dispose() {
-    _player.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -133,59 +139,66 @@ class _VideoPreviewState extends State<VideoPreview> {
           child: Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Video(controller: _controller),
-                  _PlayPauseOverlay(player: _player),
-                ],
+              child: AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    VideoPlayer(_controller),
+                    _PlayPauseOverlay(controller: _controller),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-        _VideoProgressIndicator(player: _player),
+        _VideoProgressIndicator(controller: _controller),
       ],
     );
   }
 }
 
 class _PlayPauseOverlay extends StatelessWidget {
-  final Player player;
+  final VideoPlayerController controller;
 
-  const _PlayPauseOverlay({required this.player});
+  const _PlayPauseOverlay({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<bool>(
-      stream: player.stream.playing,
-      builder: (context, snapshot) {
-        final bool isPlaying = snapshot.data ?? false;
-        return Stack(
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 50),
-              reverseDuration: const Duration(milliseconds: 200),
-              child:
-                  isPlaying
-                      ? const SizedBox.shrink()
-                      : Container(color: Colors.black26),
-            ),
-            GestureDetector(
-              onTap: () {
-                isPlaying ? player.pause() : player.play();
-              },
-            ),
-          ],
-        );
-      },
+    final bool isPlaying = controller.value.isPlaying;
+    return Stack(
+      children: [
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 50),
+          reverseDuration: const Duration(milliseconds: 200),
+          child:
+              isPlaying
+                  ? const SizedBox.shrink()
+                  : Container(color: Colors.black26),
+        ),
+        GestureDetector(
+          onTap: () {
+            if (isPlaying) {
+              controller.pause();
+            } else {
+              controller.play();
+            }
+          },
+          child: Container(
+            color: Colors.transparent,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+        ),
+      ],
     );
   }
 }
 
 class _VideoProgressIndicator extends StatelessWidget {
-  final Player player;
+  final VideoPlayerController controller;
 
-  const _VideoProgressIndicator({required this.player});
+  const _VideoProgressIndicator({required this.controller});
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -198,70 +211,58 @@ class _VideoProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final position = controller.value.position;
+    final duration = controller.value.duration;
+    final bool isPlaying = controller.value.isPlaying;
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StreamBuilder<Duration>(
-            stream: player.stream.position,
-            builder: (context, snapshot) {
-              final position = snapshot.data ?? Duration.zero;
-              return StreamBuilder<Duration>(
-                stream: player.stream.duration,
-                builder: (context, snapshot) {
-                  final duration = snapshot.data ?? Duration.zero;
-                  return Column(
-                    children: [
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          activeTrackColor:
-                              Theme.of(context).colorScheme.primary,
-                          inactiveTrackColor: Theme.of(
-                            context,
-                          ).colorScheme.primary.withAlpha(76),
-                          thumbColor: Theme.of(context).colorScheme.primary,
-                        ),
-                        child: Slider(
-                          value: position.inMilliseconds.toDouble(),
-                          max: duration.inMilliseconds.toDouble(),
-                          onChanged: (value) {
-                            player.seek(Duration(milliseconds: value.toInt()));
-                          },
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _formatDuration(position),
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          StreamBuilder<bool>(
-                            stream: player.stream.playing,
-                            builder: (context, snapshot) {
-                              final bool isPlaying = snapshot.data ?? false;
-                              return IconButton(
-                                icon: Icon(
-                                  isPlaying ? Icons.pause : Icons.play_arrow,
-                                ),
-                                onPressed: () {
-                                  isPlaying ? player.pause() : player.play();
-                                },
-                              );
-                            },
-                          ),
-                          Text(
-                            _formatDuration(duration),
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: Theme.of(context).colorScheme.primary,
+              inactiveTrackColor: Theme.of(
+                context,
+              ).colorScheme.primary.withAlpha(76),
+              thumbColor: Theme.of(context).colorScheme.primary,
+            ),
+            child: Slider(
+              value: position.inMilliseconds.toDouble().clamp(
+                0.0,
+                duration.inMilliseconds.toDouble(),
+              ),
+              max: duration.inMilliseconds.toDouble(),
+              onChanged: (value) {
+                controller.seekTo(Duration(milliseconds: value.toInt()));
+              },
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _formatDuration(position),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              IconButton(
+                icon: Icon(
+                  isPlaying ? Icons.pause : Icons.play_arrow,
+                ),
+                onPressed: () {
+                  if (isPlaying) {
+                    controller.pause();
+                  } else {
+                    controller.play();
+                  }
                 },
-              );
-            },
+              ),
+              Text(
+                _formatDuration(duration),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
           ),
         ],
       ),

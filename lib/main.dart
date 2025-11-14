@@ -28,7 +28,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'plugins/chat/l10n/chat_localizations.dart';
 import 'plugins/diary/l10n/diary_localizations.dart';
@@ -118,9 +117,6 @@ late PermissionController _permissionController;
 void main() async {
   // 确保Flutter绑定初始化
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 初始化 MediaKit
-  MediaKit.ensureInitialized();
 
   // 设置首选方向为竖屏
   await SystemChrome.setPreferredOrientations([
