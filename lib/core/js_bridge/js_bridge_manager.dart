@@ -61,6 +61,26 @@ class JSBridgeManager {
     }
   }
 
+  /// 注册插件分析处理器（由 OpenAI 插件调用）
+  ///
+  /// 用于在 JS 中调用 callPluginAnalysis() 时执行插件的数据分析方法
+  void registerPluginAnalysisHandler(
+    Future<String> Function(String methodName, Map<String, dynamic> params) handler,
+  ) {
+    if (!_initialized || _engine == null) {
+      print('警告: JS Bridge 未初始化，无法注册插件分析处理器');
+      return;
+    }
+
+    // 只有 MobileJSEngine 支持插件分析
+    if (_engine is MobileJSEngine) {
+      (_engine as MobileJSEngine).setPluginAnalysisHandler(handler);
+      print('✓ 插件分析处理器已注册');
+    } else {
+      print('跳过插件分析处理器注册 (Web 平台)');
+    }
+  }
+
   /// 注册插件的 JS API
   Future<void> registerPlugin(
       PluginBase plugin, Map<String, Function> apis) async {

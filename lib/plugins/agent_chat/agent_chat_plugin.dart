@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/js_bridge/js_bridge_manager.dart';
 import 'controllers/conversation_controller.dart';
 import 'screens/conversation_list_screen/conversation_list_screen.dart';
+import 'services/tool_service.dart';
+import '../openai/openai_plugin.dart';
 // import 'l10n/agent_chat_localizations.dart';
 
 /// Agent Chat 插件
@@ -48,6 +51,23 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
     // 初始化控制器
     _conversationController = ConversationController(storage: storage);
     await _conversationController!.initialize();
+
+    // 初始化工具服务
+    await ToolService.initialize();
+
+    // 注册插件分析处理器（如果 OpenAI 插件可用）
+    final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+    if (openaiPlugin != null) {
+      JSBridgeManager.instance.registerPluginAnalysisHandler(
+        (methodName, params) async {
+          // 调用 OpenAI 插件的 Prompt 替换控制器
+          return await openaiPlugin.getPromptReplacementController().executeMethod(
+            methodName,
+            params,
+          );
+        },
+      );
+    }
   }
 
   @override

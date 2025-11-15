@@ -39,16 +39,18 @@ class _ChatScreenState extends State<ChatScreen> {
       conversationService: ConversationService(storage: widget.storage),
     );
 
-    await _controller.initialize();
+    // 在 initialize 之前添加监听器，确保状态变化能触发界面更新
     _controller.addListener(_onControllerChanged);
-
-    // 监听MessageService以实现流式响应实时更新
     _controller.messageService.addListener(_onControllerChanged);
 
+    await _controller.initialize();
+
     // 初始化完成后滚动到底部
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToBottom();
-    });
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom();
+      });
+    }
   }
 
   void _onControllerChanged() {

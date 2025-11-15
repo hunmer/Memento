@@ -91,6 +91,26 @@ class PromptReplacementController {
     return _methods.containsKey(methodName);
   }
 
+  /// 执行已注册的方法（用于工具调用）
+  Future<String> executeMethod(
+    String methodName,
+    Map<String, dynamic> params,
+  ) async {
+    final callback = _methods[methodName];
+    if (callback == null) {
+      throw Exception('方法 $methodName 未注册');
+    }
+
+    try {
+      // 执行方法并返回结果
+      final result = await callback(params);
+      return result;
+    } catch (e) {
+      debugPrint('执行方法 $methodName 时出错: $e');
+      rethrow;
+    }
+  }
+
   /// 预处理prompt中的所有方法替换
   /// 返回一个包含所有需要替换的模式及其结果的列表
   Future<List<ProcessedMethodReplacement>> preprocessPromptReplacements(

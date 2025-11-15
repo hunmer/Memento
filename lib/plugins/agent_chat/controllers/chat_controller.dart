@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:openai_dart/openai_dart.dart';
+import 'package:uuid/uuid.dart';
 import '../../../core/plugin_manager.dart';
 import '../../openai/openai_plugin.dart';
 import '../../openai/models/ai_agent.dart';
@@ -9,9 +10,11 @@ import '../../openai/services/request_service.dart';
 import '../models/conversation.dart';
 import '../models/chat_message.dart';
 import '../models/file_attachment.dart';
+import '../models/tool_call_step.dart';
 import '../services/message_service.dart';
 import '../services/conversation_service.dart';
 import '../services/token_counter_service.dart';
+import '../services/tool_service.dart';
 import '../../../utils/file_picker_helper.dart';
 
 /// 聊天控制器
@@ -240,16 +243,30 @@ class ChatController extends ChangeNotifier {
   Future<void> _requestAIResponse(
     String aiMessageId,
     String userInput,
-    List<File> files,
-  ) async {
+    List<File> files, {
+    bool enableToolCalling = true, // 是否启用工具调用
+  }) async {
     if (_currentAgent == null) return;
 
     final buffer = StringBuffer();
     int tokenCount = 0;
+    bool isCollectingToolCall = false;
 
     try {
       // 构建上下文消息
       final contextMessages = _buildContextMessages(userInput);
+
+      // 如果启用工具调用,添加工具列表到 system prompt
+      if (enableToolCalling && _currentAgent!.enableFunctionCalling && contextMessages.isNotEmpty) {
+        final toolsPrompt = ToolService.getToolListPrompt();
+        final originalSystemPrompt = contextMessages[0].content;
+
+        contextMessages[0] = ChatCompletionMessage.system(
+          content: originalSystemPrompt is String
+              ? originalSystemPrompt + toolsPrompt
+              : toolsPrompt,
+        );
+      }
 
       // 处理文件（仅支持图片vision模式）
       final imageFiles = files.where((f) => FilePickerHelper.isImageFile(f)).toList();
@@ -264,17 +281,33 @@ class ChatController extends ChangeNotifier {
           buffer.write(token);
           tokenCount++;
 
-          // 处理thinking标签
-          final processedContent =
-              RequestService.processThinkingContent(buffer.toString());
+          final content = buffer.toString();
 
-          // 更新AI消息
-          messageService.updateAIMessageContent(
-            conversation.id,
-            aiMessageId,
-            processedContent,
-            tokenCount,
-          );
+          // 检测工具调用
+          if (_currentAgent!.enableFunctionCalling &&
+              ToolService.containsToolCall(content)) {
+            isCollectingToolCall = true;
+            // 显示收集中状态
+            final displayContent = '$content\n\n⚙️ 正在准备工具调用...';
+            messageService.updateAIMessageContent(
+              conversation.id,
+              aiMessageId,
+              displayContent,
+              tokenCount,
+            );
+          } else if (!isCollectingToolCall) {
+            // 正常流式显示
+            final processedContent =
+                RequestService.processThinkingContent(content);
+
+            // 更新AI消息
+            messageService.updateAIMessageContent(
+              conversation.id,
+              aiMessageId,
+              processedContent,
+              tokenCount,
+            );
+          }
         },
         onError: (error) {
           debugPrint('AI响应错误: $error');
@@ -289,20 +322,26 @@ class ChatController extends ChangeNotifier {
 
           messageService.completeAIMessage(conversation.id, aiMessageId);
         },
-        onComplete: () {
-          // 完成生成
-          messageService.completeAIMessage(conversation.id, aiMessageId);
+        onComplete: () async {
+          // 检查是否需要执行工具调用
+          if (_currentAgent!.enableFunctionCalling &&
+              ToolService.containsToolCall(buffer.toString())) {
+            await _handleToolCall(aiMessageId, buffer.toString());
+          } else {
+            // 完成生成
+            messageService.completeAIMessage(conversation.id, aiMessageId);
 
-          // 更新会话的最后消息
-          final finalContent = RequestService.processThinkingContent(
-            buffer.toString(),
-          );
-          conversationService.updateLastMessage(
-            conversation.id,
-            finalContent.length > 50
-                ? '${finalContent.substring(0, 50)}...'
-                : finalContent,
-          );
+            // 更新会话的最后消息
+            final finalContent = RequestService.processThinkingContent(
+              buffer.toString(),
+            );
+            conversationService.updateLastMessage(
+              conversation.id,
+              finalContent.length > 50
+                  ? '${finalContent.substring(0, 50)}...'
+                  : finalContent,
+            );
+          }
         },
         replacePrompt: false, // 不替换prompt
       );
@@ -499,6 +538,141 @@ class ChatController extends ChangeNotifier {
   /// 获取上下文token数
   int getContextTokens() {
     return messageService.getContextTokens(conversation.id, contextMessageCount);
+  }
+
+  /// 处理工具调用
+  Future<void> _handleToolCall(String messageId, String aiResponse) async {
+    try {
+      // 1. 解析工具调用
+      final toolCall = ToolService.parseToolCallFromResponse(aiResponse);
+      if (toolCall == null) {
+        // 解析失败，直接完成消息
+        messageService.completeAIMessage(conversation.id, messageId);
+        return;
+      }
+
+      // 2. 更新消息显示解析结果
+      var displayContent = '$aiResponse\n\n';
+
+      // 3. 逐步执行工具调用
+      for (int i = 0; i < toolCall.steps.length; i++) {
+        final step = toolCall.steps[i];
+
+        // 显示执行中状态
+        displayContent += '\n🔧 **步骤 ${i + 1}: ${step.title}**\n';
+        displayContent += '📝 ${step.desc}\n';
+        displayContent += '⏳ 正在执行...\n';
+        messageService.updateAIMessageContent(
+          conversation.id,
+          messageId,
+          displayContent,
+          TokenCounterService.estimateTokenCount(displayContent),
+        );
+
+        // 执行工具调用
+        if (step.method == 'run_js') {
+          try {
+            final result = await ToolService.executeJsCode(step.data);
+
+            // 显示成功结果
+            displayContent = displayContent.replaceAll(
+              '⏳ 正在执行...',
+              '✅ 执行成功\n```json\n$result\n```',
+            );
+            messageService.updateAIMessageContent(
+              conversation.id,
+              messageId,
+              displayContent,
+              TokenCounterService.estimateTokenCount(displayContent),
+            );
+
+            // 更新步骤状态
+            step.result = result;
+            step.status = ToolCallStatus.success;
+          } catch (e) {
+            // 显示错误并中断
+            displayContent = displayContent.replaceAll(
+              '⏳ 正在执行...',
+              '❌ 执行失败: $e',
+            );
+            messageService.updateAIMessageContent(
+              conversation.id,
+              messageId,
+              displayContent,
+              TokenCounterService.estimateTokenCount(displayContent),
+            );
+            messageService.completeAIMessage(conversation.id, messageId);
+            return; // 中断流程
+          }
+        }
+      }
+
+      // 4. 所有工具调用成功，将结果发送给 AI 继续生成
+      final toolResultMessage = _buildToolResultMessage(toolCall.steps);
+      await _continueWithToolResult(messageId, toolResultMessage);
+    } catch (e) {
+      // 解析失败
+      final errorContent = '$aiResponse\n\n❌ 工具调用处理失败: $e';
+      messageService.updateAIMessageContent(
+        conversation.id,
+        messageId,
+        errorContent,
+        TokenCounterService.estimateTokenCount(errorContent),
+      );
+      messageService.completeAIMessage(conversation.id, messageId);
+    }
+  }
+
+  /// 构建工具结果消息
+  String _buildToolResultMessage(List<ToolCallStep> steps) {
+    final buffer = StringBuffer();
+    buffer.writeln('工具执行结果:\n');
+
+    for (int i = 0; i < steps.length; i++) {
+      final step = steps[i];
+      buffer.writeln('步骤 ${i + 1}: ${step.title}');
+      if (step.result != null) {
+        buffer.writeln('结果: ${step.result}');
+      }
+      buffer.writeln();
+    }
+
+    buffer.writeln('---');
+    buffer.writeln('请根据以上工具执行结果直接回答用户的问题，不要再次调用工具。');
+
+    return buffer.toString();
+  }
+
+  /// 使用工具结果继续对话
+  Future<void> _continueWithToolResult(
+    String originalMessageId,
+    String toolResult,
+  ) async {
+    // 将工具结果作为系统消息添加
+    final resultMessage = ChatMessage(
+      id: const Uuid().v4(),
+      conversationId: conversation.id,
+      content: toolResult,
+      isUser: false,
+      timestamp: DateTime.now(),
+      metadata: {'isToolResult': true},
+    );
+    await messageService.addMessage(resultMessage);
+
+    // 创建新的 AI 消息继续生成
+    final newAiMessage = ChatMessage.ai(
+      conversationId: conversation.id,
+      isGenerating: true,
+    );
+    await messageService.addMessage(newAiMessage);
+
+    // 继续请求 AI（禁用工具调用，避免无限循环）
+    await _requestAIResponse(
+      newAiMessage.id,
+      '',
+      [],
+      enableToolCalling: false,
+    );
   }
 
   @override
