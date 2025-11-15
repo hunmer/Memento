@@ -144,6 +144,7 @@ class AppRoutes extends NavigatorObserver {
     activity: (context) => const ActivityMainView(),
     checkin: (context) => const CheckinMainView(),
     settings: (context) => const SettingsScreen(),
+    agentChat: (context) => const AgentChatMainView(),
     bill: (context) => const BillMainView(),
     calendar: (context) => const CalendarMainView(),
     calendarAlbum: (context) => const CalendarAlbumMainView(),

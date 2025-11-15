@@ -104,8 +104,11 @@ class _MessageInputState extends State<MessageInput> {
                       focusNode: _focusNode,
                       maxLines: null,
                       textInputAction: TextInputAction.newline,
+                      enabled: widget.controller.currentAgent != null,
                       decoration: InputDecoration(
-                        hintText: '输入消息...',
+                        hintText: widget.controller.currentAgent != null
+                            ? '输入消息...'
+                            : '请先选择Agent...',
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -118,7 +121,7 @@ class _MessageInputState extends State<MessageInput> {
                                 child: Center(
                                   widthFactor: 1.0,
                                   child: Text(
-                                    '~${widget.controller.inputTokenCount}',
+                                    '~${widget.controller.inputTokenCount} tokens',
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.grey[600],
@@ -138,7 +141,8 @@ class _MessageInputState extends State<MessageInput> {
                 Container(
                   decoration: BoxDecoration(
                     color: widget.controller.inputText.trim().isEmpty ||
-                            widget.controller.isSending
+                            widget.controller.isSending ||
+                            widget.controller.currentAgent == null
                         ? Colors.grey[300]
                         : Colors.blue,
                     shape: BoxShape.circle,
@@ -155,7 +159,8 @@ class _MessageInputState extends State<MessageInput> {
                           )
                         : const Icon(Icons.send, color: Colors.white),
                     onPressed: widget.controller.inputText.trim().isEmpty ||
-                            widget.controller.isSending
+                            widget.controller.isSending ||
+                            widget.controller.currentAgent == null
                         ? null
                         : _sendMessage,
                   ),

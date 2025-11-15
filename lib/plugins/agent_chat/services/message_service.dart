@@ -103,6 +103,13 @@ class MessageService extends ChangeNotifier {
     }
   }
 
+  /// 清空指定会话的所有消息
+  Future<void> clearAllMessages(String conversationId) async {
+    _messageCache[conversationId] = [];
+    await _saveMessages(conversationId);
+    notifyListeners();
+  }
+
   /// 获取指定会话的消息列表
   Future<List<ChatMessage>> getMessages(String conversationId) async {
     if (!_messageCache.containsKey(conversationId)) {
