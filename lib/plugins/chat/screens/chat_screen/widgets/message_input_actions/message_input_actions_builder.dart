@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../services/file_service.dart';
 import 'handlers/index.dart';
 import 'types.dart';
-import 'package:Memento/plugins/openai/widgets/plugin_analysis_dialog.dart';
+import 'package:Memento/plugins/openai/widgets/basic_info_dialog.dart';
 import '../../../../l10n/chat_localizations.dart';
 
 /// 构建消息输入动作列表
@@ -127,7 +127,7 @@ class MessageInputActionsBuilder {
         onTap: () {
           showDialog(
             context: context,
-            builder: (context) => const PluginAnalysisDialog(),
+            builder: (context) => const BasicInfoDialog(preset: null),
           );
         },
       ),
