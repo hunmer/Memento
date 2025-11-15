@@ -97,7 +97,7 @@ class ConversationService extends ChangeNotifier {
   /// 创建新会话
   Future<Conversation> createConversation({
     required String title,
-    required String agentId,
+    String? agentId,
     List<String>? groups,
     int? contextMessageCount,
   }) async {

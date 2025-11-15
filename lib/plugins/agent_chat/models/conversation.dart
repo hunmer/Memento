@@ -12,8 +12,8 @@ class Conversation {
   /// 会话标题
   String title;
 
-  /// 绑定的Agent ID
-  final String agentId;
+  /// 绑定的Agent ID（可选，可在聊天时选择）
+  final String? agentId;
 
   /// 所属分组（支持多个分组）
   List<String> groups;
@@ -57,7 +57,7 @@ class Conversation {
   /// 创建新会话的工厂方法
   factory Conversation.create({
     required String title,
-    required String agentId,
+    String? agentId,
     List<String>? groups,
     int? contextMessageCount,
   }) {
@@ -78,7 +78,7 @@ class Conversation {
     return Conversation(
       id: json['id'] as String,
       title: json['title'] as String,
-      agentId: json['agentId'] as String,
+      agentId: json['agentId'] as String?,
       groups: (json['groups'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??

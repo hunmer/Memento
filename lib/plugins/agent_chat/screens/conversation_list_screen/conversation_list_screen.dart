@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../agent_chat_plugin.dart';
 import '../../controllers/conversation_controller.dart';
 import '../../models/conversation.dart';
 import '../chat_screen/chat_screen.dart';
-import '../../../../core/plugin_manager.dart';
 
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
-  final ConversationController controller;
-
-  const ConversationListScreen({
-    super.key,
-    required this.controller,
-  });
+  const ConversationListScreen({super.key});
 
   @override
   State<ConversationListScreen> createState() =>
@@ -19,16 +14,20 @@ class ConversationListScreen extends StatefulWidget {
 }
 
 class _ConversationListScreenState extends State<ConversationListScreen> {
+  late ConversationController _controller;
+
   @override
   void initState() {
     super.initState();
+    // 通过插件实例获取controller
+    _controller = AgentChatPlugin.instance.conversationController;
     // 监听控制器变化
-    widget.controller.addListener(_onControllerChanged);
+    _controller.addListener(_onControllerChanged);
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_onControllerChanged);
+    _controller.removeListener(_onControllerChanged);
     super.dispose();
   }
 
@@ -60,9 +59,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
           ),
         ],
       ),
-      body: widget.controller.isLoading
+      body: _controller.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : widget.controller.conversations.isEmpty
+          : _controller.conversations.isEmpty
               ? _buildEmptyState()
               : _buildConversationList(),
       floatingActionButton: FloatingActionButton(
@@ -107,7 +106,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   /// 会话列表
   Widget _buildConversationList() {
-    final conversations = widget.controller.conversations;
+    final conversations = _controller.conversations;
 
     return ListView.builder(
       padding: const EdgeInsets.all(8),
@@ -250,7 +249,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   /// 打开会话
   Future<void> _openConversation(Conversation conversation) async {
-    await widget.controller.selectConversation(conversation.id);
+    await _controller.selectConversation(conversation.id);
 
     if (mounted) {
       // 导航到聊天页面
@@ -259,7 +258,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         MaterialPageRoute(
           builder: (context) => ChatScreen(
             conversation: conversation,
-            storage: widget.controller.storage,
+            storage: _controller.storage,
           ),
         ),
       );
@@ -273,7 +272,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   ) async {
     switch (value) {
       case 'pin':
-        await widget.controller.togglePin(conversation.id);
+        await _controller.togglePin(conversation.id);
         break;
 
       case 'edit':
@@ -290,107 +289,111 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   Future<void> _showCreateConversationDialog() async {
     final titleController = TextEditingController();
 
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('新建会话'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: '会话标题',
-                hintText: '输入会话标题',
+    try {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('新建会话'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: '会话标题',
+                  hintText: '输入会话标题',
+                ),
+                autofocus: true,
               ),
-              autofocus: true,
+              const SizedBox(height: 16),
+              const Text(
+                '提示：可以在会话中选择Agent进行对话',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消'),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              '注意：请先在OpenAI插件中创建Agent',
-              style: TextStyle(fontSize: 12, color: Colors.orange),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('创建'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('创建'),
-          ),
-        ],
-      ),
-    );
+      );
 
-    if (result == true && titleController.text.isNotEmpty) {
-      try {
-        // TODO: 实现Agent选择
-        // 暂时使用占位符
-        await widget.controller.createConversation(
-          title: titleController.text,
-          agentId: 'placeholder_agent_id',
-        );
+      if (result == true && titleController.text.isNotEmpty) {
+        try {
+          // 创建会话时不需要指定agentId，可以在聊天时选择
+          await _controller.createConversation(
+            title: titleController.text,
+          );
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('会话创建成功')),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('创建失败: $e')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('会话创建成功')),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('创建失败: $e')),
+            );
+          }
         }
       }
+    } finally {
+      // 确保无论如何都会 dispose controller
+      titleController.dispose();
     }
-
-    titleController.dispose();
   }
 
   /// 显示编辑会话对话框
   Future<void> _showEditConversationDialog(Conversation conversation) async {
     final titleController = TextEditingController(text: conversation.title);
 
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('编辑会话'),
-        content: TextField(
-          controller: titleController,
-          decoration: const InputDecoration(
-            labelText: '会话标题',
+    try {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('编辑会话'),
+          content: TextField(
+            controller: titleController,
+            decoration: const InputDecoration(
+              labelText: '会话标题',
+            ),
+            autofocus: true,
           ),
-          autofocus: true,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('保存'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('保存'),
-          ),
-        ],
-      ),
-    );
+      );
 
-    if (result == true && titleController.text.isNotEmpty) {
-      final updated = conversation.copyWith(title: titleController.text);
-      await widget.controller.updateConversation(updated);
+      if (result == true && titleController.text.isNotEmpty) {
+        final updated = conversation.copyWith(title: titleController.text);
+        await _controller.updateConversation(updated);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('会话已更新')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('会话已更新')),
+          );
+        }
       }
+    } finally {
+      // 确保无论如何都会 dispose controller
+      titleController.dispose();
     }
-
-    titleController.dispose();
   }
 
   /// 显示删除确认对话框
@@ -417,7 +420,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     );
 
     if (result == true) {
-      await widget.controller.deleteConversation(conversation.id);
+      await _controller.deleteConversation(conversation.id);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

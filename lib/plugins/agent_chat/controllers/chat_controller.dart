@@ -84,29 +84,69 @@ class ChatController extends ChangeNotifier {
     try {
       // 加载消息
       await messageService.setCurrentConversation(conversation.id);
-
-      // 加载Agent
-      await _loadAgent();
     } catch (e) {
       debugPrint('初始化聊天控制器失败: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+
+    // 在消息加载完成后，异步加载 agent（不阻塞界面）
+    if (conversation.agentId != null) {
+      _loadAgentInBackground(conversation.agentId!);
+    }
   }
 
-  /// 加载Agent
-  Future<void> _loadAgent() async {
+  /// 在后台加载 Agent（不影响 loading 状态）
+  Future<void> _loadAgentInBackground(String agentId) async {
     try {
       final openAIPlugin =
           PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
 
       if (openAIPlugin != null) {
-        _currentAgent =
-            await openAIPlugin.controller.getAgent(conversation.agentId);
+        _currentAgent = await openAIPlugin.controller.getAgent(agentId);
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('后台加载Agent失败: $e');
+      // 加载失败不影响界面显示
+    }
+  }
+
+  /// 选择并加载Agent
+  Future<void> selectAgent(String agentId) async {
+    try {
+      final openAIPlugin =
+          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+
+      if (openAIPlugin != null) {
+        _currentAgent = await openAIPlugin.controller.getAgent(agentId);
+
+        // 更新会话的 agentId
+        final updatedConversation = conversation.copyWith(agentId: agentId);
+        await conversationService.updateConversation(updatedConversation);
+
+        notifyListeners();
       }
     } catch (e) {
       debugPrint('加载Agent失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取可用的Agent列表
+  Future<List<AIAgent>> getAvailableAgents() async {
+    try {
+      final openAIPlugin =
+          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+
+      if (openAIPlugin != null) {
+        return await openAIPlugin.controller.loadAgents();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('获取Agent列表失败: $e');
+      return [];
     }
   }
 
@@ -294,12 +334,19 @@ class ChatController extends ChangeNotifier {
       );
     }
 
-    // 获取历史消息
-    final historyMessages =
-        messageService.getLastMessages(conversation.id, contextMessageCount);
+    // 获取历史消息（排除正在生成的消息）
+    final allMessages = messageService.currentMessages;
+    final historyMessages = allMessages
+        .where((msg) => !msg.isGenerating) // 排除正在生成的消息
+        .toList();
 
-    // 转换历史消息
-    for (var msg in historyMessages) {
+    // 获取最后 N 条消息
+    final contextMessages = historyMessages.length > contextMessageCount
+        ? historyMessages.sublist(historyMessages.length - contextMessageCount)
+        : historyMessages;
+
+    // 转换历史消息为API格式
+    for (var msg in contextMessages) {
       if (msg.isUser) {
         messages.add(
           ChatCompletionMessage.user(
@@ -314,13 +361,6 @@ class ChatController extends ChangeNotifier {
         );
       }
     }
-
-    // 添加当前用户消息
-    messages.add(
-      ChatCompletionMessage.user(
-        content: ChatCompletionUserMessageContent.string(currentInput),
-      ),
-    );
 
     return messages;
   }
@@ -377,23 +417,52 @@ class ChatController extends ChangeNotifier {
     await messageService.deleteMessage(conversation.id, messageId);
   }
 
+  /// 清空所有消息
+  Future<void> clearAllMessages() async {
+    await messageService.clearAllMessages(conversation.id);
+    notifyListeners();
+  }
+
   /// 重新生成AI回复
-  Future<void> regenerateResponse(String userMessageId) async {
+  /// 参数 messageId 可以是用户消息ID或AI消息ID
+  Future<void> regenerateResponse(String messageId) async {
     if (_isSending) return;
 
     try {
       _isSending = true;
       notifyListeners();
 
-      // 获取用户消息
-      final userMessage =
-          messageService.getMessage(conversation.id, userMessageId);
-      if (userMessage == null || !userMessage.isUser) {
-        throw Exception('无效的消息ID');
+      // 获取消息
+      final message = messageService.getMessage(conversation.id, messageId);
+      if (message == null) {
+        throw Exception('消息不存在');
+      }
+
+      // 如果传入的是AI消息，找到前一条用户消息
+      ChatMessage? userMessage;
+      if (message.isUser) {
+        userMessage = message;
+      } else {
+        // 找到这条AI消息之前的用户消息
+        final messages = messageService.currentMessages;
+        final currentIndex = messages.indexWhere((m) => m.id == messageId);
+        if (currentIndex > 0) {
+          // 向前查找最近的用户消息
+          for (int i = currentIndex - 1; i >= 0; i--) {
+            if (messages[i].isUser) {
+              userMessage = messages[i];
+              break;
+            }
+          }
+        }
+      }
+
+      if (userMessage == null) {
+        throw Exception('未找到对应的用户消息');
       }
 
       // 删除之后的AI回复
-      await messageService.prepareRegenerate(conversation.id, userMessageId);
+      await messageService.prepareRegenerate(conversation.id, userMessage.id);
 
       // 创建新的AI消息
       final aiMessage = ChatMessage.ai(

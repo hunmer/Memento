@@ -91,23 +91,38 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.conversation.title,
-              style: const TextStyle(fontSize: 16),
-            ),
-            if (_controller.currentAgent != null)
+        title: InkWell(
+          onTap: _showAgentSelector,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                _controller.currentAgent!.name,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.normal,
-                ),
+                widget.conversation.title,
+                style: const TextStyle(fontSize: 16),
               ),
-          ],
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _controller.currentAgent?.name ?? '点击选择Agent',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _controller.currentAgent != null
+                          ? Colors.grey[600]
+                          : Colors.orange[700],
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    size: 16,
+                    color: Colors.grey[600],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         actions: [
           // Token统计按钮
@@ -115,6 +130,12 @@ class _ChatScreenState extends State<ChatScreen> {
             icon: const Icon(Icons.analytics_outlined),
             onPressed: _showTokenStats,
             tooltip: 'Token统计',
+          ),
+          // 清空聊天记录按钮
+          IconButton(
+            icon: const Icon(Icons.delete_sweep),
+            onPressed: _showClearMessagesConfirm,
+            tooltip: '清空聊天记录',
           ),
           // 设置按钮
           IconButton(
@@ -178,7 +199,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            '开始新的对话',
+            _controller.currentAgent != null ? '开始新的对话' : '请先选择一个Agent',
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],
@@ -192,6 +213,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 fontSize: 14,
                 color: Colors.grey[500],
               ),
+            )
+          else
+            OutlinedButton.icon(
+              onPressed: _showAgentSelector,
+              icon: const Icon(Icons.smart_toy),
+              label: const Text('选择Agent'),
             ),
         ],
       ),
@@ -364,6 +391,161 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
     );
+  }
+
+  /// 显示清空聊天记录确认对话框
+  Future<void> _showClearMessagesConfirm() async {
+    if (_controller.messages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('当前没有消息记录')),
+      );
+      return;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认清空'),
+        content: Text(
+          '确定要清空当前会话的所有消息吗？\n\n'
+          '当前共有 ${_controller.messages.length} 条消息，此操作不可恢复。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('清空'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await _controller.clearAllMessages();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('聊天记录已清空')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('清空失败: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  /// 显示Agent选择器
+  Future<void> _showAgentSelector() async {
+    try {
+      final agents = await _controller.getAvailableAgents();
+
+      if (!mounted) return;
+
+      if (agents.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('未找到可用的Agent，请先在OpenAI插件中创建'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+
+      final selectedAgent = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('选择Agent'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: agents.length,
+              itemBuilder: (context, index) {
+                final agent = agents[index];
+                final isSelected = _controller.currentAgent?.id == agent.id;
+
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: isSelected ? Colors.blue : Colors.grey[300],
+                    child: Icon(
+                      Icons.smart_toy,
+                      color: isSelected ? Colors.white : Colors.grey[600],
+                    ),
+                  ),
+                  title: Text(
+                    agent.name,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  subtitle: Text(
+                    agent.description.isEmpty ? '暂无描述' : agent.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: isSelected
+                      ? const Icon(Icons.check_circle, color: Colors.blue)
+                      : null,
+                  selected: isSelected,
+                  onTap: () => Navigator.pop(context, agent.id),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+          ],
+        ),
+      );
+
+      if (selectedAgent != null && mounted) {
+        try {
+          await _controller.selectAgent(selectedAgent);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('已切换到 ${_controller.currentAgent?.name}'),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('切换Agent失败: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('加载Agent列表失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   /// 显示删除确认对话框
