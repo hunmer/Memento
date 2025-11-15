@@ -160,6 +160,26 @@ abstract class OpenAILocalizations {
 
   String get noToolsAvailable;
 
+  // Analysis Presets
+  String get basicInfo;
+  String get analysisTab;
+  String get presetTitle;
+  String get presetDescription;
+  String get presetTags;
+  String get addPreset;
+  String get savePreset;
+  String get editPreset;
+  String get deletePreset;
+  String get confirmDeletePreset;
+  String get pleaseEnterTitle;
+  String get presetSaved;
+  String get saveFailed;
+  String get noPresetsYet;
+  String get createFirstPreset;
+  String get addTag;
+  String get enterTagName;
+  String get createdAt;
+
   String get confirmDeleteProviderTitle;
 
   get confirmDeleteProviderMessage;
@@ -574,6 +594,44 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
 
   @override
   String get noToolsAvailable => '没有可用工具';
+
+  // Analysis Presets
+  @override
+  String get basicInfo => '基础信息';
+  @override
+  String get analysisTab => '分析';
+  @override
+  String get presetTitle => '预设标题';
+  @override
+  String get presetDescription => '描述';
+  @override
+  String get presetTags => '标签';
+  @override
+  String get addPreset => '添加预设';
+  @override
+  String get savePreset => '保存预设';
+  @override
+  String get editPreset => '编辑预设';
+  @override
+  String get deletePreset => '删除预设';
+  @override
+  String get confirmDeletePreset => '确定要删除这个预设吗？此操作不可撤销。';
+  @override
+  String get pleaseEnterTitle => '请输入标题';
+  @override
+  String get presetSaved => '预设已保存';
+  @override
+  String get saveFailed => '保存失败';
+  @override
+  String get noPresetsYet => '暂无预设';
+  @override
+  String get createFirstPreset => '点击左下角按钮创建第一个预设';
+  @override
+  String get addTag => '添加标签';
+  @override
+  String get enterTagName => '输入标签名称';
+  @override
+  String get createdAt => '创建于';
 
   @override
   String get addProviderButton => "Add Provider";
@@ -1010,6 +1068,44 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
 
   @override
   String get noToolsAvailable => 'No Tools Available';
+
+  // Analysis Presets
+  @override
+  String get basicInfo => 'Basic Info';
+  @override
+  String get analysisTab => 'Analysis';
+  @override
+  String get presetTitle => 'Preset Title';
+  @override
+  String get presetDescription => 'Description';
+  @override
+  String get presetTags => 'Tags';
+  @override
+  String get addPreset => 'Add Preset';
+  @override
+  String get savePreset => 'Save Preset';
+  @override
+  String get editPreset => 'Edit Preset';
+  @override
+  String get deletePreset => 'Delete Preset';
+  @override
+  String get confirmDeletePreset => 'Are you sure you want to delete this preset? This action cannot be undone.';
+  @override
+  String get pleaseEnterTitle => 'Please enter a title';
+  @override
+  String get presetSaved => 'Preset saved';
+  @override
+  String get saveFailed => 'Save failed';
+  @override
+  String get noPresetsYet => 'No presets yet';
+  @override
+  String get createFirstPreset => 'Click the button in the bottom left to create your first preset';
+  @override
+  String get addTag => 'Add Tag';
+  @override
+  String get enterTagName => 'Enter tag name';
+  @override
+  String get createdAt => 'Created at';
 
   @override
   String get addProviderButton => "添加提供商";
