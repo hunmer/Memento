@@ -178,9 +178,6 @@ class _PresetRunScreenState extends State<PresetRunScreen>
                       onPressed: _pickFiles,
                       icon: const Icon(Icons.attach_file),
                       label: const Text('添加文件'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                      ),
                     ),
                     const SizedBox(width: 12),
                     OutlinedButton.icon(
