@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../models/script_info.dart';
+import '../models/script_folder.dart';
 import 'script_loader.dart';
 
 /// 脚本管理器服务
@@ -7,6 +8,12 @@ import 'script_loader.dart';
 /// 提供脚本CRUD操作和状态管理，使用ChangeNotifier通知UI更新
 class ScriptManager extends ChangeNotifier {
   final ScriptLoader loader;
+
+  /// 所有脚本文件夹列表
+  List<ScriptFolder> _folders = [];
+
+  /// 当前选中的文件夹
+  ScriptFolder? _currentFolder;
 
   /// 所有脚本列表
   List<ScriptInfo> _scripts = [];
@@ -21,6 +28,12 @@ class ScriptManager extends ChangeNotifier {
   String? _lastError;
 
   ScriptManager(this.loader);
+
+  /// 获取所有脚本文件夹
+  List<ScriptFolder> get folders => List.unmodifiable(_folders);
+
+  /// 获取当前选中的文件夹
+  ScriptFolder? get currentFolder => _currentFolder;
 
   /// 获取所有脚本
   List<ScriptInfo> get scripts => List.unmodifiable(_scripts);
@@ -47,19 +60,100 @@ class ScriptManager extends ChangeNotifier {
   /// 已启用脚本数量
   int get enabledScriptCount => getEnabledScripts().length;
 
-  /// 加载所有脚本
+  /// 初始化文件夹列表
+  Future<void> initializeFolders(List<ScriptFolder> folders) async {
+    _folders = folders;
+
+    // 设置默认选中第一个文件夹
+    if (_folders.isNotEmpty) {
+      _currentFolder = _folders.first;
+    }
+
+    notifyListeners();
+  }
+
+  /// 设置当前文件夹
+  Future<void> setCurrentFolder(ScriptFolder folder) async {
+    if (!_folders.contains(folder)) {
+      throw Exception('文件夹不存在: ${folder.name}');
+    }
+
+    _currentFolder = folder;
+    notifyListeners();
+
+    // 重新加载当前文件夹的脚本
+    await loadScripts();
+  }
+
+  /// 添加新文件夹
+  Future<void> addFolder(ScriptFolder folder) async {
+    if (_folders.any((f) => f.id == folder.id)) {
+      throw Exception('文件夹ID已存在: ${folder.id}');
+    }
+
+    _folders.add(folder);
+    notifyListeners();
+
+    print('✅ 添加文件夹: ${folder.name}');
+  }
+
+  /// 删除文件夹（不能删除内置文件夹）
+  Future<void> removeFolder(String folderId) async {
+    final folder = _folders.firstWhere(
+      (f) => f.id == folderId,
+      orElse: () => throw Exception('文件夹不存在: $folderId'),
+    );
+
+    if (folder.isBuiltIn) {
+      throw Exception('不能删除内置文件夹');
+    }
+
+    _folders.removeWhere((f) => f.id == folderId);
+
+    // 如果删除的是当前文件夹，切换到第一个文件夹
+    if (_currentFolder?.id == folderId && _folders.isNotEmpty) {
+      _currentFolder = _folders.first;
+      await loadScripts();
+    }
+
+    notifyListeners();
+    print('✅ 删除文件夹: ${folder.name}');
+  }
+
+  /// 更新文件夹
+  Future<void> updateFolder(ScriptFolder folder) async {
+    final index = _folders.indexWhere((f) => f.id == folder.id);
+    if (index == -1) {
+      throw Exception('文件夹不存在: ${folder.id}');
+    }
+
+    _folders[index] = folder;
+    notifyListeners();
+
+    print('✅ 更新文件夹: ${folder.name}');
+  }
+
+  /// 加载当前文件夹的脚本
   Future<void> loadScripts() async {
     try {
       _isLoading = true;
       _lastError = null;
       notifyListeners();
 
-      _scripts = await loader.scanScripts();
+      // 如果没有选中文件夹，加载空列表
+      if (_currentFolder == null) {
+        _scripts = [];
+        print('⚠️ 未选中任何文件夹');
+        return;
+      }
+
+      // 加载当前文件夹的脚本
+      _scripts = await loader.scanScriptsInFolder(_currentFolder!);
 
       // 按名称排序
       _scripts.sort((a, b) => a.name.compareTo(b.name));
 
-      print('✅ 加载了 ${_scripts.length} 个脚本');
+      print('✅ 从文件夹 ${_currentFolder!.name} 加载了 ${_scripts.length} 个脚本');
     } catch (e) {
       _lastError = '加载脚本失败: $e';
       print('❌ $_lastError');
@@ -67,6 +161,22 @@ class ScriptManager extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// 加载所有文件夹的所有脚本（用于获取所有启用的脚本）
+  Future<List<ScriptInfo>> loadAllScripts() async {
+    final allScripts = <ScriptInfo>[];
+
+    for (final folder in _folders.where((f) => f.enabled)) {
+      try {
+        final scripts = await loader.scanScriptsInFolder(folder);
+        allScripts.addAll(scripts);
+      } catch (e) {
+        print('⚠️ 加载文件夹 ${folder.name} 失败: $e');
+      }
+    }
+
+    return allScripts;
   }
 
   /// 根据ID获取脚本
