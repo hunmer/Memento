@@ -416,7 +416,7 @@ packages:
     source: hosted
     version: "9.1.0"
   flutter_image_compress:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_image_compress
       sha256: "51d23be39efc2185e72e290042a0da41aed70b14ef97db362a6b5368d0523b27"
@@ -686,22 +686,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.3.0"
-  image_compression:
-    dependency: transitive
-    description:
-      name: image_compression
-      sha256: "0ab2ad255fc3877c0e425a3f46796b2872806c1d7260207ec72b723975f6f3e0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.5"
-  image_compression_flutter:
-    dependency: "direct main"
-    description:
-      name: image_compression_flutter
-      sha256: "0d7fc5d37bb69996285dd57342b3a37ad92fa4bb0616484af084ec924d6818b4"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.4"
   image_picker:
     dependency: "direct main"
     description:

@@ -35,7 +35,7 @@ android {
         applicationId = "github.hunmer.memento"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23 // Updated for record plugin compatibility
+        minSdk = flutter.minSdkVersion // Updated for record plugin compatibility
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
