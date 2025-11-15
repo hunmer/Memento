@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'platform/js_engine_interface.dart';
 import 'platform/js_engine_factory.dart';
+import 'platform/mobile_js_engine.dart';
+import 'js_ui_handlers.dart';
 import '../plugin_base.dart';
 
 /// 全局 JS 桥接管理器
@@ -38,6 +41,25 @@ class JSBridgeManager {
 
   /// 检查是否支持
   bool get isSupported => _initialized && _engine != null;
+
+  /// 注册 UI 处理器（Toast/Alert/Dialog）
+  ///
+  /// 必须在有 BuildContext 的情况下调用，通常在 UI 组件初始化时调用
+  void registerUIHandlers(BuildContext context) {
+    if (!_initialized || _engine == null) {
+      print('警告: JS Bridge 未初始化，无法注册 UI 处理器');
+      return;
+    }
+
+    // 只有 MobileJSEngine 需要注册 UI 处理器
+    if (_engine is MobileJSEngine) {
+      final handlers = JSUIHandlers(context);
+      handlers.register(_engine as MobileJSEngine);
+      print('✓ UI 处理器已注册 (Toast/Alert/Dialog)');
+    } else {
+      print('跳过 UI 处理器注册 (Web 平台)');
+    }
+  }
 
   /// 注册插件的 JS API
   Future<void> registerPlugin(

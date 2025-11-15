@@ -1,4 +1,5 @@
 import 'script_trigger.dart';
+import 'script_input.dart';
 
 /// 脚本元数据模型
 ///
@@ -34,6 +35,9 @@ class ScriptInfo {
   /// 脚本类型：module（可接受参数）| standalone（独立运行）
   String type;
 
+  /// 输入参数定义（仅用于 module 类型）
+  List<ScriptInput> inputs;
+
   /// 触发条件列表
   List<ScriptTrigger> triggers;
 
@@ -54,6 +58,7 @@ class ScriptInfo {
     this.updateUrl,
     this.enabled = true,
     this.type = 'module',
+    this.inputs = const [],
     this.triggers = const [],
     this.createdAt,
     this.updatedAt,
@@ -76,6 +81,10 @@ class ScriptInfo {
       updateUrl: json['updateUrl'] as String?,
       enabled: json['enabled'] as bool? ?? true,
       type: json['type'] as String? ?? 'module',
+      inputs: (json['inputs'] as List<dynamic>?)
+              ?.map((e) => ScriptInput.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       triggers: (json['triggers'] as List<dynamic>?)
               ?.map((e) => ScriptTrigger.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -100,6 +109,7 @@ class ScriptInfo {
       if (updateUrl != null) 'updateUrl': updateUrl,
       'enabled': enabled,
       'type': type,
+      'inputs': inputs.map((i) => i.toJson()).toList(),
       'triggers': triggers.map((t) => t.toJson()).toList(),
       if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
@@ -116,6 +126,7 @@ class ScriptInfo {
     String? updateUrl,
     bool? enabled,
     String? type,
+    List<ScriptInput>? inputs,
     List<ScriptTrigger>? triggers,
     DateTime? updatedAt,
   }) {
@@ -130,6 +141,7 @@ class ScriptInfo {
       updateUrl: updateUrl ?? this.updateUrl,
       enabled: enabled ?? this.enabled,
       type: type ?? this.type,
+      inputs: inputs ?? this.inputs,
       triggers: triggers ?? this.triggers,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -147,6 +159,9 @@ class ScriptInfo {
 
   /// 是否是 module 类型（可接受参数）
   bool get isModule => type == 'module';
+
+  /// 是否需要输入参数
+  bool get hasInputs => inputs.isNotEmpty;
 
   @override
   String toString() {

@@ -1,0 +1,48 @@
+{
+  "name": "用户问候脚本",
+  "version": "1.0.0",
+  "description": "一个简单的示例脚本，展示如何使用输入参数",
+  "icon": "star",
+  "author": "Memento Team",
+  "enabled": true,
+  "type": "module",
+  "inputs": [
+    {
+      "label": "用户名",
+      "key": "username",
+      "type": "string",
+      "required": true,
+      "placeholder": "请输入您的名字",
+      "description": "您的名字将用于个性化问候"
+    },
+    {
+      "label": "年龄",
+      "key": "age",
+      "type": "number",
+      "required": false,
+      "defaultValue": 18,
+      "placeholder": "例如：25",
+      "description": "您的年龄（可选）"
+    },
+    {
+      "label": "性别",
+      "key": "gender",
+      "type": "select",
+      "required": true,
+      "options": ["男", "女", "其他"],
+      "defaultValue": "其他",
+      "description": "请选择您的性别"
+    },
+    {
+      "label": "接收通知",
+      "key": "enableNotification",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": true,
+      "description": "是否接收系统通知"
+    }
+  ],
+  "triggers": [],
+  "createdAt": "2025-01-15T00:00:00.000Z",
+  "updatedAt": "2025-01-15T00:00:00.000Z"
+}

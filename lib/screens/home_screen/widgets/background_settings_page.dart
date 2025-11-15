@@ -23,8 +23,11 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
   BoxFit _globalBackgroundFit = BoxFit.cover;
   double _globalBackgroundBlur = 0.0;
 
-  // 全局小组件透明度 (0-1)
+  // 全局小组件透明度 (0-1) - 影响整个小组件
   double _globalWidgetOpacity = 1.0;
+
+  // 全局小组件背景颜色透明度 (0-1) - 仅影响背景颜色
+  double _globalWidgetBackgroundOpacity = 1.0;
 
   @override
   void initState() {
@@ -50,6 +53,9 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
           );
           _globalBackgroundBlur = (globalConfig['backgroundBlur'] as num?)?.toDouble() ?? 0.0;
           _globalWidgetOpacity = (globalConfig['widgetOpacity'] as num?)?.toDouble() ?? 1.0;
+          _globalWidgetBackgroundOpacity =
+              (globalConfig['widgetBackgroundOpacity'] as num?)?.toDouble() ??
+              1.0;
           _isLoading = false;
         });
       }
@@ -93,6 +99,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
         'backgroundFit': LayoutConfig.boxFitToString(_globalBackgroundFit),
         'backgroundBlur': _globalBackgroundBlur,
         'widgetOpacity': _globalWidgetOpacity,
+        'widgetBackgroundOpacity': _globalWidgetBackgroundOpacity,
       });
 
       if (mounted) {
@@ -536,7 +543,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                             const Icon(Icons.opacity),
                             const SizedBox(width: 12),
                             const Text(
-                              '小组件透明度',
+                                '小组件整体透明度',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -554,7 +561,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '调整主页小组件的透明度，数值越小越透明',
+                            '调整整个小组件的透明度（包括文字和内容）',
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).hintColor,
@@ -599,6 +606,85 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                     ),
                   ),
                 ),
+
+                  const SizedBox(height: 16),
+
+                  // 全局小组件背景颜色透明度设置卡片
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.format_color_fill),
+                              const SizedBox(width: 12),
+                              const Text(
+                                '背景颜色透明度',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                '${(_globalWidgetBackgroundOpacity * 100).toInt()}%',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '仅调整小组件背景颜色的透明度，不影响文字',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).hintColor,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Slider(
+                            value: _globalWidgetBackgroundOpacity,
+                            min: 0.0,
+                            max: 1.0,
+                            divisions: 20,
+                            label:
+                                '${(_globalWidgetBackgroundOpacity * 100).toInt()}%',
+                            onChanged: (value) {
+                              setState(() {
+                                _globalWidgetBackgroundOpacity = value;
+                              });
+                            },
+                            onChangeEnd: (value) {
+                              _saveGlobalBackground();
+                            },
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '0%（完全透明）',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                              Text(
+                                '100%（不透明）',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
                 const SizedBox(height: 24),
 

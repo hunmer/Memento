@@ -3,6 +3,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../../../core/js_bridge/js_bridge_manager.dart';
 
+/// 示例文件信息
+class ExampleFile {
+  final String name; // 文件名（显示用）
+  final String path; // 文件路径
+  final String category; // 分类
+
+  ExampleFile({
+    required this.name,
+    required this.path,
+    required this.category,
+  });
+}
+
 class JSConsoleController extends ChangeNotifier {
   String _code = '';
   String _output = '';
@@ -10,11 +23,26 @@ class JSConsoleController extends ChangeNotifier {
   Map<String, String> _examples = {};
   bool _examplesLoaded = false;
 
+  // 新增：文件相关属性
+  List<ExampleFile> _exampleFiles = [];
+  String? _selectedFilePath;
+  Map<String, Map<String, String>> _examplesByFile = {}; // 按文件分组的示例
+
   String get code => _code;
   String get output => _output;
   bool get isRunning => _isRunning;
   Map<String, String> get examples => _examples;
   bool get examplesLoaded => _examplesLoaded;
+
+  // 新增：文件选择相关 getter
+  List<ExampleFile> get exampleFiles => _exampleFiles;
+  String? get selectedFilePath => _selectedFilePath;
+
+  /// 获取当前选中文件的示例
+  Map<String, String> get currentFileExamples {
+    if (_selectedFilePath == null) return _examples;
+    return _examplesByFile[_selectedFilePath] ?? {};
+  }
 
   void setCode(String code) {
     _code = code;
@@ -23,6 +51,12 @@ class JSConsoleController extends ChangeNotifier {
 
   void clearOutput() {
     _output = '';
+    notifyListeners();
+  }
+
+  /// 选择示例文件
+  void selectFile(String? filePath) {
+    _selectedFilePath = filePath;
     notifyListeners();
   }
 
@@ -80,8 +114,9 @@ class JSConsoleController extends ChangeNotifier {
 
     try {
       // 需要加载的示例文件列表
-      final exampleFiles = [
+      final exampleFilePaths = [
         'lib/screens/js_console/examples/basic_examples.json',
+        'lib/screens/js_console/examples/flutter_api_examples.json',
         'lib/screens/js_console/examples/chat_examples.json',
         'lib/screens/js_console/examples/activity_examples.json',
         'lib/screens/js_console/examples/bill_examples.json',
@@ -104,8 +139,10 @@ class JSConsoleController extends ChangeNotifier {
       ];
 
       _examples = {};
+      _exampleFiles = [];
+      _examplesByFile = {};
 
-      for (final filePath in exampleFiles) {
+      for (final filePath in exampleFilePaths) {
         try {
           // 加载 JSON 文件
           final jsonString = await rootBundle.loadString(filePath);
@@ -115,6 +152,18 @@ class JSConsoleController extends ChangeNotifier {
           final category = jsonData['category'] as String? ?? '未分类';
           final examples = jsonData['examples'] as List<dynamic>? ?? [];
 
+          // 创建文件信息对象
+          final fileName = filePath.split('/').last.replaceAll('_examples.json', '');
+          final fileInfo = ExampleFile(
+            name: category,
+            path: filePath,
+            category: category,
+          );
+          _exampleFiles.add(fileInfo);
+
+          // 为这个文件创建示例 Map
+          final fileExamples = <String, String>{};
+
           // 添加到 examples Map
           for (final example in examples) {
             if (example is Map<String, dynamic>) {
@@ -122,12 +171,18 @@ class JSConsoleController extends ChangeNotifier {
               final code = example['code'] as String?;
 
               if (title != null && code != null) {
-                // 使用 "分类 - 标题" 作为键
-                final key = category == '未分类' ? title : '$category - $title';
-                _examples[key] = code;
+                // 使用标题作为键（不再包含分类前缀）
+                fileExamples[title] = code;
+
+                // 全局示例仍使用 "分类 - 标题" 格式
+                final globalKey = category == '未分类' ? title : '$category - $title';
+                _examples[globalKey] = code;
               }
             }
           }
+
+          // 存储按文件分组的示例
+          _examplesByFile[filePath] = fileExamples;
 
           print('✓ 已加载示例文件: $filePath (${examples.length} 个)');
         } catch (e) {
@@ -145,7 +200,12 @@ class JSConsoleController extends ChangeNotifier {
 
   /// 加载指定示例代码到编辑器
   void loadExample(String exampleKey) {
-    _code = _examples[exampleKey] ?? '';
+    // 从当前选中的文件或全局示例中加载
+    if (_selectedFilePath != null) {
+      _code = _examplesByFile[_selectedFilePath]?[exampleKey] ?? '';
+    } else {
+      _code = _examples[exampleKey] ?? '';
+    }
     notifyListeners();
   }
 }
