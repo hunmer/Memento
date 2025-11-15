@@ -783,62 +783,33 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       presencePenalty: 0.0,
     );
 
-    // 使用 TestService 的对话框
-    final result = await TestService.showLongTextInputDialog(
+    // 获取当前表单的值
+    final formValues = {
+      'name': _nameController.text,
+      'baseUrl': _baseUrlController.text,
+      'model': _modelController.text,
+      'systemPrompt': _promptController.text,
+      'serviceProviderId': _selectedProviderId,
+      'apiKey': apiKey,
+      // 可以在这里添加更多参数，如果界面上有相应的输入控件
+      'temperature': 0.7, // 默认值，如果界面上有输入控件，可以从控件获取
+      'maxLength': 2000, // 默认值
+      'topP': 1.0, // 默认值
+      'frequencyPenalty': 0.0, // 默认值
+      'presencePenalty': 0.0, // 默认值
+    };
+
+    // 使用 TestService 的对话框，传递 testAgent 和 formValues
+    // 对话框内部会自动处理测试和显示结果
+    await TestService.showLongTextInputDialog(
       context,
       title:
           '${OpenAILocalizations.of(context).testAgentTitle}${testAgent.name}',
       hintText: OpenAILocalizations.of(context).enterTestText,
       enableImagePicker: true,
+      testAgent: testAgent,
+      formValues: formValues,
     );
-
-    if (result != null && mounted) {
-      final input = result['text'] as String;
-      final File? imageFile = result['image'] as File?;
-
-      if (input.isNotEmpty) {
-        try {
-          // 获取当前表单的值
-          final formValues = {
-            'name': _nameController.text,
-            'baseUrl': _baseUrlController.text,
-            'model': _modelController.text,
-            'systemPrompt': _promptController.text,
-            'serviceProviderId': _selectedProviderId,
-            'apiKey': apiKey,
-            // 可以在这里添加更多参数，如果界面上有相应的输入控件
-            'temperature': 0.7, // 默认值，如果界面上有输入控件，可以从控件获取
-            'maxLength': 2000, // 默认值
-            'topP': 1.0, // 默认值
-            'frequencyPenalty': 0.0, // 默认值
-            'presencePenalty': 0.0, // 默认值
-          };
-
-          // 处理请求并获取响应，传入表单值
-          final response = await TestService.processTestRequest(
-            input,
-            testAgent,
-            imageFile: imageFile,
-            formValues: formValues,
-          );
-
-          // 显示响应结果
-          if (mounted) {
-            TestService.showResponseDialog(context, response);
-          }
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${OpenAILocalizations.of(context).testError}: $e',
-                ),
-              ),
-            );
-          }
-        }
-      }
-    }
   }
 
   @override
