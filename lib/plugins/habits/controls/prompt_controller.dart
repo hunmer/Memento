@@ -1,16 +1,16 @@
 import '../../openai/openai_plugin.dart';
-import '../activity_plugin.dart';
+import '../habits_plugin.dart';
 import '../services/prompt_replacements.dart';
 
-/// Activity 插件的 Prompt 控制器
+/// Habits 插件的 Prompt 控制器
 ///
 /// 负责注册 Prompt 替换方法到 OpenAI 插件
-class ActivityPromptController {
-  final ActivityPlugin plugin;
-  late final ActivityPromptReplacements _replacements;
+class HabitsPromptController {
+  final HabitsPlugin plugin;
+  late final HabitsPromptReplacements _replacements;
 
-  ActivityPromptController(this.plugin) {
-    _replacements = ActivityPromptReplacements(plugin);
+  HabitsPromptController(this.plugin) {
+    _replacements = HabitsPromptReplacements(plugin);
   }
 
   /// 初始化并注册Prompt方法
@@ -23,16 +23,16 @@ class ActivityPromptController {
   void _registerPromptMethods() {
     Future.delayed(const Duration(seconds: 1), () {
       try {
-        // 注册 activity_getActivities 方法 (修正命名: activitys → activities)
+        // 注册 habits_getHabits 方法
         OpenAIPlugin.instance.registerPromptReplacementMethod(
-          'activity_getActivities',
-          _replacements.getActivities,
+          'habits_getHabits',
+          _replacements.getHabits,
         );
 
-        // 向后兼容旧方法名
+        // 注册 habits_getStats 方法
         OpenAIPlugin.instance.registerPromptReplacementMethod(
-          'activity_getActivitys',
-          _replacements.getActivities,
+          'habits_getStats',
+          _replacements.getStats,
         );
       } catch (e) {
         // 如果注册失败,可能是OpenAI插件还未初始化,稍后重试

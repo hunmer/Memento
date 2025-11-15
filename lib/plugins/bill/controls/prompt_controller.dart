@@ -1,51 +1,51 @@
-import 'package:flutter/material.dart';
-import 'package:Memento/core/plugin_manager.dart';
-import '../services/prompt_replacements.dart';
 import '../../openai/openai_plugin.dart';
+import '../bill_plugin.dart';
+import '../services/prompt_replacements.dart';
 
+/// Bill 插件的 Prompt 控制器
+///
+/// 负责注册 Prompt 替换方法到 OpenAI 插件
 class PromptController {
-  final BillPromptReplacements _promptReplacements = BillPromptReplacements();
+  final BillPlugin plugin;
+  late final BillPromptReplacements _replacements;
 
+  PromptController(this.plugin) {
+    _replacements = BillPromptReplacements(plugin);
+  }
+
+  /// 初始化并注册Prompt方法
   void initialize() {
-    // 初始化prompt替换服务
-    _promptReplacements.initialize();
+    // 延迟注册以确保OpenAI插件已初始化
+    _registerPromptMethods();
+  }
 
-    // 延迟注册prompt替换方法，等待OpenAI插件初始化完成
+  /// 注册Prompt替换方法
+  void _registerPromptMethods() {
     Future.delayed(const Duration(seconds: 1), () {
-      _registerPromptMethods();
+      try {
+        // 注册 bill_getBills 方法
+        OpenAIPlugin.instance.registerPromptReplacementMethod(
+          'bill_getBills',
+          _replacements.getBills,
+        );
+      } catch (e) {
+        // 如果注册失败,可能是OpenAI插件还未初始化,稍后重试
+        Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
+      }
     });
   }
 
-  /// 注册prompt替换方法
-  void _registerPromptMethods() {
+  /// 注销Prompt方法
+  void unregisterPromptMethods() {
     try {
-      final openaiPlugin =
-          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
-      if (openaiPlugin != null) {
-        openaiPlugin.registerPromptReplacementMethod(
-          'bill_getBills',
-          _promptReplacements.getBills,
-        );
-      } else {
-        debugPrint('注册bill_getBills方法失败：未找到OpenAI插件，将在5秒后重试');
-        // 如果OpenAI插件还未准备好，5秒后重试
-        Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
-      }
+      OpenAIPlugin.instance.unregisterPromptReplacementMethod('bill_getBills');
     } catch (e) {
-      // 发生错误时，5秒后重试
-      Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
+      // 忽略注销错误
     }
   }
 
-  void unregisterPromptMethods() {
-    // 注销prompt替换方法
-    final openaiPlugin =
-        PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
-    if (openaiPlugin != null) {
-      openaiPlugin.unregisterPromptReplacementMethod('bill_getBills');
-    }
-
-    // 清理prompt替换服务
-    _promptReplacements.dispose();
+  /// 释放资源
+  void dispose() {
+    _replacements.dispose();
   }
 }

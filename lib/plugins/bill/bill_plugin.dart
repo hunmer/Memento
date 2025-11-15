@@ -32,7 +32,6 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   BillPlugin() {
     _billController = BillController();
-    _promptController = PromptController();
   }
 
   @override
@@ -57,6 +56,9 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   Future<void> initialize() async {
     _billController.setPlugin(this);
     _billController.initialize();
+
+    // 初始化 Prompt 控制器
+    _promptController = PromptController(this);
     _promptController.initialize();
 
     // 注册 JS API（最后一步）
@@ -79,6 +81,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   Future<void> uninstall() async {
     _promptController.unregisterPromptMethods();
+    _promptController.dispose();
   }
 
   @override

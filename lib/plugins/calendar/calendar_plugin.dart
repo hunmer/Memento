@@ -14,6 +14,7 @@ import './widgets/event_detail_card.dart';
 import './services/todo_event_service.dart';
 import '../todo/todo_plugin.dart';
 import './l10n/calendar_localizations.dart';
+import './controls/prompt_controller.dart';
 
 class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   // 总控制器，管理所有日历相关服务
@@ -58,6 +59,10 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 初始化 Prompt Controller
+    final promptController = CalendarPromptController(this);
+    promptController.initialize();
   }
 
   syncfusion.CalendarView _getCalendarViewFromString(String viewString) {

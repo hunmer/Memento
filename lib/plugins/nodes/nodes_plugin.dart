@@ -6,8 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
-import '../openai/openai_plugin.dart';
-import 'services/prompt_replacements.dart';
+import 'controls/prompt_controller.dart';
 import 'controllers/nodes_controller.dart';
 import 'screens/notebooks_screen.dart';
 import 'l10n/nodes_localizations.dart';
@@ -52,7 +51,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   late NodesController _controller;
-  final NodesPromptReplacements _promptReplacements = NodesPromptReplacements();
+  late NodesPromptController _promptController;
   bool _isInitialized = false;
 
   NodesPlugin();
@@ -68,12 +67,10 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   @override
   Future<void> initialize() async {
     _controller = NodesController(storage);
-    _promptReplacements.initialize();
 
-    // 延迟注册 prompt 替换方法，等待 OpenAI 插件初始化完成
-    Future.delayed(const Duration(seconds: 1), () {
-      _registerPromptMethods();
-    });
+    // 初始化 Prompt 控制器
+    _promptController = NodesPromptController();
+    _promptController.initialize();
 
     _isInitialized = true;
 
@@ -119,31 +116,6 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
   @override
   IconData get icon => Icons.account_tree;
-
-  /// 注册 prompt 替换方法
-  void _registerPromptMethods() {
-    try {
-      final openaiPlugin =
-          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
-      if (openaiPlugin != null) {
-        openaiPlugin.registerPromptReplacementMethod(
-          'nodes_getNodePaths',
-          _promptReplacements.getNodePaths,
-        );
-      } else {
-        // 如果 OpenAI 插件还未准备好，5 秒后重试
-        Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
-      }
-    } catch (e) {
-      // 发生错误时，5 秒后重试
-      Future.delayed(const Duration(seconds: 5), _registerPromptMethods);
-    }
-  }
-
-  /// 清理资源
-  void dispose() {
-    _promptReplacements.dispose();
-  }
 
   // ==================== JS API 定义 ====================
 

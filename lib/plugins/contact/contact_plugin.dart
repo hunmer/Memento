@@ -15,6 +15,7 @@ import 'widgets/contact_card.dart';
 import 'widgets/contact_form.dart';
 import 'widgets/filter_dialog.dart';
 import 'package:uuid/uuid.dart';
+import 'controls/prompt_controller.dart';
 
 class ContactPlugin extends BasePlugin with JSBridgePlugin {
   late ContactController _controller;
@@ -37,6 +38,10 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 初始化 Prompt Controller
+    final promptController = ContactPromptController(this);
+    promptController.initialize();
   }
 
   @override

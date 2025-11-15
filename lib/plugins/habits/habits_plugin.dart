@@ -13,6 +13,7 @@ import 'package:Memento/plugins/habits/controllers/completion_record_controller.
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/widgets/habits_home.dart';
+import 'package:Memento/plugins/habits/controls/prompt_controller.dart';
 
 class HabitsMainView extends StatefulWidget {
   const HabitsMainView({super.key});
@@ -91,6 +92,10 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 初始化 Prompt Controller
+    final promptController = HabitsPromptController(this);
+    promptController.initialize();
   }
 
   TimerController get timerController => _timerController;
