@@ -39,6 +39,8 @@ class TestService {
     String? hintText,
     String? initialValue,
     bool enableImagePicker = false,
+    AIAgent? testAgent,
+    Map<String, dynamic>? formValues,
   }) async {
     // 获取本地化实例
     final l10n = OpenAILocalizations.of(context);
@@ -54,6 +56,8 @@ class TestService {
           hintText: hintText ?? l10n.enterTestText,
           initialValue: loadedInitialValue,
           enableImagePicker: enableImagePicker,
+          testAgent: testAgent,
+          formValues: formValues,
         );
       },
     );
@@ -280,12 +284,16 @@ class _TextInputDialog extends StatefulWidget {
   final String hintText;
   final String initialValue;
   final bool enableImagePicker;
+  final AIAgent? testAgent;
+  final Map<String, dynamic>? formValues;
 
   const _TextInputDialog({
     required this.title,
     required this.hintText,
     required this.initialValue,
     this.enableImagePicker = false,
+    this.testAgent,
+    this.formValues,
   });
 
   @override
@@ -297,6 +305,8 @@ class _TextInputDialogState extends State<_TextInputDialog> {
   bool _isDisposed = false;
   bool _isLoading = false;
   File? _selectedImage;
+  String? _testResult;  // 测试结果
+  bool _isTesting = false;  // 是否正在测试
 
   @override
   void initState() {
@@ -355,12 +365,64 @@ class _TextInputDialogState extends State<_TextInputDialog> {
       allowMultiple: false,
     );
 
-    if (result != null && 
-        result.files.isNotEmpty && 
+    if (result != null &&
+        result.files.isNotEmpty &&
         result.files.first.path != null) {
       setState(() {
         _selectedImage = File(result.files.first.path!);
       });
+    }
+  }
+
+  /// 执行测试
+  Future<void> _runTest() async {
+    if (_isDisposed || widget.testAgent == null) return;
+
+    final input = _controller.text.trim();
+    if (input.isEmpty) {
+      if (!_isDisposed) {
+        final l10n = OpenAILocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.enterTestText)),
+        );
+      }
+      return;
+    }
+
+    setState(() {
+      _isTesting = true;
+      _testResult = null;
+    });
+
+    try {
+      // 保存输入
+      await TestService.saveLastInput(input);
+
+      // 执行测试
+      final response = await TestService.processTestRequest(
+        input,
+        widget.testAgent!,
+        imageFile: _selectedImage,
+        formValues: widget.formValues,
+      );
+
+      if (!_isDisposed) {
+        setState(() {
+          _testResult = response;
+        });
+      }
+    } catch (e) {
+      if (!_isDisposed) {
+        setState(() {
+          _testResult = '测试失败: $e';
+        });
+      }
+    } finally {
+      if (!_isDisposed) {
+        setState(() {
+          _isTesting = false;
+        });
+      }
     }
   }
 
@@ -406,6 +468,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
                 controller: _controller,
@@ -414,6 +477,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                   hintText: widget.hintText,
                   border: const OutlineInputBorder(),
                 ),
+                enabled: !_isTesting,  // 测试时禁用输入
               ),
               if (widget.enableImagePicker) ...[
                 const SizedBox(height: 16),
@@ -457,6 +521,53 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                   ),
                 ],
               ],
+              // 显示测试结果
+              if (_testResult != null) ...[
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                Builder(
+                  builder: (context) {
+                    final l10n = OpenAILocalizations.of(context);
+                    return Text(
+                      l10n.testResponse,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    );
+                  }
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: SingleChildScrollView(
+                    child: SelectableText(
+                      _testResult!,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ),
+              ],
+              // 显示加载指示器
+              if (_isTesting) ...[
+                const SizedBox(height: 16),
+                const Center(
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 8),
+                      Text('测试中...'),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -466,8 +577,8 @@ class _TextInputDialogState extends State<_TextInputDialog> {
           builder: (context) {
             final l10n = OpenAILocalizations.of(context);
             return TextButton(
-              child: Text(l10n.cancel),
-              onPressed: () {
+              child: Text(l10n.close),
+              onPressed: _isTesting ? null : () {
                 if (!_isDisposed) {
                   Navigator.of(context).pop();
                 }
@@ -475,23 +586,35 @@ class _TextInputDialogState extends State<_TextInputDialog> {
             );
           }
         ),
-        Builder(
-          builder: (context) {
-            final l10n = OpenAILocalizations.of(context);
-            return TextButton(
-              child: Text(l10n.save),
-              onPressed: () {
-                if (!_isDisposed) {
-                  final text = _controller.text;
-                  Navigator.of(context).pop({
-                    'text': text,
-                    'image': _selectedImage,
-                  });
-                }
-              },
-            );
-          }
-        ),
+        // 如果提供了测试agent，显示测试按钮；否则显示保存按钮
+        if (widget.testAgent != null)
+          Builder(
+            builder: (context) {
+              final l10n = OpenAILocalizations.of(context);
+              return ElevatedButton(
+                onPressed: _isTesting ? null : _runTest,
+                child: Text(l10n.testAgent),
+              );
+            }
+          )
+        else
+          Builder(
+            builder: (context) {
+              final l10n = OpenAILocalizations.of(context);
+              return TextButton(
+                child: Text(l10n.save),
+                onPressed: () {
+                  if (!_isDisposed) {
+                    final text = _controller.text;
+                    Navigator.of(context).pop({
+                      'text': text,
+                      'image': _selectedImage,
+                    });
+                  }
+                },
+              );
+            }
+          ),
       ],
     );
   }

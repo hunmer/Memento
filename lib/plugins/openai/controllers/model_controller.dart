@@ -30,18 +30,47 @@ class ModelController {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? modelsJson = prefs.getString(_storageKey);
-      
+
       if (modelsJson != null) {
         final List<dynamic> jsonList = jsonDecode(modelsJson);
         _modelGroups = jsonList
             .map((json) => LLMModelGroup.fromJson(json))
             .toList();
+
+        // 智能合并：检查是否有新的默认模型组，如果有则添加
+        bool hasNewGroups = false;
+        for (final defaultGroup in llmModelGroups) {
+          final existingGroup = _modelGroups.firstWhere(
+            (g) => g.id == defaultGroup.id,
+            orElse: () => LLMModelGroup(id: '', name: '', models: []),
+          );
+
+          // 如果这个组不存在，添加整个组
+          if (existingGroup.id.isEmpty) {
+            _modelGroups.add(defaultGroup);
+            hasNewGroups = true;
+          } else {
+            // 如果组存在，检查是否有新的模型需要添加
+            for (final defaultModel in defaultGroup.models) {
+              final modelExists = existingGroup.models.any((m) => m.id == defaultModel.id);
+              if (!modelExists) {
+                existingGroup.models.add(defaultModel);
+                hasNewGroups = true;
+              }
+            }
+          }
+        }
+
+        // 如果有新增的组或模型，保存到本地存储
+        if (hasNewGroups) {
+          await _saveToStorage();
+        }
       } else {
         // 首次使用，加载默认模型
         _modelGroups = List.from(llmModelGroups);
         await _saveToStorage();
       }
-      
+
       _initialized = true;
     } catch (e) {
       // 加载失败，使用默认模型
