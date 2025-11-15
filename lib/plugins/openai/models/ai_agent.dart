@@ -33,6 +33,7 @@ class AIAgent {
   final IconData? icon;
   final Color? iconColor;
   final String? avatarUrl;
+  final bool enableFunctionCalling;
 
   const AIAgent({
     required this.id,
@@ -55,6 +56,7 @@ class AIAgent {
     this.icon,
     this.iconColor,
     this.avatarUrl,
+    this.enableFunctionCalling = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -78,6 +80,7 @@ class AIAgent {
     'icon': icon?.codePoint,
     'iconColor': iconColor?.value,
     'avatarUrl': avatarUrl,
+    'enableFunctionCalling': enableFunctionCalling,
   };
 
   factory AIAgent.fromJson(Map<String, dynamic> json) => AIAgent(
@@ -101,6 +104,7 @@ class AIAgent {
     icon: json['icon'] != null ? IconData(json['icon'] as int, fontFamily: 'MaterialIcons') : null,
     iconColor: json['iconColor'] != null ? Color(json['iconColor'] as int) : null,
     avatarUrl: json['avatarUrl'] as String?,
+    enableFunctionCalling: json['enableFunctionCalling'] as bool? ?? false,
   );
 
   /// 创建一个新的 AIAgent 实例，可以选择性地更新某些字段
@@ -125,6 +129,7 @@ class AIAgent {
     double? frequencyPenalty,
     double? presencePenalty,
     List<String>? stop,
+    bool? enableFunctionCalling,
   }) {
     return AIAgent(
       id: id ?? this.id,
@@ -147,6 +152,7 @@ class AIAgent {
       frequencyPenalty: frequencyPenalty ?? this.frequencyPenalty,
       presencePenalty: presencePenalty ?? this.presencePenalty,
       stop: stop ?? this.stop,
+      enableFunctionCalling: enableFunctionCalling ?? this.enableFunctionCalling,
     );
   }
 }

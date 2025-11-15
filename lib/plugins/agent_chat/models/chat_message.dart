@@ -1,5 +1,6 @@
 import 'package:uuid/uuid.dart';
 import 'file_attachment.dart';
+import 'tool_call_step.dart';
 
 const _uuid = Uuid();
 
@@ -35,6 +36,9 @@ class ChatMessage {
   /// 元数据（扩展字段）
   Map<String, dynamic>? metadata;
 
+  /// 工具调用（仅 AI 消息，当 AI 返回工具调用时使用）
+  ToolCallResponse? toolCall;
+
   ChatMessage({
     required this.id,
     required this.conversationId,
@@ -46,6 +50,7 @@ class ChatMessage {
     this.editedAt,
     this.isGenerating = false,
     this.metadata,
+    this.toolCall,
   });
 
   /// 创建用户消息
@@ -103,6 +108,9 @@ class ChatMessage {
           : null,
       isGenerating: json['isGenerating'] as bool? ?? false,
       metadata: json['metadata'] as Map<String, dynamic>?,
+      toolCall: json['toolCall'] != null
+          ? ToolCallResponse.fromJson(json['toolCall'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -119,6 +127,7 @@ class ChatMessage {
       if (editedAt != null) 'editedAt': editedAt!.toIso8601String(),
       'isGenerating': isGenerating,
       if (metadata != null) 'metadata': metadata,
+      if (toolCall != null) 'toolCall': toolCall!.toJson(),
     };
   }
 
@@ -130,6 +139,7 @@ class ChatMessage {
     DateTime? editedAt,
     bool? isGenerating,
     Map<String, dynamic>? metadata,
+    ToolCallResponse? toolCall,
   }) {
     return ChatMessage(
       id: id,
@@ -142,6 +152,7 @@ class ChatMessage {
       editedAt: editedAt ?? this.editedAt,
       isGenerating: isGenerating ?? this.isGenerating,
       metadata: metadata ?? this.metadata,
+      toolCall: toolCall ?? this.toolCall,
     );
   }
 

@@ -47,6 +47,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   String _selectedProviderId = '';
   final List<String> _tags = [];
   final _tagController = TextEditingController();
+  bool _enableFunctionCalling = false;
 
   List<ServiceProvider> _providers = [];
   bool _isLoadingProviders = true;
@@ -67,6 +68,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       _modelController.text = widget.agent!.model;
       _headersController.text = _formatHeaders(widget.agent!.headers);
       _tags.addAll(widget.agent!.tags);
+      _enableFunctionCalling = widget.agent!.enableFunctionCalling;
     }
   }
 
@@ -242,6 +244,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       icon: _selectedIcon,
       iconColor: _selectedIconColor,
       avatarUrl: _avatarUrl,
+      enableFunctionCalling: _enableFunctionCalling,
     );
 
     try {
@@ -729,6 +732,17 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                         ),
                       )
                       .toList(),
+            ),
+            const SizedBox(height: 24),
+            SwitchListTile(
+              title: const Text('启用插件功能调用'),
+              subtitle: const Text('允许 AI 调用插件功能获取数据'),
+              value: _enableFunctionCalling,
+              onChanged: (value) {
+                setState(() {
+                  _enableFunctionCalling = value;
+                });
+              },
             ),
             const SizedBox(height: 32),
             ElevatedButton(

@@ -23,6 +23,9 @@ class MobileJSEngine implements JSEngine {
     List<Map<String, dynamic>> actions,
   )? _onDialog;
 
+  // 插件分析回调函数（由 OpenAI 插件注入）
+  Future<String> Function(String methodName, Map<String, dynamic> params)? _onPluginAnalysis;
+
   @override
   bool get isSupported => true; // Android/iOS/Desktop 都支持
 
@@ -55,6 +58,13 @@ class MobileJSEngine implements JSEngine {
         handler,
   ) {
     _onDialog = handler;
+  }
+
+  /// 设置插件分析回调
+  void setPluginAnalysisHandler(
+    Future<String> Function(String, Map<String, dynamic>) handler,
+  ) {
+    _onPluginAnalysis = handler;
   }
 
   @override
@@ -187,6 +197,34 @@ class MobileJSEngine implements JSEngine {
           });
         }
       };
+
+      // 定义 callPluginAnalysis 全局函数（用于工具调用）
+      globalThis.callPluginAnalysis = function(methodName, params) {
+        var callId = Date.now() + '_' + Math.floor(Math.random() * 1000000);
+        var resultKey = '_callPluginAnalysis_callback_' + callId;
+
+        var config = {
+          methodName: String(methodName),
+          params: params || {}
+        };
+
+        sendMessage('_callPluginAnalysis', JSON.stringify({ callId: callId, config: config }));
+
+        // 标记此 Promise 正在等待
+        if (!globalThis.__PENDING_CALLS__) {
+          globalThis.__PENDING_CALLS__ = {};
+        }
+        globalThis.__PENDING_CALLS__[resultKey] = {
+          resolve: null,
+          reject: null,
+          timestamp: Date.now()
+        };
+
+        return new Promise(function(resolve, reject) {
+          globalThis.__PENDING_CALLS__[resultKey].resolve = resolve;
+          globalThis.__PENDING_CALLS__[resultKey].reject = reject;
+        });
+      };
     ''');
 
     // 设置消息处理器（QuickJS 期望返回 undefined 而不是 null）
@@ -277,6 +315,29 @@ class MobileJSEngine implements JSEngine {
         );
       } catch (e) {
         print('[JS Bridge] Dialog 错误: $e');
+      }
+    });
+
+    // 插件分析处理器
+    _runtime.onMessage('_callPluginAnalysis', (dynamic data) {
+      try {
+        final callId = data['callId'];
+        final config = data['config'];
+        final methodName = config['methodName'] as String;
+        final params = config['params'] as Map<String, dynamic>? ?? {};
+
+        print('[JS Bridge] 调用插件分析: $methodName');
+
+        // 调用插件分析方法
+        _callPluginAnalysis(callId, methodName, params);
+      } catch (e) {
+        print('[JS Bridge] 插件分析错误: $e');
+        // 返回错误
+        _returnPluginAnalysisResult(
+          data['callId'],
+          null,
+          error: '调用失败: $e',
+        );
       }
     });
   }
@@ -722,6 +783,56 @@ class MobileJSEngine implements JSEngine {
       }
     } else {
       print('[JS Bridge] Dialog 未设置处理器');
+    }
+  }
+
+  /// 调用插件分析方法
+  Future<void> _callPluginAnalysis(
+    String callId,
+    String methodName,
+    Map<String, dynamic> params,
+  ) async {
+    if (_onPluginAnalysis != null) {
+      try {
+        final result = await _onPluginAnalysis!(methodName, params);
+
+        // 将结果返回给 JavaScript
+        _returnPluginAnalysisResult(callId, result);
+      } catch (e) {
+        print('[JS Bridge] 插件分析执行错误: $e');
+        _returnPluginAnalysisResult(callId, null, error: e.toString());
+      }
+    } else {
+      print('[JS Bridge] 插件分析未设置处理器');
+      _returnPluginAnalysisResult(callId, null, error: '未设置处理器');
+    }
+  }
+
+  /// 返回插件分析结果给 JavaScript
+  void _returnPluginAnalysisResult(String callId, String? result, {String? error}) {
+    try {
+      final resultKey = '_callPluginAnalysis_callback_$callId';
+
+      String resultJson;
+      if (error != null) {
+        resultJson = jsonEncode({'error': error});
+      } else {
+        // result 可能已经是 JSON 字符串，直接使用
+        resultJson = result ?? 'null';
+      }
+
+      _runtime.evaluate(
+        'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
+      );
+      _runtime.evaluate('globalThis.__TEMP_RESULT__ = $resultJson;');
+      _runtime.evaluate(
+        "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
+        "delete globalThis.__TEMP_RESULT__;",
+      );
+
+      print('[JS Bridge] 插件分析结果已返回: ${resultJson.substring(0, resultJson.length > 100 ? 100 : resultJson.length)}...');
+    } catch (e) {
+      print('[JS Bridge] 返回插件分析结果错误: $e');
     }
   }
 }
