@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:image_compression_flutter/image_compression_flutter.dart' as img_compression;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path/path.dart' as path;
 
 /// 图片压缩任务
@@ -105,57 +105,51 @@ class ImageCompressionService {
         throw Exception('源文件不存在: $sourcePath');
       }
 
-      // 读取源文件
-      final sourceBytes = await sourceFile.readAsBytes();
-
-      // 获取文件扩展名
-      final extension = path.extension(sourcePath).toLowerCase();
-
-      // 确定输出格式
-      img_compression.ImageOutputType outputType;
-      switch (extension) {
-        case '.png':
-          outputType = img_compression.ImageOutputType.png;
-          break;
-        case '.jpg':
-        case '.jpeg':
-        default:
-          // 使用 webpThenJpg 以获得最佳压缩效果
-          outputType = img_compression.ImageOutputType.webpThenJpg;
-          break;
-      }
-
-      // 创建压缩配置
-      final configuration = img_compression.Configuration(
-        outputType: outputType,
-        useJpgPngNativeCompressor: !kIsWeb, // 仅在非Web平台使用原生压缩
-        quality: quality,
-      );
-
-      // 创建输入参数
-      final param = img_compression.ImageFileConfiguration(
-        input: img_compression.ImageFile(
-          rawBytes: sourceBytes,
-          filePath: sourcePath,
-        ),
-        config: configuration,
-      );
-
-      // 执行压缩（使用包提供的全局 compressor 实例）
-      final output = await img_compression.compressor.compress(param);
-
       // 确保目标目录存在
       final targetDir = Directory(path.dirname(targetPath));
       if (!await targetDir.exists()) {
         await targetDir.create(recursive: true);
       }
 
-      // 保存压缩后的文件
-      final targetFile = File(targetPath);
-      await targetFile.writeAsBytes(output.rawBytes);
+      // 获取文件扩展名并确定输出格式
+      final extension = path.extension(sourcePath).toLowerCase();
+      CompressFormat format;
+
+      switch (extension) {
+        case '.png':
+          format = CompressFormat.png;
+          break;
+        case '.webp':
+          format = CompressFormat.webp;
+          break;
+        case '.heic':
+          format = CompressFormat.heic;
+          break;
+        case '.jpg':
+        case '.jpeg':
+        default:
+          format = CompressFormat.jpeg;
+          break;
+      }
+
+      // 执行压缩
+      final result = await FlutterImageCompress.compressAndGetFile(
+        sourcePath,
+        targetPath,
+        quality: quality,
+        format: format,
+        // 保持原始方向
+        keepExif: false,
+        // 自动旋转
+        autoCorrectionAngle: true,
+      );
+
+      if (result == null) {
+        throw Exception('图片压缩失败: 返回结果为空');
+      }
 
       debugPrint('图片压缩完成: $sourcePath -> $targetPath (质量: $quality)');
-      return targetPath;
+      return result.path;
     } catch (e) {
       debugPrint('图片压缩失败: $e');
       rethrow;
