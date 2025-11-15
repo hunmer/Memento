@@ -9,6 +9,7 @@ import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart'
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
+import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
@@ -45,6 +46,7 @@ class AppRoutes extends NavigatorObserver {
   static const String jsonDynamicTest = '/json_dynamic_test';
 
   // 插件路由路径
+  static const String agentChat = '/agent_chat';
   static const String bill = '/bill';
   static const String calendar = '/calendar';
   static const String calendarAlbum = '/calendar_album';
@@ -88,6 +90,8 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const CheckinMainView());
       case 'settings':
         return _createRoute(const SettingsScreen());
+      case 'agent_chat':
+        return _createRoute(const AgentChatMainView());
       case 'bill':
         return _createRoute(const BillMainView());
       case 'calendar':

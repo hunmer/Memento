@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../controllers/conversation_controller.dart';
 import '../../models/conversation.dart';
+import '../chat_screen/chat_screen.dart';
+import '../../../../core/plugin_manager.dart';
 
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
@@ -251,11 +253,14 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     await widget.controller.selectConversation(conversation.id);
 
     if (mounted) {
-      // TODO: 导航到聊天页面
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('打开会话: ${conversation.title}'),
-          duration: const Duration(seconds: 1),
+      // 导航到聊天页面
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(
+            conversation: conversation,
+            storage: widget.controller.storage,
+          ),
         ),
       );
     }
