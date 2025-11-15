@@ -5,13 +5,14 @@ import '../services/script_executor.dart';
 import '../models/script_info.dart';
 import '../models/script_input.dart';
 import '../models/script_trigger.dart';
+import '../models/script_folder.dart';
 import '../widgets/script_card.dart';
 import '../widgets/script_run_dialog.dart';
 import 'script_edit_screen.dart';
 
 /// 脚本列表界面
 ///
-/// 展示所有脚本，支持启用/禁用切换、搜索、刷新
+/// 展示所有脚本，支持启用/禁用切换、搜索、刷新、文件夹切换
 class ScriptsListScreen extends StatefulWidget {
   final ScriptManager scriptManager;
   final ScriptExecutor? scriptExecutor;
@@ -312,10 +313,85 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
       value: widget.scriptManager,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('脚本中心'),
+          title: Consumer<ScriptManager>(
+            builder: (context, manager, child) {
+              final currentFolder = manager.currentFolder;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('脚本中心'),
+                  if (currentFolder != null)
+                    Text(
+                      currentFolder.name,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           backgroundColor: Colors.deepPurple,
           foregroundColor: Colors.white,
           actions: [
+            // 文件夹选择器
+            Consumer<ScriptManager>(
+              builder: (context, manager, child) {
+                final folders = manager.folders;
+                final currentFolder = manager.currentFolder;
+
+                if (folders.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return PopupMenuButton<ScriptFolder>(
+                  icon: const Icon(Icons.folder),
+                  tooltip: '选择文件夹',
+                  onSelected: (folder) async {
+                    await manager.setCurrentFolder(folder);
+                  },
+                  itemBuilder: (context) {
+                    return folders.map((folder) {
+                      final isSelected = folder.id == currentFolder?.id;
+                      return PopupMenuItem<ScriptFolder>(
+                        value: folder,
+                        child: Row(
+                          children: [
+                            if (isSelected)
+                              const Icon(
+                                Icons.check,
+                                size: 20,
+                                color: Colors.deepPurple,
+                              ),
+                            if (isSelected) const SizedBox(width: 8),
+                            Icon(
+                              folder.isBuiltIn
+                                  ? Icons.folder_special
+                                  : Icons.folder,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                folder.name,
+                                style: TextStyle(
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList();
+                  },
+                );
+              },
+            ),
+
             // 筛选按钮
             IconButton(
               icon: Icon(

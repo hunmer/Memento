@@ -1,0 +1,38 @@
+{
+  "name": "事件处理示例",
+  "version": "1.0.0",
+  "description": "演示如何在脚本中访问和处理事件数据",
+  "icon": "event",
+  "author": "Memento Team",
+  "enabled": false,
+  "type": "module",
+  "inputs": [],
+  "triggers": [
+    {
+      "event": "diary_entry_added",
+      "delay": 0
+    },
+    {
+      "event": "diary_entry_updated",
+      "delay": 0
+    },
+    {
+      "event": "diary_entry_deleted",
+      "delay": 0
+    },
+    {
+      "event": "todo_task_added",
+      "delay": 0
+    },
+    {
+      "event": "todo_task_completed",
+      "delay": 0
+    },
+    {
+      "event": "calendar_event_added",
+      "delay": 0
+    }
+  ],
+  "createdAt": "2025-11-15T00:00:00.000Z",
+  "updatedAt": "2025-11-15T00:00:00.000Z"
+}

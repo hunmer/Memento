@@ -1,8 +1,11 @@
 import 'dart:io';
+import 'dart:convert' show json;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as path;
 import '../../../core/storage/storage_manager.dart';
 import '../models/script_info.dart';
+import '../models/script_folder.dart';
 
 /// 脚本加载器服务
 ///
@@ -12,7 +15,7 @@ class ScriptLoader {
 
   ScriptLoader(this.storage);
 
-  /// 获取scripts目录路径
+  /// 获取默认scripts目录路径
   Future<String> getScriptsDirectory() async {
     if (kIsWeb) {
       return 'scripts'; // Web平台使用相对路径
@@ -22,7 +25,53 @@ class ScriptLoader {
     }
   }
 
-  /// 扫描scripts目录，返回所有脚本信息
+  /// 扫描指定文件夹，返回该文件夹下的所有脚本信息
+  Future<List<ScriptInfo>> scanScriptsInFolder(ScriptFolder folder) async {
+    try {
+      final folderPath = folder.path;
+
+      // Web平台特殊处理
+      if (kIsWeb) {
+        return await _scanScriptsWeb(folderPath);
+      }
+
+      // 移动端和桌面端
+      final scriptsDir = Directory(folderPath);
+
+      // 如果目录不存在，创建它（仅对非内置文件夹）
+      if (!await scriptsDir.exists()) {
+        if (!folder.isBuiltIn) {
+          await scriptsDir.create(recursive: true);
+        }
+        return [];
+      }
+
+      final List<ScriptInfo> scripts = [];
+
+      // 遍历子目录
+      await for (var entity in scriptsDir.list()) {
+        if (entity is Directory) {
+          final scriptId = path.basename(entity.path);
+          try {
+            final scriptInfo = await loadScriptMetadata(scriptId, folderPath);
+            if (scriptInfo != null) {
+              scripts.add(scriptInfo);
+            }
+          } catch (e) {
+            print('⚠️ 加载脚本失败: $scriptId, 错误: $e');
+          }
+        }
+      }
+
+      return scripts;
+    } catch (e) {
+      print('❌ 扫描脚本文件夹失败: ${folder.name}, 错误: $e');
+      return [];
+    }
+  }
+
+  /// 扫描scripts目录，返回所有脚本信息（已废弃，建议使用 scanScriptsInFolder）
+  @Deprecated('使用 scanScriptsInFolder 代替')
   Future<List<ScriptInfo>> scanScripts() async {
     try {
       final scriptsPath = await getScriptsDirectory();
@@ -48,7 +97,7 @@ class ScriptLoader {
         if (entity is Directory) {
           final scriptId = path.basename(entity.path);
           try {
-            final scriptInfo = await loadScriptMetadata(scriptId);
+            final scriptInfo = await loadScriptMetadata(scriptId, scriptsPath);
             if (scriptInfo != null) {
               scripts.add(scriptInfo);
             }
@@ -62,6 +111,35 @@ class ScriptLoader {
     } catch (e) {
       print('❌ 扫描脚本目录失败: $e');
       return [];
+    }
+  }
+
+  /// 加载内置脚本的元数据
+  Future<ScriptInfo?> _loadBuiltInScriptMetadata(
+    String scriptId,
+    String assetsPath,
+  ) async {
+    try {
+      final metadataPath = '$assetsPath/${scriptId}_metadata.json';
+
+      // 从 assets 加载 JSON 文件
+      final jsonString = await rootBundle.loadString(metadataPath);
+      final jsonData = json.decode(jsonString);
+
+      if (jsonData is! Map<String, dynamic>) {
+        print('⚠️ 无效的元数据格式: $scriptId');
+        return null;
+      }
+
+      // 创建 ScriptInfo 对象
+      return ScriptInfo.fromJson(
+        jsonData,
+        id: scriptId,
+        path: '$assetsPath/$scriptId',
+      );
+    } catch (e) {
+      print('❌ 加载内置脚本元数据失败: $scriptId, 错误: $e');
+      return null;
     }
   }
 
@@ -92,9 +170,12 @@ class ScriptLoader {
   }
 
   /// 加载单个脚本的元数据
-  Future<ScriptInfo?> loadScriptMetadata(String scriptId) async {
+  Future<ScriptInfo?> loadScriptMetadata(
+    String scriptId, [
+    String? basePath,
+  ]) async {
     try {
-      final scriptsPath = await getScriptsDirectory();
+      final scriptsPath = basePath ?? await getScriptsDirectory();
       final scriptPath = path.join(scriptsPath, scriptId);
       final metadataPath = path.join(scriptPath, 'metadata.json');
 

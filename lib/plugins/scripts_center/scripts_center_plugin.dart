@@ -3,10 +3,41 @@ import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/event/event_manager.dart';
+import '../../core/event/event_args.dart';
+import '../../core/event/item_event_args.dart';
 import 'services/script_loader.dart';
 import 'services/script_manager.dart';
 import 'services/script_executor.dart';
+import 'models/script_folder.dart';
 import 'screens/scripts_list_screen.dart';
+
+/// 将 EventArgs 对象序列化为 Map，以便传递给 JavaScript
+Map<String, dynamic> _serializeEventArgs(EventArgs args) {
+  final Map<String, dynamic> result = {
+    'eventName': args.eventName,
+    'whenOccurred': args.whenOccurred.toIso8601String(),
+  };
+
+  // 处理不同类型的 EventArgs 子类
+  if (args is ItemEventArgs) {
+    result['itemId'] = args.itemId;
+    result['title'] = args.title;
+    result['action'] = args.action;
+  } else if (args is Value) {
+    result['value'] = args.value;
+  } else if (args is Values) {
+    result['value1'] = args.value1;
+    result['value2'] = args.value2;
+  } else if (args is UpdateEvent) {
+    result['version'] = args.version;
+    result['forceUpdate'] = args.forceUpdate;
+    if (args.changelog != null) {
+      result['changelog'] = args.changelog;
+    }
+  }
+
+  return result;
+}
 
 /// 脚本中心插件
 ///
@@ -66,7 +97,10 @@ class ScriptsCenterPlugin extends BasePlugin {
       // 初始化JS引擎
       await _scriptExecutor.initialize();
 
-      // 加载所有脚本
+      // 初始化默认文件夹
+      await _initializeDefaultFolders();
+
+      // 加载当前文件夹的脚本
       await _scriptManager.loadScripts();
 
       print('✅ ScriptsCenterPlugin初始化成功');
@@ -74,6 +108,35 @@ class ScriptsCenterPlugin extends BasePlugin {
       print('   - 已启用 ${_scriptManager.enabledScriptCount} 个脚本');
     } catch (e) {
       print('❌ ScriptsCenterPlugin初始化失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 初始化默认文件夹
+  Future<void> _initializeDefaultFolders() async {
+    try {
+      final folders = <ScriptFolder>[];
+
+      // 1. 默认脚本文件夹（应用文档目录下的 scripts）
+      final defaultScriptsPath = await _scriptLoader.getScriptsDirectory();
+      folders.add(
+        ScriptFolder(
+          id: 'default',
+          name: '我的脚本',
+          path: defaultScriptsPath,
+          isBuiltIn: true,
+          enabled: true,
+          icon: 'folder',
+          description: '默认脚本存储位置',
+        ),
+      );
+
+      // 初始化文件夹
+      await _scriptManager.initializeFolders(folders);
+
+      print('✅ 初始化了 ${folders.length} 个默认文件夹');
+    } catch (e) {
+      print('❌ 初始化默认文件夹失败: $e');
       rethrow;
     }
   }
@@ -94,9 +157,11 @@ class ScriptsCenterPlugin extends BasePlugin {
   }
 
   /// 设置事件触发器
-  void _setupTriggers() {
+  void _setupTriggers() async {
     try {
-      final enabledScripts = _scriptManager.getEnabledScripts();
+      // 加载所有文件夹的脚本
+      final allScripts = await _scriptManager.loadAllScripts();
+      final enabledScripts = allScripts.where((s) => s.enabled).toList();
       final scriptsWithTriggers =
           enabledScripts.where((script) => script.hasTriggers).toList();
 
@@ -122,9 +187,12 @@ class ScriptsCenterPlugin extends BasePlugin {
 
               // 执行脚本
               try {
+                // 序列化事件数据
+                final eventData = _serializeEventArgs(args);
+
                 final result = await _scriptExecutor.execute(
                   script.id,
-                  args: {'event': trigger.event, 'eventArgs': args.eventName},
+                  args: {'event': trigger.event, 'eventData': eventData},
                 );
 
                 if (!result.success) {
