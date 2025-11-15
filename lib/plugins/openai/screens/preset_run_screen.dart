@@ -173,6 +173,15 @@ class _PresetRunScreenState extends State<PresetRunScreen>
                       label: const Text('添加图片'),
                     ),
                     const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: _pickFiles,
+                      icon: const Icon(Icons.attach_file),
+                      label: const Text('添加文件'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     OutlinedButton.icon(
                       onPressed: () async {
                         final result =
@@ -416,13 +425,31 @@ class _PresetRunScreenState extends State<PresetRunScreen>
     }
   }
 
-  /// 显示已选择的图片
+  /// 选择文件（任意类型）
+  Future<void> _pickFiles() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+      allowMultiple: true,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        _selectedImages.addAll(
+          result.files
+              .where((file) => file.path != null)
+              .map((file) => File(file.path!)),
+        );
+      });
+    }
+  }
+
+  /// 显示已选择的图片/文件
   Widget _buildSelectedImages() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '已选择 ${_selectedImages.length} 张图片：',
+          '已选择 ${_selectedImages.length} 个文件：',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -431,16 +458,51 @@ class _PresetRunScreenState extends State<PresetRunScreen>
           runSpacing: 8,
           children: _selectedImages.asMap().entries.map((entry) {
             final index = entry.key;
-            final image = entry.value;
+            final file = entry.value;
+            final isImage = _isImageFile(file);
+
             return Stack(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.file(
-                    image,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey[200],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: isImage
+                        ? Image.file(
+                            file,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _getFileIcon(file),
+                                size: 32,
+                                color: Colors.grey[700],
+                              ),
+                              const SizedBox(height: 4),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                child: Text(
+                                  _getFileName(file),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey[700],
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
                 Positioned(
@@ -451,10 +513,10 @@ class _PresetRunScreenState extends State<PresetRunScreen>
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.black54,
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 24,
-                        minHeight: 24,
-                      ),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 24,
+                      minHeight: 24,
                     ),
                     onPressed: () {
                       setState(() {
@@ -469,6 +531,40 @@ class _PresetRunScreenState extends State<PresetRunScreen>
         ),
       ],
     );
+  }
+
+  /// 判断文件是否为图片
+  bool _isImageFile(File file) {
+    final extension = file.path.split('.').last.toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].contains(extension);
+  }
+
+  /// 获取文件图标
+  IconData _getFileIcon(File file) {
+    final extension = file.path.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'xls':
+      case 'xlsx':
+        return Icons.table_chart;
+      case 'txt':
+        return Icons.text_snippet;
+      case 'zip':
+      case 'rar':
+      case '7z':
+        return Icons.folder_zip;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  /// 获取文件名
+  String _getFileName(File file) {
+    return file.path.split('/').last.split('\\').last;
   }
 
   /// 运行预设
@@ -516,10 +612,12 @@ class _PresetRunScreenState extends State<PresetRunScreen>
       String raw = '';
 
       // 流式响应
+      // 注意：当前只支持单张图片，如果选择了多张，只会使用第一张
       await RequestService.streamResponse(
         agent: _selectedAgent!,
         prompt: processedPrompt,
-        imageFiles: _selectedImages,
+        vision: _selectedImages.isNotEmpty,
+        filePath: _selectedImages.isNotEmpty ? _selectedImages.first.path : null,
         onToken: (token) {
           if (!mounted) return;
           setState(() {
@@ -689,6 +787,84 @@ class _PresetRunScreenState extends State<PresetRunScreen>
                   ),
                   child: SelectableText(history.prompt),
                 ),
+
+                // 附件（如果有）
+                if (history.imagePaths.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    '附件 (${history.imagePaths.length}):',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: history.imagePaths.map((filePath) {
+                      final file = File(filePath);
+                      final isImage = _isImageFile(file);
+                      return Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.grey[200],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: isImage
+                              ? Image.file(
+                                  file,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.broken_image,
+                                            size: 24, color: Colors.grey[600]),
+                                        Text(
+                                          '无法加载',
+                                          style: TextStyle(
+                                            fontSize: 8,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      _getFileIcon(file),
+                                      size: 24,
+                                      color: Colors.grey[700],
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                                      child: Text(
+                                        _getFileName(file),
+                                        style: TextStyle(
+                                          fontSize: 8,
+                                          color: Colors.grey[700],
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
 
                 const SizedBox(height: 16),
 
