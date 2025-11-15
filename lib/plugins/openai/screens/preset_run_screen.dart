@@ -12,6 +12,7 @@ import '../controllers/execution_history_controller.dart';
 import '../l10n/openai_localizations.dart';
 import '../openai_plugin.dart';
 import '../services/request_service.dart';
+import '../services/file_processing_service.dart';
 import '../widgets/agent_list_drawer.dart';
 import '../widgets/plugin_method_selection_dialog.dart';
 import '../controllers/prompt_replacement_controller.dart';
@@ -609,58 +610,53 @@ class _PresetRunScreenState extends State<PresetRunScreen>
         processedReplacements,
       );
 
-      String raw = '';
+      // 判断文件处理模式
+      if (_selectedImages.isEmpty) {
+        // 模式1: 无文件，使用普通流式响应
+        await _runWithoutFiles(
+          processedPrompt,
+          history,
+          startTime,
+        );
+      } else {
+        // 分析文件类型
+        final imageFiles = <File>[];
+        final otherFiles = <File>[];
 
-      // 流式响应
-      // 注意：当前只支持单张图片，如果选择了多张，只会使用第一张
-      await RequestService.streamResponse(
-        agent: _selectedAgent!,
-        prompt: processedPrompt,
-        vision: _selectedImages.isNotEmpty,
-        filePath: _selectedImages.isNotEmpty ? _selectedImages.first.path : null,
-        onToken: (token) {
-          if (!mounted) return;
-          setState(() {
-            raw += token;
-            _responseMessage = RequestService.processThinkingContent(raw);
-          });
-        },
-        onError: (error) {
-          if (!mounted) return;
-          setState(() {
-            _responseMessage += "\nERROR: $error";
-            _isLoading = false;
-          });
+        for (final file in _selectedImages) {
+          if (_isImageFile(file)) {
+            imageFiles.add(file);
+          } else {
+            otherFiles.add(file);
+          }
+        }
 
-          // 更新历史记录为失败
-          _historyController.updateHistory(
-            history.copyWith(
-              status: 'error',
-              errorMessage: error,
-              response: _responseMessage,
-              durationMs:
-                  DateTime.now().difference(startTime).inMilliseconds,
-            ),
+        if (otherFiles.isEmpty && imageFiles.isNotEmpty) {
+          // 模式2: 只有图片文件，使用 vision 模式
+          await _runWithVision(
+            processedPrompt,
+            imageFiles,
+            history,
+            startTime,
           );
-        },
-        onComplete: () {
-          if (!mounted) return;
-          setState(() {
-            _isLoading = false;
-          });
-
-          // 更新历史记录为成功
-          _historyController.updateHistory(
-            history.copyWith(
-              status: 'success',
-              response: _responseMessage,
-              durationMs:
-                  DateTime.now().difference(startTime).inMilliseconds,
-            ),
+        } else if (FileProcessingService.supportsAssistantsAPI(_selectedAgent!)) {
+          // 模式3: 包含非图片文件且支持 Assistants API
+          await _runWithAssistantsAPI(
+            processedPrompt,
+            _selectedImages,
+            history,
+            startTime,
           );
-        },
-        replacePrompt: true,
-      );
+        } else {
+          // 模式4: 包含非图片文件但不支持 Assistants API，使用文件内容读取
+          await _runWithFileContent(
+            processedPrompt,
+            _selectedImages,
+            history,
+            startTime,
+          );
+        }
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -908,6 +904,193 @@ class _PresetRunScreenState extends State<PresetRunScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 模式1: 无文件流式响应
+  Future<void> _runWithoutFiles(
+    String prompt,
+    ExecutionHistory history,
+    DateTime startTime,
+  ) async {
+    String raw = '';
+
+    await RequestService.streamResponse(
+      agent: _selectedAgent!,
+      prompt: prompt,
+      onToken: (token) {
+        if (!mounted) return;
+        setState(() {
+          raw += token;
+          _responseMessage = RequestService.processThinkingContent(raw);
+        });
+      },
+      onError: (error) => _handleError(error, history, startTime),
+      onComplete: () => _handleComplete(history, startTime),
+      replacePrompt: false, // 已经处理过替换
+    );
+  }
+
+  /// 模式2: Vision 模式（仅图片）
+  Future<void> _runWithVision(
+    String prompt,
+    List<File> imageFiles,
+    ExecutionHistory history,
+    DateTime startTime,
+  ) async {
+    String raw = '';
+
+    // 只使用第一张图片（当前 RequestService 限制）
+    await RequestService.streamResponse(
+      agent: _selectedAgent!,
+      prompt: prompt,
+      vision: true,
+      filePath: imageFiles.first.path,
+      onToken: (token) {
+        if (!mounted) return;
+        setState(() {
+          raw += token;
+          _responseMessage = RequestService.processThinkingContent(raw);
+        });
+      },
+      onError: (error) => _handleError(error, history, startTime),
+      onComplete: () => _handleComplete(history, startTime),
+      replacePrompt: false,
+    );
+
+    // 如果有多张图片，显示警告
+    if (imageFiles.length > 1 && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('注意：当前仅使用了第一张图片，其他 ${imageFiles.length - 1} 张已忽略'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  }
+
+  /// 模式3: Assistants API 模式
+  Future<void> _runWithAssistantsAPI(
+    String prompt,
+    List<File> files,
+    ExecutionHistory history,
+    DateTime startTime,
+  ) async {
+    setState(() {
+      _responseMessage = '正在使用 Assistants API 处理文件...\n';
+    });
+
+    try {
+      final response = await FileProcessingService.processWithAssistantsAPI(
+        agent: _selectedAgent!,
+        prompt: prompt,
+        files: files,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _responseMessage = response;
+        _isLoading = false;
+      });
+
+      // 更新历史记录为成功
+      _historyController.updateHistory(
+        history.copyWith(
+          status: 'success',
+          response: response,
+          durationMs: DateTime.now().difference(startTime).inMilliseconds,
+        ),
+      );
+    } catch (e) {
+      _handleError('Assistants API 错误: $e', history, startTime);
+    }
+  }
+
+  /// 模式4: 文件内容读取模式（降级方案）
+  Future<void> _runWithFileContent(
+    String prompt,
+    List<File> files,
+    ExecutionHistory history,
+    DateTime startTime,
+  ) async {
+    setState(() {
+      _responseMessage = '正在读取文件内容...\n';
+    });
+
+    try {
+      // 读取文件内容并合并到提示词
+      final enhancedPrompt = await FileProcessingService.processWithContentReading(
+        prompt: prompt,
+        files: files,
+      );
+
+      setState(() {
+        _responseMessage = '文件内容已加载，开始处理...\n';
+      });
+
+      // 使用普通流式响应
+      String raw = '';
+      await RequestService.streamResponse(
+        agent: _selectedAgent!,
+        prompt: enhancedPrompt,
+        onToken: (token) {
+          if (!mounted) return;
+          setState(() {
+            raw += token;
+            _responseMessage = RequestService.processThinkingContent(raw);
+          });
+        },
+        onError: (error) => _handleError(error, history, startTime),
+        onComplete: () => _handleComplete(history, startTime),
+        replacePrompt: false,
+      );
+
+      // 显示提示
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('注意：当前服务商不支持 Assistants API，已使用文件内容读取模式'),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      _handleError('文件内容读取错误: $e', history, startTime);
+    }
+  }
+
+  /// 处理错误
+  void _handleError(String error, ExecutionHistory history, DateTime startTime) {
+    if (!mounted) return;
+    setState(() {
+      _responseMessage += "\nERROR: $error";
+      _isLoading = false;
+    });
+
+    _historyController.updateHistory(
+      history.copyWith(
+        status: 'error',
+        errorMessage: error,
+        response: _responseMessage,
+        durationMs: DateTime.now().difference(startTime).inMilliseconds,
+      ),
+    );
+  }
+
+  /// 处理完成
+  void _handleComplete(ExecutionHistory history, DateTime startTime) {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
+
+    _historyController.updateHistory(
+      history.copyWith(
+        status: 'success',
+        response: _responseMessage,
+        durationMs: DateTime.now().difference(startTime).inMilliseconds,
       ),
     );
   }

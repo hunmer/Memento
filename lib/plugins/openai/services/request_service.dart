@@ -48,7 +48,10 @@ class RequestService {
 
   static final Map<String, OpenAIClient> _clients = {};
 
-  /// 获取或创建OpenAI客户端
+  /// 获取或创建OpenAI客户端（公开方法，供其他服务使用）
+  static OpenAIClient getClient(AIAgent agent) => _getClient(agent);
+
+  /// 获取或创建OpenAI客户端（内部实现）
   static OpenAIClient _getClient(AIAgent agent) {
       // 从headers中提取API密钥
       final apiKey =
