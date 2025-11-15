@@ -8,6 +8,7 @@ import '../base_plugin.dart';
 import 'screens/main_screen.dart';
 import 'controllers/calendar_controller.dart';
 import 'controllers/tag_controller.dart';
+import 'controls/prompt_controller.dart';
 import 'models/calendar_entry.dart';
 import 'l10n/calendar_album_localizations.dart';
 
@@ -55,6 +56,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
   late final CalendarController calendarController;
   late final TagController tagController;
+  late final CalendarAlbumPromptController _promptController;
 
   @override
   String get id => 'calendar_album';
@@ -69,6 +71,11 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   Future<void> initialize() async {
     calendarController = CalendarController();
     tagController = TagController(onTagsChanged: () {});
+
+    // 初始化Prompt控制器
+    _promptController = CalendarAlbumPromptController(this);
+    _promptController.initialize();
+
     await initializeDefaultData();
 
     // 注册 JS API（最后一步）

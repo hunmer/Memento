@@ -11,10 +11,12 @@ import 'models/timer_item.dart';
 import 'views/timer_main_view.dart';
 import 'services/timer_service.dart';
 import 'storage/timer_controller.dart';
+import 'controls/prompt_controller.dart';
 import 'l10n/timer_localizations.dart';
 
 class TimerPlugin extends BasePlugin with JSBridgePlugin {
   late final TimerController timerController;
+  late final TimerPromptController _promptController;
 
   List<TimerTask> _tasks = [];
   static TimerPlugin? _instance;
@@ -41,6 +43,10 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   Future<void> initialize() async {
     timerController = TimerController(storage);
     await _loadTasks();
+
+    // 初始化 Prompt 控制器
+    _promptController = TimerPromptController(this);
+    _promptController.initialize();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();

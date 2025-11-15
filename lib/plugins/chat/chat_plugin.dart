@@ -12,6 +12,7 @@ import 'services/message_service.dart';
 import 'services/settings_service.dart';
 import 'services/ui_service.dart';
 import 'services/user_service.dart';
+import 'controls/prompt_controller.dart';
 
 class ChatMainView extends StatefulWidget {
   const ChatMainView({super.key});
@@ -53,6 +54,9 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   late final SettingsService settingsService;
   late final UIService uiService;
   late final UserService userService;
+
+  // Prompt controller
+  late final ChatPromptController _promptController;
   @override
   String get id => 'chat';
 
@@ -77,6 +81,10 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     await channelService.initialize();
     await messageService.initialize();
     await uiService.initialize();
+
+    // Initialize prompt controller
+    _promptController = ChatPromptController(this);
+    _promptController.initialize();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();

@@ -62,6 +62,7 @@ import 'plugins/tracker/tracker_plugin.dart'; // OpenAI插件
 import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自动更新控制器
 import 'plugins/database/database_plugin.dart';
 import 'plugins/scripts_center/scripts_center_plugin.dart'; // 脚本中心插件
+import 'plugins/agent_chat/agent_chat_plugin.dart'; // Agent Chat插件
 import 'utils/image_utils.dart'; // 图片工具类
 
 
@@ -162,6 +163,7 @@ void main() async {
     final plugins = [
       ChatPlugin(),
       OpenAIPlugin(),
+      AgentChatPlugin(), // Agent Chat插件
       DiaryPlugin(),
       ActivityPlugin(),
       CheckinPlugin(),

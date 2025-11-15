@@ -10,6 +10,7 @@ import 'services/script_manager.dart';
 import 'services/script_executor.dart';
 import 'models/script_folder.dart';
 import 'screens/scripts_list_screen.dart';
+import 'controls/prompt_controller.dart';
 
 /// 深度序列化对象为 JSON 兼容的 Map/List/基本类型（异步版本）
 Future<dynamic> _deepSerializeAsync(dynamic value) async {
@@ -124,6 +125,9 @@ class ScriptsCenterPlugin extends BasePlugin {
   late ScriptManager _scriptManager;
   late ScriptExecutor _scriptExecutor;
 
+  // Prompt 控制器
+  late ScriptsCenterPromptController _promptController;
+
   // 事件订阅ID列表
   final List<String> _subscriptionIds = [];
 
@@ -163,6 +167,10 @@ class ScriptsCenterPlugin extends BasePlugin {
 
       // 加载当前文件夹的脚本
       await _scriptManager.loadScripts();
+
+      // 初始化 Prompt 控制器
+      _promptController = ScriptsCenterPromptController(this);
+      _promptController.initialize();
 
       print('✅ ScriptsCenterPlugin初始化成功');
       print('   - 已加载 ${_scriptManager.scriptCount} 个脚本');
@@ -394,12 +402,11 @@ class ScriptsCenterPlugin extends BasePlugin {
     );
   }
 
-  @override
   void dispose() {
     _clearTriggers();
+    _promptController.dispose();
     _scriptExecutor.dispose();
     _scriptManager.dispose();
-    // super.dispose();
   }
 }
 

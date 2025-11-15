@@ -82,6 +82,7 @@ dependencies:
   flutter_js: ^0.8.1
   flutter_image_compress: ^2.3.0
   json_dynamic_widget: ^12.0.0
+  flutter_markdown: ^0.7.4  # For agent_chat plugin Markdown rendering
 
 dev_dependencies:
   flutter_test:
