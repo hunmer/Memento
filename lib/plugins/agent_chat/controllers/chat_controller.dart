@@ -24,6 +24,7 @@ class ChatController extends ChangeNotifier {
   final Conversation conversation;
   final MessageService messageService;
   final ConversationService conversationService;
+  bool _conversationServiceInitialized = false;
 
   /// 当前Agent
   AIAgent? _currentAgent;
@@ -89,6 +90,7 @@ class ChatController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      await _ensureConversationServiceReady();
       debugPrint(
         '📝 初始化会话: ${conversation.id}, AgentID: ${conversation.agentId}',
       );
@@ -110,6 +112,12 @@ class ChatController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> _ensureConversationServiceReady() async {
+    if (_conversationServiceInitialized) return;
+    await conversationService.initialize();
+    _conversationServiceInitialized = true;
   }
 
   /// 在后台加载 Agent（不影响 loading 状态）
@@ -134,6 +142,7 @@ class ChatController extends ChangeNotifier {
   /// 选择并加载Agent
   Future<void> selectAgent(String agentId) async {
     try {
+      await _ensureConversationServiceReady();
       final openAIPlugin =
           PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
 
@@ -391,14 +400,10 @@ class ChatController extends ChangeNotifier {
       );
     }
 
-    // 获取历史消息（排除正在生成的消息，只使用顶级消息）
+    // 获取历史消息（排除正在生成的消息，保留子消息以避免丢失工具结果）
     final allMessages = messageService.currentMessages;
     final historyMessages =
-        allMessages
-            .where(
-              (msg) => !msg.isGenerating && msg.parentId == null,
-            ) // 只使用顶级消息
-            .toList();
+        allMessages.where((msg) => !msg.isGenerating).toList();
 
     // 获取最后 N 条消息
     final contextMessages =
