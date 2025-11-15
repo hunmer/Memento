@@ -11,6 +11,7 @@ import './models/record.dart';
 import './services/database_service.dart';
 import './widgets/database_list_widget.dart';
 import './controllers/database_controller.dart';
+import './controls/prompt_controller.dart';
 
 /// 数据库插件主视图
 class DatabaseMainView extends StatefulWidget {
@@ -31,6 +32,7 @@ class _DatabaseMainViewState extends State<DatabaseMainView> {
 class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   late final DatabaseService service = DatabaseService(this);
   late final DatabaseController controller = DatabaseController(service);
+  late final DatabasePromptController _promptController = DatabasePromptController(this);
 
   @override
   String get id => 'database';
@@ -56,6 +58,8 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   @override
   Future<void> initialize() async {
     await service.initializeDefaultData();
+    // 初始化 Prompt 控制器
+    _promptController.initialize();
     // 注册 JS API（最后一步）
     await registerJSAPI();
   }
