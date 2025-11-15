@@ -130,6 +130,22 @@ class MessageService extends ChangeNotifier {
     }
   }
 
+  /// 获取指定消息的子消息列表
+  List<ChatMessage> getChildMessages(String conversationId, String parentId) {
+    final messages = _messageCache[conversationId];
+    if (messages == null) return [];
+
+    return messages.where((m) => m.parentId == parentId).toList();
+  }
+
+  /// 获取所有顶级消息（没有父消息的消息）
+  List<ChatMessage> getTopLevelMessages(String conversationId) {
+    final messages = _messageCache[conversationId];
+    if (messages == null) return [];
+
+    return messages.where((m) => m.parentId == null).toList();
+  }
+
   /// 获取最后N条消息（用于上下文）
   List<ChatMessage> getLastMessages(String conversationId, int count) {
     final messages = _messageCache[conversationId] ?? [];

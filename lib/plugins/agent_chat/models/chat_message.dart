@@ -39,6 +39,9 @@ class ChatMessage {
   /// 工具调用（仅 AI 消息，当 AI 返回工具调用时使用）
   ToolCallResponse? toolCall;
 
+  /// 父消息ID（用于建立消息父子关系）
+  String? parentId;
+
   ChatMessage({
     required this.id,
     required this.conversationId,
@@ -51,6 +54,7 @@ class ChatMessage {
     this.isGenerating = false,
     this.metadata,
     this.toolCall,
+    this.parentId,
   });
 
   /// 创建用户消息
@@ -111,6 +115,7 @@ class ChatMessage {
       toolCall: json['toolCall'] != null
           ? ToolCallResponse.fromJson(json['toolCall'] as Map<String, dynamic>)
           : null,
+      parentId: json['parentId'] as String?,
     );
   }
 
@@ -128,6 +133,7 @@ class ChatMessage {
       'isGenerating': isGenerating,
       if (metadata != null) 'metadata': metadata,
       if (toolCall != null) 'toolCall': toolCall!.toJson(),
+      if (parentId != null) 'parentId': parentId,
     };
   }
 
@@ -140,6 +146,7 @@ class ChatMessage {
     bool? isGenerating,
     Map<String, dynamic>? metadata,
     ToolCallResponse? toolCall,
+    String? parentId,
   }) {
     return ChatMessage(
       id: id,
@@ -153,6 +160,7 @@ class ChatMessage {
       isGenerating: isGenerating ?? this.isGenerating,
       metadata: metadata ?? this.metadata,
       toolCall: toolCall ?? this.toolCall,
+      parentId: parentId ?? this.parentId,
     );
   }
 

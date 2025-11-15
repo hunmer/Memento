@@ -29,6 +29,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint('🎬 ChatScreen initState: conversationId=${widget.conversation.id}, agentId=${widget.conversation.agentId}');
     _initializeController();
   }
 
@@ -43,7 +44,9 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.addListener(_onControllerChanged);
     _controller.messageService.addListener(_onControllerChanged);
 
+    debugPrint('🚀 开始初始化ChatController');
     await _controller.initialize();
+    debugPrint('✅ ChatController初始化完成, currentAgent=${_controller.currentAgent?.name}');
 
     // 初始化完成后滚动到底部
     if (mounted) {
@@ -165,6 +168,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               padding: const EdgeInsets.only(bottom: 16),
                               child: MessageBubble(
                                 message: message,
+                                hasAgent: _controller.currentAgent != null,
                                 onEdit: (messageId, newContent) async {
                                   await _controller.editMessage(
                                       messageId, newContent);

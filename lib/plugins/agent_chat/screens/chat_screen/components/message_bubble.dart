@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../models/chat_message.dart';
 import '../../../services/token_counter_service.dart';
 import 'markdown_content.dart';
+import 'tool_call_steps.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 /// 消息气泡组件
@@ -13,6 +14,7 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(String messageId, String newContent)? onEdit;
   final Future<void> Function(String messageId)? onDelete;
   final Future<void> Function(String messageId)? onRegenerate;
+  final bool hasAgent;
 
   const MessageBubble({
     super.key,
@@ -20,11 +22,14 @@ class MessageBubble extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onRegenerate,
+    this.hasAgent = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final isUser = message.isUser;
+    final isToolCallMessage =
+        message.toolCall != null && message.toolCall!.steps.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -38,11 +43,7 @@ class MessageBubble extends StatelessWidget {
             CircleAvatar(
               radius: 16,
               backgroundColor: Colors.blue[100],
-              child: Icon(
-                Icons.smart_toy,
-                size: 18,
-                color: Colors.blue[700],
-              ),
+              child: Icon(Icons.smart_toy, size: 18, color: Colors.blue[700]),
             ),
             const SizedBox(width: 8),
           ],
@@ -89,6 +90,9 @@ class MessageBubble extends StatelessWidget {
                             ),
                           ],
                         )
+                      else if (isToolCallMessage)
+                        // 如果是工具调用消息,显示工具调用步骤
+                        _buildToolCallContent()
                       else if (message.content.isEmpty)
                         const Text(
                           '(空消息)',
@@ -119,10 +123,7 @@ class MessageBubble extends StatelessWidget {
                       TokenCounterService.formatTokenCountShort(
                         message.tokenCount,
                       ),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                     ),
 
                     const SizedBox(width: 8),
@@ -130,10 +131,7 @@ class MessageBubble extends StatelessWidget {
                     // 时间
                     Text(
                       _formatTime(message.timestamp),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                     ),
 
                     // 已编辑标记
@@ -166,11 +164,7 @@ class MessageBubble extends StatelessWidget {
             CircleAvatar(
               radius: 16,
               backgroundColor: Colors.green[100],
-              child: Icon(
-                Icons.person,
-                size: 18,
-                color: Colors.green[700],
-              ),
+              child: Icon(Icons.person, size: 18, color: Colors.green[700]),
             ),
           ],
         ],
@@ -178,44 +172,105 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
+  /// 构建工具调用内容
+  Widget _buildToolCallContent() {
+    // 如果有工具调用,显示steps组件
+    if (message.toolCall != null && message.toolCall!.steps.isNotEmpty) {
+      // 智能解析content，提取思考内容和AI回复
+      final parsedContent = _parseToolCallContent(message.content);
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 显示思考内容
+          if (parsedContent['thinking']?.isNotEmpty ?? false) ...[
+            MarkdownContent(content: parsedContent['thinking']!),
+            const SizedBox(height: 8),
+          ],
+
+          // 显示工具调用步骤
+          ToolCallSteps(
+            steps: message.toolCall!.steps,
+            isGenerating: message.isGenerating,
+          ),
+
+          // 显示AI最终回复
+          if (parsedContent['finalReply']?.isNotEmpty ?? false) ...[
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
+            MarkdownContent(content: parsedContent['finalReply']!),
+          ],
+        ],
+      );
+    }
+
+    // 降级到普通文本显示
+    return MarkdownContent(content: message.content);
+  }
+
+  /// 解析工具调用消息的content
+  /// 返回: {'thinking': '...', 'finalReply': '...'}
+  Map<String, String> _parseToolCallContent(String content) {
+    final result = <String, String>{};
+
+    // 查找工具执行结果的位置
+    final toolResultIndex = content.indexOf('[工具执行结果]');
+    final finalReplyIndex = content.indexOf('[AI最终回复]');
+
+    if (toolResultIndex != -1) {
+      // 提取思考内容（工具执行结果之前的内容）
+      result['thinking'] = content.substring(0, toolResultIndex).trim();
+
+      if (finalReplyIndex != -1) {
+        // 提取AI最终回复
+        final replyStart = finalReplyIndex + '[AI最终回复]'.length;
+        result['finalReply'] = content.substring(replyStart).trim();
+      }
+    } else {
+      // 没有工具结果标记，全部作为思考内容
+      result['thinking'] = content;
+    }
+
+    return result;
+  }
+
   /// 构建附件显示
   Widget _buildAttachments() {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: message.attachments.map((attachment) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                attachment.isImage ? Icons.image : Icons.description,
-                size: 16,
-                color: Colors.grey[600],
+      children:
+          message.attachments.map((attachment) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.grey[300]!),
               ),
-              const SizedBox(width: 4),
-              Text(
-                attachment.fileName,
-                style: const TextStyle(fontSize: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    attachment.isImage ? Icons.image : Icons.description,
+                    size: 16,
+                    color: Colors.grey[600],
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    attachment.fileName,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    attachment.formattedSize,
+                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  ),
+                ],
               ),
-              const SizedBox(width: 4),
-              Text(
-                attachment.formattedSize,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 
@@ -223,18 +278,14 @@ class MessageBubble extends StatelessWidget {
   Widget _buildActionMenu(BuildContext context) {
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
-      icon: Icon(
-        Icons.more_vert,
-        size: 16,
-        color: Colors.grey[600],
-      ),
+      icon: Icon(Icons.more_vert, size: 16, color: Colors.grey[600]),
       onSelected: (value) {
         switch (value) {
           case 'copy':
             Clipboard.setData(ClipboardData(text: message.content));
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('已复制到剪贴板')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
             break;
           case 'edit':
             _showEditDialog(context);
@@ -247,51 +298,52 @@ class MessageBubble extends StatelessWidget {
             break;
         }
       },
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: 'copy',
-          child: Row(
-            children: [
-              Icon(Icons.copy, size: 18),
-              SizedBox(width: 8),
-              Text('复制'),
-            ],
-          ),
-        ),
-        if (message.isUser && onEdit != null)
-          const PopupMenuItem(
-            value: 'edit',
-            child: Row(
-              children: [
-                Icon(Icons.edit, size: 18),
-                SizedBox(width: 8),
-                Text('编辑'),
-              ],
+      itemBuilder:
+          (context) => [
+            const PopupMenuItem(
+              value: 'copy',
+              child: Row(
+                children: [
+                  Icon(Icons.copy, size: 18),
+                  SizedBox(width: 8),
+                  Text('复制'),
+                ],
+              ),
             ),
-          ),
-        if (!message.isUser && onRegenerate != null)
-          const PopupMenuItem(
-            value: 'regenerate',
-            child: Row(
-              children: [
-                Icon(Icons.refresh, size: 18),
-                SizedBox(width: 8),
-                Text('重新生成'),
-              ],
-            ),
-          ),
-        if (onDelete != null)
-          const PopupMenuItem(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete, size: 18, color: Colors.red),
-                SizedBox(width: 8),
-                Text('删除', style: TextStyle(color: Colors.red)),
-              ],
-            ),
-          ),
-      ],
+            if (message.isUser && onEdit != null)
+              const PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, size: 18),
+                    SizedBox(width: 8),
+                    Text('编辑'),
+                  ],
+                ),
+              ),
+            if (!message.isUser && onRegenerate != null && hasAgent)
+              const PopupMenuItem(
+                value: 'regenerate',
+                child: Row(
+                  children: [
+                    Icon(Icons.refresh, size: 18),
+                    SizedBox(width: 8),
+                    Text('重新生成'),
+                  ],
+                ),
+              ),
+            if (onDelete != null)
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, size: 18, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('删除', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+          ],
     );
   }
 
@@ -301,33 +353,34 @@ class MessageBubble extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('编辑消息'),
-        content: TextField(
-          controller: textController,
-          maxLines: 5,
-          decoration: const InputDecoration(
-            hintText: '输入消息内容...',
-            border: OutlineInputBorder(),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('编辑消息'),
+            content: TextField(
+              controller: textController,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                hintText: '输入消息内容...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  final newContent = textController.text.trim();
+                  if (newContent.isNotEmpty && newContent != message.content) {
+                    onEdit?.call(message.id, newContent);
+                  }
+                  Navigator.pop(context);
+                },
+                child: const Text('保存'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {
-              final newContent = textController.text.trim();
-              if (newContent.isNotEmpty && newContent != message.content) {
-                onEdit?.call(message.id, newContent);
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('保存'),
-          ),
-        ],
-      ),
     );
   }
 
