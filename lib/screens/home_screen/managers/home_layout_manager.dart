@@ -28,6 +28,16 @@ class HomeLayoutManager extends ChangeNotifier {
   String _gridAlignment = 'top';
   String get gridAlignment => _gridAlignment;
 
+  /// 全局小组件透明度（0.0-1.0，默认1.0不透明）
+  /// 影响整个小组件包括文字内容
+  double _globalWidgetOpacity = 1.0;
+  double get globalWidgetOpacity => _globalWidgetOpacity;
+
+  /// 全局小组件背景颜色透明度（0.0-1.0，默认1.0不透明）
+  /// 仅影响背景颜色，不影响文字内容
+  double _globalWidgetBackgroundOpacity = 1.0;
+  double get globalWidgetBackgroundOpacity => _globalWidgetBackgroundOpacity;
+
   /// 配置键名
   static const String _configKey = 'home_layout';
 
@@ -70,6 +80,15 @@ class HomeLayoutManager extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('加载活动布局ID失败: $e');
+    }
+
+    // 加载全局背景配置（包含透明度）
+    try {
+      final globalConfig = await getGlobalBackgroundConfig();
+      _globalWidgetOpacity = (globalConfig['widgetOpacity'] as num?)?.toDouble() ?? 1.0;
+      _globalWidgetBackgroundOpacity = (globalConfig['widgetBackgroundOpacity'] as num?)?.toDouble() ?? 1.0;
+    } catch (e) {
+      debugPrint('加载全局背景配置失败: $e');
     }
 
     await loadLayout();
@@ -605,6 +624,9 @@ class HomeLayoutManager extends ChangeNotifier {
   Future<void> saveGlobalBackgroundConfig(Map<String, dynamic> config) async {
     try {
       await globalConfigManager.savePluginConfig(_globalBackgroundKey, config);
+      // 更新缓存的透明度值
+      _globalWidgetOpacity = (config['widgetOpacity'] as num?)?.toDouble() ?? 1.0;
+      _globalWidgetBackgroundOpacity = (config['widgetBackgroundOpacity'] as num?)?.toDouble() ?? 1.0;
       notifyListeners();
     } catch (e) {
       debugPrint('Error saving global background config: $e');

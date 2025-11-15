@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/script_info.dart';
+import '../models/script_input.dart';
 import '../models/script_trigger.dart';
 import '../services/script_manager.dart';
+import '../widgets/script_input_edit_dialog.dart';
 
 /// 脚本编辑屏幕
 ///
@@ -45,6 +47,9 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
   String _selectedIcon = 'code';
   String _selectedType = 'module';
   bool _enabled = true;
+
+  // 输入参数列表
+  List<ScriptInput> _inputs = [];
 
   // 触发条件列表
   List<ScriptTrigger> _triggers = [];
@@ -162,6 +167,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       _selectedIcon = script.icon;
       _selectedType = script.type;
       _enabled = script.enabled;
+      _inputs = List.from(script.inputs);
       _triggers = List.from(script.triggers);
 
       // 异步加载代码
@@ -221,6 +227,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       'type': _selectedType,
       'enabled': _enabled,
       'code': _codeController.text,
+      'inputs': _inputs,
       'triggers': _triggers.map((t) => t.toJson()).toList(),
       'updateUrl': _updateUrlController.text.trim().isEmpty
           ? null
@@ -228,6 +235,57 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
     };
 
     Navigator.of(context).pop(scriptData);
+  }
+
+  /// 添加输入参数
+  Future<void> _addInput() async {
+    final input = await showDialog<ScriptInput>(
+      context: context,
+      builder: (context) => const ScriptInputEditDialog(),
+    );
+
+    if (input != null) {
+      setState(() {
+        _inputs.add(input);
+      });
+    }
+  }
+
+  /// 编辑输入参数
+  Future<void> _editInput(int index) async {
+    final input = await showDialog<ScriptInput>(
+      context: context,
+      builder: (context) => ScriptInputEditDialog(input: _inputs[index]),
+    );
+
+    if (input != null) {
+      setState(() {
+        _inputs[index] = input;
+      });
+    }
+  }
+
+  /// 删除输入参数
+  void _deleteInput(int index) {
+    setState(() {
+      _inputs.removeAt(index);
+    });
+  }
+
+  /// 根据输入类型获取对应图标
+  IconData _getInputTypeIcon(String type) {
+    switch (type) {
+      case 'string':
+        return Icons.text_fields;
+      case 'number':
+        return Icons.numbers;
+      case 'boolean':
+        return Icons.toggle_on;
+      case 'select':
+        return Icons.list;
+      default:
+        return Icons.input;
+    }
   }
 
   @override
@@ -613,7 +671,164 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
               });
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+
+          // 输入参数设置（仅用于 module 类型）
+          if (_selectedType == 'module') ...[
+            Row(
+              children: [
+                const Icon(Icons.input_outlined, size: 20, color: Colors.deepPurple),
+                const SizedBox(width: 8),
+                const Text(
+                  '输入参数',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // 参数列表
+            if (_inputs.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 48,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '暂无输入参数',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '为 Module 类型脚本添加输入参数，执行时会显示表单收集用户输入',
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              )
+            else
+              ..._inputs.asMap().entries.map((entry) {
+                final index = entry.key;
+                final input = entry.value;
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
+                      child: Icon(
+                        _getInputTypeIcon(input.type),
+                        color: Colors.deepPurple,
+                        size: 20,
+                      ),
+                    ),
+                    title: Row(
+                      children: [
+                        Text(
+                          input.label,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '(${input.key})',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                        if (input.required) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              '必填',
+                              style: TextStyle(
+                                color: Colors.orange,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    subtitle: Text(
+                      input.description ?? '类型: ${input.type}',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 20),
+                          onPressed: () => _editInput(index),
+                          tooltip: '编辑',
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, size: 20),
+                          color: Colors.red,
+                          onPressed: () => _deleteInput(index),
+                          tooltip: '删除',
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+
+            const SizedBox(height: 12),
+
+            // 添加参数按钮
+            OutlinedButton.icon(
+              onPressed: _addInput,
+              icon: const Icon(Icons.add),
+              label: const Text('添加输入参数'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.deepPurple,
+                side: const BorderSide(color: Colors.deepPurple),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
 
           // 更新地址
           TextFormField(

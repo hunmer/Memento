@@ -5,6 +5,7 @@ import '../models/home_item.dart';
 import '../models/home_widget_item.dart';
 import '../models/home_folder_item.dart';
 import '../managers/home_widget_registry.dart';
+import '../managers/home_layout_manager.dart';
 import 'folder_dialog.dart';
 
 /// 主页卡片组件
@@ -32,6 +33,8 @@ class HomeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isWidgetItem = item is HomeWidgetItem;
+
     final cardContent = Stack(
       children: [
         Card(
@@ -42,7 +45,10 @@ class HomeCard extends StatelessWidget {
                 ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
                 : BorderSide.none,
           ),
-          child: item is HomeWidgetItem
+          // 对小组件卡片使用透明的 Card 背景色，这样内部背景颜色的透明度
+          // 能够作用到整体（否则会被 Card 自身的背景色遮挡）
+          color: isWidgetItem ? Colors.transparent : null,
+          child: isWidgetItem
               ? _buildWidgetCard(context, item as HomeWidgetItem)
               : _buildFolderCard(context, item as HomeFolderItem),
         ),
@@ -65,7 +71,7 @@ class HomeCard extends StatelessWidget {
                 color:
                     isSelected
                         ? Theme.of(context).primaryColor
-                        : Theme.of(context).cardColor.withOpacity(0.8),
+                        : Theme.of(context).cardColor.withValues(alpha: 0.8),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color:
@@ -109,27 +115,50 @@ class HomeCard extends StatelessWidget {
     }
 
     try {
+      // 获取全局透明度设置
+      final layoutManager = HomeLayoutManager();
+      final globalWidgetOpacity = layoutManager.globalWidgetOpacity;
+      final globalBackgroundOpacity = layoutManager.globalWidgetBackgroundOpacity;
+
       // 获取背景配置
-      final backgroundColor = widgetItem.config['backgroundColor'] != null
-          ? Color(widgetItem.config['backgroundColor'] as int)
-          : null;
+      Color backgroundColor;
+      if (widgetItem.config['backgroundColor'] != null) {
+        // 用户设置了自定义背景颜色
+        final originalColor = Color(widgetItem.config['backgroundColor'] as int);
+        backgroundColor = originalColor.withValues(
+          alpha: originalColor.a * globalBackgroundOpacity,
+        );
+      } else {
+        // 没有设置背景颜色，使用默认的主题卡片颜色
+        final defaultColor = Theme.of(context).cardColor;
+        backgroundColor = defaultColor.withValues(
+          alpha: defaultColor.a * globalBackgroundOpacity,
+        );
+      }
+
       final backgroundImagePath = widgetItem.config['backgroundImage'] as String?;
 
       Widget content = widgetDef.build(context, widgetItem.config);
 
-      // 如果有背景颜色或背景图,添加装饰容器
-      if (backgroundColor != null || backgroundImagePath != null) {
-        content = Container(
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            image: backgroundImagePath != null && File(backgroundImagePath).existsSync()
-                ? DecorationImage(
-                    image: FileImage(File(backgroundImagePath)),
-                    fit: BoxFit.cover,
-                  )
-                : null,
-            borderRadius: BorderRadius.circular(12),
-          ),
+      // 总是添加背景装饰容器（因为总是有背景颜色）
+      content = Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          image: backgroundImagePath != null && File(backgroundImagePath).existsSync()
+              ? DecorationImage(
+                  image: FileImage(File(backgroundImagePath)),
+                  fit: BoxFit.cover,
+                )
+              : null,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: content,
+      );
+
+      // 应用整体小组件透明度（影响整个卡片包括内容）
+      if (globalWidgetOpacity < 1.0) {
+        content = Opacity(
+          opacity: globalWidgetOpacity,
           child: content,
         );
       }

@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import '../services/script_manager.dart';
 import '../services/script_executor.dart';
 import '../models/script_info.dart';
+import '../models/script_input.dart';
 import '../models/script_trigger.dart';
 import '../widgets/script_card.dart';
+import '../widgets/script_run_dialog.dart';
 import 'script_edit_screen.dart';
 
 /// 脚本列表界面
@@ -131,12 +133,16 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
               .map((t) => ScriptTrigger.fromJson(t as Map<String, dynamic>))
               .toList();
 
+          // 解析输入参数数据
+          final inputsData = result['inputs'] as List<ScriptInput>? ?? [];
+
           await widget.scriptManager.saveScriptMetadata(
             newScript.id,
             newScript.copyWith(
               enabled: result['enabled'] as bool,
               type: result['type'] as String,
               updateUrl: result['updateUrl'] as String?,
+              inputs: inputsData,
               triggers: triggers,
             ),
           );
@@ -160,6 +166,9 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
             .map((t) => ScriptTrigger.fromJson(t as Map<String, dynamic>))
             .toList();
 
+        // 解析输入参数数据
+        final inputsData = result['inputs'] as List<ScriptInput>? ?? [];
+
         // 编辑现有脚本
         final updatedScript = script.copyWith(
           name: result['name'] as String,
@@ -170,6 +179,7 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
           enabled: result['enabled'] as bool,
           type: result['type'] as String,
           updateUrl: result['updateUrl'] as String?,
+          inputs: inputsData,
           triggers: triggers,
           updatedAt: DateTime.now(),
         );
@@ -210,6 +220,20 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
       return;
     }
 
+    // 如果是 module 类型且有输入参数,显示表单收集用户输入
+    Map<String, dynamic>? inputValues;
+    if (script.isModule && script.hasInputs) {
+      inputValues = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => ScriptRunDialog(script: script),
+      );
+
+      // 用户取消了
+      if (inputValues == null) {
+        return;
+      }
+    }
+
     // 显示加载提示
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -234,7 +258,11 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
     }
 
     try {
-      final result = await widget.scriptExecutor!.execute(script.id);
+      // 执行脚本,传入用户输入的参数
+      final result = await widget.scriptExecutor!.execute(
+        script.id,
+        args: inputValues,
+      );
 
       if (mounted) {
         // 清除加载提示

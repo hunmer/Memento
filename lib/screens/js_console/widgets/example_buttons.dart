@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
 import '../controllers/js_console_controller.dart';
 
 class ExampleButtons extends StatelessWidget {
   const ExampleButtons({super.key});
+
+  /// 判断是否为桌面平台
+  bool get isDesktop {
+    if (kIsWeb) return false;
+    return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,31 +39,103 @@ class ExampleButtons extends StatelessWidget {
           );
         }
 
+        // 获取当前要显示的示例
+        final currentExamples = controller.currentFileExamples;
+
         // 显示示例按钮
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           color: Colors.grey[200],
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: controller.examples.keys.map((key) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: OutlinedButton.icon(
-                    onPressed: () => controller.loadExample(key),
-                    icon: const Icon(Icons.code, size: 16),
-                    label: Text(key),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                    ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 文件选择下拉框
+              if (controller.exampleFiles.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      const Text('选择示例文件: ', style: TextStyle(fontSize: 12)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButton<String>(
+                          value: controller.selectedFilePath,
+                          isExpanded: true,
+                          hint: const Text('全部示例', style: TextStyle(fontSize: 12)),
+                          items: [
+                            // "全部" 选项
+                            const DropdownMenuItem<String>(
+                              value: null,
+                              child: Text('全部示例', style: TextStyle(fontSize: 12)),
+                            ),
+                            // 各个文件选项
+                            ...controller.exampleFiles.map((file) {
+                              return DropdownMenuItem<String>(
+                                value: file.path,
+                                child: Text(file.name, style: const TextStyle(fontSize: 12)),
+                              );
+                            }),
+                          ],
+                          onChanged: (value) => controller.selectFile(value),
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              }).toList(),
-            ),
+                ),
+
+              // 示例按钮列表（带滚动条）
+              SizedBox(
+                height: 40,
+                child: _buildButtonList(context, controller, currentExamples),
+              ),
+            ],
           ),
         );
       },
     );
+  }
+
+  /// 构建按钮列表（根据平台决定是否显示滚动条）
+  Widget _buildButtonList(
+    BuildContext context,
+    JSConsoleController controller,
+    Map<String, String> examples,
+  ) {
+    final scrollController = ScrollController();
+
+    final buttonRow = SingleChildScrollView(
+      controller: scrollController,
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: examples.keys.map((key) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: OutlinedButton.icon(
+              onPressed: () => controller.loadExample(key),
+              icon: const Icon(Icons.code, size: 16),
+              label: Text(key),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+
+    // 桌面端显示滚动条
+    if (isDesktop) {
+      return Scrollbar(
+        controller: scrollController,
+        thumbVisibility: true, // 始终显示滚动条
+        child: buttonRow,
+      );
+    }
+
+    // 移动端不显示滚动条
+    return buttonRow;
   }
 }

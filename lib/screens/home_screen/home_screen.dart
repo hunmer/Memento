@@ -74,6 +74,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     super.initState();
     _initializeLayout();
 
+    // 监听布局管理器的变化（包括透明度设置）
+    _layoutManager.addListener(_onLayoutChanged);
+
     // 延迟初始化，确保在布局完成后执行
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -90,8 +93,18 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   @override
   void dispose() {
+    _layoutManager.removeListener(_onLayoutChanged);
     _pageController?.dispose();
     super.dispose();
+  }
+
+  /// 布局管理器变化时的回调（包括透明度设置）
+  void _onLayoutChanged() {
+    if (mounted) {
+      setState(() {
+        // 触发界面重新构建，应用新的透明度设置
+      });
+    }
   }
 
   /// 初始化布局

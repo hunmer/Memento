@@ -4,9 +4,29 @@ import 'controllers/js_console_controller.dart';
 import 'widgets/code_editor.dart';
 import 'widgets/output_viewer.dart';
 import 'widgets/example_buttons.dart';
+import '../../core/js_bridge/js_bridge_manager.dart';
 
-class JSConsoleScreen extends StatelessWidget {
+class JSConsoleScreen extends StatefulWidget {
   const JSConsoleScreen({super.key});
+
+  @override
+  State<JSConsoleScreen> createState() => _JSConsoleScreenState();
+}
+
+class _JSConsoleScreenState extends State<JSConsoleScreen> {
+  bool _uiHandlersRegistered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 在第一帧渲染后注册 UI 处理器
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_uiHandlersRegistered && mounted) {
+        JSBridgeManager.instance.registerUIHandlers(context);
+        _uiHandlersRegistered = true;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
