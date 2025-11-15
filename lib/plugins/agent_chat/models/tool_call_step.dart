@@ -38,11 +38,26 @@ class ToolCallStep {
 
     /// 从 JSON 创建
     factory ToolCallStep.fromJson(Map<String, dynamic> json) {
+        final statusString = json['status'] as String?;
+        ToolCallStatus parsedStatus = ToolCallStatus.pending;
+        if (statusString != null) {
+            final normalized = statusString.contains('.')
+                ? statusString.split('.').last
+                : statusString;
+            parsedStatus = ToolCallStatus.values.firstWhere(
+              (s) => s.name == normalized,
+              orElse: () => ToolCallStatus.pending,
+            );
+        }
+
         return ToolCallStep(
             method: json['method'] as String? ?? 'run_js',
             title: json['title'] as String? ?? '执行步骤',
             desc: json['desc'] as String? ?? '',
             data: json['data'] as String? ?? '',
+            status: parsedStatus,
+            result: json['result'] as String?,
+            error: json['error'] as String?,
         );
     }
 
@@ -53,7 +68,7 @@ class ToolCallStep {
             'title': title,
             'desc': desc,
             'data': data,
-            'status': status.toString(),
+            'status': status.name,
             'result': result,
             'error': error,
         };

@@ -252,12 +252,14 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     await _controller.selectConversation(conversation.id);
 
     if (mounted) {
+      final latestConversation =
+          _controller.currentConversation ?? conversation;
       // 导航到聊天页面
       await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ChatScreen(
-            conversation: conversation,
+            conversation: latestConversation,
             storage: _controller.storage,
           ),
         ),

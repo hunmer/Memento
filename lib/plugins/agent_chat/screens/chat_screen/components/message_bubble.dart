@@ -220,7 +220,8 @@ class MessageBubble extends StatelessWidget {
 
     if (toolResultIndex != -1) {
       // 提取思考内容（工具执行结果之前的内容）
-      result['thinking'] = content.substring(0, toolResultIndex).trim();
+      final thinkingRaw = content.substring(0, toolResultIndex);
+      result['thinking'] = _stripToolJsonBlocks(thinkingRaw).trim();
 
       if (finalReplyIndex != -1) {
         // 提取AI最终回复
@@ -229,10 +230,24 @@ class MessageBubble extends StatelessWidget {
       }
     } else {
       // 没有工具结果标记，全部作为思考内容
-      result['thinking'] = content;
+      result['thinking'] = _stripToolJsonBlocks(content).trim();
     }
 
     return result;
+  }
+
+  /// 移除工具调用返回的JSON代码块，避免在思考区域显示
+  String _stripToolJsonBlocks(String content) {
+    var cleaned = content;
+    cleaned = cleaned.replaceAll(
+      RegExp(r'```json[\s\S]*?```', multiLine: true),
+      '',
+    );
+    cleaned = cleaned.replaceAll(
+      RegExp(r'\{\s*"steps"\s*:\s*\[[\s\S]*?\]\s*\}', multiLine: true),
+      '',
+    );
+    return cleaned;
   }
 
   /// 构建附件显示
