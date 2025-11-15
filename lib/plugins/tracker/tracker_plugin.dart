@@ -12,6 +12,7 @@ import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:provider/provider.dart';
 import 'controllers/tracker_controller.dart';
 import 'screens/home_screen.dart';
+import 'controls/prompt_controller.dart';
 
 export 'models/goal.dart';
 export 'models/record.dart';
@@ -57,6 +58,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   late final TrackerController _controller = TrackerController();
   TrackerController get controller => _controller;
+  late TrackerPromptController _promptController;
   @override
   String get id => 'tracker';
 
@@ -70,6 +72,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   Future<void> initialize() async {
     await TrackerNotificationUtils.initialize();
     await _controller.loadInitialData();
+
+    // 初始化 Prompt 控制器
+    _promptController = TrackerPromptController(this);
+    _promptController.initialize();
+
     // 注册 JS API（最后一步）
     await registerJSAPI();
   }

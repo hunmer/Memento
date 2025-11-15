@@ -70,14 +70,14 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     await storage.createDirectory('activity');
     _activityService = ActivityService(storage, 'activity');
 
-    // 初始化Prompt控制器
-    _promptController = ActivityPromptController(storage, 'activity');
-    _promptController.initialize();
-
     _isInitialized = true;
 
-    // 注册 JS API（最后一步）
+    // 注册 JS API
     await registerJSAPI();
+
+    // 初始化Prompt控制器（必须在 jsAPI 注册之后）
+    _promptController = ActivityPromptController(this);
+    _promptController.initialize();
   }
 
   @override

@@ -10,6 +10,7 @@ import 'models/warehouse.dart';
 import 'models/goods_item.dart';
 import 'models/find_item_result.dart';
 import 'l10n/goods_localizations.dart';
+import 'controls/prompt_controller.dart';
 
 /// 物品相关事件的基类
 abstract class GoodsEventArgs extends EventArgs {
@@ -70,6 +71,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   final List<Warehouse> _warehouses = [];
   final List<Function()> _listeners = [];
+  late GoodsPromptController _promptController;
 
   List<Warehouse> get warehouses => _warehouses;
 
@@ -188,6 +190,10 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
     // 加载排序偏好
     await _loadSortPreferences();
+
+    // 初始化 Prompt 控制器
+    _promptController = GoodsPromptController(this);
+    _promptController.initialize();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();

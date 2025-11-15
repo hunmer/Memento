@@ -57,7 +57,7 @@ class _DiaryMainViewState extends State<DiaryMainView> {
 }
 
 class DiaryPlugin extends BasePlugin with JSBridgePlugin {
-  final DiaryPromptController _promptController = DiaryPromptController();
+  late final DiaryPromptController _promptController;
   static DiaryPlugin? _instance;
   static DiaryPlugin get instance {
     if (_instance == null) {
@@ -274,6 +274,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     await storage.createDirectory('diary');
 
     // 初始化 prompt 控制器
+    _promptController = DiaryPromptController(this);
     _promptController.initialize();
 
     // 注册 JS API（最后一步）
@@ -291,6 +292,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
 
   Future<void> dispose() async {
     _promptController.unregisterPromptMethods();
+    _promptController.dispose();
   }
 
   @override

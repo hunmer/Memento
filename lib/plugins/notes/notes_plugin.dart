@@ -41,9 +41,12 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   @override
   Future<void> initialize() async {
     controller = NotesController(storage);
-    _promptController = NotesPromptController();
     await controller.initialize();
-    _promptController.initialize(controller);
+
+    // 初始化 Prompt 控制器
+    _promptController = NotesPromptController(this);
+    _promptController.initialize();
+
     _isInitialized = true;
 
     // 注册 JS API（最后一步）
@@ -165,6 +168,7 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   @override
   Future<void> uninstall() async {
     _promptController.unregisterPromptMethods();
+    _promptController.dispose();
     await super.uninstall();
   }
 

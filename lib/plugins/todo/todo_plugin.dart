@@ -9,10 +9,12 @@ import '../base_plugin.dart';
 import 'controllers/controllers.dart';
 import 'models/models.dart';
 import 'views/todo_main_view.dart';
+import 'controls/prompt_controller.dart';
 
 class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   late TaskController taskController;
   late ReminderController reminderController;
+  late TodoPromptController _promptController;
   static TodoPlugin? _instance;
   static TodoPlugin get instance {
     if (_instance == null) {
@@ -49,6 +51,10 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       'defaultSortBy': 'dueDate', // 'dueDate', 'priority', or 'custom'
       'reminderAdvanceTime': 60, // minutes
     });
+
+    // 初始化 Prompt 控制器
+    _promptController = TodoPromptController(this);
+    _promptController.initialize();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();

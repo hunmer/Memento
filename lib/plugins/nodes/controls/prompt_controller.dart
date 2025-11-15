@@ -1,11 +1,11 @@
 import '../services/prompt_replacements.dart';
 import '../../openai/openai_plugin.dart';
 
-/// Day 插件的 Prompt 控制器
+/// Nodes 插件的 Prompt 控制器
 ///
 /// 负责注册 Prompt 替换方法到 OpenAI 插件
-class PromptController {
-  final DayPromptReplacements _replacements = DayPromptReplacements();
+class NodesPromptController {
+  final NodesPromptReplacements _replacements = NodesPromptReplacements();
 
   /// 初始化并注册Prompt方法
   void initialize() {
@@ -20,16 +20,16 @@ class PromptController {
   void _registerPromptMethods() {
     Future.delayed(const Duration(seconds: 1), () {
       try {
-        // 注册 day_getDays 方法
+        // 注册 nodes_getNodePaths 方法
         OpenAIPlugin.instance.registerPromptReplacementMethod(
-          'day_getDays',
-          _replacements.getDays,
+          'nodes_getNodePaths',
+          _replacements.getNodePaths,
         );
 
         // 注册向后兼容的旧方法名（如果存在）
         OpenAIPlugin.instance.registerPromptReplacementMethod(
-          'day_getMemorialDays',
-          _replacements.getDays,
+          'nodes_getNodes',
+          _replacements.getNodePaths,
         );
       } catch (e) {
         // 如果OpenAI插件还未准备好，5秒后重试
@@ -41,8 +41,8 @@ class PromptController {
   /// 注销Prompt替换方法
   void unregisterPromptMethods() {
     try {
-      OpenAIPlugin.instance.unregisterPromptReplacementMethod('day_getDays');
-      OpenAIPlugin.instance.unregisterPromptReplacementMethod('day_getMemorialDays');
+      OpenAIPlugin.instance.unregisterPromptReplacementMethod('nodes_getNodePaths');
+      OpenAIPlugin.instance.unregisterPromptReplacementMethod('nodes_getNodes');
     } catch (e) {
       // 忽略错误
     }

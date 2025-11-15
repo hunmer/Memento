@@ -1,16 +1,16 @@
 import '../../openai/openai_plugin.dart';
-import '../activity_plugin.dart';
+import '../goods_plugin.dart';
 import '../services/prompt_replacements.dart';
 
-/// Activity 插件的 Prompt 控制器
+/// Goods 插件的 Prompt 控制器
 ///
 /// 负责注册 Prompt 替换方法到 OpenAI 插件
-class ActivityPromptController {
-  final ActivityPlugin plugin;
-  late final ActivityPromptReplacements _replacements;
+class GoodsPromptController {
+  final GoodsPlugin plugin;
+  late final GoodsPromptReplacements _replacements;
 
-  ActivityPromptController(this.plugin) {
-    _replacements = ActivityPromptReplacements(plugin);
+  GoodsPromptController(this.plugin) {
+    _replacements = GoodsPromptReplacements(plugin);
   }
 
   /// 初始化并注册Prompt方法
@@ -23,16 +23,16 @@ class ActivityPromptController {
   void _registerPromptMethods() {
     Future.delayed(const Duration(seconds: 1), () {
       try {
-        // 注册 activity_getActivities 方法 (修正命名: activitys → activities)
+        // 注册 goods_getItems 方法
         OpenAIPlugin.instance.registerPromptReplacementMethod(
-          'activity_getActivities',
-          _replacements.getActivities,
+          'goods_getItems',
+          _replacements.getItems,
         );
 
-        // 向后兼容旧方法名
+        // 注册 goods_getCategories 方法
         OpenAIPlugin.instance.registerPromptReplacementMethod(
-          'activity_getActivitys',
-          _replacements.getActivities,
+          'goods_getCategories',
+          _replacements.getCategories,
         );
       } catch (e) {
         // 如果注册失败,可能是OpenAI插件还未初始化,稍后重试
