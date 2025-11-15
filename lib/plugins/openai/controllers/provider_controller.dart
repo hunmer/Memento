@@ -96,6 +96,75 @@ class ProviderController {
         baseUrl: 'https://YOUR_RESOURCE_NAME.openai.azure.com',
         headers: {'api-key': 'YOUR_API_KEY', 'api-version': '2023-05-15'},
       ),
+      ServiceProvider(
+        id: 'anthropic',
+        label: 'Anthropic (Claude)',
+        baseUrl: 'https://api.anthropic.com/v1',
+        headers: {
+          'x-api-key': 'YOUR_API_KEY',
+          'anthropic-version': '2023-06-01',
+        },
+      ),
+      ServiceProvider(
+        id: 'google',
+        label: 'Google (Gemini)',
+        baseUrl: 'https://generativelanguage.googleapis.com/v1',
+        headers: {'x-goog-api-key': 'YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'alibaba',
+        label: '阿里云百炼 (通义千问)',
+        baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'zhipu',
+        label: '智谱 AI (GLM)',
+        baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'moonshot',
+        label: '月之暗面 (Kimi)',
+        baseUrl: 'https://api.moonshot.cn/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'xfyun',
+        label: '讯飞星火',
+        baseUrl: 'https://spark-api-open.xf-yun.com/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'openrouter',
+        label: 'OpenRouter',
+        baseUrl: 'https://openrouter.ai/api/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'together',
+        label: 'Together AI',
+        baseUrl: 'https://api.together.xyz/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'groq',
+        label: 'Groq',
+        baseUrl: 'https://api.groq.com/openai/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'cohere',
+        label: 'Cohere',
+        baseUrl: 'https://api.cohere.ai/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'perplexity',
+        label: 'Perplexity',
+        baseUrl: 'https://api.perplexity.ai',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
     ];
   }
 }

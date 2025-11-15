@@ -299,11 +299,9 @@ class MobileJSEngine implements JSEngine {
       // 包装用户代码：提供 setResult 函数并自动捕获返回值
       final wrappedCode = '''
         (async function() {
-          console.log('[Wrapper] 开始执行包装代码');
 
           // 定义 setResult 函数，用户可以显式设置返回值
           globalThis.setResult = function(value) {
-            console.log('[setResult] 被调用，值类型:', typeof value);
             if (typeof value === 'object' && value !== null) {
               globalThis.__EVAL_RESULTS__['$executionId'] = JSON.stringify(value);
             } else if (value === undefined) {
@@ -311,31 +309,24 @@ class MobileJSEngine implements JSEngine {
             } else {
               globalThis.__EVAL_RESULTS__['$executionId'] = String(value);
             }
-            console.log('[setResult] 结果已保存到 $executionId');
           };
 
           try {
             // 执行用户代码并等待完成
-            console.log('[Wrapper] 执行用户代码...');
             var result = await (async function() {
               $code
             })();
 
-            console.log('[Wrapper] 用户代码执行完成，结果类型:', typeof result);
 
             // 如果用户没有调用 setResult，自动设置结果
             if (!globalThis.__EVAL_RESULTS__['$executionId']) {
-              console.log('[Wrapper] 自动调用 setResult');
               globalThis.setResult(result);
-            } else {
-              console.log('[Wrapper] 用户已调用 setResult，跳过自动设置');
             }
           } catch (error) {
             console.error('[Wrapper] 执行错误:', error);
             // 保存错误信息
             globalThis.__EVAL_RESULTS__['$executionId'] = 'Error: ' + error.toString();
           } finally {
-            console.log('[Wrapper] 清理 setResult 函数');
             // 清理 setResult 函数
             delete globalThis.setResult;
           }
@@ -347,7 +338,6 @@ class MobileJSEngine implements JSEngine {
       print('[JS Debug] 代码已提交执行，等待结果...');
 
       // 初始处理：密集执行微任务并处理待处理调用
-      print('[JS Debug] 初始密集处理微任务...');
       for (int i = 0; i < 50; i++) {
         // 处理待处理的 Promise 调用
         _runtime.evaluate('''
@@ -355,28 +345,18 @@ class MobileJSEngine implements JSEngine {
             var pendingKeys = Object.keys(globalThis.__PENDING_CALLS__ || {});
             var resultKeys = Object.keys(globalThis.__DART_RESULTS__ || {});
 
-            if (pendingKeys.length > 0) {
-              console.log('[轮询] 待处理调用:', pendingKeys.length, '个');
-              console.log('[轮询] 待处理 keys:', pendingKeys);
-              console.log('[轮询] 结果 keys:', resultKeys);
-            }
 
             for (var i = 0; i < pendingKeys.length; i++) {
               var key = pendingKeys[i];
               var pending = globalThis.__PENDING_CALLS__[key];
 
-              console.log('[轮询] 检查 key:', key);
-              console.log('[轮询] 结果中是否有此 key:', key in globalThis.__DART_RESULTS__);
-
               if (globalThis.__DART_RESULTS__[key]) {
-                console.log('[轮询] ✓ 找到结果！');
                 var resultJson = globalThis.__DART_RESULTS__[key];
                 delete globalThis.__DART_RESULTS__[key];
                 delete globalThis.__PENDING_CALLS__[key];
 
                 try {
                   var parsed = JSON.parse(resultJson);
-                  console.log('[轮询] 调用 resolve');
                   if (parsed && parsed.error) {
                     pending.reject(new Error(parsed.error));
                   } else {
@@ -385,8 +365,6 @@ class MobileJSEngine implements JSEngine {
                 } catch (e) {
                   pending.resolve(resultJson);
                 }
-              } else {
-                console.log('[轮询] ✗ 未找到匹配结果');
               }
             }
           })();
@@ -413,14 +391,12 @@ class MobileJSEngine implements JSEngine {
 
               // 检查 Dart 是否已返回结果
               if (globalThis.__DART_RESULTS__[key]) {
-                console.log('[主轮询] 找到结果，key:', key);
                 var resultJson = globalThis.__DART_RESULTS__[key];
                 delete globalThis.__DART_RESULTS__[key];
                 delete globalThis.__PENDING_CALLS__[key];
 
                 try {
                   var parsed = JSON.parse(resultJson);
-                  console.log('[主轮询] 调用 resolve');
                   if (parsed && parsed.error) {
                     pending.reject(new Error(parsed.error));
                   } else {

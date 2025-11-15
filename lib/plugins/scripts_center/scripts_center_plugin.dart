@@ -11,8 +11,68 @@ import 'services/script_executor.dart';
 import 'models/script_folder.dart';
 import 'screens/scripts_list_screen.dart';
 
-/// 将 EventArgs 对象序列化为 Map，以便传递给 JavaScript
-Map<String, dynamic> _serializeEventArgs(EventArgs args) {
+/// 深度序列化对象为 JSON 兼容的 Map/List/基本类型（异步版本）
+Future<dynamic> _deepSerializeAsync(dynamic value) async {
+  // null 值
+  if (value == null) {
+    return null;
+  }
+
+  // 基本类型：String, num, bool
+  if (value is String || value is num || value is bool) {
+    return value;
+  }
+
+  // DateTime 转为 ISO 8601 字符串
+  if (value is DateTime) {
+    return value.toIso8601String();
+  }
+
+  // List 类型：递归序列化每个元素
+  if (value is List) {
+    final results = <dynamic>[];
+    for (final item in value) {
+      results.add(await _deepSerializeAsync(item));
+    }
+    return results;
+  }
+
+  // Map 类型：递归序列化每个值
+  if (value is Map) {
+    final result = <String, dynamic>{};
+    for (final entry in value.entries) {
+      result[entry.key.toString()] = await _deepSerializeAsync(entry.value);
+    }
+    return result;
+  }
+
+  // 尝试调用 toJson 方法（如果存在）
+  try {
+    final dynamic obj = value;
+    final jsonResult = obj.toJson();
+
+    // 如果 toJson 返回 Future，等待它
+    if (jsonResult is Future) {
+      final awaited = await jsonResult;
+      return await _deepSerializeAsync(awaited);
+    }
+
+    // 递归序列化 toJson 的结果
+    return await _deepSerializeAsync(jsonResult);
+  } catch (e) {
+    // 对象没有 toJson 方法或调用失败，继续尝试其他方法
+  }
+
+  // 尝试转换为字符串（最后的兜底方案）
+  try {
+    return value.toString();
+  } catch (e) {
+    return '<无法序列化: ${value.runtimeType}>';
+  }
+}
+
+/// 将 EventArgs 对象序列化为 Map，以便传递给 JavaScript（异步版本）
+Future<Map<String, dynamic>> _serializeEventArgsAsync(EventArgs args) async {
   final Map<String, dynamic> result = {
     'eventName': args.eventName,
     'whenOccurred': args.whenOccurred.toIso8601String(),
@@ -24,10 +84,10 @@ Map<String, dynamic> _serializeEventArgs(EventArgs args) {
     result['title'] = args.title;
     result['action'] = args.action;
   } else if (args is Value) {
-    result['value'] = args.value;
+    result['value'] = await _deepSerializeAsync(args.value);
   } else if (args is Values) {
-    result['value1'] = args.value1;
-    result['value2'] = args.value2;
+    result['value1'] = await _deepSerializeAsync(args.value1);
+    result['value2'] = await _deepSerializeAsync(args.value2);
   } else if (args is UpdateEvent) {
     result['version'] = args.version;
     result['forceUpdate'] = args.forceUpdate;
@@ -36,7 +96,8 @@ Map<String, dynamic> _serializeEventArgs(EventArgs args) {
     }
   }
 
-  return result;
+  // 深度序列化整个 result，确保所有嵌套对象都被转换
+  return await _deepSerializeAsync(result) as Map<String, dynamic>;
 }
 
 /// 脚本中心插件
@@ -187,8 +248,8 @@ class ScriptsCenterPlugin extends BasePlugin {
 
               // 执行脚本
               try {
-                // 序列化事件数据
-                final eventData = _serializeEventArgs(args);
+                // 序列化事件数据（异步）
+                final eventData = await _serializeEventArgsAsync(args);
 
                 final result = await _scriptExecutor.execute(
                   script.id,
