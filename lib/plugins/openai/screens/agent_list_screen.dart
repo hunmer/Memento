@@ -1,5 +1,6 @@
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
+import 'package:Memento/plugins/openai/controllers/analysis_preset_controller.dart';
 import 'package:flutter/material.dart';
 import '../l10n/openai_localizations.dart';
 import '../openai_plugin.dart';
@@ -7,9 +8,13 @@ import '../controllers/tool_app_controller.dart';
 import '../widgets/agent_list_view.dart';
 import '../widgets/agent_grid_view.dart';
 import '../widgets/tool_app_grid_view.dart';
+import '../widgets/analysis_preset_list.dart';
+import '../widgets/basic_info_dialog.dart';
 import '../widgets/filter_dialog.dart';
 import '../models/ai_agent.dart';
+import '../models/analysis_preset.dart';
 import 'agent_edit_screen.dart';
+import 'preset_run_screen.dart';
 
 class AgentListScreen extends StatefulWidget {
   const AgentListScreen({super.key});
@@ -23,6 +28,7 @@ class _AgentListScreenState extends State<AgentListScreen>
   late TabController _tabController;
   late AgentController _agentController;
   late ToolAppController _toolAppController;
+  late AnalysisPresetController _presetController;
   bool _isGridView = true;
   Set<String> _selectedProviders = {};
   Set<String> _selectedTags = {};
@@ -33,8 +39,15 @@ class _AgentListScreenState extends State<AgentListScreen>
     _tabController = TabController(length: 2, vsync: this);
     _agentController = OpenAIPlugin.instance.controller;
     _toolAppController = ToolAppController();
+    _presetController = AnalysisPresetController();
     _agentController.addListener(_onAgentsChanged);
     _loadAgents();
+    _presetController.loadPresets();
+
+    // 监听Tab切换以更新FAB显示
+    _tabController.addListener(() {
+      setState(() {}); // 触发rebuild以更新FAB显示
+    });
   }
 
   @override
@@ -85,6 +98,34 @@ class _AgentListScreenState extends State<AgentListScreen>
     }).toList();
   }
 
+  // 打开基础信息对话框（编辑预设）
+  void _openPresetDialog(AnalysisPreset? preset) async {
+    final result = await showDialog<AnalysisPreset>(
+      context: context,
+      builder: (context) => BasicInfoDialog(preset: preset),
+    );
+
+    // 对话框关闭后刷新列表
+    if (result != null && mounted) {
+      await _presetController.loadPresets();
+    }
+  }
+
+  // 打开预设运行页面
+  void _openPresetRunScreen(AnalysisPreset preset) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PresetRunScreen(preset: preset),
+      ),
+    );
+
+    // 页面返回后刷新列表
+    if (mounted) {
+      await _presetController.loadPresets();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,16 +171,20 @@ class _AgentListScreenState extends State<AgentListScreen>
                     ? AgentGridView(agents: _getFilteredAgents())
                     : AgentListView(agents: _getFilteredAgents()),
           ),
-          // Tools Tab
+          // Analysis Tab (原Tools Tab)
           Scaffold(
             appBar: AppBar(
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => PluginManager.toHomeScreen(context),
               ),
-              title: Text(OpenAILocalizations.of(context).toolsTitle),
+              title: Text(OpenAILocalizations.of(context).analysisTab),
             ),
-            body: _buildToolsBody(),
+            body: AnalysisPresetList(
+              controller: _presetController,
+              onPresetTap: (preset) => _openPresetDialog(preset),
+              onPresetRun: (preset) => _openPresetRunScreen(preset),
+            ),
           ),
         ],
       ),
@@ -153,8 +198,8 @@ class _AgentListScreenState extends State<AgentListScreen>
               text: OpenAILocalizations.of(context).agentsTab,
             ),
             Tab(
-              icon: const Icon(Icons.build),
-              text: OpenAILocalizations.of(context).toolsTab,
+              icon: const Icon(Icons.analytics),
+              text: OpenAILocalizations.of(context).analysisTab,
             ),
           ],
           labelColor: Theme.of(context).primaryColor,
@@ -163,6 +208,14 @@ class _AgentListScreenState extends State<AgentListScreen>
           labelStyle: const TextStyle(fontSize: 12),
         ),
       ),
+      floatingActionButton: _tabController.index == 1 // 只在分析Tab显示
+          ? FloatingActionButton(
+              onPressed: () => _openPresetDialog(null), // null表示新建预设
+              tooltip: OpenAILocalizations.of(context).addPreset,
+              child: const Icon(Icons.add),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 

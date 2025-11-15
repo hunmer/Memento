@@ -6,15 +6,20 @@ import '../services/request_service.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:flutter/material.dart';
 import '../controllers/prompt_replacement_controller.dart';
+import '../controllers/analysis_preset_controller.dart';
 import 'package:Memento/widgets/quill_viewer/index.dart';
 import '../models/ai_agent.dart';
+import '../models/analysis_preset.dart';
 import '../widgets/agent_list_drawer.dart';
 import '../widgets/plugin_method_selection_dialog.dart';
+import '../widgets/basic_info_tab.dart';
 import '../../../utils/image_utils.dart';
 import '../l10n/openai_localizations.dart';
 
 class PluginAnalysisDialog extends StatefulWidget {
-  const PluginAnalysisDialog({super.key});
+  final String? presetId; // 预设ID（null表示新建模式）
+
+  const PluginAnalysisDialog({super.key, this.presetId});
 
   @override
   State<PluginAnalysisDialog> createState() => _PluginAnalysisDialogState();
@@ -119,6 +124,9 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog>
   }
 
   final TextEditingController _promptController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  List<String> _tags = [];
   AIAgent? _selectedAgent;
   String _responseMessage = ''; // 改为空字符串初始值，方便拼接
   bool _isLoading = false;
@@ -127,18 +135,66 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog>
   final PromptReplacementController _promptReplacementController =
       PromptReplacementController();
 
+  // 预设相关
+  bool _isEditMode = false;
+  String? _currentPresetId;
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this); // 改为3个Tab
+    _isEditMode = widget.presetId != null;
+
+    if (_isEditMode) {
+      _loadPreset(widget.presetId!);
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     _promptController.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
     _streamController.close();
     super.dispose();
+  }
+
+  // 加载预设数据
+  Future<void> _loadPreset(String presetId) async {
+    final controller = AnalysisPresetController();
+    final preset = await controller.getPreset(presetId);
+
+    if (preset != null && mounted) {
+      setState(() {
+        _currentPresetId = preset.id;
+        _titleController.text = preset.title;
+        _descriptionController.text = preset.description;
+        _tags = List.from(preset.tags);
+        _promptController.text = preset.prompt;
+
+        // 加载关联的智能体
+        if (preset.agentId != null) {
+          _loadAgent(preset.agentId!);
+        }
+      });
+    }
+  }
+
+  // 加载智能体
+  Future<void> _loadAgent(String agentId) async {
+    try {
+      final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+      final agentController = plugin.controller;
+      final agent = await agentController.getAgent(agentId);
+      if (agent != null && mounted) {
+        setState(() {
+          _selectedAgent = agent;
+        });
+      }
+    } catch (e) {
+      debugPrint('加载智能体失败: $e');
+    }
   }
 
   // 打开智能体选择抽屉
@@ -267,7 +323,45 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog>
     }
   }
 
-  // 在后台线程处理API请求的方法
+  // 保存预设
+  Future<void> _savePreset() async {
+    final localizations = OpenAILocalizations.of(context);
+
+    // 验证输入
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizations.pleaseEnterTitle)),
+      );
+      return;
+    }
+
+    try {
+      final controller = AnalysisPresetController();
+      final preset = AnalysisPreset(
+        id: _currentPresetId, // 编辑模式时使用原ID，新建模式时为null
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        tags: _tags,
+        agentId: _selectedAgent?.id,
+        prompt: _promptController.text.trim(),
+        updatedAt: DateTime.now(),
+      );
+
+      await controller.savePreset(preset);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizations.presetSaved)),
+      );
+
+      Navigator.pop(context, true); // 返回true表示已保存
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${localizations.saveFailed}: $e')),
+      );
+    }
+  }
 
   // 构建表单标签页
   Widget _buildFormTab(OpenAILocalizations localizations) {
@@ -437,6 +531,7 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog>
                   TabBar(
                     controller: _tabController,
                     tabs: [
+                      Tab(text: localizations.basicInfo),
                       Tab(text: localizations.form),
                       Tab(text: localizations.output),
                     ],
@@ -446,6 +541,14 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog>
                     child: TabBarView(
                       controller: _tabController,
                       children: [
+                        // 基础信息标签页
+                        BasicInfoTab(
+                          titleController: _titleController,
+                          descriptionController: _descriptionController,
+                          tags: _tags,
+                          onTagsChanged: (newTags) => setState(() => _tags = newTags),
+                        ),
+
                         // 表单标签页内容
                         _buildFormTab(localizations),
 
@@ -463,11 +566,25 @@ class _PluginAnalysisDialogState extends State<PluginAnalysisDialog>
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                // 取消按钮
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(context, false),
                   child: Text(localizations.cancel),
                 ),
                 const SizedBox(width: 8),
+
+                // 保存预设按钮
+                ElevatedButton.icon(
+                  onPressed: _savePreset,
+                  icon: const Icon(Icons.save),
+                  label: Text(localizations.savePreset),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // 发送请求按钮
                 ElevatedButton.icon(
                   onPressed: _isLoading ? null : _sendToAgent,
                   icon: const Icon(Icons.send),
