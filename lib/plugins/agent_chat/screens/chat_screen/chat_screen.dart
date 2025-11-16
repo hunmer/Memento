@@ -6,6 +6,7 @@ import '../../services/conversation_service.dart';
 import '../../../../core/storage/storage_manager.dart';
 import 'components/message_bubble.dart';
 import 'components/message_input.dart';
+import '../tool_management_screen/tool_management_screen.dart';
 
 /// 聊天界面
 class ChatScreen extends StatefulWidget {
@@ -130,6 +131,12 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
         actions: [
+          // 工具管理按钮
+          IconButton(
+            icon: const Icon(Icons.build_outlined),
+            onPressed: _openToolManagement,
+            tooltip: '工具管理',
+          ),
           // Token统计按钮
           IconButton(
             icon: const Icon(Icons.analytics_outlined),
@@ -285,6 +292,16 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  /// 打开工具管理界面
+  void _openToolManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ToolManagementScreen(),
+      ),
     );
   }
 

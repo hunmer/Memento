@@ -1,0 +1,226 @@
+{
+  "timer_getTimers": {
+    "title": "获取计时器列表",
+    "description": "获取所有计时器任务列表",
+    "parameters": [],
+    "returns": {
+      "type": "String",
+      "description": "TimerTask 对象数组的 JSON 字符串"
+    },
+    "examples": [
+      {
+        "code": "const timers = await window.memento.timer.getTimers();\nconsole.log(JSON.parse(timers));",
+        "comment": "获取所有计时器"
+      }
+    ],
+    "notes": "返回的 TimerTask 包含: id, name, color, icon, group, isRunning, repeatCount, remainingRepeatCount, enableNotification, createdAt, timerItems(子计时器列表)",
+    "enabled": true
+  },
+  "timer_createTimer": {
+    "title": "创建计时器",
+    "description": "创建新的计时器任务",
+    "parameters": [
+      {
+        "name": "name",
+        "type": "String",
+        "optional": false,
+        "description": "计时器名称"
+      },
+      {
+        "name": "duration",
+        "type": "Number",
+        "optional": false,
+        "description": "计时时长(秒)"
+      },
+      {
+        "name": "type",
+        "type": "String",
+        "optional": false,
+        "description": "计时器类型: 'countUp'(正计时)、'countDown'(倒计时)、'pomodoro'(番茄钟)"
+      },
+      {
+        "name": "group",
+        "type": "String",
+        "optional": true,
+        "description": "分组名称,默认为 '默认'"
+      }
+    ],
+    "returns": {
+      "type": "String",
+      "description": "创建结果的 JSON 字符串,包含 success, taskId, message"
+    },
+    "examples": [
+      {
+        "code": "// 创建正计时 60 秒\nconst result = await window.memento.timer.createTimer('学习计时', 60, 'countUp', '工作');\nconsole.log(JSON.parse(result));",
+        "comment": "创建正计时"
+      },
+      {
+        "code": "// 创建倒计时 300 秒(5分钟)\nconst result2 = await window.memento.timer.createTimer('午休提醒', 300, 'countDown');\nconsole.log(JSON.parse(result2));",
+        "comment": "创建倒计时"
+      }
+    ],
+    "notes": "创建后自动生成唯一 taskId(UUID v4)。正计时从 0 开始向上计时,倒计时从设定时间向下计时,番茄钟需要额外配置工作/休息时长",
+    "enabled": true
+  },
+  "timer_deleteTimer": {
+    "title": "删除计时器",
+    "description": "删除指定的计时器任务",
+    "parameters": [
+      {
+        "name": "timerId",
+        "type": "String",
+        "optional": false,
+        "description": "计时器任务 ID"
+      }
+    ],
+    "returns": {
+      "type": "String",
+      "description": "删除结果的 JSON 字符串,包含 success, message"
+    },
+    "examples": [
+      {
+        "code": "const result = await window.memento.timer.deleteTimer('1705300800000');\nconsole.log(JSON.parse(result));",
+        "comment": "删除计时器"
+      }
+    ],
+    "notes": "删除操作不可逆,会同时删除任务及其所有子计时器",
+    "enabled": true
+  },
+  "timer_startTimer": {
+    "title": "启动计时器",
+    "description": "启动指定的计时器任务",
+    "parameters": [
+      {
+        "name": "timerId",
+        "type": "String",
+        "optional": false,
+        "description": "计时器任务 ID"
+      }
+    ],
+    "returns": {
+      "type": "String",
+      "description": "启动结果的 JSON 字符串,包含 success, message, taskId, isRunning"
+    },
+    "examples": [
+      {
+        "code": "const result = await window.memento.timer.startTimer('1705300800000');\nconsole.log(JSON.parse(result));",
+        "comment": "启动计时器"
+      }
+    ],
+    "notes": "启动后会在 Android/iOS 平台显示前台通知,多个子计时器会按顺序执行",
+    "enabled": true
+  },
+  "timer_pauseTimer": {
+    "title": "暂停计时器",
+    "description": "暂停正在运行的计时器任务",
+    "parameters": [
+      {
+        "name": "timerId",
+        "type": "String",
+        "optional": false,
+        "description": "计时器任务 ID"
+      }
+    ],
+    "returns": {
+      "type": "String",
+      "description": "暂停结果的 JSON 字符串,包含 success, message, taskId, isRunning"
+    },
+    "examples": [
+      {
+        "code": "const result = await window.memento.timer.pauseTimer('1705300800000');\nconsole.log(JSON.parse(result));",
+        "comment": "暂停计时器"
+      }
+    ],
+    "notes": "暂停后可以通过 startTimer 继续计时,已完成的进度会保留",
+    "enabled": true
+  },
+  "timer_stopTimer": {
+    "title": "停止计时器",
+    "description": "停止计时器任务(暂停 + 停止前台通知)",
+    "parameters": [
+      {
+        "name": "timerId",
+        "type": "String",
+        "optional": false,
+        "description": "计时器任务 ID"
+      }
+    ],
+    "returns": {
+      "type": "String",
+      "description": "停止结果的 JSON 字符串,包含 success, message, taskId, isRunning"
+    },
+    "examples": [
+      {
+        "code": "const result = await window.memento.timer.stopTimer('1705300800000');\nconsole.log(JSON.parse(result));",
+        "comment": "停止计时器"
+      }
+    ],
+    "notes": "与 pauseTimer 不同,stopTimer 会同时停止前台通知服务(仅 Android/iOS)",
+    "enabled": true
+  },
+  "timer_resetTimer": {
+    "title": "重置计时器",
+    "description": "重置计时器任务,清除所有进度",
+    "parameters": [
+      {
+        "name": "timerId",
+        "type": "String",
+        "optional": false,
+        "description": "计时器任务 ID"
+      }
+    ],
+    "returns": {
+      "type": "String",
+      "description": "重置结果的 JSON 字符串,包含 success, message, taskId"
+    },
+    "examples": [
+      {
+        "code": "const result = await window.memento.timer.resetTimer('1705300800000');\nconsole.log(JSON.parse(result));",
+        "comment": "重置计时器"
+      }
+    ],
+    "notes": "重置后所有子计时器的进度归零,重复次数重置,任务停止运行",
+    "enabled": true
+  },
+  "timer_getTimerStatus": {
+    "title": "获取计时器状态",
+    "description": "获取指定计时器的详细状态信息",
+    "parameters": [
+      {
+        "name": "timerId",
+        "type": "String",
+        "optional": false,
+        "description": "计时器任务 ID"
+      }
+    ],
+    "returns": {
+      "type": "String",
+      "description": "计时器状态的 JSON 字符串,包含任务信息、当前进度、活动子计时器等"
+    },
+    "examples": [
+      {
+        "code": "const status = await window.memento.timer.getTimerStatus('1705300800000');\nconsole.log(JSON.parse(status));",
+        "comment": "查询计时器状态"
+      }
+    ],
+    "notes": "返回字段: taskId, name, isRunning, isCompleted, elapsedDuration, repeatCount, remainingRepeatCount, currentTimerIndex, activeTimer(当前活动的子计时器), timerItems(所有子计时器列表)",
+    "enabled": true
+  },
+  "timer_getHistory": {
+    "title": "获取历史记录",
+    "description": "获取所有已完成的计时器任务历史",
+    "parameters": [],
+    "returns": {
+      "type": "String",
+      "description": "历史记录的 JSON 字符串,包含 total(总数) 和 tasks(任务列表)"
+    },
+    "examples": [
+      {
+        "code": "const history = await window.memento.timer.getHistory();\nconsole.log(JSON.parse(history));",
+        "comment": "查询历史记录"
+      }
+    ],
+    "notes": "返回的每个任务包含: id, name, group, createdAt, totalDuration(总时长), timerItems(子计时器信息)",
+    "enabled": true
+  }
+}

@@ -263,7 +263,7 @@ class ChatController extends ChangeNotifier {
     return attachments;
   }
 
-  /// 请求AI回复
+  /// 请求AI回复（两阶段工具调用）
   Future<void> _requestAIResponse(
     String aiMessageId,
     String userInput,
@@ -280,18 +280,17 @@ class ChatController extends ChangeNotifier {
       // 构建上下文消息
       final contextMessages = _buildContextMessages(userInput);
 
-      // 如果启用工具调用,添加工具列表到 system prompt
+      // ========== 第一阶段：发送简要索引 ==========
       if (enableToolCalling &&
           _currentAgent!.enableFunctionCalling &&
           contextMessages.isNotEmpty) {
-        final toolsPrompt = ToolService.getToolListPrompt();
+        final toolBriefPrompt = ToolService.getToolBriefPrompt();
         final originalSystemPrompt = contextMessages[0].content;
 
         contextMessages[0] = ChatCompletionMessage.system(
-          content:
-              originalSystemPrompt is String
-                  ? originalSystemPrompt + toolsPrompt
-                  : toolsPrompt,
+          content: originalSystemPrompt is String
+              ? originalSystemPrompt + toolBriefPrompt
+              : toolBriefPrompt,
         );
       }
 
@@ -299,9 +298,10 @@ class ChatController extends ChangeNotifier {
       final imageFiles =
           files.where((f) => FilePickerHelper.isImageFile(f)).toList();
 
+      // 第一阶段：流式接收 AI 回复
       await RequestService.streamResponse(
         agent: _currentAgent!,
-        prompt: null, // 使用contextMessages
+        prompt: null,
         contextMessages: contextMessages,
         vision: imageFiles.isNotEmpty,
         filePath: imageFiles.isNotEmpty ? imageFiles.first.path : null,
@@ -311,9 +311,12 @@ class ChatController extends ChangeNotifier {
 
           final content = buffer.toString();
 
-          // 检测工具调用
+          // 检测是否为工具需求（第一阶段）或工具调用（第二阶段）
+          final toolRequest = ToolService.parseToolRequest(content);
+          final containsToolCall = ToolService.containsToolCall(content);
+
           if (_currentAgent!.enableFunctionCalling &&
-              ToolService.containsToolCall(content)) {
+              (toolRequest != null || containsToolCall)) {
             isCollectingToolCall = true;
             // 显示收集中状态
             final displayContent = '$content\n\n⚙️ 正在准备工具调用...';
@@ -329,7 +332,6 @@ class ChatController extends ChangeNotifier {
               content,
             );
 
-            // 更新AI消息
             messageService.updateAIMessageContent(
               conversation.id,
               aiMessageId,
@@ -341,7 +343,6 @@ class ChatController extends ChangeNotifier {
         onError: (error) {
           debugPrint('AI响应错误: $error');
 
-          // 更新为错误消息
           messageService.updateAIMessageContent(
             conversation.id,
             aiMessageId,
@@ -352,32 +353,120 @@ class ChatController extends ChangeNotifier {
           messageService.completeAIMessage(conversation.id, aiMessageId);
         },
         onComplete: () async {
-          // 检查是否需要执行工具调用
-          if (_currentAgent!.enableFunctionCalling &&
-              ToolService.containsToolCall(buffer.toString())) {
-            await _handleToolCall(aiMessageId, buffer.toString());
-          } else {
-            // 完成生成
-            messageService.completeAIMessage(conversation.id, aiMessageId);
+          final firstResponse = buffer.toString();
 
-            // 更新会话的最后消息
-            final finalContent = RequestService.processThinkingContent(
-              buffer.toString(),
-            );
-            conversationService.updateLastMessage(
-              conversation.id,
-              finalContent.length > 50
-                  ? '${finalContent.substring(0, 50)}...'
-                  : finalContent,
-            );
+          // ========== 检测工具需求（第一阶段响应）==========
+          final toolRequest = ToolService.parseToolRequest(firstResponse);
+
+          if (_currentAgent!.enableFunctionCalling &&
+              toolRequest != null &&
+              toolRequest.isNotEmpty) {
+            debugPrint('🔍 AI 请求工具: ${toolRequest.join(", ")}');
+
+            // ========== 第二阶段：追加详细文档 ==========
+            try {
+              final detailPrompt =
+                  await ToolService.getToolDetailPrompt(toolRequest);
+
+              // 添加 AI 第一次回复到上下文
+              contextMessages.add(
+                ChatCompletionMessage.assistant(content: firstResponse),
+              );
+
+              // 添加详细文档请求
+              contextMessages.add(
+                ChatCompletionMessage.user(
+                  content: ChatCompletionUserMessageContent.string(
+                    '$detailPrompt\n\n请根据文档生成工具调用代码。',
+                  ),
+                ),
+              );
+
+              // 清空 buffer，准备接收第二阶段响应
+              buffer.clear();
+              tokenCount = 0;
+              isCollectingToolCall = false;
+
+              // 第二阶段：请求生成工具调用代码
+              await RequestService.streamResponse(
+                agent: _currentAgent!,
+                prompt: null,
+                contextMessages: contextMessages,
+                vision: false,
+                onToken: (token) {
+                  buffer.write(token);
+                  tokenCount++;
+
+                  final content = buffer.toString();
+
+                  if (_currentAgent!.enableFunctionCalling &&
+                      ToolService.containsToolCall(content)) {
+                    isCollectingToolCall = true;
+                    final displayContent = '$content\n\n⚙️ 正在准备执行工具...';
+                    messageService.updateAIMessageContent(
+                      conversation.id,
+                      aiMessageId,
+                      displayContent,
+                      tokenCount,
+                    );
+                  } else if (!isCollectingToolCall) {
+                    final processedContent =
+                        RequestService.processThinkingContent(content);
+                    messageService.updateAIMessageContent(
+                      conversation.id,
+                      aiMessageId,
+                      processedContent,
+                      tokenCount,
+                    );
+                  }
+                },
+                onError: (error) {
+                  debugPrint('第二阶段 AI 响应错误: $error');
+                  messageService.updateAIMessageContent(
+                    conversation.id,
+                    aiMessageId,
+                    '抱歉，生成工具调用时出现错误：$error',
+                    0,
+                  );
+                  messageService.completeAIMessage(conversation.id, aiMessageId);
+                },
+                onComplete: () async {
+                  final secondResponse = buffer.toString();
+
+                  // 执行工具调用
+                  if (ToolService.containsToolCall(secondResponse)) {
+                    await _handleToolCall(aiMessageId, secondResponse);
+                  } else {
+                    // 没有生成工具调用，直接完成
+                    _processNormalResponse(aiMessageId, secondResponse);
+                  }
+                },
+                replacePrompt: false,
+              );
+            } catch (e) {
+              debugPrint('第二阶段请求失败: $e');
+              messageService.updateAIMessageContent(
+                conversation.id,
+                aiMessageId,
+                '抱歉，获取工具文档时出现错误：$e',
+                0,
+              );
+              messageService.completeAIMessage(conversation.id, aiMessageId);
+            }
+          } else if (_currentAgent!.enableFunctionCalling &&
+              ToolService.containsToolCall(firstResponse)) {
+            // 直接包含工具调用（跳过第一阶段）
+            await _handleToolCall(aiMessageId, firstResponse);
+          } else {
+            // 无需工具，直接完成
+            _processNormalResponse(aiMessageId, firstResponse);
           }
         },
-        replacePrompt: false, // 不替换prompt
+        replacePrompt: false,
       );
     } catch (e) {
       debugPrint('请求AI回复失败: $e');
 
-      // 更新为错误消息
       messageService.updateAIMessageContent(
         conversation.id,
         aiMessageId,
@@ -387,6 +476,28 @@ class ChatController extends ChangeNotifier {
 
       messageService.completeAIMessage(conversation.id, aiMessageId);
     }
+  }
+
+  /// 处理正常回复（无需工具调用）
+  void _processNormalResponse(String messageId, String content) {
+    final processedContent = RequestService.processThinkingContent(content);
+
+    messageService.updateAIMessageContent(
+      conversation.id,
+      messageId,
+      processedContent,
+      TokenCounterService.estimateTokenCount(content),
+    );
+
+    messageService.completeAIMessage(conversation.id, messageId);
+
+    // 更新会话的最后消息
+    conversationService.updateLastMessage(
+      conversation.id,
+      processedContent.length > 50
+          ? '${processedContent.substring(0, 50)}...'
+          : processedContent,
+    );
   }
 
   /// 构建上下文消息列表
