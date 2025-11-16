@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../controllers/chat_controller.dart';
+import '../../../models/chat_command.dart';
 import '../../../../../utils/file_picker_helper.dart';
 import 'suggested_questions_dialog.dart';
+import 'command_selector.dart';
 
 /// 消息输入框组件
 class MessageInput extends StatefulWidget {
@@ -20,6 +22,10 @@ class MessageInput extends StatefulWidget {
 class _MessageInputState extends State<MessageInput> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  // 命令模式状态
+  bool _isCommandMode = false;
+  List<ChatCommand> _filteredCommands = [];
 
   @override
   void initState() {
@@ -39,7 +45,19 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _onTextChanged() {
-    widget.controller.setInputText(_textController.text);
+    final text = _textController.text;
+    widget.controller.setInputText(text);
+
+    // 检测命令模式
+    setState(() {
+      if (text.startsWith('/') && !text.contains('\n')) {
+        _isCommandMode = true;
+        _filteredCommands = ChatCommand.filterCommands(text);
+      } else {
+        _isCommandMode = false;
+        _filteredCommands = [];
+      }
+    });
   }
 
   void _onControllerChanged() {
@@ -72,6 +90,13 @@ class _MessageInputState extends State<MessageInput> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 命令选择器
+          if (_isCommandMode && _filteredCommands.isNotEmpty)
+            CommandSelector(
+              commands: _filteredCommands,
+              onCommandSelected: _handleCommandSelected,
+            ),
+
           // 文件预览区域
           if (widget.controller.selectedFiles.isNotEmpty)
             _buildFilePreview(),
@@ -319,10 +344,103 @@ class _MessageInputState extends State<MessageInput> {
     }
   }
 
+  /// 处理命令选择
+  void _handleCommandSelected(ChatCommand command) {
+    switch (command.type) {
+      case ChatCommandType.files:
+        _executeFilesCommand();
+        break;
+      case ChatCommandType.tools:
+        // 如果需要参数，填充命令模板
+        if (command.requiresArgument) {
+          _textController.text = '/${command.command} ';
+          _textController.selection = TextSelection.fromPosition(
+            TextPosition(offset: _textController.text.length),
+          );
+          _focusNode.requestFocus();
+        } else {
+          _executeToolsCommand(null);
+        }
+        break;
+    }
+  }
+
+  /// 执行 /files 命令
+  void _executeFilesCommand() {
+    // 清空输入框
+    _textController.clear();
+    widget.controller.setInputText('');
+
+    // 显示附件菜单
+    _showAttachmentMenu();
+  }
+
+  /// 执行 /tools 命令
+  Future<void> _executeToolsCommand(String? toolName) async {
+    // 清空输入框
+    _textController.clear();
+    widget.controller.setInputText('');
+
+    if (toolName == null || toolName.trim().isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('请指定工具模板名称，例如: /tools 导出数据'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      await widget.controller.executeToolTemplate(toolName.trim());
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('执行工具失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   /// 发送消息
   Future<void> _sendMessage() async {
-    if (widget.controller.inputText.trim().isEmpty) return;
+    final text = widget.controller.inputText.trim();
+    if (text.isEmpty) return;
 
+    // 检查是否是命令
+    if (text.startsWith('/')) {
+      final (commandType, argument) = ChatCommand.parseInput(text);
+
+      if (commandType != null) {
+        // 执行命令
+        switch (commandType) {
+          case ChatCommandType.files:
+            _executeFilesCommand();
+            return;
+          case ChatCommandType.tools:
+            await _executeToolsCommand(argument);
+            return;
+        }
+      } else {
+        // 无效命令
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('无效的命令'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+    }
+
+    // 正常发送消息
     try {
       await widget.controller.sendMessage();
       _focusNode.requestFocus();

@@ -1,0 +1,289 @@
+{
+  "testSync": {
+    "title": "测试同步",
+    "description": "测试物品插件的数据同步功能",
+    "parameters": [],
+    "returns": {
+      "type": "string",
+      "description": "同步测试结果信息"
+    },
+    "examples": [
+      {
+        "title": "测试同步",
+        "code": "const result = await Memento.plugins.goods.testSync();\nsetResult(result);"
+      }
+    ],
+    "notes": "用于调试和验证数据同步功能",
+    "enabled": true
+  },
+  "getWarehouses": {
+    "title": "获取所有仓库",
+    "description": "获取所有物品仓库的列表（不含物品数据）",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "仓库列表，每个元素包含 id、name、description、createdAt 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取所有仓库",
+        "code": "const warehouses = await Memento.plugins.goods.getWarehouses();\nsetResult(JSON.stringify(warehouses, null, 2));"
+      }
+    ],
+    "notes": "返回的仓库对象不包含 items 字段，如需获取物品请使用 getGoods",
+    "enabled": true
+  },
+  "getWarehouse": {
+    "title": "获取单个仓库",
+    "description": "根据ID获取指定仓库的详细信息",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "仓库对象（不含物品数据）"
+    },
+    "examples": [
+      {
+        "title": "获取仓库详情",
+        "code": "const warehouse = await Memento.plugins.goods.getWarehouse('wh123');\nsetResult(JSON.stringify(warehouse, null, 2));"
+      }
+    ],
+    "notes": "如仓库不存在则返回 null",
+    "enabled": true
+  },
+  "createWarehouse": {
+    "title": "创建仓库",
+    "description": "创建一个新的物品仓库",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "仓库名称"},
+      {"name": "description", "type": "string", "required": false, "description": "仓库描述"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的仓库对象"
+    },
+    "examples": [
+      {
+        "title": "创建简单仓库",
+        "code": "const wh = await Memento.plugins.goods.createWarehouse('我的仓库', '存放个人物品');\nsetResult(`仓库已创建: ${wh.name}`);"
+      },
+      {
+        "title": "创建仓库（仅名称）",
+        "code": "const wh = await Memento.plugins.goods.createWarehouse('工具箱');\nsetResult(`仓库ID: ${wh.id}`);"
+      }
+    ],
+    "notes": "新创建的仓库初始为空，不包含任何物品",
+    "enabled": true
+  },
+  "updateWarehouse": {
+    "title": "更新仓库",
+    "description": "更新仓库的名称或描述",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"},
+      {"name": "name", "type": "string", "required": false, "description": "新名称"},
+      {"name": "description", "type": "string", "required": false, "description": "新描述"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的仓库对象"
+    },
+    "examples": [
+      {
+        "title": "更新仓库名称",
+        "code": "const updated = await Memento.plugins.goods.updateWarehouse('wh123', '新名称');\nsetResult(`仓库已更新: ${updated.name}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，未提供的字段保持不变",
+    "enabled": true
+  },
+  "deleteWarehouse": {
+    "title": "删除仓库",
+    "description": "删除指定的仓库（包括其中的所有物品）",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除仓库",
+        "code": "const success = await Memento.plugins.goods.deleteWarehouse('wh123');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆，会同时删除该仓库下的所有物品",
+    "enabled": true
+  },
+  "clearWarehouse": {
+    "title": "清空仓库",
+    "description": "删除指定仓库中的所有物品（保留仓库本身）",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "清空成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "清空仓库",
+        "code": "const success = await Memento.plugins.goods.clearWarehouse('wh123');\nsetResult(success ? '仓库已清空' : '清空失败');"
+      }
+    ],
+    "notes": "仅删除物品数据，仓库本身及其名称描述保持不变",
+    "enabled": true
+  },
+  "getGoods": {
+    "title": "获取物品列表",
+    "description": "获取指定仓库中的所有物品",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "物品列表，每个元素包含 id、name、category、quantity、customFields 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取仓库中的所有物品",
+        "code": "const items = await Memento.plugins.goods.getGoods('wh123');\nsetResult(`共有 ${items.length} 件物品`);"
+      }
+    ],
+    "notes": "返回指定仓库的所有物品，包括自定义字段和使用记录",
+    "enabled": true
+  },
+  "getGoodsItem": {
+    "title": "获取单个物品",
+    "description": "根据ID获取指定物品的详细信息",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"},
+      {"name": "itemId", "type": "string", "required": true, "description": "物品ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "物品对象（包含所有字段和使用记录）"
+    },
+    "examples": [
+      {
+        "title": "获取物品详情",
+        "code": "const item = await Memento.plugins.goods.getGoodsItem('wh123', 'item456');\nsetResult(JSON.stringify(item, null, 2));"
+      }
+    ],
+    "notes": "如物品不存在则返回 null",
+    "enabled": true
+  },
+  "createGoodsItem": {
+    "title": "创建物品",
+    "description": "在指定仓库中创建新物品",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"},
+      {"name": "name", "type": "string", "required": true, "description": "物品名称"},
+      {"name": "category", "type": "string", "required": false, "description": "物品分类"},
+      {"name": "quantity", "type": "number", "required": false, "description": "数量，默认 1"},
+      {"name": "customFieldsJson", "type": "string", "required": false, "description": "自定义字段（JSON对象字符串）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的物品对象"
+    },
+    "examples": [
+      {
+        "title": "创建简单物品",
+        "code": "const item = await Memento.plugins.goods.createGoodsItem('wh123', '笔记本电脑', '电子产品', 1);\nsetResult(`物品已创建: ${item.name}`);"
+      },
+      {
+        "title": "创建带自定义字段的物品",
+        "code": "const fields = JSON.stringify({品牌: 'Apple', 型号: 'MacBook Pro', 购买日期: '2024-01-15'});\nconst item = await Memento.plugins.goods.createGoodsItem('wh123', '笔记本', '电子产品', 1, fields);\nsetResult(`物品ID: ${item.id}`);"
+      }
+    ],
+    "notes": "自定义字段可用于存储任意键值对信息（如品牌、型号、购买日期等）",
+    "enabled": true
+  },
+  "updateGoodsItem": {
+    "title": "更新物品",
+    "description": "更新物品的信息",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"},
+      {"name": "itemId", "type": "string", "required": true, "description": "物品ID"},
+      {"name": "name", "type": "string", "required": false, "description": "新名称"},
+      {"name": "category", "type": "string", "required": false, "description": "新分类"},
+      {"name": "quantity", "type": "number", "required": false, "description": "新数量"},
+      {"name": "customFieldsJson", "type": "string", "required": false, "description": "新自定义字段"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的物品对象"
+    },
+    "examples": [
+      {
+        "title": "更新物品数量",
+        "code": "const updated = await Memento.plugins.goods.updateGoodsItem('wh123', 'item456', null, null, 5);\nsetResult(`数量已更新为: ${updated.quantity}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，未提供的字段保持不变",
+    "enabled": true
+  },
+  "deleteGoodsItem": {
+    "title": "删除物品",
+    "description": "删除指定的物品（包括使用记录）",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"},
+      {"name": "itemId", "type": "string", "required": true, "description": "物品ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除物品",
+        "code": "const success = await Memento.plugins.goods.deleteGoodsItem('wh123', 'item456');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆，会同时删除该物品的所有使用记录",
+    "enabled": true
+  },
+  "addUsageRecord": {
+    "title": "添加使用记录",
+    "description": "为物品添加一条使用记录",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"},
+      {"name": "itemId", "type": "string", "required": true, "description": "物品ID"},
+      {"name": "dateStr", "type": "string", "required": true, "description": "使用日期（格式：YYYY-MM-DD）"},
+      {"name": "note", "type": "string", "required": false, "description": "使用备注"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新添加的使用记录对象"
+    },
+    "examples": [
+      {
+        "title": "添加使用记录",
+        "code": "const record = await Memento.plugins.goods.addUsageRecord('wh123', 'item456', '2025-01-15', '用于编程');\nsetResult(`已记录使用: ${record.date}`);"
+      }
+    ],
+    "notes": "使用记录用于追踪物品的使用历史和频率",
+    "enabled": true
+  },
+  "getStatistics": {
+    "title": "获取统计信息",
+    "description": "获取指定仓库的物品统计信息",
+    "parameters": [
+      {"name": "warehouseId", "type": "string", "required": true, "description": "仓库ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象，包含总物品数、分类统计、使用频率等信息"
+    },
+    "examples": [
+      {
+        "title": "获取仓库统计",
+        "code": "const stats = await Memento.plugins.goods.getStatistics('wh123');\nsetResult(`总物品数: ${stats.totalItems}, 分类数: ${stats.categoryCount}`);"
+      }
+    ],
+    "notes": "统计信息包括物品总数、各分类物品数、最常用物品等",
+    "enabled": true
+  }
+}

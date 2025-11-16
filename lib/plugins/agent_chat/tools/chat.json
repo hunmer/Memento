@@ -1,0 +1,167 @@
+{
+  "testSync": {
+    "title": "测试同步",
+    "description": "测试聊天插件的同步功能",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "测试结果对象"
+    },
+    "examples": [
+      {
+        "title": "测试同步",
+        "code": "const result = await Memento.plugins.chat.testSync();\nsetResult(JSON.stringify(result, null, 2));"
+      }
+    ],
+    "notes": "用于调试和验证插件功能",
+    "enabled": true
+  },
+  "getChannels": {
+    "title": "获取所有频道",
+    "description": "获取所有聊天频道的列表",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "频道列表，每个元素包含 id、name、lastMessage 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取所有频道",
+        "code": "const channels = await Memento.plugins.chat.getChannels();\nsetResult(JSON.stringify(channels, null, 2));"
+      }
+    ],
+    "notes": "返回所有聊天频道，不包含具体的消息内容",
+    "enabled": true
+  },
+  "createChannel": {
+    "title": "创建频道",
+    "description": "创建一个新的聊天频道",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "频道名称"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的频道对象"
+    },
+    "examples": [
+      {
+        "title": "创建频道",
+        "code": "const channel = await Memento.plugins.chat.createChannel('工作交流');\nsetResult(`频道已创建: ${channel.name}`);"
+      }
+    ],
+    "notes": "新创建的频道初始为空，不包含任何消息",
+    "enabled": true
+  },
+  "deleteChannel": {
+    "title": "删除频道",
+    "description": "删除指定的频道（包括所有消息）",
+    "parameters": [
+      {"name": "channelId", "type": "string", "required": true, "description": "频道ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除频道",
+        "code": "const success = await Memento.plugins.chat.deleteChannel('channel123');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆，会同时删除该频道下的所有消息",
+    "enabled": true
+  },
+  "sendMessage": {
+    "title": "发送消息",
+    "description": "在指定频道发送一条消息",
+    "parameters": [
+      {"name": "channelId", "type": "string", "required": true, "description": "频道ID"},
+      {"name": "content", "type": "string", "required": true, "description": "消息内容"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新发送的消息对象"
+    },
+    "examples": [
+      {
+        "title": "发送文本消息",
+        "code": "const message = await Memento.plugins.chat.sendMessage('channel123', '你好，这是一条测试消息');\nsetResult(`消息已发送: ${message.id}`);"
+      }
+    ],
+    "notes": "消息发送者自动设置为当前用户",
+    "enabled": true
+  },
+  "getMessages": {
+    "title": "获取频道消息",
+    "description": "获取指定频道的所有消息",
+    "parameters": [
+      {"name": "channelId", "type": "string", "required": true, "description": "频道ID"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "消息列表，每条消息包含 id、content、userId、timestamp 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取频道消息",
+        "code": "const messages = await Memento.plugins.chat.getMessages('channel123');\nsetResult(`频道共有 ${messages.length} 条消息`);"
+      }
+    ],
+    "notes": "消息按时间升序排列",
+    "enabled": true
+  },
+  "deleteMessage": {
+    "title": "删除消息",
+    "description": "删除指定的消息",
+    "parameters": [
+      {"name": "channelId", "type": "string", "required": true, "description": "频道ID"},
+      {"name": "messageId", "type": "string", "required": true, "description": "消息ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除消息",
+        "code": "const success = await Memento.plugins.chat.deleteMessage('channel123', 'msg456');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆",
+    "enabled": true
+  },
+  "getCurrentUser": {
+    "title": "获取当前用户",
+    "description": "获取当前登录用户的信息",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "用户对象，包含 id、name、avatar 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取当前用户",
+        "code": "const user = await Memento.plugins.chat.getCurrentUser();\nsetResult(JSON.stringify(user, null, 2));"
+      }
+    ],
+    "notes": "返回当前用户的基本信息",
+    "enabled": true
+  },
+  "getAIUser": {
+    "title": "获取AI用户",
+    "description": "获取AI助手用户的信息",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "AI用户对象，包含 id、name、avatar、isAI 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取AI用户",
+        "code": "const aiUser = await Memento.plugins.chat.getAIUser();\nsetResult(JSON.stringify(aiUser, null, 2));"
+      }
+    ],
+    "notes": "返回AI助手的用户信息，isAI 字段为 true",
+    "enabled": true
+  }
+}

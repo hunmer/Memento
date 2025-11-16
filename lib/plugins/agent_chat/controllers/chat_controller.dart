@@ -11,10 +11,12 @@ import '../models/conversation.dart';
 import '../models/chat_message.dart';
 import '../models/file_attachment.dart';
 import '../models/tool_call_step.dart';
+import '../models/saved_tool_template.dart';
 import '../services/message_service.dart';
 import '../services/conversation_service.dart';
 import '../services/token_counter_service.dart';
 import '../services/tool_service.dart';
+import '../services/tool_template_service.dart';
 import '../../../utils/file_picker_helper.dart';
 
 /// 聊天控制器
@@ -24,6 +26,7 @@ class ChatController extends ChangeNotifier {
   final Conversation conversation;
   final MessageService messageService;
   final ConversationService conversationService;
+  final ToolTemplateService? templateService;
   bool _conversationServiceInitialized = false;
 
   /// 当前Agent
@@ -45,6 +48,7 @@ class ChatController extends ChangeNotifier {
     required this.conversation,
     required this.messageService,
     required this.conversationService,
+    this.templateService,
   });
 
   // ========== Getters ==========
@@ -878,6 +882,97 @@ class ChatController extends ChangeNotifier {
       }
     } else {
       debugPrint('⚠️ AI回复还在生成中或未找到');
+    }
+  }
+
+  // ========== 工具模板执行 ==========
+
+  /// 执行工具模板
+  Future<void> executeToolTemplate(String templateName) async {
+    if (templateService == null) {
+      throw Exception('工具模板服务未初始化');
+    }
+
+    // 查找模板
+    final template = templateService!.getTemplateByName(templateName);
+    if (template == null) {
+      throw Exception('未找到工具模板: $templateName');
+    }
+
+    // 标记模板为已使用
+    await templateService!.markTemplateAsUsed(template.id);
+
+    // 创建AI消息占位符
+    final aiMessage = ChatMessage.ai(
+      conversationId: conversation.id,
+      content: '正在执行工具: ${template.name}',
+      isGenerating: true,
+    );
+
+    // 设置工具调用步骤
+    final toolCall = ToolCallResponse(steps: template.steps);
+    final messageWithToolCall = aiMessage.copyWith(toolCall: toolCall);
+
+    await messageService.addMessage(messageWithToolCall);
+
+    // 执行工具调用步骤
+    await _executeToolSteps(messageWithToolCall.id, template.steps);
+  }
+
+  /// 执行工具调用步骤
+  Future<void> _executeToolSteps(
+    String messageId,
+    List<ToolCallStep> steps,
+  ) async {
+    for (var i = 0; i < steps.length; i++) {
+      final step = steps[i];
+
+      // 更新步骤状态为运行中
+      step.status = ToolCallStatus.running;
+      await _updateMessageToolSteps(messageId, steps);
+
+      try {
+        // 执行步骤
+        final result = await ToolService.executeToolStep(step);
+
+        // 更新步骤状态为成功
+        step.status = ToolCallStatus.success;
+        step.result = result;
+        await _updateMessageToolSteps(messageId, steps);
+      } catch (e) {
+        // 更新步骤状态为失败
+        step.status = ToolCallStatus.failed;
+        step.error = e.toString();
+        await _updateMessageToolSteps(messageId, steps);
+        break; // 停止执行后续步骤
+      }
+    }
+
+    // 完成消息生成
+    final message = messageService.getMessage(conversation.id, messageId);
+    if (message != null) {
+      final completedMessage = message.copyWith(
+        isGenerating: false,
+        content: '工具执行完成',
+      );
+      await messageService.updateMessage(completedMessage);
+    }
+
+    notifyListeners();
+  }
+
+  /// 更新消息的工具调用步骤
+  Future<void> _updateMessageToolSteps(
+    String messageId,
+    List<ToolCallStep> steps,
+  ) async {
+    final message = messageService.getMessage(conversation.id, messageId);
+    if (message != null) {
+      final updatedMessage = message.copyWith(
+        toolCall: ToolCallResponse(steps: steps),
+      );
+      await messageService.updateMessage(updatedMessage);
+      notifyListeners();
     }
   }
 

@@ -1,0 +1,148 @@
+{
+  "getActivities": {
+    "title": "获取活动列表",
+    "description": "获取指定日期的所有活动记录",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "活动列表，每个活动包含 id、startTime、endTime、title、tags、description、mood、color 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取今日活动",
+        "code": "const today = new Date().toISOString().split('T')[0];\nconst activities = await Memento.plugins.activity.getActivities(today);\nsetResult(`今天共有 ${activities.length} 个活动`);"
+      }
+    ],
+    "notes": "日期格式必须为 YYYY-MM-DD，返回的活动按时间顺序排列",
+    "enabled": true
+  },
+  "createActivity": {
+    "title": "创建活动记录",
+    "description": "创建一个新的活动记录",
+    "parameters": [
+      {"name": "startTime", "type": "string", "required": true, "description": "开始时间（ISO 8601 格式）"},
+      {"name": "endTime", "type": "string", "required": true, "description": "结束时间（ISO 8601 格式）"},
+      {"name": "title", "type": "string", "required": true, "description": "活动标题"},
+      {"name": "tags", "type": "Array", "required": false, "description": "标签数组（如：[\"工作\", \"会议\"]）"},
+      {"name": "description", "type": "string", "required": false, "description": "活动描述"},
+      {"name": "mood", "type": "string", "required": false, "description": "心情表情（如：😊）"},
+      {"name": "color", "type": "string", "required": false, "description": "活动颜色（整数值字符串）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "创建结果对象，包含 success 和 activity 字段"
+    },
+    "examples": [
+      {
+        "title": "创建简单活动",
+        "code": "const result = await Memento.plugins.activity.createActivity(\n  '2025-01-15T08:00:00.000Z',\n  '2025-01-15T10:00:00.000Z',\n  '晨间会议'\n);\nsetResult(result.success ? '创建成功' : '创建失败');"
+      },
+      {
+        "title": "创建完整活动",
+        "code": "const result = await Memento.plugins.activity.createActivity(\n  '2025-01-15T08:00:00.000Z',\n  '2025-01-15T10:00:00.000Z',\n  '项目会议',\n  ['工作', '会议'],\n  '讨论项目进度',\n  '😊',\n  '4294198070'\n);\nsetResult(`活动ID: ${result.activity.id}`);"
+      }
+    ],
+    "notes": "如果时间段与现有活动重叠，会自动替换原活动；结束时间必须晚于开始时间",
+    "enabled": true
+  },
+  "updateActivity": {
+    "title": "更新活动记录",
+    "description": "更新指定的活动记录",
+    "parameters": [
+      {"name": "activityId", "type": "string", "required": true, "description": "活动ID"},
+      {"name": "dateStr", "type": "string", "required": true, "description": "活动所在日期（格式：YYYY-MM-DD）"},
+      {"name": "startTime", "type": "string", "required": true, "description": "开始时间（ISO 8601 格式）"},
+      {"name": "endTime", "type": "string", "required": true, "description": "结束时间（ISO 8601 格式）"},
+      {"name": "title", "type": "string", "required": true, "description": "活动标题"},
+      {"name": "tags", "type": "Array", "required": false, "description": "标签数组"},
+      {"name": "description", "type": "string", "required": false, "description": "活动描述"},
+      {"name": "mood", "type": "string", "required": false, "description": "心情表情"},
+      {"name": "color", "type": "string", "required": false, "description": "活动颜色"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新结果对象，包含 success 和 activity 字段"
+    },
+    "examples": [
+      {
+        "title": "更新活动",
+        "code": "const result = await Memento.plugins.activity.updateActivity(\n  'activity-id-123',\n  '2025-01-15',\n  '2025-01-15T09:00:00.000Z',\n  '2025-01-15T11:00:00.000Z',\n  '修改后的会议',\n  ['工作'],\n  '延长了会议时间',\n  '😊'\n);\nsetResult(result.success ? '更新成功' : result.error);"
+      }
+    ],
+    "notes": "如果修改后的时间与其他活动重叠会返回错误；如果日期改变，会自动迁移到新日期文件",
+    "enabled": true
+  },
+  "deleteActivity": {
+    "title": "删除活动记录",
+    "description": "删除指定的活动记录",
+    "parameters": [
+      {"name": "activityId", "type": "string", "required": true, "description": "活动ID"},
+      {"name": "dateStr", "type": "string", "required": true, "description": "活动所在日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "删除结果对象，包含 success 字段"
+    },
+    "examples": [
+      {
+        "title": "删除活动",
+        "code": "const result = await Memento.plugins.activity.deleteActivity('activity-id-123', '2025-01-15');\nsetResult(result.success ? '删除成功' : result.error);"
+      }
+    ],
+    "notes": "删除操作不可逆，请谨慎使用",
+    "enabled": true
+  },
+  "getTodayStats": {
+    "title": "获取今日统计",
+    "description": "获取今天的活动统计信息",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象，包含 activityCount（活动数）、durationMinutes（总时长分钟）、durationHours（总时长小时）、remainingMinutes（剩余分钟）、remainingHours（剩余小时）"
+    },
+    "examples": [
+      {
+        "title": "获取今日统计",
+        "code": "const stats = await Memento.plugins.activity.getTodayStats();\nsetResult(`今天记录了 ${stats.activityCount} 个活动，共 ${stats.durationHours} 小时，还剩 ${stats.remainingHours} 小时`);"
+      }
+    ],
+    "notes": "统计数据基于今天的所有活动记录，剩余时间计算到当天 23:59",
+    "enabled": true
+  },
+  "getTagGroups": {
+    "title": "获取标签分组",
+    "description": "获取所有标签分组配置",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "标签分组列表，每个分组包含 name 和 tags 字段"
+    },
+    "examples": [
+      {
+        "title": "获取标签分组",
+        "code": "const groups = await Memento.plugins.activity.getTagGroups();\nsetResult(JSON.stringify(groups, null, 2));"
+      }
+    ],
+    "notes": "标签分组用于组织和快速选择标签",
+    "enabled": true
+  },
+  "getRecentTags": {
+    "title": "获取最近使用的标签",
+    "description": "获取最近使用的标签列表",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "最近使用的标签数组（最多10个）"
+    },
+    "examples": [
+      {
+        "title": "获取最近标签",
+        "code": "const recentTags = await Memento.plugins.activity.getRecentTags();\nsetResult(`最近使用的标签: ${recentTags.join(', ')}`);"
+      }
+    ],
+    "notes": "最多保留10个最近使用的标签，新使用的标签会排在前面",
+    "enabled": true
+  }
+}

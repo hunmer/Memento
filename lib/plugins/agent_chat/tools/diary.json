@@ -1,0 +1,153 @@
+{
+  "getTodayWordCount": {
+    "title": "获取今日字数",
+    "description": "获取今天日记的字数统计",
+    "parameters": [],
+    "returns": {
+      "type": "number",
+      "description": "今日日记字数"
+    },
+    "examples": [
+      {
+        "title": "获取今日字数",
+        "code": "const count = await Memento.plugins.diary.getTodayWordCount();\nsetResult(`今天写了 ${count} 字`);"
+      }
+    ],
+    "notes": "仅统计今天的日记内容字数",
+    "enabled": true
+  },
+  "getMonthWordCount": {
+    "title": "获取本月字数",
+    "description": "获取本月所有日记的总字数",
+    "parameters": [],
+    "returns": {
+      "type": "number",
+      "description": "本月总字数"
+    },
+    "examples": [
+      {
+        "title": "获取本月字数",
+        "code": "const count = await Memento.plugins.diary.getMonthWordCount();\nsetResult(`本月共写了 ${count} 字`);"
+      }
+    ],
+    "notes": "统计当前月份所有日记的字数总和",
+    "enabled": true
+  },
+  "getMonthProgress": {
+    "title": "获取本月进度",
+    "description": "获取本月日记完成进度",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "进度对象，包含 completedDays（已完成天数）和 totalDays（总天数）"
+    },
+    "examples": [
+      {
+        "title": "获取本月进度",
+        "code": "const progress = await Memento.plugins.diary.getMonthProgress();\nsetResult(`本月进度: ${progress.completedDays}/${progress.totalDays}`);"
+      }
+    ],
+    "notes": "返回格式为元组 (completedDays, totalDays)",
+    "enabled": true
+  },
+  "loadDiaryEntry": {
+    "title": "加载日记条目",
+    "description": "加载指定日期的日记",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "日记对象，包含 title、content、mood 等字段，如不存在则返回 null"
+    },
+    "examples": [
+      {
+        "title": "加载日记",
+        "code": "const entry = await Memento.plugins.diary.loadDiaryEntry('2025-01-15');\nif (entry) {\n  setResult(JSON.stringify(entry, null, 2));\n} else {\n  setResult('该日期没有日记');\n}"
+      }
+    ],
+    "notes": "如果指定日期没有日记则返回 null",
+    "enabled": true
+  },
+  "saveDiaryEntry": {
+    "title": "保存日记条目",
+    "description": "保存或更新指定日期的日记",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"},
+      {"name": "content", "type": "string", "required": true, "description": "日记内容（Markdown 格式）"},
+      {"name": "title", "type": "string", "required": false, "description": "日记标题（默认为空）"},
+      {"name": "mood", "type": "string", "required": false, "description": "心情表情（如：😊）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "保存后的日记对象"
+    },
+    "examples": [
+      {
+        "title": "保存简单日记",
+        "code": "const entry = await Memento.plugins.diary.saveDiaryEntry('2025-01-15', '今天天气很好，完成了很多工作...');\nsetResult('日记已保存');"
+      },
+      {
+        "title": "保存完整日记",
+        "code": "const entry = await Memento.plugins.diary.saveDiaryEntry('2025-01-15', '# 美好的一天\\n\\n今天完成了项目里程碑...', '美好的一天', '😊');\nsetResult(`已保存日记: ${entry.title}`);"
+      }
+    ],
+    "notes": "如果日期已存在日记则更新，否则创建新日记；内容支持 Markdown 格式",
+    "enabled": true
+  },
+  "deleteDiaryEntry": {
+    "title": "删除日记条目",
+    "description": "删除指定日期的日记",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true，失败或不存在返回 false"
+    },
+    "examples": [
+      {
+        "title": "删除日记",
+        "code": "const success = await Memento.plugins.diary.deleteDiaryEntry('2025-01-15');\nsetResult(success ? '删除成功' : '删除失败或日记不存在');"
+      }
+    ],
+    "notes": "删除操作不可逆",
+    "enabled": true
+  },
+  "hasEntryForDate": {
+    "title": "检查日期是否有日记",
+    "description": "检查指定日期是否存在日记记录",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "存在返回 true，否则返回 false"
+    },
+    "examples": [
+      {
+        "title": "检查日记是否存在",
+        "code": "const exists = await Memento.plugins.diary.hasEntryForDate('2025-01-15');\nsetResult(exists ? '该日期有日记' : '该日期没有日记');"
+      }
+    ],
+    "notes": "用于快速判断某天是否写了日记",
+    "enabled": true
+  },
+  "getDiaryStats": {
+    "title": "获取日记统计",
+    "description": "获取所有日记的统计信息",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象，包含 totalCharCount（总字数）、entryCount（日记数）、averageCharCount（平均字数）"
+    },
+    "examples": [
+      {
+        "title": "获取统计信息",
+        "code": "const stats = await Memento.plugins.diary.getDiaryStats();\nsetResult(`总字数: ${stats.totalCharCount}, 日记数: ${stats.entryCount}, 平均字数: ${stats.averageCharCount}`);"
+      }
+    ],
+    "notes": "统计所有历史日记的数据",
+    "enabled": true
+  }
+}
