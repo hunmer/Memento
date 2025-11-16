@@ -17,6 +17,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
   final _searchController = TextEditingController();
   String _searchKeyword = '';
   bool _isLoading = false;
+  String? _selectedPluginFilter; // null 表示显示全部
 
   Map<String, PluginToolSet> _allPluginTools = {};
   List<String> _filteredToolIds = [];
@@ -277,6 +278,11 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     final sections = <Widget>[];
 
     _allPluginTools.forEach((pluginId, toolSet) {
+      // 如果选择了插件过滤，只显示该插件
+      if (_selectedPluginFilter != null && pluginId != _selectedPluginFilter) {
+        return;
+      }
+
       // 如果有搜索关键词，只显示匹配的工具
       List<String> toolIds;
       if (_searchKeyword.isNotEmpty) {
@@ -299,6 +305,55 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     });
 
     return sections;
+  }
+
+  /// 构建插件筛选按钮栏
+  Widget _buildPluginFilterBar() {
+    final pluginIds = _allPluginTools.keys.toList()..sort();
+
+    return SizedBox(
+      height: 50,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: [
+          // "全部" 按钮
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: const Text('全部'),
+              selected: _selectedPluginFilter == null,
+              onSelected: (selected) {
+                setState(() {
+                  _selectedPluginFilter = null;
+                });
+              },
+              selectedColor: Theme.of(context).colorScheme.primaryContainer,
+            ),
+          ),
+          // 各个插件按钮
+          ...pluginIds.map((pluginId) {
+            final toolSet = _allPluginTools[pluginId];
+            final enabledCount = toolSet?.enabledToolCount ?? 0;
+            final totalCount = toolSet?.toolCount ?? 0;
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text('$pluginId ($enabledCount/$totalCount)'),
+                selected: _selectedPluginFilter == pluginId,
+                onSelected: (selected) {
+                  setState(() {
+                    _selectedPluginFilter = selected ? pluginId : null;
+                  });
+                },
+                selectedColor: Theme.of(context).colorScheme.primaryContainer,
+              ),
+            );
+          }),
+        ],
+      ),
+    );
   }
 
   @override
@@ -336,6 +391,11 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                     onChanged: _onSearchChanged,
                   ),
                 ),
+
+                // 插件筛选按钮栏
+                if (_allPluginTools.isNotEmpty) _buildPluginFilterBar(),
+
+                const SizedBox(height: 8),
 
                 // 统计信息
                 Padding(

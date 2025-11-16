@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/saved_tool_template.dart';
 import '../models/tool_call_step.dart';
@@ -119,7 +118,9 @@ class ToolTemplateService extends ChangeNotifier {
       throw Exception('模板不存在');
     }
 
-    _templates[index] = template;
+    _templates[index] = template.copyWith(
+      steps: _normalizeSteps(template.steps),
+    );
     await _saveTemplates();
     notifyListeners();
   }
@@ -185,5 +186,11 @@ class ToolTemplateService extends ChangeNotifier {
       return t.name.toLowerCase().contains(lowerQuery) ||
           (t.description?.toLowerCase().contains(lowerQuery) ?? false);
     }).toList();
+  }
+
+  List<ToolCallStep> _normalizeSteps(List<ToolCallStep> steps) {
+    return steps
+        .map((step) => step.withoutRuntimeState())
+        .toList(growable: false);
   }
 }

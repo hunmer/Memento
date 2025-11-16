@@ -29,6 +29,8 @@ class _MessageInputState extends State<MessageInput> {
   // 工具模板搜索状态
   bool _isSearchingTools = false;
   List<SavedToolTemplate> _searchResults = [];
+  bool _isLoadingToolResults = false;
+  String? _toolSearchKeyword;
 
   @override
   void initState() {
@@ -94,22 +96,10 @@ class _MessageInputState extends State<MessageInput> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // 工具模板搜索结果
-          if (_isSearchingTools)
-            ToolTemplateSelector(
-              templates: _searchResults,
-              onTemplateSelected: _handleTemplateSelected,
-              onCancel: () {
-                setState(() {
-                  _isSearchingTools = false;
-                  _searchResults = [];
-                });
-              },
-            ),
+          if (_isSearchingTools) _buildToolTemplateSearchArea(),
 
           // 命令选择器
-          if (!_isSearchingTools &&
-              _isCommandMode &&
-              _filteredCommands.isNotEmpty)
+          if (_isCommandMode && _filteredCommands.isNotEmpty)
             CommandSelector(
               commands: _filteredCommands,
               onCommandSelected: _handleCommandSelected,
@@ -450,6 +440,127 @@ class _MessageInputState extends State<MessageInput> {
     }
   }
 
+  /// 构建工具模板搜索区域
+  Widget _buildToolTemplateSearchArea() {
+    if (_isLoadingToolResults) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: Colors.grey[300]!),
+            bottom: BorderSide(color: Colors.grey[300]!),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '正在加载工具模板...',
+              style: TextStyle(color: Colors.grey[700]),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_searchResults.isEmpty && (_toolSearchKeyword?.isNotEmpty ?? false)) {
+      return _buildToolSearchEmptyState();
+    }
+
+    return ToolTemplateSelector(
+      templates: _searchResults,
+      onTemplateSelected: _handleTemplateSelected,
+      onCancel: () {
+        setState(() {
+          _isSearchingTools = false;
+          _isLoadingToolResults = false;
+          _searchResults = [];
+          _toolSearchKeyword = null;
+        });
+      },
+    );
+  }
+
+  Widget _buildToolSearchEmptyState() {
+    final keyword = _toolSearchKeyword ?? '';
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: Colors.grey[300]!),
+          bottom: BorderSide(color: Colors.grey[300]!),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+            child: Row(
+              children: [
+                Icon(Icons.search_off, size: 20, color: Colors.orange[700]),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '找不到 $keyword',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[800],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 20),
+                  onPressed: () {
+                    setState(() {
+                      _isSearchingTools = false;
+                      _isLoadingToolResults = false;
+                      _searchResults = [];
+                      _toolSearchKeyword = null;
+                    });
+                  },
+                  tooltip: '取消',
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Text(
+              '没有找到匹配的工具模板，请尝试其他关键词。',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// 处理命令选择
   void _handleCommandSelected(ChatCommand command) {
     switch (command.type) {
@@ -487,25 +598,37 @@ class _MessageInputState extends State<MessageInput> {
     _textController.clear();
     widget.controller.setInputText('');
 
-    if (searchQuery == null || searchQuery.trim().isEmpty) {
-      // 没有搜索关键词，显示所有模板
-      setState(() {
-        _isSearchingTools = true;
-        _searchResults = widget.controller.templateService?.templates ?? [];
-      });
-      return;
-    }
-
-    // 搜索匹配的模板
-    final results =
-        widget.controller.templateService?.searchTemplates(
-          searchQuery.trim(),
-        ) ??
-        [];
+    final keyword = searchQuery?.trim();
+    final normalizedKeyword =
+        (keyword == null || keyword.isEmpty) ? null : keyword;
 
     setState(() {
       _isSearchingTools = true;
-      _searchResults = results;
+      _isLoadingToolResults = true;
+      _searchResults = [];
+      _toolSearchKeyword = normalizedKeyword;
+    });
+
+    widget.controller
+        .fetchToolTemplates(keyword: normalizedKeyword)
+        .then((results) {
+      if (!mounted) return;
+      setState(() {
+        _searchResults = results;
+        _isLoadingToolResults = false;
+      });
+    }).catchError((error) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingToolResults = false;
+        _searchResults = [];
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('加载工具模板失败: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
     });
   }
 
@@ -518,6 +641,7 @@ class _MessageInputState extends State<MessageInput> {
     setState(() {
       _isSearchingTools = false;
       _searchResults = [];
+      _toolSearchKeyword = null;
     });
 
     // 聚焦输入框

@@ -204,6 +204,8 @@ class ChatController extends ChangeNotifier {
         metadata['toolTemplate'] = {
           'id': _selectedToolTemplate!.id,
           'name': _selectedToolTemplate!.name,
+          if (_selectedToolTemplate!.description?.isNotEmpty ?? false)
+            'description': _selectedToolTemplate!.description,
         };
       }
 
@@ -235,6 +237,11 @@ class ChatController extends ChangeNotifier {
       _selectedToolTemplate = null;
       notifyListeners();
 
+      // 优先执行工具模板，获取结果上下文
+      if (selectedTemplate != null) {
+        await _executeToolTemplateBeforeAI(userMessage, selectedTemplate);
+      }
+
       // 创建AI消息占位符
       final aiMessage = ChatMessage.ai(
         conversationId: conversation.id,
@@ -244,15 +251,12 @@ class ChatController extends ChangeNotifier {
       await messageService.addMessage(aiMessage);
 
       // 流式请求AI回复
-      await _requestAIResponse(aiMessage.id, userInput, files);
-
-      // AI回复完成后，如果用户消息包含工具模板，则执行它
-      if (selectedTemplate != null) {
-        await _executeToolTemplateAfterAIResponse(
-          aiMessage.id,
-          selectedTemplate,
-        );
-      }
+      await _requestAIResponse(
+        aiMessage.id,
+        userInput,
+        files,
+        enableToolCalling: selectedTemplate == null,
+      );
     } catch (e) {
       debugPrint('发送消息失败: $e');
       rethrow;
@@ -561,12 +565,46 @@ class ChatController extends ChangeNotifier {
             content: ChatCompletionUserMessageContent.string(msg.content),
           ),
         );
+
+        final templateResult = _extractTemplateResult(msg.metadata);
+        if (templateResult != null && templateResult.isNotEmpty) {
+          messages.add(
+            ChatCompletionMessage.user(
+              content: ChatCompletionUserMessageContent.string(templateResult),
+            ),
+          );
+        }
       } else {
         messages.add(ChatCompletionMessage.assistant(content: msg.content));
       }
     }
 
     return messages;
+  }
+
+  String? _extractTemplateResult(Map<String, dynamic>? metadata) {
+    if (metadata == null) return null;
+    final templateMeta = metadata['toolTemplate'];
+    if (templateMeta is Map<String, dynamic>) {
+      final result = templateMeta['resultSummary'];
+      if (result is String && result.isNotEmpty) {
+        return result;
+      }
+    }
+    return null;
+  }
+
+  List<ToolCallStep> _cloneTemplateSteps(SavedToolTemplate template) {
+    if (templateService != null) {
+      return templateService!.cloneTemplateSteps(template);
+    }
+    return template.steps.map((s) => s.withoutRuntimeState()).toList();
+  }
+
+  /// 获取工具模板列表
+  Future<List<SavedToolTemplate>> fetchToolTemplates({String? keyword}) async {
+    if (templateService == null) return [];
+    return templateService!.fetchTemplates(query: keyword);
   }
 
   // ========== 输入管理 ==========
@@ -841,6 +879,8 @@ class ChatController extends ChangeNotifier {
       buffer.writeln('步骤 ${i + 1}: ${step.title}');
       if (step.result != null) {
         buffer.writeln('结果: ${step.result}');
+      } else if (step.error != null) {
+        buffer.writeln('错误: ${step.error}');
       }
       buffer.writeln();
     }
@@ -924,82 +964,58 @@ class ChatController extends ChangeNotifier {
 
   // ========== 工具模板执行 ==========
 
-  /// 在AI回复后执行工具模板
-  Future<void> _executeToolTemplateAfterAIResponse(
-    String aiMessageId,
+  /// 在请求 AI 之前先执行选中的工具模板
+  Future<void> _executeToolTemplateBeforeAI(
+    ChatMessage userMessage,
     SavedToolTemplate template,
   ) async {
-    if (templateService == null) return;
+    final steps = _cloneTemplateSteps(template);
 
-    try {
-      // 等待AI消息完成生成
-      var aiMessage = messageService.getMessage(conversation.id, aiMessageId);
-      var attempts = 0;
-      while (aiMessage != null && aiMessage.isGenerating && attempts < 300) {
-        await Future.delayed(const Duration(milliseconds: 100));
-        aiMessage = messageService.getMessage(conversation.id, aiMessageId);
-        attempts++;
-      }
-
-      if (aiMessage == null || aiMessage.isGenerating) {
-        debugPrint('⚠️ AI消息未完成或超时，跳过工具模板执行');
-        return;
-      }
-
-      debugPrint('✅ AI回复完成，开始执行工具模板: ${template.name}');
-
-      // 标记模板为已使用
+    // 标记模板使用
+    if (templateService != null) {
       await templateService!.markTemplateAsUsed(template.id);
-
-      // 创建工具调用响应
-      final toolCall = ToolCallResponse(steps: template.steps);
-
-      // 更新AI消息，添加工具调用
-      final updatedMessage = aiMessage.copyWith(
-        toolCall: toolCall,
-        isGenerating: true,
-      );
-      await messageService.updateMessage(updatedMessage);
-      notifyListeners();
-
-      // 执行工具调用步骤
-      await _executeToolSteps(aiMessageId, template.steps);
-    } catch (e) {
-      debugPrint('执行工具模板失败: $e');
-    }
-  }
-
-  /// 执行工具模板（旧方法，保留用于向后兼容）
-  @deprecated
-  Future<void> executeToolTemplate(String templateName) async {
-    if (templateService == null) {
-      throw Exception('工具模板服务未初始化');
     }
 
-    // 查找模板
-    final template = templateService!.getTemplateByName(templateName);
-    if (template == null) {
-      throw Exception('未找到工具模板: $templateName');
-    }
-
-    // 标记模板为已使用
-    await templateService!.markTemplateAsUsed(template.id);
-
-    // 创建AI消息占位符
-    final aiMessage = ChatMessage.ai(
+    // 创建工具执行消息，作为用户消息的子消息
+    final toolMessage = ChatMessage.ai(
       conversationId: conversation.id,
       content: '正在执行工具: ${template.name}',
       isGenerating: true,
+    ).copyWith(
+      parentId: userMessage.id,
+      toolCall: ToolCallResponse(steps: steps),
     );
+    await messageService.addMessage(toolMessage);
 
-    // 设置工具调用步骤
-    final toolCall = ToolCallResponse(steps: template.steps);
-    final messageWithToolCall = aiMessage.copyWith(toolCall: toolCall);
+    // 执行步骤
+    await _executeToolSteps(toolMessage.id, steps);
 
-    await messageService.addMessage(messageWithToolCall);
+    // 汇总执行结果
+    final summary = _buildToolResultMessage(steps);
+    final latestToolMessage =
+        messageService.getMessage(conversation.id, toolMessage.id);
+    if (latestToolMessage != null) {
+      await messageService.updateMessage(
+        latestToolMessage.copyWith(content: summary),
+      );
+    }
 
-    // 执行工具调用步骤
-    await _executeToolSteps(messageWithToolCall.id, template.steps);
+    // 更新用户消息的模板元数据，附加执行结果
+    final metadata = Map<String, dynamic>.from(userMessage.metadata ?? {});
+    final templateMeta = Map<String, dynamic>.from(
+      (metadata['toolTemplate'] as Map<String, dynamic>?) ?? {},
+    );
+    templateMeta
+      ..['id'] = template.id
+      ..['name'] = template.name;
+    if (template.description?.isNotEmpty ?? false) {
+      templateMeta['description'] = template.description;
+    }
+    templateMeta['resultSummary'] = summary;
+    metadata['toolTemplate'] = templateMeta;
+
+    final updatedUserMessage = userMessage.copyWith(metadata: metadata);
+    await messageService.updateMessage(updatedUserMessage);
   }
 
   /// 执行工具调用步骤
