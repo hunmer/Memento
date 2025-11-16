@@ -141,6 +141,12 @@ class ToolService {
     final buffer = StringBuffer();
 
     buffer.writeln('\n## 🛠️ 可用工具列表');
+    buffer.writeln('\n### ⚠️ 重要提示');
+    buffer.writeln('\n作为 AI 助手，你**无法直接获取**以下类型的信息，必须使用工具：');
+    buffer.writeln('1. **当前时间**：你无法感知时间流逝，必须使用 `system_getCurrentTime` 或 `system_getTimestamp` 工具');
+    buffer.writeln('2. **用户数据**：所有用户的任务、笔记、日记等数据都存储在本地，必须使用对应的插件工具获取');
+    buffer.writeln('3. **设备信息**：设备类型、操作系统版本等需要使用 `system_getDeviceInfo` 工具');
+    buffer.writeln('4. **应用状态**：应用版本、配置等需要使用 `system_getAppInfo` 工具');
     buffer.writeln('\n你可以调用以下插件功能来获取数据或执行操作。');
     buffer.writeln('当需要使用工具时，请返回以下 JSON 格式：\n');
     buffer.writeln('```json');
@@ -212,6 +218,12 @@ class ToolService {
 
 ## 🛠️ 可用工具列表
 
+### ⚠️ 重要提示
+
+作为 AI 助手，你**无法直接获取**以下类型的信息，必须使用工具：
+1. **当前时间**：你无法感知时间流逝，必须使用 `system.getCurrentTime()` 工具
+2. **用户数据**：所有用户的任务、笔记、日记等数据都存储在本地，必须使用对应的插件工具获取
+
 你可以通过返回 JSON 格式来调用插件功能：
 
 ```json
@@ -229,12 +241,17 @@ class ToolService {
 
 ### 常用 API
 
+**system** (系统)
+  - `Memento.system.getCurrentTime()` - 获取当前时间
+  - `Memento.system.getDeviceInfo()` - 获取设备信息
+  - `Memento.system.getAppInfo()` - 获取应用信息
+
 **todo** (待办任务)
-  - `Memento.todo.getTasks(status, priority)` - 获取任务
-  - `Memento.todo.getTodayTasks()` - 获取今日任务
+  - `Memento.plugins.todo.getTasks(status, priority)` - 获取任务
+  - `Memento.plugins.todo.getTodayTasks()` - 获取今日任务
 
 **notes** (笔记)
-  - `Memento.notes.getNotes(params)` - 获取笔记
+  - `Memento.plugins.notes.getNotes(params)` - 获取笔记
 
 使用 `setResult()` 返回结果。
 ''';
@@ -248,7 +265,14 @@ class ToolService {
 
     final buffer = StringBuffer();
     buffer.writeln('\n## 🛠️ 可用工具索引');
-    buffer.writeln('\n如果需要使用工具来获取数据或执行操作，请先分析需求并返回以下格式：\n');
+    buffer.writeln('\n### ⚠️ 重要提示');
+    buffer.writeln('\n作为 AI 助手，你**无法直接获取**以下类型的信息，必须使用工具：');
+    buffer.writeln('1. **当前时间**：你无法感知时间流逝，必须使用 `system_getCurrentTime` 或 `system_getTimestamp` 工具');
+    buffer.writeln('2. **用户数据**：所有用户的任务、笔记、日记等数据都存储在本地，必须使用对应的插件工具获取');
+    buffer.writeln('3. **设备信息**：设备类型、操作系统版本等需要使用 `system_getDeviceInfo` 工具');
+    buffer.writeln('4. **应用状态**：应用版本、配置等需要使用 `system_getAppInfo` 工具');
+    buffer.writeln('\n### 使用流程');
+    buffer.writeln('\n当用户的需求涉及以上信息时，请分析需求并返回以下格式：\n');
     buffer.writeln('```json');
     buffer.writeln('{');
     buffer.writeln('  "needed_tools": ["tool_id1", "tool_id2"]');
@@ -260,7 +284,14 @@ class ToolService {
       buffer.writeln('- **${item[0]}**: ${item[1]}');
     }
 
-    buffer.writeln('\n请根据用户需求，选择需要的工具并返回其 ID 列表。');
+    buffer.writeln('\n### 示例场景');
+    buffer.writeln('\n**场景 1**：用户问"现在几点了？"');
+    buffer.writeln('- 你需要返回：`{"needed_tools": ["system_getCurrentTime"]}`');
+    buffer.writeln('\n**场景 2**：用户问"我今天有什么任务？"');
+    buffer.writeln('- 你需要先获取当前日期，再查询任务');
+    buffer.writeln('- 你需要返回：`{"needed_tools": ["system_getCurrentTime", "todo_getTodayTasks"]}`');
+    buffer.writeln('\n**场景 3**：用户问"AI 是什么？"');
+    buffer.writeln('- 这是知识性问题，无需使用工具，直接回答即可');
 
     return buffer.toString();
   }
@@ -271,12 +302,20 @@ class ToolService {
 
 ## 🛠️ 可用工具索引
 
+### ⚠️ 重要提示
+
+作为 AI 助手，你**无法直接获取**以下类型的信息，必须使用工具：
+1. **当前时间**：你无法感知时间流逝，必须使用 `system_getCurrentTime` 工具
+2. **用户数据**：所有用户的任务、笔记、日记等数据都存储在本地，必须使用对应的插件工具获取
+
 如果需要使用工具，请返回：
 ```json
 {"needed_tools": ["tool_id1", "tool_id2"]}
 ```
 
 可用工具：
+- **system_getCurrentTime**: 获取当前时间
+- **system_getDeviceInfo**: 获取设备信息
 - **todo_getTasks**: 获取任务列表
 - **notes_getNotes**: 获取笔记列表
 ''';

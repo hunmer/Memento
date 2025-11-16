@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/tool_config.dart';
+import '../../../../../core/js_bridge/js_bridge_manager.dart';
 
 /// 工具编辑对话框
 class ToolEditorDialog extends StatefulWidget {
@@ -20,7 +21,8 @@ class ToolEditorDialog extends StatefulWidget {
   State<ToolEditorDialog> createState() => _ToolEditorDialogState();
 }
 
-class _ToolEditorDialogState extends State<ToolEditorDialog> {
+class _ToolEditorDialogState extends State<ToolEditorDialog>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
 
   // 表单字段控制器
@@ -40,9 +42,15 @@ class _ToolEditorDialogState extends State<ToolEditorDialog> {
   // 启用状态
   bool _enabled = true;
 
+  // Tab 控制器
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+
+    // 初始化 Tab 控制器（4个Tab：基本信息、参数列表、返回值、示例代码）
+    _tabController = TabController(length: 4, vsync: this);
 
     // 初始化控制器
     _toolIdController = TextEditingController(text: widget.toolId ?? '');
@@ -79,6 +87,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog> {
 
   @override
   void dispose() {
+    _tabController.dispose();
     _toolIdController.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
@@ -218,103 +227,35 @@ class _ToolEditorDialogState extends State<ToolEditorDialog> {
             Expanded(
               child: Form(
                 key: _formKey,
-                child: ListView(
+                child: Column(
                   children: [
-                    // 工具 ID
-                    TextFormField(
-                      controller: _toolIdController,
-                      decoration: const InputDecoration(
-                        labelText: '工具 ID',
-                        hintText: '例如: todo_getTasks',
-                      ),
-                      enabled: widget.isNew,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return '请输入工具 ID';
-                        }
-                        if (!RegExp(r'^[a-z_][a-z0-9_]*$').hasMatch(value)) {
-                          return '工具 ID 只能包含小写字母、数字和下划线';
-                        }
-                        return null;
-                      },
+                    // Tab 栏
+                    TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      tabs: const [
+                        Tab(text: '基本信息'),
+                        Tab(text: '参数列表'),
+                        Tab(text: '返回值'),
+                        Tab(text: '示例代码'),
+                      ],
                     ),
-                    const SizedBox(height: 16),
 
-                    // 插件 ID（只读）
-                    TextFormField(
-                      initialValue: widget.pluginId,
-                      decoration: const InputDecoration(
-                        labelText: '插件 ID',
+                    // Tab 内容
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          // 基本信息
+                          _buildBasicInfoTab(),
+                          // 参数列表
+                          _buildParametersTab(),
+                          // 返回值
+                          _buildReturnsTab(),
+                          // 示例代码
+                          _buildExamplesTab(),
+                        ],
                       ),
-                      enabled: false,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 工具标题
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(
-                        labelText: '工具标题',
-                        hintText: '工具的简短标题',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return '请输入工具标题';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 工具描述
-                    TextFormField(
-                      controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: '工具描述',
-                        hintText: '详细描述工具的功能',
-                      ),
-                      maxLines: 3,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return '请输入工具描述';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 24),
-
-                    // 参数列表
-                    _buildParametersSection(),
-                    const SizedBox(height: 24),
-
-                    // 返回值配置
-                    _buildReturnsSection(),
-                    const SizedBox(height: 24),
-
-                    // 示例列表
-                    _buildExamplesSection(),
-                    const SizedBox(height: 24),
-
-                    // 注意事项
-                    TextFormField(
-                      controller: _notesController,
-                      decoration: const InputDecoration(
-                        labelText: '注意事项（可选）',
-                        hintText: '使用工具时的注意事项',
-                      ),
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 启用工具
-                    SwitchListTile(
-                      title: const Text('启用工具'),
-                      value: _enabled,
-                      onChanged: (value) {
-                        setState(() {
-                          _enabled = value;
-                        });
-                      },
                     ),
                   ],
                 ),
@@ -344,132 +285,231 @@ class _ToolEditorDialogState extends State<ToolEditorDialog> {
     );
   }
 
-  /// 构建参数列表部分
-  Widget _buildParametersSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  /// 构建基本信息 Tab
+  Widget _buildBasicInfoTab() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
       children: [
-        Row(
-          children: [
-            Text(
-              '参数列表',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add_circle),
-              onPressed: _addParameter,
-              tooltip: '添加参数',
-            ),
-          ],
+        // 工具 ID
+        TextFormField(
+          controller: _toolIdController,
+          decoration: const InputDecoration(
+            labelText: '工具 ID',
+            hintText: '例如: todo_getTasks',
+            helperText: '工具的唯一标识符，只能包含小写字母、数字和下划线',
+          ),
+          enabled: widget.isNew,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return '请输入工具 ID';
+            }
+            if (!RegExp(r'^[a-z_][a-z0-9_]*$').hasMatch(value)) {
+              return '工具 ID 只能包含小写字母、数字和下划线';
+            }
+            return null;
+          },
         ),
-        const SizedBox(height: 8),
-        if (_parameters.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('暂无参数，点击 + 添加'),
-            ),
-          )
-        else
-          ..._parameters.asMap().entries.map((entry) {
-            final index = entry.key;
-            final param = entry.value;
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          '参数 ${index + 1}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          iconSize: 20,
-                          color: Colors.red,
-                          onPressed: () => _removeParameter(index),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: param.nameController,
-                      decoration: const InputDecoration(
-                        labelText: '参数名',
-                        isDense: true,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return '请输入参数名';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: param.typeController,
-                      decoration: const InputDecoration(
-                        labelText: '参数类型',
-                        hintText: 'string, number, boolean, object, array',
-                        isDense: true,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return '请输入参数类型';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: param.descController,
-                      decoration: const InputDecoration(
-                        labelText: '参数描述',
-                        isDense: true,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return '请输入参数描述';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    CheckboxListTile(
-                      title: const Text('可选参数'),
-                      value: param.optional,
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: (value) {
-                        setState(() {
-                          param.optional = value ?? false;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
+        const SizedBox(height: 16),
+
+        // 插件 ID（只读）
+        TextFormField(
+          initialValue: widget.pluginId,
+          decoration: const InputDecoration(
+            labelText: '插件 ID',
+            helperText: '该工具所属的插件',
+          ),
+          enabled: false,
+        ),
+        const SizedBox(height: 16),
+
+        // 工具标题
+        TextFormField(
+          controller: _titleController,
+          decoration: const InputDecoration(
+            labelText: '工具标题',
+            hintText: '工具的简短标题',
+            helperText: '显示给用户的工具名称',
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return '请输入工具标题';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+
+        // 工具描述
+        TextFormField(
+          controller: _descriptionController,
+          decoration: const InputDecoration(
+            labelText: '工具描述',
+            hintText: '详细描述工具的功能',
+            helperText: '向AI解释该工具的用途和功能',
+          ),
+          maxLines: 5,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return '请输入工具描述';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+
+        // 注意事项
+        TextFormField(
+          controller: _notesController,
+          decoration: const InputDecoration(
+            labelText: '注意事项（可选）',
+            hintText: '使用工具时的注意事项',
+            helperText: '额外的使用说明或限制条件',
+          ),
+          maxLines: 3,
+        ),
+        const SizedBox(height: 16),
+
+        // 启用工具
+        Card(
+          child: SwitchListTile(
+            title: const Text('启用工具'),
+            subtitle: const Text('禁用后该工具将不会提供给AI使用'),
+            value: _enabled,
+            onChanged: (value) {
+              setState(() {
+                _enabled = value;
+              });
+            },
+          ),
+        ),
       ],
     );
   }
 
-  /// 构建返回值部分
-  Widget _buildReturnsSection() {
+  /// 构建参数列表 Tab
+  Widget _buildParametersTab() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '返回值',
-          style: Theme.of(context).textTheme.titleMedium,
+        // 添加按钮
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('添加参数'),
+                onPressed: _addParameter,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 8),
+
+        // 参数列表
+        Expanded(
+          child: _parameters.isEmpty
+              ? const Center(
+                  child: Text('暂无参数，点击上方按钮添加'),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(8),
+                  itemCount: _parameters.length,
+                  itemBuilder: (context, index) {
+                    final param = _parameters[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '参数 ${index + 1}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const Spacer(),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  iconSize: 20,
+                                  color: Colors.red,
+                                  onPressed: () => _removeParameter(index),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: param.nameController,
+                              decoration: const InputDecoration(
+                                labelText: '参数名',
+                                isDense: true,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return '请输入参数名';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: param.typeController,
+                              decoration: const InputDecoration(
+                                labelText: '参数类型',
+                                hintText:
+                                    'string, number, boolean, object, array',
+                                isDense: true,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return '请输入参数类型';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: param.descController,
+                              decoration: const InputDecoration(
+                                labelText: '参数描述',
+                                isDense: true,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return '请输入参数描述';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            CheckboxListTile(
+                              title: const Text('可选参数'),
+                              value: param.optional,
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              onChanged: (value) {
+                                setState(() {
+                                  param.optional = value ?? false;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  /// 构建返回值 Tab
+  Widget _buildReturnsTab() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
         TextFormField(
           controller: _returnsTypeController,
           decoration: const InputDecoration(
@@ -483,13 +523,13 @@ class _ToolEditorDialogState extends State<ToolEditorDialog> {
             return null;
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         TextFormField(
           controller: _returnsDescController,
           decoration: const InputDecoration(
             labelText: '返回值描述',
           ),
-          maxLines: 2,
+          maxLines: 5,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return '请输入返回值描述';
@@ -501,82 +541,168 @@ class _ToolEditorDialogState extends State<ToolEditorDialog> {
     );
   }
 
-  /// 构建示例列表部分
-  Widget _buildExamplesSection() {
+  /// 构建示例代码 Tab
+  Widget _buildExamplesTab() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              '示例代码',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add_circle),
-              onPressed: _addExample,
-              tooltip: '添加示例',
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        if (_examples.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('暂无示例，点击 + 添加'),
-            ),
-          )
-        else
-          ..._examples.asMap().entries.map((entry) {
-            final index = entry.key;
-            final example = entry.value;
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          '示例 ${index + 1}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          iconSize: 20,
-                          color: Colors.red,
-                          onPressed: () => _removeExample(index),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: example.commentController,
-                      decoration: const InputDecoration(
-                        labelText: '示例说明',
-                        isDense: true,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: example.codeController,
-                      decoration: const InputDecoration(
-                        labelText: '示例代码',
-                        hintText: 'const result = await Memento.todo.getTasks();',
-                        isDense: true,
-                      ),
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
+        // 添加按钮
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('添加示例'),
+                onPressed: _addExample,
               ),
-            );
-          }),
+            ],
+          ),
+        ),
+
+        // 示例列表
+        Expanded(
+          child: _examples.isEmpty
+              ? const Center(
+                  child: Text('暂无示例，点击上方按钮添加'),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(8),
+                  itemCount: _examples.length,
+                  itemBuilder: (context, index) {
+                    final example = _examples[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '示例 ${index + 1}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const Spacer(),
+                                // 测试按钮
+                                ElevatedButton.icon(
+                                  icon: const Icon(Icons.play_arrow, size: 18),
+                                  label: const Text('测试'),
+                                  onPressed: () =>
+                                      _testExample(example.codeController.text),
+                                ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  iconSize: 20,
+                                  color: Colors.red,
+                                  onPressed: () => _removeExample(index),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: example.commentController,
+                              decoration: const InputDecoration(
+                                labelText: '示例说明',
+                                isDense: true,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: example.codeController,
+                              decoration: const InputDecoration(
+                                labelText: '示例代码',
+                                hintText:
+                                    'const result = await Memento.todo.getTasks();',
+                                isDense: true,
+                              ),
+                              maxLines: 5,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
       ],
+    );
+  }
+
+  /// 测试示例代码
+  Future<void> _testExample(String code) async {
+    if (code.trim().isEmpty) {
+      _showTestResult('错误', '示例代码不能为空');
+      return;
+    }
+
+    // 显示加载对话框
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('正在执行 JS 代码...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      // 执行 JS 代码
+      final result = await JSBridgeManager.instance.evaluate(code);
+
+      // 关闭加载对话框
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      // 显示结果
+      if (result.success) {
+        _showTestResult('执行成功', result.result?.toString() ?? 'null');
+      } else {
+        _showTestResult('执行失败', result.error ?? '未知错误');
+      }
+    } catch (e) {
+      // 关闭加载对话框
+      if (mounted) {
+        Navigator.pop(context);
+      }
+      _showTestResult('执行异常', e.toString());
+    }
+  }
+
+  /// 显示测试结果对话框
+  void _showTestResult(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: SelectableText(
+            message,
+            style: const TextStyle(fontFamily: 'monospace'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
     );
   }
 }

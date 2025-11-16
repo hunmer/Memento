@@ -21,7 +21,7 @@ class ScriptLoader {
       return 'scripts'; // Web平台使用相对路径
     } else {
       final appDir = await StorageManager.getApplicationDocumentsDirectory();
-      return path.join(appDir.path, 'scripts');
+      return path.join(appDir.path, 'app_data', 'scripts');
     }
   }
 
@@ -193,11 +193,7 @@ class ScriptLoader {
       }
 
       // 创建ScriptInfo对象
-      return ScriptInfo.fromJson(
-        jsonData,
-        id: scriptId,
-        path: scriptPath,
-      );
+      return ScriptInfo.fromJson(jsonData, id: scriptId, path: scriptPath);
     } catch (e) {
       print('❌ 加载脚本元数据失败: $scriptId, 错误: $e');
       return null;
@@ -226,10 +222,7 @@ class ScriptLoader {
   }
 
   /// 保存脚本元数据
-  Future<void> saveScriptMetadata(
-    String scriptId,
-    ScriptInfo info,
-  ) async {
+  Future<void> saveScriptMetadata(String scriptId, ScriptInfo info) async {
     try {
       final scriptsPath = await getScriptsDirectory();
       final scriptPath = path.join(scriptsPath, scriptId);

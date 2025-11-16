@@ -581,7 +581,7 @@ Future<String> _getScriptsDirectory() async {
   } else {
     // 移动端和桌面端
     final appDir = await getApplicationDocumentsDirectory();
-    return path.join(appDir.path, 'scripts');
+    return path.join(appDir.path,  'app_data', 'scripts');
   }
 }
 ```

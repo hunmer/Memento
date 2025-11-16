@@ -17,8 +17,8 @@
       }
     ],
     "returns": {
-      "type": "Promise<string>",
-      "description": "任务数组的 JSON 字符串，需要使用 JSON.parse() 解析"
+      "type": "Promise<Array>",
+      "description": "任务对象数组"
     },
     "examples": [
       {
@@ -38,7 +38,7 @@
         "comment": "获取进行中的高优先级任务"
       }
     ],
-    "notes": "所有插件方法都是异步的，必须使用 await。返回值为 JSON 字符串，需要 JSON.parse() 解析。",
+    "notes": "所有插件方法都是异步的，必须使用 await。返回值为对象。",
     "enabled": true
   },
   "todo_getTask": {
@@ -53,16 +53,16 @@
       }
     ],
     "returns": {
-      "type": "Promise<string>",
-      "description": "任务对象的 JSON 字符串，失败时返回 {error: '...'}"
+      "type": "Promise<Object>",
+      "description": "任务对象，失败时返回 {error: '...'}"
     },
     "examples": [
       {
-        "code": "const task = await Memento.plugins.todo.getTask('550e8400-e29b-41d4-a716-446655440000');\nconst data = JSON.parse(task);",
+        "code": "const task = await Memento.plugins.todo.getTask('550e8400-e29b-41d4-a716-446655440000');",
         "comment": "获取指定任务的详情"
       }
     ],
-    "notes": "返回值为 JSON 字符串，需要 JSON.parse() 解析。失败时返回包含 error 字段的对象。",
+    "notes": "失败时返回包含 error 字段的对象。",
     "enabled": true
   },
   "todo_getTodayTasks": {
@@ -70,12 +70,12 @@
     "description": "获取今天截止或今天开始的所有任务。",
     "parameters": [],
     "returns": {
-      "type": "Promise<string>",
-      "description": "今日任务数组的 JSON 字符串"
+      "type": "Promise<Array>",
+      "description": "今日任务对象数组"
     },
     "examples": [
       {
-        "code": "const todayTasks = await Memento.plugins.todo.getTodayTasks();\nconst tasks = JSON.parse(todayTasks);\nconsole.log(`今日有 ${tasks.length} 个任务`);",
+        "code": "const tasks = await Memento.plugins.todo.getTodayTasks();\nconsole.log(`今日有 ${tasks.length} 个任务`);",
         "comment": "获取今日任务并统计数量"
       }
     ],
@@ -87,12 +87,12 @@
     "description": "获取截止日期已过且未完成的任务。",
     "parameters": [],
     "returns": {
-      "type": "Promise<string>",
-      "description": "过期任务数组的 JSON 字符串"
+      "type": "Promise<Array>",
+      "description": "过期任务对象数组"
     },
     "examples": [
       {
-        "code": "const overdueTasks = await Memento.plugins.todo.getOverdueTasks();\nconst tasks = JSON.parse(overdueTasks);\nif (tasks.length > 0) {\n  console.log(`有 ${tasks.length} 个任务已过期！`);\n}",
+        "code": "const tasks = await Memento.plugins.todo.getOverdueTasks();\nif (tasks.length > 0) {\n  console.log(`有 ${tasks.length} 个任务已过期！`);\n}",
         "comment": "获取过期任务并提示"
       }
     ],
@@ -141,8 +141,8 @@
       }
     ],
     "returns": {
-      "type": "Promise<string>",
-      "description": "新建任务对象的 JSON 字符串"
+      "type": "Promise<Object>",
+      "description": "新建的任务对象"
     },
     "examples": [
       {
@@ -175,8 +175,8 @@
       }
     ],
     "returns": {
-      "type": "Promise<string>",
-      "description": "更新后的任务对象 JSON 字符串"
+      "type": "Promise<Object>",
+      "description": "更新后的任务对象"
     },
     "examples": [
       {
@@ -203,12 +203,12 @@
       }
     ],
     "returns": {
-      "type": "Promise<string>",
+      "type": "Promise<Object>",
       "description": "成功时返回 {success: true, taskId: '...'}，失败时返回 {error: '...'}"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.todo.deleteTask('task-id-here');\nconst data = JSON.parse(result);\nif (data.success) {\n  console.log('任务已删除');\n}",
+        "code": "const result = await Memento.plugins.todo.deleteTask('task-id-here');\nif (result.success) {\n  console.log('任务已删除');\n}",
         "comment": "删除任务并检查结果"
       }
     ],
@@ -227,12 +227,12 @@
       }
     ],
     "returns": {
-      "type": "Promise<string>",
-      "description": "完成后的任务对象 JSON 字符串"
+      "type": "Promise<Object>",
+      "description": "完成后的任务对象"
     },
     "examples": [
       {
-        "code": "const completed = await Memento.plugins.todo.completeTask('task-id-here');\nconst task = JSON.parse(completed);\nconsole.log(`任务 \"${task.title}\" 已完成！`);",
+        "code": "const task = await Memento.plugins.todo.completeTask('task-id-here');\nconsole.log(`任务 \"${task.title}\" 已完成！`);",
         "comment": "完成任务并显示确认信息"
       }
     ],
