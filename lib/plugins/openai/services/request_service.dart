@@ -11,19 +11,19 @@ class RequestService {
   static String processThinkingContent(String content) {
     // 使用正则表达式匹配<think>标签内的内容
     final thinkPattern = RegExp(r'<think>(.*?)</think>', dotAll: true);
-    
+
     // 创建一个StringBuffer来构建最终的内容
     final StringBuffer result = StringBuffer();
     int lastMatchEnd = 0;
-    
+
     // 查找所有匹配项
     for (final match in thinkPattern.allMatches(content)) {
       // 添加标签之前的内容（不在think标签内的内容）
       result.write(content.substring(lastMatchEnd, match.start));
-      
+
       // 获取标签内的文本
       String thinkContent = match.group(1) ?? '';
-      
+
       // 如果内容不为空，则格式化并添加
       if (thinkContent.trim().isNotEmpty) {
         // 分割成行，为每行添加前缀 ">"
@@ -31,18 +31,18 @@ class RequestService {
             .split('\n')
             .map((line) => line.trim().isEmpty ? '>' : '> $line')
             .join('\n');
-        
+
         // 添加格式化后的内容
         result.write(formattedContent);
       }
-      
+
       // 更新lastMatchEnd为当前匹配的结束位置
       lastMatchEnd = match.end;
     }
-    
+
     // 添加最后一个标签之后的内容
     result.write(content.substring(lastMatchEnd));
-    
+
     return result.toString();
   }
 
@@ -53,32 +53,32 @@ class RequestService {
 
   /// 获取或创建OpenAI客户端（内部实现）
   static OpenAIClient _getClient(AIAgent agent) {
-      // 从headers中提取API密钥
-      final apiKey =
-          agent.headers['Authorization']?.replaceAll('Bearer ', '') ??
-          agent.headers['api-key'] ??
-          '';
+    // 从headers中提取API密钥
+    final apiKey =
+        agent.headers['Authorization']?.replaceAll('Bearer ', '') ??
+        agent.headers['api-key'] ??
+        '';
 
-      // 可选的组织ID
-      final organization = agent.headers['OpenAI-Organization'];
+    // 可选的组织ID
+    final organization = agent.headers['OpenAI-Organization'];
 
-      developer.log('创建新的OpenAI客户端: ${agent.id}', name: 'RequestService');
-      developer.log('baseUrl: ${agent.baseUrl}', name: 'RequestService');
-      developer.log('model: ${agent.model}', name: 'RequestService');
+    developer.log('创建新的OpenAI客户端: ${agent.id}', name: 'RequestService');
+    developer.log('baseUrl: ${agent.baseUrl}', name: 'RequestService');
+    developer.log('model: ${agent.model}', name: 'RequestService');
 
-      // 创建新的headers对象，合并api-key和Authorization
-      final Map<String, String> mergedHeaders = Map<String, String>.from(
-        agent.headers,
-      );
-      mergedHeaders['api-key'] = apiKey;
-      mergedHeaders['Authorization'] = 'Bearer $apiKey';
-      print(mergedHeaders);
-      return OpenAIClient(
-        apiKey: apiKey,
-        organization: organization,
-        baseUrl: agent.baseUrl,
-        headers: mergedHeaders,
-      );
+    // 创建新的headers对象，合并api-key和Authorization
+    final Map<String, String> mergedHeaders = Map<String, String>.from(
+      agent.headers,
+    );
+    mergedHeaders['api-key'] = apiKey;
+    mergedHeaders['Authorization'] = 'Bearer $apiKey';
+    print(mergedHeaders);
+    return OpenAIClient(
+      apiKey: apiKey,
+      organization: organization,
+      baseUrl: agent.baseUrl,
+      headers: mergedHeaders,
+    );
   }
 
   /// 发送聊天请求
@@ -97,17 +97,12 @@ class RequestService {
       String processedInput = input;
       if (replacePrompt) {
         try {
-          processedInput = await PromptReplacementController().processPrompt(input);
-          developer.log(
-            'Prompt替换结果: $processedInput',
-            name: 'RequestService',
+          processedInput = await PromptReplacementController().processPrompt(
+            input,
           );
+          developer.log('Prompt替换结果: $processedInput', name: 'RequestService');
         } catch (e) {
-          developer.log(
-            'Prompt替换失败: $e',
-            name: 'RequestService',
-            error: e,
-          );
+          developer.log('Prompt替换失败: $e', name: 'RequestService', error: e);
         }
       }
 
@@ -143,17 +138,19 @@ class RequestService {
         final List<ChatCompletionMessage> messages = [
           ChatCompletionMessage.system(content: agent.systemPrompt),
         ];
-        
+
         // 添加上下文消息（如果有）
         if (contextMessages != null && contextMessages.isNotEmpty) {
           messages.addAll(contextMessages);
         }
-        
+
         // 添加当前用户消息
-        messages.add(ChatCompletionMessage.user(
-          content: ChatCompletionUserMessageContent.string(processedInput),
-        ));
-        
+        messages.add(
+          ChatCompletionMessage.user(
+            content: ChatCompletionUserMessageContent.string(processedInput),
+          ),
+        );
+
         request = CreateChatCompletionRequest(
           model: ChatCompletionModel.modelId(agent.model),
           messages: messages,
@@ -244,12 +241,12 @@ class RequestService {
             if (messages[i].role == ChatCompletionMessageRole.user) {
               final userMessage = messages[i];
               final content = userMessage.content;
-              
+
               // 获取现有的文本内容
               String? textContent;
               if (content is String) {
                 textContent = content;
-              } 
+              }
 
               // 创建新的消息，包含文本（如果有）和图片
               messages[i] = ChatCompletionMessage.user(
@@ -273,25 +270,21 @@ class RequestService {
       } else if (prompt != null && replacePrompt) {
         // 非Vision模式下，如果有prompt且需要替换，则处理最后一个用户消息
         try {
-          final processedPrompt = await PromptReplacementController().processPrompt(prompt);
+          final processedPrompt = await PromptReplacementController()
+              .processPrompt(prompt);
           for (int i = messages.length - 1; i >= 0; i--) {
             if (messages[i].role == ChatCompletionMessageRole.user) {
               messages[i] = ChatCompletionMessage.user(
-                content: ChatCompletionUserMessageContent.string(processedPrompt),
+                content: ChatCompletionUserMessageContent.string(
+                  processedPrompt,
+                ),
               );
               break;
             }
           }
-          developer.log(
-            'Prompt替换结果: $processedPrompt',
-            name: 'RequestService',
-          );
+          developer.log('Prompt替换结果: $processedPrompt', name: 'RequestService');
         } catch (e) {
-          developer.log(
-            'Prompt替换失败: $e',
-            name: 'RequestService',
-            error: e,
-          );
+          developer.log('Prompt替换失败: $e', name: 'RequestService', error: e);
         }
       }
 
@@ -305,18 +298,24 @@ class RequestService {
       );
 
       developer.log('发送流式请求: ${request.model}', name: 'RequestService');
+      developer.log(
+        '发送所有文本内容：${messages.map((e) => e.content).join('')}',
+        name: 'RequestService',
+      );
 
       final stopwatch = Stopwatch()..start();
       final stream = client.createChatCompletionStream(request: request);
 
       int totalChars = 0;
       int chunkCount = 0;
+      String finalResponse = '';
 
       await for (final res in stream) {
         final content = res.choices.first.delta.content;
         if (content != null) {
           totalChars += content.length;
           chunkCount++;
+          finalResponse += content;
 
           // 每10个块记录一次进度
           if (chunkCount % 10 == 0) {
@@ -331,6 +330,7 @@ class RequestService {
       }
 
       stopwatch.stop();
+      developer.log('返回文本完成: $finalResponse', name: 'RequestService');
       developer.log(
         '流式响应完成: 总计$totalChars字符, $chunkCount个块, 总耗时: ${stopwatch.elapsedMilliseconds}ms',
         name: 'RequestService',

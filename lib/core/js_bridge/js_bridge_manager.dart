@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'platform/js_engine_interface.dart';
 import 'platform/js_engine_factory.dart';
@@ -103,7 +104,7 @@ class JSBridgeManager {
         }
 
         // 创建插件命名空间
-        globalThis.Memento.${plugin.id} = {};
+        globalThis.Memento.plugins.${plugin.id} = {};
 
         // 兼容浏览器环境
         if (typeof window !== 'undefined') {
@@ -156,7 +157,7 @@ class JSBridgeManager {
           var namespace = globalThis.Memento;
 
           // 直接返回 Promise，让调用者处理
-          namespace.${plugin.id}.$apiName = function() {
+          namespace.plugins.${plugin.id}.$apiName = function() {
             var args = Array.prototype.slice.call(arguments);
             // 直接返回 Promise（不 await）
             return Memento_${plugin.id}_$apiName.apply(null, args);
@@ -187,7 +188,8 @@ class JSBridgeManager {
         if (typeof globalThis.Memento === 'undefined') {
           globalThis.Memento = {
             version: '1.0.0',
-            plugins: {}
+            plugins: {},
+            system: {}
           };
         }
 
@@ -197,6 +199,165 @@ class JSBridgeManager {
         }
       })();
     ''');
+
+    // 注册系统级 API
+    await _registerSystemAPIs();
+  }
+
+  /// 注册系统级 API（时间、设备信息等）
+  Future<void> _registerSystemAPIs() async {
+    if (_engine == null) return;
+
+    // 1. 获取当前时间
+    await _engine!.registerFunction('Memento_system_getCurrentTime', ([dynamic a]) async {
+      try {
+        final now = DateTime.now();
+        final weekdayNames = ['一', '二', '三', '四', '五', '六', '日'];
+
+        final timeInfo = {
+          'timestamp': now.millisecondsSinceEpoch,
+          'datetime': now.toIso8601String(),
+          'year': now.year,
+          'month': now.month,
+          'day': now.day,
+          'hour': now.hour,
+          'minute': now.minute,
+          'second': now.second,
+          'weekday': now.weekday,
+          'weekdayName': weekdayNames[now.weekday - 1],
+        };
+
+        return jsonEncode(timeInfo);
+      } catch (e) {
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 2. 获取设备信息
+    await _engine!.registerFunction('Memento_system_getDeviceInfo', ([dynamic a]) async {
+      try {
+        // 导入 device_info_plus 包以获取详细设备信息
+        // 这里先返回基础信息，后续可以扩展
+        final deviceInfo = {
+          'platform': _getPlatformName(),
+          'platformVersion': 'Unknown',
+          'deviceModel': 'Unknown',
+          'isPhysicalDevice': true,
+        };
+
+        return jsonEncode(deviceInfo);
+      } catch (e) {
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 3. 获取应用信息
+    await _engine!.registerFunction('Memento_system_getAppInfo', ([dynamic a]) async {
+      try {
+        // 导入 package_info_plus 包以获取详细应用信息
+        // 这里先返回基础信息
+        final appInfo = {
+          'appName': 'Memento',
+          'version': '1.0.0',
+          'buildNumber': '1',
+          'packageName': 'com.example.memento',
+        };
+
+        return jsonEncode(appInfo);
+      } catch (e) {
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 4. 格式化日期时间
+    await _engine!.registerFunction('Memento_system_formatDate', ([dynamic a, dynamic b]) async {
+      try {
+        final dateInput = a;
+        final format = b ?? 'yyyy-MM-dd HH:mm:ss';
+
+        DateTime dateTime;
+        if (dateInput is num) {
+          dateTime = DateTime.fromMillisecondsSinceEpoch(dateInput.toInt());
+        } else if (dateInput is String) {
+          dateTime = DateTime.parse(dateInput);
+        } else {
+          throw Exception('Invalid date input type');
+        }
+
+        final formatted = _formatDateTime(dateTime, format.toString());
+        return formatted;
+      } catch (e) {
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 5. 获取当前时间戳
+    await _engine!.registerFunction('Memento_system_getTimestamp', ([dynamic a]) async {
+      try {
+        return DateTime.now().millisecondsSinceEpoch;
+      } catch (e) {
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 在 JS 中创建系统 API 代理
+    await _engine!.evaluateDirect('''
+      (function() {
+        var namespace = globalThis.Memento;
+
+        namespace.system.getCurrentTime = function() {
+          return Memento_system_getCurrentTime();
+        };
+
+        namespace.system.getDeviceInfo = function() {
+          return Memento_system_getDeviceInfo();
+        };
+
+        namespace.system.getAppInfo = function() {
+          return Memento_system_getAppInfo();
+        };
+
+        namespace.system.formatDate = function(dateInput, format) {
+          return Memento_system_formatDate(dateInput, format);
+        };
+
+        namespace.system.getTimestamp = function() {
+          return Memento_system_getTimestamp();
+        };
+      })();
+    ''');
+  }
+
+  /// 获取平台名称
+  String _getPlatformName() {
+    if (kIsWeb) return 'web';
+
+    // 使用 Platform 类判断平台
+    try {
+      // 需要导入 dart:io 并使用条件导入
+      return 'unknown';
+    } catch (e) {
+      return 'unknown';
+    }
+  }
+
+  /// 格式化日期时间
+  String _formatDateTime(DateTime dateTime, String format) {
+    final weekdayNames = ['一', '二', '三', '四', '五', '六', '日'];
+
+    String result = format;
+
+    // 替换占位符
+    result = result.replaceAll('yyyy', dateTime.year.toString().padLeft(4, '0'));
+    result = result.replaceAll('MM', dateTime.month.toString().padLeft(2, '0'));
+    result = result.replaceAll('dd', dateTime.day.toString().padLeft(2, '0'));
+    result = result.replaceAll('HH', dateTime.hour.toString().padLeft(2, '0'));
+    result = result.replaceAll('hh', (dateTime.hour % 12).toString().padLeft(2, '0'));
+    result = result.replaceAll('mm', dateTime.minute.toString().padLeft(2, '0'));
+    result = result.replaceAll('ss', dateTime.second.toString().padLeft(2, '0'));
+    result = result.replaceAll('E', weekdayNames[dateTime.weekday - 1]);
+
+    return result;
   }
 
   /// 序列化结果

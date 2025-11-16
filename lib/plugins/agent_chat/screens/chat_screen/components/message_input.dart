@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../controllers/chat_controller.dart';
 import '../../../../../utils/file_picker_helper.dart';
+import 'suggested_questions_dialog.dart';
 
 /// 消息输入框组件
 class MessageInput extends StatefulWidget {
@@ -62,7 +63,7 @@ class _MessageInputState extends State<MessageInput> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -114,22 +115,41 @@ class _MessageInputState extends State<MessageInput> {
                           horizontal: 16,
                           vertical: 10,
                         ),
-                        // 显示token统计
-                        suffixIcon: widget.controller.inputText.isNotEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.only(right: 12),
-                                child: Center(
-                                  widthFactor: 1.0,
+                        // 显示token统计和"你可以问"按钮
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Token统计
+                              if (widget.controller.inputText.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 4),
                                   child: Text(
-                                    '~${widget.controller.inputTokenCount} tokens',
+                                    '~${widget.controller.inputTokenCount}',
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.grey[600],
                                     ),
                                   ),
                                 ),
-                              )
-                            : null,
+                              // "你可以问"按钮
+                              if (widget.controller.currentAgent != null)
+                                InkWell(
+                                  onTap: _showSuggestedQuestions,
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: Icon(
+                                      Icons.lightbulb_outline,
+                                      size: 20,
+                                      color: Colors.orange[700],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -283,6 +303,20 @@ class _MessageInputState extends State<MessageInput> {
         ),
       ),
     );
+  }
+
+  /// 显示预设问题对话框
+  Future<void> _showSuggestedQuestions() async {
+    final selectedQuestion = await showSuggestedQuestionsDialog(context);
+
+    if (selectedQuestion != null && mounted) {
+      // 将选中的问题填充到输入框
+      _textController.text = selectedQuestion;
+      widget.controller.setInputText(selectedQuestion);
+
+      // 聚焦到输入框
+      _focusNode.requestFocus();
+    }
   }
 
   /// 发送消息

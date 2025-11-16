@@ -22,6 +22,7 @@ class ToolConfigManager {
 
   // 配置文件列表
   static const List<String> _pluginIds = [
+    'system', // 系统级工具（时间、设备信息等）
     'todo',
     'notes',
     'tracker',
@@ -62,7 +63,7 @@ class ToolConfigManager {
   /// 获取数据目录
   Future<Directory> _getDataDirectory() async {
     final appDir = await getApplicationDocumentsDirectory();
-    return Directory(path.join(appDir.path, 'agent_chat'));
+    return Directory(path.join(appDir.path, 'app_data', 'agent_chat'));
   }
 
   /// 从 assets 复制配置文件到数据目录
@@ -72,7 +73,7 @@ class ToolConfigManager {
     // 复制 index.json
     try {
       final indexData = await rootBundle.loadString(
-        'assets/lib/plugins/agent_chat/tools/index.json',
+        'lib/plugins/agent_chat/tools/index.json',
       );
       final indexFile = File(path.join(toolsDir.path, 'index.json'));
       await indexFile.writeAsString(indexData);
@@ -85,7 +86,7 @@ class ToolConfigManager {
     for (final pluginId in _pluginIds) {
       try {
         final configData = await rootBundle.loadString(
-          'assets/lib/plugins/agent_chat/tools/$pluginId.json',
+          'lib/plugins/agent_chat/tools/$pluginId.json',
         );
         final configFile = File(path.join(toolsDir.path, '$pluginId.json'));
         await configFile.writeAsString(configData);
@@ -116,11 +117,13 @@ class ToolConfigManager {
       if (await indexFile.exists()) {
         final content = await indexFile.readAsString();
         final List<dynamic> jsonData = json.decode(content);
-        _toolIndex = jsonData
-            .map((item) => (item as List<dynamic>)
-                .map((e) => e.toString())
-                .toList())
-            .toList();
+        _toolIndex =
+            jsonData
+                .map(
+                  (item) =>
+                      (item as List<dynamic>).map((e) => e.toString()).toList(),
+                )
+                .toList();
       } else {
         print('⚠️ index.json 不存在');
         _toolIndex = [];
@@ -135,8 +138,9 @@ class ToolConfigManager {
   Future<void> _loadPluginConfig(String pluginId) async {
     try {
       final dataDir = await _getDataDirectory();
-      final configFile =
-          File(path.join(dataDir.path, 'tools', '$pluginId.json'));
+      final configFile = File(
+        path.join(dataDir.path, 'tools', '$pluginId.json'),
+      );
 
       if (await configFile.exists()) {
         final content = await configFile.readAsString();
@@ -154,8 +158,9 @@ class ToolConfigManager {
   Future<void> _savePluginConfig(String pluginId) async {
     try {
       final dataDir = await _getDataDirectory();
-      final configFile =
-          File(path.join(dataDir.path, 'tools', '$pluginId.json'));
+      final configFile = File(
+        path.join(dataDir.path, 'tools', '$pluginId.json'),
+      );
 
       final toolSet = _pluginTools[pluginId];
       if (toolSet == null) {
@@ -253,10 +258,7 @@ class ToolConfigManager {
 
     // 如果插件不存在，创建新的工具集
     if (toolSet == null) {
-      toolSet = PluginToolSet(
-        pluginId: pluginId,
-        tools: {toolId: config},
-      );
+      toolSet = PluginToolSet(pluginId: pluginId, tools: {toolId: config});
       _pluginTools[pluginId] = toolSet;
     } else {
       // 添加工具到现有工具集
@@ -382,17 +384,22 @@ class ToolConfigManager {
 
       // 导入索引
       final List<dynamic> indexData = importData['index'];
-      _toolIndex = indexData
-          .map((item) =>
-              (item as List<dynamic>).map((e) => e.toString()).toList())
-          .toList();
+      _toolIndex =
+          indexData
+              .map(
+                (item) =>
+                    (item as List<dynamic>).map((e) => e.toString()).toList(),
+              )
+              .toList();
 
       // 导入插件配置
       _pluginTools.clear();
       final Map<String, dynamic> pluginsData = importData['plugins'];
       pluginsData.forEach((pluginId, toolsData) {
-        _pluginTools[pluginId] =
-            PluginToolSet.fromJson(pluginId, toolsData as Map<String, dynamic>);
+        _pluginTools[pluginId] = PluginToolSet.fromJson(
+          pluginId,
+          toolsData as Map<String, dynamic>,
+        );
       });
 
       // 保存到文件
@@ -437,9 +444,11 @@ class ToolConfigManager {
 
     final lowerKeyword = keyword.toLowerCase();
     return _toolIndex
-        .where((item) =>
-            item[0].toLowerCase().contains(lowerKeyword) ||
-            item[1].toLowerCase().contains(lowerKeyword))
+        .where(
+          (item) =>
+              item[0].toLowerCase().contains(lowerKeyword) ||
+              item[1].toLowerCase().contains(lowerKeyword),
+        )
         .map((item) => item[0])
         .toList();
   }

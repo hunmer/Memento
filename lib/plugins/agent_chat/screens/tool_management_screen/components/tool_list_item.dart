@@ -76,129 +76,124 @@ class ToolListItem extends StatelessWidget {
     }
   }
 
-  /// 删除工具
-  Future<void> _deleteTool(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除工具 "$toolId" 吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('删除'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    try {
-      await ToolConfigManager.instance.deleteTool(pluginId, toolId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('工具已删除'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      onRefresh();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('删除工具失败: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: ListTile(
-        leading: Icon(
-          config.enabled ? Icons.check_circle : Icons.cancel,
-          color: config.enabled ? Colors.green : Colors.grey,
-        ),
-        title: Text(
-          toolId,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            decoration: config.enabled ? null : TextDecoration.lineThrough,
-            color: config.enabled ? null : Colors.grey,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              config.title,
-              style: const TextStyle(fontSize: 13),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              config.getBriefDescription(),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+    return Dismissible(
+      key: Key('${pluginId}_$toolId'),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        // 弹出确认对话框
+        return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('确认删除'),
+            content: Text('确定要删除工具 "$toolId" 吗？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(Icons.input, size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  '${config.parameters.length} 个参数',
-                  style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
                 ),
-                const SizedBox(width: 12),
-                Icon(Icons.code, size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  '${config.examples.length} 个示例',
-                  style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                ),
-              ],
+                child: const Text('删除'),
+              ),
+            ],
+          ),
+        );
+      },
+      onDismissed: (direction) async {
+        try {
+          await ToolConfigManager.instance.deleteTool(pluginId, toolId);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('工具已删除'),
+              backgroundColor: Colors.green,
             ),
-          ],
+          );
+          onRefresh();
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('删除工具失败: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: Colors.red,
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+          size: 32,
         ),
-        isThreeLine: true,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 启用/禁用开关
-            Switch(
-              value: config.enabled,
-              onChanged: (value) => _toggleEnabled(context, value),
+      ),
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: ListTile(
+          leading: Icon(
+            config.enabled ? Icons.check_circle : Icons.cancel,
+            color: config.enabled ? Colors.green : Colors.grey,
+          ),
+          title: Text(
+            toolId,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              decoration: config.enabled ? null : TextDecoration.lineThrough,
+              color: config.enabled ? null : Colors.grey,
             ),
-            // 编辑按钮
-            IconButton(
-              icon: const Icon(Icons.edit),
-              tooltip: '编辑',
-              onPressed: () => _editTool(context),
-            ),
-            // 删除按钮
-            IconButton(
-              icon: const Icon(Icons.delete),
-              tooltip: '删除',
-              color: Colors.red,
-              onPressed: () => _deleteTool(context),
-            ),
-          ],
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 4),
+              Text(
+                config.title,
+                style: const TextStyle(fontSize: 13),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                config.getBriefDescription(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.input, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${config.parameters.length} 个参数',
+                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(Icons.code, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${config.examples.length} 个示例',
+                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          isThreeLine: true,
+          trailing: Switch(
+            value: config.enabled,
+            onChanged: (value) => _toggleEnabled(context, value),
+          ),
+          onTap: () => _editTool(context),
         ),
       ),
     );

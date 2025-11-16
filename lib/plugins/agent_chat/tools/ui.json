@@ -22,15 +22,15 @@
     },
     "examples": [
       {
-        "code": "flutter.toast('操作成功');",
+        "code": "Memento.plugins.ui.toast('操作成功');",
         "comment": "显示简单提示"
       },
       {
-        "code": "flutter.toast('已保存', {\n  duration: 'long',\n  gravity: 'top'\n});",
+        "code": "Memento.plugins.ui.toast('已保存', {\n  duration: 'long',\n  gravity: 'top'\n});",
         "comment": "长时间显示在顶部"
       },
       {
-        "code": "flutter.toast('加载中...', {\n  duration: 3000\n});",
+        "code": "Memento.plugins.ui.toast('加载中...', {\n  duration: 3000\n});",
         "comment": "自定义显示时长（3秒）"
       }
     ],
@@ -60,15 +60,15 @@
     },
     "examples": [
       {
-        "code": "await flutter.alert('操作完成');",
+        "code": "await Memento.plugins.ui.alert('操作完成');",
         "comment": "仅显示确认按钮"
       },
       {
-        "code": "const result = await flutter.alert('确认删除这个项目？', {\n  title: '警告',\n  confirmText: '删除',\n  cancelText: '取消',\n  showCancel: true\n});\n\nif (result.confirmed) {\n  console.log('用户点击了确认');\n}",
+        "code": "const result = await Memento.plugins.ui.alert('确认删除这个项目？', {\n  title: '警告',\n  confirmText: '删除',\n  cancelText: '取消',\n  showCancel: true\n});\n\nif (result.confirmed) {\n  console.log('用户点击了确认');\n}",
         "comment": "带取消按钮的确认对话框"
       },
       {
-        "code": "const result = await flutter.alert('检测到新版本，是否更新？', {\n  title: '版本更新',\n  confirmText: '立即更新',\n  cancelText: '稍后再说',\n  showCancel: true\n});",
+        "code": "const result = await Memento.plugins.ui.alert('检测到新版本，是否更新？', {\n  title: '版本更新',\n  confirmText: '立即更新',\n  cancelText: '稍后再说',\n  showCancel: true\n});",
         "comment": "自定义按钮文字"
       }
     ],
@@ -92,15 +92,15 @@
     },
     "examples": [
       {
-        "code": "const result = await flutter.dialog({\n  title: '选择操作',\n  content: '请选择要执行的操作',\n  actions: [\n    { text: '取消', value: 'cancel' },\n    { text: '保存', value: 'save' },\n    { text: '删除', value: 'delete', isDestructive: true }\n  ]\n});\n\nconsole.log('用户选择:', result);",
+        "code": "const result = await Memento.plugins.ui.dialog({\n  title: '选择操作',\n  content: '请选择要执行的操作',\n  actions: [\n    { text: '取消', value: 'cancel' },\n    { text: '保存', value: 'save' },\n    { text: '删除', value: 'delete', isDestructive: true }\n  ]\n});\n\nconsole.log('用户选择:', result);",
         "comment": "多按钮选择对话框"
       },
       {
-        "code": "const color = await flutter.dialog({\n  title: '选择颜色',\n  actions: [\n    { text: '红色', value: 'red' },\n    { text: '蓝色', value: 'blue' },\n    { text: '绿色', value: 'green' }\n  ]\n});\n\nif (color) {\n  console.log('选择的颜色:', color);\n}",
+        "code": "const color = await Memento.plugins.ui.dialog({\n  title: '选择颜色',\n  actions: [\n    { text: '红色', value: 'red' },\n    { text: '蓝色', value: 'blue' },\n    { text: '绿色', value: 'green' }\n  ]\n});\n\nif (color) {\n  console.log('选择的颜色:', color);\n}",
         "comment": "简单选择对话框"
       },
       {
-        "code": "const confirmed = await flutter.dialog({\n  title: '确认操作',\n  content: '此操作不可撤销，确定继续？',\n  actions: [\n    { text: '取消', value: false },\n    { text: '确定', value: true }\n  ]\n});\n\nif (confirmed) {\n  // 执行操作\n}",
+        "code": "const confirmed = await Memento.plugins.ui.dialog({\n  title: '确认操作',\n  content: '此操作不可撤销，确定继续？',\n  actions: [\n    { text: '取消', value: false },\n    { text: '确定', value: true }\n  ]\n});\n\nif (confirmed) {\n  // 执行操作\n}",
         "comment": "确认对话框（灵活版本）"
       }
     ],
