@@ -12,13 +12,31 @@ class ToolTemplateService extends ChangeNotifier {
 
   final StorageManager _storage;
   List<SavedToolTemplate> _templates = [];
+  late final Future<void> _initialLoadFuture;
 
   ToolTemplateService(this._storage) {
-    _loadTemplates();
+    _initialLoadFuture = _loadTemplates();
   }
 
   /// 获取所有模板
   List<SavedToolTemplate> get templates => List.unmodifiable(_templates);
+
+  /// 确保模板已加载
+  Future<void> ensureInitialized() => _initialLoadFuture;
+
+  /// 获取模板列表，可选关键词过滤
+  Future<List<SavedToolTemplate>> fetchTemplates({String? query}) async {
+    await ensureInitialized();
+    if (query == null || query.trim().isEmpty) {
+      return templates;
+    }
+    return searchTemplates(query.trim());
+  }
+
+  /// 克隆模板步骤，确保去除执行态字段
+  List<ToolCallStep> cloneTemplateSteps(SavedToolTemplate template) {
+    return _normalizeSteps(template.steps);
+  }
 
   /// 加载模板
   Future<void> _loadTemplates() async {
@@ -27,6 +45,9 @@ class ToolTemplateService extends ChangeNotifier {
       if (data != null && data is List) {
         _templates = data
             .map((e) => SavedToolTemplate.fromJson(e as Map<String, dynamic>))
+            .map((template) => template.copyWith(
+                  steps: _normalizeSteps(template.steps),
+                ))
             .toList();
 
         // 按最后使用时间排序，未使用的按创建时间排序
@@ -52,7 +73,14 @@ class ToolTemplateService extends ChangeNotifier {
   /// 保存模板列表到存储
   Future<void> _saveTemplates() async {
     try {
-      final data = _templates.map((t) => t.toJson()).toList();
+      final data = _templates
+          .map(
+            (t) => t.copyWith(
+              steps: _normalizeSteps(t.steps),
+            ),
+          )
+          .map((t) => t.toJson())
+          .toList();
       await _storage.write(_storageKey, data);
     } catch (e) {
       debugPrint('保存工具模板失败: $e');
@@ -74,7 +102,7 @@ class ToolTemplateService extends ChangeNotifier {
     final template = SavedToolTemplate.create(
       name: name,
       description: description,
-      steps: steps,
+      steps: _normalizeSteps(steps),
     );
 
     _templates.insert(0, template);
