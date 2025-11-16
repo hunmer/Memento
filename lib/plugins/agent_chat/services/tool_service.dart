@@ -125,6 +125,16 @@ class ToolService {
     }
   }
 
+  /// 执行单个工具步骤
+  static Future<String> executeToolStep(ToolCallStep step) async {
+    switch (step.method) {
+      case 'run_js':
+        return await executeJsCode(step.data);
+      default:
+        throw Exception('不支持的方法类型: ${step.method}');
+    }
+  }
+
   /// 获取工具列表 Prompt（用于添加到 system prompt）
   /// @deprecated 使用 getToolBriefPrompt() 和 getToolDetailPrompt() 实现两阶段调用
   static String getToolListPrompt() {

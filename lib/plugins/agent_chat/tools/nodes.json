@@ -1,0 +1,276 @@
+{
+  "getNotebooks": {
+    "title": "获取所有笔记本",
+    "description": "获取所有笔记本的列表",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "笔记本列表，每个元素包含 id、name、description、createdAt 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取所有笔记本",
+        "code": "const notebooks = await Memento.plugins.nodes.getNotebooks();\nsetResult(JSON.stringify(notebooks, null, 2));"
+      }
+    ],
+    "notes": "返回所有笔记本，不包含其中的节点数据",
+    "enabled": true
+  },
+  "getNotebook": {
+    "title": "获取单个笔记本",
+    "description": "根据ID获取指定笔记本的详细信息",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "笔记本对象（不含节点数据）"
+    },
+    "examples": [
+      {
+        "title": "获取笔记本详情",
+        "code": "const notebook = await Memento.plugins.nodes.getNotebook('nb123');\nsetResult(JSON.stringify(notebook, null, 2));"
+      }
+    ],
+    "notes": "如笔记本不存在则返回 null",
+    "enabled": true
+  },
+  "createNotebook": {
+    "title": "创建笔记本",
+    "description": "创建一个新的笔记本",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "笔记本名称"},
+      {"name": "description", "type": "string", "required": false, "description": "笔记本描述"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的笔记本对象"
+    },
+    "examples": [
+      {
+        "title": "创建笔记本",
+        "code": "const nb = await Memento.plugins.nodes.createNotebook('工作笔记', '记录日常工作');\nsetResult(`笔记本已创建: ${nb.name}`);"
+      },
+      {
+        "title": "创建笔记本（仅名称）",
+        "code": "const nb = await Memento.plugins.nodes.createNotebook('学习笔记');\nsetResult(`笔记本ID: ${nb.id}`);"
+      }
+    ],
+    "notes": "新创建的笔记本初始为空，不包含任何节点",
+    "enabled": true
+  },
+  "updateNotebook": {
+    "title": "更新笔记本",
+    "description": "更新笔记本的名称或描述",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "name", "type": "string", "required": false, "description": "新名称"},
+      {"name": "description", "type": "string", "required": false, "description": "新描述"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的笔记本对象"
+    },
+    "examples": [
+      {
+        "title": "更新笔记本名称",
+        "code": "const updated = await Memento.plugins.nodes.updateNotebook('nb123', '项目笔记');\nsetResult(`笔记本已更新: ${updated.name}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，未提供的字段保持不变",
+    "enabled": true
+  },
+  "deleteNotebook": {
+    "title": "删除笔记本",
+    "description": "删除指定的笔记本（包括所有节点）",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除笔记本",
+        "code": "const success = await Memento.plugins.nodes.deleteNotebook('nb123');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆，会同时删除该笔记本下的所有节点（包括树形结构）",
+    "enabled": true
+  },
+  "getNodes": {
+    "title": "获取节点列表",
+    "description": "获取指定笔记本中的所有节点（扁平列表）",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "节点列表，每个元素包含 id、title、content、parentId、order 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取所有节点",
+        "code": "const nodes = await Memento.plugins.nodes.getNodes('nb123');\nsetResult(`共有 ${nodes.length} 个节点`);"
+      }
+    ],
+    "notes": "返回扁平列表，如需树形结构请使用 getNodeTree",
+    "enabled": true
+  },
+  "getNode": {
+    "title": "获取单个节点",
+    "description": "根据ID获取指定节点的详细信息",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "nodeId", "type": "string", "required": true, "description": "节点ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "节点对象（包含完整内容）"
+    },
+    "examples": [
+      {
+        "title": "获取节点详情",
+        "code": "const node = await Memento.plugins.nodes.getNode('nb123', 'node456');\nsetResult(JSON.stringify(node, null, 2));"
+      }
+    ],
+    "notes": "如节点不存在则返回 null",
+    "enabled": true
+  },
+  "createNode": {
+    "title": "创建节点",
+    "description": "在指定笔记本中创建新节点",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "title", "type": "string", "required": true, "description": "节点标题"},
+      {"name": "content", "type": "string", "required": false, "description": "节点内容（Markdown）"},
+      {"name": "parentId", "type": "string", "required": false, "description": "父节点ID（根节点传 null）"},
+      {"name": "order", "type": "number", "required": false, "description": "排序顺序，默认 0"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的节点对象"
+    },
+    "examples": [
+      {
+        "title": "创建根节点",
+        "code": "const node = await Memento.plugins.nodes.createNode('nb123', '第一章', '# 简介\\n这是第一章内容');\nsetResult(`节点已创建: ${node.title}`);"
+      },
+      {
+        "title": "创建子节点",
+        "code": "const child = await Memento.plugins.nodes.createNode('nb123', '1.1 小节', '内容', 'parentNodeId', 1);\nsetResult(`子节点ID: ${child.id}`);"
+      }
+    ],
+    "notes": "支持无限层级嵌套，通过 parentId 构建树形结构",
+    "enabled": true
+  },
+  "updateNode": {
+    "title": "更新节点",
+    "description": "更新节点的标题、内容或其他属性",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "nodeId", "type": "string", "required": true, "description": "节点ID"},
+      {"name": "title", "type": "string", "required": false, "description": "新标题"},
+      {"name": "content", "type": "string", "required": false, "description": "新内容"},
+      {"name": "order", "type": "number", "required": false, "description": "新排序顺序"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的节点对象"
+    },
+    "examples": [
+      {
+        "title": "更新节点内容",
+        "code": "const updated = await Memento.plugins.nodes.updateNode('nb123', 'node456', null, '# 新内容\\n更新后的文本');\nsetResult('节点已更新');"
+      }
+    ],
+    "notes": "仅更新提供的字段，未提供的字段保持不变",
+    "enabled": true
+  },
+  "deleteNode": {
+    "title": "删除节点",
+    "description": "删除指定的节点（包括所有子节点）",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "nodeId", "type": "string", "required": true, "description": "节点ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除节点",
+        "code": "const success = await Memento.plugins.nodes.deleteNode('nb123', 'node456');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆，会递归删除该节点的所有子节点",
+    "enabled": true
+  },
+  "moveNode": {
+    "title": "移动节点",
+    "description": "将节点移动到新的父节点下",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "nodeId", "type": "string", "required": true, "description": "要移动的节点ID"},
+      {"name": "newParentId", "type": "string", "required": false, "description": "新父节点ID（移到根级传 null）"},
+      {"name": "newOrder", "type": "number", "required": false, "description": "新排序顺序"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "移动后的节点对象"
+    },
+    "examples": [
+      {
+        "title": "移动到其他父节点",
+        "code": "const moved = await Memento.plugins.nodes.moveNode('nb123', 'node456', 'newParent789', 2);\nsetResult(`节点已移动到: ${moved.parentId}`);"
+      },
+      {
+        "title": "移动到根级",
+        "code": "const moved = await Memento.plugins.nodes.moveNode('nb123', 'node456', null);\nsetResult('节点已移动到根级');"
+      }
+    ],
+    "notes": "移动节点会保留其所有子节点（整个子树一起移动）",
+    "enabled": true
+  },
+  "getNodeTree": {
+    "title": "获取节点树",
+    "description": "获取指定笔记本的完整树形结构",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "树形节点列表（根节点数组，每个节点包含 children 数组）"
+    },
+    "examples": [
+      {
+        "title": "获取树形结构",
+        "code": "const tree = await Memento.plugins.nodes.getNodeTree('nb123');\nsetResult(JSON.stringify(tree, null, 2));"
+      }
+    ],
+    "notes": "返回嵌套的树形结构，每个节点的 children 字段包含其子节点数组",
+    "enabled": true
+  },
+  "getNodePath": {
+    "title": "获取节点路径",
+    "description": "获取从根节点到指定节点的完整路径",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "nodeId", "type": "string", "required": true, "description": "节点ID"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "路径数组（从根节点到目标节点的所有节点）"
+    },
+    "examples": [
+      {
+        "title": "获取节点面包屑路径",
+        "code": "const path = await Memento.plugins.nodes.getNodePath('nb123', 'node456');\nconst breadcrumb = path.map(n => n.title).join(' > ');\nsetResult(breadcrumb);"
+      }
+    ],
+    "notes": "路径数组按从根到叶的顺序排列，第一个元素为根节点，最后一个为目标节点",
+    "enabled": true
+  }
+}

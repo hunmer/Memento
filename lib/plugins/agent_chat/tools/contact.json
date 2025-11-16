@@ -1,0 +1,210 @@
+{
+  "getContacts": {
+    "title": "获取所有联系人",
+    "description": "获取所有联系人的列表",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "联系人列表，每个元素包含 id、name、phone、tags 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取所有联系人",
+        "code": "const contacts = await Memento.plugins.contact.getContacts();\nsetResult(JSON.stringify(contacts, null, 2));"
+      }
+    ],
+    "notes": "返回所有联系人信息",
+    "enabled": true
+  },
+  "getContact": {
+    "title": "获取联系人详情",
+    "description": "根据ID获取指定联系人的详细信息",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "联系人对象，如不存在则返回 error 字段"
+    },
+    "examples": [
+      {
+        "title": "获取联系人详情",
+        "code": "const contact = await Memento.plugins.contact.getContact('contact123');\nif (contact.error) {\n  setResult('联系人不存在');\n} else {\n  setResult(JSON.stringify(contact, null, 2));\n}"
+      }
+    ],
+    "notes": "如联系人不存在，返回对象包含 error 字段",
+    "enabled": true
+  },
+  "createContact": {
+    "title": "创建联系人",
+    "description": "创建一个新的联系人",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "姓名"},
+      {"name": "phone", "type": "string", "required": true, "description": "电话号码"},
+      {"name": "avatar", "type": "string", "required": false, "description": "头像路径"},
+      {"name": "address", "type": "string", "required": false, "description": "地址"},
+      {"name": "notes", "type": "string", "required": false, "description": "备注"},
+      {"name": "tags", "type": "Array", "required": false, "description": "标签数组"},
+      {"name": "customFields", "type": "Object", "required": false, "description": "自定义字段（键值对对象）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的联系人对象"
+    },
+    "examples": [
+      {
+        "title": "创建简单联系人",
+        "code": "const contact = await Memento.plugins.contact.createContact('张三', '13800138000');\nsetResult(`联系人已创建: ${contact.name}`);"
+      },
+      {
+        "title": "创建完整联系人",
+        "code": "const contact = await Memento.plugins.contact.createContact('李四', '13900139000', null, '北京市海淀区', '重要客户', ['朋友', '客户'], {公司: '北京科技', 职位: '经理'});\nsetResult(`联系人ID: ${contact.id}`);"
+      }
+    ],
+    "notes": "姓名和电话号码必填，其他字段可选",
+    "enabled": true
+  },
+  "updateContact": {
+    "title": "更新联系人",
+    "description": "更新已有联系人的信息",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"},
+      {"name": "name", "type": "string", "required": false, "description": "新姓名"},
+      {"name": "phone", "type": "string", "required": false, "description": "新电话号码"},
+      {"name": "avatar", "type": "string", "required": false, "description": "新头像路径"},
+      {"name": "address", "type": "string", "required": false, "description": "新地址"},
+      {"name": "notes", "type": "string", "required": false, "description": "新备注"},
+      {"name": "tags", "type": "Array", "required": false, "description": "新标签数组"},
+      {"name": "customFields", "type": "Object", "required": false, "description": "新自定义字段"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的联系人对象，如不存在则返回 error 字段"
+    },
+    "examples": [
+      {
+        "title": "更新联系人电话",
+        "code": "const updated = await Memento.plugins.contact.updateContact('contact123', null, '13700137000');\nsetResult(`电话已更新: ${updated.phone}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，其他字段保持不变",
+    "enabled": true
+  },
+  "deleteContact": {
+    "title": "删除联系人",
+    "description": "删除指定的联系人（包括相关的交互记录）",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true，失败返回 false"
+    },
+    "examples": [
+      {
+        "title": "删除联系人",
+        "code": "const success = await Memento.plugins.contact.deleteContact('contact123');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆，会同时删除该联系人的所有交互记录",
+    "enabled": true
+  },
+  "addInteraction": {
+    "title": "添加交互记录",
+    "description": "为联系人添加一条交互记录（自动更新最后联系时间）",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"},
+      {"name": "notes", "type": "string", "required": true, "description": "交互内容描述"},
+      {"name": "dateStr", "type": "string", "required": false, "description": "交互日期（ISO8601 格式，默认当前时间）"},
+      {"name": "participants", "type": "Array", "required": false, "description": "其他参与者的联系人ID数组"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的交互记录对象"
+    },
+    "examples": [
+      {
+        "title": "添加简单交互记录",
+        "code": "const record = await Memento.plugins.contact.addInteraction('contact123', '电话沟通了项目进度');\nsetResult(`交互记录已添加: ${record.id}`);"
+      },
+      {
+        "title": "添加多人交互记录",
+        "code": "const record = await Memento.plugins.contact.addInteraction('contact123', '三方会议讨论合作', '2025-01-15T14:00:00.000Z', ['contact456', 'contact789']);\nsetResult('已记录多人会议');"
+      }
+    ],
+    "notes": "添加交互记录会自动更新联系人的 lastContactTime 字段",
+    "enabled": true
+  },
+  "getInteractions": {
+    "title": "获取交互记录",
+    "description": "获取指定联系人的所有交互记录",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "交互记录列表，每条记录包含 id、date、notes、participants 字段"
+    },
+    "examples": [
+      {
+        "title": "获取交互记录",
+        "code": "const records = await Memento.plugins.contact.getInteractions('contact123');\nsetResult(`共有 ${records.length} 条交互记录`);"
+      }
+    ],
+    "notes": "按交互日期倒序排列",
+    "enabled": true
+  },
+  "deleteInteraction": {
+    "title": "删除交互记录",
+    "description": "删除指定的交互记录",
+    "parameters": [
+      {"name": "interactionId", "type": "string", "required": true, "description": "交互记录ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true，失败返回 false"
+    },
+    "examples": [
+      {
+        "title": "删除交互记录",
+        "code": "const success = await Memento.plugins.contact.deleteInteraction('record456');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆",
+    "enabled": true
+  },
+  "getRecentContacts": {
+    "title": "获取最近联系人数",
+    "description": "获取最近一个月内有过联系的人数",
+    "parameters": [],
+    "returns": {
+      "type": "number",
+      "description": "最近联系人数量"
+    },
+    "examples": [
+      {
+        "title": "获取最近联系人数",
+        "code": "const count = await Memento.plugins.contact.getRecentContacts();\nsetResult(`最近一个月联系了 ${count} 个人`);"
+      }
+    ],
+    "notes": "统计 lastContactTime 在最近 30 天内的联系人数量",
+    "enabled": true
+  },
+  "getAllTags": {
+    "title": "获取所有标签",
+    "description": "获取系统中使用的所有联系人标签",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "标签字符串数组"
+    },
+    "examples": [
+      {
+        "title": "获取所有标签",
+        "code": "const tags = await Memento.plugins.contact.getAllTags();\nsetResult(tags.join(', '));"
+      }
+    ],
+    "notes": "返回去重后的标签列表",
+    "enabled": true
+  }
+}

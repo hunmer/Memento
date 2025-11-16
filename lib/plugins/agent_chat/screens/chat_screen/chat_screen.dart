@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../controllers/chat_controller.dart';
 import '../../models/conversation.dart';
+import '../../models/chat_message.dart';
 import '../../services/message_service.dart';
 import '../../services/conversation_service.dart';
+import '../../services/tool_template_service.dart';
 import '../../../../core/storage/storage_manager.dart';
 import 'components/message_bubble.dart';
 import 'components/message_input.dart';
+import 'components/save_tool_dialog.dart';
 import '../tool_management_screen/tool_management_screen.dart';
+import '../tool_template_screen/tool_template_screen.dart';
 
 /// 聊天界面
 class ChatScreen extends StatefulWidget {
@@ -25,6 +29,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   late final ChatController _controller;
+  late final ToolTemplateService _templateService;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -35,10 +40,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initializeController() async {
+    // 初始化工具模板服务
+    _templateService = ToolTemplateService(widget.storage);
+
     _controller = ChatController(
       conversation: widget.conversation,
       messageService: MessageService(storage: widget.storage),
       conversationService: ConversationService(storage: widget.storage),
+      templateService: _templateService,
     );
 
     // 在 initialize 之前添加监听器，确保状态变化能触发界面更新
@@ -131,6 +140,12 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
         actions: [
+          // 工具模板管理按钮
+          IconButton(
+            icon: const Icon(Icons.inventory_2_outlined),
+            onPressed: _openToolTemplateManagement,
+            tooltip: '工具模板',
+          ),
           // 工具管理按钮
           IconButton(
             icon: const Icon(Icons.build_outlined),
@@ -185,6 +200,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                 },
                                 onRegenerate: (messageId) async {
                                   await _controller.regenerateResponse(messageId);
+                                },
+                                onSaveTool: (message) async {
+                                  await _handleSaveTool(message);
                                 },
                               ),
                             );
@@ -292,6 +310,26 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  /// 处理保存工具
+  Future<void> _handleSaveTool(ChatMessage message) async {
+    await showSaveToolDialog(context, message, _templateService);
+  }
+
+  /// 打开工具模板管理界面
+  void _openToolTemplateManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ToolTemplateScreen(
+          templateService: _templateService,
+          onUseTemplate: (template) {
+            _controller.setSelectedToolTemplate(template);
+          },
+        ),
+      ),
     );
   }
 

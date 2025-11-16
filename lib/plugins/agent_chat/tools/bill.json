@@ -1,0 +1,235 @@
+{
+  "getAccounts": {
+    "title": "获取所有账户",
+    "description": "获取所有账户的列表（不含账单数据）",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "账户列表，每个元素包含 id、title、totalAmount 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取所有账户",
+        "code": "const accounts = await Memento.plugins.bill.getAccounts();\nsetResult(JSON.stringify(accounts, null, 2));"
+      }
+    ],
+    "notes": "返回的账户对象不包含 bills 字段，如需获取账单请使用 getBills",
+    "enabled": true
+  },
+  "createAccount": {
+    "title": "创建账户",
+    "description": "创建一个新的账户",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "账户名称"},
+      {"name": "iconCodePoint", "type": "number", "required": false, "description": "图标代码点（MaterialIcons）"},
+      {"name": "backgroundColor", "type": "number", "required": false, "description": "背景颜色值（Color.value）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的账户对象"
+    },
+    "examples": [
+      {
+        "title": "创建简单账户",
+        "code": "const account = await Memento.plugins.bill.createAccount('现金账户');\nsetResult(`账户已创建: ${account.title}`);"
+      },
+      {
+        "title": "创建带图标和颜色的账户",
+        "code": "const account = await Memento.plugins.bill.createAccount('信用卡', 58837, 4280391411);\nsetResult(`账户ID: ${account.id}`);"
+      }
+    ],
+    "notes": "不提供图标和颜色时使用默认值（account_balance_wallet 图标，绿色背景）",
+    "enabled": true
+  },
+  "updateAccount": {
+    "title": "更新账户",
+    "description": "更新账户的名称、图标或背景颜色",
+    "parameters": [
+      {"name": "accountId", "type": "string", "required": true, "description": "账户ID"},
+      {"name": "title", "type": "string", "required": false, "description": "新账户名称"},
+      {"name": "iconCodePoint", "type": "number", "required": false, "description": "新图标代码点"},
+      {"name": "backgroundColor", "type": "number", "required": false, "description": "新背景颜色值"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的账户对象"
+    },
+    "examples": [
+      {
+        "title": "更新账户名称",
+        "code": "const updated = await Memento.plugins.bill.updateAccount('acc123', '支付宝账户');\nsetResult(`账户已更新: ${updated.title}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，未提供的字段保持不变",
+    "enabled": true
+  },
+  "deleteAccount": {
+    "title": "删除账户",
+    "description": "删除指定的账户（包括其中的所有账单）",
+    "parameters": [
+      {"name": "accountId", "type": "string", "required": true, "description": "账户ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除账户",
+        "code": "const success = await Memento.plugins.bill.deleteAccount('acc123');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆，会同时删除该账户下的所有账单",
+    "enabled": true
+  },
+  "getBills": {
+    "title": "获取账单列表",
+    "description": "获取账单列表，支持按账户和日期范围筛选",
+    "parameters": [
+      {"name": "accountId", "type": "string", "required": false, "description": "账户ID（不传则返回所有账户的账单）"},
+      {"name": "startDate", "type": "string", "required": false, "description": "开始日期（格式：YYYY-MM-DD）"},
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "账单列表，每条记录包含 id、title、amount、category、date 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取所有账单",
+        "code": "const bills = await Memento.plugins.bill.getBills();\nsetResult(`共有 ${bills.length} 条账单`);"
+      },
+      {
+        "title": "获取指定账户的账单",
+        "code": "const bills = await Memento.plugins.bill.getBills('acc123');\nsetResult(JSON.stringify(bills, null, 2));"
+      },
+      {
+        "title": "获取日期范围内的账单",
+        "code": "const bills = await Memento.plugins.bill.getBills(null, '2025-01-01', '2025-01-31');\nsetResult(`一月份共 ${bills.length} 条账单`);"
+      }
+    ],
+    "notes": "金额字段：正数表示收入，负数表示支出",
+    "enabled": true
+  },
+  "createBill": {
+    "title": "创建账单",
+    "description": "在指定账户中创建新账单",
+    "parameters": [
+      {"name": "accountId", "type": "string", "required": true, "description": "账户ID"},
+      {"name": "amount", "type": "number", "required": true, "description": "金额（正数=收入，负数=支出）"},
+      {"name": "category", "type": "string", "required": true, "description": "分类（如：工资、餐饮、交通）"},
+      {"name": "title", "type": "string", "required": true, "description": "账单标题"},
+      {"name": "date", "type": "string", "required": false, "description": "日期（格式：YYYY-MM-DD，默认今天）"},
+      {"name": "note", "type": "string", "required": false, "description": "备注"},
+      {"name": "tag", "type": "string", "required": false, "description": "标签"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的账单对象"
+    },
+    "examples": [
+      {
+        "title": "创建收入账单",
+        "code": "const bill = await Memento.plugins.bill.createBill('acc123', 5000, '工资', '月度工资', '2025-01-15');\nsetResult(`账单已创建: ${bill.id}`);"
+      },
+      {
+        "title": "创建支出账单",
+        "code": "const bill = await Memento.plugins.bill.createBill('acc123', -120, '餐饮', '午餐', null, '公司食堂');\nsetResult('已记录午餐支出 120元');"
+      }
+    ],
+    "notes": "金额为正数记录收入，负数记录支出；不提供日期时使用当天日期",
+    "enabled": true
+  },
+  "updateBill": {
+    "title": "更新账单",
+    "description": "更新指定账单的信息",
+    "parameters": [
+      {"name": "billId", "type": "string", "required": true, "description": "账单ID"},
+      {"name": "accountId", "type": "string", "required": true, "description": "账户ID"},
+      {"name": "amount", "type": "number", "required": false, "description": "新金额"},
+      {"name": "category", "type": "string", "required": false, "description": "新分类"},
+      {"name": "title", "type": "string", "required": false, "description": "新标题"},
+      {"name": "date", "type": "string", "required": false, "description": "新日期（格式：YYYY-MM-DD）"},
+      {"name": "note", "type": "string", "required": false, "description": "新备注"},
+      {"name": "tag", "type": "string", "required": false, "description": "新标签"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的账单对象"
+    },
+    "examples": [
+      {
+        "title": "更新账单金额",
+        "code": "const updated = await Memento.plugins.bill.updateBill('bill456', 'acc123', -150);\nsetResult(`金额已更新为: ${updated.amount}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，其他字段保持不变",
+    "enabled": true
+  },
+  "deleteBill": {
+    "title": "删除账单",
+    "description": "删除指定的账单",
+    "parameters": [
+      {"name": "accountId", "type": "string", "required": true, "description": "账户ID"},
+      {"name": "billId", "type": "string", "required": true, "description": "账单ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除账单",
+        "code": "const success = await Memento.plugins.bill.deleteBill('acc123', 'bill456');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆",
+    "enabled": true
+  },
+  "getStats": {
+    "title": "获取财务统计",
+    "description": "获取指定时间范围的财务统计信息",
+    "parameters": [
+      {"name": "startDate", "type": "string", "required": false, "description": "开始日期（格式：YYYY-MM-DD）"},
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期（格式：YYYY-MM-DD）"},
+      {"name": "accountId", "type": "string", "required": false, "description": "账户ID（不传则统计所有账户）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象，包含 totalIncome（总收入）、totalExpense（总支出）、balance（余额）、billCount（账单数）等字段"
+    },
+    "examples": [
+      {
+        "title": "获取本月统计",
+        "code": "const stats = await Memento.plugins.bill.getStats('2025-01-01', '2025-01-31');\nsetResult(`本月收入: ${stats.totalIncome}, 支出: ${stats.totalExpense}, 余额: ${stats.balance}`);"
+      },
+      {
+        "title": "获取全部统计",
+        "code": "const stats = await Memento.plugins.bill.getStats();\nsetResult(JSON.stringify(stats, null, 2));"
+      }
+    ],
+    "notes": "统计信息还包括 todayFinance（今日财务）、monthFinance（本月财务）、monthBillCount（本月记账数）",
+    "enabled": true
+  },
+  "getCategoryStats": {
+    "title": "获取分类统计",
+    "description": "获取按分类统计的收支金额",
+    "parameters": [
+      {"name": "startDate", "type": "string", "required": false, "description": "开始日期（格式：YYYY-MM-DD）"},
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期（格式：YYYY-MM-DD）"},
+      {"name": "accountId", "type": "string", "required": false, "description": "账户ID（不传则统计所有账户）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "分类统计对象，键为分类名称，值为该分类的总金额"
+    },
+    "examples": [
+      {
+        "title": "获取分类统计",
+        "code": "const catStats = await Memento.plugins.bill.getCategoryStats('2025-01-01', '2025-01-31');\nsetResult(JSON.stringify(catStats, null, 2));"
+      }
+    ],
+    "notes": "返回示例: {\"工资\": 5000.00, \"餐饮\": -800.00, \"交通\": -200.00}",
+    "enabled": true
+  }
+}

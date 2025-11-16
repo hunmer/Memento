@@ -14,6 +14,7 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(String messageId, String newContent)? onEdit;
   final Future<void> Function(String messageId)? onDelete;
   final Future<void> Function(String messageId)? onRegenerate;
+  final Future<void> Function(ChatMessage message)? onSaveTool;
   final bool hasAgent;
 
   const MessageBubble({
@@ -22,6 +23,7 @@ class MessageBubble extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onRegenerate,
+    this.onSaveTool,
     this.hasAgent = true,
   });
 
@@ -291,6 +293,9 @@ class MessageBubble extends StatelessWidget {
 
   /// 构建操作菜单
   Widget _buildActionMenu(BuildContext context) {
+    final isToolCallMessage =
+        message.toolCall != null && message.toolCall!.steps.isNotEmpty;
+
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
       icon: Icon(Icons.more_vert, size: 16, color: Colors.grey[600]),
@@ -310,6 +315,9 @@ class MessageBubble extends StatelessWidget {
             break;
           case 'regenerate':
             onRegenerate?.call(message.id);
+            break;
+          case 'save_tool':
+            onSaveTool?.call(message);
             break;
         }
       },
@@ -344,6 +352,17 @@ class MessageBubble extends StatelessWidget {
                     Icon(Icons.refresh, size: 18),
                     SizedBox(width: 8),
                     Text('重新生成'),
+                  ],
+                ),
+              ),
+            if (!message.isUser && isToolCallMessage && onSaveTool != null)
+              const PopupMenuItem(
+                value: 'save_tool',
+                child: Row(
+                  children: [
+                    Icon(Icons.save, size: 18, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text('保存工具', style: TextStyle(color: Colors.blue)),
                   ],
                 ),
               ),

@@ -1,0 +1,166 @@
+{
+  "getEvents": {
+    "title": "获取所有事件",
+    "description": "获取所有日历事件（包括 Todo 任务事件）",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "事件列表，每个元素包含 id、title、description、startTime、endTime 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取所有事件",
+        "code": "const events = await Memento.plugins.calendar.getEvents();\nsetResult(JSON.stringify(events, null, 2));"
+      }
+    ],
+    "notes": "返回的事件包括普通日历事件（source='default'）和来自 Todo 插件的任务事件（source='todo'）",
+    "enabled": true
+  },
+  "getTodayEvents": {
+    "title": "获取今日事件",
+    "description": "获取今天的所有日历事件",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "今日事件列表"
+    },
+    "examples": [
+      {
+        "title": "获取今日事件",
+        "code": "const todayEvents = await Memento.plugins.calendar.getTodayEvents();\nsetResult(`今天有 ${todayEvents.length} 个事件`);"
+      }
+    ],
+    "notes": "返回今天 00:00:00 到 23:59:59 之间的所有事件",
+    "enabled": true
+  },
+  "getEventsByDateRange": {
+    "title": "获取日期范围内的事件",
+    "description": "获取指定日期范围内的事件",
+    "parameters": [
+      {"name": "startDate", "type": "string", "required": true, "description": "开始日期（ISO8601 格式，如：2025-01-15T00:00:00.000Z）"},
+      {"name": "endDate", "type": "string", "required": true, "description": "结束日期（ISO8601 格式）"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "指定范围内的事件列表"
+    },
+    "examples": [
+      {
+        "title": "获取本周事件",
+        "code": "const events = await Memento.plugins.calendar.getEventsByDateRange('2025-01-15T00:00:00.000Z', '2025-01-21T23:59:59.000Z');\nsetResult(`本周有 ${events.length} 个事件`);"
+      }
+    ],
+    "notes": "日期需要使用 ISO8601 格式，可使用 JavaScript 的 Date.toISOString() 生成",
+    "enabled": true
+  },
+  "createEvent": {
+    "title": "创建事件",
+    "description": "创建一个新的日历事件",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "事件标题"},
+      {"name": "description", "type": "string", "required": true, "description": "事件描述"},
+      {"name": "startTime", "type": "string", "required": true, "description": "开始时间（ISO8601 格式）"},
+      {"name": "endTime", "type": "string", "required": false, "description": "结束时间（ISO8601 格式，可选）"},
+      {"name": "iconCodePoint", "type": "number", "required": false, "description": "图标代码点（MaterialIcons）"},
+      {"name": "colorValue", "type": "number", "required": false, "description": "颜色值（Color.value）"},
+      {"name": "reminderMinutes", "type": "number", "required": false, "description": "提前提醒的分钟数"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的事件对象"
+    },
+    "examples": [
+      {
+        "title": "创建简单事件",
+        "code": "const event = await Memento.plugins.calendar.createEvent('项目会议', '讨论Q1计划', '2025-01-15T09:00:00.000Z');\nsetResult(`事件已创建: ${event.id}`);"
+      },
+      {
+        "title": "创建带提醒的事件",
+        "code": "const event = await Memento.plugins.calendar.createEvent('重要会议', '年度规划', '2025-01-20T14:00:00.000Z', '2025-01-20T16:00:00.000Z', null, null, 15);\nsetResult('已创建事件，将提前15分钟提醒');"
+      }
+    ],
+    "notes": "reminderMinutes 可选值: 5, 15, 30, 60, 120, 1440（1天）, 2880（2天）",
+    "enabled": true
+  },
+  "updateEvent": {
+    "title": "更新事件",
+    "description": "更新已有事件的信息",
+    "parameters": [
+      {"name": "eventId", "type": "string", "required": true, "description": "事件ID"},
+      {"name": "title", "type": "string", "required": false, "description": "新标题"},
+      {"name": "description", "type": "string", "required": false, "description": "新描述"},
+      {"name": "startTime", "type": "string", "required": false, "description": "新开始时间（ISO8601 格式）"},
+      {"name": "endTime", "type": "string", "required": false, "description": "新结束时间（ISO8601 格式）"},
+      {"name": "iconCodePoint", "type": "number", "required": false, "description": "新图标代码点"},
+      {"name": "colorValue", "type": "number", "required": false, "description": "新颜色值"},
+      {"name": "reminderMinutes", "type": "number", "required": false, "description": "新提醒时间"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的事件对象"
+    },
+    "examples": [
+      {
+        "title": "更新事件标题",
+        "code": "const updated = await Memento.plugins.calendar.updateEvent('evt123', '改期会议');\nsetResult(`事件已更新: ${updated.title}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，其他字段保持不变；Todo 任务事件（source='todo'）不可更新",
+    "enabled": true
+  },
+  "deleteEvent": {
+    "title": "删除事件",
+    "description": "删除指定的事件",
+    "parameters": [
+      {"name": "eventId", "type": "string", "required": true, "description": "事件ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除事件",
+        "code": "const success = await Memento.plugins.calendar.deleteEvent('evt123');\nsetResult(success ? '删除成功' : '删除失败');"
+      }
+    ],
+    "notes": "删除操作不可逆；Todo 任务事件（source='todo'）不可删除",
+    "enabled": true
+  },
+  "completeEvent": {
+    "title": "完成事件",
+    "description": "将事件标记为已完成",
+    "parameters": [
+      {"name": "eventId", "type": "string", "required": true, "description": "事件ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "完成后的事件对象（包含 completedTime 字段）"
+    },
+    "examples": [
+      {
+        "title": "完成事件",
+        "code": "const completed = await Memento.plugins.calendar.completeEvent('evt123');\nsetResult(`事件已完成，完成时间: ${completed.completedTime}`);"
+      }
+    ],
+    "notes": "完成后的事件会被移到已完成事件列表，不再显示在日历中",
+    "enabled": true
+  },
+  "getCompletedEvents": {
+    "title": "获取已完成事件",
+    "description": "获取所有已完成的事件列表",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "已完成事件列表，包含 completedTime 字段"
+    },
+    "examples": [
+      {
+        "title": "获取已完成事件",
+        "code": "const completed = await Memento.plugins.calendar.getCompletedEvents();\nsetResult(`共有 ${completed.length} 个已完成事件`);"
+      }
+    ],
+    "notes": "已完成事件按完成时间倒序排列",
+    "enabled": true
+  }
+}

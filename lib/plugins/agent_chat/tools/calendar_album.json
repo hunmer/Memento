@@ -1,0 +1,258 @@
+{
+  "testSync": {
+    "title": "测试同步",
+    "description": "测试日历相册插件的同步功能",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "测试结果对象，包含 status、message、timestamp 字段"
+    },
+    "examples": [
+      {
+        "title": "测试同步",
+        "code": "const result = await Memento.plugins.calendar_album.testSync();\nsetResult(JSON.stringify(result, null, 2));"
+      }
+    ],
+    "notes": "用于调试和验证插件功能",
+    "enabled": true
+  },
+  "getEntries": {
+    "title": "获取所有日记",
+    "description": "获取所有日记条目（按创建时间倒序）",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "日记列表，每个元素包含 id、title、content、tags、createdAt 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取所有日记",
+        "code": "const entries = await Memento.plugins.calendar_album.getEntries();\nsetResult(JSON.stringify(entries, null, 2));"
+      }
+    ],
+    "notes": "日记内容为 Markdown 格式",
+    "enabled": true
+  },
+  "getEntriesForDate": {
+    "title": "获取指定日期的日记",
+    "description": "获取指定日期的所有日记条目",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期字符串（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "指定日期的日记列表"
+    },
+    "examples": [
+      {
+        "title": "获取今日日记",
+        "code": "const entries = await Memento.plugins.calendar_album.getEntriesForDate('2025-01-15');\nsetResult(`今天有 ${entries.length} 条日记`);"
+      }
+    ],
+    "notes": "日期格式必须为 YYYY-MM-DD",
+    "enabled": true
+  },
+  "addEntry": {
+    "title": "添加日记",
+    "description": "添加一条新的日记",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "日记标题"},
+      {"name": "content", "type": "string", "required": true, "description": "日记内容（Markdown 格式）"},
+      {"name": "dateStr", "type": "string", "required": false, "description": "日期（格式：YYYY-MM-DD，默认今天）"},
+      {"name": "tagsStr", "type": "string", "required": false, "description": "标签（逗号分隔，如：\"生活,心情\"）"},
+      {"name": "location", "type": "string", "required": false, "description": "位置"},
+      {"name": "mood", "type": "string", "required": false, "description": "心情（emoji 表情）"},
+      {"name": "weather", "type": "string", "required": false, "description": "天气"},
+      {"name": "imageUrlsStr", "type": "string", "required": false, "description": "图片URL列表（逗号分隔）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的日记对象"
+    },
+    "examples": [
+      {
+        "title": "添加简单日记",
+        "code": "const entry = await Memento.plugins.calendar_album.addEntry('美好的一天', '今天天气很好，心情愉快！');\nsetResult(`日记已创建: ${entry.id}`);"
+      },
+      {
+        "title": "添加完整日记",
+        "code": "const entry = await Memento.plugins.calendar_album.addEntry('生日聚会', '今天过生日，很开心！', '2025-01-15', '生活,生日', '家', '😊', '晴天', 'photos/1.jpg,photos/2.jpg');\nsetResult('已添加生日日记');"
+      }
+    ],
+    "notes": "标签和图片URL使用逗号分隔，不要有多余空格",
+    "enabled": true
+  },
+  "updateEntry": {
+    "title": "更新日记",
+    "description": "更新已有日记的内容",
+    "parameters": [
+      {"name": "entryId", "type": "string", "required": true, "description": "日记ID"},
+      {"name": "title", "type": "string", "required": false, "description": "新标题"},
+      {"name": "content", "type": "string", "required": false, "description": "新内容"},
+      {"name": "tagsStr", "type": "string", "required": false, "description": "新标签（逗号分隔）"},
+      {"name": "location", "type": "string", "required": false, "description": "新位置"},
+      {"name": "mood", "type": "string", "required": false, "description": "新心情"},
+      {"name": "weather", "type": "string", "required": false, "description": "新天气"},
+      {"name": "imageUrlsStr", "type": "string", "required": false, "description": "新图片URL列表（逗号分隔）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的日记对象"
+    },
+    "examples": [
+      {
+        "title": "更新日记内容",
+        "code": "const updated = await Memento.plugins.calendar_album.updateEntry('entry123', null, '更新后的内容...');\nsetResult('日记已更新');"
+      }
+    ],
+    "notes": "仅更新提供的字段，其他字段保持不变",
+    "enabled": true
+  },
+  "deleteEntry": {
+    "title": "删除日记",
+    "description": "删除指定的日记",
+    "parameters": [
+      {"name": "entryId", "type": "string", "required": true, "description": "日记ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "结果对象，包含 success 和可选的 error 字段"
+    },
+    "examples": [
+      {
+        "title": "删除日记",
+        "code": "const result = await Memento.plugins.calendar_album.deleteEntry('entry123');\nsetResult(result.success ? '删除成功' : result.error);"
+      }
+    ],
+    "notes": "删除操作不可逆",
+    "enabled": true
+  },
+  "getEntryById": {
+    "title": "根据ID获取日记",
+    "description": "根据日记ID获取详细信息",
+    "parameters": [
+      {"name": "entryId", "type": "string", "required": true, "description": "日记ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "日记对象，如不存在则返回 error 字段"
+    },
+    "examples": [
+      {
+        "title": "获取日记详情",
+        "code": "const entry = await Memento.plugins.calendar_album.getEntryById('entry123');\nif (entry.error) {\n  setResult('日记不存在');\n} else {\n  setResult(JSON.stringify(entry, null, 2));\n}"
+      }
+    ],
+    "notes": "如日记不存在，返回对象包含 error 字段",
+    "enabled": true
+  },
+  "getTags": {
+    "title": "获取所有标签",
+    "description": "获取系统中的所有标签列表",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "标签字符串数组"
+    },
+    "examples": [
+      {
+        "title": "获取标签列表",
+        "code": "const tags = await Memento.plugins.calendar_album.getTags();\nsetResult(tags.join(', '));"
+      }
+    ],
+    "notes": "返回去重后的标签列表",
+    "enabled": true
+  },
+  "getEntriesByTag": {
+    "title": "根据标签获取日记",
+    "description": "获取包含指定标签的所有日记",
+    "parameters": [
+      {"name": "tag", "type": "string", "required": true, "description": "标签名称"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "包含该标签的日记列表"
+    },
+    "examples": [
+      {
+        "title": "获取生活类日记",
+        "code": "const entries = await Memento.plugins.calendar_album.getEntriesByTag('生活');\nsetResult(`共有 ${entries.length} 条生活类日记`);"
+      }
+    ],
+    "notes": "单标签筛选",
+    "enabled": true
+  },
+  "getEntriesByTags": {
+    "title": "根据多标签获取日记（AND逻辑）",
+    "description": "获取同时包含所有指定标签的日记",
+    "parameters": [
+      {"name": "tagsStr", "type": "string", "required": true, "description": "标签列表（逗号分隔）"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "同时包含所有标签的日记列表"
+    },
+    "examples": [
+      {
+        "title": "获取同时包含多个标签的日记",
+        "code": "const entries = await Memento.plugins.calendar_album.getEntriesByTags('生活,心情');\nsetResult(`共有 ${entries.length} 条同时标记为生活和心情的日记`);"
+      }
+    ],
+    "notes": "AND 逻辑：只返回同时包含所有指定标签的日记",
+    "enabled": true
+  },
+  "getPhotos": {
+    "title": "获取所有照片",
+    "description": "获取所有日记中的照片URL列表",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "照片URL字符串数组"
+    },
+    "examples": [
+      {
+        "title": "获取所有照片",
+        "code": "const photos = await Memento.plugins.calendar_album.getPhotos();\nsetResult(`共有 ${photos.length} 张照片`);"
+      }
+    ],
+    "notes": "包括直接上传的图片和 Markdown 内容中提取的图片",
+    "enabled": true
+  },
+  "getPhotosByDateRange": {
+    "title": "根据日期范围获取照片",
+    "description": "获取指定日期范围内的照片信息",
+    "parameters": [
+      {"name": "startDate", "type": "string", "required": true, "description": "开始日期（格式：YYYY-MM-DD）"},
+      {"name": "endDate", "type": "string", "required": true, "description": "结束日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "照片信息列表，每个元素包含 date、imageUrl、entryId、entryTitle 字段"
+    },
+    "examples": [
+      {
+        "title": "获取一月份的照片",
+        "code": "const photos = await Memento.plugins.calendar_album.getPhotosByDateRange('2025-01-01', '2025-01-31');\nsetResult(JSON.stringify(photos, null, 2));"
+      }
+    ],
+    "notes": "返回照片的日期、URL、所属日记ID和标题",
+    "enabled": true
+  },
+  "getStatistics": {
+    "title": "获取统计信息",
+    "description": "获取日记相册的统计数据",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象，包含 todayCount、last7DaysCount、totalCount、tagCount、photoCount 字段"
+    },
+    "examples": [
+      {
+        "title": "获取统计信息",
+        "code": "const stats = await Memento.plugins.calendar_album.getStatistics();\nsetResult(`今日: ${stats.todayCount}, 近7天: ${stats.last7DaysCount}, 总计: ${stats.totalCount}`);"
+      }
+    ],
+    "notes": "包含今日、近7天、总数、标签数、照片数等统计信息",
+    "enabled": true
+  }
+}
