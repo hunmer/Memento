@@ -2,18 +2,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../controllers/chat_controller.dart';
 import '../../../models/chat_command.dart';
+import '../../../models/saved_tool_template.dart';
 import '../../../../../utils/file_picker_helper.dart';
 import 'suggested_questions_dialog.dart';
 import 'command_selector.dart';
+import 'tool_template_selector.dart';
 
 /// 消息输入框组件
 class MessageInput extends StatefulWidget {
   final ChatController controller;
 
-  const MessageInput({
-    super.key,
-    required this.controller,
-  });
+  const MessageInput({super.key, required this.controller});
 
   @override
   State<MessageInput> createState() => _MessageInputState();
@@ -26,6 +25,10 @@ class _MessageInputState extends State<MessageInput> {
   // 命令模式状态
   bool _isCommandMode = false;
   List<ChatCommand> _filteredCommands = [];
+
+  // 工具模板搜索状态
+  bool _isSearchingTools = false;
+  List<SavedToolTemplate> _searchResults = [];
 
   @override
   void initState() {
@@ -90,16 +93,33 @@ class _MessageInputState extends State<MessageInput> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 工具模板搜索结果
+          if (_isSearchingTools)
+            ToolTemplateSelector(
+              templates: _searchResults,
+              onTemplateSelected: _handleTemplateSelected,
+              onCancel: () {
+                setState(() {
+                  _isSearchingTools = false;
+                  _searchResults = [];
+                });
+              },
+            ),
+
           // 命令选择器
-          if (_isCommandMode && _filteredCommands.isNotEmpty)
+          if (!_isSearchingTools &&
+              _isCommandMode &&
+              _filteredCommands.isNotEmpty)
             CommandSelector(
               commands: _filteredCommands,
               onCommandSelected: _handleCommandSelected,
             ),
 
-          // 文件预览区域
-          if (widget.controller.selectedFiles.isNotEmpty)
-            _buildFilePreview(),
+          // 当前状态显示区域（工具模板和文件）
+          if (!_isSearchingTools &&
+              (widget.controller.selectedToolTemplate != null ||
+                  widget.controller.selectedFiles.isNotEmpty))
+            _buildCurrentStatus(),
 
           // 输入框区域
           Padding(
@@ -132,9 +152,10 @@ class _MessageInputState extends State<MessageInput> {
                       textInputAction: TextInputAction.newline,
                       enabled: widget.controller.currentAgent != null,
                       decoration: InputDecoration(
-                        hintText: widget.controller.currentAgent != null
-                            ? '输入消息...'
-                            : '请先选择Agent...',
+                        hintText:
+                            widget.controller.currentAgent != null
+                                ? '输入消息...'
+                                : '请先选择Agent...',
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -185,29 +206,32 @@ class _MessageInputState extends State<MessageInput> {
                 // 发送按钮
                 Container(
                   decoration: BoxDecoration(
-                    color: widget.controller.inputText.trim().isEmpty ||
-                            widget.controller.isSending ||
-                            widget.controller.currentAgent == null
-                        ? Colors.grey[300]
-                        : Colors.blue,
+                    color:
+                        widget.controller.inputText.trim().isEmpty ||
+                                widget.controller.isSending ||
+                                widget.controller.currentAgent == null
+                            ? Colors.grey[300]
+                            : Colors.blue,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: widget.controller.isSending
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.send, color: Colors.white),
-                    onPressed: widget.controller.inputText.trim().isEmpty ||
-                            widget.controller.isSending ||
-                            widget.controller.currentAgent == null
-                        ? null
-                        : _sendMessage,
+                    icon:
+                        widget.controller.isSending
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Icon(Icons.send, color: Colors.white),
+                    onPressed:
+                        widget.controller.inputText.trim().isEmpty ||
+                                widget.controller.isSending ||
+                                widget.controller.currentAgent == null
+                            ? null
+                            : _sendMessage,
                   ),
                 ),
               ],
@@ -218,39 +242,124 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
-  /// 构建文件预览
-  Widget _buildFilePreview() {
+  /// 构建当前状态显示
+  Widget _buildCurrentStatus() {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[200]!),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '已选择 ${widget.controller.selectedFiles.length} 个文件',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.bold,
+          // 工具模板
+          if (widget.controller.selectedToolTemplate != null) ...[
+            Row(
+              children: [
+                Icon(Icons.build_circle, size: 16, color: Colors.orange[700]),
+                const SizedBox(width: 6),
+                Text(
+                  '使用工具模板',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _buildToolTemplateChip(widget.controller.selectedToolTemplate!),
+          ],
+
+          // 分隔
+          if (widget.controller.selectedToolTemplate != null &&
+              widget.controller.selectedFiles.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Divider(height: 1, color: Colors.grey[300]),
+            const SizedBox(height: 12),
+          ],
+
+          // 文件
+          if (widget.controller.selectedFiles.isNotEmpty) ...[
+            Row(
+              children: [
+                Icon(Icons.attach_file, size: 16, color: Colors.blue[700]),
+                const SizedBox(width: 6),
+                Text(
+                  '已选择 ${widget.controller.selectedFiles.length} 个文件',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children:
+                  widget.controller.selectedFiles.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final file = entry.value;
+                    return _buildFileChip(file, index);
+                  }).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 构建工具模板芯片
+  Widget _buildToolTemplateChip(SavedToolTemplate template) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.orange[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.orange[200]!),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.build_circle, size: 18, color: Colors.orange[700]),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  template.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange[900],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${template.steps.length} 个步骤',
+                  style: TextStyle(fontSize: 12, color: Colors.orange[700]),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: widget.controller.selectedFiles
-                .asMap()
-                .entries
-                .map((entry) {
-              final index = entry.key;
-              final file = entry.value;
-              return _buildFileChip(file, index);
-            }).toList(),
+          const SizedBox(width: 8),
+          InkWell(
+            onTap: () => widget.controller.clearSelectedToolTemplate(),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.orange[300]!),
+              ),
+              child: Icon(Icons.close, size: 14, color: Colors.orange[700]),
+            ),
           ),
         ],
       ),
@@ -289,11 +398,7 @@ class _MessageInputState extends State<MessageInput> {
           const SizedBox(width: 4),
           InkWell(
             onTap: () => widget.controller.removeFile(index),
-            child: const Icon(
-              Icons.close,
-              size: 16,
-              color: Colors.grey,
-            ),
+            child: const Icon(Icons.close, size: 16, color: Colors.grey),
           ),
         ],
       ),
@@ -304,29 +409,30 @@ class _MessageInputState extends State<MessageInput> {
   void _showAttachmentMenu() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.image),
-              title: const Text('图片'),
-              onTap: () {
-                Navigator.pop(context);
-                widget.controller.pickImages();
-              },
+      builder:
+          (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.image),
+                  title: const Text('图片'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    widget.controller.pickImages();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.description),
+                  title: const Text('文档'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    widget.controller.pickDocuments();
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.description),
-              title: const Text('文档'),
-              onTap: () {
-                Navigator.pop(context);
-                widget.controller.pickDocuments();
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -376,35 +482,46 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   /// 执行 /tools 命令
-  Future<void> _executeToolsCommand(String? toolName) async {
+  void _executeToolsCommand(String? searchQuery) {
     // 清空输入框
     _textController.clear();
     widget.controller.setInputText('');
 
-    if (toolName == null || toolName.trim().isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('请指定工具模板名称，例如: /tools 导出数据'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
+    if (searchQuery == null || searchQuery.trim().isEmpty) {
+      // 没有搜索关键词，显示所有模板
+      setState(() {
+        _isSearchingTools = true;
+        _searchResults = widget.controller.templateService?.templates ?? [];
+      });
       return;
     }
 
-    try {
-      await widget.controller.executeToolTemplate(toolName.trim());
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('执行工具失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+    // 搜索匹配的模板
+    final results =
+        widget.controller.templateService?.searchTemplates(
+          searchQuery.trim(),
+        ) ??
+        [];
+
+    setState(() {
+      _isSearchingTools = true;
+      _searchResults = results;
+    });
+  }
+
+  /// 处理模板选择
+  void _handleTemplateSelected(SavedToolTemplate template) {
+    // 选中模板
+    widget.controller.setSelectedToolTemplate(template);
+
+    // 关闭搜索
+    setState(() {
+      _isSearchingTools = false;
+      _searchResults = [];
+    });
+
+    // 聚焦输入框
+    _focusNode.requestFocus();
   }
 
   /// 发送消息
@@ -423,17 +540,14 @@ class _MessageInputState extends State<MessageInput> {
             _executeFilesCommand();
             return;
           case ChatCommandType.tools:
-            await _executeToolsCommand(argument);
+            _executeToolsCommand(argument);
             return;
         }
       } else {
         // 无效命令
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('无效的命令'),
-              backgroundColor: Colors.red,
-            ),
+            const SnackBar(content: Text('无效的命令'), backgroundColor: Colors.red),
           );
         }
         return;
@@ -447,10 +561,7 @@ class _MessageInputState extends State<MessageInput> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('发送失败: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('发送失败: $e'), backgroundColor: Colors.red),
         );
       }
     }
