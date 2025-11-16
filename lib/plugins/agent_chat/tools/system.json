@@ -9,7 +9,7 @@
     },
     "examples": [
       {
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nsetResult(JSON.stringify(timeInfo));",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nsetResult(timeInfo);",
         "comment": "获取当前时间信息"
       },
       {
@@ -30,7 +30,7 @@
     },
     "examples": [
       {
-        "code": "const deviceInfo = await Memento.system.getDeviceInfo();\nsetResult(JSON.stringify(deviceInfo));",
+        "code": "const deviceInfo = await Memento.system.getDeviceInfo();\nsetResult(deviceInfo);",
         "comment": "获取完整设备信息"
       },
       {
@@ -51,7 +51,7 @@
     },
     "examples": [
       {
-        "code": "const appInfo = await Memento.system.getAppInfo();\nsetResult(JSON.stringify(appInfo));",
+        "code": "const appInfo = await Memento.system.getAppInfo();\nsetResult(appInfo);",
         "comment": "获取应用版本信息"
       },
       {

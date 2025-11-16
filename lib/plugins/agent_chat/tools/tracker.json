@@ -9,7 +9,7 @@
     },
     "examples": [
       {
-        "code": "const result = memento.tracker.testSync();\nconsole.log(result);",
+        "code": "const result = Memento.plugins.tracker.testSync();\nsetResult(result);",
         "comment": "验证目标追踪插件连接"
       }
     ],
@@ -39,19 +39,19 @@
     },
     "examples": [
       {
-        "code": "// 获取所有目标\nconst allGoals = await memento.tracker.getGoals();",
+        "code": "// 获取所有目标\nconst allGoals = await Memento.plugins.tracker.getGoals();\nsetResult(allGoals);",
         "comment": "获取所有目标"
       },
       {
-        "code": "// 获取进行中的目标\nconst activeGoals = await memento.tracker.getGoals('active');",
+        "code": "// 获取进行中的目标\nconst activeGoals = await Memento.plugins.tracker.getGoals('active');\nsetResult(activeGoals);",
         "comment": "筛选活跃目标"
       },
       {
-        "code": "// 获取'学习'分组的目标\nconst studyGoals = await memento.tracker.getGoals(null, '学习');",
+        "code": "// 获取'学习'分组的目标\nconst studyGoals = await Memento.plugins.tracker.getGoals(null, '学习');\nsetResult(studyGoals);",
         "comment": "按分组筛选"
       },
       {
-        "code": "// 获取'健康'分组中已完成的目标\nconst completedHealthGoals = await memento.tracker.getGoals('completed', '健康');",
+        "code": "// 获取'健康'分组中已完成的目标\nconst completedHealthGoals = await Memento.plugins.tracker.getGoals('completed', '健康');\nsetResult(completedHealthGoals);",
         "comment": "组合筛选"
       }
     ],
@@ -75,7 +75,7 @@
     },
     "examples": [
       {
-        "code": "const goal = await memento.tracker.getGoal('1736950800000');\nconst goalData = JSON.parse(goal);\nconsole.log(`目标名称: ${goalData.name}, 进度: ${goalData.currentValue}/${goalData.targetValue}`);",
+        "code": "const goal = await Memento.plugins.tracker.getGoal('1736950800000');\nconst goalData = JSON.parse(goal);\nconst result = `目标名称: ${goalData.name}, 进度: ${goalData.currentValue}/${goalData.targetValue}`;\nsetResult(result);",
         "comment": "获取并解析目标信息"
       }
     ],
@@ -129,11 +129,11 @@
     },
     "examples": [
       {
-        "code": "// 创建每日阅读目标\nconst goal = await memento.tracker.createGoal(\n  '每日阅读',\n  '分钟',\n  30,\n  '学习'\n);",
+        "code": "// 创建每日阅读目标\nconst goal = await Memento.plugins.tracker.createGoal(\n  '每日阅读',\n  '分钟',\n  30,\n  '学习'\n);\nsetResult(goal);",
         "comment": "创建每日目标"
       },
       {
-        "code": "// 创建每周运动目标\nconst weeklyGoal = await memento.tracker.createGoal(\n  '每周运动',\n  '小时',\n  5,\n  '健康',\n  null,\n  'weekly'\n);",
+        "code": "// 创建每周运动目标\nconst weeklyGoal = await Memento.plugins.tracker.createGoal(\n  '每周运动',\n  '小时',\n  5,\n  '健康',\n  null,\n  'weekly'\n);\nsetResult(weeklyGoal);",
         "comment": "创建每周目标"
       }
     ],
@@ -163,11 +163,11 @@
     },
     "examples": [
       {
-        "code": "// 更新目标名称和目标值\nconst updated = await memento.tracker.updateGoal(\n  '1736950800000',\n  JSON.stringify({\n    name: '每日深度阅读',\n    targetValue: 60\n  })\n);",
+        "code": "// 更新目标名称和目标值\nconst updated = await Memento.plugins.tracker.updateGoal(\n  '1736950800000',\n  JSON.stringify({\n    name: '每日深度阅读',\n    targetValue: 60\n  })\n);\nsetResult(updated);",
         "comment": "更新基本信息"
       },
       {
-        "code": "// 更新提醒时间和分组\nconst updated2 = await memento.tracker.updateGoal(\n  '1736950800000',\n  JSON.stringify({\n    reminderTime: '20:00',\n    group: '个人成长'\n  })\n);",
+        "code": "// 更新提醒时间和分组\nconst updated2 = await Memento.plugins.tracker.updateGoal(\n  '1736950800000',\n  JSON.stringify({\n    reminderTime: '20:00',\n    group: '个人成长'\n  })\n);\nsetResult(updated2);",
         "comment": "更新提醒设置"
       }
     ],
@@ -191,7 +191,7 @@
     },
     "examples": [
       {
-        "code": "await memento.tracker.deleteGoal('1736950800000');",
+        "code": "const result = await Memento.plugins.tracker.deleteGoal('1736950800000');\nsetResult(result);",
         "comment": "删除目标及其记录"
       }
     ],
@@ -233,11 +233,11 @@
     },
     "examples": [
       {
-        "code": "// 添加今日阅读记录\nconst record = await memento.tracker.recordData(\n  '1736950800000',\n  30,\n  '阅读《代码整洁之道》'\n);",
+        "code": "// 添加今日阅读记录\nconst record = await Memento.plugins.tracker.recordData(\n  '1736950800000',\n  30,\n  '阅读《代码整洁之道》'\n);\nsetResult(record);",
         "comment": "添加当前记录"
       },
       {
-        "code": "// 添加指定时间的记录\nconst pastRecord = await memento.tracker.recordData(\n  '1736950800000',\n  45,\n  '昨日补记',\n  '2025-01-14T20:00:00.000Z'\n);",
+        "code": "// 添加指定时间的记录\nconst pastRecord = await Memento.plugins.tracker.recordData(\n  '1736950800000',\n  45,\n  '昨日补记',\n  '2025-01-14T20:00:00.000Z'\n);\nsetResult(pastRecord);",
         "comment": "补记历史数据"
       }
     ],
@@ -267,11 +267,11 @@
     },
     "examples": [
       {
-        "code": "// 获取所有记录\nconst allRecords = await memento.tracker.getRecords('1736950800000');",
+        "code": "// 获取所有记录\nconst allRecords = await Memento.plugins.tracker.getRecords('1736950800000');\nsetResult(allRecords);",
         "comment": "获取全部记录"
       },
       {
-        "code": "// 获取最近 10 条记录\nconst recentRecords = await memento.tracker.getRecords('1736950800000', 10);\nconst records = JSON.parse(recentRecords);\nrecords.forEach(record => {\n  console.log(`${record.recordedAt}: ${record.value} ${record.note || ''}`);\n});",
+        "code": "// 获取最近 10 条记录\nconst recentRecords = await Memento.plugins.tracker.getRecords('1736950800000', 10);\nconst records = JSON.parse(recentRecords);\nconst result = records.map(record => `${record.recordedAt}: ${record.value} ${record.note || ''}`).join('\\n');\nsetResult(result);",
         "comment": "获取最新记录"
       }
     ],
@@ -295,7 +295,7 @@
     },
     "examples": [
       {
-        "code": "await memento.tracker.deleteRecord('1736951000000');",
+        "code": "const result = await Memento.plugins.tracker.deleteRecord('1736951000000');\nsetResult(result);",
         "comment": "删除指定记录"
       }
     ],
@@ -319,7 +319,7 @@
     },
     "examples": [
       {
-        "code": "const progress = await memento.tracker.getProgress('1736950800000');\nconst progressData = JSON.parse(progress);\nconsole.log(`进度: ${progressData.percentage}%`);\nconsole.log(`完成状态: ${progressData.isCompleted ? '已完成' : '进行中'}`);",
+        "code": "const progress = await Memento.plugins.tracker.getProgress('1736950800000');\nconst progressData = JSON.parse(progress);\nconst result = `进度: ${progressData.percentage}%\\n完成状态: ${progressData.isCompleted ? '已完成' : '进行中'}`;\nsetResult(result);",
         "comment": "查询目标进度"
       }
     ],
@@ -343,11 +343,11 @@
     },
     "examples": [
       {
-        "code": "// 获取全局统计\nconst stats = await memento.tracker.getStats();\nconst statsData = JSON.parse(stats);\nconsole.log(`总目标数: ${statsData.totalGoals}`);\nconsole.log(`今日完成: ${statsData.todayCompleted}`);\nconsole.log(`本月完成: ${statsData.monthCompleted}`);\nconsole.log(`整体进度: ${(statsData.overallProgress * 100).toFixed(1)}%`);\nconsole.log(`分组列表: ${statsData.groups.join(', ')}`);\n",
+        "code": "// 获取全局统计\nconst stats = await Memento.plugins.tracker.getStats();\nconst statsData = JSON.parse(stats);\nconst result = `总目标数: ${statsData.totalGoals}\\n今日完成: ${statsData.todayCompleted}\\n本月完成: ${statsData.monthCompleted}\\n整体进度: ${(statsData.overallProgress * 100).toFixed(1)}%\\n分组列表: ${statsData.groups.join(', ')}`;\nsetResult(result);",
         "comment": "全局统计"
       },
       {
-        "code": "// 获取单个目标统计\nconst goalStats = await memento.tracker.getStats('1736950800000');\nconst goalStatsData = JSON.parse(goalStats);\nconsole.log(`目标名称: ${goalStatsData.goalName}`);\nconsole.log(`总记录数: ${goalStatsData.totalRecords}`);\nconsole.log(`累计值: ${goalStatsData.totalValue}`);",
+        "code": "// 获取单个目标统计\nconst goalStats = await Memento.plugins.tracker.getStats('1736950800000');\nconst goalStatsData = JSON.parse(goalStats);\nconst result = `目标名称: ${goalStatsData.goalName}\\n总记录数: ${goalStatsData.totalRecords}\\n累计值: ${goalStatsData.totalValue}`;\nsetResult(result);",
         "comment": "单目标统计"
       }
     ],
