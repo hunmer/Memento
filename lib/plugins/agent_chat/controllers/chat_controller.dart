@@ -44,6 +44,9 @@ class ChatController extends ChangeNotifier {
   /// 当前输入的文本
   String _inputText = '';
 
+  /// 选中的工具模板
+  SavedToolTemplate? _selectedToolTemplate;
+
   ChatController({
     required this.conversation,
     required this.messageService,
@@ -58,6 +61,7 @@ class ChatController extends ChangeNotifier {
   AIAgent? get currentAgent => _currentAgent;
   List<File> get selectedFiles => _selectedFiles;
   String get inputText => _inputText;
+  SavedToolTemplate? get selectedToolTemplate => _selectedToolTemplate;
 
   List<ChatMessage> get messages {
     // 只返回顶级消息（没有父消息ID的消息）
@@ -194,12 +198,23 @@ class ChatController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // 构建metadata
+      final metadata = <String, dynamic>{};
+      if (_selectedToolTemplate != null) {
+        metadata['toolTemplate'] = {
+          'id': _selectedToolTemplate!.id,
+          'name': _selectedToolTemplate!.name,
+        };
+      }
+
       // 创建用户消息
       final userMessage = ChatMessage.user(
         conversationId: conversation.id,
         content: _inputText.trim(),
         tokenCount: TokenCounterService.estimateTokenCount(_inputText),
         attachments: await _processAttachments(),
+      ).copyWith(
+        metadata: metadata.isNotEmpty ? metadata : null,
       );
 
       // 保存用户消息
@@ -214,8 +229,10 @@ class ChatController extends ChangeNotifier {
       // 清空输入
       final userInput = _inputText;
       final files = List<File>.from(_selectedFiles);
+      final selectedTemplate = _selectedToolTemplate;
       _inputText = '';
       _selectedFiles.clear();
+      _selectedToolTemplate = null;
       notifyListeners();
 
       // 创建AI消息占位符
@@ -228,6 +245,14 @@ class ChatController extends ChangeNotifier {
 
       // 流式请求AI回复
       await _requestAIResponse(aiMessage.id, userInput, files);
+
+      // AI回复完成后，如果用户消息包含工具模板，则执行它
+      if (selectedTemplate != null) {
+        await _executeToolTemplateAfterAIResponse(
+          aiMessage.id,
+          selectedTemplate,
+        );
+      }
     } catch (e) {
       debugPrint('发送消息失败: $e');
       rethrow;
@@ -580,6 +605,18 @@ class ChatController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 设置选中的工具模板
+  void setSelectedToolTemplate(SavedToolTemplate? template) {
+    _selectedToolTemplate = template;
+    notifyListeners();
+  }
+
+  /// 清除选中的工具模板
+  void clearSelectedToolTemplate() {
+    _selectedToolTemplate = null;
+    notifyListeners();
+  }
+
   // ========== 消息编辑 ==========
 
   /// 编辑消息
@@ -887,7 +924,53 @@ class ChatController extends ChangeNotifier {
 
   // ========== 工具模板执行 ==========
 
-  /// 执行工具模板
+  /// 在AI回复后执行工具模板
+  Future<void> _executeToolTemplateAfterAIResponse(
+    String aiMessageId,
+    SavedToolTemplate template,
+  ) async {
+    if (templateService == null) return;
+
+    try {
+      // 等待AI消息完成生成
+      var aiMessage = messageService.getMessage(conversation.id, aiMessageId);
+      var attempts = 0;
+      while (aiMessage != null && aiMessage.isGenerating && attempts < 300) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        aiMessage = messageService.getMessage(conversation.id, aiMessageId);
+        attempts++;
+      }
+
+      if (aiMessage == null || aiMessage.isGenerating) {
+        debugPrint('⚠️ AI消息未完成或超时，跳过工具模板执行');
+        return;
+      }
+
+      debugPrint('✅ AI回复完成，开始执行工具模板: ${template.name}');
+
+      // 标记模板为已使用
+      await templateService!.markTemplateAsUsed(template.id);
+
+      // 创建工具调用响应
+      final toolCall = ToolCallResponse(steps: template.steps);
+
+      // 更新AI消息，添加工具调用
+      final updatedMessage = aiMessage.copyWith(
+        toolCall: toolCall,
+        isGenerating: true,
+      );
+      await messageService.updateMessage(updatedMessage);
+      notifyListeners();
+
+      // 执行工具调用步骤
+      await _executeToolSteps(aiMessageId, template.steps);
+    } catch (e) {
+      debugPrint('执行工具模板失败: $e');
+    }
+  }
+
+  /// 执行工具模板（旧方法，保留用于向后兼容）
+  @deprecated
   Future<void> executeToolTemplate(String templateName) async {
     if (templateService == null) {
       throw Exception('工具模板服务未初始化');
@@ -953,7 +1036,6 @@ class ChatController extends ChangeNotifier {
     if (message != null) {
       final completedMessage = message.copyWith(
         isGenerating: false,
-        content: '工具执行完成',
       );
       await messageService.updateMessage(completedMessage);
     }
