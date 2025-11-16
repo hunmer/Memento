@@ -23,11 +23,24 @@ class ToolConfigManager {
   // 配置文件列表
   static const List<String> _pluginIds = [
     'system', // 系统级工具（时间、设备信息等）
-    'todo',
+    'activity',
+    'bill',
+    'calendar',
+    'calendar_album',
+    'chat',
+    'checkin',
+    'contact',
+    'database',
+    'day',
+    'diary',
+    'goods',
+    'habits',
+    'nodes',
     'notes',
-    'tracker',
     'store',
     'timer',
+    'todo',
+    'tracker',
     'ui',
   ];
 
