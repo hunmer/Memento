@@ -94,6 +94,19 @@ class ToolCallStep {
             error: error ?? this.error,
         );
     }
+
+    /// 创建一个不包含运行时状态的新副本
+    ToolCallStep withoutRuntimeState({
+        ToolCallStatus state = ToolCallStatus.pending,
+    }) {
+        return ToolCallStep(
+            method: method,
+            title: title,
+            desc: desc,
+            data: data,
+            status: state,
+        );
+    }
 }
 
 /// 工具调用执行状态
