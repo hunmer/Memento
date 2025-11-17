@@ -130,7 +130,7 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
   /// AI输入Tab
   Widget _buildUserPromptTab() {
     return _buildContentTab(
-      content: widget.detail.fullAIInput,
+      content: widget.detail.userPrompt,
       icon: Icons.input,
       emptyText: '无AI输入数据',
     );

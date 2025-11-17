@@ -541,9 +541,12 @@ class _MessageInputState extends State<MessageInput> {
 
       // 读取配置
       final settings = plugin.settings;
+      debugPrint('🎤 [语音输入] 读取到的完整配置: $settings');
       final asrConfigMap = settings['asrConfig'] as Map<String, dynamic>?;
+      debugPrint('🎤 [语音输入] ASR配置: $asrConfigMap');
 
       if (asrConfigMap == null) {
+        debugPrint('⚠️ [语音输入] ASR配置为空');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -557,6 +560,7 @@ class _MessageInputState extends State<MessageInput> {
 
       // 创建配置对象
       final asrConfig = TencentASRConfig.fromJson(asrConfigMap);
+      debugPrint('🎤 [语音输入] 创建配置对象: appId=${asrConfig.appId}');
 
       // 验证配置
       if (!asrConfig.isValid()) {

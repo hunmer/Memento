@@ -49,6 +49,9 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
   @override
   Future<void> initialize() async {
+    // 加载插件配置（包括语音识别配置等）
+    await loadSettings({});
+
     // 初始化控制器
     _conversationController = ConversationController(storage: storage);
     await _conversationController!.initialize();
