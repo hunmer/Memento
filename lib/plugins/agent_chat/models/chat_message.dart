@@ -42,6 +42,9 @@ class ChatMessage {
   /// 父消息ID（用于建立消息父子关系）
   String? parentId;
 
+  /// 是否为会话分隔符（用于标记新会话的开始）
+  bool isSessionDivider;
+
   ChatMessage({
     required this.id,
     required this.conversationId,
@@ -55,6 +58,7 @@ class ChatMessage {
     this.metadata,
     this.toolCall,
     this.parentId,
+    this.isSessionDivider = false,
   });
 
   /// 创建用户消息
@@ -93,6 +97,20 @@ class ChatMessage {
     );
   }
 
+  /// 创建会话分隔符
+  factory ChatMessage.sessionDivider({
+    required String conversationId,
+  }) {
+    return ChatMessage(
+      id: _uuid.v4(),
+      conversationId: conversationId,
+      content: '开启了新会话',
+      isUser: false,
+      timestamp: DateTime.now(),
+      isSessionDivider: true,
+    );
+  }
+
   /// 从JSON反序列化
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
@@ -116,6 +134,7 @@ class ChatMessage {
           ? ToolCallResponse.fromJson(json['toolCall'] as Map<String, dynamic>)
           : null,
       parentId: json['parentId'] as String?,
+      isSessionDivider: json['isSessionDivider'] as bool? ?? false,
     );
   }
 
@@ -134,6 +153,7 @@ class ChatMessage {
       if (metadata != null) 'metadata': metadata,
       if (toolCall != null) 'toolCall': toolCall!.toJson(),
       if (parentId != null) 'parentId': parentId,
+      'isSessionDivider': isSessionDivider,
     };
   }
 
@@ -147,6 +167,7 @@ class ChatMessage {
     Map<String, dynamic>? metadata,
     ToolCallResponse? toolCall,
     String? parentId,
+    bool? isSessionDivider,
   }) {
     return ChatMessage(
       id: id,
@@ -161,6 +182,7 @@ class ChatMessage {
       metadata: metadata ?? this.metadata,
       toolCall: toolCall ?? this.toolCall,
       parentId: parentId ?? this.parentId,
+      isSessionDivider: isSessionDivider ?? this.isSessionDivider,
     );
   }
 

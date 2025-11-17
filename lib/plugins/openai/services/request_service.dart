@@ -198,6 +198,7 @@ class RequestService {
   /// [filePath] - 图片文件路径（vision模式下使用）
   /// [replacePrompt] - 是否启用prompt替换
   /// [contextMessages] - 上下文消息列表，包含system消息和历史消息，按时间从旧到新排序
+  /// [responseFormat] - 响应格式（用于 Structured Outputs）
   static Future<void> streamResponse({
     required AIAgent agent,
     String? prompt,
@@ -208,6 +209,7 @@ class RequestService {
     String? filePath,
     bool replacePrompt = true,
     List<ChatCompletionMessage>? contextMessages,
+    ResponseFormat? responseFormat,
   }) async {
     try {
       // 如果提供了contextMessages，直接使用它作为消息列表
@@ -295,6 +297,7 @@ class RequestService {
         model: ChatCompletionModel.modelId(agent.model),
         messages: messages,
         temperature: 0.7,
+        responseFormat: responseFormat,
       );
 
       developer.log('发送流式请求: ${request.model}', name: 'RequestService');

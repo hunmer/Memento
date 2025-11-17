@@ -96,24 +96,69 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.provider == null
-              ? OpenAILocalizations.of(context).addProvider
-              : OpenAILocalizations.of(context).editProvider,
-        ),
+  // 检查是否有未添加的 header 输入
+  bool _hasUnsavedHeaderInput() {
+    return _headerKeyController.text.trim().isNotEmpty ||
+        _headerValueController.text.trim().isNotEmpty;
+  }
+
+  // 显示确认对话框
+  Future<bool> _showUnsavedChangesDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(OpenAILocalizations.of(context).unsavedChangesTitle),
+        content: Text(OpenAILocalizations.of(context).unsavedHeaderWarning),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveProvider,
-            tooltip: OpenAILocalizations.of(context).saveTooltip,
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(OpenAILocalizations.of(context).cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(OpenAILocalizations.of(context).discard),
           ),
         ],
       ),
-      body: Form(
+    );
+    return result ?? false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return;
+
+        // 检查是否有未添加的 header 输入
+        if (_hasUnsavedHeaderInput()) {
+          final shouldPop = await _showUnsavedChangesDialog();
+          if (shouldPop && context.mounted) {
+            Navigator.pop(context);
+          }
+        } else {
+          if (context.mounted) {
+            Navigator.pop(context);
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.provider == null
+                ? OpenAILocalizations.of(context).addProvider
+                : OpenAILocalizations.of(context).editProvider,
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: _saveProvider,
+              tooltip: OpenAILocalizations.of(context).saveTooltip,
+            ),
+          ],
+        ),
+        body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -253,6 +298,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

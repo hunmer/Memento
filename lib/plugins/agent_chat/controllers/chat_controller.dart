@@ -17,6 +17,7 @@ import '../services/conversation_service.dart';
 import '../services/token_counter_service.dart';
 import '../services/tool_service.dart';
 import '../services/tool_template_service.dart';
+import '../services/message_detail_service.dart';
 import '../../../utils/file_picker_helper.dart';
 
 /// 聊天控制器
@@ -26,8 +27,12 @@ class ChatController extends ChangeNotifier {
   final Conversation conversation;
   final MessageService messageService;
   final ConversationService conversationService;
+  final MessageDetailService messageDetailService;
   final ToolTemplateService? templateService;
   bool _conversationServiceInitialized = false;
+
+  /// 当前会话（可变，用于存储最新的会话数据）
+  Conversation? _currentConversation;
 
   /// 当前Agent
   AIAgent? _currentAgent;
@@ -51,6 +56,7 @@ class ChatController extends ChangeNotifier {
     required this.conversation,
     required this.messageService,
     required this.conversationService,
+    required this.messageDetailService,
     this.templateService,
   });
 
@@ -99,6 +105,7 @@ class ChatController extends ChangeNotifier {
 
     try {
       await _ensureConversationServiceReady();
+      _currentConversation = conversation;
       debugPrint(
         '📝 初始化会话: ${conversation.id}, AgentID: ${conversation.agentId}',
       );
@@ -158,8 +165,12 @@ class ChatController extends ChangeNotifier {
         _currentAgent = await openAIPlugin.controller.getAgent(agentId);
 
         // 更新会话的 agentId
-        final updatedConversation = conversation.copyWith(agentId: agentId);
+        final currentConv = _currentConversation ?? conversation;
+        final updatedConversation = currentConv.copyWith(agentId: agentId);
         await conversationService.updateConversation(updatedConversation);
+
+        // 更新本地引用
+        _currentConversation = updatedConversation;
 
         notifyListeners();
       }
@@ -338,6 +349,17 @@ class ChatController extends ChangeNotifier {
         contextMessages: contextMessages,
         vision: imageFiles.isNotEmpty,
         filePath: imageFiles.isNotEmpty ? imageFiles.first.path : null,
+        // 如果启用工具调用,使用 JSON Schema 强制返回工具请求格式
+        responseFormat: enableToolCalling && _currentAgent!.enableFunctionCalling
+            ? ResponseFormat.jsonSchema(
+                jsonSchema: JsonSchemaObject(
+                  name: 'ToolRequest',
+                  description: '工具需求请求',
+                  strict: true,
+                  schema: ToolService.toolRequestSchema,
+                ),
+              )
+            : null,
         onToken: (token) {
           buffer.write(token);
           tokenCount++;
@@ -426,6 +448,15 @@ class ChatController extends ChangeNotifier {
                 prompt: null,
                 contextMessages: contextMessages,
                 vision: false,
+                // 使用 JSON Schema 强制返回工具调用格式
+                responseFormat: ResponseFormat.jsonSchema(
+                  jsonSchema: JsonSchemaObject(
+                    name: 'ToolCall',
+                    description: '工具调用步骤',
+                    strict: true,
+                    schema: ToolService.toolCallSchema,
+                  ),
+                ),
                 onToken: (token) {
                   buffer.write(token);
                   tokenCount++;
@@ -539,8 +570,17 @@ class ChatController extends ChangeNotifier {
 
     // 添加系统提示词
     if (_currentAgent != null) {
+      String systemPrompt = _currentAgent!.systemPrompt;
+
+      // 如果有选中的工具，添加工具提示
+      final tools = selectedTools;
+      if (tools.isNotEmpty) {
+        final toolNames = tools.map((t) => t['toolName'] ?? t['toolId']).join('、');
+        systemPrompt += '\n\n用户希望使用以下工具: $toolNames';
+      }
+
       messages.add(
-        ChatCompletionMessage.system(content: _currentAgent!.systemPrompt),
+        ChatCompletionMessage.system(content: systemPrompt),
       );
     }
 
@@ -549,16 +589,32 @@ class ChatController extends ChangeNotifier {
     final historyMessages =
         allMessages.where((msg) => !msg.isGenerating).toList();
 
-    // 获取最后 N 条消息
-    final contextMessages =
-        historyMessages.length > contextMessageCount
-            ? historyMessages.sublist(
-              historyMessages.length - contextMessageCount,
-            )
-            : historyMessages;
+    // 找到最后一个会话分隔符的索引
+    int lastDividerIndex = -1;
+    for (int i = historyMessages.length - 1; i >= 0; i--) {
+      if (historyMessages[i].isSessionDivider) {
+        lastDividerIndex = i;
+        break;
+      }
+    }
 
-    // 转换历史消息为API格式
+    // 如果找到分隔符，只获取分隔符之后的消息
+    final messagesAfterDivider = lastDividerIndex >= 0
+        ? historyMessages.sublist(lastDividerIndex + 1)
+        : historyMessages;
+
+    // 获取最后 N 条消息（从分隔符之后的消息中选取）
+    final contextMessages =
+        messagesAfterDivider.length > contextMessageCount
+            ? messagesAfterDivider.sublist(
+              messagesAfterDivider.length - contextMessageCount,
+            )
+            : messagesAfterDivider;
+
+    // 转换历史消息为API格式（排除会话分隔符）
     for (var msg in contextMessages) {
+      if (msg.isSessionDivider) continue; // 跳过会话分隔符
+
       if (msg.isUser) {
         messages.add(
           ChatCompletionMessage.user(
@@ -655,6 +711,95 @@ class ChatController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ========== 选中工具管理 ==========
+
+  /// 获取选中的工具列表
+  List<Map<String, String>> get selectedTools {
+    final currentConv = _currentConversation ?? conversation;
+    final metadata = currentConv.metadata;
+    if (metadata == null) return [];
+    final tools = metadata['selectedTools'];
+    if (tools is List) {
+      return tools.map((e) => Map<String, String>.from(e as Map)).toList();
+    }
+    return [];
+  }
+
+  /// 添加工具到会话
+  Future<void> addToolToConversation(
+    String pluginId,
+    String toolId,
+    String toolName,
+  ) async {
+    await _ensureConversationServiceReady();
+
+    final currentTools = selectedTools;
+
+    // 检查是否已存在
+    final exists = currentTools.any(
+      (tool) => tool['pluginId'] == pluginId && tool['toolId'] == toolId,
+    );
+
+    if (!exists) {
+      currentTools.add({
+        'pluginId': pluginId,
+        'toolId': toolId,
+        'toolName': toolName,
+      });
+
+      final currentConv = _currentConversation ?? conversation;
+      final metadata = Map<String, dynamic>.from(currentConv.metadata ?? {});
+      metadata['selectedTools'] = currentTools;
+
+      final updatedConversation = currentConv.copyWith(metadata: metadata);
+      await conversationService.updateConversation(updatedConversation);
+
+      // 更新本地引用
+      _currentConversation = updatedConversation;
+
+      notifyListeners();
+    }
+  }
+
+  /// 移除选中的工具
+  Future<void> removeToolFromConversation(String pluginId, String toolId) async {
+    await _ensureConversationServiceReady();
+
+    final currentTools = selectedTools;
+    currentTools.removeWhere(
+      (tool) => tool['pluginId'] == pluginId && tool['toolId'] == toolId,
+    );
+
+    final currentConv = _currentConversation ?? conversation;
+    final metadata = Map<String, dynamic>.from(currentConv.metadata ?? {});
+    metadata['selectedTools'] = currentTools;
+
+    final updatedConversation = currentConv.copyWith(metadata: metadata);
+    await conversationService.updateConversation(updatedConversation);
+
+    // 更新本地引用
+    _currentConversation = updatedConversation;
+
+    notifyListeners();
+  }
+
+  /// 清空选中的工具
+  Future<void> clearSelectedTools() async {
+    await _ensureConversationServiceReady();
+
+    final currentConv = _currentConversation ?? conversation;
+    final metadata = Map<String, dynamic>.from(currentConv.metadata ?? {});
+    metadata.remove('selectedTools');
+
+    final updatedConversation = currentConv.copyWith(metadata: metadata);
+    await conversationService.updateConversation(updatedConversation);
+
+    // 更新本地引用
+    _currentConversation = updatedConversation;
+
+    notifyListeners();
+  }
+
   // ========== 消息编辑 ==========
 
   /// 编辑消息
@@ -671,6 +816,30 @@ class ChatController extends ChangeNotifier {
   Future<void> clearAllMessages() async {
     await messageService.clearAllMessages(conversation.id);
     notifyListeners();
+  }
+
+  /// 创建新会话（插入会话分隔符）
+  Future<void> createNewSession() async {
+    // 检查最后一条消息是否已经是会话分隔符
+    final allMessages = messages;
+    if (allMessages.isNotEmpty && allMessages.last.isSessionDivider) {
+      // 最后一条消息已经是会话分隔符，不需要再创建
+      return;
+    }
+
+    // 创建会话分隔符消息
+    final dividerMessage = ChatMessage.sessionDivider(
+      conversationId: conversation.id,
+    );
+
+    await messageService.addMessage(dividerMessage);
+    notifyListeners();
+  }
+
+  /// 检查最后一条消息是否为会话分隔符
+  bool get isLastMessageSessionDivider {
+    final allMessages = messages;
+    return allMessages.isNotEmpty && allMessages.last.isSessionDivider;
   }
 
   /// 重新生成AI回复
@@ -954,11 +1123,63 @@ class ChatController extends ChangeNotifier {
         debugPrint(
           '✅ AI最终回复已追加到父消息, 最终content长度: ${updatedParent.content.length}',
         );
+
+        // 保存消息详细数据
+        await _saveMessageDetail(
+          messageId: originalMessageId,
+          aiMessage: updatedParent,
+          finalReply: newAiMessageFinal.content,
+        );
       } else {
         debugPrint('❌ 未找到父消息: $originalMessageId');
       }
     } else {
       debugPrint('⚠️ AI回复还在生成中或未找到');
+    }
+  }
+
+  /// 保存消息详细数据（用于工具调用详情查看）
+  Future<void> _saveMessageDetail({
+    required String messageId,
+    required ChatMessage aiMessage,
+    required String finalReply,
+  }) async {
+    try {
+      // 查找对应的用户消息（往前查找最近的用户消息）
+      final allMessages = messageService.currentMessages;
+      final aiIndex = allMessages.indexWhere((m) => m.id == messageId);
+
+      String userPrompt = '';
+      if (aiIndex > 0) {
+        // 从AI消息往前查找最近的用户消息
+        for (int i = aiIndex - 1; i >= 0; i--) {
+          if (allMessages[i].isUser && allMessages[i].parentId == null) {
+            userPrompt = allMessages[i].content;
+            break;
+          }
+        }
+      }
+
+      // 提取思考过程（去除工具结果和最终回复部分）
+      String thinkingProcess = aiMessage.content;
+      final toolResultIndex = thinkingProcess.indexOf('[工具执行结果]');
+      if (toolResultIndex != -1) {
+        thinkingProcess = thinkingProcess.substring(0, toolResultIndex).trim();
+      }
+
+      // 保存详细数据
+      await messageDetailService.saveDetail(
+        messageId: messageId,
+        conversationId: conversation.id,
+        userPrompt: userPrompt,
+        thinkingProcess: thinkingProcess,
+        toolCallData: aiMessage.toolCall?.toJson(),
+        finalReply: finalReply,
+      );
+
+      debugPrint('💾 消息详细数据已保存: ${messageId.substring(0, 8)}');
+    } catch (e) {
+      debugPrint('❌ 保存消息详细数据失败: $e');
     }
   }
 
