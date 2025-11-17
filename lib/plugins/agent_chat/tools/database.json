@@ -120,7 +120,7 @@
     "examples": [
       {
         "title": "创建记录",
-        "code": "const fields = JSON.stringify({标题: '新任务', 日期: '2025-01-15', 完成: false});\nconst record = await Memento.plugins.database.createRecord('db123', fields);\nsetResult(`记录已创建: ${record.id}`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst fields = JSON.stringify({标题: '新任务', 日期: today, 完成: false});\nconst record = await Memento.plugins.database.createRecord('db123', fields);\nsetResult(`记录已创建: ${record.id}`);"
       }
     ],
     "notes": "字段名必须与数据库定义的字段名匹配，字段值类型需符合字段类型定义",
@@ -141,7 +141,7 @@
     "examples": [
       {
         "title": "更新记录",
-        "code": "const updates = JSON.stringify({完成: true, 完成日期: '2025-01-16'});\nconst record = await Memento.plugins.database.updateRecord('db123', 'rec456', updates);\nsetResult('记录已更新');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst updates = JSON.stringify({完成: true, 完成日期: today});\nconst record = await Memento.plugins.database.updateRecord('db123', 'rec456', updates);\nsetResult('记录已更新');"
       }
     ],
     "notes": "仅更新提供的字段，其他字段保持不变",

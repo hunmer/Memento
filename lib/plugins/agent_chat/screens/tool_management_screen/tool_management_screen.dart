@@ -445,9 +445,20 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
 
   /// 构建统计信息卡片
   Widget _buildStatistics() {
-    final stats = ToolConfigManager.instance.getStatistics();
-    final totalTools = stats['total_tools'] as int;
-    final enabledTools = stats['enabled_tools'] as int;
+    // 直接从内存中的工具配置计算统计，确保与 _showDisabledTools 一致
+    int totalTools = 0;
+    int enabledTools = 0;
+
+    _allPluginTools.forEach((pluginId, toolSet) {
+      toolSet.tools.forEach((toolId, config) {
+        totalTools++;
+        if (config.enabled) {
+          enabledTools++;
+        }
+      });
+    });
+
+    final disabledCount = totalTools - enabledTools;
 
     return Card(
       child: Padding(
@@ -459,17 +470,26 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
             _buildStatItem('已启用', enabledTools.toString(), Icons.check_circle,
                 color: Colors.green),
             _buildStatItem(
-                '已禁用', (totalTools - enabledTools).toString(), Icons.block,
-                color: Colors.grey),
+              '已禁用',
+              disabledCount.toString(),
+              Icons.block,
+              color: Colors.grey,
+              onTap: disabledCount > 0 ? _showDisabledTools : null,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon,
-      {Color? color}) {
-    return Column(
+  Widget _buildStatItem(
+    String label,
+    String value,
+    IconData icon, {
+    Color? color,
+    VoidCallback? onTap,
+  }) {
+    final child = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: color),
@@ -483,6 +503,198 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
         ),
       ],
+    );
+
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: child,
+        ),
+      );
+    }
+
+    return child;
+  }
+
+  /// 显示已禁用工具列表
+  void _showDisabledTools() {
+    // 收集所有已禁用的工具
+    final disabledTools = <Map<String, dynamic>>[];
+
+    print('🔍 开始收集已禁用工具...');
+    print('📦 插件总数: ${_allPluginTools.length}');
+
+    _allPluginTools.forEach((pluginId, toolSet) {
+      print('📌 检查插件: $pluginId (${toolSet.tools.length} 个工具)');
+
+      int disabledCount = 0;
+      toolSet.tools.forEach((toolId, config) {
+        if (!config.enabled) {
+          disabledCount++;
+          disabledTools.add({
+            'pluginId': pluginId,
+            'toolId': toolId,
+            'config': config,
+          });
+          print('  ❌ 禁用工具: $toolId - ${config.title}');
+        }
+      });
+
+      if (disabledCount > 0) {
+        print('  ⚠️  $pluginId 有 $disabledCount 个禁用工具');
+      }
+    });
+
+    print('📊 总共找到 ${disabledTools.length} 个已禁用工具');
+
+    // 按插件ID排序
+    disabledTools.sort((a, b) => (a['pluginId'] as String).compareTo(b['pluginId'] as String));
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.block, color: Colors.grey),
+            const SizedBox(width: 8),
+            const Text('已禁用的工具'),
+            const Spacer(),
+            Text(
+              '${disabledTools.length} 个',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: disabledTools.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle, size: 64, color: Colors.green),
+                        SizedBox(height: 16),
+                        Text('所有工具都已启用！'),
+                      ],
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: disabledTools.length,
+                  itemBuilder: (context, index) {
+                    final item = disabledTools[index];
+                    final pluginId = item['pluginId'] as String;
+                    final toolId = item['toolId'] as String;
+                    final config = item['config'] as ToolConfig;
+
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.grey[200],
+                        child: Text(
+                          pluginId[0].toUpperCase(),
+                          style: TextStyle(color: Colors.grey[700]),
+                        ),
+                      ),
+                      title: Text(
+                        toolId,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            config.title,
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '插件: $pluginId',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+                        tooltip: '启用此工具',
+                        onPressed: () async {
+                          try {
+                            await ToolConfigManager.instance.toggleToolEnabled(
+                              pluginId,
+                              toolId,
+                              true,
+                            );
+                            Navigator.pop(context);
+                            await _loadTools();
+                            _showSuccess('已启用工具: $toolId');
+                          } catch (e) {
+                            _showError('启用失败: $e');
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          if (disabledTools.isNotEmpty)
+            TextButton.icon(
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('确认全部启用'),
+                    content: Text('确定要启用所有 ${disabledTools.length} 个已禁用的工具吗？'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('取消'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('全部启用'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true) {
+                  try {
+                    for (final item in disabledTools) {
+                      await ToolConfigManager.instance.toggleToolEnabled(
+                        item['pluginId'] as String,
+                        item['toolId'] as String,
+                        true,
+                      );
+                    }
+                    Navigator.pop(context);
+                    await _loadTools();
+                    _showSuccess('已启用所有工具');
+                  } catch (e) {
+                    _showError('批量启用失败: $e');
+                  }
+                }
+              },
+              icon: const Icon(Icons.done_all),
+              label: const Text('全部启用'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
     );
   }
 }

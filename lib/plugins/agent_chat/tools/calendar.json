@@ -47,7 +47,7 @@
     "examples": [
       {
         "title": "获取本周事件",
-        "code": "const events = await Memento.plugins.calendar.getEventsByDateRange('2025-01-15T00:00:00.000Z', '2025-01-21T23:59:59.000Z');\nsetResult(`本周有 ${events.length} 个事件`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst startDate = weekStart.toISOString().split('T')[0] + 'T00:00:00.000Z';\nconst endDate = weekEnd.toISOString().split('T')[0] + 'T23:59:59.000Z';\nconst events = await Memento.plugins.calendar.getEventsByDateRange(startDate, endDate);\nsetResult(`本周有 ${events.length} 个事件`);"
       }
     ],
     "notes": "日期需要使用 ISO8601 格式，可使用 JavaScript 的 Date.toISOString() 生成",
@@ -71,12 +71,12 @@
     },
     "examples": [
       {
-        "title": "创建简单事件",
-        "code": "const event = await Memento.plugins.calendar.createEvent('项目会议', '讨论Q1计划', '2025-01-15T09:00:00.000Z');\nsetResult(`事件已创建: ${event.id}`);"
+        "title": "创建今日事件",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent('项目会议', '讨论Q1计划', startTime);\nsetResult(`事件已创建: ${event.id}`);"
       },
       {
         "title": "创建带提醒的事件",
-        "code": "const event = await Memento.plugins.calendar.createEvent('重要会议', '年度规划', '2025-01-20T14:00:00.000Z', '2025-01-20T16:00:00.000Z', null, null, 15);\nsetResult('已创建事件，将提前15分钟提醒');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T14:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T16:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent('重要会议', '年度规划', startTime, endTime, null, null, 15);\nsetResult('已创建事件，将提前15分钟提醒');"
       }
     ],
     "notes": "reminderMinutes 可选值: 5, 15, 30, 60, 120, 1440（1天）, 2880（2天）",

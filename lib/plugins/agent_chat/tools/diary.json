@@ -62,8 +62,8 @@
     },
     "examples": [
       {
-        "title": "加载日记",
-        "code": "const entry = await Memento.plugins.diary.loadDiaryEntry('2025-01-15');\nif (entry) {\n  setResult(JSON.stringify(entry, null, 2));\n} else {\n  setResult('该日期没有日记');\n}"
+        "title": "加载今日日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entry = await Memento.plugins.diary.loadDiaryEntry(today);\nif (entry) {\n  setResult(JSON.stringify(entry, null, 2));\n} else {\n  setResult('今天还没有日记');\n}"
       }
     ],
     "notes": "如果指定日期没有日记则返回 null",
@@ -85,11 +85,11 @@
     "examples": [
       {
         "title": "保存简单日记",
-        "code": "const entry = await Memento.plugins.diary.saveDiaryEntry('2025-01-15', '今天天气很好，完成了很多工作...');\nsetResult('日记已保存');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entry = await Memento.plugins.diary.saveDiaryEntry(today, '今天天气很好，完成了很多工作...');\nsetResult('日记已保存');"
       },
       {
         "title": "保存完整日记",
-        "code": "const entry = await Memento.plugins.diary.saveDiaryEntry('2025-01-15', '# 美好的一天\\n\\n今天完成了项目里程碑...', '美好的一天', '😊');\nsetResult(`已保存日记: ${entry.title}`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entry = await Memento.plugins.diary.saveDiaryEntry(today, '# 美好的一天\\n\\n今天完成了项目里程碑...', '美好的一天', '😊');\nsetResult(`已保存日记: ${entry.title}`);"
       }
     ],
     "notes": "如果日期已存在日记则更新，否则创建新日记；内容支持 Markdown 格式",
@@ -107,8 +107,8 @@
     },
     "examples": [
       {
-        "title": "删除日记",
-        "code": "const success = await Memento.plugins.diary.deleteDiaryEntry('2025-01-15');\nsetResult(success ? '删除成功' : '删除失败或日记不存在');"
+        "title": "删除今日日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst success = await Memento.plugins.diary.deleteDiaryEntry(today);\nsetResult(success ? '删除成功' : '删除失败或日记不存在');"
       }
     ],
     "notes": "删除操作不可逆",
@@ -126,8 +126,8 @@
     },
     "examples": [
       {
-        "title": "检查日记是否存在",
-        "code": "const exists = await Memento.plugins.diary.hasEntryForDate('2025-01-15');\nsetResult(exists ? '该日期有日记' : '该日期没有日记');"
+        "title": "检查今日是否有日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst exists = await Memento.plugins.diary.hasEntryForDate(today);\nsetResult(exists ? '今天有日记' : '今天还没有日记');"
       }
     ],
     "notes": "用于快速判断某天是否写了日记",
