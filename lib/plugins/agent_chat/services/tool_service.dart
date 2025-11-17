@@ -9,6 +9,57 @@ class ToolService {
   static String? _cachedToolBriefPrompt;
   static bool _initialized = false;
 
+  /// 第一阶段 JSON Schema - 工具需求
+  static const Map<String, dynamic> toolRequestSchema = {
+    'type': 'object',
+    'properties': {
+      'needed_tools': {
+        'type': 'array',
+        'description': '需要使用的工具ID列表',
+        'items': {'type': 'string'},
+      },
+    },
+    'required': ['needed_tools'],
+    'additionalProperties': false,
+  };
+
+  /// 第二阶段 JSON Schema - 工具调用
+  static const Map<String, dynamic> toolCallSchema = {
+    'type': 'object',
+    'properties': {
+      'steps': {
+        'type': 'array',
+        'description': '工具执行步骤列表',
+        'items': {
+          'type': 'object',
+          'properties': {
+            'method': {
+              'type': 'string',
+              'description': '执行方法,固定为 run_js',
+              'enum': ['run_js'],
+            },
+            'title': {
+              'type': 'string',
+              'description': '步骤标题',
+            },
+            'desc': {
+              'type': 'string',
+              'description': '步骤描述',
+            },
+            'data': {
+              'type': 'string',
+              'description': 'JavaScript 代码字符串',
+            },
+          },
+          'required': ['method', 'title', 'desc', 'data'],
+          'additionalProperties': false,
+        },
+      },
+    },
+    'required': ['steps'],
+    'additionalProperties': false,
+  };
+
   /// 初始化工具服务（加载所有工具配置）
   static Future<void> initialize() async {
     if (_initialized) return;

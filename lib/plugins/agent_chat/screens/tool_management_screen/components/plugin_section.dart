@@ -8,6 +8,7 @@ class PluginSection extends StatefulWidget {
   final PluginToolSet toolSet;
   final List<String> visibleToolIds;
   final VoidCallback onRefresh;
+  final Function(String pluginId, String toolId, ToolConfig config)? onAddToChat;
 
   const PluginSection({
     super.key,
@@ -15,6 +16,7 @@ class PluginSection extends StatefulWidget {
     required this.toolSet,
     required this.visibleToolIds,
     required this.onRefresh,
+    this.onAddToChat,
   });
 
   @override
@@ -83,6 +85,7 @@ class _PluginSectionState extends State<PluginSection> {
                 toolId: toolId,
                 config: config,
                 onRefresh: widget.onRefresh,
+                onAddToChat: widget.onAddToChat,
               );
             }),
         ],

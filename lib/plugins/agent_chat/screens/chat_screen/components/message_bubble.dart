@@ -29,6 +29,11 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 如果是会话分隔符，显示特殊样式
+    if (message.isSessionDivider) {
+      return _buildSessionDivider();
+    }
+
     final isUser = message.isUser;
     final isToolCallMessage =
         message.toolCall != null && message.toolCall!.steps.isNotEmpty;
@@ -40,16 +45,6 @@ class MessageBubble extends StatelessWidget {
         mainAxisAlignment:
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!isUser) ...[
-            // AI头像
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: Colors.blue[100],
-              child: Icon(Icons.smart_toy, size: 18, color: Colors.blue[700]),
-            ),
-            const SizedBox(width: 8),
-          ],
-
           // 消息内容
           Flexible(
             child: Column(
@@ -159,16 +154,45 @@ class MessageBubble extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
 
-          if (isUser) ...[
-            const SizedBox(width: 8),
-            // 用户头像
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: Colors.green[100],
-              child: Icon(Icons.person, size: 18, color: Colors.green[700]),
+  /// 构建会话分隔符
+  Widget _buildSessionDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Row(
+        children: [
+          Expanded(child: Divider(color: Colors.blue[300], thickness: 1)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue[200]!),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.fiber_new, size: 16, color: Colors.blue[700]),
+                  const SizedBox(width: 6),
+                  Text(
+                    message.content,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
+          Expanded(child: Divider(color: Colors.blue[300], thickness: 1)),
         ],
       ),
     );

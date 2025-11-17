@@ -7,7 +7,14 @@ import 'components/tool_editor_dialog.dart';
 
 /// 工具管理界面
 class ToolManagementScreen extends StatefulWidget {
-  const ToolManagementScreen({super.key});
+  final String? conversationId;
+  final Function(String pluginId, String toolId, ToolConfig config)? onAddToChat;
+
+  const ToolManagementScreen({
+    super.key,
+    this.conversationId,
+    this.onAddToChat,
+  });
 
   @override
   State<ToolManagementScreen> createState() => _ToolManagementScreenState();
@@ -300,6 +307,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
           toolSet: toolSet,
           visibleToolIds: toolIds,
           onRefresh: _loadTools,
+          onAddToChat: widget.onAddToChat,
         ),
       );
     });

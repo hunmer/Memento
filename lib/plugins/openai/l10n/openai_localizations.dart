@@ -217,6 +217,12 @@ abstract class OpenAILocalizations {
   get editHeader;
 
   get deleteHeader;
+
+  String get unsavedChangesTitle;
+
+  String get unsavedHeaderWarning;
+
+  String get discard;
 }
 
 /// 中文实现
@@ -686,6 +692,12 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
   String get deleteHeader => '删除';
   @override
   String get saveTooltip => '保存';
+  @override
+  String get unsavedChangesTitle => '未保存的更改';
+  @override
+  String get unsavedHeaderWarning => 'Header 输入框中有未添加的内容,确定要放弃这些更改吗?';
+  @override
+  String get discard => '放弃';
 }
 
 /// 英文实现
@@ -1159,6 +1171,12 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   String get deleteHeader => 'Delete';
   @override
   String get saveTooltip => 'Save';
+  @override
+  String get unsavedChangesTitle => 'Unsaved Changes';
+  @override
+  String get unsavedHeaderWarning => 'There are unsaved changes in the header input fields. Do you want to discard these changes?';
+  @override
+  String get discard => 'Discard';
 }
 
 /// 本地化代理

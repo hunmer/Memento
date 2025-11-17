@@ -9,6 +9,7 @@ class ToolListItem extends StatelessWidget {
   final String toolId;
   final ToolConfig config;
   final VoidCallback onRefresh;
+  final Function(String pluginId, String toolId, ToolConfig config)? onAddToChat;
 
   const ToolListItem({
     super.key,
@@ -16,6 +17,7 @@ class ToolListItem extends StatelessWidget {
     required this.toolId,
     required this.config,
     required this.onRefresh,
+    this.onAddToChat,
   });
 
   /// 切换启用状态
@@ -29,10 +31,7 @@ class ToolListItem extends StatelessWidget {
       onRefresh();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('切换状态失败: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('切换状态失败: $e'), backgroundColor: Colors.red),
       );
     }
   }
@@ -41,12 +40,13 @@ class ToolListItem extends StatelessWidget {
   Future<void> _editTool(BuildContext context) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => ToolEditorDialog(
-        pluginId: pluginId,
-        toolId: toolId,
-        config: config,
-        isNew: false,
-      ),
+      builder:
+          (context) => ToolEditorDialog(
+            pluginId: pluginId,
+            toolId: toolId,
+            config: config,
+            isNew: false,
+          ),
     );
 
     if (result != null) {
@@ -67,15 +67,11 @@ class ToolListItem extends StatelessWidget {
         onRefresh();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('更新工具失败: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('更新工具失败: $e'), backgroundColor: Colors.red),
         );
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -86,24 +82,25 @@ class ToolListItem extends StatelessWidget {
         // 弹出确认对话框
         return await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('确认删除'),
-            content: Text('确定要删除工具 "$toolId" 吗？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+          builder:
+              (context) => AlertDialog(
+                title: const Text('确认删除'),
+                content: Text('确定要删除工具 "$toolId" 吗？'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('取消'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('删除'),
+                  ),
+                ],
               ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('删除'),
-              ),
-            ],
-          ),
         );
       },
       onDismissed: (direction) async {
@@ -118,10 +115,7 @@ class ToolListItem extends StatelessWidget {
           onRefresh();
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('删除工具失败: $e'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text('删除工具失败: $e'), backgroundColor: Colors.red),
           );
         }
       },
@@ -129,11 +123,7 @@ class ToolListItem extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         color: Colors.red,
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-          size: 32,
-        ),
+        child: const Icon(Icons.delete, color: Colors.white, size: 32),
       ),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -154,17 +144,11 @@ class ToolListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 4),
-              Text(
-                config.title,
-                style: const TextStyle(fontSize: 13),
-              ),
+              Text(config.title, style: const TextStyle(fontSize: 13)),
               const SizedBox(height: 2),
               Text(
                 config.getBriefDescription(),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -189,9 +173,22 @@ class ToolListItem extends StatelessWidget {
             ],
           ),
           isThreeLine: true,
-          trailing: Switch(
-            value: config.enabled,
-            onChanged: (value) => _toggleEnabled(context, value),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (onAddToChat != null)
+                IconButton(
+                  icon: const Icon(Icons.add_comment, size: 20),
+                  tooltip: '添加到聊天',
+                  onPressed: () => onAddToChat!(pluginId, toolId, config),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                ),
+              Switch(
+                value: config.enabled,
+                onChanged: (value) => _toggleEnabled(context, value),
+              ),
+            ],
           ),
           onTap: () => _editTool(context),
         ),
