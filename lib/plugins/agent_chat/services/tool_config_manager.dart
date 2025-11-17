@@ -83,18 +83,6 @@ class ToolConfigManager {
   Future<void> _copyAssetsToDataDirectory(Directory toolsDir) async {
     print('🔄 首次启动：复制工具配置到数据目录...');
 
-    // 复制 index.json
-    try {
-      final indexData = await rootBundle.loadString(
-        'lib/plugins/agent_chat/tools/index.json',
-      );
-      final indexFile = File(path.join(toolsDir.path, 'index.json'));
-      await indexFile.writeAsString(indexData);
-      print('✅ 复制 index.json');
-    } catch (e) {
-      print('⚠️ 复制 index.json 失败: $e');
-    }
-
     // 复制各插件配置文件
     for (final pluginId in _pluginIds) {
       try {
@@ -109,7 +97,71 @@ class ToolConfigManager {
       }
     }
 
+    // 重新生成 index.json（基于实际的工具配置）
+    await _regenerateToolIndex(toolsDir);
+
     print('✅ 工具配置复制完成');
+  }
+
+  /// 重新生成工具索引
+  Future<void> _regenerateToolIndex(Directory toolsDir) async {
+    print('🔄 重新生成工具索引...');
+
+    final newIndex = <List<String>>[];
+
+    // 遍历所有插件配置文件
+    for (final pluginId in _pluginIds) {
+      try {
+        final configFile = File(path.join(toolsDir.path, '$pluginId.json'));
+        if (!await configFile.exists()) continue;
+
+        final content = await configFile.readAsString();
+        final Map<String, dynamic> jsonData = json.decode(content);
+
+        // 为每个工具创建索引条目
+        jsonData.forEach((methodName, toolData) {
+          if (toolData is Map<String, dynamic>) {
+            final title = toolData['title'] as String?;
+            final description = toolData['description'] as String?;
+
+            // 生成完整的工具 ID (pluginId_methodName 格式)
+            // 如果 methodName 已经包含插件前缀，则不重复添加
+            String fullToolId;
+            if (methodName.startsWith('${pluginId}_')) {
+              fullToolId = methodName;
+            } else {
+              fullToolId = '${pluginId}_$methodName';
+            }
+
+            // 使用简要描述（优先使用 title，其次是 description 的第一句话）
+            String brief = title ?? '';
+            if (brief.isEmpty && description != null) {
+              final sentences = description.split(RegExp(r'[。\.]\s*'));
+              brief = sentences.isNotEmpty ? sentences.first : description;
+              if (brief.length > 50) {
+                brief = '${brief.substring(0, 50)}...';
+              }
+            }
+
+            newIndex.add([fullToolId, brief]);
+          }
+        });
+
+        print('✅ 生成 $pluginId 的索引 (${jsonData.length} 个工具)');
+      } catch (e) {
+        print('⚠️ 生成 $pluginId 索引失败: $e');
+      }
+    }
+
+    // 保存新的索引文件
+    try {
+      final indexFile = File(path.join(toolsDir.path, 'index.json'));
+      final content = const JsonEncoder.withIndent('  ').convert(newIndex);
+      await indexFile.writeAsString(content);
+      print('✅ 工具索引已生成 (共 ${newIndex.length} 个工具)');
+    } catch (e) {
+      print('❌ 保存工具索引失败: $e');
+    }
   }
 
   /// 加载所有配置

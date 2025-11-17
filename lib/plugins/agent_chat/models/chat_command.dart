@@ -69,10 +69,23 @@ class ChatCommand {
       return allCommands;
     }
 
-    return allCommands.where((cmd) {
-      return cmd.command.toLowerCase().startsWith(cleanInput.toLowerCase()) ||
-          cmd.displayName.toLowerCase().contains(cleanInput.toLowerCase());
+    final commandQuery = cleanInput.split(' ').first;
+    if (commandQuery.isEmpty) {
+      return allCommands;
+    }
+
+    final lowerQuery = commandQuery.toLowerCase();
+    final matches = allCommands.where((cmd) {
+      return cmd.command.toLowerCase().startsWith(lowerQuery) ||
+          cmd.displayName.toLowerCase().contains(lowerQuery);
     }).toList();
+
+    if (matches.isEmpty) {
+      final exact = allCommands.where((cmd) => cmd.command == lowerQuery);
+      return exact.toList();
+    }
+
+    return matches;
   }
 
   /// 解析命令输入
