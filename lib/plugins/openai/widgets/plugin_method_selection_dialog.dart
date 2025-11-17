@@ -30,19 +30,26 @@ class _PluginMethodSelectionDialogState
 
   // 插件显示名称映射
   Map<String, String> get _pluginDisplayNames => {
+        'system': '系统',
         'activity': '活动',
         'bill': '账单',
+        'calendar': '日历',
+        'calendar_album': '日记相册',
+        'chat': '聊天',
         'checkin': '签到',
-        'diary': '日记',
-        'notes': '笔记',
+        'contact': '联系人',
+        'database': '数据库',
         'day': '纪念日',
-        'nodes': '节点',
-        'todo': '任务',
-        'tracker': '目标',
+        'diary': '日记',
         'goods': '物品',
         'habits': '习惯',
-        'contact': '联系人',
-        'calendar': '日历',
+        'nodes': '节点',
+        'notes': '笔记',
+        'store': '商店',
+        'timer': '计时器',
+        'todo': '任务',
+        'tracker': '目标',
+        'ui': '界面',
       };
 
   // 过滤方法列表

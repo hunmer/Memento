@@ -163,6 +163,16 @@ class ToolService {
     buffer.writeln('- `await Memento.system.getDeviceInfo()` - 获取设备信息');
     buffer.writeln('- `await Memento.system.getAppInfo()` - 获取应用信息');
     buffer.writeln('\n你可以调用以下插件功能来获取数据或执行操作。');
+    buffer.writeln('\n### 🎯 run_js 工具用途说明\n');
+    buffer.writeln('**JavaScript 代码仅用于**:');
+    buffer.writeln('- ✅ 数据查询(调用插件 API 获取数据)');
+    buffer.writeln('- ✅ 数据处理(过滤、排序、统计、计算等)');
+    buffer.writeln('- ✅ 数据格式化(转换数据结构、格式化输出等)');
+    buffer.writeln('\n**JavaScript 代码不应用于**:');
+    buffer.writeln('- ❌ 生成建议、分析、总结等自然语言内容');
+    buffer.writeln('- ❌ 回答用户的"为什么"、"怎么样"等分析性问题');
+    buffer.writeln('- ❌ 提供指导、意见或评价');
+    buffer.writeln('\n**正确流程**: JavaScript 返回结构化数据 → AI 基于数据进行分析和建议');
     buffer.writeln('当需要使用工具时，请返回以下 JSON 格式：\n');
     buffer.writeln('```json');
     buffer.writeln('{');
@@ -263,6 +273,21 @@ class ToolService {
 - `await Memento.system.getDeviceInfo()` - 获取设备信息
 - `await Memento.system.getAppInfo()` - 获取应用信息
 
+
+### 🎯 run_js 工具用途说明
+
+**JavaScript 代码仅用于**:
+- ✅ 数据查询(调用插件 API 获取数据)
+- ✅ 数据处理(过滤、排序、统计、计算等)
+- ✅ 数据格式化(转换数据结构、格式化输出等)
+
+**JavaScript 代码不应用于**:
+- ❌ 生成建议、分析、总结等自然语言内容
+- ❌ 回答用户的"为什么"、"怎么样"等分析性问题
+- ❌ 提供指导、意见或评价
+
+**正确流程**: JavaScript 返回结构化数据 → AI 基于数据进行分析和建议
+
 你可以通过返回 JSON 格式来调用插件功能：
 
 ```json
@@ -309,44 +334,18 @@ setResult(result);
     final toolIndex = ToolConfigManager.instance.getToolIndex(enabledOnly: true);
 
     final buffer = StringBuffer();
-    buffer.writeln('\n## 🛠️ 可用工具索引');
-    buffer.writeln('\n### ⚠️ 重要提示');
-    buffer.writeln('\n作为 AI 助手，你**无法直接获取**以下类型的信息：');
-    buffer.writeln('1. **当前时间**：你无法感知时间流逝，不能硬编码日期时间字符串');
-    buffer.writeln('2. **用户数据**：所有用户的任务、笔记、日记等数据都存储在本地，必须使用插件工具获取');
-    buffer.writeln('3. **设备信息**：设备类型、操作系统版本等信息');
-    buffer.writeln('4. **应用状态**：应用版本、配置等信息');
-    buffer.writeln('\n### 系统 API（可在 JavaScript 代码中直接调用）');
-    buffer.writeln('\n以下系统 API **不需要**作为单独的工具步骤，而是在生成的 JavaScript 代码中直接调用：');
-    buffer.writeln('- `Memento.system.getCurrentTime()` - 获取当前时间');
-    buffer.writeln('- `Memento.system.getTimestamp()` - 获取当前时间戳');
-    buffer.writeln('- `Memento.system.formatDate(dateInput, format)` - 格式化日期');
-    buffer.writeln('- `Memento.system.getDeviceInfo()` - 获取设备信息');
-    buffer.writeln('- `Memento.system.getAppInfo()` - 获取应用信息');
-    buffer.writeln('\n### 使用流程');
-    buffer.writeln('\n当用户的需求涉及用户数据时，请分析需求并返回以下格式：\n');
+    buffer.writeln('\n## 🛠️ 可用工具');
+    buffer.writeln('\n当用户询问需要数据查询的问题时，分析需求并返回：');
     buffer.writeln('```json');
-    buffer.writeln('{');
-    buffer.writeln('  "needed_tools": ["tool_id1", "tool_id2"]');
-    buffer.writeln('}');
+    buffer.writeln('{"needed_tools": ["tool_id1", "tool_id2"]}');
     buffer.writeln('```\n');
-    buffer.writeln('### 可用工具（共 ${toolIndex.length} 个）：\n');
+    buffer.writeln('可用工具列表（${toolIndex.length} 个）：\n');
 
     for (final item in toolIndex) {
       // 跳过系统工具，因为它们不作为独立步骤
       if (item[0].startsWith('system_')) continue;
       buffer.writeln('- **${item[0]}**: ${item[1]}');
     }
-
-    buffer.writeln('\n### 示例场景');
-    buffer.writeln('\n**场景 1**：用户问"现在几点了？"');
-    buffer.writeln('- 无需返回工具列表，直接在响应中说明你将获取时间');
-    buffer.writeln('- 后续生成 JavaScript 代码时使用：`const time = await Memento.system.getCurrentTime();`');
-    buffer.writeln('\n**场景 2**：用户问"我今天有什么任务？"');
-    buffer.writeln('- 返回：`{"needed_tools": ["todo_getTodayTasks"]}`');
-    buffer.writeln('- 在生成的 JavaScript 中，如果需要时间信息，直接调用 `Memento.system.getCurrentTime()`');
-    buffer.writeln('\n**场景 3**：用户问"AI 是什么？"');
-    buffer.writeln('- 这是知识性问题，无需使用工具，直接回答即可');
 
     return buffer.toString();
   }
@@ -355,36 +354,17 @@ setResult(result);
   static String _getFallbackBriefPrompt() {
     return '''
 
-## 🛠️ 可用工具索引
+## 🛠️ 可用工具
 
-### ⚠️ 重要提示
-
-作为 AI 助手，你**无法直接获取**以下类型的信息：
-1. **当前时间**：你无法感知时间流逝，不能硬编码日期时间字符串
-2. **用户数据**：所有用户的任务、笔记、日记等数据都存储在本地，必须使用插件工具获取
-
-### 系统 API（在 JavaScript 代码中直接调用）
-
-以下系统 API **不需要**作为单独的工具步骤，而是在生成的 JavaScript 代码中直接调用：
-- `Memento.system.getCurrentTime()` - 获取当前时间
-- `Memento.system.getTimestamp()` - 获取时间戳
-- `Memento.system.formatDate()` - 格式化日期
-- `Memento.system.getDeviceInfo()` - 获取设备信息
-- `Memento.system.getAppInfo()` - 获取应用信息
-
-如果需要使用插件工具，请返回：
+当用户询问需要数据查询的问题时，分析需求并返回：
 ```json
 {"needed_tools": ["tool_id1", "tool_id2"]}
 ```
 
-可用插件工具：
+可用工具列表：
 - **todo_getTasks**: 获取任务列表
 - **todo_getTodayTasks**: 获取今日任务
 - **notes_getNotes**: 获取笔记列表
-
-示例：用户问"我今天有什么任务？"
-- 返回：`{"needed_tools": ["todo_getTodayTasks"]}`
-- 生成的代码中可以直接调用 `Memento.system.getCurrentTime()` 获取时间信息
 ''';
   }
 
@@ -458,6 +438,18 @@ setResult(result);
     });
 
     // 添加工具调用格式说明
+    buffer.writeln('\n### 🎯 run_js 工具用途说明\n');
+    buffer.writeln('**JavaScript 代码仅用于**:');
+    buffer.writeln('- ✅ 数据查询(调用插件 API 获取数据)');
+    buffer.writeln('- ✅ 数据处理(过滤、排序、统计、计算等)');
+    buffer.writeln('- ✅ 数据格式化(转换数据结构、格式化输出等)');
+    buffer.writeln('\n**JavaScript 代码不应用于**:');
+    buffer.writeln('- ❌ 生成建议、分析、总结等自然语言内容');
+    buffer.writeln('- ❌ 回答用户的"为什么"、"怎么样"等分析性问题');
+    buffer.writeln('- ❌ 提供指导、意见或评价');
+    buffer.writeln('\n**正确流程**:');
+    buffer.writeln('1. JavaScript 返回结构化数据(如数组、对象)');
+    buffer.writeln('2. AI 基于这些数据进行自然语言分析和建议\n');
     buffer.writeln('## 📝 生成工具调用\n');
     buffer.writeln('请根据以上文档生成 JavaScript 代码，格式如下：\n');
     buffer.writeln('```json');

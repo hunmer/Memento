@@ -25,10 +25,21 @@ class ToolParameter {
   });
 
   factory ToolParameter.fromJson(Map<String, dynamic> json) {
+    // 兼容 'optional' 和 'required' 两种字段名
+    final bool optional;
+    if (json.containsKey('optional')) {
+      optional = json['optional'] as bool? ?? false;
+    } else if (json.containsKey('required')) {
+      // required 的反义是 optional
+      optional = !(json['required'] as bool? ?? true);
+    } else {
+      optional = false;
+    }
+
     return ToolParameter(
       name: json['name'] as String,
       type: json['type'] as String,
-      optional: json['optional'] as bool? ?? false,
+      optional: optional,
       description: json['description'] as String,
     );
   }
@@ -111,7 +122,8 @@ class ToolExample {
   factory ToolExample.fromJson(Map<String, dynamic> json) {
     return ToolExample(
       code: json['code'] as String,
-      comment: json['comment'] as String,
+      // 兼容 'comment' 和 'title' 两种字段名
+      comment: (json['comment'] ?? json['title'] ?? '') as String,
     );
   }
 
@@ -251,8 +263,17 @@ class PluginToolSet {
 
   factory PluginToolSet.fromJson(String pluginId, Map<String, dynamic> json) {
     final tools = <String, ToolConfig>{};
-    json.forEach((key, value) {
-      tools[key] = ToolConfig.fromJson(value as Map<String, dynamic>);
+    json.forEach((methodName, value) {
+      // 生成完整的工具 ID (pluginId_methodName 格式)
+      // 如果 methodName 已经包含插件前缀，则不重复添加
+      String fullToolId;
+      if (methodName.startsWith('${pluginId}_')) {
+        fullToolId = methodName;
+      } else {
+        fullToolId = '${pluginId}_$methodName';
+      }
+
+      tools[fullToolId] = ToolConfig.fromJson(value as Map<String, dynamic>);
     });
     return PluginToolSet(
       pluginId: pluginId,

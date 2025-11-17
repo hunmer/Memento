@@ -31,6 +31,9 @@ class _MessageInputState extends State<MessageInput> {
   List<SavedToolTemplate> _searchResults = [];
   bool _isLoadingToolResults = false;
   String? _toolSearchKeyword;
+  List<SavedToolTemplate> _commandToolResults = [];
+  bool _isLoadingCommandToolResults = false;
+  String? _commandToolQuery;
 
   @override
   void initState() {
@@ -53,15 +56,87 @@ class _MessageInputState extends State<MessageInput> {
     final text = _textController.text;
     widget.controller.setInputText(text);
 
+    final bool isPotentialCommand = text.startsWith('/') && !text.contains('\n');
+    final (commandType, argument) =
+        isPotentialCommand ? ChatCommand.parseInput(text) : (null, null);
+
     // 检测命令模式
     setState(() {
-      if (text.startsWith('/') && !text.contains('\n')) {
+      if (isPotentialCommand) {
         _isCommandMode = true;
         _filteredCommands = ChatCommand.filterCommands(text);
       } else {
         _isCommandMode = false;
         _filteredCommands = [];
       }
+    });
+
+    _handleCommandInputChange(isPotentialCommand ? commandType : null, argument);
+  }
+
+  void _handleCommandInputChange(
+    ChatCommandType? commandType,
+    String? argument,
+  ) {
+    if (_isCommandMode && commandType == ChatCommandType.tools) {
+      final keyword = argument?.trim() ?? '';
+      if (keyword.isEmpty) {
+        if (_commandToolResults.isNotEmpty ||
+            _isLoadingCommandToolResults ||
+            _commandToolQuery != null) {
+          setState(() {
+            _commandToolResults = [];
+            _isLoadingCommandToolResults = false;
+            _commandToolQuery = null;
+          });
+        }
+        return;
+      }
+
+      _searchToolTemplatesForCommand(keyword);
+      return;
+    }
+
+    if (_commandToolResults.isNotEmpty ||
+        _isLoadingCommandToolResults ||
+        _commandToolQuery != null) {
+      setState(() {
+        _commandToolResults = [];
+        _isLoadingCommandToolResults = false;
+        _commandToolQuery = null;
+      });
+    }
+  }
+
+  void _searchToolTemplatesForCommand(String keyword) {
+    if (widget.controller.templateService == null) {
+      return;
+    }
+
+    if (_commandToolQuery == keyword && _isLoadingCommandToolResults) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingCommandToolResults = true;
+      _commandToolResults = [];
+      _commandToolQuery = keyword;
+    });
+
+    widget.controller
+        .fetchToolTemplates(keyword: keyword)
+        .then((results) {
+      if (!mounted || _commandToolQuery != keyword) return;
+      setState(() {
+        _commandToolResults = results;
+        _isLoadingCommandToolResults = false;
+      });
+    }).catchError((error) {
+      if (!mounted || _commandToolQuery != keyword) return;
+      setState(() {
+        _commandToolResults = [];
+        _isLoadingCommandToolResults = false;
+      });
     });
   }
 
@@ -104,6 +179,11 @@ class _MessageInputState extends State<MessageInput> {
               commands: _filteredCommands,
               onCommandSelected: _handleCommandSelected,
             ),
+
+          if (!_isSearchingTools &&
+              _isCommandMode &&
+              (_commandToolQuery?.isNotEmpty ?? false))
+            _buildToolCommandSearchResults(),
 
           // 当前状态显示区域（工具模板和文件）
           if (!_isSearchingTools &&
@@ -492,6 +572,141 @@ class _MessageInputState extends State<MessageInput> {
         });
       },
     );
+  }
+
+  Widget _buildToolCommandSearchResults() {
+    final keyword = _commandToolQuery ?? '';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: Colors.grey[300]!),
+          bottom: BorderSide(color: Colors.grey[300]!),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Row(
+              children: [
+                Icon(Icons.search, size: 18, color: Colors.orange[700]),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '匹配的工具模板：$keyword',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                if (_isLoadingCommandToolResults)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+              ],
+            ),
+          ),
+          if (_isLoadingCommandToolResults)
+            const SizedBox(height: 12)
+          else if (_commandToolResults.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Text(
+                '找不到 "$keyword"，按 Enter 继续搜索',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 8),
+              itemCount:
+                  _commandToolResults.length > 5 ? 5 : _commandToolResults.length,
+              itemBuilder: (context, index) {
+                final template = _commandToolResults[index];
+                return _buildToolCommandResultItem(template);
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToolCommandResultItem(SavedToolTemplate template) {
+    return InkWell(
+      onTap: () => _applyToolCommandTemplate(template),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            Icon(Icons.build_circle, size: 20, color: Colors.orange[600]),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    template.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (template.description != null &&
+                      template.description!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      template.description!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const Icon(Icons.north_west, size: 16, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _applyToolCommandTemplate(SavedToolTemplate template) {
+    final newInput = '/tools ${template.name}';
+    _textController.text = newInput;
+    _textController.selection = TextSelection.collapsed(
+      offset: newInput.length,
+    );
+    widget.controller.setInputText(newInput);
+
+    setState(() {
+      _commandToolResults = [];
+      _isLoadingCommandToolResults = false;
+      _commandToolQuery = template.name;
+    });
   }
 
   Widget _buildToolSearchEmptyState() {
