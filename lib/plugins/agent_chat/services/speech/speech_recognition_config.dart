@@ -119,17 +119,28 @@ class TencentASRConfig {
         .map((key) => '$key=${params[key]}')
         .join('&');
 
-    // HMAC-SHA1 加密
+    // 构建签名原文：完整 URL 路径（不含协议 wss://）
+    // 格式：asr.cloud.tencent.com/asr/v2/{appId}?{排序后的参数}
+    final signatureSource = 'asr.cloud.tencent.com/asr/v2/$appId?$queryString';
+
+    // Debug: 打印签名原文
+    print('🔐 [签名生成] 签名原文: $signatureSource');
+
+    // 使用 HMAC-SHA1 加密签名原文
     final key = utf8.encode(secretKey);
-    final bytes = utf8.encode(queryString);
+    final bytes = utf8.encode(signatureSource);
     final hmacSha1 = Hmac(sha1, key);
     final digest = hmacSha1.convert(bytes);
 
     // Base64 编码
     final signature = base64.encode(digest.bytes);
+    print('🔐 [签名生成] Base64编码后: $signature');
 
-    // URL 编码
-    return Uri.encodeComponent(signature);
+    // URL 编码（必须对 +、= 等特殊字符编码）
+    final encodedSignature = Uri.encodeComponent(signature);
+    print('🔐 [签名生成] URL编码后: $encodedSignature');
+
+    return encodedSignature;
   }
 
   /// 生成 WebSocket 连接 URL
@@ -176,7 +187,10 @@ class TencentASRConfig {
         .map((e) => '${e.key}=${e.value}')
         .join('&');
 
-    return 'wss://asr.cloud.tencent.com/asr/v2/$appId?$queryString';
+    final url = 'wss://asr.cloud.tencent.com/asr/v2/$appId?$queryString';
+    print('🌐 [WebSocket] 连接URL: $url');
+
+    return url;
   }
 
   /// 验证配置是否有效

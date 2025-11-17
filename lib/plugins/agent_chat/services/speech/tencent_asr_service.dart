@@ -87,9 +87,10 @@ class TencentASRService implements SpeechRecognitionService {
       // 建立 WebSocket 连接
       await _connectWebSocket();
 
-      // 等待握手完成（最多等待 3 秒）
-      final handshakeTimeout = DateTime.now().add(const Duration(seconds: 3));
-      while (!_handshakeCompleted && DateTime.now().isBefore(handshakeTimeout)) {
+      // 等待握手完成（最多等待 10 秒）
+      final handshakeTimeout = DateTime.now().add(const Duration(seconds: 10));
+      while (!_handshakeCompleted &&
+          DateTime.now().isBefore(handshakeTimeout)) {
         await Future.delayed(const Duration(milliseconds: 100));
       }
 

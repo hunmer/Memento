@@ -6,10 +6,7 @@ import '../services/speech/speech_recognition_config.dart';
 class AgentChatSettingsScreen extends StatefulWidget {
   final PluginBase plugin;
 
-  const AgentChatSettingsScreen({
-    super.key,
-    required this.plugin,
-  });
+  const AgentChatSettingsScreen({super.key, required this.plugin});
 
   @override
   State<AgentChatSettingsScreen> createState() =>
@@ -101,7 +98,12 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
         'wordInfo': false,
       };
 
+      debugPrint('🔧 [设置页面] 准备保存配置: appId=${asrConfig['appId']}');
       await widget.plugin.updateSettings({'asrConfig': asrConfig});
+
+      // 验证保存后立即读取
+      final savedConfig = widget.plugin.settings['asrConfig'];
+      debugPrint('🔧 [设置页面] 保存后验证: $savedConfig');
 
       setState(() {
         _hasChanges = false;
@@ -116,6 +118,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
         );
       }
     } catch (e) {
+      debugPrint('❌ [设置页面] 保存失败: $e');
       _showError('保存设置失败: $e');
     } finally {
       setState(() {
@@ -161,10 +164,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
@@ -178,9 +178,9 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Text(
             '语音识别设置',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
 
@@ -190,8 +190,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
           child: Text(
             '配置腾讯云实时语音识别服务，用于聊天界面的语音输入功能。',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
 
@@ -218,161 +218,160 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
 
         // 表单
         Expanded(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Form(
-                  key: _formKey,
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    children: [
-                      // App ID 输入框
-                      TextFormField(
-                        controller: _appIdController,
-                        decoration: const InputDecoration(
-                          labelText: 'App ID',
-                          hintText: '请输入腾讯云应用 ID',
-                          border: OutlineInputBorder(),
-                          helperText: '在腾讯云控制台获取',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return '请输入 App ID';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Secret ID 输入框
-                      TextFormField(
-                        controller: _secretIdController,
-                        decoration: const InputDecoration(
-                          labelText: 'Secret ID',
-                          hintText: '请输入密钥 ID',
-                          border: OutlineInputBorder(),
-                          helperText: '访问密钥 ID',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return '请输入 Secret ID';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Secret Key 输入框
-                      TextFormField(
-                        controller: _secretKeyController,
-                        obscureText: _obscureSecretKey,
-                        decoration: InputDecoration(
-                          labelText: 'Secret Key',
-                          hintText: '请输入密钥 Key',
-                          border: const OutlineInputBorder(),
-                          helperText: '访问密钥 Key（请妥善保管）',
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureSecretKey
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureSecretKey = !_obscureSecretKey;
-                              });
-                            },
+          child:
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Form(
+                    key: _formKey,
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      children: [
+                        // App ID 输入框
+                        TextFormField(
+                          controller: _appIdController,
+                          decoration: const InputDecoration(
+                            labelText: 'App ID',
+                            hintText: '请输入腾讯云应用 ID',
+                            border: OutlineInputBorder(),
+                            helperText: '在腾讯云控制台获取',
                           ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return '请输入 App ID';
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return '请输入 Secret Key';
-                          }
-                          return null;
-                        },
-                      ),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 16),
 
-                      // 引擎配置说明
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    size: 20,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '识别引擎配置',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                ],
+                        // Secret ID 输入框
+                        TextFormField(
+                          controller: _secretIdController,
+                          decoration: const InputDecoration(
+                            labelText: 'Secret ID',
+                            hintText: '请输入密钥 ID',
+                            border: OutlineInputBorder(),
+                            helperText: '访问密钥 ID',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return '请输入 Secret ID';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Secret Key 输入框
+                        TextFormField(
+                          controller: _secretKeyController,
+                          obscureText: _obscureSecretKey,
+                          decoration: InputDecoration(
+                            labelText: 'Secret Key',
+                            hintText: '请输入密钥 Key',
+                            border: const OutlineInputBorder(),
+                            helperText: '访问密钥 Key（请妥善保管）',
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureSecretKey
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '当前使用默认配置：',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '• 采样率：16000 Hz\n'
-                                '• 引擎模型：16k_zh（中文普通话）\n'
-                                '• VAD 人声检测：关闭\n'
-                                '• 脏词过滤：关闭',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
+                              onPressed: () {
+                                setState(() {
+                                  _obscureSecretKey = !_obscureSecretKey;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return '请输入 Secret Key';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // 引擎配置说明
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      size: 20,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
-                              ),
-                            ],
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '识别引擎配置',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '当前使用默认配置：',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '• 采样率：16000 Hz\n'
+                                  '• 引擎模型：16k_zh（中文普通话）\n'
+                                  '• VAD 人声检测：关闭\n'
+                                  '• 脏词过滤：关闭',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodySmall?.copyWith(
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      // 操作按钮
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _testConnection,
-                              child: const Text('测试配置'),
+                        // 操作按钮
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: _testConnection,
+                                child: const Text('测试配置'),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: _hasChanges ? _saveSettings : null,
-                              child: const Text('保存设置'),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton(
+                                onPressed: _hasChanges ? _saveSettings : null,
+                                child: const Text('保存设置'),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
 
-                      const SizedBox(height: 16),
-                    ],
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
-                ),
         ),
       ],
     );
