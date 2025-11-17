@@ -129,7 +129,7 @@
       },
       {
         "title": "添加多人交互记录",
-        "code": "const record = await Memento.plugins.contact.addInteraction('contact123', '三方会议讨论合作', '2025-01-15T14:00:00.000Z', ['contact456', 'contact789']);\nsetResult('已记录多人会议');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst timestamp = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T14:00:00.000Z');\nconst record = await Memento.plugins.contact.addInteraction('contact123', '三方会议讨论合作', timestamp, ['contact456', 'contact789']);\nsetResult('已记录多人会议');"
       }
     ],
     "notes": "添加交互记录会自动更新联系人的 lastContactTime 字段",

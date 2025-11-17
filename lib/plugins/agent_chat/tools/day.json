@@ -32,7 +32,7 @@
     "examples": [
       {
         "title": "创建倒计时纪念日",
-        "code": "const day = await Memento.plugins.day.createMemorialDay('新年', '2025-01-01', 'countdown', 7);\nsetResult(`纪念日已创建: ${day.title}`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst nextYear = timeInfo.year + 1;\nconst newYearDate = `${nextYear}-01-01`;\nconst day = await Memento.plugins.day.createMemorialDay('新年', newYearDate, 'countdown', 7);\nsetResult(`纪念日已创建: ${day.title}`);"
       },
       {
         "title": "创建正计时纪念日",
@@ -97,7 +97,7 @@
     "examples": [
       {
         "title": "计算距离新年的天数",
-        "code": "const days = await Memento.plugins.day.getDaysUntil('2025-01-01');\nsetResult(`距离新年还有 ${days} 天`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst nextYear = timeInfo.year + 1;\nconst newYearDate = `${nextYear}-01-01`;\nconst days = await Memento.plugins.day.getDaysUntil(newYearDate);\nsetResult(`距离${nextYear}年新年还有 ${days} 天`);"
       }
     ],
     "notes": "返回值可能为负数（表示已过去的天数）",

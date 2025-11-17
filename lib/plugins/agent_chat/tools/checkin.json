@@ -54,11 +54,11 @@
     "examples": [
       {
         "title": "获取本月签到历史",
-        "code": "const history = await Memento.plugins.checkin.getCheckinHistory('2025-01-01', '2025-01-31');\nsetResult(`本月共签到 ${history.length} 次`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst history = await Memento.plugins.checkin.getCheckinHistory(startDate, endDate);\nsetResult(`本月共签到 ${history.length} 次`);"
       },
       {
         "title": "获取今日签到历史",
-        "code": "const today = new Date().toISOString().split('T')[0];\nconst history = await Memento.plugins.checkin.getCheckinHistory(today, today);\nsetResult(JSON.stringify(history, null, 2));"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst history = await Memento.plugins.checkin.getCheckinHistory(today, today);\nsetResult(JSON.stringify(history, null, 2));"
       }
     ],
     "notes": "如果不提供日期参数，默认返回当天的签到记录；记录按签到时间排序",

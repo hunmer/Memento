@@ -223,12 +223,12 @@
         "comment": "搜索带\"工作\"标签的笔记"
       },
       {
-        "code": "const results3 = await Memento.plugins.notes.searchNotes(\n  '',\n  null,\n  '2025-01-13T00:00:00Z',\n  '2025-01-20T23:59:59Z'\n);\nsetResult(results3);",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst startTime = weekStart.toISOString().split('.')[0] + 'Z';\nconst endTime = weekEnd.toISOString().replace(/T.*/, 'T23:59:59Z');\nconst results3 = await Memento.plugins.notes.searchNotes('', null, startTime, endTime);\nsetResult(results3);",
         "comment": "搜索本周创建的笔记"
       },
       {
-        "code": "const results4 = await Memento.plugins.notes.searchNotes(\n  '会议',\n  ['工作', '产品'],\n  '2025-01-01T00:00:00Z',\n  '2025-01-31T23:59:59Z'\n);\nsetResult(results4);",
-        "comment": "组合搜索：关键词 + 标签 + 日期范围"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startTime = `${year}-${month}-01T00:00:00Z`;\nconst endTime = `${year}-${month}-${String(lastDay).padStart(2, '0')}T23:59:59Z`;\nconst results4 = await Memento.plugins.notes.searchNotes('会议', ['工作', '产品'], startTime, endTime);\nsetResult(results4);",
+        "comment": "组合搜索：关键词 + 标签 + 本月日期范围"
       }
     ],
     "notes": "标签过滤是\"或\"逻辑，任一标签匹配即可。日期范围基于创建时间。",

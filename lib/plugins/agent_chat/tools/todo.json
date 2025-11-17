@@ -150,8 +150,8 @@
         "comment": "创建简单任务"
       },
       {
-        "code": "const task2 = await Memento.plugins.todo.createTask(\n  '编写需求分析',\n  '详细描述项目需求和功能点',\n  '2025-01-15T09:00:00.000Z',\n  '2025-01-20T18:00:00.000Z',\n  'high',\n  '[\"工作\",\"文档\",\"紧急\"]'\n);\nsetResult(task2);",
-        "comment": "创建完整任务"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst startTime = today.toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst endDate = new Date(today);\nendDate.setDate(today.getDate() + 5);\nconst endTime = endDate.toISOString().replace(/T.*/, 'T18:00:00.000Z');\nconst task2 = await Memento.plugins.todo.createTask(\n  '编写需求分析',\n  '详细描述项目需求和功能点',\n  startTime,\n  endTime,\n  'high',\n  '[\"工作\",\"文档\",\"紧急\"]'\n);\nsetResult(task2);",
+        "comment": "创建完整任务（从今天到5天后）"
       }
     ],
     "notes": "日期参数必须使用 ISO 8601 格式字符串。tagsJson 需要传入 JSON 字符串格式。",

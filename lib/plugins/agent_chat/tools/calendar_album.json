@@ -46,7 +46,7 @@
     "examples": [
       {
         "title": "获取今日日记",
-        "code": "const entries = await Memento.plugins.calendar_album.getEntriesForDate('2025-01-15');\nsetResult(`今天有 ${entries.length} 条日记`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entries = await Memento.plugins.calendar_album.getEntriesForDate(today);\nsetResult(`今天有 ${entries.length} 条日记`);"
       }
     ],
     "notes": "日期格式必须为 YYYY-MM-DD",
@@ -76,7 +76,7 @@
       },
       {
         "title": "添加完整日记",
-        "code": "const entry = await Memento.plugins.calendar_album.addEntry('生日聚会', '今天过生日，很开心！', '2025-01-15', '生活,生日', '家', '😊', '晴天', 'photos/1.jpg,photos/2.jpg');\nsetResult('已添加生日日记');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entry = await Memento.plugins.calendar_album.addEntry('生日聚会', '今天过生日，很开心！', today, '生活,生日', '家', '😊', '晴天', 'photos/1.jpg,photos/2.jpg');\nsetResult('已添加生日日记');"
       }
     ],
     "notes": "标签和图片URL使用逗号分隔，不要有多余空格",
@@ -231,8 +231,8 @@
     },
     "examples": [
       {
-        "title": "获取一月份的照片",
-        "code": "const photos = await Memento.plugins.calendar_album.getPhotosByDateRange('2025-01-01', '2025-01-31');\nsetResult(JSON.stringify(photos, null, 2));"
+        "title": "获取本月的照片",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst photos = await Memento.plugins.calendar_album.getPhotosByDateRange(startDate, endDate);\nsetResult(JSON.stringify(photos, null, 2));"
       }
     ],
     "notes": "返回照片的日期、URL、所属日记ID和标题",

@@ -13,6 +13,7 @@ class SuggestedQuestionsDialog extends StatefulWidget {
 class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
   final _service = SuggestedQuestionsService();
   Map<String, List<String>>? _questions;
+  String? _selectedCategory;
   bool _isLoading = true;
 
   @override
@@ -27,6 +28,10 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
       if (mounted) {
         setState(() {
           _questions = questions;
+          // 默认选中第一个分类
+          if (questions.isNotEmpty) {
+            _selectedCategory = questions.keys.first;
+          }
           _isLoading = false;
         });
       }
@@ -36,10 +41,7 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('加载问题失败: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('加载问题失败: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -61,11 +63,16 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
           // 标题栏
           _buildHeader(),
 
+          // 分类按钮横向滚动列表
+          if (!_isLoading && _questions != null && _questions!.isNotEmpty)
+            _buildCategoryTabs(),
+
           // 内容区域
           Flexible(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _questions == null || _questions!.isEmpty
+            child:
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _questions == null || _questions!.isEmpty
                     ? _buildEmptyState()
                     : _buildQuestionsList(),
           ),
@@ -95,10 +102,7 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
           const SizedBox(width: 8),
           const Text(
             '你可以问',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const Spacer(),
           IconButton(
@@ -137,9 +141,10 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
     return ListView(
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(vertical: 8),
-      children: _questions!.entries.map((entry) {
-        return _buildCategorySection(entry.key, entry.value);
-      }).toList(),
+      children:
+          _questions!.entries.map((entry) {
+            return _buildCategorySection(entry.key, entry.value);
+          }).toList(),
     );
   }
 
@@ -184,16 +189,9 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                question,
-                style: const TextStyle(fontSize: 15),
-              ),
+              child: Text(question, style: const TextStyle(fontSize: 15)),
             ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 14,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey[400]),
           ],
         ),
       ),

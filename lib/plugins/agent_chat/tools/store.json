@@ -99,8 +99,8 @@
     },
     "examples": [
       {
-        "code": "const newProduct = await Memento.plugins.store.createProduct(\n  '迟到豁免卡',\n  '可豁免一次迟到',\n  30,\n  20,\n  '2025-01-01T00:00:00.000Z',\n  '2025-12-31T23:59:59.999Z',\n  60,\n  'assets/late_pass.png'\n);\nsetResult(newProduct);",
-        "comment": "创建新商品"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst newProduct = await Memento.plugins.store.createProduct(\n  '迟到豁免卡',\n  '可豁免一次迟到',\n  30,\n  20,\n  startDate,\n  endDate,\n  60,\n  'assets/late_pass.png'\n);\nsetResult(newProduct);",
+        "comment": "创建今年有效的新商品"
       }
     ],
     "notes": "创建后自动分配唯一 ID(时间戳字符串)",
@@ -171,8 +171,8 @@
     },
     "examples": [
       {
-        "code": "const updated = await Memento.plugins.store.updateProduct(\n  '1731473170123',\n  '免作业卡(升级版)',\n  '可免除两次作业',\n  100,\n  5,\n  '2025-01-01T00:00:00.000Z',\n  '2025-12-31T23:59:59.999Z',\n  60\n);\nsetResult(updated);",
-        "comment": "更新商品信息"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst updated = await Memento.plugins.store.updateProduct(\n  '1731473170123',\n  '免作业卡(升级版)',\n  '可免除两次作业',\n  100,\n  5,\n  startDate,\n  endDate,\n  60\n);\nsetResult(updated);",
+        "comment": "更新商品信息（今年有效期）"
       }
     ],
     "notes": "如果商品不存在会抛出异常,已兑换的用户物品不受影响(使用快照机制)",

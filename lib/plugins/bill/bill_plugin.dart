@@ -265,10 +265,16 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   // ==================== JS API 实现 ====================
 
-  /// 获取所有账户
+  /// 获取所有账户(不包含账单数据)
   Future<String> _jsGetAccounts() async {
     final accounts = _billController.accounts;
-    return jsonEncode(accounts.map((a) => a.toJson()).toList());
+    // 只返回账户基本信息,移除 bills 字段
+    final accountsJson = accounts.map((a) {
+      final json = a.toJson();
+      json.remove('bills');
+      return json;
+    }).toList();
+    return jsonEncode(accountsJson);
   }
 
   /// 创建账户

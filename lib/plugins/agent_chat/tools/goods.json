@@ -261,7 +261,7 @@
     "examples": [
       {
         "title": "添加使用记录",
-        "code": "const record = await Memento.plugins.goods.addUsageRecord('wh123', 'item456', '2025-01-15', '用于编程');\nsetResult(`已记录使用: ${record.date}`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst record = await Memento.plugins.goods.addUsageRecord('wh123', 'item456', today, '用于编程');\nsetResult(`已记录使用: ${record.date}`);"
       }
     ],
     "notes": "使用记录用于追踪物品的使用历史和频率",

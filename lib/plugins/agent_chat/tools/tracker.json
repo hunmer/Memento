@@ -237,7 +237,7 @@
         "comment": "添加当前记录"
       },
       {
-        "code": "// 添加指定时间的记录\nconst pastRecord = await Memento.plugins.tracker.recordData(\n  '1736950800000',\n  45,\n  '昨日补记',\n  '2025-01-14T20:00:00.000Z'\n);\nsetResult(pastRecord);",
+        "code": "// 添加昨日的记录\nconst timeInfo = await Memento.system.getCurrentTime();\nconst yesterday = new Date(timeInfo.timestamp);\nyesterday.setDate(yesterday.getDate() - 1);\nconst pastTime = yesterday.toISOString().replace(/T.*/, 'T20:00:00.000Z');\nconst pastRecord = await Memento.plugins.tracker.recordData(\n  '1736950800000',\n  45,\n  '昨日补记',\n  pastTime\n);\nsetResult(pastRecord);",
         "comment": "补记历史数据"
       }
     ],
