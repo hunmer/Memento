@@ -16,11 +16,7 @@ class ToolDetailDialog extends StatefulWidget {
   final MessageDetail detail;
   final List<ToolCallStep>? toolCallSteps;
 
-  const ToolDetailDialog({
-    super.key,
-    required this.detail,
-    this.toolCallSteps,
-  });
+  const ToolDetailDialog({super.key, required this.detail, this.toolCallSteps});
 
   @override
   State<ToolDetailDialog> createState() => _ToolDetailDialogState();
@@ -45,9 +41,7 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.85,
         height: MediaQuery.of(context).size.height * 0.8,
@@ -61,10 +55,7 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
                 const SizedBox(width: 8),
                 const Text(
                   '工具调用详情',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 IconButton(
@@ -97,7 +88,7 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
                   ],
                 ),
                 tabs: const [
-                  Tab(text: '用户输入'),
+                  Tab(text: 'AI输入'),
                   Tab(text: '思考过程'),
                   Tab(text: '工具调用'),
                   Tab(text: '最终回复'),
@@ -136,12 +127,12 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
     );
   }
 
-  /// 用户输入Tab
+  /// AI输入Tab
   Widget _buildUserPromptTab() {
     return _buildContentTab(
-      content: widget.detail.userPrompt,
-      icon: Icons.person,
-      emptyText: '无用户输入',
+      content: widget.detail.fullAIInput,
+      icon: Icons.input,
+      emptyText: '无AI输入数据',
     );
   }
 
@@ -175,17 +166,15 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
               child: IconButton(
                 icon: const Icon(Icons.copy, size: 18),
                 tooltip: '复制工具调用数据',
-                onPressed: () => _copyToClipboard(
-                  widget.detail.toolCallData.toString(),
-                  '工具调用数据',
-                ),
+                onPressed:
+                    () => _copyToClipboard(
+                      widget.detail.toolCallData.toString(),
+                      '工具调用数据',
+                    ),
               ),
             ),
             // 工具调用步骤
-            ToolCallSteps(
-              steps: widget.toolCallSteps!,
-              isGenerating: false,
-            ),
+            ToolCallSteps(steps: widget.toolCallSteps!, isGenerating: false),
           ],
         ),
       ),
@@ -250,13 +239,7 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
         children: [
           Icon(icon, size: 48, color: Colors.grey[400]),
           const SizedBox(height: 16),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
+          Text(text, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
         ],
       ),
     );

@@ -5,6 +5,7 @@ import '../../core/config_manager.dart';
 import '../../core/js_bridge/js_bridge_manager.dart';
 import 'controllers/conversation_controller.dart';
 import 'screens/conversation_list_screen/conversation_list_screen.dart';
+import 'screens/agent_chat_settings_screen.dart';
 import 'services/tool_service.dart';
 import '../openai/openai_plugin.dart';
 // import 'l10n/agent_chat_localizations.dart';
@@ -88,6 +89,11 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
   String? getPluginName(context) {
     // TODO: 集成国际化后返回翻译后的名称
     return 'Agent Chat';
+  }
+
+  @override
+  Widget buildSettingsView(BuildContext context) {
+    return AgentChatSettingsScreen(plugin: this);
   }
 }
 
