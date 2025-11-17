@@ -30,13 +30,27 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
 
     try {
       final providers = await _controller.getProviders();
+      final defaultProviders = _controller.getDefaultProviders();
+
       if (providers.isEmpty) {
         // 如果没有服务商，添加默认服务商
-        final defaultProviders = _controller.getDefaultProviders();
         await _controller.saveProviders(defaultProviders);
         _providers = defaultProviders;
       } else {
-        _providers = providers;
+        // 合并逻辑：添加默认列表中存在但用户数据中缺失的服务商
+        final existingIds = providers.map((p) => p.id).toSet();
+        final missingProviders = defaultProviders
+            .where((defaultProvider) => !existingIds.contains(defaultProvider.id))
+            .toList();
+
+        if (missingProviders.isNotEmpty) {
+          // 将缺失的默认服务商添加到列表末尾
+          final mergedProviders = [...providers, ...missingProviders];
+          await _controller.saveProviders(mergedProviders);
+          _providers = mergedProviders;
+        } else {
+          _providers = providers;
+        }
       }
     } catch (e) {
       _showErrorSnackBar(

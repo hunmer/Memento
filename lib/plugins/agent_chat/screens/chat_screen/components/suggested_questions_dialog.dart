@@ -116,6 +116,53 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
     );
   }
 
+  /// 构建分类标签栏
+  Widget _buildCategoryTabs() {
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        border: Border(
+          bottom: BorderSide(color: Colors.grey[200]!, width: 1),
+        ),
+      ),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        itemCount: _questions!.length,
+        itemBuilder: (context, index) {
+          final categoryKey = _questions!.keys.elementAt(index);
+          final categoryName = _service.getCategoryName(categoryKey);
+          final isSelected = _selectedCategory == categoryKey;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            child: FilterChip(
+              label: Text(categoryName),
+              selected: isSelected,
+              onSelected: (selected) {
+                setState(() {
+                  _selectedCategory = categoryKey;
+                });
+              },
+              backgroundColor: Colors.white,
+              selectedColor: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+              checkmarkColor: Theme.of(context).primaryColor,
+              labelStyle: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Theme.of(context).primaryColor : Colors.grey[700],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   /// 构建空状态
   Widget _buildEmptyState() {
     return Center(
@@ -136,47 +183,23 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
     );
   }
 
-  /// 构建问题列表
+  /// 构建问题列表（只显示选中分类的问题）
   Widget _buildQuestionsList() {
-    return ListView(
+    if (_selectedCategory == null) return const SizedBox.shrink();
+
+    final questions = _questions![_selectedCategory] ?? [];
+
+    return ListView.separated(
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(vertical: 8),
-      children:
-          _questions!.entries.map((entry) {
-            return _buildCategorySection(entry.key, entry.value);
-          }).toList(),
-    );
-  }
-
-  /// 构建分类区域
-  Widget _buildCategorySection(String categoryKey, List<String> questions) {
-    final categoryName = _service.getCategoryName(categoryKey);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 分类标题
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            categoryName,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
-            ),
-          ),
-        ),
-
-        // 问题列表
-        ...questions.map((question) => _buildQuestionItem(question)),
-
-        // 分隔线
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Divider(color: Colors.grey[200], height: 1),
-        ),
-      ],
+      itemCount: questions.length,
+      separatorBuilder: (context, index) => Divider(
+        color: Colors.grey[200],
+        height: 1,
+        indent: 16,
+        endIndent: 16,
+      ),
+      itemBuilder: (context, index) => _buildQuestionItem(questions[index]),
     );
   }
 
