@@ -52,6 +52,9 @@ class ChatController extends ChangeNotifier {
   /// 选中的工具模板
   SavedToolTemplate? _selectedToolTemplate;
 
+  /// 消息ID到上下文消息的映射（用于保存详细数据）
+  final Map<String, List<ChatCompletionMessage>> _contextMessagesCache = {};
+
   ChatController({
     required this.conversation,
     required this.messageService,
@@ -337,6 +340,9 @@ class ChatController extends ChangeNotifier {
               : toolBriefPrompt,
         );
       }
+
+      // 保存上下文消息（用于后续保存详细数据）
+      _contextMessagesCache[aiMessageId] = List.from(contextMessages);
 
       // 处理文件（仅支持图片vision模式）
       final imageFiles =
@@ -1160,27 +1166,88 @@ class ChatController extends ChangeNotifier {
         }
       }
 
-      // 提取思考过程（去除工具结果和最终回复部分）
+      // 提取思考过程（去除工具调用JSON、工具结果和最终回复部分）
       String thinkingProcess = aiMessage.content;
+
+      // 1. 去除工具执行结果之后的内容
       final toolResultIndex = thinkingProcess.indexOf('[工具执行结果]');
       if (toolResultIndex != -1) {
         thinkingProcess = thinkingProcess.substring(0, toolResultIndex).trim();
       }
+
+      // 2. 去除工具调用JSON（{"steps": ...} 或 ```json...```）
+      // 匹配 ```json ... ``` 代码块
+      thinkingProcess = thinkingProcess.replaceAll(
+        RegExp(r'```json\s*\{[\s\S]*?\}\s*```', multiLine: true),
+        '',
+      );
+
+      // 匹配直接的 {"steps": [...]} JSON
+      thinkingProcess = thinkingProcess.replaceAll(
+        RegExp(r'\{\s*"steps"\s*:\s*\[[\s\S]*?\]\s*\}', multiLine: true),
+        '',
+      );
+
+      // 清理多余的空行
+      thinkingProcess = thinkingProcess.replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
+
+      // 格式化完整AI输入
+      final fullAIInput = _formatContextMessages(messageId);
 
       // 保存详细数据
       await messageDetailService.saveDetail(
         messageId: messageId,
         conversationId: conversation.id,
         userPrompt: userPrompt,
+        fullAIInput: fullAIInput,
         thinkingProcess: thinkingProcess,
         toolCallData: aiMessage.toolCall?.toJson(),
         finalReply: finalReply,
       );
 
+      // 清除缓存的上下文消息
+      _contextMessagesCache.remove(messageId);
+
       debugPrint('💾 消息详细数据已保存: ${messageId.substring(0, 8)}');
     } catch (e) {
       debugPrint('❌ 保存消息详细数据失败: $e');
     }
+  }
+
+  /// 格式化上下文消息为可读字符串
+  String _formatContextMessages(String messageId) {
+    final contextMessages = _contextMessagesCache[messageId];
+    if (contextMessages == null || contextMessages.isEmpty) {
+      return '(无上下文消息)';
+    }
+
+    final buffer = StringBuffer();
+    buffer.writeln('# AI完整输入上下文\n');
+
+    for (int i = 0; i < contextMessages.length; i++) {
+      final msg = contextMessages[i];
+      final role = msg.role.toString().split('.').last; // 从枚举获取字符串
+
+      buffer.writeln('## 消息 ${i + 1}: $role');
+      buffer.writeln();
+
+      // 提取消息内容
+      final content = msg.content;
+      if (content is String) {
+        buffer.writeln(content);
+      } else if (content is ChatCompletionUserMessageContent) {
+        // 处理用户消息内容（可能包含图片等）
+        buffer.writeln(content.toString());
+      } else {
+        buffer.writeln('(复杂消息类型: ${content.runtimeType})');
+      }
+
+      buffer.writeln();
+      buffer.writeln('---');
+      buffer.writeln();
+    }
+
+    return buffer.toString();
   }
 
   // ========== 工具模板执行 ==========

@@ -293,6 +293,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   child: MessageBubble(
                                     message: message,
                                     hasAgent: _controller.currentAgent != null,
+                                    storage: widget.storage,
                                     onEdit: (messageId, newContent) async {
                                       await _controller.editMessage(
                                         messageId,

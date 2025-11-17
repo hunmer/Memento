@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../models/chat_message.dart';
 import '../../../services/token_counter_service.dart';
+import '../../../services/message_detail_service.dart';
+import '../../../../../core/storage/storage_manager.dart';
 import 'markdown_content.dart';
+import 'tool_detail_dialog.dart';
 import 'tool_call_steps.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -16,6 +19,7 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(String messageId)? onRegenerate;
   final Future<void> Function(ChatMessage message)? onSaveTool;
   final bool hasAgent;
+  final StorageManager? storage;
 
   const MessageBubble({
     super.key,
@@ -25,6 +29,7 @@ class MessageBubble extends StatelessWidget {
     this.onRegenerate,
     this.onSaveTool,
     this.hasAgent = true,
+    this.storage,
   });
 
   @override
@@ -343,6 +348,9 @@ class MessageBubble extends StatelessWidget {
           case 'save_tool':
             onSaveTool?.call(message);
             break;
+          case 'view_details':
+            _showToolDetailDialog(context);
+            break;
         }
       },
       itemBuilder:
@@ -387,6 +395,17 @@ class MessageBubble extends StatelessWidget {
                     Icon(Icons.save, size: 18, color: Colors.blue),
                     SizedBox(width: 8),
                     Text('保存工具', style: TextStyle(color: Colors.blue)),
+                  ],
+                ),
+              ),
+            if (!message.isUser && isToolCallMessage && storage != null)
+              const PopupMenuItem(
+                value: 'view_details',
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 18, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text('查看详情', style: TextStyle(color: Colors.blue)),
                   ],
                 ),
               ),
@@ -440,6 +459,64 @@ class MessageBubble extends StatelessWidget {
             ],
           ),
     );
+  }
+
+  /// 显示工具调用详情对话框
+  Future<void> _showToolDetailDialog(BuildContext context) async {
+    if (storage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('无法加载详情数据')),
+      );
+      return;
+    }
+
+    // 显示加载指示器
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      // 加载消息详细数据
+      final detailService = MessageDetailService(storage: storage!);
+      final detail = await detailService.loadDetail(message.id);
+
+      // 关闭加载指示器
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (detail == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('未找到详细数据，可能此消息是在更新前创建的')),
+          );
+        }
+        return;
+      }
+
+      // 显示详情对话框
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => ToolDetailDialog(
+            detail: detail,
+            toolCallSteps: message.toolCall?.steps,
+          ),
+        );
+      }
+    } catch (e) {
+      // 关闭加载指示器
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('加载详情失败: $e')),
+        );
+      }
+    }
   }
 
   /// 格式化时间

@@ -4,9 +4,13 @@ import '../../../controllers/chat_controller.dart';
 import '../../../models/chat_command.dart';
 import '../../../models/saved_tool_template.dart';
 import '../../../../../utils/file_picker_helper.dart';
+import '../../../services/speech/speech_recognition_config.dart';
+import '../../../services/speech/tencent_asr_service.dart';
 import 'suggested_questions_dialog.dart';
 import 'command_selector.dart';
 import 'tool_template_selector.dart';
+import 'voice_input_dialog.dart';
+import '../../../agent_chat_plugin.dart';
 
 /// 消息输入框组件
 class MessageInput extends StatefulWidget {
@@ -202,6 +206,15 @@ class _MessageInputState extends State<MessageInput> {
                   icon: const Icon(Icons.attach_file),
                   onPressed: _showAttachmentMenu,
                   tooltip: '添加附件',
+                ),
+
+                // 语音按钮
+                IconButton(
+                  icon: const Icon(Icons.mic),
+                  onPressed: widget.controller.currentAgent != null
+                      ? _showVoiceInputDialog
+                      : null,
+                  tooltip: '语音输入',
                 ),
 
                 // 输入框
@@ -517,6 +530,80 @@ class _MessageInputState extends State<MessageInput> {
 
       // 聚焦到输入框
       _focusNode.requestFocus();
+    }
+  }
+
+  /// 显示语音输入对话框
+  Future<void> _showVoiceInputDialog() async {
+    try {
+      // 获取插件实例
+      final plugin = AgentChatPlugin.instance;
+
+      // 读取配置
+      final settings = plugin.settings;
+      final asrConfigMap = settings['asrConfig'] as Map<String, dynamic>?;
+
+      if (asrConfigMap == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('请先在设置中配置腾讯云语音识别服务'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      // 创建配置对象
+      final asrConfig = TencentASRConfig.fromJson(asrConfigMap);
+
+      // 验证配置
+      if (!asrConfig.isValid()) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('语音识别配置无效，请检查设置'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // 创建语音识别服务
+      final recognitionService = TencentASRService(config: asrConfig);
+
+      // 显示语音输入对话框
+      if (mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => VoiceInputDialog(
+            recognitionService: recognitionService,
+            onRecognitionComplete: (text) {
+              // 将识别的文本填充到输入框
+              _textController.text = text;
+              widget.controller.setInputText(text);
+
+              // 聚焦到输入框
+              _focusNode.requestFocus();
+            },
+          ),
+        );
+      }
+
+      // 释放服务资源
+      recognitionService.dispose();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('打开语音输入失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

@@ -18,6 +18,7 @@ class MessageDetailService {
     required String messageId,
     required String conversationId,
     required String userPrompt,
+    required String fullAIInput,
     required String thinkingProcess,
     required Map<String, dynamic>? toolCallData,
     required String finalReply,
@@ -27,6 +28,7 @@ class MessageDetailService {
         messageId: messageId,
         conversationId: conversationId,
         userPrompt: userPrompt,
+        fullAIInput: fullAIInput,
         thinkingProcess: thinkingProcess,
         toolCallData: toolCallData,
         finalReply: finalReply,
@@ -109,8 +111,11 @@ class MessageDetail {
   /// 会话ID
   final String conversationId;
 
-  /// 用户输入
+  /// 用户原始输入
   final String userPrompt;
+
+  /// AI接收到的完整输入（包括系统提示词、上下文消息等）
+  final String fullAIInput;
 
   /// AI思考过程
   final String thinkingProcess;
@@ -128,6 +133,7 @@ class MessageDetail {
     required this.messageId,
     required this.conversationId,
     required this.userPrompt,
+    required this.fullAIInput,
     required this.thinkingProcess,
     this.toolCallData,
     required this.finalReply,
@@ -139,6 +145,7 @@ class MessageDetail {
       'messageId': messageId,
       'conversationId': conversationId,
       'userPrompt': userPrompt,
+      'fullAIInput': fullAIInput,
       'thinkingProcess': thinkingProcess,
       'toolCallData': toolCallData,
       'finalReply': finalReply,
@@ -151,6 +158,7 @@ class MessageDetail {
       messageId: json['messageId'] as String,
       conversationId: json['conversationId'] as String,
       userPrompt: json['userPrompt'] as String,
+      fullAIInput: json['fullAIInput'] as String? ?? json['userPrompt'] as String, // 向后兼容
       thinkingProcess: json['thinkingProcess'] as String,
       toolCallData: json['toolCallData'] as Map<String, dynamic>?,
       finalReply: json['finalReply'] as String,
