@@ -444,8 +444,27 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取指定日期范围的日记
   /// 参数: {"startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD"}
   /// 返回: JSON 字符串，包含日记列表
-  Future<String> _jsGetDiaries(String startDate, String endDate) async {
+  Future<String> _jsGetDiaries(Map<String, dynamic> params) async {
     try {
+      // 验证必需参数
+      if (!params.containsKey('startDate')) {
+        return jsonEncode({
+          'error': '缺少必需参数: startDate',
+          'total': 0,
+          'diaries': [],
+        });
+      }
+      if (!params.containsKey('endDate')) {
+        return jsonEncode({
+          'error': '缺少必需参数: endDate',
+          'total': 0,
+          'diaries': [],
+        });
+      }
+
+      final startDate = params['startDate'] as String;
+      final endDate = params['endDate'] as String;
+
       final start = DateTime.parse(startDate);
       final end = DateTime.parse(endDate);
 
@@ -484,10 +503,19 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取指定日期的日记
-  /// 参数: date (YYYY-MM-DD 格式)
+  /// 参数: {"date": "YYYY-MM-DD"}
   /// 返回: JSON 字符串，包含日记内容
-  Future<String> _jsGetDiary(String date) async {
+  Future<String> _jsGetDiary(Map<String, dynamic> params) async {
     try {
+      // 验证必需参数
+      if (!params.containsKey('date')) {
+        return jsonEncode({
+          'exists': false,
+          'error': '缺少必需参数: date',
+        });
+      }
+
+      final date = params['date'] as String;
       final dateTime = DateTime.parse(date);
       final entry = await DiaryUtils.loadDiaryEntry(dateTime);
 
@@ -517,15 +545,29 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 保存日记
-  /// 参数: date, title, content, mood (可选)
+  /// 参数: {"date": "YYYY-MM-DD", "content": "日记内容", "title": "标题（可选）", "mood": "心情（可选）"}
   /// 返回: JSON 字符串，包含成功状态
-  Future<String> _jsSaveDiary(
-    String date,
-    String title,
-    String content, [
-    String? mood,
-  ]) async {
+  Future<String> _jsSaveDiary(Map<String, dynamic> params) async {
     try {
+      // 验证必需参数
+      if (!params.containsKey('date')) {
+        return jsonEncode({
+          'success': false,
+          'error': '缺少必需参数: date',
+        });
+      }
+      if (!params.containsKey('content')) {
+        return jsonEncode({
+          'success': false,
+          'error': '缺少必需参数: content',
+        });
+      }
+
+      final date = params['date'] as String;
+      final content = params['content'] as String;
+      final title = params['title'] as String? ?? '';  // 可选，默认为空字符串
+      final mood = params['mood'] as String?;  // 可选，默认为 null
+
       final dateTime = DateTime.parse(date);
 
       await DiaryUtils.saveDiaryEntry(
@@ -549,10 +591,19 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除日记
-  /// 参数: date (YYYY-MM-DD 格式)
+  /// 参数: {"date": "YYYY-MM-DD"}
   /// 返回: JSON 字符串，包含成功状态
-  Future<String> _jsDeleteDiary(String date) async {
+  Future<String> _jsDeleteDiary(Map<String, dynamic> params) async {
     try {
+      // 验证必需参数
+      if (!params.containsKey('date')) {
+        return jsonEncode({
+          'success': false,
+          'error': '缺少必需参数: date',
+        });
+      }
+
+      final date = params['date'] as String;
       final dateTime = DateTime.parse(date);
       final success = await DiaryUtils.deleteDiaryEntry(dateTime);
 
@@ -570,8 +621,9 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取今日统计
+  /// 参数: {} (空对象，保持接口一致性)
   /// 返回: JSON 字符串，包含今日字数
-  Future<String> _jsGetTodayStats() async {
+  Future<String> _jsGetTodayStats(Map<String, dynamic> params) async {
     try {
       final wordCount = await getTodayWordCount();
       final today = DateTime.now();
@@ -589,8 +641,9 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取本月统计
+  /// 参数: {} (空对象，保持接口一致性)
   /// 返回: JSON 字符串，包含本月字数和进度
-  Future<String> _jsGetMonthStats() async {
+  Future<String> _jsGetMonthStats(Map<String, dynamic> params) async {
     try {
       final monthWordCount = await getMonthWordCount();
       final progress = await getMonthProgress();

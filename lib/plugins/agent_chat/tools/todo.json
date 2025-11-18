@@ -1,19 +1,25 @@
 {
   "todo_getTasks": {
     "title": "获取任务列表",
-    "description": "查询待办任务，支持按状态和优先级筛选。返回任务对象数组。",
+    "description": "查询待办任务,支持按状态和优先级筛选。返回任务对象数组。",
     "parameters": [
       {
-        "name": "status",
-        "type": "string",
-        "optional": true,
-        "description": "任务状态：'todo'(待办) | 'inProgress'(进行中) | 'in_progress'(进行中) | 'done'(已完成)"
-      },
-      {
-        "name": "priority",
-        "type": "string",
-        "optional": true,
-        "description": "优先级：'low'(低) | 'medium'(中) | 'high'(高)"
+        "name": "params",
+        "type": "object",
+        "optional": false,
+        "description": "查询参数对象",
+        "properties": {
+          "status": {
+            "type": "string",
+            "optional": true,
+            "description": "任务状态:'todo'(待办) | 'inProgress'(进行中) | 'in_progress'(进行中) | 'done'(已完成)"
+          },
+          "priority": {
+            "type": "string",
+            "optional": true,
+            "description": "优先级:'low'(低) | 'medium'(中) | 'high'(高)"
+          }
+        }
       }
     ],
     "returns": {
@@ -22,23 +28,23 @@
     },
     "examples": [
       {
-        "code": "const allTasks = await Memento.plugins.todo.getTasks();\nsetResult(allTasks);",
+        "code": "const allTasks = await Memento.plugins.todo.getTasks({});\nsetResult(allTasks);",
         "comment": "获取所有任务"
       },
       {
-        "code": "const todoTasks = await Memento.plugins.todo.getTasks('todo');\nsetResult(todoTasks);",
+        "code": "const todoTasks = await Memento.plugins.todo.getTasks({ status: 'todo' });\nsetResult(todoTasks);",
         "comment": "获取待办任务"
       },
       {
-        "code": "const highPriorityTasks = await Memento.plugins.todo.getTasks(null, 'high');\nsetResult(highPriorityTasks);",
+        "code": "const highPriorityTasks = await Memento.plugins.todo.getTasks({ priority: 'high' });\nsetResult(highPriorityTasks);",
         "comment": "获取高优先级任务"
       },
       {
-        "code": "const inProgressHigh = await Memento.plugins.todo.getTasks('inProgress', 'high');\nsetResult(inProgressHigh);",
+        "code": "const inProgressHigh = await Memento.plugins.todo.getTasks({ status: 'inProgress', priority: 'high' });\nsetResult(inProgressHigh);",
         "comment": "获取进行中的高优先级任务"
       }
     ],
-    "notes": "所有插件方法都是异步的，必须使用 await。返回值为对象。",
+    "notes": "所有插件方法都是异步的,必须使用 await。返回值为对象。",
     "enabled": true
   },
   "todo_getTask": {
@@ -46,19 +52,26 @@
     "description": "根据任务ID获取单个任务的详细信息。",
     "parameters": [
       {
-        "name": "taskId",
-        "type": "string",
+        "name": "params",
+        "type": "object",
         "optional": false,
-        "description": "任务 ID"
+        "description": "查询参数对象",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "optional": false,
+            "description": "任务 ID"
+          }
+        }
       }
     ],
     "returns": {
       "type": "Promise<Object>",
-      "description": "任务对象，失败时返回 {error: '...'}"
+      "description": "任务对象,失败时返回 {error: '...'}"
     },
     "examples": [
       {
-        "code": "const task = await Memento.plugins.todo.getTask('550e8400-e29b-41d4-a716-446655440000');\nsetResult(task);",
+        "code": "const task = await Memento.plugins.todo.getTask({ taskId: '550e8400-e29b-41d4-a716-446655440000' });\nsetResult(task);",
         "comment": "获取指定任务的详情"
       }
     ],
@@ -68,31 +81,45 @@
   "todo_getTodayTasks": {
     "title": "获取今日任务",
     "description": "获取今天截止或今天开始的所有任务。",
-    "parameters": [],
+    "parameters": [
+      {
+        "name": "params",
+        "type": "object",
+        "optional": false,
+        "description": "参数对象(无需实际参数,但保持接口一致性)"
+      }
+    ],
     "returns": {
       "type": "Promise<Array>",
       "description": "今日任务对象数组"
     },
     "examples": [
       {
-        "code": "const tasks = await Memento.plugins.todo.getTodayTasks();\nsetResult(tasks);",
+        "code": "const tasks = await Memento.plugins.todo.getTodayTasks({});\nsetResult(tasks);",
         "comment": "获取今日任务"
       }
     ],
-    "notes": "无需参数，返回今天截止或今天开始的所有任务。",
+    "notes": "无需参数,返回今天截止或今天开始的所有任务。",
     "enabled": true
   },
   "todo_getOverdueTasks": {
     "title": "获取过期任务",
     "description": "获取截止日期已过且未完成的任务。",
-    "parameters": [],
+    "parameters": [
+      {
+        "name": "params",
+        "type": "object",
+        "optional": false,
+        "description": "参数对象(无需实际参数,但保持接口一致性)"
+      }
+    ],
     "returns": {
       "type": "Promise<Array>",
       "description": "过期任务对象数组"
     },
     "examples": [
       {
-        "code": "const tasks = await Memento.plugins.todo.getOverdueTasks();\nsetResult(tasks);",
+        "code": "const tasks = await Memento.plugins.todo.getOverdueTasks({});\nsetResult(tasks);",
         "comment": "获取过期任务"
       }
     ],
@@ -101,43 +128,45 @@
   },
   "todo_createTask": {
     "title": "创建任务",
-    "description": "创建新的待办任务，支持设置标题、描述、日期、优先级和标签。",
+    "description": "创建新的待办任务,支持设置标题、描述、日期、优先级和标签。",
     "parameters": [
       {
-        "name": "title",
-        "type": "string",
+        "name": "params",
+        "type": "object",
         "optional": false,
-        "description": "任务标题"
-      },
-      {
-        "name": "description",
-        "type": "string",
-        "optional": true,
-        "description": "任务描述"
-      },
-      {
-        "name": "startDate",
-        "type": "string",
-        "optional": true,
-        "description": "开始日期，ISO 8601 格式字符串，例如 '2025-01-15T00:00:00.000Z'"
-      },
-      {
-        "name": "dueDate",
-        "type": "string",
-        "optional": true,
-        "description": "截止日期，ISO 8601 格式字符串"
-      },
-      {
-        "name": "priority",
-        "type": "string",
-        "optional": true,
-        "description": "优先级：'low' | 'medium' | 'high'，默认 'medium'"
-      },
-      {
-        "name": "tagsJson",
-        "type": "string",
-        "optional": true,
-        "description": "标签数组的 JSON 字符串，例如 '[\"工作\",\"紧急\"]'"
+        "description": "任务创建参数对象",
+        "properties": {
+          "title": {
+            "type": "string",
+            "optional": false,
+            "description": "任务标题(必需)"
+          },
+          "description": {
+            "type": "string",
+            "optional": true,
+            "description": "任务描述"
+          },
+          "startDate": {
+            "type": "string",
+            "optional": true,
+            "description": "开始日期,ISO 8601 格式字符串,例如 '2025-01-15T00:00:00.000Z'"
+          },
+          "dueDate": {
+            "type": "string",
+            "optional": true,
+            "description": "截止日期,ISO 8601 格式字符串"
+          },
+          "priority": {
+            "type": "string",
+            "optional": true,
+            "description": "优先级:'low' | 'medium' | 'high',默认 'medium'"
+          },
+          "tags": {
+            "type": "string",
+            "optional": true,
+            "description": "标签数组的 JSON 字符串,例如 '[\"工作\",\"紧急\"]'"
+          }
+        }
       }
     ],
     "returns": {
@@ -146,32 +175,38 @@
     },
     "examples": [
       {
-        "code": "const task1 = await Memento.plugins.todo.createTask('完成项目文档');\nsetResult(task1);",
+        "code": "const task1 = await Memento.plugins.todo.createTask({ title: '完成项目文档' });\nsetResult(task1);",
         "comment": "创建简单任务"
       },
       {
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst startTime = today.toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst endDate = new Date(today);\nendDate.setDate(today.getDate() + 5);\nconst endTime = endDate.toISOString().replace(/T.*/, 'T18:00:00.000Z');\nconst task2 = await Memento.plugins.todo.createTask(\n  '编写需求分析',\n  '详细描述项目需求和功能点',\n  startTime,\n  endTime,\n  'high',\n  '[\"工作\",\"文档\",\"紧急\"]'\n);\nsetResult(task2);",
-        "comment": "创建完整任务（从今天到5天后）"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst startTime = today.toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst endDate = new Date(today);\nendDate.setDate(today.getDate() + 5);\nconst endTime = endDate.toISOString().replace(/T.*/, 'T18:00:00.000Z');\nconst task2 = await Memento.plugins.todo.createTask({\n  title: '编写需求分析',\n  description: '详细描述项目需求和功能点',\n  startDate: startTime,\n  dueDate: endTime,\n  priority: 'high',\n  tags: '[\"工作\",\"文档\",\"紧急\"]'\n});\nsetResult(task2);",
+        "comment": "创建完整任务(从今天到5天后)"
       }
     ],
-    "notes": "日期参数必须使用 ISO 8601 格式字符串。tagsJson 需要传入 JSON 字符串格式。",
+    "notes": "日期参数必须使用 ISO 8601 格式字符串。tags 需要传入 JSON 字符串格式。",
     "enabled": true
   },
   "todo_updateTask": {
     "title": "更新任务",
-    "description": "更新现有任务的属性，支持更新标题、描述、状态、优先级、日期和标签。",
+    "description": "更新现有任务的属性,支持更新标题、描述、状态、优先级、日期和标签。",
     "parameters": [
       {
-        "name": "taskId",
-        "type": "string",
+        "name": "params",
+        "type": "object",
         "optional": false,
-        "description": "任务 ID"
-      },
-      {
-        "name": "updateJson",
-        "type": "string",
-        "optional": false,
-        "description": "更新内容的 JSON 字符串，可包含字段：title, description, priority, status, startDate, dueDate, tags"
+        "description": "任务更新参数对象",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "optional": false,
+            "description": "任务 ID(必需)"
+          },
+          "updates": {
+            "type": "object",
+            "optional": false,
+            "description": "更新内容对象(必需),可包含字段:title, description, priority, status, startDate, dueDate, tags"
+          }
+        }
       }
     ],
     "returns": {
@@ -180,15 +215,15 @@
     },
     "examples": [
       {
-        "code": "const updated = await Memento.plugins.todo.updateTask(\n  'task-id-here',\n  JSON.stringify({\n    title: '新标题',\n    priority: 'high',\n    tags: ['工作', '紧急', '重要']\n  })\n);\nsetResult(updated);",
+        "code": "const updated = await Memento.plugins.todo.updateTask({\n  taskId: 'task-id-here',\n  updates: {\n    title: '新标题',\n    priority: 'high',\n    tags: ['工作', '紧急', '重要']\n  }\n});\nsetResult(updated);",
         "comment": "更新任务标题和优先级"
       },
       {
-        "code": "const updated2 = await Memento.plugins.todo.updateTask(\n  'task-id-here',\n  JSON.stringify({ status: 'inProgress' })\n);\nsetResult(updated2);",
+        "code": "const updated2 = await Memento.plugins.todo.updateTask({\n  taskId: 'task-id-here',\n  updates: { status: 'inProgress' }\n});\nsetResult(updated2);",
         "comment": "更新任务状态"
       }
     ],
-    "notes": "可更新字段：title(标题), description(描述), priority(优先级), status(状态), startDate(开始日期), dueDate(截止日期), tags(标签数组)。status 可选值：'todo', 'inProgress', 'done'。",
+    "notes": "可更新字段:title(标题), description(描述), priority(优先级), status(状态), startDate(开始日期), dueDate(截止日期), tags(标签数组)。status 可选值:'todo', 'inProgress', 'done'。",
     "enabled": true
   },
   "todo_deleteTask": {
@@ -196,34 +231,48 @@
     "description": "根据任务ID删除指定的任务。",
     "parameters": [
       {
-        "name": "taskId",
-        "type": "string",
+        "name": "params",
+        "type": "object",
         "optional": false,
-        "description": "任务 ID"
+        "description": "删除参数对象",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "optional": false,
+            "description": "任务 ID(必需)"
+          }
+        }
       }
     ],
     "returns": {
       "type": "Promise<Object>",
-      "description": "成功时返回 {success: true, taskId: '...'}，失败时返回 {error: '...'}"
+      "description": "成功时返回 {success: true, taskId: '...'},失败时返回 {error: '...'}"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.todo.deleteTask('task-id-here');\nsetResult(result);",
+        "code": "const result = await Memento.plugins.todo.deleteTask({ taskId: 'task-id-here' });\nsetResult(result);",
         "comment": "删除任务"
       }
     ],
-    "notes": "删除操作不可恢复，请谨慎使用。",
+    "notes": "删除操作不可恢复,请谨慎使用。",
     "enabled": true
   },
   "todo_completeTask": {
     "title": "完成任务",
-    "description": "标记任务为已完成，会自动停止计时器并完成所有子任务。",
+    "description": "标记任务为已完成,会自动停止计时器并完成所有子任务。",
     "parameters": [
       {
-        "name": "taskId",
-        "type": "string",
+        "name": "params",
+        "type": "object",
         "optional": false,
-        "description": "任务 ID"
+        "description": "完成参数对象",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "optional": false,
+            "description": "任务 ID(必需)"
+          }
+        }
       }
     ],
     "returns": {
@@ -232,11 +281,11 @@
     },
     "examples": [
       {
-        "code": "const task = await Memento.plugins.todo.completeTask('task-id-here');\nsetResult(task);",
+        "code": "const task = await Memento.plugins.todo.completeTask({ taskId: 'task-id-here' });\nsetResult(task);",
         "comment": "完成任务"
       }
     ],
-    "notes": "会自动将 status 设置为 'done'，停止计时器，并完成所有子任务。",
+    "notes": "会自动将 status 设置为 'done',停止计时器,并完成所有子任务。",
     "enabled": true
   }
 }

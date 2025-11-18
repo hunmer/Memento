@@ -103,9 +103,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取指定日期的活动列表
-  /// 参数: date (可选, YYYY-MM-DD 格式, 默认今天)
-  Future<String> _jsGetActivities([String? dateStr]) async {
+  /// 参数: params - { date?: string } (YYYY-MM-DD 格式, 默认今天)
+  Future<String> _jsGetActivities(Map<String, dynamic> params) async {
     try {
+      final dateStr = params['date'] as String?;
       final date = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
       final activities = await _activityService.getActivitiesForDate(date);
       return jsonEncode(activities.map((a) => a.toJson()).toList());
@@ -115,29 +116,40 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 创建活动
-  /// 参数: startTime, endTime, title, tags (JSON数组字符串), description, mood
-  Future<String> _jsCreateActivity(
-    String startTimeStr,
-    String endTimeStr,
-    String title, [
-    String? tagsJson,
-    String? description,
-    String? mood,
-  ]) async {
+  /// 参数: params - {
+  ///   startTime: string (必需, ISO 8601 格式),
+  ///   endTime: string (必需, ISO 8601 格式),
+  ///   title: string (必需),
+  ///   tags?: Array 或 string,
+  ///   description?: string,
+  ///   mood?: string
+  /// }
+  Future<String> _jsCreateActivity(Map<String, dynamic> params) async {
     try {
+      // 验证必需参数
+      if (!params.containsKey('startTime') ||
+          !params.containsKey('endTime') ||
+          !params.containsKey('title')) {
+        return jsonEncode({
+          'success': false,
+          'error': '缺少必需参数: startTime, endTime, title'
+        });
+      }
+
+      final startTimeStr = params['startTime'] as String;
+      final endTimeStr = params['endTime'] as String;
+      final title = params['title'] as String;
+
       final startTime = DateTime.parse(startTimeStr);
       final endTime = DateTime.parse(endTimeStr);
 
       // 解析标签
-      List<String> tags = [];
-      if (tagsJson != null && tagsJson.isNotEmpty) {
-        try {
-          tags = List<String>.from(jsonDecode(tagsJson));
-        } catch (e) {
-          // 如果解析失败,尝试按逗号分割
-          tags = tagsJson.split(',').map((t) => t.trim()).toList();
-        }
-      }
+      final List<String> tags = params['tags'] != null
+          ? List<String>.from(params['tags'])
+          : [];
+
+      final description = params['description'] as String?;
+      final mood = params['mood'] as String?;
 
       final activity = ActivityRecord(
         startTime: startTime,
@@ -156,29 +168,43 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新活动
-  /// 参数: activityId, startTime, endTime, title, tags, description, mood
-  Future<String> _jsUpdateActivity(
-    String activityId,
-    String startTimeStr,
-    String endTimeStr,
-    String title, [
-    String? tagsJson,
-    String? description,
-    String? mood,
-  ]) async {
+  /// 参数: params - {
+  ///   activityId: string (必需),
+  ///   startTime: string (必需, ISO 8601 格式),
+  ///   endTime: string (必需, ISO 8601 格式),
+  ///   title: string (必需),
+  ///   tags?: List or string,
+  ///   description?: string,
+  ///   mood?: string
+  /// }
+  Future<String> _jsUpdateActivity(Map<String, dynamic> params) async {
     try {
+      // 验证必需参数
+      if (!params.containsKey('activityId') ||
+          !params.containsKey('startTime') ||
+          !params.containsKey('endTime') ||
+          !params.containsKey('title')) {
+        return jsonEncode({
+          'success': false,
+          'error': '缺少必需参数: activityId, startTime, endTime, title'
+        });
+      }
+
+      final activityId = params['activityId'] as String;
+      final startTimeStr = params['startTime'] as String;
+      final endTimeStr = params['endTime'] as String;
+      final title = params['title'] as String;
+
       final startTime = DateTime.parse(startTimeStr);
       final endTime = DateTime.parse(endTimeStr);
 
       // 解析标签
-      List<String> tags = [];
-      if (tagsJson != null && tagsJson.isNotEmpty) {
-        try {
-          tags = List<String>.from(jsonDecode(tagsJson));
-        } catch (e) {
-          tags = tagsJson.split(',').map((t) => t.trim()).toList();
-        }
-      }
+      final List<String> tags = params['tags'] != null
+          ? List<String>.from(params['tags'])
+          : [];
+
+      final description = params['description'] as String?;
+      final mood = params['mood'] as String?;
 
       // 查找旧活动
       final activities = await _activityService.getActivitiesForDate(startTime);
@@ -206,9 +232,23 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除活动
-  /// 参数: activityId, date (YYYY-MM-DD 格式)
-  Future<String> _jsDeleteActivity(String activityId, String dateStr) async {
+  /// 参数: params - {
+  ///   activityId: string (必需),
+  ///   date: string (必需, YYYY-MM-DD 格式)
+  /// }
+  Future<String> _jsDeleteActivity(Map<String, dynamic> params) async {
     try {
+      // 验证必需参数
+      if (!params.containsKey('activityId') || !params.containsKey('date')) {
+        return jsonEncode({
+          'success': false,
+          'error': '缺少必需参数: activityId, date'
+        });
+      }
+
+      final activityId = params['activityId'] as String;
+      final dateStr = params['date'] as String;
+
       final date = DateTime.parse(dateStr);
       final activities = await _activityService.getActivitiesForDate(date);
 
@@ -225,8 +265,9 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取今日统计
-  /// 返回: { activityCount, durationMinutes, remainingMinutes }
-  Future<String> _jsGetTodayStats() async {
+  /// 参数: params - {} (无需参数)
+  /// 返回: { activityCount, durationMinutes, durationHours, remainingMinutes, remainingHours }
+  Future<String> _jsGetTodayStats(Map<String, dynamic> params) async {
     try {
       final activityCount = await getTodayActivityCount();
       final durationMinutes = await getTodayActivityDuration();
@@ -245,7 +286,8 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取标签分组
-  Future<String> _jsGetTagGroups() async {
+  /// 参数: params - {} (无需参数)
+  Future<String> _jsGetTagGroups(Map<String, dynamic> params) async {
     try {
       final tagGroups = await _activityService.getTagGroups();
       return jsonEncode(
@@ -257,7 +299,8 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取最近使用的标签
-  Future<String> _jsGetRecentTags() async {
+  /// 参数: params - {} (无需参数)
+  Future<String> _jsGetRecentTags(Map<String, dynamic> params) async {
     try {
       final recentTags = await _activityService.getRecentTags();
       return jsonEncode(recentTags);

@@ -185,18 +185,23 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取所有数据库
-  Future<String> _jsGetDatabases() async {
+  Future<String> _jsGetDatabases(Map<String, dynamic> params) async {
     final databases = await service.getAllDatabases();
     return jsonEncode(databases.map((db) => db.toMap()).toList());
   }
 
   /// 创建数据库
-  /// 参数: name, description (可选), fields (可选 JSON 数组)
-  Future<String> _jsCreateDatabase(
-    String name, [
-    String? description,
-    String? fieldsJson,
-  ]) async {
+  Future<String> _jsCreateDatabase(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? name = params['name'];
+    if (name == null) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    // 可选参数
+    final String? description = params['description'];
+    final String? fieldsJson = params['fieldsJson'];
+
     // 解析字段
     List<DatabaseField> fields = [];
     if (fieldsJson != null && fieldsJson.isNotEmpty) {
@@ -224,13 +229,18 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新数据库
-  /// 参数: databaseId, name (可选), description (可选), fields (可选 JSON 数组)
-  Future<String> _jsUpdateDatabase(
-    String databaseId, [
-    String? name,
-    String? description,
-    String? fieldsJson,
-  ]) async {
+  Future<String> _jsUpdateDatabase(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? databaseId = params['databaseId'];
+    if (databaseId == null) {
+      return jsonEncode({'error': '缺少必需参数: databaseId'});
+    }
+
+    // 可选参数
+    final String? name = params['name'];
+    final String? description = params['description'];
+    final String? fieldsJson = params['fieldsJson'];
+
     final databases = await service.getAllDatabases();
     final database = databases.firstWhere((db) => db.id == databaseId);
 
@@ -259,13 +269,28 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除数据库
-  Future<bool> _jsDeleteDatabase(String databaseId) async {
+  Future<bool> _jsDeleteDatabase(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? databaseId = params['databaseId'];
+    if (databaseId == null) {
+      return false;
+    }
+
     await service.deleteDatabase(databaseId);
     return true;
   }
 
   /// 获取数据库的所有记录
-  Future<String> _jsGetRecords(String databaseId, [int? limit]) async {
+  Future<String> _jsGetRecords(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? databaseId = params['databaseId'];
+    if (databaseId == null) {
+      return jsonEncode({'error': '缺少必需参数: databaseId'});
+    }
+
+    // 可选参数
+    final int? limit = params['limit'];
+
     var records = await controller.getRecords(databaseId);
 
     // 如果指定了 limit，只返回最新的 N 条记录
@@ -277,14 +302,24 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 创建记录
-  /// 参数: databaseId, fieldsJson (JSON 对象，键值对)
-  Future<String> _jsCreateRecord(String databaseId, String fieldsJson) async {
+  Future<String> _jsCreateRecord(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? databaseId = params['databaseId'];
+    final String? fieldsJson = params['fieldsJson'];
+
+    if (databaseId == null) {
+      return jsonEncode({'error': '缺少必需参数: databaseId'});
+    }
+    if (fieldsJson == null) {
+      return jsonEncode({'error': '缺少必需参数: fieldsJson'});
+    }
+
     // 解析字段数据
     Map<String, dynamic> fields;
     try {
       fields = jsonDecode(fieldsJson) as Map<String, dynamic>;
     } catch (e) {
-      throw ArgumentError('Invalid fields JSON: $fieldsJson');
+      return jsonEncode({'error': 'Invalid fields JSON: $fieldsJson'});
     }
 
     final record = Record(
@@ -300,12 +335,22 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新记录
-  /// 参数: databaseId, recordId, fieldsJson (JSON 对象，只更新提供的字段)
-  Future<String> _jsUpdateRecord(
-    String databaseId,
-    String recordId,
-    String fieldsJson,
-  ) async {
+  Future<String> _jsUpdateRecord(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? databaseId = params['databaseId'];
+    final String? recordId = params['recordId'];
+    final String? fieldsJson = params['fieldsJson'];
+
+    if (databaseId == null) {
+      return jsonEncode({'error': '缺少必需参数: databaseId'});
+    }
+    if (recordId == null) {
+      return jsonEncode({'error': '缺少必需参数: recordId'});
+    }
+    if (fieldsJson == null) {
+      return jsonEncode({'error': '缺少必需参数: fieldsJson'});
+    }
+
     final records = await controller.getRecords(databaseId);
     final record = records.firstWhere((r) => r.id == recordId);
 
@@ -314,7 +359,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
     try {
       updatedFields = jsonDecode(fieldsJson) as Map<String, dynamic>;
     } catch (e) {
-      throw ArgumentError('Invalid fields JSON: $fieldsJson');
+      return jsonEncode({'error': 'Invalid fields JSON: $fieldsJson'});
     }
 
     // 合并现有字段和更新字段
@@ -331,7 +376,15 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除记录
-  Future<bool> _jsDeleteRecord(String databaseId, String recordId) async {
+  Future<bool> _jsDeleteRecord(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? databaseId = params['databaseId'];
+    final String? recordId = params['recordId'];
+
+    if (databaseId == null || recordId == null) {
+      return false;
+    }
+
     // 先加载数据库到 controller
     await controller.loadDatabase(databaseId);
     await controller.deleteRecord(recordId);
@@ -339,8 +392,16 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 查询记录
-  /// 参数: databaseId, filtersJson (可选，JSON 对象，键值对匹配)
-  Future<String> _jsQuery(String databaseId, [String? filtersJson]) async {
+  Future<String> _jsQuery(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? databaseId = params['databaseId'];
+    if (databaseId == null) {
+      return jsonEncode({'error': '缺少必需参数: databaseId'});
+    }
+
+    // 可选参数
+    final String? filtersJson = params['filtersJson'];
+
     var records = await controller.getRecords(databaseId);
 
     // 如果提供了过滤条件，应用过滤
@@ -371,8 +432,16 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取数据库或记录数量
-  /// 参数: type ('databases' 或 'records'), databaseId (仅当 type='records' 时需要)
-  Future<int> _jsGetCount(String type, [String? databaseId]) async {
+  Future<int> _jsGetCount(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? type = params['type'];
+    if (type == null) {
+      return 0;
+    }
+
+    // 可选参数
+    final String? databaseId = params['databaseId'];
+
     if (type == 'databases') {
       return await service.getDatabaseCount();
     } else if (type == 'records' && databaseId != null) {

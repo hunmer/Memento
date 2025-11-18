@@ -266,7 +266,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取所有账户(不包含账单数据)
-  Future<String> _jsGetAccounts() async {
+  Future<String> _jsGetAccounts(Map<String, dynamic> params) async {
     final accounts = _billController.accounts;
     // 只返回账户基本信息,移除 bills 字段
     final accountsJson = accounts.map((a) {
@@ -278,14 +278,18 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 创建账户
-  /// @param title 账户名称
-  /// @param iconCodePoint 图标代码点 (可选，默认 Icons.account_balance_wallet)
-  /// @param backgroundColor 背景颜色值 (可选，默认绿色)
-  Future<String> _jsCreateAccount(
-    String title, [
-    int? iconCodePoint,
-    int? backgroundColor,
-  ]) async {
+  /// @param params.title 账户名称 (必需)
+  /// @param params.iconCodePoint 图标代码点 (可选，默认 Icons.account_balance_wallet)
+  /// @param params.backgroundColor 背景颜色值 (可选，默认绿色)
+  Future<String> _jsCreateAccount(Map<String, dynamic> params) async {
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final int? iconCodePoint = params['iconCodePoint'];
+    final int? backgroundColor = params['backgroundColor'];
+
     final account = Account(
       title: title,
       icon: iconCodePoint != null
@@ -300,20 +304,24 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 更新账户
-  /// @param accountId 账户ID
-  /// @param title 新账户名称 (可选)
-  /// @param iconCodePoint 新图标代码点 (可选)
-  /// @param backgroundColor 新背景颜色值 (可选)
-  Future<String> _jsUpdateAccount(
-    String accountId, [
-    String? title,
-    int? iconCodePoint,
-    int? backgroundColor,
-  ]) async {
+  /// @param params.accountId 账户ID (必需)
+  /// @param params.title 新账户名称 (可选)
+  /// @param params.iconCodePoint 新图标代码点 (可选)
+  /// @param params.backgroundColor 新背景颜色值 (可选)
+  Future<String> _jsUpdateAccount(Map<String, dynamic> params) async {
+    final String? accountId = params['accountId'];
+    if (accountId == null || accountId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: accountId'});
+    }
+
     final account = _billController.accounts.firstWhere(
       (a) => a.id == accountId,
       orElse: () => throw '账户不存在',
     );
+
+    final String? title = params['title'];
+    final int? iconCodePoint = params['iconCodePoint'];
+    final int? backgroundColor = params['backgroundColor'];
 
     final updatedAccount = account.copyWith(
       title: title,
@@ -329,21 +337,26 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除账户
-  /// @param accountId 账户ID
-  Future<bool> _jsDeleteAccount(String accountId) async {
+  /// @param params.accountId 账户ID (必需)
+  Future<bool> _jsDeleteAccount(Map<String, dynamic> params) async {
+    final String? accountId = params['accountId'];
+    if (accountId == null || accountId.isEmpty) {
+      throw '缺少必需参数: accountId';
+    }
+
     await _billController.deleteAccount(accountId);
     return true;
   }
 
   /// 获取账单列表
-  /// @param accountId 账户ID (可选，不传则返回所有账户的账单)
-  /// @param startDate 开始日期 (可选，格式: YYYY-MM-DD)
-  /// @param endDate 结束日期 (可选，格式: YYYY-MM-DD)
-  Future<String> _jsGetBills([
-    String? accountId,
-    String? startDate,
-    String? endDate,
-  ]) async {
+  /// @param params.accountId 账户ID (可选，不传则返回所有账户的账单)
+  /// @param params.startDate 开始日期 (可选，格式: YYYY-MM-DD)
+  /// @param params.endDate 结束日期 (可选，格式: YYYY-MM-DD)
+  Future<String> _jsGetBills(Map<String, dynamic> params) async {
+    final String? accountId = params['accountId'];
+    final String? startDate = params['startDate'];
+    final String? endDate = params['endDate'];
+
     // 解析日期参数
     DateTime? start;
     DateTime? end;
@@ -380,22 +393,38 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 创建账单
-  /// @param accountId 账户ID
-  /// @param amount 金额 (正数=收入，负数=支出)
-  /// @param category 分类
-  /// @param title 标题
-  /// @param date 日期 (可选，格式: YYYY-MM-DD，默认今天)
-  /// @param note 备注 (可选)
-  /// @param tag 标签 (可选)
-  Future<String> _jsCreateBill(
-    String accountId,
-    double amount,
-    String category,
-    String title, [
-    String? date,
-    String? note,
-    String? tag,
-  ]) async {
+  /// @param params.accountId 账户ID (必需)
+  /// @param params.amount 金额 (必需，正数=收入，负数=支出)
+  /// @param params.category 分类 (必需)
+  /// @param params.title 标题 (必需)
+  /// @param params.date 日期 (可选，格式: YYYY-MM-DD，默认今天)
+  /// @param params.note 备注 (可选，默认空字符串)
+  /// @param params.tag 标签 (可选)
+  Future<String> _jsCreateBill(Map<String, dynamic> params) async {
+    final String? accountId = params['accountId'];
+    if (accountId == null || accountId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: accountId'});
+    }
+
+    final double? amount = params['amount'];
+    if (amount == null) {
+      return jsonEncode({'error': '缺少必需参数: amount'});
+    }
+
+    final String? category = params['category'];
+    if (category == null || category.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: category'});
+    }
+
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final String? date = params['date'];
+    final String? note = params['note'];
+    final String? tag = params['tag'];
+
     // 解析日期
     DateTime billDate;
     if (date != null && date.isNotEmpty) {
@@ -427,24 +456,25 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 更新账单
-  /// @param billId 账单ID
-  /// @param accountId 账户ID
-  /// @param amount 新金额 (可选)
-  /// @param category 新分类 (可选)
-  /// @param title 新标题 (可选)
-  /// @param date 新日期 (可选，格式: YYYY-MM-DD)
-  /// @param note 新备注 (可选)
-  /// @param tag 新标签 (可选)
-  Future<String> _jsUpdateBill(
-    String billId,
-    String accountId, [
-    double? amount,
-    String? category,
-    String? title,
-    String? date,
-    String? note,
-    String? tag,
-  ]) async {
+  /// @param params.billId 账单ID (必需)
+  /// @param params.accountId 账户ID (必需)
+  /// @param params.amount 新金额 (可选)
+  /// @param params.category 新分类 (可选)
+  /// @param params.title 新标题 (可选)
+  /// @param params.date 新日期 (可选，格式: YYYY-MM-DD)
+  /// @param params.note 新备注 (可选)
+  /// @param params.tag 新标签 (可选)
+  Future<String> _jsUpdateBill(Map<String, dynamic> params) async {
+    final String? billId = params['billId'];
+    if (billId == null || billId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: billId'});
+    }
+
+    final String? accountId = params['accountId'];
+    if (accountId == null || accountId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: accountId'});
+    }
+
     // 查找账户
     final account = _billController.accounts.firstWhere(
       (a) => a.id == accountId,
@@ -456,6 +486,13 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       (b) => b.id == billId,
       orElse: () => throw '账单不存在',
     );
+
+    final double? amount = params['amount'];
+    final String? category = params['category'];
+    final String? title = params['title'];
+    final String? date = params['date'];
+    final String? note = params['note'];
+    final String? tag = params['tag'];
 
     // 解析日期
     DateTime? billDate;
@@ -483,22 +520,32 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除账单
-  /// @param accountId 账户ID
-  /// @param billId 账单ID
-  Future<bool> _jsDeleteBill(String accountId, String billId) async {
+  /// @param params.accountId 账户ID (必需)
+  /// @param params.billId 账单ID (必需)
+  Future<bool> _jsDeleteBill(Map<String, dynamic> params) async {
+    final String? accountId = params['accountId'];
+    if (accountId == null || accountId.isEmpty) {
+      throw '缺少必需参数: accountId';
+    }
+
+    final String? billId = params['billId'];
+    if (billId == null || billId.isEmpty) {
+      throw '缺少必需参数: billId';
+    }
+
     await _billController.deleteBill(accountId, billId);
     return true;
   }
 
   /// 获取统计信息
-  /// @param startDate 开始日期 (可选，格式: YYYY-MM-DD)
-  /// @param endDate 结束日期 (可选，格式: YYYY-MM-DD)
-  /// @param accountId 账户ID (可选，不传则统计所有账户)
-  Future<String> _jsGetStats([
-    String? startDate,
-    String? endDate,
-    String? accountId,
-  ]) async {
+  /// @param params.startDate 开始日期 (可选，格式: YYYY-MM-DD)
+  /// @param params.endDate 结束日期 (可选，格式: YYYY-MM-DD)
+  /// @param params.accountId 账户ID (可选，不传则统计所有账户)
+  Future<String> _jsGetStats(Map<String, dynamic> params) async {
+    final String? startDate = params['startDate'];
+    final String? endDate = params['endDate'];
+    final String? accountId = params['accountId'];
+
     // 解析日期参数
     DateTime? start;
     DateTime? end;
@@ -553,14 +600,14 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取分类统计
-  /// @param startDate 开始日期 (可选，格式: YYYY-MM-DD)
-  /// @param endDate 结束日期 (可选，格式: YYYY-MM-DD)
-  /// @param accountId 账户ID (可选，不传则统计所有账户)
-  Future<String> _jsGetCategoryStats([
-    String? startDate,
-    String? endDate,
-    String? accountId,
-  ]) async {
+  /// @param params.startDate 开始日期 (可选，格式: YYYY-MM-DD)
+  /// @param params.endDate 结束日期 (可选，格式: YYYY-MM-DD)
+  /// @param params.accountId 账户ID (可选，不传则统计所有账户)
+  Future<String> _jsGetCategoryStats(Map<String, dynamic> params) async {
+    final String? startDate = params['startDate'];
+    final String? endDate = params['endDate'];
+    final String? accountId = params['accountId'];
+
     // 解析日期参数
     DateTime? start;
     DateTime? end;

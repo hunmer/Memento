@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:openai_dart/openai_dart.dart';
@@ -622,11 +623,51 @@ class ChatController extends ChangeNotifier {
       if (msg.isSessionDivider) continue; // 跳过会话分隔符
 
       if (msg.isUser) {
-        messages.add(
-          ChatCompletionMessage.user(
-            content: ChatCompletionUserMessageContent.string(msg.content),
-          ),
-        );
+        // 检查消息是否包含图片附件
+        final imageAttachments = msg.attachments.where((a) => a.isImage).toList();
+
+        if (imageAttachments.isNotEmpty) {
+          // 包含图片：使用 parts 格式
+          final parts = <ChatCompletionMessageContentPart>[];
+
+          // 添加文本内容
+          if (msg.content.isNotEmpty) {
+            parts.add(ChatCompletionMessageContentPart.text(text: msg.content));
+          }
+
+          // 添加图片附件
+          for (var attachment in imageAttachments) {
+            try {
+              final file = File(attachment.filePath);
+              if (file.existsSync()) {
+                final bytes = file.readAsBytesSync();
+                final base64Image = base64Encode(bytes);
+                parts.add(
+                  ChatCompletionMessageContentPart.image(
+                    imageUrl: ChatCompletionMessageImageUrl(
+                      url: 'data:image/jpeg;base64,$base64Image',
+                    ),
+                  ),
+                );
+              }
+            } catch (e) {
+              debugPrint('读取图片附件失败: ${attachment.filePath}, 错误: $e');
+            }
+          }
+
+          messages.add(
+            ChatCompletionMessage.user(
+              content: ChatCompletionUserMessageContent.parts(parts),
+            ),
+          );
+        } else {
+          // 不包含图片：使用字符串格式
+          messages.add(
+            ChatCompletionMessage.user(
+              content: ChatCompletionUserMessageContent.string(msg.content),
+            ),
+          );
+        }
 
         final templateResult = _extractTemplateResult(msg.metadata);
         if (templateResult != null && templateResult.isNotEmpty) {

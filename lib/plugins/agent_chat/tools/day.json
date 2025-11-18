@@ -5,125 +5,125 @@
     "parameters": [],
     "returns": {
       "type": "Array",
-      "description": "纪念日列表，每个元素包含 id、title、date、type、notifyDaysBefore 等字段"
+      "description": "纪念日列表,每个元素包含 id、title、date、type、notifyDaysBefore 等字段"
     },
     "examples": [
       {
         "title": "获取所有纪念日",
-        "code": "const days = await Memento.plugins.day.getMemorialDays();\nsetResult(JSON.stringify(days, null, 2));"
+        "code": "const days = await Memento.plugins.day.getMemorialDays({});\nsetResult(JSON.stringify(days, null, 2));"
       }
     ],
-    "notes": "返回所有已创建的纪念日，包括倒计时和正计时类型",
+    "notes": "返回所有已创建的纪念日,包括倒计时和正计时类型",
     "enabled": true
   },
   "createMemorialDay": {
     "title": "创建纪念日",
     "description": "创建一个新的纪念日",
     "parameters": [
-      {"name": "title", "type": "string", "required": true, "description": "纪念日标题"},
-      {"name": "dateStr", "type": "string", "required": true, "description": "日期字符串（格式：YYYY-MM-DD）"},
-      {"name": "type", "type": "string", "required": false, "description": "类型：'countdown'（倒计时）或 'countup'（正计时），默认 countdown"},
-      {"name": "notifyDaysBefore", "type": "number", "required": false, "description": "提前提醒天数，默认 0"}
+      {"name": "name", "type": "string", "required": true, "description": "纪念日名称"},
+      {"name": "date", "type": "string", "required": true, "description": "日期字符串(格式:YYYY-MM-DD)"},
+      {"name": "notesJson", "type": "string", "required": false, "description": "笔记列表(JSON数组字符串)"},
+      {"name": "backgroundColor", "type": "number", "required": false, "description": "背景颜色值(整数)"}
     ],
     "returns": {
       "type": "Object",
-      "description": "新创建的纪念日对象"
+      "description": "新创建的纪念日对象,包含 success、data 或 error 字段"
     },
     "examples": [
       {
-        "title": "创建倒计时纪念日",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst nextYear = timeInfo.year + 1;\nconst newYearDate = `${nextYear}-01-01`;\nconst day = await Memento.plugins.day.createMemorialDay('新年', newYearDate, 'countdown', 7);\nsetResult(`纪念日已创建: ${day.title}`);"
+        "title": "创建纪念日",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst nextYear = timeInfo.year + 1;\nconst newYearDate = `${nextYear}-01-01`;\nconst result = await Memento.plugins.day.createMemorialDay({name: '新年', date: newYearDate});\nsetResult(result.success ? `纪念日已创建: ${result.data.title}` : result.error);"
       },
       {
-        "title": "创建正计时纪念日",
-        "code": "const birthday = await Memento.plugins.day.createMemorialDay('我的生日', '1990-06-15', 'countup');\nsetResult(`已记录生日: ${birthday.id}`);"
+        "title": "创建带笔记的纪念日",
+        "code": "const result = await Memento.plugins.day.createMemorialDay({\n  name: '生日',\n  date: '2025-06-15',\n  notesJson: JSON.stringify(['准备礼物', '订餐厅'])\n});\nsetResult(result.success ? '创建成功' : result.error);"
       }
     ],
-    "notes": "倒计时显示距离日期的剩余天数，正计时显示距离日期已过去的天数",
+    "notes": "必需参数: name(名称)、date(日期);可选参数: notesJson(笔记数组)、backgroundColor(颜色值)",
     "enabled": true
   },
   "updateMemorialDay": {
     "title": "更新纪念日",
     "description": "更新指定纪念日的信息",
     "parameters": [
-      {"name": "dayId", "type": "string", "required": true, "description": "纪念日ID"},
-      {"name": "title", "type": "string", "required": false, "description": "新标题"},
-      {"name": "dateStr", "type": "string", "required": false, "description": "新日期（格式：YYYY-MM-DD）"},
-      {"name": "type", "type": "string", "required": false, "description": "新类型"},
-      {"name": "notifyDaysBefore", "type": "number", "required": false, "description": "新的提前提醒天数"}
+      {"name": "id", "type": "string", "required": true, "description": "纪念日ID"},
+      {"name": "name", "type": "string", "required": false, "description": "新名称"},
+      {"name": "date", "type": "string", "required": false, "description": "新日期(格式:YYYY-MM-DD)"},
+      {"name": "notesJson", "type": "string", "required": false, "description": "新笔记列表(JSON数组字符串)"},
+      {"name": "backgroundColor", "type": "number", "required": false, "description": "新背景颜色值(整数)"}
     ],
     "returns": {
       "type": "Object",
-      "description": "更新后的纪念日对象"
+      "description": "更新后的纪念日对象,包含 success、data 或 error 字段"
     },
     "examples": [
       {
-        "title": "更新纪念日标题",
-        "code": "const updated = await Memento.plugins.day.updateMemorialDay('day123', '春节', null, null, null);\nsetResult(`已更新: ${updated.title}`);"
+        "title": "更新纪念日名称",
+        "code": "const result = await Memento.plugins.day.updateMemorialDay({id: 'day123', name: '春节'});\nsetResult(result.success ? `已更新: ${result.data.title}` : result.error);"
       }
     ],
-    "notes": "仅更新提供的字段，未提供的字段保持不变",
+    "notes": "必需参数: id(纪念日ID);所有其他字段均为可选,仅更新提供的字段",
     "enabled": true
   },
   "deleteMemorialDay": {
     "title": "删除纪念日",
     "description": "删除指定的纪念日",
     "parameters": [
-      {"name": "dayId", "type": "string", "required": true, "description": "纪念日ID"}
+      {"name": "id", "type": "string", "required": true, "description": "纪念日ID"}
     ],
     "returns": {
-      "type": "boolean",
-      "description": "删除成功返回 true"
+      "type": "Object",
+      "description": "删除结果,包含 success、message 或 error 字段"
     },
     "examples": [
       {
         "title": "删除纪念日",
-        "code": "const success = await Memento.plugins.day.deleteMemorialDay('day123');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.day.deleteMemorialDay({id: 'day123'});\nsetResult(result.success ? result.message : result.error);"
       }
     ],
-    "notes": "删除操作不可逆",
+    "notes": "删除操作不可逆,需确认纪念日ID正确",
     "enabled": true
   },
   "getDaysUntil": {
     "title": "计算距离天数",
     "description": "计算当前日期到指定日期的天数差",
     "parameters": [
-      {"name": "dateStr", "type": "string", "required": true, "description": "目标日期（格式：YYYY-MM-DD）"}
+      {"name": "date", "type": "string", "required": true, "description": "目标日期(格式:YYYY-MM-DD)"}
     ],
     "returns": {
-      "type": "number",
-      "description": "天数差（正数表示未来，负数表示过去）"
+      "type": "Object",
+      "description": "包含 success、days(天数差)、isExpired(是否过期)、isToday(是否今天)等字段"
     },
     "examples": [
       {
         "title": "计算距离新年的天数",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst nextYear = timeInfo.year + 1;\nconst newYearDate = `${nextYear}-01-01`;\nconst days = await Memento.plugins.day.getDaysUntil(newYearDate);\nsetResult(`距离${nextYear}年新年还有 ${days} 天`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst nextYear = timeInfo.year + 1;\nconst newYearDate = `${nextYear}-01-01`;\nconst result = await Memento.plugins.day.getDaysUntil({date: newYearDate});\nif (result.success) {\n  setResult(`距离${nextYear}年新年还有 ${result.days} 天`);\n} else {\n  setResult(result.error);\n}"
       }
     ],
-    "notes": "返回值可能为负数（表示已过去的天数）",
+    "notes": "返回值可能为负数(表示已过去的天数)",
     "enabled": true
   },
   "getUpcomingDays": {
     "title": "获取即将到来的纪念日",
     "description": "获取指定天数内即将到来的纪念日列表",
     "parameters": [
-      {"name": "days", "type": "number", "required": false, "description": "天数范围，默认 30 天"}
+      {"name": "withinDays", "type": "number", "required": false, "description": "天数范围,默认 7 天"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "即将到来的纪念日列表，按日期排序"
+      "type": "Object",
+      "description": "包含 success、count(数量)、days(纪念日列表)或 error 字段"
     },
     "examples": [
       {
         "title": "获取未来7天的纪念日",
-        "code": "const upcoming = await Memento.plugins.day.getUpcomingDays(7);\nsetResult(`未来一周有 ${upcoming.length} 个纪念日`);"
+        "code": "const result = await Memento.plugins.day.getUpcomingDays({withinDays: 7});\nif (result.success) {\n  setResult(`未来一周有 ${result.count} 个纪念日`);\n} else {\n  setResult(result.error);\n}"
       },
       {
         "title": "获取未来一个月的纪念日",
-        "code": "const upcoming = await Memento.plugins.day.getUpcomingDays(30);\nsetResult(JSON.stringify(upcoming, null, 2));"
+        "code": "const result = await Memento.plugins.day.getUpcomingDays({withinDays: 30});\nsetResult(result.success ? JSON.stringify(result.days, null, 2) : result.error);"
       }
     ],
-    "notes": "只返回倒计时类型（countdown）的纪念日，按时间从近到远排序",
+    "notes": "默认查询未来7天内的纪念日,按时间从近到远排序",
     "enabled": true
   }
 }

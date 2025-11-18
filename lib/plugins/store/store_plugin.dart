@@ -303,13 +303,18 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取所有商品列表
-  Future<String> _jsGetProducts() async {
+  Future<String> _jsGetProducts(Map<String, dynamic> params) async {
     final products = controller.products;
     return jsonEncode(products.map((p) => p.toJson()).toList());
   }
 
   /// 获取商品详情
-  Future<String> _jsGetProduct(String productId) async {
+  Future<String> _jsGetProduct(Map<String, dynamic> params) async {
+    final String? productId = params['productId'];
+    if (productId == null || productId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: productId'});
+    }
+
     final product = controller.products.firstWhere(
       (p) => p.id == productId,
       orElse: () => throw Exception('商品不存在: $productId'),
@@ -318,16 +323,46 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 创建商品
-  Future<String> _jsCreateProduct(
-    String name,
-    String description,
-    int price,
-    int stock,
-    String exchangeStart,
-    String exchangeEnd,
-    int useDuration, [
-    String? image,
-  ]) async {
+  Future<String> _jsCreateProduct(Map<String, dynamic> params) async {
+    // 提取必需参数
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    final String? description = params['description'];
+    if (description == null || description.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: description'});
+    }
+
+    final int? price = params['price'];
+    if (price == null) {
+      return jsonEncode({'error': '缺少必需参数: price'});
+    }
+
+    final int? stock = params['stock'];
+    if (stock == null) {
+      return jsonEncode({'error': '缺少必需参数: stock'});
+    }
+
+    final String? exchangeStart = params['exchangeStart'];
+    if (exchangeStart == null || exchangeStart.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: exchangeStart'});
+    }
+
+    final String? exchangeEnd = params['exchangeEnd'];
+    if (exchangeEnd == null || exchangeEnd.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: exchangeEnd'});
+    }
+
+    final int? useDuration = params['useDuration'];
+    if (useDuration == null) {
+      return jsonEncode({'error': '缺少必需参数: useDuration'});
+    }
+
+    // 提取可选参数
+    final String? image = params['image'];
+
     final product = Product(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
@@ -346,17 +381,51 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新商品
-  Future<String> _jsUpdateProduct(
-    String productId,
-    String name,
-    String description,
-    int price,
-    int stock,
-    String exchangeStart,
-    String exchangeEnd,
-    int useDuration, [
-    String? image,
-  ]) async {
+  Future<String> _jsUpdateProduct(Map<String, dynamic> params) async {
+    // 提取必需参数
+    final String? productId = params['productId'];
+    if (productId == null || productId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: productId'});
+    }
+
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    final String? description = params['description'];
+    if (description == null || description.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: description'});
+    }
+
+    final int? price = params['price'];
+    if (price == null) {
+      return jsonEncode({'error': '缺少必需参数: price'});
+    }
+
+    final int? stock = params['stock'];
+    if (stock == null) {
+      return jsonEncode({'error': '缺少必需参数: stock'});
+    }
+
+    final String? exchangeStart = params['exchangeStart'];
+    if (exchangeStart == null || exchangeStart.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: exchangeStart'});
+    }
+
+    final String? exchangeEnd = params['exchangeEnd'];
+    if (exchangeEnd == null || exchangeEnd.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: exchangeEnd'});
+    }
+
+    final int? useDuration = params['useDuration'];
+    if (useDuration == null) {
+      return jsonEncode({'error': '缺少必需参数: useDuration'});
+    }
+
+    // 提取可选参数
+    final String? image = params['image'];
+
     final products = controller.products;
     final index = products.indexWhere((p) => p.id == productId);
     if (index == -1) {
@@ -381,7 +450,12 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除商品（归档）
-  Future<bool> _jsDeleteProduct(String productId) async {
+  Future<bool> _jsDeleteProduct(Map<String, dynamic> params) async {
+    final String? productId = params['productId'];
+    if (productId == null || productId.isEmpty) {
+      throw Exception('缺少必需参数: productId');
+    }
+
     final product = controller.products.firstWhere(
       (p) => p.id == productId,
       orElse: () => throw Exception('商品不存在: $productId'),
@@ -392,7 +466,12 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 兑换商品
-  Future<String> _jsRedeem(String productId) async {
+  Future<String> _jsRedeem(Map<String, dynamic> params) async {
+    final String? productId = params['productId'];
+    if (productId == null || productId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: productId'});
+    }
+
     final product = controller.products.firstWhere(
       (p) => p.id == productId,
       orElse: () => throw Exception('商品不存在: $productId'),
@@ -407,12 +486,22 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取当前积分
-  Future<int> _jsGetPoints() async {
+  Future<int> _jsGetPoints(Map<String, dynamic> params) async {
     return controller.currentPoints;
   }
 
   /// 添加积分
-  Future<String> _jsAddPoints(int points, String reason) async {
+  Future<String> _jsAddPoints(Map<String, dynamic> params) async {
+    final int? points = params['points'];
+    if (points == null) {
+      return jsonEncode({'error': '缺少必需参数: points'});
+    }
+
+    final String? reason = params['reason'];
+    if (reason == null || reason.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: reason'});
+    }
+
     await controller.addPoints(points, reason);
     return jsonEncode({
       'success': true,
@@ -422,25 +511,30 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取兑换历史（用户物品）
-  Future<String> _jsGetRedeemHistory() async {
+  Future<String> _jsGetRedeemHistory(Map<String, dynamic> params) async {
     final items = controller.userItems;
     return jsonEncode(items.map((item) => item.toJson()).toList());
   }
 
   /// 获取积分历史
-  Future<String> _jsGetPointsHistory() async {
+  Future<String> _jsGetPointsHistory(Map<String, dynamic> params) async {
     final logs = controller.pointsLogs;
     return jsonEncode(logs.map((log) => log.toJson()).toList());
   }
 
   /// 获取用户物品
-  Future<String> _jsGetUserItems() async {
+  Future<String> _jsGetUserItems(Map<String, dynamic> params) async {
     final items = controller.userItems;
     return jsonEncode(items.map((item) => item.toJson()).toList());
   }
 
   /// 使用物品
-  Future<String> _jsUseItem(String itemId) async {
+  Future<String> _jsUseItem(Map<String, dynamic> params) async {
+    final String? itemId = params['itemId'];
+    if (itemId == null || itemId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: itemId'});
+    }
+
     final item = controller.userItems.firstWhere(
       (i) => i.id == itemId,
       orElse: () => throw Exception('物品不存在: $itemId'),
@@ -454,7 +548,12 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 归档商品
-  Future<bool> _jsArchiveProduct(String productId) async {
+  Future<bool> _jsArchiveProduct(Map<String, dynamic> params) async {
+    final String? productId = params['productId'];
+    if (productId == null || productId.isEmpty) {
+      throw Exception('缺少必需参数: productId');
+    }
+
     final product = controller.products.firstWhere(
       (p) => p.id == productId,
       orElse: () => throw Exception('商品不存在: $productId'),
@@ -465,7 +564,12 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 恢复归档商品
-  Future<bool> _jsRestoreProduct(String productId) async {
+  Future<bool> _jsRestoreProduct(Map<String, dynamic> params) async {
+    final String? productId = params['productId'];
+    if (productId == null || productId.isEmpty) {
+      throw Exception('缺少必需参数: productId');
+    }
+
     final product = controller.archivedProducts.firstWhere(
       (p) => p.id == productId,
       orElse: () => throw Exception('归档商品不存在: $productId'),
@@ -476,7 +580,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取归档商品列表
-  Future<String> _jsGetArchivedProducts() async {
+  Future<String> _jsGetArchivedProducts(Map<String, dynamic> params) async {
     final products = controller.archivedProducts;
     return jsonEncode(products.map((p) => p.toJson()).toList());
   }

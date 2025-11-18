@@ -168,7 +168,16 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 创建频道
-  Future<String> _jsCreateChannel(String name, [String? avatar]) async {
+  Future<String> _jsCreateChannel(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    // 可选参数
+    final String? avatar = params['avatar'];
+
     final channel = Channel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: name,
@@ -181,19 +190,38 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除频道
-  Future<bool> _jsDeleteChannel(String channelId) async {
+  Future<String> _jsDeleteChannel(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? channelId = params['channelId'];
+    if (channelId == null || channelId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: channelId'});
+    }
+
     await channelService.deleteChannel(channelId);
-    return true;
+    return jsonEncode({'success': true});
   }
 
   /// 发送消息
-  Future<String> _jsSendMessage(
-      String channelId, String content, String type) async {
+  Future<String> _jsSendMessage(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? channelId = params['channelId'];
+    final String? content = params['content'];
+
+    if (channelId == null || channelId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: channelId'});
+    }
+    if (content == null || content.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: content'});
+    }
+
+    // 可选参数
+    final String? type = params['type'];
+
     // 解析消息类型
     MessageType messageType;
     try {
       messageType = MessageType.values.firstWhere(
-        (t) => t.name == type.toLowerCase(),
+        (t) => t.name == (type ?? 'sent').toLowerCase(),
         orElse: () => MessageType.sent,
       );
     } catch (e) {
@@ -218,7 +246,16 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取频道消息
-  Future<String> _jsGetMessages(String channelId, [int? limit]) async {
+  Future<String> _jsGetMessages(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? channelId = params['channelId'];
+    if (channelId == null || channelId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: channelId'});
+    }
+
+    // 可选参数
+    final int? limit = params['limit'];
+
     final messages = await channelService.getChannelMessages(channelId);
     if (messages == null) {
       return jsonEncode([]);
@@ -237,13 +274,26 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除消息
-  Future<bool> _jsDeleteMessage(String channelId, String messageId) async {
+  Future<String> _jsDeleteMessage(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? channelId = params['channelId'];
+    final String? messageId = params['messageId'];
+
+    if (channelId == null || channelId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: channelId'});
+    }
+    if (messageId == null || messageId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: messageId'});
+    }
+
     final messages = await channelService.getChannelMessages(channelId);
-    if (messages == null) return false;
+    if (messages == null) {
+      return jsonEncode({'success': false, 'error': '频道不存在'});
+    }
 
     messages.removeWhere((m) => m.id == messageId);
     await channelService.saveMessages(channelId, messages);
-    return true;
+    return jsonEncode({'success': true});
   }
 
   /// 获取当前用户

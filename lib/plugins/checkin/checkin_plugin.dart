@@ -302,7 +302,7 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取签到项目列表
-  Future<String> _jsGetCheckinItems() async {
+  Future<String> _jsGetCheckinItems(Map<String, dynamic> params) async {
     final items = _checkinItems.map((item) => {
       'id': item.id,
       'name': item.name,
@@ -320,7 +320,13 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 执行签到
-  Future<String> _jsCheckin(String itemId, [String? note]) async {
+  Future<String> _jsCheckin(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? itemId = params['itemId'];
+    if (itemId == null) {
+      return jsonEncode({'error': '缺少必需参数: itemId'});
+    }
+
     final item = _checkinItems.firstWhere(
       (item) => item.id == itemId,
       orElse: () => throw Exception('签到项目不存在: $itemId'),
@@ -333,6 +339,9 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
         'message': '今天已经签到过了',
       });
     }
+
+    // 可选参数
+    final String? note = params['note'];
 
     // 创建签到记录
     final now = DateTime.now();
@@ -355,15 +364,21 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取签到历史
-  Future<String> _jsGetCheckinHistory(
-    String itemId, [
-    String? startDate,
-    String? endDate,
-  ]) async {
+  Future<String> _jsGetCheckinHistory(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? itemId = params['itemId'];
+    if (itemId == null) {
+      return jsonEncode({'error': '缺少必需参数: itemId'});
+    }
+
     final item = _checkinItems.firstWhere(
       (item) => item.id == itemId,
       orElse: () => throw Exception('签到项目不存在: $itemId'),
     );
+
+    // 可选参数
+    final String? startDate = params['startDate'];
+    final String? endDate = params['endDate'];
 
     // 解析日期范围
     DateTime? start;
@@ -408,7 +423,10 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取统计信息
-  Future<String> _jsGetStats([String? itemId]) async {
+  Future<String> _jsGetStats(Map<String, dynamic> params) async {
+    // 可选参数
+    final String? itemId = params['itemId'];
+
     if (itemId != null) {
       // 获取单个项目的统计信息
       final item = _checkinItems.firstWhere(
@@ -439,11 +457,13 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 创建签到项目
-  Future<String> _jsCreateCheckinItem(
-    String name, [
-    String? group,
-    String? description,
-  ]) async {
+  Future<String> _jsCreateCheckinItem(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? name = params['name'];
+    if (name == null) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
     // 检查名称是否重复
     if (_checkinItems.any((item) => item.name == name)) {
       return jsonEncode({
@@ -451,6 +471,10 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
         'message': '签到项目名称已存在: $name',
       });
     }
+
+    // 可选参数
+    final String? group = params['group'];
+    final String? description = params['description'];
 
     // 创建新项目
     final item = CheckinItem(

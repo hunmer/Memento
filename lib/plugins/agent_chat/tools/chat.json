@@ -46,7 +46,7 @@
     "examples": [
       {
         "title": "创建频道",
-        "code": "const channel = await Memento.plugins.chat.createChannel('工作交流');\nsetResult(`频道已创建: ${channel.name}`);"
+        "code": "const channel = await Memento.plugins.chat.createChannel({name: '工作交流'});\nsetResult(`频道已创建: ${channel.name}`);"
       }
     ],
     "notes": "新创建的频道初始为空，不包含任何消息",
@@ -59,13 +59,13 @@
       {"name": "channelId", "type": "string", "required": true, "description": "频道ID"}
     ],
     "returns": {
-      "type": "boolean",
-      "description": "删除成功返回 true"
+      "type": "Object",
+      "description": "操作结果对象，包含 success 字段"
     },
     "examples": [
       {
         "title": "删除频道",
-        "code": "const success = await Memento.plugins.chat.deleteChannel('channel123');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.chat.deleteChannel({channelId: 'channel123'});\nsetResult(result.success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆，会同时删除该频道下的所有消息",
@@ -76,7 +76,8 @@
     "description": "在指定频道发送一条消息",
     "parameters": [
       {"name": "channelId", "type": "string", "required": true, "description": "频道ID"},
-      {"name": "content", "type": "string", "required": true, "description": "消息内容"}
+      {"name": "content", "type": "string", "required": true, "description": "消息内容"},
+      {"name": "type", "type": "string", "required": false, "description": "消息类型（默认为 sent）"}
     ],
     "returns": {
       "type": "Object",
@@ -85,7 +86,7 @@
     "examples": [
       {
         "title": "发送文本消息",
-        "code": "const message = await Memento.plugins.chat.sendMessage('channel123', '你好，这是一条测试消息');\nsetResult(`消息已发送: ${message.id}`);"
+        "code": "const message = await Memento.plugins.chat.sendMessage({\n  channelId: 'channel123',\n  content: '你好，这是一条测试消息'\n});\nsetResult(`消息已发送: ${message.id}`);"
       }
     ],
     "notes": "消息发送者自动设置为当前用户",
@@ -95,7 +96,8 @@
     "title": "获取频道消息",
     "description": "获取指定频道的所有消息",
     "parameters": [
-      {"name": "channelId", "type": "string", "required": true, "description": "频道ID"}
+      {"name": "channelId", "type": "string", "required": true, "description": "频道ID"},
+      {"name": "limit", "type": "number", "required": false, "description": "限制返回的消息数量"}
     ],
     "returns": {
       "type": "Array",
@@ -104,7 +106,11 @@
     "examples": [
       {
         "title": "获取频道消息",
-        "code": "const messages = await Memento.plugins.chat.getMessages('channel123');\nsetResult(`频道共有 ${messages.length} 条消息`);"
+        "code": "const messages = await Memento.plugins.chat.getMessages({channelId: 'channel123'});\nsetResult(`频道共有 ${messages.length} 条消息`);"
+      },
+      {
+        "title": "获取最新10条消息",
+        "code": "const messages = await Memento.plugins.chat.getMessages({channelId: 'channel123', limit: 10});\nsetResult(JSON.stringify(messages, null, 2));"
       }
     ],
     "notes": "消息按时间升序排列",
@@ -118,13 +124,13 @@
       {"name": "messageId", "type": "string", "required": true, "description": "消息ID"}
     ],
     "returns": {
-      "type": "boolean",
-      "description": "删除成功返回 true"
+      "type": "Object",
+      "description": "操作结果对象，包含 success 字段"
     },
     "examples": [
       {
         "title": "删除消息",
-        "code": "const success = await Memento.plugins.chat.deleteMessage('channel123', 'msg456');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.chat.deleteMessage({channelId: 'channel123', messageId: 'msg456'});\nsetResult(result.success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆",

@@ -23,6 +23,7 @@ import 'package:Memento/widgets/l10n/group_selector_localizations.dart';
 import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
 import 'package:Memento/widgets/l10n/location_picker_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -357,6 +358,7 @@ class _MyAppState extends State<MyApp> {
               FloatingBallLocalizations.delegate,
               GoodsLocalizations.delegate,
               NodesLocalizations.delegate,
+              SfGlobalLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               WebDAVLocalizations.delegate,

@@ -173,11 +173,15 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取任务列表
-  /// 参数：status (可选), priority (可选)
-  /// status: 'todo', 'inProgress', 'done'
-  /// priority: 'low', 'medium', 'high'
-  Future<String> _jsGetTasks([String? statusStr, String? priorityStr]) async {
+  /// 参数对象: {
+  ///   status: 'todo' | 'inProgress' | 'in_progress' | 'done' (可选),
+  ///   priority: 'low' | 'medium' | 'high' (可选)
+  /// }
+  Future<String> _jsGetTasks(Map<String, dynamic> params) async {
     List<Task> tasks = taskController.tasks;
+
+    final String? statusStr = params['status'];
+    final String? priorityStr = params['priority'];
 
     // 状态过滤
     if (statusStr != null && statusStr.isNotEmpty) {
@@ -222,8 +226,14 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取任务详情
-  /// 参数：taskId (必需)
-  Future<String> _jsGetTask(String taskId) async {
+  /// 参数对象: { taskId: string (必需) }
+  Future<String> _jsGetTask(Map<String, dynamic> params) async {
+    final String? taskId = params['taskId'];
+
+    if (taskId == null || taskId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: taskId'});
+    }
+
     try {
       final task = taskController.tasks.firstWhere((t) => t.id == taskId);
       return jsonEncode(task.toJson());
@@ -233,7 +243,8 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取今日任务（今天截止或今天开始的任务）
-  Future<String> _jsGetTodayTasks() async {
+  /// 参数对象: {} (无需参数,但保持接口一致性)
+  Future<String> _jsGetTodayTasks(Map<String, dynamic> params) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -265,7 +276,8 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取过期任务（截止日期已过且未完成）
-  Future<String> _jsGetOverdueTasks() async {
+  /// 参数对象: {} (无需参数,但保持接口一致性)
+  Future<String> _jsGetOverdueTasks(Map<String, dynamic> params) async {
     final now = DateTime.now();
 
     final overdueTasks = taskController.tasks.where((task) {
@@ -284,31 +296,41 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 创建任务
-  /// 参数：title (必需), description (可选), startDate (可选), dueDate (可选),
-  ///       priority (可选), tags (可选, JSON 数组字符串)
-  Future<String> _jsCreateTask(
-    String title, [
-    String? description,
-    String? startDateStr,
-    String? dueDateStr,
-    String? priorityStr,
-    String? tagsJsonStr,
-  ]) async {
+  /// 参数对象: {
+  ///   title: string (必需),
+  ///   description: string (可选),
+  ///   startDate: string (可选, ISO 8601 格式),
+  ///   dueDate: string (可选, ISO 8601 格式),
+  ///   priority: 'low' | 'medium' | 'high' (可选, 默认 'medium'),
+  ///   tags: string (可选, JSON 数组字符串, 如 '["工作","紧急"]')
+  /// }
+  Future<String> _jsCreateTask(Map<String, dynamic> params) async {
     try {
+      final String? title = params['title'];
+
+      // 验证必需参数
+      if (title == null || title.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: title'});
+      }
+
+      final String? description = params['description'];
+      final String? startDateStr = params['startDate'];
+      final String? dueDateStr = params['dueDate'];
+      final String priorityStr = params['priority'] ?? 'medium';
+      final String? tagsJsonStr = params['tags'];
+
       // 解析优先级
       TaskPriority priority = TaskPriority.medium;
-      if (priorityStr != null && priorityStr.isNotEmpty) {
-        switch (priorityStr.toLowerCase()) {
-          case 'low':
-            priority = TaskPriority.low;
-            break;
-          case 'medium':
-            priority = TaskPriority.medium;
-            break;
-          case 'high':
-            priority = TaskPriority.high;
-            break;
-        }
+      switch (priorityStr.toLowerCase()) {
+        case 'low':
+          priority = TaskPriority.low;
+          break;
+        case 'medium':
+          priority = TaskPriority.medium;
+          break;
+        case 'high':
+          priority = TaskPriority.high;
+          break;
       }
 
       // 解析日期
@@ -355,12 +377,43 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 更新任务
-  /// 参数：taskId (必需), updateJson (必需, JSON 字符串)
-  /// updateJson 格式: {"title": "新标题", "priority": "high", ...}
-  Future<String> _jsUpdateTask(String taskId, String updateJsonStr) async {
+  /// 参数对象: {
+  ///   taskId: string (必需),
+  ///   updates: {
+  ///     title: string (可选),
+  ///     description: string (可选),
+  ///     priority: 'low' | 'medium' | 'high' (可选),
+  ///     status: 'todo' | 'inProgress' | 'in_progress' | 'done' (可选),
+  ///     startDate: string (可选, ISO 8601 格式),
+  ///     dueDate: string (可选, ISO 8601 格式),
+  ///     tags: array (可选, 标签数组)
+  ///   } (必需)
+  /// }
+  Future<String> _jsUpdateTask(Map<String, dynamic> params) async {
     try {
+      final String? taskId = params['taskId'];
+      final dynamic updatesData = params['updates'];
+
+      // 验证必需参数
+      if (taskId == null || taskId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: taskId'});
+      }
+
+      if (updatesData == null) {
+        return jsonEncode({'error': '缺少必需参数: updates'});
+      }
+
+      // 解析 updates 参数
+      Map<String, dynamic> updateData;
+      if (updatesData is String) {
+        updateData = jsonDecode(updatesData) as Map<String, dynamic>;
+      } else if (updatesData is Map) {
+        updateData = Map<String, dynamic>.from(updatesData);
+      } else {
+        return jsonEncode({'error': 'updates 参数格式错误,必须是对象或 JSON 字符串'});
+      }
+
       final task = taskController.tasks.firstWhere((t) => t.id == taskId);
-      final updateData = jsonDecode(updateJsonStr) as Map<String, dynamic>;
 
       // 更新字段
       if (updateData.containsKey('title')) {
@@ -423,9 +476,16 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除任务
-  /// 参数：taskId (必需)
-  Future<String> _jsDeleteTask(String taskId) async {
+  /// 参数对象: { taskId: string (必需) }
+  Future<String> _jsDeleteTask(Map<String, dynamic> params) async {
     try {
+      final String? taskId = params['taskId'];
+
+      // 验证必需参数
+      if (taskId == null || taskId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: taskId'});
+      }
+
       await taskController.deleteTask(taskId);
       return jsonEncode({'success': true, 'taskId': taskId});
     } catch (e) {
@@ -434,9 +494,16 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 完成任务（标记为已完成）
-  /// 参数：taskId (必需)
-  Future<String> _jsCompleteTask(String taskId) async {
+  /// 参数对象: { taskId: string (必需) }
+  Future<String> _jsCompleteTask(Map<String, dynamic> params) async {
     try {
+      final String? taskId = params['taskId'];
+
+      // 验证必需参数
+      if (taskId == null || taskId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: taskId'});
+      }
+
       await taskController.updateTaskStatus(taskId, TaskStatus.done);
       final task = taskController.tasks.firstWhere((t) => t.id == taskId);
       return jsonEncode(task.toJson());
