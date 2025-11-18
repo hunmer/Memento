@@ -42,7 +42,7 @@
       {"name": "title", "type": "string", "required": true, "description": "习惯名称"},
       {"name": "durationMinutes", "type": "number", "required": true, "description": "目标时长（分钟）"},
       {"name": "id", "type": "string", "required": false, "description": "自定义习惯ID，不提供则自动生成"},
-      {"name": "skillId", "type": "string", "required": false, "description": "关联的技能ID"},
+      {"name": "skillId", "type": "string", "required": false, "description": "关联的技能ID，如果不存在会自动创建新技能"},
       {"name": "notes", "type": "string", "required": false, "description": "备注"},
       {"name": "group", "type": "string", "required": false, "description": "分组"},
       {"name": "icon", "type": "string", "required": false, "description": "图标"},
@@ -66,10 +66,14 @@
       },
       {
         "title": "创建带自定义ID的习惯",
-        "code": "const habit = await Memento.plugins.habits.createHabit({id: 'habit_reading_001', title: '晨读', durationMinutes: 45});\nsetResult(`习惯已创建: ${habit.id} - ${habit.title}`);"
+        "code": "const habit = await Memento.plugins.habits.createHabit({id: 'habit123', title: '晨读', durationMinutes: 45});\nsetResult(`习惯已创建: ${habit.id} - ${habit.title}`);"
+      },
+      {
+        "title": "创建习惯并自动创建关联技能",
+        "code": "const habit = await Memento.plugins.habits.createHabit({title: '学习React', durationMinutes: 90, skillId: 'react_development'});\nsetResult(`习惯已创建: ${habit.title}，自动关联技能: ${habit.skillId}`);\n// 技能'react_development'会自动创建，标题也是'react_development'"
       }
     ],
-    "notes": "习惯可关联技能，完成记录会自动累积到技能的总时长（一万小时定律）",
+    "notes": "习惯可关联技能，完成记录会自动累积到技能的总时长（一万小时定律）。如果提供的skillId不存在，系统会自动创建一个新技能，使用skillId作为技能的ID和标题",
     "enabled": true
   },
   "updateHabit": {
@@ -252,7 +256,7 @@
     "examples": [
       {
         "title": "简单打卡",
-        "code": "const record = await Memento.plugins.habits.checkIn({habitId: 'habit123'});\nsetResult(`打卡成功，时长: ${record.duration.inMinutes} 分钟`);"
+        "code": "const record = await Memento.plugins.habits.checkIn({habitId: 'habit123'});\nsetResult(`打卡成功，时长: ${record.duration / 60} 分钟`);"
       },
       {
         "title": "带时长和备注的打卡",

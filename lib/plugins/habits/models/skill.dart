@@ -37,15 +37,15 @@ class Skill {
 
   factory Skill.fromMap(Map<String, dynamic> map) {
     return Skill(
-      id: map['id'],
-      title: map['title'],
+      id: map['id']?.toString() ?? '',
+      title: map['title']?.toString() ?? '',
       description: map['description'],
       notes: map['notes'],
       group: map['group'],
       icon: map['icon'],
       image: map['image'],
-      targetMinutes: map['targetMinutes'] ?? 0,
-      maxDurationMinutes: map['maxDurationMinutes'] ?? 0,
+      targetMinutes: (map['targetMinutes'] as num?)?.toInt() ?? 0,
+      maxDurationMinutes: (map['maxDurationMinutes'] as num?)?.toInt() ?? 0,
     );
   }
 }

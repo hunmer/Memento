@@ -43,6 +43,7 @@ class MobileStorage implements StorageInterface {
   /// 保存数据
   @override
   Future<void> saveData(String key, String value) async {
+    await _ensureInitialized();
     final fullPath = path.join(_basePath, key);
     final file = io.File(fullPath);
 
@@ -67,6 +68,7 @@ class MobileStorage implements StorageInterface {
   @override
   Future<String?> loadData(String key) async {
     try {
+      await _ensureInitialized();
       final fullPath = path.join(_basePath, key);
       final file = io.File(fullPath);
 
@@ -86,6 +88,7 @@ class MobileStorage implements StorageInterface {
   @override
   Future<void> removeData(String key) async {
     try {
+      await _ensureInitialized();
       final fullPath = path.join(_basePath, key);
       final file = io.File(fullPath);
 
@@ -101,6 +104,7 @@ class MobileStorage implements StorageInterface {
   @override
   Future<bool> hasData(String key) async {
     try {
+      await _ensureInitialized();
       final fullPath = path.join(_basePath, key);
       final file = io.File(fullPath);
       return await file.exists();
@@ -114,6 +118,7 @@ class MobileStorage implements StorageInterface {
   @override
   Future<void> saveJson(String key, dynamic data) async {
     try {
+      await _ensureInitialized();
       final jsonString = jsonEncode(data);
       await saveData(key, jsonString);
     } catch (e) {
@@ -125,6 +130,7 @@ class MobileStorage implements StorageInterface {
   @override
   Future<dynamic> loadJson(String key, [dynamic defaultValue]) async {
     try {
+      await _ensureInitialized();
       final jsonString = await loadData(key);
       if (jsonString == null || jsonString.isEmpty) {
         return defaultValue ?? {};
@@ -140,6 +146,7 @@ class MobileStorage implements StorageInterface {
   @override
   Future<List<String>> getKeysWithPrefix(String prefix) async {
     try {
+      await _ensureInitialized();
       final fullPath = path.join(_basePath, prefix);
       final directory = io.Directory(fullPath);
 
@@ -162,6 +169,7 @@ class MobileStorage implements StorageInterface {
   @override
   Future<void> clearWithPrefix(String prefix) async {
     try {
+      await _ensureInitialized();
       final keys = await getKeysWithPrefix(prefix);
       final prefs = await SharedPreferences.getInstance();
       for (final key in keys) {
@@ -186,6 +194,7 @@ class MobileStorage implements StorageInterface {
   /// 读取字符串内容
   @override
   Future<String> readString(String targetPath, [String? defaultValue]) async {
+    await _ensureInitialized();
     final fullPath = path.join(_basePath, targetPath);
     final file = io.File(fullPath);
     if (!await file.exists()) {
@@ -197,6 +206,7 @@ class MobileStorage implements StorageInterface {
   /// 写入字符串内容
   @override
   Future<void> writeString(String targetPath, String content) async {
+    await _ensureInitialized();
     final fullPath = path.join(_basePath, targetPath);
     final file = io.File(fullPath);
 
@@ -212,6 +222,7 @@ class MobileStorage implements StorageInterface {
   /// 删除文件
   @override
   Future<void> deleteFile(String targetPath) async {
+    await _ensureInitialized();
     final fullPath = path.join(_basePath, targetPath);
     final file = io.File(fullPath);
     if (await file.exists()) {

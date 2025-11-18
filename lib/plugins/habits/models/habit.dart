@@ -43,15 +43,15 @@ class Habit {
 
   factory Habit.fromMap(Map<String, dynamic> map) {
     return Habit(
-      id: map['id'],
-      title: map['title'],
+      id: map['id']?.toString() ?? '',
+      title: map['title']?.toString() ?? '',
       notes: map['notes'],
       group: map['group'],
       icon: map['icon'],
       image: map['image'],
       reminderDays: List<int>.from(map['reminderDays'] ?? []),
-      intervalDays: map['intervalDays'] ?? 0,
-      durationMinutes: map['durationMinutes'],
+      intervalDays: (map['intervalDays'] as num?)?.toInt() ?? 0,
+      durationMinutes: (map['durationMinutes'] as num?)?.toInt() ?? 0,
       tags: List<String>.from(map['tags'] ?? []),
       skillId: map['skillId'],
     );

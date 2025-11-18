@@ -229,7 +229,8 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
   /// 获取所有习惯
   Future<String> _jsGetHabits(Map<String, dynamic> params) async {
-    final habits = _habitController.getHabits();
+    // 确保习惯数据已加载完成
+    final habits = await _habitController.loadHabits();
     return jsonEncode(habits.map((h) => h.toMap()).toList());
   }
 
@@ -241,7 +242,8 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: habitId'});
     }
 
-    final habits = _habitController.getHabits();
+    // 确保习惯数据已加载完成
+    final habits = await _habitController.loadHabits();
     try {
       final habit = habits.firstWhere((h) => h.id == habitId);
       return jsonEncode(habit.toMap());
@@ -265,21 +267,40 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
     // 可选参数
     final String? habitId = params['id']; // 支持自定义ID，方便调试
-    final String? skillId = params['skillId'];
+    String? skillId = params['skillId'];
     final String? notes = params['notes'];
     final String? group = params['group'];
     final String? icon = params['icon'];
     final String? image = params['image'];
-    final List<int>? reminderDays = params['reminderDays'] != null
-        ? List<int>.from(params['reminderDays'])
-        : null;
+    final List<int>? reminderDays =
+        params['reminderDays'] != null
+            ? List<int>.from(params['reminderDays'])
+            : null;
     final int? intervalDays = params['intervalDays'];
-    final List<String>? tags = params['tags'] != null
-        ? List<String>.from(params['tags'])
-        : null;
+    final List<String>? tags =
+        params['tags'] != null ? List<String>.from(params['tags']) : null;
+
+    // 如果提供了skillId，检查技能是否存在，不存在则自动创建
+    if (skillId != null && skillId.isNotEmpty) {
+      try {
+        _skillController.getSkillById(skillId);
+        // 技能存在，不做任何操作
+      } catch (e) {
+        // 技能不存在，自动创建一个新技能
+        final newSkill = Skill(
+          id: skillId,
+          title: skillId, // 使用skillId作为标题
+          description: '自动创建的技能，关联习惯：$title',
+          targetMinutes: 0,
+          maxDurationMinutes: 0,
+        );
+        await _skillController.saveSkill(newSkill);
+      }
+    }
 
     // 如果没有提供自定义ID，则生成新的习惯ID
-    final finalHabitId = habitId ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final finalHabitId =
+        habitId ?? DateTime.now().millisecondsSinceEpoch.toString();
 
     final habit = Habit(
       id: finalHabitId,
@@ -307,7 +328,8 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: habitId'});
     }
 
-    final habits = _habitController.getHabits();
+    // 确保习惯数据已加载完成
+    final habits = await _habitController.loadHabits();
     try {
       final existingHabit = habits.firstWhere((h) => h.id == habitId);
 
@@ -346,7 +368,8 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
   /// 获取所有技能
   Future<String> _jsGetSkills(Map<String, dynamic> params) async {
-    final skills = _skillController.getSkills();
+    // 确保技能数据已加载完成
+    final skills = await _skillController.loadSkills();
     return jsonEncode(skills.map((s) => s.toMap()).toList());
   }
 
@@ -360,7 +383,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
     try {
       final skill = _skillController.getSkillById(skillId);
-      return jsonEncode(skill.toMap());
+      return jsonEncode(skill!.toMap());
     } catch (e) {
       return jsonEncode({'error': 'Skill not found: $skillId'});
     }
@@ -385,7 +408,8 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     final int? maxDurationMinutes = params['maxDurationMinutes'];
 
     // 如果没有提供自定义ID，则生成新的技能ID
-    final finalSkillId = skillId ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final finalSkillId =
+        skillId ?? DateTime.now().millisecondsSinceEpoch.toString();
 
     final skill = Skill(
       id: finalSkillId,
@@ -415,7 +439,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
       final existingSkill = _skillController.getSkillById(skillId);
 
       // 合并现有数据和更新数据
-      final skillMap = existingSkill.toMap();
+      final skillMap = existingSkill!.toMap();
       final updates = Map<String, dynamic>.from(params);
       updates.remove('skillId');
       skillMap.addAll(updates);
@@ -437,6 +461,16 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
         return jsonEncode({'success': false, 'error': '缺少必需参数: skillId'});
       }
 
+      // 先检查技能是否存在
+      try {
+        _skillController.getSkillById(skillId);
+      } catch (e) {
+        return jsonEncode({
+          'success': false,
+          'error': 'Skill not found: $skillId',
+        });
+      }
+
       await _skillController.deleteSkill(skillId);
       return jsonEncode({'success': true, 'skillId': skillId});
     } catch (e) {
@@ -456,14 +490,16 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     final int? durationSeconds = params['durationSeconds'];
     final String? notes = params['notes'];
 
-    final habits = _habitController.getHabits();
+    // 确保习惯数据已加载完成
+    final habits = await _habitController.loadHabits();
     try {
       final habit = habits.firstWhere((h) => h.id == habitId);
 
       final recordId = DateTime.now().millisecondsSinceEpoch.toString();
-      final duration = durationSeconds != null
-          ? Duration(seconds: durationSeconds)
-          : Duration(minutes: habit.durationMinutes);
+      final duration =
+          durationSeconds != null
+              ? Duration(seconds: durationSeconds)
+              : Duration(minutes: habit.durationMinutes);
 
       final record = CompletionRecord(
         id: recordId,
@@ -476,7 +512,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
       await _recordController.saveCompletionRecord(habitId, record);
       return jsonEncode(record.toMap());
     } catch (e) {
-      return jsonEncode({'error': 'Habit not found: $habitId'});
+      return jsonEncode({'error': 'Habit not found: $habitId. Details: $e'});
     }
   }
 
@@ -494,9 +530,10 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     final records = await _recordController.getHabitCompletionRecords(habitId);
 
     // 如果指定了 limit，只返回最新的 N 条记录
-    final List<CompletionRecord> resultRecords = limit != null && limit < records.length
-        ? records.sublist(records.length - limit)
-        : records;
+    final List<CompletionRecord> resultRecords =
+        limit != null && limit < records.length
+            ? records.sublist(records.length - limit)
+            : records;
 
     return jsonEncode(resultRecords.map((r) => r.toMap()).toList());
   }
@@ -537,13 +574,15 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
   /// 获取今日需要打卡的习惯
   Future<String> _jsGetTodayHabits(Map<String, dynamic> params) async {
-    final habits = _habitController.getHabits();
+    // 确保习惯数据已加载完成
+    final habits = await _habitController.loadHabits();
     final today = DateTime.now().weekday % 7; // 转换为 0-6 (周日-周六)
 
-    final todayHabits = habits.where((habit) {
-      // 如果是每日习惯（intervalDays == 0）或包含今日的提醒日期
-      return habit.intervalDays == 0 || habit.reminderDays.contains(today);
-    }).toList();
+    final todayHabits =
+        habits.where((habit) {
+          // 如果是每日习惯（intervalDays == 0）或包含今日的提醒日期
+          return habit.intervalDays == 0 || habit.reminderDays.contains(today);
+        }).toList();
 
     return jsonEncode(todayHabits.map((h) => h.toMap()).toList());
   }
@@ -559,13 +598,15 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     // 可选参数
     final int? initialSeconds = params['initialSeconds'];
 
-    final habits = _habitController.getHabits();
+    // 确保习惯数据已加载完成
+    final habits = await _habitController.loadHabits();
     try {
       final habit = habits.firstWhere((h) => h.id == habitId);
 
-      final initialDuration = initialSeconds != null
-          ? Duration(seconds: initialSeconds)
-          : Duration(minutes: habit.durationMinutes);
+      final initialDuration =
+          initialSeconds != null
+              ? Duration(seconds: initialSeconds)
+              : Duration(minutes: habit.durationMinutes);
 
       // 启动计时器（使用空回调，因为 JS API 不需要实时更新）
       _timerController.startTimer(
@@ -594,10 +635,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
     _timerController.stopTimer(habitId);
 
-    return jsonEncode({
-      'habitId': habitId,
-      'status': 'stopped',
-    });
+    return jsonEncode({'habitId': habitId, 'status': 'stopped'});
   }
 
   /// 获取计时器状态
@@ -612,10 +650,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     final isRunning = _timerController.isHabitTiming(habitId);
 
     if (timerData == null) {
-      return jsonEncode({
-        'habitId': habitId,
-        'isRunning': false,
-      });
+      return jsonEncode({'habitId': habitId, 'isRunning': false});
     }
 
     return jsonEncode({
