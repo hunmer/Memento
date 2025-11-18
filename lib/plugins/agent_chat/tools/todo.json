@@ -141,6 +141,11 @@
             "optional": false,
             "description": "任务标题(必需)"
           },
+          "id": {
+            "type": "string",
+            "optional": true,
+            "description": "任务ID(可选,不提供则自动生成)"
+          },
           "description": {
             "type": "string",
             "optional": true,
@@ -181,9 +186,13 @@
       {
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst startTime = today.toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst endDate = new Date(today);\nendDate.setDate(today.getDate() + 5);\nconst endTime = endDate.toISOString().replace(/T.*/, 'T18:00:00.000Z');\nconst task2 = await Memento.plugins.todo.createTask({\n  title: '编写需求分析',\n  description: '详细描述项目需求和功能点',\n  startDate: startTime,\n  dueDate: endTime,\n  priority: 'high',\n  tags: '[\"工作\",\"文档\",\"紧急\"]'\n});\nsetResult(task2);",
         "comment": "创建完整任务(从今天到5天后)"
+      },
+      {
+        "code": "const task3 = await Memento.plugins.todo.createTask({\n  id: 'task123',\n  title: '重要会议',\n  description: '与客户讨论项目进展',\n  priority: 'high',\n  tags: '[\"工作\",\"会议\"]'\n});\nsetResult(`任务已创建，自定义ID: ${task3.id}`);",
+        "comment": "使用自定义ID创建任务"
       }
     ],
-    "notes": "日期参数必须使用 ISO 8601 格式字符串。tags 需要传入 JSON 字符串格式。",
+    "notes": "必需参数: title(任务标题);可选参数: id(自定义ID)、description(任务描述)、startDate/dueDate(日期)、priority(优先级)、tags(标签);如果不提供id会自动生成UUID;ID不能与现有任务重复;日期参数必须使用 ISO 8601 格式字符串;tags 需要传入 JSON 字符串格式。",
     "enabled": true
   },
   "todo_updateTask": {

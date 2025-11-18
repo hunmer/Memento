@@ -20,6 +20,7 @@
     "title": "创建纪念日",
     "description": "创建一个新的纪念日",
     "parameters": [
+      {"name": "id", "type": "string", "required": false, "description": "纪念日ID(可选,不传则自动生成)"},
       {"name": "name", "type": "string", "required": true, "description": "纪念日名称"},
       {"name": "date", "type": "string", "required": true, "description": "日期字符串(格式:YYYY-MM-DD)"},
       {"name": "notesJson", "type": "string", "required": false, "description": "笔记列表(JSON数组字符串)"},
@@ -35,11 +36,15 @@
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst nextYear = timeInfo.year + 1;\nconst newYearDate = `${nextYear}-01-01`;\nconst result = await Memento.plugins.day.createMemorialDay({name: '新年', date: newYearDate});\nsetResult(result.success ? `纪念日已创建: ${result.data.title}` : result.error);"
       },
       {
+        "title": "创建带自定义ID的纪念日",
+        "code": "const result = await Memento.plugins.day.createMemorialDay({\n  id: 'day123',\n  name: '测试纪念日',\n  date: '2025-12-31'\n});\nsetResult(result.success ? `创建成功，ID: ${result.data.id}` : result.error);"
+      },
+      {
         "title": "创建带笔记的纪念日",
         "code": "const result = await Memento.plugins.day.createMemorialDay({\n  name: '生日',\n  date: '2025-06-15',\n  notesJson: JSON.stringify(['准备礼物', '订餐厅'])\n});\nsetResult(result.success ? '创建成功' : result.error);"
       }
     ],
-    "notes": "必需参数: name(名称)、date(日期);可选参数: notesJson(笔记数组)、backgroundColor(颜色值)",
+    "notes": "必需参数: name(名称)、date(日期);可选参数: id(自定义ID)、notesJson(笔记数组)、backgroundColor(颜色值)",
     "enabled": true
   },
   "updateMemorialDay": {

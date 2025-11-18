@@ -298,6 +298,7 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// 创建任务
   /// 参数对象: {
   ///   title: string (必需),
+  ///   id: string (可选, 自定义ID),
   ///   description: string (可选),
   ///   startDate: string (可选, ISO 8601 格式),
   ///   dueDate: string (可选, ISO 8601 格式),
@@ -313,11 +314,20 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         return jsonEncode({'error': '缺少必需参数: title'});
       }
 
+      final String? id = params['id'];
       final String? description = params['description'];
       final String? startDateStr = params['startDate'];
       final String? dueDateStr = params['dueDate'];
       final String priorityStr = params['priority'] ?? 'medium';
       final String? tagsJsonStr = params['tags'];
+
+      // 检查自定义ID是否已存在
+      if (id != null && id.isNotEmpty) {
+        final existingTask = taskController.tasks.where((t) => t.id == id).firstOrNull;
+        if (existingTask != null) {
+          return jsonEncode({'error': '任务ID已存在: $id'});
+        }
+      }
 
       // 解析优先级
       TaskPriority priority = TaskPriority.medium;
@@ -359,7 +369,7 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
       // 创建任务
       final task = Task(
-        id: const Uuid().v4(),
+        id: (id != null && id.isNotEmpty) ? id : const Uuid().v4(),
         title: title,
         description: description,
         createdAt: DateTime.now(),

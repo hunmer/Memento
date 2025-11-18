@@ -68,6 +68,12 @@
         "description": "笔记内容，支持 Markdown 格式"
       },
       {
+        "name": "id",
+        "type": "string",
+        "optional": true,
+        "description": "笔记ID(可选,不提供则自动生成)"
+      },
+      {
         "name": "folderId",
         "type": "string",
         "optional": true,
@@ -92,9 +98,13 @@
       {
         "code": "const note2 = await Memento.plugins.notes.createNote(\n  '会议记录',\n  '# 产品会议\\n\\n讨论内容...',\n  'work_folder_id',\n  ['会议', '产品']\n);\nsetResult(note2);",
         "comment": "创建带标签的笔记"
+      },
+      {
+        "code": "const note3 = await Memento.plugins.notes.createNote(\n  '项目计划',\n  '# Q1项目计划\\n\\n## 目标\\n- 完成产品开发\\n- 上线测试版本\\n\\n## 时间线\\n- 1月：需求分析\\n- 2月：开发阶段\\n- 3月：测试上线',\n  'note123',\n  'project_folder_id',\n  ['工作', '项目', '重要']\n);\nsetResult(`笔记已创建，自定义ID: ${note3.id}`);",
+        "comment": "使用自定义ID创建笔记"
       }
     ],
-    "notes": "content 参数支持 Markdown 格式。tags 参数直接传数组，不是 JSON 字符串。",
+    "notes": "必需参数: title(笔记标题)、content(笔记内容);可选参数: id(自定义ID)、folderId(文件夹ID)、tags(标签数组);如果不提供id会自动生成UUID;ID不能与现有笔记重复;content 参数支持 Markdown 格式;tags 参数直接传数组，不是 JSON 字符串。",
     "enabled": true
   },
   "notes_updateNote": {

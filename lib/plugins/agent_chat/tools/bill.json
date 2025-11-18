@@ -81,7 +81,7 @@
     "examples": [
       {
         "title": "删除账户",
-        "code": "const success = await Memento.plugins.bill.deleteAccount({accountId: 'acc123'});\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.bill.deleteAccount({accountId: 'acc123'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
       }
     ],
     "notes": "删除操作不可逆，会同时删除该账户下的所有账单",
@@ -124,6 +124,7 @@
       {"name": "amount", "type": "number", "required": true, "description": "金额（正数=收入，负数=支出）"},
       {"name": "category", "type": "string", "required": true, "description": "分类（如：工资、餐饮、交通）"},
       {"name": "title", "type": "string", "required": true, "description": "账单标题"},
+      {"name": "id", "type": "string", "required": false, "description": "账单ID(可选,不提供则自动生成)"},
       {"name": "date", "type": "string", "required": false, "description": "日期（格式：YYYY-MM-DD，默认今天）"},
       {"name": "note", "type": "string", "required": false, "description": "备注"},
       {"name": "tag", "type": "string", "required": false, "description": "标签"}
@@ -142,11 +143,15 @@
         "code": "const bill = await Memento.plugins.bill.createBill({accountId: 'acc123', amount: -120, category: '餐饮', title: '午餐', note: '公司食堂'});\nsetResult('已记录午餐支出 120元');"
       },
       {
+        "title": "使用自定义ID创建账单",
+        "code": "const bill = await Memento.plugins.bill.createBill({\n  accountId: 'acc123',\n  amount: -299,\n  category: '购物',\n  title: '购买书籍',\n  id: 'bill123',\n  date: '2025-01-15',\n  note: '技术书籍《代码大全》'\n});\nsetResult(`账单已创建，自定义ID: ${bill.id}`);"
+      },
+      {
         "title": "自动使用首个账户创建账单",
         "code": "const accounts = await Memento.plugins.bill.getAccounts({});\nif (accounts.length === 0) {\n  setResult('错误：没有可用账户，请先创建账户');\n} else {\n  const firstAccountId = accounts[0].id;\n  const bill = await Memento.plugins.bill.createBill({accountId: firstAccountId, amount: -88, category: '交通', title: '地铁费'});\n  setResult(`已在账户 ${accounts[0].title} 中创建账单`);\n}"
       }
     ],
-    "notes": "金额为正数记录收入，负数记录支出；不提供日期时使用当天日期",
+    "notes": "必需参数: accountId(账户ID)、amount(金额)、category(分类)、title(账单标题);可选参数: id(自定义ID)、date(日期)、note(备注)、tag(标签);如果不提供id会自动生成UUID;ID不能与现有账单重复;金额为正数记录收入，负数记录支出;不提供日期时使用当天日期",
     "enabled": true
   },
   "updateBill": {
@@ -189,7 +194,7 @@
     "examples": [
       {
         "title": "删除账单",
-        "code": "const success = await Memento.plugins.bill.deleteBill({accountId: 'acc123', billId: 'bill456'});\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.bill.deleteBill({accountId: 'acc123', billId: 'bill456'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
       }
     ],
     "notes": "删除操作不可逆",

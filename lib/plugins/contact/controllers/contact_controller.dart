@@ -99,7 +99,12 @@ class ContactController {
   // 获取联系人
   Future<Contact?> getContact(String id) async {
     final contacts = await getAllContacts();
-    return contacts.firstWhere((c) => c.id == id);
+    for (final contact in contacts) {
+      if (contact.id == id) {
+        return contact;
+      }
+    }
+    return null;
   }
 
   // 获取所有交互记录
