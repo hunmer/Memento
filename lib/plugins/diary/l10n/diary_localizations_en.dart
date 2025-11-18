@@ -18,7 +18,6 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
   @override
   String get clearSelection => 'Clear Selection';
 
-  @override
   String get close => 'Close';
 
   @override
@@ -42,10 +41,8 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
   @override
   String get editActivity => 'Edit Activity';
 
-  @override
   String get cancel => 'Cancel';
 
-  @override
   String get save => 'Save';
 
   @override
@@ -57,19 +54,14 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
   @override
   String get activityDescription => 'Activity Description';
 
-  @override
   String get startTime => 'Start Time';
 
-  @override
   String get endTime => 'End Time';
 
-  @override
   String get interval => 'Interval';
 
-  @override
   String get minutes => 'minutes';
 
-  @override
   String get tags => 'Tags';
 
   @override

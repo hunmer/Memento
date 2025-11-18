@@ -309,7 +309,7 @@ class _ScriptEditDialogState extends State<ScriptEditDialog> {
 
                       // 脚本类型
                       DropdownButtonFormField<String>(
-                        value: _selectedType,
+                        initialValue: _selectedType,
                         decoration: const InputDecoration(
                           labelText: '脚本类型',
                           prefixIcon: Icon(Icons.category),

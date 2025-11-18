@@ -153,7 +153,7 @@ class JSConsoleController extends ChangeNotifier {
           final examples = jsonData['examples'] as List<dynamic>? ?? [];
 
           // 创建文件信息对象
-          final fileName = filePath.split('/').last.replaceAll('_examples.json', '');
+          filePath.split('/').last.replaceAll('_examples.json', '');
           final fileInfo = ExampleFile(
             name: category,
             path: filePath,

@@ -86,7 +86,7 @@ class ScriptCard extends StatelessWidget {
                   Switch(
                     value: script.enabled,
                     onChanged: onToggle,
-                    activeColor: Colors.deepPurple,
+                    activeThumbColor: Colors.deepPurple,
                   ),
                 ],
               ),

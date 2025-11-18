@@ -228,7 +228,6 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     // 可选参数
-    final String? contextJson = params['contextJson'];
 
     try {
       // 获取助手信息

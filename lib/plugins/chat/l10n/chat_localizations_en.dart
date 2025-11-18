@@ -141,9 +141,7 @@ class ChatLocalizationsEn extends ChatLocalizations {
 
   String get reset => 'Reset';
 
-  @override
-  String get apply => 'Apply';
-
+  
   @override
   String get setBackground => 'Set Background';
 
@@ -209,8 +207,6 @@ class ChatLocalizationsEn extends ChatLocalizations {
   String get settings => 'Settings';
   @override
   String get editMessage => 'Edit Message';
-  @override
-  String get save => 'Save';
   @override
   String get deleteMessage => 'Delete Message';
   @override
@@ -313,7 +309,6 @@ class ChatLocalizationsEn extends ChatLocalizations {
   String get deleteChannelConfirmation =>
       'Are you sure you want to delete channel "\${channel.title}"? This action cannot be undone.';
 
-  @override
   String get fileOpenFailed => 'Failed to open file: \$e';
 
   @override

@@ -1,4 +1,3 @@
-import 'package:Memento/core/plugin_manager.dart';
 import '../services/prompt_replacements.dart';
 import '../../openai/openai_plugin.dart';
 

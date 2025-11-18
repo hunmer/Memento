@@ -17,7 +17,7 @@ class StatusDropdown extends StatelessWidget {
     final l10n = NodesLocalizations.of(context);
 
     return DropdownButtonFormField<NodeStatus>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: l10n.status,
         border: const OutlineInputBorder(),

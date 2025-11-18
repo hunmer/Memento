@@ -428,7 +428,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                 }
                                 completer.complete(null);
                               }
-                            case CropFailure(:final cause):
+                            case CropFailure():
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(

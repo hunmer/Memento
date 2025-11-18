@@ -333,7 +333,7 @@ class _ScriptRunDialogState extends State<ScriptRunDialog> {
   /// 构建下拉选择字段
   Widget _buildSelectInput(ScriptInput input) {
     return DropdownButtonFormField<String>(
-      value: _selectValues[input.key],
+      initialValue: _selectValues[input.key],
       decoration: InputDecoration(
         labelText: input.label + (input.required ? ' *' : ''),
         helperText: input.description,

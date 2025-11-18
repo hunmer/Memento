@@ -160,7 +160,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog>
                       PaintingBinding.instance.imageCache.clearLiveImages();
 
                       // 通知所有监听器（包括聊天消息气泡）更新
-                      widget.chatPlugin.notifyListeners();
+                      widget.chatPlugin.refresh();
 
                       if (context.mounted) {
                         // 返回更新后的用户对象

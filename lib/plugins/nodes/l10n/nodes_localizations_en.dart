@@ -54,38 +54,27 @@ class NodesLocalizationsEn extends NodesLocalizations {
   @override
   String get movedTo => 'Moved to {targetFolder.name}';
 
-  @override
   String get sortByName => 'Sort by name';
 
-  @override
   String get sortByDate => 'Sort by date';
 
-  @override
   String get sortByPriority => 'Sort by priority';
 
-  @override
   String get filterAll => 'All';
 
-  @override
   String get filterCompleted => 'Completed';
 
-  @override
   String get filterPending => 'Pending';
 
-  @override
   String get nodeStatusCompleted => 'Completed';
 
-  @override
   String get nodeStatusPending => 'Pending';
 
-  @override
   String get confirmCompleteNode =>
       'Are you sure you want to mark this node as completed?';
 
-  @override
   String get confirmReopenNode => 'Are you sure you want to reopen this node?';
 
-  @override
   String get emptyNodesMessage =>
       'No nodes yet, click the button below to create';
 

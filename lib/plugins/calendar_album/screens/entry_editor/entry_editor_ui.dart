@@ -187,7 +187,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
           labelText: l10n.mood,
           border: const OutlineInputBorder(),
         ),
-        value: controller.mood,
+        initialValue: controller.mood,
         items:
             [
                   'Happy',
@@ -218,7 +218,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
           labelText: l10n.weather,
           border: const OutlineInputBorder(),
         ),
-        value: controller.weather,
+        initialValue: controller.weather,
         items:
             [
                   'Sunny',

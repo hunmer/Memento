@@ -255,7 +255,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
 
   Widget _buildTagSelector() {
     return DropdownButtonFormField<String>(
-      value: _tag,
+      initialValue: _tag,
       decoration: InputDecoration(
         labelText: BillLocalizations.of(context).category,
         border: const OutlineInputBorder(),

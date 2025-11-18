@@ -412,7 +412,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _dateType,
+              initialValue: _dateType,
               decoration: InputDecoration(
                 labelText: TrackerLocalizations.of(context).dateSettings,
               ),

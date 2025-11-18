@@ -88,6 +88,7 @@ class BackupService {
   }
 
   void dispose() {
+    // ignore: deprecated_member_use_from_same_package
     EventManager.instance.unsubscribeById(_subscriptionId);
   }
 }

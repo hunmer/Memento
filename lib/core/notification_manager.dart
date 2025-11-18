@@ -1,5 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// ignore: depend_on_referenced_packages
 import 'package:timezone/timezone.dart' as tz;
+// ignore: depend_on_referenced_packages
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:logging/logging.dart';
 

@@ -1,5 +1,6 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:flutter_js/flutter_js.dart';
 import 'js_engine_interface.dart';
 
@@ -253,7 +254,6 @@ class MobileJSEngine implements JSEngine {
     // Toast 处理器
     _runtime.onMessage('_flutterToast', (dynamic data) {
       try {
-        final callId = data['callId'];
         final config = data['config'];
         final message = config['message'] as String;
         final duration = config['duration'] as String;

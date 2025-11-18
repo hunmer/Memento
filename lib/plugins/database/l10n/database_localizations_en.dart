@@ -27,10 +27,8 @@ class DatabaseLocalizationsEn extends DatabaseLocalizations {
   @override
   String get cancel => 'Cancel';
 
-  @override
   String get save => 'Save';
 
-  @override
   String get ok => 'OK';
 
   @override
@@ -81,7 +79,6 @@ class DatabaseLocalizationsEn extends DatabaseLocalizations {
   @override
   String get addDatabaseHint => 'Click the button below to add';
 
-  @override
   String get copySuccessMessage => 'Copy successful';
 
   @override

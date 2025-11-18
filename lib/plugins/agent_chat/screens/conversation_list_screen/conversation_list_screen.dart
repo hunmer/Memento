@@ -122,8 +122,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               : _buildConversationList(),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreateConversationDialog,
-        child: const Icon(Icons.add),
         tooltip: '新建会话',
+        child: const Icon(Icons.add),
       ),
     );
   }

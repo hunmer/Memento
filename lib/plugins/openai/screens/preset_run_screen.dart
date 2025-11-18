@@ -40,7 +40,7 @@ class _PresetRunScreenState extends State<PresetRunScreen>
   // 表单相关
   final TextEditingController _promptController = TextEditingController();
   AIAgent? _selectedAgent;
-  List<File> _selectedImages = [];
+  final List<File> _selectedImages = [];
   bool _isLoading = false;
   String _responseMessage = '';
 
@@ -362,7 +362,7 @@ class _PresetRunScreenState extends State<PresetRunScreen>
 
   /// 打开智能体选择器
   void _openAgentSelector() {
-    final localizations = OpenAILocalizations.of(context);
+    OpenAILocalizations.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

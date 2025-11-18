@@ -24,7 +24,7 @@ class ConversationController extends ChangeNotifier {
   String _searchQuery = '';
 
   /// 选中的分组过滤器（空列表表示显示所有）
-  List<String> _selectedGroupFilters = [];
+  final List<String> _selectedGroupFilters = [];
 
   /// 选中的Agent过滤器（null表示显示所有）
   String? _selectedAgentFilter;

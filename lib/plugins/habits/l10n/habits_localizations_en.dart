@@ -261,99 +261,63 @@ class HabitsLocalizationsEn extends HabitsLocalizations {
   String get totalDuration => 'Total duration';
 
   // New habit tracking related strings
-  @override
   String get habitTarget => 'Target';
 
-  @override
-  String get habitTargetHint => 'Set your habit target';
-
-  @override
+  
   String get habitProgress => 'Progress';
 
-  @override
   String get habitReminderTime => 'Reminder Time';
 
-  @override
   String get habitStartDate => 'Start Date';
 
-  @override
   String get habitEndDate => 'End Date';
 
-  @override
   String get habitActiveDays => 'Active Days';
 
-  @override
   String get habitMotivation => 'Motivation';
 
-  @override
-  String get habitDifficulty => 'Difficulty';
-
-  @override
-  String get habitCategory => 'Category';
-
-  @override
+  
   String get habitTags => 'Tags';
 
-  @override
   String get habitNotes => 'Notes';
 
-  @override
   String get habitLog => 'Log';
 
-  @override
   String get habitCalendar => 'Calendar';
 
-  @override
   String get habitAnalytics => 'Analytics';
 
-  @override
   String get habitShare => 'Share';
 
-  @override
   String get habitExport => 'Export';
 
-  @override
   String get habitImport => 'Import';
 
-  @override
   String get habitReset => 'Reset';
 
-  @override
   String get habitArchive => 'Archive';
 
-  @override
   String get habitRestore => 'Restore';
 
-  @override
   String get habitDuplicate => 'Duplicate';
 
-  @override
   String get habitTemplate => 'Template';
 
-  @override
   String get habitChallenge => 'Challenge';
 
-  @override
   String get habitReward => 'Reward';
 
-  @override
   String get habitReminderNotification => 'Reminder Notification';
 
-  @override
   String get habitCompletionNotification => 'Completion Notification';
 
-  @override
   String get habitStreakBrokenNotification => 'Streak Broken Notification';
 
-  @override
   String get habitSettings => 'Settings';
 
-  @override
   String get habitHelp => 'Help';
 
-  @override
   String get habitFeedback => 'Feedback';
 
-  @override
   String get habitAbout => 'About';
 }

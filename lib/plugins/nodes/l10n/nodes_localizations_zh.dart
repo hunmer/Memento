@@ -51,37 +51,26 @@ class NodesLocalizationsZh extends NodesLocalizations {
   @override
   String get movedTo => '已移动到 {targetFolder.name}';
 
-  @override
   String get sortByName => '按名称排序';
 
-  @override
   String get sortByDate => '按日期排序';
 
-  @override
   String get sortByPriority => '按优先级排序';
 
-  @override
   String get filterAll => '全部';
 
-  @override
   String get filterCompleted => '已完成';
 
-  @override
   String get filterPending => '待完成';
 
-  @override
   String get nodeStatusCompleted => '已完成';
 
-  @override
   String get nodeStatusPending => '待完成';
 
-  @override
   String get confirmCompleteNode => '确定要将此节点标记为已完成吗？';
 
-  @override
   String get confirmReopenNode => '确定要重新打开此节点吗？';
 
-  @override
   String get emptyNodesMessage => '暂无节点，点击下方按钮创建';
 
   @override

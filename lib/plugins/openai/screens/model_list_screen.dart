@@ -347,7 +347,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedGroup,
+                initialValue: _selectedGroup,
                 decoration: InputDecoration(
                   labelText: OpenAILocalizations.of(context).modelGroup,
                 ),

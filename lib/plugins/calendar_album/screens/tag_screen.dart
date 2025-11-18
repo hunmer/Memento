@@ -19,6 +19,7 @@ class _TagItem {
   final String tag;
   bool active;
 
+  // ignore: unused_element_parameter
   _TagItem(this.tag, {this.active = false});
 }
 

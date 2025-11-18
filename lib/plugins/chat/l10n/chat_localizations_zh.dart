@@ -143,13 +143,10 @@ class ChatLocalizationsZh extends ChatLocalizations {
   @override
   String get noUsersAvailable => '没有可用的用户';
 
-  @override
   String get cancel => '取消';
 
-  @override
   String get reset => '重置';
 
-  @override
   String get apply => '应用';
 
   @override
@@ -217,7 +214,6 @@ class ChatLocalizationsZh extends ChatLocalizations {
   String get settings => '设置';
   @override
   String get editMessage => '编辑消息';
-  @override
   String get save => '保存';
   @override
   String get deleteMessage => '删除消息';
@@ -310,7 +306,6 @@ class ChatLocalizationsZh extends ChatLocalizations {
   String get deleteChannelConfirmation =>
       '确定要删除频道"\${channel.title}"吗？此操作不可撤销。';
 
-  @override
   String get fileOpenFailed => '打开文件失败: \$e';
 
   @override

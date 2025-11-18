@@ -56,6 +56,7 @@ class ConfigManager {
     } else if (parts.length > 1) {
       return Locale(parts[0], parts[1]);
     }
+    // ignore: deprecated_member_use
     return WidgetsBinding.instance.window.locale;
   }
 

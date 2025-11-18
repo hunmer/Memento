@@ -230,7 +230,7 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
 
                       // 数据类型
                       DropdownButtonFormField<String>(
-                        value: _selectedType,
+                        initialValue: _selectedType,
                         decoration: const InputDecoration(
                           labelText: '数据类型',
                           prefixIcon: Icon(Icons.category),

@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'dart:convert' show json;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as path;
 import '../../../core/storage/storage_manager.dart';
 import '../models/script_info.dart';
@@ -114,34 +112,6 @@ class ScriptLoader {
     }
   }
 
-  /// 加载内置脚本的元数据
-  Future<ScriptInfo?> _loadBuiltInScriptMetadata(
-    String scriptId,
-    String assetsPath,
-  ) async {
-    try {
-      final metadataPath = '$assetsPath/${scriptId}_metadata.json';
-
-      // 从 assets 加载 JSON 文件
-      final jsonString = await rootBundle.loadString(metadataPath);
-      final jsonData = json.decode(jsonString);
-
-      if (jsonData is! Map<String, dynamic>) {
-        print('⚠️ 无效的元数据格式: $scriptId');
-        return null;
-      }
-
-      // 创建 ScriptInfo 对象
-      return ScriptInfo.fromJson(
-        jsonData,
-        id: scriptId,
-        path: '$assetsPath/$scriptId',
-      );
-    } catch (e) {
-      print('❌ 加载内置脚本元数据失败: $scriptId, 错误: $e');
-      return null;
-    }
-  }
 
   /// Web平台扫描脚本（使用索引文件）
   Future<List<ScriptInfo>> _scanScriptsWeb(String scriptsPath) async {

@@ -13,22 +13,21 @@ mixin FolderOperations on NotesMainViewState {
       builder:
           (context) => AlertDialog(
             title: Text(
-              NotesLocalizations.of(context).newFolder ?? 'New Folder',
+              NotesLocalizations.of(context).newFolder,
             ),
             content: TextField(
               controller: folderNameController,
               autofocus: true,
               decoration: InputDecoration(
                 hintText:
-                    NotesLocalizations.of(context).folderNameHint ??
-                    'Folder name',
+                    NotesLocalizations.of(context).folderNameHint,
               ),
               onSubmitted: (value) => Navigator.pop(context, value),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(NotesLocalizations.of(context).cancel ?? 'Cancel'),
+                child: Text(NotesLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -37,7 +36,7 @@ mixin FolderOperations on NotesMainViewState {
                   }
                 },
                 child: Text(
-                  NotesLocalizations.of(context).confirm ?? 'Confirm',
+                  NotesLocalizations.of(context).confirm,
                 ),
               ),
             ],
@@ -58,7 +57,7 @@ mixin FolderOperations on NotesMainViewState {
       builder:
           (context) => AlertDialog(
             title: Text(
-              NotesLocalizations.of(context).renameFolder ?? 'Rename Folder',
+              NotesLocalizations.of(context).renameFolder,
             ),
             content: TextField(
               controller: renameController,
@@ -91,11 +90,10 @@ mixin FolderOperations on NotesMainViewState {
       builder:
           (context) => AlertDialog(
             title: Text(
-              NotesLocalizations.of(context).deleteFolder ?? 'Delete Folder',
+              NotesLocalizations.of(context).deleteFolder,
             ),
             content: Text(
-              NotesLocalizations.of(context).deleteFolderConfirm ??
-                  'Are you sure you want to delete this folder? All content in this folder will be deleted and cannot be recovered.',
+              NotesLocalizations.of(context).deleteFolderConfirm,
             ),
             actions: [
               TextButton(

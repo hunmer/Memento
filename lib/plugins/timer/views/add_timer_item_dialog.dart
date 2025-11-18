@@ -121,7 +121,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
 
               // 计时器类型选择
               DropdownButtonFormField<TimerType>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: InputDecoration(
                   labelText: TimerLocalizations.of(context).timerType,
                   border: OutlineInputBorder(),
