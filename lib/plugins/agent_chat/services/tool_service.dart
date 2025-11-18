@@ -215,14 +215,19 @@ class ToolService {
     buffer.writeln('- `await Memento.system.getAppInfo()` - 获取应用信息');
     buffer.writeln('\n你可以调用以下插件功能来获取数据或执行操作。');
     buffer.writeln('\n### 🎯 run_js 工具用途说明\n');
-    buffer.writeln('**JavaScript 代码仅用于**:');
+    buffer.writeln('**JavaScript 代码可用于**:');
     buffer.writeln('- ✅ 数据查询(调用插件 API 获取数据)');
+    buffer.writeln('- ✅ 数据修改(执行签到、创建任务、更新数据等操作)');
     buffer.writeln('- ✅ 数据处理(过滤、排序、统计、计算等)');
     buffer.writeln('- ✅ 数据格式化(转换数据结构、格式化输出等)');
     buffer.writeln('\n**JavaScript 代码不应用于**:');
     buffer.writeln('- ❌ 生成建议、分析、总结等自然语言内容');
     buffer.writeln('- ❌ 回答用户的"为什么"、"怎么样"等分析性问题');
     buffer.writeln('- ❌ 提供指导、意见或评价');
+    buffer.writeln('\n**⚠️ 重要原则**:');
+    buffer.writeln('- 当用户提出明确的操作需求(如"帮我签到"、"创建任务")时,应生成完整的操作步骤,直接完成任务');
+    buffer.writeln('- 不要只查询信息后询问用户确认,应该根据用户意图自动完成完整流程');
+    buffer.writeln('- 一个 steps 数组中可以包含多个步骤,形成完整的操作链');
     buffer.writeln('\n**正确流程**: JavaScript 返回结构化数据 → AI 基于数据进行分析和建议');
     buffer.writeln('当需要使用工具时，请返回以下 JSON 格式：\n');
     buffer.writeln('```json');
@@ -292,6 +297,36 @@ class ToolService {
     buffer.writeln('  ]');
     buffer.writeln('}');
     buffer.writeln('```\n');
+    buffer.writeln('**示例 3：完整的签到流程（查询+执行）**\n');
+    buffer.writeln('用户请求"帮我完成签到"时，应该直接执行完整流程，不要只查询后询问：\n');
+    buffer.writeln('```json');
+    buffer.writeln('{');
+    buffer.writeln('  "steps": [');
+    buffer.writeln('    {');
+    buffer.writeln('      "method": "run_js",');
+    buffer.writeln('      "title": "执行签到操作",');
+    buffer.writeln('      "desc": "查找第一个未签到的项目并执行签到",');
+    final checkinExample = '''const items = await Memento.plugins.checkin.getCheckinItems(); const target = items.find(i => !i.isCheckedToday); if (!target) { setResult('所有项目今天都已签到'); } else { const result = await Memento.plugins.checkin.checkin(target.id); setResult(result.success ? \`签到成功: \${target.name}\` : result.message); }''';
+    buffer.writeln('      "data": "${checkinExample.replaceAll('"', '\\"')}"');
+    buffer.writeln('    }');
+    buffer.writeln('  ]');
+    buffer.writeln('}');
+    buffer.writeln('```\n');
+    buffer.writeln('**示例 4：多步骤操作链（查询条件+创建）**\n');
+    buffer.writeln('当用户说"创建明天的任务"时，直接完成创建，不要询问确认：\n');
+    buffer.writeln('```json');
+    buffer.writeln('{');
+    buffer.writeln('  "steps": [');
+    buffer.writeln('    {');
+    buffer.writeln('      "method": "run_js",');
+    buffer.writeln('      "title": "创建明天的任务",');
+    buffer.writeln('      "desc": "获取明天日期并创建任务",');
+    final createTaskExample = '''const time = await Memento.system.getCurrentTime(); const tomorrow = time.timestamp + 24 * 60 * 60 * 1000; const result = await Memento.plugins.todo.createTask('New Task', { dueDate: tomorrow }); setResult(result.success ? 'Task created successfully' : 'Failed to create task');''';
+    buffer.writeln('      "data": "${createTaskExample.replaceAll('"', '\\"')}"');
+    buffer.writeln('    }');
+    buffer.writeln('  ]');
+    buffer.writeln('}');
+    buffer.writeln('```\n');
 
     buffer.writeln('### ⚠️ 注意事项\n');
     buffer.writeln('1. **系统 API 直接调用**: `Memento.system.*` API 不需要作为单独的工具步骤，直接在代码中调用');
@@ -327,8 +362,9 @@ class ToolService {
 
 ### 🎯 run_js 工具用途说明
 
-**JavaScript 代码仅用于**:
+**JavaScript 代码可用于**:
 - ✅ 数据查询(调用插件 API 获取数据)
+- ✅ 数据修改(执行签到、创建任务、更新数据等操作)
 - ✅ 数据处理(过滤、排序、统计、计算等)
 - ✅ 数据格式化(转换数据结构、格式化输出等)
 
@@ -336,6 +372,10 @@ class ToolService {
 - ❌ 生成建议、分析、总结等自然语言内容
 - ❌ 回答用户的"为什么"、"怎么样"等分析性问题
 - ❌ 提供指导、意见或评价
+
+**⚠️ 重要原则**:
+- 当用户提出明确的操作需求时,应生成完整的操作步骤,直接完成任务
+- 不要只查询信息后询问用户确认,应该根据用户意图自动完成完整流程
 
 **正确流程**: JavaScript 返回结构化数据 → AI 基于数据进行分析和建议
 
@@ -490,14 +530,19 @@ setResult(result);
 
     // 添加工具调用格式说明
     buffer.writeln('\n### 🎯 run_js 工具用途说明\n');
-    buffer.writeln('**JavaScript 代码仅用于**:');
+    buffer.writeln('**JavaScript 代码可用于**:');
     buffer.writeln('- ✅ 数据查询(调用插件 API 获取数据)');
+    buffer.writeln('- ✅ 数据修改(执行签到、创建任务、更新数据等操作)');
     buffer.writeln('- ✅ 数据处理(过滤、排序、统计、计算等)');
     buffer.writeln('- ✅ 数据格式化(转换数据结构、格式化输出等)');
     buffer.writeln('\n**JavaScript 代码不应用于**:');
     buffer.writeln('- ❌ 生成建议、分析、总结等自然语言内容');
     buffer.writeln('- ❌ 回答用户的"为什么"、"怎么样"等分析性问题');
     buffer.writeln('- ❌ 提供指导、意见或评价');
+    buffer.writeln('\n**⚠️ 重要原则**:');
+    buffer.writeln('- 当用户提出明确的操作需求时,应生成完整的操作步骤,直接完成任务');
+    buffer.writeln('- 不要只查询信息后询问用户确认,应该根据用户意图自动完成完整流程');
+    buffer.writeln('- 一个步骤中可以包含查询+操作的完整逻辑(如:查找项目ID → 执行签到)');
     buffer.writeln('\n**正确流程**:');
     buffer.writeln('1. JavaScript 返回结构化数据(如数组、对象)');
     buffer.writeln('2. AI 基于这些数据进行自然语言分析和建议\n');

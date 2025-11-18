@@ -3,6 +3,7 @@ import '../../agent_chat_plugin.dart';
 import '../../controllers/conversation_controller.dart';
 import '../../models/conversation.dart';
 import '../chat_screen/chat_screen.dart';
+import '../agent_chat_settings_screen.dart';
 
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
@@ -16,6 +17,11 @@ class ConversationListScreen extends StatefulWidget {
 class _ConversationListScreenState extends State<ConversationListScreen> {
   late ConversationController _controller;
 
+  // 搜索相关
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +34,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   @override
   void dispose() {
     _controller.removeListener(_onControllerChanged);
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -37,25 +45,73 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     }
   }
 
+  /// 切换搜索状态
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        // 退出搜索时清空搜索内容
+        _searchController.clear();
+        _controller.setSearchQuery('');
+        _searchFocusNode.unfocus();
+      } else {
+        // 进入搜索时自动聚焦
+        _searchFocusNode.requestFocus();
+      }
+    });
+  }
+
+  /// 打开设置页面
+  void _openSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('设置'),
+          ),
+          body: AgentChatSettingsScreen(plugin: AgentChatPlugin.instance),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agent Chat'),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: '搜索会话...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                  ),
+                ),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontSize: 16,
+                ),
+                cursorColor: Theme.of(context).colorScheme.onPrimary,
+                onChanged: (query) {
+                  _controller.setSearchQuery(query);
+                },
+              )
+            : const Text('Agent Chat'),
         actions: [
           // 搜索按钮
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: 实现搜索功能
-            },
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: _toggleSearch,
           ),
           // 设置按钮
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {
-              // TODO: 打开设置页面
-            },
+            onPressed: _openSettings,
           ),
         ],
       ),

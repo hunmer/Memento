@@ -70,6 +70,7 @@ import 'utils/image_utils.dart'; // 图片工具类
 import 'plugins/chat/home_widgets.dart';
 import 'plugins/diary/home_widgets.dart';
 import 'plugins/activity/home_widgets.dart';
+import 'plugins/agent_chat/home_widgets.dart';
 import 'plugins/openai/home_widgets.dart';
 import 'plugins/notes/home_widgets.dart';
 import 'plugins/goods/home_widgets.dart';
@@ -226,6 +227,7 @@ Future<void> _initializeHomeWidgets() async {
     ChatHomeWidgets.register();
     DiaryHomeWidgets.register();
     ActivityHomeWidgets.register();
+    AgentChatHomeWidgets.register();
     OpenAIHomeWidgets.register();
     NotesHomeWidgets.register();
     GoodsHomeWidgets.register();

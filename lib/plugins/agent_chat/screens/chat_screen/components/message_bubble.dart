@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../models/chat_message.dart';
+import '../../../models/file_attachment.dart';
 import '../../../services/token_counter_service.dart';
 import '../../../services/message_detail_service.dart';
 import '../../../../../core/storage/storage_manager.dart';
+import '../../../../../widgets/file_preview/file_preview_screen.dart';
 import 'markdown_content.dart';
 import 'tool_detail_dialog.dart';
 import 'tool_call_steps.dart';
@@ -286,38 +289,108 @@ class MessageBubble extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children:
-          message.attachments.map((attachment) {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    attachment.isImage ? Icons.image : Icons.description,
-                    size: 16,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    attachment.fileName,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    attachment.formattedSize,
-                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
+      children: message.attachments.map((attachment) {
+        // 图片附件显示缩略图
+        if (attachment.isImage) {
+          return _buildImageAttachment(attachment);
+        }
+
+        // 非图片附件显示文件信息
+        return _buildFileAttachment(attachment);
+      }).toList(),
     );
+  }
+
+  /// 构建图片附件
+  Widget _buildImageAttachment(FileAttachment attachment) {
+    return Builder(
+      builder: (context) => GestureDetector(
+        onTap: () => _viewImage(context, attachment),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            constraints: const BoxConstraints(
+              maxWidth: 200,
+              maxHeight: 200,
+            ),
+            child: Image.file(
+              File(attachment.filePath),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 200,
+                  height: 150,
+                  color: Colors.grey[300],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.broken_image, size: 48, color: Colors.grey[600]),
+                      const SizedBox(height: 8),
+                      Text(
+                        '图片加载失败',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 构建文件附件
+  Widget _buildFileAttachment(FileAttachment attachment) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.description,
+            size: 16,
+            color: Colors.grey[600],
+          ),
+          const SizedBox(width: 4),
+          Text(
+            attachment.fileName,
+            style: const TextStyle(fontSize: 12),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            attachment.formattedSize,
+            style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 查看图片大图
+  void _viewImage(BuildContext context, FileAttachment attachment) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FilePreviewScreen(
+          filePath: attachment.filePath,
+          fileName: attachment.fileName,
+          mimeType: 'image/${_getImageExtension(attachment.fileName)}',
+          fileSize: attachment.fileSize,
+        ),
+      ),
+    );
+  }
+
+  /// 获取图片扩展名
+  String _getImageExtension(String fileName) {
+    final ext = fileName.split('.').last.toLowerCase();
+    return ext.isNotEmpty ? ext : 'jpg';
   }
 
   /// 构建操作菜单
@@ -365,7 +438,8 @@ class MessageBubble extends StatelessWidget {
                 ],
               ),
             ),
-            if (message.isUser && onEdit != null)
+            // 允许编辑所有消息（除了工具调用消息）
+            if (onEdit != null && !isToolCallMessage)
               const PopupMenuItem(
                 value: 'edit',
                 child: Row(
@@ -432,13 +506,56 @@ class MessageBubble extends StatelessWidget {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('编辑消息'),
-            content: TextField(
-              controller: textController,
-              maxLines: 5,
-              decoration: const InputDecoration(
-                hintText: '输入消息内容...',
-                border: OutlineInputBorder(),
+            title: Row(
+              children: [
+                const Text('编辑消息'),
+                const SizedBox(width: 8),
+                if (!message.isUser)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[100],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'AI',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange[800],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            content: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: textController,
+                    maxLines: null,
+                    minLines: 5,
+                    keyboardType: TextInputType.multiline,
+                    decoration: const InputDecoration(
+                      hintText: '输入消息内容...',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '${textController.text.length} 字符',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             actions: [
