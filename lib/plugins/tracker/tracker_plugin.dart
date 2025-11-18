@@ -405,6 +405,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
         : valueRaw as double;
 
     // 提取可选参数
+    final String? customId = params['id']; // 支持自定义ID
     final String? note = params['note'];
     final String? dateTime = params['dateTime'];
 
@@ -414,8 +415,19 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       orElse: () => throw ArgumentError('Goal not found: $goalId'),
     );
 
+    // 如果提供了自定义ID，使用自定义ID；否则使用时间戳生成
+    final recordId = customId?.isNotEmpty == true
+        ? customId!
+        : DateTime.now().millisecondsSinceEpoch.toString();
+
+    // 检查ID是否已存在
+    final existingRecords = await _controller.getRecordsForGoal(goalId);
+    if (existingRecords.any((r) => r.id == recordId)) {
+      return {'error': '记录ID已存在: $recordId'};
+    }
+
     final record = Record(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: recordId,
       goalId: goalId,
       value: value,
       note: note,

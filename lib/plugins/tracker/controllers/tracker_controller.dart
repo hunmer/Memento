@@ -100,6 +100,12 @@ class TrackerController with ChangeNotifier {
   }
 
   Future<void> deleteGoal(String id) async {
+    // 检查目标是否存在
+    final goalExists = _goals.any((g) => g.id == id);
+    if (!goalExists) {
+      throw ArgumentError('目标不存在: $id');
+    }
+
     _goals.removeWhere((g) => g.id == id);
     _records.removeWhere((r) => r.goalId == id);
     await _saveGoals();
@@ -223,8 +229,14 @@ class TrackerController with ChangeNotifier {
 
   // 删除单条记录
   Future<void> deleteRecord(String recordId) async {
-    final record = _records.firstWhere((r) => r.id == recordId);
-    final goal = _goals.firstWhere((g) => g.id == record.goalId);
+    final record = _records.firstWhere(
+      (r) => r.id == recordId,
+      orElse: () => throw ArgumentError('记录不存在: $recordId'),
+    );
+    final goal = _goals.firstWhere(
+      (g) => g.id == record.goalId,
+      orElse: () => throw ArgumentError('目标不存在: ${record.goalId}'),
+    );
     _records.removeWhere((r) => r.id == recordId);
     await _saveRecords();
     // 更新目标当前值
