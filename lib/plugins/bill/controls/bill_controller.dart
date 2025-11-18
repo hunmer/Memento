@@ -187,6 +187,11 @@ class BillController with ChangeNotifier {
 
   // 创建新账户
   Future<void> createAccount(Account account) async {
+    // 检查账户 ID 是否已存在
+    if (_accounts.any((a) => a.id == account.id)) {
+      throw '账户ID已存在';
+    }
+    // 检查账户名称是否已存在
     if (_accounts.any((a) => a.title == account.title)) {
       throw '账户名称已存在';
     }

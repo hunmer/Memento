@@ -50,7 +50,8 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
     super.initState();
 
     // 初始化 Tab 控制器（4个Tab：基本信息、参数列表、返回值、示例代码）
-    _tabController = TabController(length: 4, vsync: this);
+    // 默认激活"示例代码"tab以方便调试
+    _tabController = TabController(length: 4, vsync: this, initialIndex: 3);
 
     // 初始化控制器
     _toolIdController = TextEditingController(text: widget.toolId ?? '');

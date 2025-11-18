@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,7 @@ class FloatingBallManager {
   static final FloatingBallManager _instance = FloatingBallManager._internal();
   factory FloatingBallManager() => _instance;
   FloatingBallManager._internal() {
-    _loadActions();
+    _loadActions().then((_) => _initCompleter.complete());
   }
 
   final Map<FloatingBallGesture, ActionInfo> _actions = {};
@@ -40,6 +41,12 @@ class FloatingBallManager {
   // 默认启用状态
   // 存储文件路径
   File? _storageFile;
+
+  // 初始化完成器，确保数据加载完成
+  final Completer<void> _initCompleter = Completer<void>();
+
+  // 写入锁，防止并发写入导致数据覆盖
+  bool _isWriting = false;
 
   // 预定义的动作映射表
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
@@ -107,9 +114,62 @@ class FloatingBallManager {
     final directory = await StorageManager.getApplicationDocumentsDirectory();
     _storageFile = File('${directory.path}/floating_ball_config.json');
     if (!await _storageFile!.exists()) {
-      await _storageFile!.writeAsString('{}');
+      // 写入完整的默认配置而不是空对象
+      await _storageFile!.writeAsString(json.encode(_getDefaultConfig()));
     }
     return _storageFile!;
+  }
+
+  // 确保初始化完成
+  Future<void> _ensureInitialized() async {
+    if (!_initCompleter.isCompleted) {
+      await _initCompleter.future;
+    }
+  }
+
+  // 获取默认配置
+  Map<String, dynamic> _getDefaultConfig() {
+    return {
+      'actions': {},
+      'size_scale': 0.6,
+      'position': {'x': 21.0, 'y': 99.0},
+      'enabled': true,
+    };
+  }
+
+  // 验证配置完整性
+  bool _isConfigValid(Map<String, dynamic> config) {
+    return config.containsKey('actions') &&
+        config.containsKey('size_scale') &&
+        config.containsKey('position') &&
+        config.containsKey('enabled');
+  }
+
+  // 合并配置与默认值
+  Map<String, dynamic> _mergeWithDefaults(Map<String, dynamic> config) {
+    final defaults = _getDefaultConfig();
+    return {
+      'actions': config['actions'] ?? defaults['actions'],
+      'size_scale': config['size_scale'] ?? defaults['size_scale'],
+      'position': config['position'] ?? defaults['position'],
+      'enabled': config['enabled'] ?? defaults['enabled'],
+    };
+  }
+
+  // 安全写入数据，带锁机制防止竞态条件
+  Future<void> _writeDataSafe(Map<String, dynamic> data) async {
+    // 等待其他写入操作完成
+    while (_isWriting) {
+      await Future.delayed(const Duration(milliseconds: 10));
+    }
+
+    _isWriting = true;
+    try {
+      final file = await _getStorageFile();
+      await file.writeAsString(json.encode(data));
+    } finally {
+      _isWriting = false;
+    }
   }
 
   // 读取数据
@@ -117,43 +177,44 @@ class FloatingBallManager {
     try {
       final file = await _getStorageFile();
       if (!await file.exists()) {
-        return {
-          'actions': {},
-          'size_scale': 0.6,
-          'position': {'x': 21.0, 'y': 99.0},
-          'enabled': true,
-        };
+        return _getDefaultConfig();
       }
 
       final content = await file.readAsString();
       if (content.trim().isEmpty) {
-        return {
-          'actions': {},
-          'size_scale': 0.6,
-          'position': {'x': 21.0, 'y': 99.0},
-          'enabled': true,
-        };
+        return _getDefaultConfig();
       }
 
       final decoded = json.decode(content) as Map<String, dynamic>;
+
+      // 验证配置完整性
+      if (!_isConfigValid(decoded)) {
+        debugPrint('Invalid config detected, merging with defaults');
+        return _mergeWithDefaults(decoded);
+      }
+
       return decoded;
     } catch (e) {
       debugPrint('Error reading floating ball data: $e');
+
+      // 尝试备份损坏的文件
+      try {
+        final file = await _getStorageFile();
+        if (await file.exists()) {
+          final backupPath =
+              '${file.path}.backup_${DateTime.now().millisecondsSinceEpoch}';
+          await file.copy(backupPath);
+          debugPrint('Corrupted config backed up to: $backupPath');
+        }
+      } catch (backupError) {
+        debugPrint('Failed to backup corrupted config: $backupError');
+      }
+
       // 返回默认配置
-      return {
-        'actions': {},
-        'size_scale': 0.6,
-        'position': {'x': 21.0, 'y': 99.0},
-        'enabled': true,
-      };
+      return _getDefaultConfig();
     }
   }
 
-  // 写入数据
-  Future<void> _writeData(Map<String, dynamic> data) async {
-    final file = await _getStorageFile();
-    await file.writeAsString(json.encode(data));
-  }
 
   // 加载保存的动作
   Future<void> _loadActions() async {
@@ -172,6 +233,7 @@ class FloatingBallManager {
     FloatingBallGesture gesture,
     String? actionTitle,
   ) async {
+    await _ensureInitialized();
     final data = await _readData();
     var actions = data['actions'] as Map<String, dynamic>? ?? {};
     if (actionTitle != null) {
@@ -180,20 +242,22 @@ class FloatingBallManager {
       actions.remove(gesture.name);
     }
     data['actions'] = actions;
-    await _writeData(data);
+    await _writeDataSafe(data);
   }
 
   // 获取悬浮球大小比例
   Future<double> getSizeScale() async {
+    await _ensureInitialized();
     final data = await _readData();
     return (data['size_scale'] as num?)?.toDouble() ?? 1.0;
   }
 
   // 保存悬浮球大小比例
   Future<void> saveSizeScale(double scale) async {
+    await _ensureInitialized();
     final data = await _readData();
     data['size_scale'] = scale;
-    await _writeData(data);
+    await _writeDataSafe(data);
 
     // 通知悬浮球大小变化
     FloatingBallService().notifySizeChange(scale);
@@ -201,15 +265,17 @@ class FloatingBallManager {
 
   // 获取悬浮球启用状态
   Future<bool> isEnabled() async {
+    await _ensureInitialized();
     final data = await _readData();
     return (data['enabled'] as bool?) ?? true;
   }
 
   // 保存悬浮球启用状态
   Future<void> setEnabled(bool enabled) async {
+    await _ensureInitialized();
     final data = await _readData();
     data['enabled'] = enabled;
-    await _writeData(data);
+    await _writeDataSafe(data);
 
     // 如果禁用，直接隐藏悬浮球
     if (!enabled) {
@@ -219,6 +285,7 @@ class FloatingBallManager {
 
   // 获取保存的位置
   Future<Offset> getPosition() async {
+    await _ensureInitialized();
     final data = await _readData();
     final position = data['position'] as Map<String, dynamic>? ?? {};
     final double x = (position['x'] as num?)?.toDouble() ?? 20;
@@ -229,10 +296,11 @@ class FloatingBallManager {
 
   // 保存位置
   Future<void> savePosition(Offset position) async {
+    await _ensureInitialized();
     _position = position;
     final data = await _readData();
     data['position'] = {'x': position.dx, 'y': position.dy};
-    await _writeData(data);
+    await _writeDataSafe(data);
   }
 
   // 设置动作
@@ -241,6 +309,7 @@ class FloatingBallManager {
     String title,
     final Function() callback,
   ) async {
+    await _ensureInitialized();
     _actions[gesture] = ActionInfo(title, callback);
     await _saveAction(gesture, title);
   }
@@ -274,14 +343,13 @@ class FloatingBallManager {
 
   // 清除动作
   Future<void> clearAction(FloatingBallGesture gesture) async {
+    await _ensureInitialized();
     _actions.remove(gesture);
     await _saveAction(gesture, null);
   }
 
   // 设置动作的上下文
   void setActionContext(BuildContext context) {
-    debugPrint('Setting action context with ${_actions.length} actions');
-
     // 更新所有已保存动作的回调函数
     for (var gesture in FloatingBallGesture.values) {
       final actionInfo = _actions[gesture];
@@ -296,11 +364,12 @@ class FloatingBallManager {
 
   // 重置悬浮球位置到默认值
   Future<void> resetPosition() async {
+    await _ensureInitialized();
     const defaultPosition = Offset(20, 100);
     _position = defaultPosition;
     final data = await _readData();
     data['position'] = {'x': defaultPosition.dx, 'y': defaultPosition.dy};
-    await _writeData(data);
+    await _writeDataSafe(data);
 
     // 通知悬浮球服务更新位置
     FloatingBallService().updatePosition(defaultPosition);

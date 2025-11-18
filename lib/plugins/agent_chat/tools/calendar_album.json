@@ -10,7 +10,7 @@
     "examples": [
       {
         "title": "测试同步",
-        "code": "const result = await Memento.plugins.calendar_album.testSync();\nsetResult(JSON.stringify(result, null, 2));"
+        "code": "const result = await Memento.plugins.calendar_album.testSync({});\nsetResult(JSON.stringify(result, null, 2));"
       }
     ],
     "notes": "用于调试和验证插件功能",
@@ -27,7 +27,7 @@
     "examples": [
       {
         "title": "获取所有日记",
-        "code": "const entries = await Memento.plugins.calendar_album.getEntries();\nsetResult(JSON.stringify(entries, null, 2));"
+        "code": "const entries = await Memento.plugins.calendar_album.getEntries({});\nsetResult(JSON.stringify(entries, null, 2));"
       }
     ],
     "notes": "日记内容为 Markdown 格式",
@@ -46,7 +46,7 @@
     "examples": [
       {
         "title": "获取今日日记",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entries = await Memento.plugins.calendar_album.getEntriesForDate(today);\nsetResult(`今天有 ${entries.length} 条日记`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entries = await Memento.plugins.calendar_album.getEntriesForDate({ dateStr: today });\nsetResult(`今天有 ${entries.length} 条日记`);"
       }
     ],
     "notes": "日期格式必须为 YYYY-MM-DD",
@@ -59,11 +59,11 @@
       {"name": "title", "type": "string", "required": true, "description": "日记标题"},
       {"name": "content", "type": "string", "required": true, "description": "日记内容（Markdown 格式）"},
       {"name": "dateStr", "type": "string", "required": false, "description": "日期（格式：YYYY-MM-DD，默认今天）"},
-      {"name": "tagsStr", "type": "string", "required": false, "description": "标签（逗号分隔，如：\"生活,心情\"）"},
+      {"name": "tags", "type": "array", "required": false, "description": "标签数组（如：[\"生活\", \"心情\"]）"},
       {"name": "location", "type": "string", "required": false, "description": "位置"},
       {"name": "mood", "type": "string", "required": false, "description": "心情（emoji 表情）"},
       {"name": "weather", "type": "string", "required": false, "description": "天气"},
-      {"name": "imageUrlsStr", "type": "string", "required": false, "description": "图片URL列表（逗号分隔）"}
+      {"name": "imageUrls", "type": "array", "required": false, "description": "图片URL数组"}
     ],
     "returns": {
       "type": "Object",
@@ -72,14 +72,14 @@
     "examples": [
       {
         "title": "添加简单日记",
-        "code": "const entry = await Memento.plugins.calendar_album.addEntry('美好的一天', '今天天气很好，心情愉快！');\nsetResult(`日记已创建: ${entry.id}`);"
+        "code": "const entry = await Memento.plugins.calendar_album.addEntry({\n  title: '美好的一天',\n  content: '今天天气很好，心情愉快！'\n});\nsetResult(`日记已创建: ${entry.id}`);"
       },
       {
         "title": "添加完整日记",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entry = await Memento.plugins.calendar_album.addEntry('生日聚会', '今天过生日，很开心！', today, '生活,生日', '家', '😊', '晴天', 'photos/1.jpg,photos/2.jpg');\nsetResult('已添加生日日记');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entry = await Memento.plugins.calendar_album.addEntry({\n  title: '生日聚会',\n  content: '今天过生日，很开心！',\n  dateStr: today,\n  tags: ['生活', '生日'],\n  location: '家',\n  mood: '😊',\n  weather: '晴天',\n  imageUrls: ['photos/1.jpg', 'photos/2.jpg']\n});\nsetResult('已添加生日日记');"
       }
     ],
-    "notes": "标签和图片URL使用逗号分隔，不要有多余空格",
+    "notes": "标签和图片URL使用数组格式",
     "enabled": true
   },
   "updateEntry": {
@@ -89,11 +89,11 @@
       {"name": "entryId", "type": "string", "required": true, "description": "日记ID"},
       {"name": "title", "type": "string", "required": false, "description": "新标题"},
       {"name": "content", "type": "string", "required": false, "description": "新内容"},
-      {"name": "tagsStr", "type": "string", "required": false, "description": "新标签（逗号分隔）"},
+      {"name": "tags", "type": "array", "required": false, "description": "新标签数组"},
       {"name": "location", "type": "string", "required": false, "description": "新位置"},
       {"name": "mood", "type": "string", "required": false, "description": "新心情"},
       {"name": "weather", "type": "string", "required": false, "description": "新天气"},
-      {"name": "imageUrlsStr", "type": "string", "required": false, "description": "新图片URL列表（逗号分隔）"}
+      {"name": "imageUrls", "type": "array", "required": false, "description": "新图片URL数组"}
     ],
     "returns": {
       "type": "Object",
@@ -102,7 +102,7 @@
     "examples": [
       {
         "title": "更新日记内容",
-        "code": "const updated = await Memento.plugins.calendar_album.updateEntry('entry123', null, '更新后的内容...');\nsetResult('日记已更新');"
+        "code": "const updated = await Memento.plugins.calendar_album.updateEntry({\n  entryId: 'entry123',\n  content: '更新后的内容...'\n});\nsetResult('日记已更新');"
       }
     ],
     "notes": "仅更新提供的字段，其他字段保持不变",
@@ -121,7 +121,7 @@
     "examples": [
       {
         "title": "删除日记",
-        "code": "const result = await Memento.plugins.calendar_album.deleteEntry('entry123');\nsetResult(result.success ? '删除成功' : result.error);"
+        "code": "const result = await Memento.plugins.calendar_album.deleteEntry({ entryId: 'entry123' });\nsetResult(result.success ? '删除成功' : result.error);"
       }
     ],
     "notes": "删除操作不可逆",
@@ -140,7 +140,7 @@
     "examples": [
       {
         "title": "获取日记详情",
-        "code": "const entry = await Memento.plugins.calendar_album.getEntryById('entry123');\nif (entry.error) {\n  setResult('日记不存在');\n} else {\n  setResult(JSON.stringify(entry, null, 2));\n}"
+        "code": "const entry = await Memento.plugins.calendar_album.getEntryById({ entryId: 'entry123' });\nif (entry.error) {\n  setResult('日记不存在');\n} else {\n  setResult(JSON.stringify(entry, null, 2));\n}"
       }
     ],
     "notes": "如日记不存在，返回对象包含 error 字段",
@@ -157,7 +157,7 @@
     "examples": [
       {
         "title": "获取标签列表",
-        "code": "const tags = await Memento.plugins.calendar_album.getTags();\nsetResult(tags.join(', '));"
+        "code": "const tags = await Memento.plugins.calendar_album.getTags({});\nsetResult(tags.join(', '));"
       }
     ],
     "notes": "返回去重后的标签列表",
@@ -176,7 +176,7 @@
     "examples": [
       {
         "title": "获取生活类日记",
-        "code": "const entries = await Memento.plugins.calendar_album.getEntriesByTag('生活');\nsetResult(`共有 ${entries.length} 条生活类日记`);"
+        "code": "const entries = await Memento.plugins.calendar_album.getEntriesByTag({ tag: '生活' });\nsetResult(`共有 ${entries.length} 条生活类日记`);"
       }
     ],
     "notes": "单标签筛选",
@@ -186,7 +186,7 @@
     "title": "根据多标签获取日记（AND逻辑）",
     "description": "获取同时包含所有指定标签的日记",
     "parameters": [
-      {"name": "tagsStr", "type": "string", "required": true, "description": "标签列表（逗号分隔）"}
+      {"name": "tags", "type": "array", "required": true, "description": "标签数组"}
     ],
     "returns": {
       "type": "Array",
@@ -195,7 +195,7 @@
     "examples": [
       {
         "title": "获取同时包含多个标签的日记",
-        "code": "const entries = await Memento.plugins.calendar_album.getEntriesByTags('生活,心情');\nsetResult(`共有 ${entries.length} 条同时标记为生活和心情的日记`);"
+        "code": "const entries = await Memento.plugins.calendar_album.getEntriesByTags({ tags: ['生活', '心情'] });\nsetResult(`共有 ${entries.length} 条同时标记为生活和心情的日记`);"
       }
     ],
     "notes": "AND 逻辑：只返回同时包含所有指定标签的日记",
@@ -212,7 +212,7 @@
     "examples": [
       {
         "title": "获取所有照片",
-        "code": "const photos = await Memento.plugins.calendar_album.getPhotos();\nsetResult(`共有 ${photos.length} 张照片`);"
+        "code": "const photos = await Memento.plugins.calendar_album.getPhotos({});\nsetResult(`共有 ${photos.length} 张照片`);"
       }
     ],
     "notes": "包括直接上传的图片和 Markdown 内容中提取的图片",
@@ -232,7 +232,7 @@
     "examples": [
       {
         "title": "获取本月的照片",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst photos = await Memento.plugins.calendar_album.getPhotosByDateRange(startDate, endDate);\nsetResult(JSON.stringify(photos, null, 2));"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst photos = await Memento.plugins.calendar_album.getPhotosByDateRange({ startDate, endDate });\nsetResult(JSON.stringify(photos, null, 2));"
       }
     ],
     "notes": "返回照片的日期、URL、所属日记ID和标题",
@@ -249,7 +249,7 @@
     "examples": [
       {
         "title": "获取统计信息",
-        "code": "const stats = await Memento.plugins.calendar_album.getStatistics();\nsetResult(`今日: ${stats.todayCount}, 近7天: ${stats.last7DaysCount}, 总计: ${stats.totalCount}`);"
+        "code": "const stats = await Memento.plugins.calendar_album.getStatistics({});\nsetResult(`今日: ${stats.todayCount}, 近7天: ${stats.last7DaysCount}, 总计: ${stats.totalCount}`);"
       }
     ],
     "notes": "包含今日、近7天、总数、标签数、照片数等统计信息",

@@ -21,6 +21,7 @@
     "description": "创建一个新的账户",
     "parameters": [
       {"name": "title", "type": "string", "required": true, "description": "账户名称"},
+      {"name": "id", "type": "string", "required": false, "description": "账户ID（不传则自动生成 UUID）"},
       {"name": "iconCodePoint", "type": "number", "required": false, "description": "图标代码点（MaterialIcons）"},
       {"name": "backgroundColor", "type": "number", "required": false, "description": "背景颜色值（Color.value）"}
     ],
@@ -30,15 +31,19 @@
     },
     "examples": [
       {
-        "title": "创建简单账户",
-        "code": "const account = await Memento.plugins.bill.createAccount({title: '现金账户'});\nsetResult(`账户已创建: ${account.title}`);"
+        "title": "创建简单账户（自动生成ID）",
+        "code": "const account = await Memento.plugins.bill.createAccount({title: '现金账户'});\nsetResult(`账户已创建: ${account.title}, ID: ${account.id}`);"
+      },
+      {
+        "title": "创建指定ID的账户（方便调试）",
+        "code": "const account = await Memento.plugins.bill.createAccount({id: 'acc123', title: '测试账户'});\nsetResult(`账户已创建: ${account.id}`);"
       },
       {
         "title": "创建带图标和颜色的账户",
-        "code": "const account = await Memento.plugins.bill.createAccount({title: '信用卡', iconCodePoint: 58837, backgroundColor: 4280391411});\nsetResult(`账户ID: ${account.id}`);"
+        "code": "const account = await Memento.plugins.bill.createAccount({id: 'acc456', title: '信用卡', iconCodePoint: 58837, backgroundColor: 4280391411});\nsetResult(`账户ID: ${account.id}`);"
       }
     ],
-    "notes": "不提供图标和颜色时使用默认值（account_balance_wallet 图标，绿色背景）",
+    "notes": "不提供图标和颜色时使用默认值（account_balance_wallet 图标，绿色背景）；不提供 id 则自动生成 UUID",
     "enabled": true
   },
   "updateAccount": {
@@ -129,12 +134,16 @@
     },
     "examples": [
       {
-        "title": "创建收入账单",
+        "title": "创建收入账单（指定账户ID）",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst bill = await Memento.plugins.bill.createBill({accountId: 'acc123', amount: 5000, category: '工资', title: '月度工资', date: today});\nsetResult(`账单已创建: ${bill.id}`);"
       },
       {
-        "title": "创建支出账单",
+        "title": "创建支出账单（指定账户ID）",
         "code": "const bill = await Memento.plugins.bill.createBill({accountId: 'acc123', amount: -120, category: '餐饮', title: '午餐', note: '公司食堂'});\nsetResult('已记录午餐支出 120元');"
+      },
+      {
+        "title": "自动使用首个账户创建账单",
+        "code": "const accounts = await Memento.plugins.bill.getAccounts({});\nif (accounts.length === 0) {\n  setResult('错误：没有可用账户，请先创建账户');\n} else {\n  const firstAccountId = accounts[0].id;\n  const bill = await Memento.plugins.bill.createBill({accountId: firstAccountId, amount: -88, category: '交通', title: '地铁费'});\n  setResult(`已在账户 ${accounts[0].title} 中创建账单`);\n}"
       }
     ],
     "notes": "金额为正数记录收入，负数记录支出；不提供日期时使用当天日期",
