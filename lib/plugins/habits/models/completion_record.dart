@@ -15,11 +15,11 @@ class CompletionRecord {
 
   factory CompletionRecord.fromMap(Map<String, dynamic> map) {
     return CompletionRecord(
-      id: map['id'] as String,
-      parentId: map['parentId'] as String,
-      date: DateTime.parse(map['date'] as String),
-      duration: Duration(seconds: map['duration'] as int),
-      notes: map['notes'] as String,
+      id: map['id']?.toString() ?? '',
+      parentId: map['parentId']?.toString() ?? '',
+      date: map['date'] != null ? DateTime.parse(map['date'].toString()) : DateTime.now(),
+      duration: Duration(seconds: (map['duration'] as num?)?.toInt() ?? 0),
+      notes: map['notes']?.toString() ?? '',
     );
   }
 

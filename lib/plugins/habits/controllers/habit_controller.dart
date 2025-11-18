@@ -8,6 +8,7 @@ class HabitController {
   final List<TimerModeListener> _timerModeListeners = [];
   final StorageManager storage;
   final TimerController timerController;
+  static const _habitsKey = 'habits/habits';
   List<Habit> _habits = [];
   HabitController(this.storage, {required this.timerController}) {
     loadHabits();
@@ -15,22 +16,35 @@ class HabitController {
 
   Future<List<Habit>> loadHabits() async {
     try {
-      final data = await storage.readJson('habits/habits', []);
+      final data = await storage.readJson(_habitsKey, []);
+
       List<Map<String, dynamic>> habitMaps = [];
       if (data is List) {
         habitMaps = List<Map<String, dynamic>>.from(
           data.whereType<Map>().where((m) => m.isNotEmpty),
         );
+      } else if (data is Map) {
+        // 如果数据是Map格式，可能存储结构有问题
+        if (data.containsKey('habits')) {
+          final habitsData = data['habits'];
+          if (habitsData is List) {
+            habitMaps = List<Map<String, dynamic>>.from(
+              habitsData.whereType<Map>().where((m) => m.isNotEmpty),
+            );
+          }
+        }
       }
+
       _habits =
           habitMaps
               .map((e) => Habit.fromMap(e))
               .where((h) => h != null)
               .toList();
+
       return _habits;
     } catch (e) {
       print('Error loading habits: $e');
-      return [];
+      return _habits = [];
     }
   }
 
@@ -47,7 +61,7 @@ class HabitController {
     }
 
     await storage.writeJson(
-      'habits/habits',
+      _habitsKey,
       habits.map((h) => h.toMap()).toList(),
     );
   }
@@ -56,7 +70,7 @@ class HabitController {
     final habits = getHabits();
     habits.removeWhere((h) => h.id == id);
     await storage.writeJson(
-      'habits/habits',
+      _habitsKey,
       habits.map((h) => h.toMap()).toList(),
     );
   }

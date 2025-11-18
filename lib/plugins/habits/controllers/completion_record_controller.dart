@@ -23,11 +23,19 @@ class CompletionRecordController {
     final records = <CompletionRecord>[];
 
     if (data != null) {
-      records.addAll(
-        List<Map<String, dynamic>>.from(
-          data as Iterable,
-        ).map((e) => CompletionRecord.fromMap(e)),
-      );
+      // 处理不同的数据格式
+      if (data is List) {
+        records.addAll(
+          data.whereType<Map>().where((m) => m.isNotEmpty).map((e) {
+            final stringKeyMap = Map<String, dynamic>.from(e);
+            return CompletionRecord.fromMap(stringKeyMap);
+          }),
+        );
+      } else if (data is Map) {
+        // 如果是单个记录对象
+        final stringKeyMap = Map<String, dynamic>.from(data);
+        records.add(CompletionRecord.fromMap(stringKeyMap));
+      }
     }
 
     records.add(record);
@@ -61,11 +69,17 @@ class CompletionRecordController {
       if (await storage.fileExists(path)) {
         final data = await storage.readJson(path);
         if (data != null) {
-          matchingRecords.addAll(
-            List<Map<String, dynamic>>.from(
-              data as Iterable,
-            ).map((e) => CompletionRecord.fromMap(e)),
-          );
+          if (data is List) {
+            matchingRecords.addAll(
+              data.whereType<Map>().where((m) => m.isNotEmpty).map((e) {
+                final stringKeyMap = Map<String, dynamic>.from(e);
+                return CompletionRecord.fromMap(stringKeyMap);
+              }),
+            );
+          } else if (data is Map) {
+            final stringKeyMap = Map<String, dynamic>.from(data);
+            matchingRecords.add(CompletionRecord.fromMap(stringKeyMap));
+          }
         }
       }
     }
@@ -87,13 +101,24 @@ class CompletionRecordController {
   }
 
   Future<void> deleteCompletionRecord(String recordId) async {
+    bool recordFound = false;
+
     for (final habitId in getHabitIds()) {
       final records = await getHabitCompletionRecords(habitId);
+      final initialLength = records.length;
       records.removeWhere((record) => record.id == recordId);
-      await storage.writeJson(
-        'habits/records/$habitId.json',
-        records.map((r) => r.toMap()).toList(),
-      );
+
+      if (records.length < initialLength) {
+        recordFound = true;
+        await storage.writeJson(
+          'habits/records/$habitId.json',
+          records.map((r) => r.toMap()).toList(),
+        );
+      }
+    }
+
+    if (!recordFound) {
+      throw Exception('Completion record not found: $recordId');
     }
   }
 
@@ -107,8 +132,19 @@ class CompletionRecordController {
     final data = await storage.readJson('habits/records/$habitId.json');
     if (data == null) return [];
 
-    return List<Map<String, dynamic>>.from(
-      data as Iterable,
-    ).map((e) => CompletionRecord.fromMap(e)).toList();
+    final records = <CompletionRecord>[];
+    if (data is List) {
+      records.addAll(
+        data.whereType<Map>().where((m) => m.isNotEmpty).map((e) {
+          final stringKeyMap = Map<String, dynamic>.from(e);
+          return CompletionRecord.fromMap(stringKeyMap);
+        }),
+      );
+    } else if (data is Map) {
+      final stringKeyMap = Map<String, dynamic>.from(data);
+      records.add(CompletionRecord.fromMap(stringKeyMap));
+    }
+
+    return records;
   }
 }
