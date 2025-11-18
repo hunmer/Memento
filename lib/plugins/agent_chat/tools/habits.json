@@ -109,7 +109,7 @@
     "examples": [
       {
         "title": "删除习惯",
-        "code": "const success = await Memento.plugins.habits.deleteHabit({habitId: 'habit123'});\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.habits.deleteHabit({habitId: 'habit123'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
       }
     ],
     "notes": "删除操作不可逆，会同时删除该习惯的所有完成记录",
@@ -221,7 +221,7 @@
     "examples": [
       {
         "title": "删除技能",
-        "code": "const success = await Memento.plugins.habits.deleteSkill({skillId: 'skill123'});\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.habits.deleteSkill({skillId: 'skill123'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
       }
     ],
     "notes": "删除技能后，关联的习惯仍然保留，但 skillId 字段会被清空",
@@ -289,7 +289,7 @@
     "examples": [
       {
         "title": "删除打卡记录",
-        "code": "const success = await Memento.plugins.habits.deleteCompletionRecord({recordId: 'record456'});\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.habits.deleteCompletionRecord({recordId: 'record456'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
       }
     ],
     "notes": "删除记录会同时扣除关联技能的累积时长",

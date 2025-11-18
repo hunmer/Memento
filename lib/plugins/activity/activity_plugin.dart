@@ -120,6 +120,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   ///   startTime: string (必需, ISO 8601 格式),
   ///   endTime: string (必需, ISO 8601 格式),
   ///   title: string (必需),
+  ///   id: string (可选, 自定义ID),
   ///   tags?: Array 或 string,
   ///   description?: string,
   ///   mood?: string
@@ -139,9 +140,19 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       final startTimeStr = params['startTime'] as String;
       final endTimeStr = params['endTime'] as String;
       final title = params['title'] as String;
+      final String? id = params['id'] as String?;
 
       final startTime = DateTime.parse(startTimeStr);
       final endTime = DateTime.parse(endTimeStr);
+
+      // 检查自定义ID是否已存在
+      if (id != null && id.isNotEmpty) {
+        final activities = await _activityService.getActivitiesForDate(startTime);
+        final existingActivity = activities.where((a) => a.id == id).firstOrNull;
+        if (existingActivity != null) {
+          return jsonEncode({'success': false, 'error': '活动ID已存在: $id'});
+        }
+      }
 
       // 解析标签
       final List<String> tags = params['tags'] != null
@@ -152,6 +163,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       final mood = params['mood'] as String?;
 
       final activity = ActivityRecord(
+        id: (id != null && id.isNotEmpty) ? id : null,
         startTime: startTime,
         endTime: endTime,
         title: title,

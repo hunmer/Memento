@@ -32,6 +32,7 @@
         "startTime": {"type": "string", "required": true, "description": "开始时间（ISO 8601 格式）"},
         "endTime": {"type": "string", "required": true, "description": "结束时间（ISO 8601 格式）"},
         "title": {"type": "string", "required": true, "description": "活动标题"},
+        "id": {"type": "string", "required": false, "description": "活动ID(可选,不提供则自动生成)"},
         "tags": {"type": "Array", "required": false, "description": "标签数组（如：[\"工作\", \"会议\"]）"},
         "description": {"type": "string", "required": false, "description": "活动描述"},
         "mood": {"type": "string", "required": false, "description": "心情表情（如：😊）"}
@@ -49,9 +50,13 @@
       {
         "title": "创建完整活动",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T08:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T10:00:00.000Z');\nconst result = await Memento.plugins.activity.createActivity({\n  startTime,\n  endTime,\n  title: '项目会议',\n  tags: ['工作', '会议'],\n  description: '讨论项目进度',\n  mood: '😊'\n});\nsetResult(`活动ID: ${result.activity.id}`);"
+      },
+      {
+        "title": "使用自定义ID创建活动",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T14:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T16:00:00.000Z');\nconst result = await Memento.plugins.activity.createActivity({\n  id: 'activity123',\n  startTime,\n  endTime,\n  title: '客户会谈',\n  tags: ['工作', '客户'],\n  description: '与客户讨论新项目需求',\n  mood: '🤝'\n});\nsetResult(`活动已创建，自定义ID: ${result.activity.id}`);"
       }
     ],
-    "notes": "如果时间段与现有活动重叠，会自动替换原活动；结束时间必须晚于开始时间；tags 参数支持数组或 JSON 字符串格式",
+    "notes": "必需参数: startTime(开始时间)、endTime(结束时间)、title(活动标题);可选参数: id(自定义ID)、tags(标签)、description(描述)、mood(心情);如果不提供id会自动生成UUID;ID不能与现有活动重复;如果时间段与现有活动重叠，会自动替换原活动;结束时间必须晚于开始时间;tags 参数支持数组或 JSON 字符串格式",
     "enabled": true
   },
   "updateActivity": {

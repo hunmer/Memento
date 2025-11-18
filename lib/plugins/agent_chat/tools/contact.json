@@ -41,6 +41,7 @@
     "parameters": [
       {"name": "name", "type": "string", "required": true, "description": "姓名"},
       {"name": "phone", "type": "string", "required": true, "description": "电话号码"},
+      {"name": "id", "type": "string", "required": false, "description": "联系人ID(可选,不提供则自动生成)"},
       {"name": "avatar", "type": "string", "required": false, "description": "头像路径"},
       {"name": "address", "type": "string", "required": false, "description": "地址"},
       {"name": "notes", "type": "string", "required": false, "description": "备注"},
@@ -59,9 +60,13 @@
       {
         "title": "创建完整联系人",
         "code": "const contact = await Memento.plugins.contact.createContact({\n  name: '李四',\n  phone: '13900139000',\n  address: '北京市海淀区',\n  notes: '重要客户',\n  tags: ['朋友', '客户'],\n  customFields: {公司: '北京科技', 职位: '经理'}\n});\nsetResult(`联系人ID: ${contact.id}`);"
+      },
+      {
+        "title": "使用自定义ID创建联系人",
+        "code": "const contact = await Memento.plugins.contact.createContact({\n  id: 'contact123',\n  name: '王五',\n  phone: '13700137000',\n  address: '上海市浦东新区',\n  notes: '多年好友',\n  tags: ['朋友'],\n  customFields: {公司: '上海科技', 职位: '工程师'}\n});\nsetResult(`联系人已创建，自定义ID: ${contact.id}`);"
       }
     ],
-    "notes": "姓名和电话号码必填，其他字段可选",
+    "notes": "必需参数: name(姓名)、phone(电话号码);可选参数: id(自定义ID)、avatar(头像)、address(地址)、notes(备注)、tags(标签)、customFields(自定义字段);如果不提供id会自动生成UUID;ID不能与现有联系人重复",
     "enabled": true
   },
   "updateContact": {
@@ -103,7 +108,7 @@
     "examples": [
       {
         "title": "删除联系人",
-        "code": "const success = await Memento.plugins.contact.deleteContact({contactId: 'contact123'});\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.contact.deleteContact({contactId: 'contact123'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
       }
     ],
     "notes": "删除操作不可逆，会同时删除该联系人的所有交互记录",
@@ -167,7 +172,7 @@
     "examples": [
       {
         "title": "删除交互记录",
-        "code": "const success = await Memento.plugins.contact.deleteInteraction({interactionId: 'record456'});\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.contact.deleteInteraction({interactionId: 'record456'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
       }
     ],
     "notes": "删除操作不可逆",

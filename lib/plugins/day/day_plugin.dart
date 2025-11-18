@@ -227,6 +227,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
       final targetDate = DateTime.parse(date);
 
       // 可选参数
+      final String? id = params['id'];
       final String? notesJson = params['notesJson'];
       final int? backgroundColor = params['backgroundColor'];
 
@@ -246,6 +247,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
 
       // 创建纪念日
       final memorialDay = MemorialDay(
+        id: id, // 支持传入自定义ID，如果为null则自动生成
         title: name,
         targetDate: targetDate,
         notes: notes,

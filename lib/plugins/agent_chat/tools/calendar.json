@@ -121,7 +121,7 @@
     "examples": [
       {
         "title": "删除事件",
-        "code": "const success = await Memento.plugins.calendar.deleteEvent({eventId: 'evt123'});\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.calendar.deleteEvent({eventId: 'evt123'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
       }
     ],
     "notes": "删除操作不可逆；Todo 任务事件（source='todo'）不可删除",

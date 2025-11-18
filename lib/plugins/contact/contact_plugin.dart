@@ -216,6 +216,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     // 提取可选参数
+    final String? id = params['id'];
     final String? avatar = params['avatar'];
     final String? address = params['address'];
     final String? notes = params['notes'];
@@ -226,9 +227,17 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
         ? Map<String, String>.from(params['customFields'])
         : null;
 
+    // 检查自定义ID是否已存在
+    if (id != null && id.isNotEmpty) {
+      final existingContact = await _controller.getContact(id);
+      if (existingContact != null) {
+        return jsonEncode({'error': '联系人ID已存在: $id'});
+      }
+    }
+
     final uuid = const Uuid();
     final contact = Contact(
-      id: uuid.v4(),
+      id: (id != null && id.isNotEmpty) ? id : uuid.v4(), // 如果传入自定义ID则使用，否则自动生成
       name: name,
       phone: phone,
       avatar: avatar,

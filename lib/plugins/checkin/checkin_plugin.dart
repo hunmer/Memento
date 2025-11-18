@@ -473,11 +473,21 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     // 可选参数
+    final String? id = params['id'];
     final String? group = params['group'];
     final String? description = params['description'];
 
+    // 检查自定义ID是否已存在
+    if (id != null && _checkinItems.any((item) => item.id == id)) {
+      return jsonEncode({
+        'success': false,
+        'message': '签到项目ID已存在: $id',
+      });
+    }
+
     // 创建新项目
     final item = CheckinItem(
+      id: id, // 如果传入null，会自动使用时间戳作为ID
       name: name,
       icon: Icons.check_circle,
       group: group ?? '默认分组',

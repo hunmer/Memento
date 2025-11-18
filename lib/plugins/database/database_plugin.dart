@@ -318,6 +318,9 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: fieldsJson'});
     }
 
+    // 可选参数 - 自定义ID
+    final String? id = params['id'];
+
     // 解析字段数据
     Map<String, dynamic> fields;
     try {
@@ -326,8 +329,21 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': 'Invalid fields JSON: $fieldsJson'});
     }
 
+    // 检查自定义ID是否已存在
+    if (id != null && id.isNotEmpty) {
+      try {
+        final existingRecords = await controller.getRecords(databaseId);
+        final existingRecord = existingRecords.where((r) => r.id == id).firstOrNull;
+        if (existingRecord != null) {
+          return jsonEncode({'success': false, 'error': '记录ID已存在: $id'});
+        }
+      } catch (e) {
+        // 如果获取记录失败，继续创建
+      }
+    }
+
     final record = Record(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: (id != null && id.isNotEmpty) ? id : DateTime.now().millisecondsSinceEpoch.toString(),
       tableId: databaseId,
       fields: fields,
       createdAt: DateTime.now(),

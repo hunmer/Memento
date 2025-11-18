@@ -93,6 +93,7 @@
     "description": "创建一个新的签到项目",
     "parameters": [
       {"name": "name", "type": "string", "required": true, "description": "项目名称"},
+      {"name": "id", "type": "string", "required": false, "description": "项目ID(可选,不提供则自动生成)"},
       {"name": "group", "type": "string", "required": false, "description": "分组名称(可选)"},
       {"name": "description", "type": "string", "required": false, "description": "项目描述(可选)"}
     ],
@@ -108,9 +109,13 @@
       {
         "title": "创建完整签到项目",
         "code": "const result = await Memento.plugins.checkin.createCheckinItem({\n  name: '晨跑',\n  group: '健康习惯',\n  description: '每天早上6点跑步30分钟'\n});\nsetResult(result.success ? `创建成功,项目ID: ${result.item.id}` : result.message);"
+      },
+      {
+        "title": "使用自定义ID创建签到项目",
+        "code": "const result = await Memento.plugins.checkin.createCheckinItem({\n  id: 'item-id-123',\n  name: '学习编程',\n  group: '技能提升',\n  description: '每天学习1小时编程'\n});\nsetResult(result.success ? `创建成功,自定义ID: ${result.item.id}` : result.message);"
       }
     ],
-    "notes": "必需参数: name(项目名称);项目名称不能与现有项目重复;创建后会自动保存到存储",
+    "notes": "必需参数: name(项目名称);可选参数: id(自定义ID)、group(分组)、description(描述);项目名称和ID都不能与现有项目重复;如果不提供id会自动生成时间戳ID;创建后会自动保存到存储",
     "enabled": true
   }
 }
