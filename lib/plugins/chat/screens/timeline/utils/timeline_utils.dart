@@ -11,7 +11,7 @@ class TimelineUtils {
     
     // 根据亮暗主题调整透明度
     final opacity = isDark ? 0.1 : 0.05;
-    return channelColor.withOpacity(opacity);
+    return channelColor.withValues(alpha: opacity);
   }
   
   /// 将消息分组为按日期排序的列表

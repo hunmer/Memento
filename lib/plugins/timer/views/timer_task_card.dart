@@ -55,14 +55,14 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
         boxShadow: [
           // 默认阴影
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
           // 激活状态的发光效果
           if (isRunning)
             BoxShadow(
-              color: task.color.withOpacity(0.3),
+              color: task.color.withValues(alpha: 0.3),
               blurRadius: 12,
               spreadRadius: 2,
             ),
@@ -74,7 +74,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: task.color.withOpacity(isRunning ? 0.8 : 0.5),
+            color: task.color.withValues(alpha: isRunning ? 0.8 : 0.5),
             width: 2,
           ),
         ),

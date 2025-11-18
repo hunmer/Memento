@@ -398,7 +398,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 label: const Text('创建新聊天'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  side: BorderSide(color: Colors.blue.withOpacity(0.5)),
+                    side: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
                   foregroundColor: Colors.blue[700],
                 ),
               ),
@@ -530,12 +530,6 @@ class _ChatScreenState extends State<ChatScreen> {
                             child: RadioListTile<int?>(
                               title: const Text('使用全局设置'),
                               value: null,
-                              groupValue: customContextCount,
-                              onChanged: (value) {
-                                setDialogState(() {
-                                  customContextCount = value;
-                                });
-                              },
                             ),
                           ),
                         ],
@@ -546,13 +540,6 @@ class _ChatScreenState extends State<ChatScreen> {
                             child: RadioListTile<int?>(
                               title: const Text('自定义'),
                               value: -1, // 用-1表示自定义模式
-                              groupValue:
-                                  customContextCount == null ? null : -1,
-                              onChanged: (value) {
-                                setDialogState(() {
-                                  customContextCount = 10; // 默认值
-                                });
-                              },
                             ),
                           ),
                         ],

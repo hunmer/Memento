@@ -142,7 +142,7 @@ class _CheckinGroupPieChartState extends State<CheckinGroupPieChart> {
     if (index >= colors.length) {
       return Color(
         (math.Random().nextDouble() * 0xFFFFFF).toInt(),
-      ).withOpacity(1.0);
+      ).withValues(alpha: 1.0);
     }
 
     return colors[index];

@@ -34,7 +34,7 @@ class TaskGridItem extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: task.priorityColor.withOpacity(0.5),
+          color: task.priorityColor.withValues(alpha: 0.5),
           width: 2,
         ),
       ),

@@ -41,7 +41,7 @@ class TagList extends StatelessWidget {
               selected: isSelected,
               onSelected: (_) => onTagToggle(tag),
               selectedColor: config?.selectedTagColor ??
-                  theme.primaryColor.withOpacity(0.2),
+                      theme.primaryColor.withValues(alpha: 0.2),
               checkmarkColor: config?.checkmarkColor ?? theme.primaryColor,
             ),
           ),

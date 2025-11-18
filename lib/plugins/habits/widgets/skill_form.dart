@@ -82,7 +82,7 @@ class _SkillFormState extends State<SkillForm> {
                       border: Border.all(
                         color: Theme.of(
                           context,
-                        ).colorScheme.primary.withOpacity(0.5),
+                        ).colorScheme.primary.withValues(alpha: 0.5),
                         width: 2,
                       ),
                     ),

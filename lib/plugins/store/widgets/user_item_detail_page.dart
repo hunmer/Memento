@@ -106,7 +106,7 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
                         color:
                             _currentIndex == i
                                 ? Theme.of(context).primaryColor
-                                : Colors.grey.withOpacity(0.3),
+                                : Colors.grey.withValues(alpha: 0.3),
                         border: Border.all(
                           color:
                               _currentIndex == i

@@ -75,7 +75,7 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .surfaceContainerHighest
-                                .withOpacity(0.5),
+                                .withValues(alpha: 0.5),
                             borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(12),
                             ),

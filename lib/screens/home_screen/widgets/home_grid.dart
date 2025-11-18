@@ -195,11 +195,11 @@ class _HomeGridState extends State<HomeGrid> {
           final dragHandleWidget = Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.9),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),

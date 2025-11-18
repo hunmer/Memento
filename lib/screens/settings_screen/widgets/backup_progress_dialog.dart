@@ -77,7 +77,7 @@ class BackupProgressDialog extends StatelessWidget {
                             color: Theme.of(context)
                                 .colorScheme
                                 .surfaceContainerHighest
-                                .withOpacity(0.3),
+                                .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           padding: const EdgeInsets.all(8),

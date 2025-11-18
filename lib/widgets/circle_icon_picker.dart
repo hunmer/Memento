@@ -39,7 +39,9 @@ class CircleIconPicker extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: backgroundColor,
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.5),
                   width: 2,
                 ),
               ),

@@ -58,6 +58,7 @@ class CalendarEvent {
     'startTime': startTime.toIso8601String(),
     'endTime': endTime?.toIso8601String(),
     'icon': icon.codePoint,
+    // ignore: deprecated_member_use
     'color': color.value,
     'source': source,
     'reminderMinutes': reminderMinutes,

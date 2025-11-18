@@ -4,6 +4,7 @@ import '../../../core/storage/storage_manager.dart';
 /// 消息详细信息服务
 ///
 /// 管理工具调用消息的详细数据（用户输入、思考过程、工具调用、最终回复）
+// ignore: unintended_html_in_doc_comment
 /// 数据以独立JSON文件存储，路径：agent_chat/message_details/<messageId>.json
 class MessageDetailService {
   final StorageManager storage;

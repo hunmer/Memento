@@ -252,7 +252,8 @@ class _SkillsListState extends State<SkillsList> {
                                                       colorFilter:
                                                           ColorFilter.mode(
                                                             Colors.black
-                                                                .withOpacity(
+                                                                .withValues(
+                                                                  alpha: 
                                                                   0.3,
                                                                 ),
                                                             BlendMode.darken,

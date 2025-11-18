@@ -215,7 +215,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
                           border: Border.all(
                             color: Theme.of(
                               context,
-                            ).colorScheme.primary.withOpacity(0.5),
+                            ).colorScheme.primary.withValues(alpha: 0.5),
                             width: 2,
                           ),
                         ),
@@ -237,7 +237,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .primary
-                                                .withOpacity(0.5),
+                                                .withValues(alpha: 0.5),
                                             width: 2,
                                           ),
                                         ),

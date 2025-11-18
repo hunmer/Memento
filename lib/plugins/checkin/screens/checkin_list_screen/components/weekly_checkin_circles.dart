@@ -93,7 +93,7 @@ class WeeklyCheckinCircles extends StatelessWidget {
                         ? Colors.green
                         : isEnabled
                             ? Colors.transparent
-                            : Colors.grey.withOpacity(0.2),
+                              : Colors.grey.withValues(alpha: 0.2),
                     border: Border.all(
                       color: isToday
                           ? Theme.of(context).primaryColor
@@ -129,7 +129,7 @@ class WeeklyCheckinCircles extends StatelessWidget {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),

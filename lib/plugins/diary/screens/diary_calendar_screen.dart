@@ -116,7 +116,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
           cellMargin: const EdgeInsets.all(2),
           cellPadding: const EdgeInsets.all(4),
           todayDecoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
             shape: BoxShape.circle,
                   border: Border.all(
                     color: Theme.of(context).colorScheme.primary,
@@ -157,7 +157,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                     decoration: BoxDecoration(
                       color: Theme.of(
                         context,
-                      ).colorScheme.primary.withOpacity(0.15),
+                      ).colorScheme.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

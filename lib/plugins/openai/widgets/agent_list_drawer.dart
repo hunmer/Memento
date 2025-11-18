@@ -93,7 +93,7 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
               border: Border.all(
                 color: _getColorForServiceProvider(
                   agent.serviceProviderId,
-                ).withOpacity(0.5),
+                ).withValues(alpha: 0.5),
                 width: 2,
               ),
             ),

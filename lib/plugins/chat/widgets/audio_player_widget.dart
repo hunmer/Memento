@@ -155,7 +155,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: widget.backgroundColor.withOpacity(0.1),
+        color: widget.backgroundColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
@@ -206,7 +206,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       _formatDuration(_duration),
                       style: TextStyle(
                         fontSize: 12,
-                        color: widget.primaryColor.withOpacity(0.7),
+                        color: widget.primaryColor.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -223,9 +223,11 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       overlayRadius: 14,
                     ),
                     activeTrackColor: widget.progressColor,
-                    inactiveTrackColor: widget.backgroundColor.withOpacity(0.3),
+                    inactiveTrackColor: widget.backgroundColor.withValues(
+                      alpha: 0.3,
+                    ),
                     thumbColor: widget.primaryColor,
-                    overlayColor: widget.primaryColor.withOpacity(0.3),
+                    overlayColor: widget.primaryColor.withValues(alpha: 0.3),
                   ),
                   child: Slider(
                     min: 0,

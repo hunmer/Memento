@@ -155,6 +155,7 @@ class CheckinItem {
       'id': id,
       'name': name,
       'icon': icon.codePoint,
+      // ignore: deprecated_member_use
       'color': color.value,
       'group': group,
       'reminderSettings': reminderSettings?.toJson(),
