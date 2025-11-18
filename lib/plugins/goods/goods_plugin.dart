@@ -559,8 +559,6 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   @override
   Map<String, Function> defineJSAPI() {
     return {
-      // 测试API（同步）
-      'testSync': _jsTestSync,
 
       // 仓库相关
       'getWarehouses': _jsGetWarehouses,
@@ -586,20 +584,9 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   // ==================== JS API 实现 ====================
-
-  /// 同步测试 API
-  String _jsTestSync() {
-    return jsonEncode({
-      'status': 'ok',
-      'message': '物品管理插件同步测试成功！',
-      'timestamp': DateTime.now().toIso8601String(),
-      'plugin': id,
-    });
-  }
-
   /// 获取所有仓库列表
   /// 返回: JSON数组，包含所有仓库信息（不含物品）
-  Future<String> _jsGetWarehouses() async {
+  Future<String> _jsGetWarehouses(Map<String, dynamic> params) async {
     final warehousesJson = _warehouses.map((w) {
       final json = w.toJson();
       // 不返回物品列表，减少数据量
@@ -634,24 +621,28 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: title'});
     }
 
-    // 可选参数
-    final int? iconCode = params['iconCode'];
-    final int? colorValue = params['colorValue'];
+    try {
+      // 可选参数
+      final int? iconCode = params['iconCode'];
+      final int? colorValue = params['colorValue'];
 
-    final warehouse = Warehouse(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: title,
-      icon: iconCode != null
-          ? IconData(iconCode, fontFamily: 'MaterialIcons')
-          : Icons.inventory_2,
-      iconColor: colorValue != null ? Color(colorValue) : color,
-    );
+      final warehouse = Warehouse(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: title,
+        icon: iconCode != null
+            ? IconData(iconCode, fontFamily: 'MaterialIcons')
+            : Icons.inventory_2,
+        iconColor: colorValue != null ? Color(colorValue) : color,
+      );
 
-    await saveWarehouse(warehouse);
+      await saveWarehouse(warehouse);
 
-    final json = warehouse.toJson();
-    json.remove('items'); // 新建仓库没有物品
-    return jsonEncode(json);
+      final json = warehouse.toJson();
+      json.remove('items'); // 新建仓库没有物品
+      return jsonEncode(json);
+    } catch (e) {
+      return jsonEncode({'error': '创建仓库失败: ${e.toString()}'});
+    }
   }
 
   /// 更新仓库信息
@@ -890,7 +881,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 获取统计信息
   /// 返回: 包含总数量、总价值、未使用物品数的统计数据
-  Future<String> _jsGetStatistics() async {
+  Future<String> _jsGetStatistics(Map<String, dynamic> params) async {
     return jsonEncode({
       'totalCount': getTotalItemsCount(),
       'totalValue': getTotalItemsValue(),

@@ -136,8 +136,6 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   @override
   Map<String, Function> defineJSAPI() {
     return {
-      // 测试API（同步）
-      'testSync': _jsTestSync,
 
       // 频道相关
       'getChannels': _jsGetChannels,
@@ -157,17 +155,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   // ==================== JS API 实现 ====================
 
-  /// 同步测试 API
-  String _jsTestSync() {
-    return jsonEncode({
-      'status': 'ok',
-      'message': '同步测试成功！',
-      'timestamp': DateTime.now().toIso8601String(),
-    });
-  }
-
   /// 获取所有频道
-  Future<String> _jsGetChannels() async {
+  Future<String> _jsGetChannels(Map<String, dynamic> params) async {
     final channels = channelService.channels;
     return jsonEncode(channels.map((c) => c.toJson()).toList());
   }
@@ -180,17 +169,21 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: name'});
     }
 
-    // 可选参数
+    try {
+      // 可选参数
 
-    final channel = Channel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: name,
-      icon: Icons.chat, // 默认图标
-      messages: [], // 空消息列表
-      backgroundColor: color, // 使用插件主题色
-    );
-    await channelService.createChannel(channel);
-    return jsonEncode(channel.toJson());
+      final channel = Channel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: name,
+        icon: Icons.chat, // 默认图标
+        messages: [], // 空消息列表
+        backgroundColor: color, // 使用插件主题色
+      );
+      await channelService.createChannel(channel);
+      return jsonEncode(channel.toJson());
+    } catch (e) {
+      return jsonEncode({'error': '创建频道失败: ${e.toString()}'});
+    }
   }
 
   /// 删除频道
@@ -201,8 +194,12 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: channelId'});
     }
 
-    await channelService.deleteChannel(channelId);
-    return jsonEncode({'success': true});
+    try {
+      await channelService.deleteChannel(channelId);
+      return jsonEncode({'success': true});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '删除失败: ${e.toString()}'});
+    }
   }
 
   /// 发送消息
@@ -218,35 +215,39 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: content'});
     }
 
-    // 可选参数
-    final String? type = params['type'];
-
-    // 解析消息类型
-    MessageType messageType;
     try {
-      messageType = MessageType.values.firstWhere(
-        (t) => t.name == (type ?? 'sent').toLowerCase(),
-        orElse: () => MessageType.sent,
+      // 可选参数
+      final String? type = params['type'];
+
+      // 解析消息类型
+      MessageType messageType;
+      try {
+        messageType = MessageType.values.firstWhere(
+          (t) => t.name == (type ?? 'sent').toLowerCase(),
+          orElse: () => MessageType.sent,
+        );
+      } catch (e) {
+        messageType = MessageType.sent;
+      }
+
+      // 创建消息
+      final message = Message(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        content: content,
+        user: userService.currentUser, // 使用 User 对象
+        type: messageType,
+        date: DateTime.now(), // 使用 date 而不是 timestamp
       );
+
+      // 保存消息
+      await channelService.addMessage(channelId, message);
+
+      // 序列化消息（toJson 返回 Future）
+      final messageJson = await message.toJson();
+      return jsonEncode(messageJson);
     } catch (e) {
-      messageType = MessageType.sent;
+      return jsonEncode({'error': '发送消息失败: ${e.toString()}'});
     }
-
-    // 创建消息
-    final message = Message(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      content: content,
-      user: userService.currentUser, // 使用 User 对象
-      type: messageType,
-      date: DateTime.now(), // 使用 date 而不是 timestamp
-    );
-
-    // 保存消息
-    await channelService.addMessage(channelId, message);
-
-    // 序列化消息（toJson 返回 Future）
-    final messageJson = await message.toJson();
-    return jsonEncode(messageJson);
   }
 
   /// 获取频道消息
@@ -290,24 +291,28 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: messageId'});
     }
 
-    final messages = await channelService.getChannelMessages(channelId);
-    if (messages == null) {
-      return jsonEncode({'success': false, 'error': '频道不存在'});
-    }
+    try {
+      final messages = await channelService.getChannelMessages(channelId);
+      if (messages == null) {
+        return jsonEncode({'success': false, 'error': '频道不存在'});
+      }
 
-    messages.removeWhere((m) => m.id == messageId);
-    await channelService.saveMessages(channelId, messages);
-    return jsonEncode({'success': true});
+      messages.removeWhere((m) => m.id == messageId);
+      await channelService.saveMessages(channelId, messages);
+      return jsonEncode({'success': true});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '删除失败: ${e.toString()}'});
+    }
   }
 
   /// 获取当前用户
-  Future<String> _jsGetCurrentUser() async {
+  Future<String> _jsGetCurrentUser(Map<String, dynamic> params) async {
     final user = userService.currentUser;
     return jsonEncode(user.toJson());
   }
 
   /// 获取所有用户
-  Future<String> _jsGetAIUser() async {
+  Future<String> _jsGetAIUser(Map<String, dynamic> params) async {
     // UserService 没有 getAIUser 方法，返回所有用户列表
     // 调用者可以根据用户名筛选 AI 用户
     final users = userService.getAllUsers();

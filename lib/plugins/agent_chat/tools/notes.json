@@ -1,21 +1,4 @@
 {
-  "notes_testSync": {
-    "title": "测试API连接",
-    "description": "测试 Notes 插件 JS API 是否正常工作（同步方法）。",
-    "parameters": [],
-    "returns": {
-      "type": "string",
-      "description": "包含状态信息的 JSON 字符串"
-    },
-    "examples": [
-      {
-        "code": "const result = Memento.plugins.notes.testSync();\nconst data = JSON.parse(result);\nconsole.log(data.message);",
-        "comment": "测试API是否可用"
-      }
-    ],
-    "notes": "这是唯一的同步方法，不需要 await。",
-    "enabled": true
-  },
   "notes_getNotes": {
     "title": "获取笔记列表",
     "description": "获取笔记列表，可选择指定文件夹ID来筛选特定文件夹中的笔记。",

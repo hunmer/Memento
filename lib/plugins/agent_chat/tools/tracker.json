@@ -1,21 +1,4 @@
 {
-  "tracker_testSync": {
-    "title": "测试同步连接",
-    "description": "同步测试 API,用于验证 JS Bridge 连接是否正常",
-    "parameters": [],
-    "returns": {
-      "type": "Object",
-      "description": "包含状态、消息和时间戳的测试结果对象"
-    },
-    "examples": [
-      {
-        "code": "const result = Memento.plugins.tracker.testSync();\nsetResult(result);",
-        "comment": "验证目标追踪插件连接"
-      }
-    ],
-    "notes": "同步方法,立即返回结果,用于快速检查连接状态",
-    "enabled": true
-  },
   "tracker_getGoals": {
     "title": "获取目标列表",
     "description": "获取目标列表,支持按状态和分组筛选",

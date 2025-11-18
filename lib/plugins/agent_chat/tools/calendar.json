@@ -47,7 +47,7 @@
     "examples": [
       {
         "title": "获取本周事件",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst startDate = weekStart.toISOString().split('T')[0] + 'T00:00:00.000Z';\nconst endDate = weekEnd.toISOString().split('T')[0] + 'T23:59:59.000Z';\nconst events = await Memento.plugins.calendar.getEventsByDateRange(startDate, endDate);\nsetResult(`本周有 ${events.length} 个事件`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst startDate = weekStart.toISOString().split('T')[0] + 'T00:00:00.000Z';\nconst endDate = weekEnd.toISOString().split('T')[0] + 'T23:59:59.000Z';\nconst events = await Memento.plugins.calendar.getEventsByDateRange({startDate: startDate, endDate: endDate});\nsetResult(`本周有 ${events.length} 个事件`);"
       }
     ],
     "notes": "日期需要使用 ISO8601 格式，可使用 JavaScript 的 Date.toISOString() 生成",
@@ -72,11 +72,11 @@
     "examples": [
       {
         "title": "创建今日事件",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent('项目会议', '讨论Q1计划', startTime);\nsetResult(`事件已创建: ${event.id}`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent({title: '项目会议', description: '讨论Q1计划', startTime: startTime});\nsetResult(`事件已创建: ${event.id}`);"
       },
       {
         "title": "创建带提醒的事件",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T14:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T16:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent('重要会议', '年度规划', startTime, endTime, null, null, 15);\nsetResult('已创建事件，将提前15分钟提醒');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T14:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T16:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent({title: '重要会议', description: '年度规划', startTime: startTime, endTime: endTime, reminderMinutes: 15});\nsetResult('已创建事件，将提前15分钟提醒');"
       }
     ],
     "notes": "reminderMinutes 可选值: 5, 15, 30, 60, 120, 1440（1天）, 2880（2天）",
@@ -102,7 +102,7 @@
     "examples": [
       {
         "title": "更新事件标题",
-        "code": "const updated = await Memento.plugins.calendar.updateEvent('evt123', '改期会议');\nsetResult(`事件已更新: ${updated.title}`);"
+        "code": "const updated = await Memento.plugins.calendar.updateEvent({eventId: 'evt123', title: '改期会议'});\nsetResult(`事件已更新: ${updated.title}`);"
       }
     ],
     "notes": "仅更新提供的字段，其他字段保持不变；Todo 任务事件（source='todo'）不可更新",
@@ -121,7 +121,7 @@
     "examples": [
       {
         "title": "删除事件",
-        "code": "const success = await Memento.plugins.calendar.deleteEvent('evt123');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const success = await Memento.plugins.calendar.deleteEvent({eventId: 'evt123'});\nsetResult(success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆；Todo 任务事件（source='todo'）不可删除",
@@ -140,7 +140,7 @@
     "examples": [
       {
         "title": "完成事件",
-        "code": "const completed = await Memento.plugins.calendar.completeEvent('evt123');\nsetResult(`事件已完成，完成时间: ${completed.completedTime}`);"
+        "code": "const completed = await Memento.plugins.calendar.completeEvent({eventId: 'evt123'});\nsetResult(`事件已完成，完成时间: ${completed.completedTime}`);"
       }
     ],
     "notes": "完成后的事件会被移到已完成事件列表，不再显示在日历中",

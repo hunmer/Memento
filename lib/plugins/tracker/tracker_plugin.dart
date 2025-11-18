@@ -201,8 +201,6 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   @override
   Map<String, Function> defineJSAPI() {
     return {
-      // 测试 API（同步）
-      'testSync': _jsTestSync,
 
       // 目标相关
       'getGoals': _jsGetGoals,
@@ -223,15 +221,6 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   // ==================== JS API 实现 ====================
-
-  /// 同步测试 API
-  String _jsTestSync() {
-    return jsonEncode({
-      'status': 'ok',
-      'message': '目标追踪插件同步测试成功！',
-      'timestamp': DateTime.now().toIso8601String(),
-    });
-  }
 
   /// 获取所有目标
   Future<String> _jsGetGoals(Map<String, dynamic> params) async {
@@ -358,15 +347,19 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除目标
-  Future<bool> _jsDeleteGoal(Map<String, dynamic> params) async {
+  Future<String> _jsDeleteGoal(Map<String, dynamic> params) async {
     // 提取必需参数并验证
     final String? goalId = params['goalId'];
     if (goalId == null || goalId.isEmpty) {
-      return false;
+      return jsonEncode({'success': false, 'error': '缺少必需参数: goalId'});
     }
 
-    await _controller.deleteGoal(goalId);
-    return true;
+    try {
+      await _controller.deleteGoal(goalId);
+      return jsonEncode({'success': true, 'goalId': goalId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '删除失败: ${e.toString()}'});
+    }
   }
 
   /// 记录数据
@@ -429,15 +422,19 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除记录
-  Future<bool> _jsDeleteRecord(Map<String, dynamic> params) async {
+  Future<String> _jsDeleteRecord(Map<String, dynamic> params) async {
     // 提取必需参数并验证
     final String? recordId = params['recordId'];
     if (recordId == null || recordId.isEmpty) {
-      return false;
+      return jsonEncode({'success': false, 'error': '缺少必需参数: recordId'});
     }
 
-    await _controller.deleteRecord(recordId);
-    return true;
+    try {
+      await _controller.deleteRecord(recordId);
+      return jsonEncode({'success': true, 'recordId': recordId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '删除失败: ${e.toString()}'});
+    }
   }
 
   /// 获取目标进度

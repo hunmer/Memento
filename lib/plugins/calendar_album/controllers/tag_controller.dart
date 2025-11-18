@@ -43,14 +43,18 @@ class TagController extends ChangeNotifier {
       // 尝试加载标签组
       final groupsJson = await storageManager.readFile(_tagGroupsFile, '[]');
       final List<dynamic> jsonData = json.decode(groupsJson);
-      tagGroups =
-          jsonData
-              .map((e) => dialog.TagGroup.fromMap(e as Map<String, dynamic>))
-              .toList();
 
-      // 确保最近使用标签组存在
-      if (!tagGroups.any((group) => group.name == '最近使用')) {
-        tagGroups.insert(0, dialog.TagGroup(name: '最近使用', tags: []));
+      // 只有在文件有内容时才覆盖默认值
+      if (jsonData.isNotEmpty) {
+        tagGroups =
+            jsonData
+                .map((e) => dialog.TagGroup.fromMap(e as Map<String, dynamic>))
+                .toList();
+
+        // 确保最近使用标签组存在
+        if (!tagGroups.any((group) => group.name == '最近使用')) {
+          tagGroups.insert(0, dialog.TagGroup(name: '最近使用', tags: []));
+        }
       }
 
       // 尝试加载最近使用的标签

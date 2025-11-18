@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../models/tool_config.dart';
 import '../../services/tool_config_manager.dart';
@@ -321,45 +322,54 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
 
     return SizedBox(
       height: 50,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: [
-          // "全部" 按钮
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: const Text('全部'),
-              selected: _selectedPluginFilter == null,
-              onSelected: (selected) {
-                setState(() {
-                  _selectedPluginFilter = null;
-                });
-              },
-              selectedColor: Theme.of(context).colorScheme.primaryContainer,
-            ),
-          ),
-          // 各个插件按钮
-          ...pluginIds.map((pluginId) {
-            final toolSet = _allPluginTools[pluginId];
-            final enabledCount = toolSet?.enabledToolCount ?? 0;
-            final totalCount = toolSet?.toolCount ?? 0;
-
-            return Padding(
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: {
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse,
+          },
+          scrollbars: false,
+        ),
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          children: [
+            // "全部" 按钮
+            Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilterChip(
-                label: Text('$pluginId ($enabledCount/$totalCount)'),
-                selected: _selectedPluginFilter == pluginId,
+                label: const Text('全部'),
+                selected: _selectedPluginFilter == null,
                 onSelected: (selected) {
                   setState(() {
-                    _selectedPluginFilter = selected ? pluginId : null;
+                    _selectedPluginFilter = null;
                   });
                 },
                 selectedColor: Theme.of(context).colorScheme.primaryContainer,
               ),
-            );
-          }),
-        ],
+            ),
+            // 各个插件按钮
+            ...pluginIds.map((pluginId) {
+              final toolSet = _allPluginTools[pluginId];
+              final enabledCount = toolSet?.enabledToolCount ?? 0;
+              final totalCount = toolSet?.toolCount ?? 0;
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilterChip(
+                  label: Text('$pluginId ($enabledCount/$totalCount)'),
+                  selected: _selectedPluginFilter == pluginId,
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedPluginFilter = selected ? pluginId : null;
+                    });
+                  },
+                  selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -370,15 +380,69 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
       appBar: AppBar(
         title: const Text('工具管理'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: '添加工具',
-            onPressed: _isLoading ? null : _addTool,
-          ),
-          IconButton(
-            icon: const Icon(Icons.file_download),
-            tooltip: '导入配置',
-            onPressed: _isLoading ? null : _importConfig,
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            tooltip: '更多选项',
+            enabled: !_isLoading,
+            onSelected: (value) {
+              switch (value) {
+                case 'add':
+                  _addTool();
+                  break;
+                case 'import':
+                  _importConfig();
+                  break;
+                case 'export':
+                  _exportConfig();
+                  break;
+                case 'reset':
+                  _resetToDefault();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'add',
+                child: Row(
+                  children: [
+                    Icon(Icons.add),
+                    SizedBox(width: 12),
+                    Text('添加工具'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'import',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download),
+                    SizedBox(width: 12),
+                    Text('导入配置'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'export',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_upload),
+                    SizedBox(width: 12),
+                    Text('导出配置'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'reset',
+                child: Row(
+                  children: [
+                    Icon(Icons.restore, color: Colors.red),
+                    SizedBox(width: 12),
+                    Text('恢复默认', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -404,13 +468,6 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                 if (_allPluginTools.isNotEmpty) _buildPluginFilterBar(),
 
                 const SizedBox(height: 8),
-
-                // 统计信息
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _buildStatistics(),
-                ),
-
                 const Divider(),
 
                 // 工具列表
@@ -422,29 +479,11 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                         ),
                 ),
 
-                // 底部按钮
+                // 底部统计信息
+                const Divider(height: 1),
                 Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _isLoading ? null : _resetToDefault,
-                          icon: const Icon(Icons.restore),
-                          label: const Text('恢复默认'),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _isLoading ? null : _exportConfig,
-                          icon: const Icon(Icons.file_upload),
-                          label: const Text('导出配置'),
-                        ),
-                      ),
-                    ],
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: _buildStatistics(),
                 ),
               ],
             ),
