@@ -4,8 +4,8 @@
     "description": "获取所有可兑换的商品列表",
     "parameters": [],
     "returns": {
-      "type": "String",
-      "description": "Product 对象数组的 JSON 字符串"
+      "type": "Array",
+      "description": "Product 对象数组"
     },
     "examples": [
       {
@@ -28,8 +28,8 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "Product 对象的 JSON 字符串"
+      "type": "Object",
+      "description": "Product 对象"
     },
     "examples": [
       {
@@ -100,8 +100,8 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "创建的 Product 对象的 JSON 字符串"
+      "type": "Object",
+      "description": "创建的 Product 对象"
     },
     "examples": [
       {
@@ -176,8 +176,8 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "更新后的 Product 对象的 JSON 字符串"
+      "type": "Object",
+      "description": "更新后的 Product 对象"
     },
     "examples": [
       {
@@ -224,8 +224,8 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "兑换结果的 JSON 字符串,包含 success, message, currentPoints"
+      "type": "Object",
+      "description": "兑换结果对象,包含 success, message, currentPoints"
     },
     "examples": [
       {
@@ -271,8 +271,8 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "操作结果的 JSON 字符串,包含 success, currentPoints, message"
+      "type": "Object",
+      "description": "操作结果对象,包含 success, currentPoints, message"
     },
     "examples": [
       {
@@ -292,8 +292,8 @@
     "description": "获取用户的所有兑换记录",
     "parameters": [],
     "returns": {
-      "type": "String",
-      "description": "UserItem 对象数组的 JSON 字符串"
+      "type": "Array",
+      "description": "UserItem 对象数组"
     },
     "examples": [
       {
@@ -309,8 +309,8 @@
     "description": "获取所有积分变动记录",
     "parameters": [],
     "returns": {
-      "type": "String",
-      "description": "PointsLog 对象数组的 JSON 字符串"
+      "type": "Array",
+      "description": "PointsLog 对象数组"
     },
     "examples": [
       {
@@ -326,8 +326,8 @@
     "description": "获取用户拥有的所有物品",
     "parameters": [],
     "returns": {
-      "type": "String",
-      "description": "UserItem 对象数组的 JSON 字符串"
+      "type": "Array",
+      "description": "UserItem 对象数组"
     },
     "examples": [
       {
@@ -350,12 +350,12 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "使用结果的 JSON 字符串,包含 success, message"
+      "type": "Object",
+      "description": "使用结果对象,包含 success, message"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.useItem({itemId: '1731473170456'});\nconst data = JSON.parse(result);\nconst msg = data.success ? '使用成功' : `使用失败: ${data.message}`;\nsetResult(msg);",
+        "code": "const result = await Memento.plugins.store.useItem({itemId: '1731473170456'});\nconst msg = result.success ? '使用成功' : `使用失败: ${result.message}`;\nsetResult(msg);",
         "comment": "使用物品"
       }
     ],
@@ -379,7 +379,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.archiveProduct({productId: 'produce'});\nsetResult(result);",
+        "code": "const result = await Memento.plugins.store.archiveProduct({productId: 'product123'});\nsetResult(result);",
         "comment": "归档商品"
       }
     ],
@@ -415,8 +415,8 @@
     "description": "获取所有已归档的商品列表",
     "parameters": [],
     "returns": {
-      "type": "String",
-      "description": "Product 对象数组的 JSON 字符串"
+      "type": "Array",
+      "description": "Product 对象数组"
     },
     "examples": [
       {

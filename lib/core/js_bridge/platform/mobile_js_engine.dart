@@ -464,7 +464,7 @@ class MobileJSEngine implements JSEngine {
               var key = pendingKeys[i];
               var pending = globalThis.__PENDING_CALLS__[key];
 
-              if (globalThis.__DART_RESULTS__[key]) {
+              if (key in globalThis.__DART_RESULTS__) {
                 var resultJson = globalThis.__DART_RESULTS__[key];
                 delete globalThis.__DART_RESULTS__[key];
                 delete globalThis.__PENDING_CALLS__[key];
@@ -503,8 +503,8 @@ class MobileJSEngine implements JSEngine {
               var key = keys[i];
               var pending = globalThis.__PENDING_CALLS__[key];
 
-              // 检查 Dart 是否已返回结果
-              if (globalThis.__DART_RESULTS__[key]) {
+              // 检查 Dart 是否已返回结果 (使用 in 操作符避免 falsy 值问题)
+              if (key in globalThis.__DART_RESULTS__) {
                 var resultJson = globalThis.__DART_RESULTS__[key];
                 delete globalThis.__DART_RESULTS__[key];
                 delete globalThis.__PENDING_CALLS__[key];
