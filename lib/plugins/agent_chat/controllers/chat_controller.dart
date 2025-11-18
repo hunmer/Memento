@@ -821,6 +821,10 @@ class ChatController extends ChangeNotifier {
   /// 清空所有消息
   Future<void> clearAllMessages() async {
     await messageService.clearAllMessages(conversation.id);
+
+    // 同时清空会话的最后消息预览
+    await conversationService.updateLastMessage(conversation.id, '');
+
     notifyListeners();
   }
 

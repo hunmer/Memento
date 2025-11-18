@@ -11,6 +11,7 @@ import 'command_selector.dart';
 import 'tool_template_selector.dart';
 import 'voice_input_dialog.dart';
 import '../../../agent_chat_plugin.dart';
+import '../../../widgets/press_to_record_button.dart';
 
 /// 消息输入框组件
 class MessageInput extends StatefulWidget {
@@ -39,12 +40,16 @@ class _MessageInputState extends State<MessageInput> {
   bool _isLoadingCommandToolResults = false;
   String? _commandToolQuery;
 
+  // 语音识别服务
+  TencentASRService? _recognitionService;
+
   @override
   void initState() {
     super.initState();
     _textController.text = widget.controller.inputText;
     _textController.addListener(_onTextChanged);
     widget.controller.addListener(_onControllerChanged);
+    _initializeVoiceRecognition();
   }
 
   @override
@@ -53,7 +58,36 @@ class _MessageInputState extends State<MessageInput> {
     widget.controller.removeListener(_onControllerChanged);
     _textController.dispose();
     _focusNode.dispose();
+    _recognitionService?.dispose();
     super.dispose();
+  }
+
+  /// 初始化语音识别服务
+  Future<void> _initializeVoiceRecognition() async {
+    try {
+      // 获取插件实例
+      final plugin = AgentChatPlugin.instance;
+
+      // 读取配置
+      final settings = plugin.settings;
+      final asrConfigMap = settings['asrConfig'] as Map<String, dynamic>?;
+
+      if (asrConfigMap == null || asrConfigMap.isEmpty) {
+        return;
+      }
+
+      // 创建配置对象
+      final asrConfig = TencentASRConfig.fromJson(asrConfigMap);
+
+      // 验证配置
+      if (asrConfig.isValid()) {
+        setState(() {
+          _recognitionService = TencentASRService(config: asrConfig);
+        });
+      }
+    } catch (e) {
+      debugPrint('初始化语音识别服务失败: $e');
+    }
   }
 
   void _onTextChanged() {
@@ -208,14 +242,36 @@ class _MessageInputState extends State<MessageInput> {
                   tooltip: '添加附件',
                 ),
 
-                // 语音按钮
-                IconButton(
-                  icon: const Icon(Icons.mic),
-                  onPressed: widget.controller.currentAgent != null
-                      ? _showVoiceInputDialog
-                      : null,
-                  tooltip: '语音输入',
-                ),
+                // 语音按钮（长按录音）
+                if (_recognitionService != null)
+                  PressToRecordButton(
+                    textController: _textController,
+                    recognitionService: _recognitionService!,
+                    enabled: widget.controller.currentAgent != null,
+                    tooltip: '长按录音',
+                    onRecognitionComplete: (text) {
+                      // 聚焦到输入框
+                      _focusNode.requestFocus();
+                    },
+                    onError: (error) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('语音识别失败: $error'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
+                  )
+                else
+                  IconButton(
+                    icon: const Icon(Icons.mic),
+                    onPressed: widget.controller.currentAgent != null
+                        ? _showVoiceInputDialog
+                        : null,
+                    tooltip: '语音输入（未配置）',
+                  ),
 
                 // 输入框
                 Expanded(
