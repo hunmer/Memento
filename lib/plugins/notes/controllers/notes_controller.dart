@@ -128,9 +128,20 @@ class NotesController {
   }
 
   // 创建新文件夹
-  Future<Folder> createFolder(String name, String? parentId) async {
+  Future<Folder> createFolder(
+    String name,
+    String? parentId, {
+    String? customId,
+  }) async {
+    // 如果提供了自定义 ID,检查是否已存在
+    if (customId != null) {
+      if (_folders.containsKey(customId)) {
+        throw Exception('文件夹 ID "$customId" 已存在,请使用不同的 ID');
+      }
+    }
+
     final folder = Folder(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: customId ?? DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
       parentId: parentId,
       createdAt: DateTime.now(),
@@ -142,9 +153,22 @@ class NotesController {
   }
 
   // 创建新笔记
-  Future<Note> createNote(String title, String content, String folderId) async {
+  Future<Note> createNote(
+    String title,
+    String content,
+    String folderId, {
+    String? customId,
+  }) async {
+    // 如果提供了自定义 ID,检查是否已存在
+    if (customId != null) {
+      final allNotes = _notes.values.expand((notes) => notes).toList();
+      if (allNotes.any((note) => note.id == customId)) {
+        throw Exception('笔记 ID "$customId" 已存在,请使用不同的 ID');
+      }
+    }
+
     final note = Note(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: customId ?? DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
       content: content,
       folderId: folderId,

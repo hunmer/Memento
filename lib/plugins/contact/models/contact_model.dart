@@ -38,6 +38,7 @@ class Contact {
       'name': name,
       'avatar': avatar,
       'icon': icon.codePoint,
+      // ignore: deprecated_member_use
       'iconColor': iconColor.value,
       'phone': phone,
       'address': address,

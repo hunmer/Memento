@@ -33,7 +33,7 @@
     },
     "examples": [
       {
-        "code": "const product = await Memento.plugins.store.getProduct({productId: '1731473170123'});\nsetResult(product);",
+        "code": "const product = await Memento.plugins.store.getProduct({productId: 'product123'});\nsetResult(product);",
         "comment": "获取指定商品信息"
       }
     ],
@@ -87,6 +87,12 @@
         "description": "使用期限(天数)"
       },
       {
+        "name": "id",
+        "type": "String",
+        "optional": true,
+        "description": "自定义商品ID,如不提供则自动生成时间戳ID"
+      },
+      {
         "name": "image",
         "type": "String",
         "optional": true,
@@ -100,10 +106,14 @@
     "examples": [
       {
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst newProduct = await Memento.plugins.store.createProduct({\n  name: '迟到豁免卡',\n  description: '可豁免一次迟到',\n  price: 30,\n  stock: 20,\n  exchangeStart: startDate,\n  exchangeEnd: endDate,\n  useDuration: 60,\n  image: 'assets/late_pass.png'\n});\nsetResult(newProduct);",
-        "comment": "创建今年有效的新商品"
+        "comment": "创建今年有效的新商品(自动生成ID)"
+      },
+      {
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst newProduct = await Memento.plugins.store.createProduct({\n  id: 'product123',\n  name: '免作业卡',\n  description: '可免除一次作业',\n  price: 50,\n  stock: 10,\n  exchangeStart: startDate,\n  exchangeEnd: endDate,\n  useDuration: 30,\n  image: 'assets/homework_pass.png'\n});\nsetResult(newProduct);",
+        "comment": "使用自定义ID创建商品"
       }
     ],
-    "notes": "创建后自动分配唯一 ID(时间戳字符串)",
+    "notes": "支持自定义商品ID,如果不提供id参数则自动分配唯一ID(时间戳字符串)",
     "enabled": true
   },
   "store_updateProduct": {
@@ -171,7 +181,7 @@
     },
     "examples": [
       {
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst updated = await Memento.plugins.store.updateProduct({\n  productId: '1731473170123',\n  name: '免作业卡(升级版)',\n  description: '可免除两次作业',\n  price: 100,\n  stock: 5,\n  exchangeStart: startDate,\n  exchangeEnd: endDate,\n  useDuration: 60\n});\nsetResult(updated);",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst updated = await Memento.plugins.store.updateProduct({\n  productId: 'product123',\n  name: '免作业卡(升级版)',\n  description: '可免除两次作业',\n  price: 100,\n  stock: 5,\n  exchangeStart: startDate,\n  exchangeEnd: endDate,\n  useDuration: 60\n});\nsetResult(updated);",
         "comment": "更新商品信息（今年有效期）"
       }
     ],
@@ -195,7 +205,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.deleteProduct({productId: '1731473170123'});\nsetResult(result);",
+        "code": "const result = await Memento.plugins.store.deleteProduct({productId: 'product123'});\nsetResult(result);",
         "comment": "归档商品"
       }
     ],
@@ -219,7 +229,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.redeem({productId: '1731473170123'});\nconst data = JSON.parse(result);\nconst msg = data.success ? `兑换成功!剩余积分: ${data.currentPoints}` : `兑换失败: ${data.message}`;\nsetResult(msg);",
+        "code": "const result = await Memento.plugins.store.redeem({productId: 'product123'});\nconst msg = result.success ? `兑换成功!剩余积分: ${result.currentPoints}` : `兑换失败: ${result.message}`;\nsetResult(msg);",
         "comment": "兑换商品"
       }
     ],
@@ -369,7 +379,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.archiveProduct({productId: '1731473170123'});\nsetResult(result);",
+        "code": "const result = await Memento.plugins.store.archiveProduct({productId: 'produce'});\nsetResult(result);",
         "comment": "归档商品"
       }
     ],
@@ -393,7 +403,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.restoreProduct({productId: '1731473170123'});\nsetResult(result);",
+        "code": "const result = await Memento.plugins.store.restoreProduct({productId: 'product123'});\nsetResult(result);",
         "comment": "恢复归档商品"
       }
     ],

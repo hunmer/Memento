@@ -674,7 +674,24 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
 
       // 显示结果
       if (result.success) {
-        _showTestResult('执行成功', result.result?.toString() ?? 'null');
+        // 将结果转换为字符串
+        String resultString;
+        final resultData = result.result;
+
+        if (resultData == null) {
+          resultString = 'null';
+        } else if (resultData is String) {
+          resultString = resultData;
+        } else {
+          // 对象类型，序列化为 JSON
+          try {
+            resultString = jsonEncode(resultData);
+          } catch (e) {
+            resultString = resultData.toString();
+          }
+        }
+
+        _showTestResult('执行成功', resultString);
       } else {
         _showTestResult('执行失败', result.error ?? '未知错误');
       }

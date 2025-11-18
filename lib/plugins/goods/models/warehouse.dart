@@ -58,6 +58,7 @@ class Warehouse {
       'id': id,
       'title': title,
       'iconData': icon.codePoint,
+      // ignore: deprecated_member_use
       'iconColor': iconColor.value,
       'imageUrl': _imageUrl, // 保存相对路径
       'items': items.map((item) => item.toJson()).toList(),

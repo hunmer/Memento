@@ -41,14 +41,6 @@ class _GroupSortDialogState extends State<GroupSortDialog> {
             (type) => RadioListTile<GroupSortType>(
               title: Text(GroupSortService.getSortTypeName(type, context)),
               value: type,
-              groupValue: _selectedSortType,
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedSortType = value;
-                  });
-                }
-              },
             ),
           ),
           const Divider(),

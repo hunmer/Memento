@@ -264,14 +264,22 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     // 提取可选参数
+    final String? customId = params['id'];
     final String? folderId = params['folderId'];
-    final List<String>? tags = params['tags'];
+    final List<String>? tags = params['tags'] != null
+        ? (params['tags'] as List<dynamic>).map((e) => e.toString()).toList()
+        : null;
 
     // 如果没有指定文件夹，使用根文件夹
     final targetFolderId = folderId ?? 'root';
 
     // 创建笔记
-    var note = await controller.createNote(title, content, targetFolderId);
+    var note = await controller.createNote(
+      title,
+      content,
+      targetFolderId,
+      customId: customId,
+    );
 
     // 如果有标签，更新笔记
     if (tags != null && tags.isNotEmpty) {
@@ -305,7 +313,9 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     // 提取可选参数
-    final List<String>? tags = params['tags'];
+    final List<String>? tags = params['tags'] != null
+        ? (params['tags'] as List<dynamic>).map((e) => e.toString()).toList()
+        : null;
 
     // 查找笔记
     final allNotes = controller.searchNotes(query: '');
@@ -359,7 +369,9 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     // 提取可选参数
-    final List<String>? tags = params['tags'];
+    final List<String>? tags = params['tags'] != null
+        ? (params['tags'] as List<dynamic>).map((e) => e.toString()).toList()
+        : null;
     final String? startDate = params['startDate'];
     final String? endDate = params['endDate'];
 
@@ -427,9 +439,14 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     // 提取可选参数
+    final String? customId = params['id'];
     final String? parentId = params['parentId'];
 
-    final folder = await controller.createFolder(name, parentId);
+    final folder = await controller.createFolder(
+      name,
+      parentId,
+      customId: customId,
+    );
     return jsonEncode(folder.toJson());
   }
 

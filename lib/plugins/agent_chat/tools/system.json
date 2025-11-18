@@ -116,5 +116,37 @@
     ],
     "notes": "返回的是 Unix 时间戳（毫秒），与 Date.now() 相同。",
     "enabled": true
+  },
+  "system_getLocation": {
+    "title": "获取位置信息",
+    "description": "获取用户的地理位置信息，支持两种模式：auto（自动获取当前位置的第一个搜索结果）和 manual（显示对话框让用户选择）。",
+    "parameters": [
+      {
+        "name": "mode",
+        "type": "string",
+        "optional": true,
+        "description": "获取位置的模式，可选值：'auto'（自动获取第一个结果）或 'manual'（手动选择），默认为 'manual'"
+      }
+    ],
+    "returns": {
+      "type": "Promise<Object|null>",
+      "description": "位置信息对象，包含：name(地点名称), address(详细地址), location(经纬度字符串), latitude(纬度), longitude(经度)。如果用户取消或发生错误，返回 null 或包含 error 字段的对象。"
+    },
+    "examples": [
+      {
+        "code": "const location = await Memento.system.getLocation('auto');\nif (location && !location.error) {\n  const msg = `当前位置：${location.name}，地址：${location.address}`;\n  setResult(msg);\n} else {\n  setResult('获取位置失败');\n}\nreturn location;",
+        "comment": "自动获取当前位置"
+      },
+      {
+        "code": "const location = await Memento.system.getLocation('manual');\nif (location) {\n  const msg = `选择的位置：${location.name}`;\n  setResult(msg);\n} else {\n  setResult('用户取消了选择');\n}\nreturn location;",
+        "comment": "手动选择位置"
+      },
+      {
+        "code": "const location = await Memento.system.getLocation();\nif (location) {\n  setResult({ lat: location.latitude, lng: location.longitude });\n} else {\n  setResult(null);\n}\nreturn location;",
+        "comment": "使用默认模式（manual）获取位置"
+      }
+    ],
+    "notes": "auto 模式会自动请求位置权限并返回当前位置附近的第一个 POI（兴趣点）；manual 模式会显示位置选择对话框，用户可以搜索或选择位置；需要位置权限（移动端），使用高德地图 API。",
+    "enabled": true
   }
 }

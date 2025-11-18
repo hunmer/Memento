@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:location/location.dart';
 import 'platform/mobile_js_engine.dart';
+import '../../widgets/location_picker.dart';
 
 /// JavaScript Bridge UI 处理器
 /// 提供默认的 Toast/Alert/Dialog 实现
@@ -13,6 +18,7 @@ class JSUIHandlers {
     engine.setToastHandler(_handleToast);
     engine.setAlertHandler(_handleAlert);
     engine.setDialogHandler(_handleDialog);
+    engine.setLocationHandler(_handleLocation);
   }
 
   /// Toast 处理器
@@ -191,6 +197,116 @@ class JSUIHandlers {
       case 'bottom':
       default:
         return Alignment.bottomCenter;
+    }
+  }
+
+  /// Location 处理器
+  Future<Map<String, dynamic>?> _handleLocation(String mode) async {
+    // 判断是否为移动端
+    final isMobile = Platform.isAndroid || Platform.isIOS;
+
+    if (mode == 'auto') {
+      // 自动模式：获取当前位置并返回第一个搜索结果
+      try {
+        // 获取当前位置
+        final location = Location();
+
+        // 检查服务是否可用
+        bool serviceEnabled = await location.serviceEnabled();
+        if (!serviceEnabled) {
+          serviceEnabled = await location.requestService();
+          if (!serviceEnabled) {
+            return {'error': 'Location services are disabled'};
+          }
+        }
+
+        // 检查权限状态
+        PermissionStatus permissionGranted = await location.hasPermission();
+        if (permissionGranted == PermissionStatus.denied) {
+          permissionGranted = await location.requestPermission();
+          if (permissionGranted != PermissionStatus.granted) {
+            return {'error': 'Location permissions are denied'};
+          }
+        }
+
+        // 获取当前位置
+        final locationData = await location.getLocation();
+        final latitude = locationData.latitude ?? 0;
+        final longitude = locationData.longitude ?? 0;
+
+        // 使用高德地图 API 进行逆地理编码
+        final response = await http.get(
+          Uri.parse(
+            'http://restapi.amap.com/v3/geocode/regeo?key=dad6a772bf826842c3049e9c7198115c&location=$longitude,$latitude&poitype=&radius=1000&extensions=all&batch=false&roadlevel=0',
+          ),
+        );
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['status'] == '1' && data['regeocode'] != null) {
+            final regeocode = data['regeocode'];
+            final pois = regeocode['pois'] as List?;
+
+            if (pois != null && pois.isNotEmpty) {
+              // 返回第一个 POI
+              final firstPoi = pois[0];
+              return {
+                'name': firstPoi['name'],
+                'address': firstPoi['address'] ?? '',
+                'location': firstPoi['location'],
+                'latitude': latitude,
+                'longitude': longitude,
+              };
+            } else {
+              // 没有 POI，返回当前位置的地址
+              return {
+                'name': '当前位置',
+                'address': regeocode['formatted_address'],
+                'location': '$longitude,$latitude',
+                'latitude': latitude,
+                'longitude': longitude,
+              };
+            }
+          }
+        }
+
+        // 如果 API 调用失败，返回基本位置信息
+        return {
+          'name': '当前位置',
+          'address': '',
+          'location': '$longitude,$latitude',
+          'latitude': latitude,
+          'longitude': longitude,
+        };
+      } catch (e) {
+        print('Auto location error: $e');
+        return {'error': e.toString()};
+      }
+    } else {
+      // manual 模式：显示对话框让用户选择
+      String? selectedLocation;
+
+      await showDialog<void>(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return LocationPicker(
+            isMobile: isMobile,
+            onLocationSelected: (location) {
+              selectedLocation = location;
+            },
+          );
+        },
+      );
+
+      if (selectedLocation != null) {
+        // 返回选中的位置信息
+        return {
+          'name': selectedLocation,
+          'address': selectedLocation,
+        };
+      }
+
+      return null; // 用户取消
     }
   }
 }

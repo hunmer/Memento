@@ -114,7 +114,10 @@ class GoodsItem {
           json['purchaseDate'] != null
               ? DateTime.parse(json['purchaseDate'] as String)
               : null,
-      purchasePrice: json['purchasePrice'] != null ? (json['purchasePrice'] as num)?.toDouble() : null,
+      purchasePrice:
+          json['purchasePrice'] != null
+              ? (json['purchasePrice'] as num).toDouble()
+              : null,
       usageRecords:
           (json['usageRecords'] as List?)
               ?.map((e) => UsageRecord.fromJson(e))
@@ -141,6 +144,7 @@ class GoodsItem {
       'imageUrl': _imageUrl, // 已经是相对路径
       'thumbUrl': _thumbUrl, // 已经是相对路径
       'iconData': icon?.codePoint,
+      // ignore: deprecated_member_use
       'iconColor': iconColor?.value,
       'tags': tags,
       'purchaseDate': purchaseDate?.toIso8601String(),

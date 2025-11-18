@@ -220,12 +220,12 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
     final String? avatar = params['avatar'];
     final String? address = params['address'];
     final String? notes = params['notes'];
-    final List<String>? tags = params['tags'] != null
-        ? List<String>.from(params['tags'])
-        : null;
-    final Map<String, String>? customFields = params['customFields'] != null
-        ? Map<String, String>.from(params['customFields'])
-        : null;
+    final List<String>? tags =
+        params['tags'] != null ? List<String>.from(params['tags']) : null;
+    final Map<String, String>? customFields =
+        params['customFields'] != null
+            ? Map<String, String>.from(params['customFields'])
+            : null;
 
     // 检查自定义ID是否已存在
     if (id != null && id.isNotEmpty) {
@@ -272,12 +272,12 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
     final String? avatar = params['avatar'];
     final String? address = params['address'];
     final String? notes = params['notes'];
-    final List<String>? tags = params['tags'] != null
-        ? List<String>.from(params['tags'])
-        : null;
-    final Map<String, String>? customFields = params['customFields'] != null
-        ? Map<String, String>.from(params['customFields'])
-        : null;
+    final List<String>? tags =
+        params['tags'] != null ? List<String>.from(params['tags']) : null;
+    final Map<String, String>? customFields =
+        params['customFields'] != null
+            ? Map<String, String>.from(params['customFields'])
+            : null;
 
     final updatedContact = contact.copyWith(
       name: name,
@@ -323,9 +323,10 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
 
     // 提取可选参数
     final String? dateStr = params['dateStr'];
-    final List<String>? participants = params['participants'] != null
-        ? List<String>.from(params['participants'])
-        : null;
+    final List<String>? participants =
+        params['participants'] != null
+            ? List<String>.from(params['participants'])
+            : null;
 
     final uuid = const Uuid();
     final date = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
@@ -349,8 +350,9 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: contactId'});
     }
 
-    final interactions =
-        await _controller.getInteractionsByContactId(contactId);
+    final interactions = await _controller.getInteractionsByContactId(
+      contactId,
+    );
     return jsonEncode(interactions.map((i) => i.toJson()).toList());
   }
 
@@ -437,19 +439,6 @@ class ContactMainViewState extends State<ContactMainView> {
                 RadioListTile<SortType>(
                   title: Text(_getSortTypeName(type)),
                   value: type,
-                  groupValue: currentSort.type,
-                  onChanged: (value) {
-                    Navigator.pop(
-                      context,
-                      SortConfig(
-                        type: value!,
-                        isReverse:
-                            type == currentSort.type
-                                ? !currentSort.isReverse
-                                : false,
-                      ),
-                    );
-                  },
                   secondary:
                       type == currentSort.type
                           ? Icon(

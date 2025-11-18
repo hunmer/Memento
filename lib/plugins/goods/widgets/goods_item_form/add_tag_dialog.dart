@@ -6,6 +6,7 @@ class AddTagDialog extends StatefulWidget {
   const AddTagDialog({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _AddTagDialogState createState() => _AddTagDialogState();
 }
 

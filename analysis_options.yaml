@@ -11,6 +11,7 @@ analyzer:
   errors:
     avoid_print: ignore
     constant_identifier_names: ignore
+    deprecated_member_use: ignore
     invalid_use_of_protected_member: ignore
     unnecessary_null_comparison: ignore
     unnecessary_type_check: ignore
