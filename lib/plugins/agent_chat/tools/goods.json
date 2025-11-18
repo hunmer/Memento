@@ -29,7 +29,7 @@
     "examples": [
       {
         "title": "获取仓库详情",
-        "code": "const warehouse = await Memento.plugins.goods.getWarehouse({warehouseId: 'wh123'});\nsetResult(JSON.stringify(warehouse, null, 2));"
+        "code": "const warehouse = await Memento.plugins.goods.getWarehouse({warehouseId: 'warehouse123'});\nsetResult(JSON.stringify(warehouse, null, 2));"
       }
     ],
     "notes": "如仓库不存在则返回错误对象",
@@ -40,6 +40,7 @@
     "description": "创建一个新的物品仓库",
     "parameters": [
       {"name": "title", "type": "string", "required": true, "description": "仓库名称"},
+      {"name": "id", "type": "string", "required": false, "description": "自定义仓库ID（可选，不提供则自动生成）"},
       {"name": "iconCode", "type": "number", "required": false, "description": "图标代码"},
       {"name": "colorValue", "type": "number", "required": false, "description": "颜色值"}
     ],
@@ -51,9 +52,13 @@
       {
         "title": "创建简单仓库",
         "code": "const wh = await Memento.plugins.goods.createWarehouse({title: '我的仓库'});\nsetResult(`仓库已创建: ${wh.title}`);"
+      },
+      {
+        "title": "使用自定义ID创建仓库",
+        "code": "const wh = await Memento.plugins.goods.createWarehouse({id: 'warehouse123', title: '我的仓库'});\nsetResult(`仓库已创建，ID: ${wh.id}`);"
       }
     ],
-    "notes": "新创建的仓库初始为空，不包含任何物品",
+    "notes": "新创建的仓库初始为空，不包含任何物品;可以指定自定义ID，ID不能与现有仓库重复",
     "enabled": true
   },
   "updateWarehouse": {
@@ -72,7 +77,7 @@
     "examples": [
       {
         "title": "更新仓库名称",
-        "code": "const updated = await Memento.plugins.goods.updateWarehouse({warehouseId: 'wh123', title: '新名称'});\nsetResult(`仓库已更新: ${updated.title}`);"
+        "code": "const updated = await Memento.plugins.goods.updateWarehouse({warehouseId: 'warehouse123', title: '新名称'});\nsetResult(`仓库已更新: ${updated.title}`);"
       }
     ],
     "notes": "仅更新提供的字段，未提供的字段保持不变",
@@ -91,7 +96,7 @@
     "examples": [
       {
         "title": "删除仓库",
-        "code": "const result = await Memento.plugins.goods.deleteWarehouse({warehouseId: 'wh123'});\nsetResult(result.success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.goods.deleteWarehouse({warehouseId: 'warehouse123'});\nsetResult(result.success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆，会同时删除该仓库下的所有物品",
@@ -110,7 +115,7 @@
     "examples": [
       {
         "title": "清空仓库",
-        "code": "const result = await Memento.plugins.goods.clearWarehouse({warehouseId: 'wh123'});\nsetResult(result.success ? '仓库已清空' : '清空失败');"
+        "code": "const result = await Memento.plugins.goods.clearWarehouse({warehouseId: 'warehouse123'});\nsetResult(result.success ? '仓库已清空' : '清空失败');"
       }
     ],
     "notes": "仅删除物品数据，仓库本身及其名称描述保持不变",
@@ -129,7 +134,7 @@
     "examples": [
       {
         "title": "获取仓库中的所有物品",
-        "code": "const items = await Memento.plugins.goods.getGoods({warehouseId: 'wh123'});\nsetResult(`共有 ${items.length} 件物品`);"
+        "code": "const items = await Memento.plugins.goods.getGoods({warehouseId: 'warehouse123'});\nsetResult(`共有 ${items.length} 件物品`);"
       },
       {
         "title": "获取所有物品",
@@ -152,7 +157,7 @@
     "examples": [
       {
         "title": "获取物品详情",
-        "code": "const item = await Memento.plugins.goods.getGoodsItem({itemId: 'item456'});\nsetResult(JSON.stringify(item, null, 2));"
+        "code": "const item = await Memento.plugins.goods.getGoodsItem({itemId: 'goods123'});\nsetResult(JSON.stringify(item, null, 2));"
       }
     ],
     "notes": "如物品不存在则返回错误对象",
@@ -171,19 +176,19 @@
     },
     "examples": [
       {
-        "title": "创建简单物品",
-        "code": "const itemData = JSON.stringify({title: '笔记本电脑'});\nconst item = await Memento.plugins.goods.createGoodsItem({warehouseId: 'wh123', itemData});\nsetResult(`物品已创建: ${item.title}`);"
+        "title": "创建简单物品（整数价格）",
+        "code": "const itemData = JSON.stringify({title: '笔记本电脑', purchasePrice: 8999});\nconst item = await Memento.plugins.goods.createGoodsItem({warehouseId: 'warehouse123', itemData});\nsetResult(`物品已创建: ${item.title}，价值: ¥${item.purchasePrice}`);"
       },
       {
-        "title": "创建带自定义字段的物品",
-        "code": "const itemData = JSON.stringify({\n  title: '笔记本',\n  customFields: [{key: '品牌', value: 'Apple'}, {key: '型号', value: 'MacBook Pro'}]\n});\nconst item = await Memento.plugins.goods.createGoodsItem({warehouseId: 'wh123', itemData});\nsetResult(`物品ID: ${item.id}`);"
+        "title": "创建带自定义字段的物品（浮点数价格）",
+        "code": "const itemData = JSON.stringify({\n  title: '笔记本',\n  purchasePrice: 15999.99,\n  customFields: [{key: '品牌', value: 'Apple'}, {key: '型号', value: 'MacBook Pro'}]\n});\nconst item = await Memento.plugins.goods.createGoodsItem({warehouseId: 'warehouse123', itemData});\nsetResult(`物品ID: ${item.id}，价值: ¥${item.purchasePrice}`);"
       },
       {
-        "title": "使用自定义ID创建物品",
-        "code": "const itemData = JSON.stringify({\n  id: 'goods123',\n  title: '机械键盘',\n  customFields: [\n    {key: '品牌', value: 'Keychron'},\n    {key: '型号', value: 'K2'},\n    {key: '轴体', value: '红轴'}\n  ]\n});\nconst item = await Memento.plugins.goods.createGoodsItem({warehouseId: 'wh123', itemData});\nsetResult(`物品已创建，自定义ID: ${item.id}`);"
+        "title": "使用自定义ID创建物品（整数价格）",
+        "code": "const itemData = JSON.stringify({\n  id: 'goods123',\n  title: '机械键盘',\n  purchasePrice: 899,\n  customFields: [\n    {key: '品牌', value: 'Keychron'},\n    {key: '型号', value: 'K2'},\n    {key: '轴体', value: '红轴'}\n  ]\n});\nconst item = await Memento.plugins.goods.createGoodsItem({warehouseId: 'warehouse123', itemData});\nsetResult(`物品已创建，自定义ID: ${item.id}，价值: ¥${item.purchasePrice}`);"
       }
     ],
-    "notes": "必需参数: warehouseId(仓库ID)、itemData(物品数据JSON字符串);itemData 中可包含 id 字段用于自定义ID;如果不提供id会自动生成UUID;ID不能与现有物品重复",
+    "notes": "必需参数: warehouseId(仓库ID)、itemData(物品数据JSON字符串);itemData 中可包含 id 字段用于自定义ID;如果不提供id会自动生成UUID;ID不能与现有物品重复;purchasePrice 字段支持整数和浮点数类型",
     "enabled": true
   },
   "updateGoodsItem": {
@@ -200,7 +205,7 @@
     "examples": [
       {
         "title": "更新物品标题",
-        "code": "const itemData = JSON.stringify({title: '新标题'});\nconst updated = await Memento.plugins.goods.updateGoodsItem({itemId: 'item456', itemData});\nsetResult(`标题已更新为: ${updated.title}`);"
+        "code": "const itemData = JSON.stringify({title: '新标题'});\nconst updated = await Memento.plugins.goods.updateGoodsItem({itemId: 'goods123', itemData});\nsetResult(`标题已更新为: ${updated.title}`);"
       }
     ],
     "notes": "仅更新 itemData 中提供的字段，未提供的字段保持不变",
@@ -219,7 +224,7 @@
     "examples": [
       {
         "title": "删除物品",
-        "code": "const result = await Memento.plugins.goods.deleteGoodsItem({itemId: 'item456'});\nsetResult(result.success ? '删除成功' : '删除失败');"
+        "code": "const result = await Memento.plugins.goods.deleteGoodsItem({itemId: 'goods123'});\nsetResult(result.success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆，会同时删除该物品的所有使用记录",
@@ -240,7 +245,7 @@
     "examples": [
       {
         "title": "添加使用记录",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst item = await Memento.plugins.goods.addUsageRecord({itemId: 'item456', dateStr: today, note: '用于编程'});\nsetResult('已记录使用');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst item = await Memento.plugins.goods.addUsageRecord({itemId: 'goods123', dateStr: today, note: '用于编程'});\nsetResult('已记录使用');"
       }
     ],
     "notes": "使用记录用于追踪物品的使用历史和频率",

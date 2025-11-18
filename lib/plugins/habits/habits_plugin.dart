@@ -264,6 +264,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     }
 
     // 可选参数
+    final String? habitId = params['id']; // 支持自定义ID，方便调试
     final String? skillId = params['skillId'];
     final String? notes = params['notes'];
     final String? group = params['group'];
@@ -277,11 +278,11 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
         ? List<String>.from(params['tags'])
         : null;
 
-    // 生成新的习惯ID
-    final habitId = DateTime.now().millisecondsSinceEpoch.toString();
+    // 如果没有提供自定义ID，则生成新的习惯ID
+    final finalHabitId = habitId ?? DateTime.now().millisecondsSinceEpoch.toString();
 
     final habit = Habit(
-      id: habitId,
+      id: finalHabitId,
       title: title,
       durationMinutes: durationMinutes,
       skillId: skillId,
@@ -374,6 +375,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     }
 
     // 可选参数
+    final String? skillId = params['id']; // 支持自定义ID，方便调试
     final String? description = params['description'];
     final String? notes = params['notes'];
     final String? group = params['group'];
@@ -382,10 +384,11 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     final int? targetMinutes = params['targetMinutes'];
     final int? maxDurationMinutes = params['maxDurationMinutes'];
 
-    final skillId = DateTime.now().millisecondsSinceEpoch.toString();
+    // 如果没有提供自定义ID，则生成新的技能ID
+    final finalSkillId = skillId ?? DateTime.now().millisecondsSinceEpoch.toString();
 
     final skill = Skill(
-      id: skillId,
+      id: finalSkillId,
       title: title,
       description: description,
       notes: notes,

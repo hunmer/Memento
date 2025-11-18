@@ -623,11 +623,20 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
     try {
       // 可选参数
+      final String? id = params['id'];
       final int? iconCode = params['iconCode'];
       final int? colorValue = params['colorValue'];
 
+      // 生成ID（如果没有提供）
+      String warehouseId = id ?? DateTime.now().millisecondsSinceEpoch.toString();
+
+      // 检查ID是否已存在
+      if (getWarehouse(warehouseId) != null) {
+        return jsonEncode({'error': '仓库ID已存在: $warehouseId'});
+      }
+
       final warehouse = Warehouse(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: warehouseId,
         title: title,
         icon: iconCode != null
             ? IconData(iconCode, fontFamily: 'MaterialIcons')
@@ -772,6 +781,12 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
       // 生成ID（如果没有提供）
       data['id'] = data['id'] ?? DateTime.now().millisecondsSinceEpoch.toString();
+
+      // 检查ID是否已存在（跨所有仓库）
+      final existingItem = findGoodsItemById(data['id']);
+      if (existingItem != null) {
+        return jsonEncode({'error': '物品ID已存在: ${data['id']}'});
+      }
 
       // 创建物品
       final item = GoodsItem.fromJson(data);
