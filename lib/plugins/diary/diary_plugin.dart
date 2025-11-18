@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -95,14 +96,19 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     final today = DateTime.now();
     final todayFile = path.join(
       storage.getPluginStoragePath(id),
-      '${today.year}/${today.month}/${today.day}.md',
+      '${DateFormat('yyyy-MM-dd').format(today)}.json',
     );
 
     int wordCount = 0;
     try {
-      if (await File(todayFile).exists()) {
+      if (await storage.exists(todayFile)) {
         final content = await storage.readFile(todayFile);
-        wordCount = content.trim().length;
+        if (content.isNotEmpty) {
+          // 解析 JSON 文件
+          final jsonData = jsonDecode(content) as Map<String, dynamic>;
+          final diaryContent = jsonData['content'] as String? ?? '';
+          wordCount = diaryContent.trim().length;
+        }
       }
     } catch (e) {
       debugPrint('Error reading today\'s diary: $e');
@@ -118,20 +124,19 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   Future<int> getMonthWordCount() async {
     final now = DateTime.now();
     var totalCount = 0;
-    final monthDir = path.join(
-      storage.getPluginStoragePath(id),
-      '${now.year}/${now.month}',
-    );
 
     try {
-      final dir = Directory(monthDir);
-      if (await dir.exists()) {
-        await for (final file in dir.list()) {
-          if (file.path.endsWith('.md')) {
-            final content = await storage.readFile(file.path);
-            totalCount += content.trim().length;
-          }
-        }
+      // 使用 DiaryUtils 加载所有日记条目
+      final allEntries = await DiaryUtils.loadDiaryEntries();
+
+      // 过滤本月的日记
+      final currentMonthEntries = allEntries.entries.where((entry) {
+        return entry.key.year == now.year && entry.key.month == now.month;
+      });
+
+      // 计算总字数
+      for (final entry in currentMonthEntries) {
+        totalCount += entry.value.content.trim().length;
       }
     } catch (e) {
       debugPrint('Error calculating month word count: $e');
@@ -146,23 +151,19 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   // 获取本月完成进度
   Future<(int, int)> getMonthProgress() async {
     final now = DateTime.now();
-    final monthDir = path.join(
-      storage.getPluginStoragePath(id),
-      '${now.year}/${now.month}',
-    );
-
     var completedDays = 0;
     final totalDays = DateTime(now.year, now.month + 1, 0).day;
 
     try {
-      final dir = Directory(monthDir);
-      if (await dir.exists()) {
-        await for (final file in dir.list()) {
-          if (file.path.endsWith('.md')) {
-            completedDays++;
-          }
-        }
-      }
+      // 使用 DiaryUtils 加载所有日记条目
+      final allEntries = await DiaryUtils.loadDiaryEntries();
+
+      // 过滤本月的日记并计算有日记的天数
+      final currentMonthDates = allEntries.keys.where((date) {
+        return date.year == now.year && date.month == now.month;
+      }).toSet();
+
+      completedDays = currentMonthDates.length;
     } catch (e) {
       debugPrint('Error calculating month progress: $e');
     }
@@ -436,6 +437,16 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
       // 统计接口
       'getTodayStats': _jsGetTodayStats,
       'getMonthStats': _jsGetMonthStats,
+      'getTodayWordCount': _jsGetTodayWordCount,
+      'getMonthWordCount': _jsGetMonthWordCount,
+      'getMonthProgress': _jsGetMonthProgress,
+
+      // 日记条目操作接口（直接操作方法）
+      'loadDiaryEntry': _jsLoadDiaryEntry,
+      'saveDiaryEntry': _jsSaveDiaryEntry,
+      'deleteDiaryEntry': _jsDeleteDiaryEntry,
+      'hasEntryForDate': _jsHasEntryForDate,
+      'getDiaryStats': _jsGetDiaryStats,
     };
   }
 
@@ -444,22 +455,22 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取指定日期范围的日记
   /// 参数: {"startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD"}
   /// 返回: JSON 字符串，包含日记列表
-  Future<String> _jsGetDiaries(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsGetDiaries(Map<String, dynamic> params) async {
     try {
       // 验证必需参数
       if (!params.containsKey('startDate')) {
-        return jsonEncode({
+        return {
           'error': '缺少必需参数: startDate',
           'total': 0,
           'diaries': [],
-        });
+        };
       }
       if (!params.containsKey('endDate')) {
-        return jsonEncode({
+        return {
           'error': '缺少必需参数: endDate',
           'total': 0,
           'diaries': [],
-        });
+        };
       }
 
       final startDate = params['startDate'] as String;
@@ -477,7 +488,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
           .toList()
         ..sort((a, b) => a.key.compareTo(b.key)); // 按日期排序
 
-      final result = {
+      return {
         'total': filteredEntries.length,
         'diaries': filteredEntries
             .map((entry) => {
@@ -491,28 +502,26 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
                 })
             .toList(),
       };
-
-      return jsonEncode(result);
     } catch (e) {
-      return jsonEncode({
+      return {
         'error': '获取日记失败: $e',
         'total': 0,
         'diaries': [],
-      });
+      };
     }
   }
 
   /// 获取指定日期的日记
   /// 参数: {"date": "YYYY-MM-DD"}
   /// 返回: JSON 字符串，包含日记内容
-  Future<String> _jsGetDiary(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsGetDiary(Map<String, dynamic> params) async {
     try {
       // 验证必需参数
       if (!params.containsKey('date')) {
-        return jsonEncode({
+        return {
           'exists': false,
           'error': '缺少必需参数: date',
-        });
+        };
       }
 
       final date = params['date'] as String;
@@ -520,13 +529,13 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
       final entry = await DiaryUtils.loadDiaryEntry(dateTime);
 
       if (entry == null) {
-        return jsonEncode({
+        return {
           'exists': false,
           'error': '该日期没有日记',
-        });
+        };
       }
 
-      return jsonEncode({
+      return {
         'exists': true,
         'date': dateTime.toIso8601String().split('T')[0],
         'title': entry.title,
@@ -535,32 +544,32 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         'wordCount': entry.content.length,
         'createdAt': entry.createdAt.toIso8601String(),
         'updatedAt': entry.updatedAt.toIso8601String(),
-      });
+      };
     } catch (e) {
-      return jsonEncode({
+      return {
         'exists': false,
         'error': '获取日记失败: $e',
-      });
+      };
     }
   }
 
   /// 保存日记
   /// 参数: {"date": "YYYY-MM-DD", "content": "日记内容", "title": "标题（可选）", "mood": "心情（可选）"}
   /// 返回: JSON 字符串，包含成功状态
-  Future<String> _jsSaveDiary(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsSaveDiary(Map<String, dynamic> params) async {
     try {
       // 验证必需参数
       if (!params.containsKey('date')) {
-        return jsonEncode({
+        return {
           'success': false,
           'error': '缺少必需参数: date',
-        });
+        };
       }
       if (!params.containsKey('content')) {
-        return jsonEncode({
+        return {
           'success': false,
           'error': '缺少必需参数: content',
-        });
+        };
       }
 
       final date = params['date'] as String;
@@ -577,79 +586,79 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         mood: mood,
       );
 
-      return jsonEncode({
+      return {
         'success': true,
         'message': '日记保存成功',
         'date': date,
-      });
+      };
     } catch (e) {
-      return jsonEncode({
+      return {
         'success': false,
         'error': '保存日记失败: $e',
-      });
+      };
     }
   }
 
   /// 删除日记
   /// 参数: {"date": "YYYY-MM-DD"}
   /// 返回: JSON 字符串，包含成功状态
-  Future<String> _jsDeleteDiary(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsDeleteDiary(Map<String, dynamic> params) async {
     try {
       // 验证必需参数
       if (!params.containsKey('date')) {
-        return jsonEncode({
+        return {
           'success': false,
           'error': '缺少必需参数: date',
-        });
+        };
       }
 
       final date = params['date'] as String;
       final dateTime = DateTime.parse(date);
       final success = await DiaryUtils.deleteDiaryEntry(dateTime);
 
-      return jsonEncode({
+      return {
         'success': success,
         'message': success ? '日记删除成功' : '该日期没有日记',
         'date': date,
-      });
+      };
     } catch (e) {
-      return jsonEncode({
+      return {
         'success': false,
         'error': '删除日记失败: $e',
-      });
+      };
     }
   }
 
   /// 获取今日统计
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: JSON 字符串，包含今日字数
-  Future<String> _jsGetTodayStats(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsGetTodayStats(Map<String, dynamic> params) async {
     try {
       final wordCount = await getTodayWordCount();
       final today = DateTime.now();
 
-      return jsonEncode({
+      return {
         'date': today.toIso8601String().split('T')[0],
         'wordCount': wordCount,
-      });
+      };
     } catch (e) {
-      return jsonEncode({
+      return {
         'error': '获取今日统计失败: $e',
         'wordCount': 0,
-      });
+      };
     }
   }
 
   /// 获取本月统计
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: JSON 字符串，包含本月字数和进度
-  Future<String> _jsGetMonthStats(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsGetMonthStats(Map<String, dynamic> params) async {
     try {
       final monthWordCount = await getMonthWordCount();
       final progress = await getMonthProgress();
       final now = DateTime.now();
 
-      return jsonEncode({
+      return {
         'year': now.year,
         'month': now.month,
         'wordCount': monthWordCount,
@@ -658,15 +667,137 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         'progress': progress.$2 > 0
             ? (progress.$1 / progress.$2 * 100).toStringAsFixed(1)
             : '0.0',
-      });
+      };
     } catch (e) {
-      return jsonEncode({
+      return {
         'error': '获取本月统计失败: $e',
         'wordCount': 0,
         'completedDays': 0,
         'totalDays': 0,
         'progress': '0.0',
-      });
+      };
     }
+  }
+
+  // ==================== 新增 JS API 实现 ====================
+
+  /// 获取今日字数（直接返回数字）
+  /// 参数: {} (空对象，保持接口一致性)
+  /// 返回: 数字，今日字数
+  Future<int> _jsGetTodayWordCount(Map<String, dynamic> params) async {
+    return await getTodayWordCount();
+  }
+
+  /// 获取本月字数（直接返回数字）
+  /// 参数: {} (空对象，保持接口一致性)
+  /// 返回: 数字，本月总字数
+  Future<int> _jsGetMonthWordCount(Map<String, dynamic> params) async {
+    return await getMonthWordCount();
+  }
+
+  /// 获取本月进度（直接返回对象）
+  /// 参数: {} (空对象，保持接口一致性)
+  /// 返回: 对象，包含 completedDays 和 totalDays
+  Future<Map<String, int>> _jsGetMonthProgress(Map<String, dynamic> params) async {
+    final progress = await getMonthProgress();
+    return {
+      'completedDays': progress.$1,
+      'totalDays': progress.$2,
+    };
+  }
+
+  /// 加载日记条目（直接操作方法）
+  /// 参数: {"dateStr": "YYYY-MM-DD"}
+  /// 返回: 日记对象或 null
+  Future<Map<String, dynamic>?> _jsLoadDiaryEntry(Map<String, dynamic> params) async {
+    try {
+      if (!params.containsKey('dateStr')) {
+        return {'error': '缺少必需参数: dateStr'};
+      }
+
+      final dateStr = params['dateStr'] as String;
+      final date = DateTime.parse(dateStr);
+      final entry = await DiaryUtils.loadDiaryEntry(date);
+
+      if (entry == null) {
+        return null;
+      }
+
+      return entry.toJson();
+    } catch (e) {
+      return {'error': '加载日记失败: $e'};
+    }
+  }
+
+  /// 保存日记条目（直接操作方法）
+  /// 参数: {"dateStr": "YYYY-MM-DD", "content": "内容", "title": "标题（可选）", "mood": "心情（可选）"}
+  /// 返回: 保存后的日记对象
+  Future<Map<String, dynamic>> _jsSaveDiaryEntry(Map<String, dynamic> params) async {
+    try {
+      if (!params.containsKey('dateStr') || !params.containsKey('content')) {
+        return {'error': '缺少必需参数: dateStr 或 content'};
+      }
+
+      final dateStr = params['dateStr'] as String;
+      final content = params['content'] as String;
+      final title = params['title'] as String? ?? '';
+      final mood = params['mood'] as String?;
+
+      final date = DateTime.parse(dateStr);
+      await DiaryUtils.saveDiaryEntry(
+        date,
+        content,
+        title: title,
+        mood: mood,
+      );
+
+      final entry = await DiaryUtils.loadDiaryEntry(date);
+      return entry?.toJson() ?? {'error': '保存后无法读取日记'};
+    } catch (e) {
+      return {'error': '保存日记失败: $e'};
+    }
+  }
+
+  /// 删除日记条目（直接操作方法）
+  /// 参数: {"dateStr": "YYYY-MM-DD"}
+  /// 返回: 布尔值，删除成功返回 true
+  Future<bool> _jsDeleteDiaryEntry(Map<String, dynamic> params) async {
+    try {
+      if (!params.containsKey('dateStr')) {
+        return false;
+      }
+
+      final dateStr = params['dateStr'] as String;
+      final date = DateTime.parse(dateStr);
+      return await DiaryUtils.deleteDiaryEntry(date);
+    } catch (e) {
+      debugPrint('Delete diary entry error: $e');
+      return false;
+    }
+  }
+
+  /// 检查日期是否有日记（直接操作方法）
+  /// 参数: {"dateStr": "YYYY-MM-DD"}
+  /// 返回: 布尔值，存在返回 true
+  Future<bool> _jsHasEntryForDate(Map<String, dynamic> params) async {
+    try {
+      if (!params.containsKey('dateStr')) {
+        return false;
+      }
+
+      final dateStr = params['dateStr'] as String;
+      final date = DateTime.parse(dateStr);
+      return await DiaryUtils.hasEntryForDate(date);
+    } catch (e) {
+      debugPrint('Check diary entry error: $e');
+      return false;
+    }
+  }
+
+  /// 获取日记统计（直接操作方法）
+  /// 参数: {} (空对象，保持接口一致性)
+  /// 返回: 统计对象
+  Future<Map<String, dynamic>> _jsGetDiaryStats(Map<String, dynamic> params) async {
+    return await DiaryUtils.getDiaryStats();
   }
 }
