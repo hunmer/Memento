@@ -27,10 +27,8 @@ class DatabaseLocalizationsZh extends DatabaseLocalizations {
   @override
   String get cancel => '取消';
 
-  @override
   String get save => '保存';
 
-  @override
   String get ok => '确定';
 
   @override
@@ -81,7 +79,6 @@ class DatabaseLocalizationsZh extends DatabaseLocalizations {
   @override
   String get addDatabaseHint => '点击右下角按钮添加';
 
-  @override
   String get copySuccessMessage => '复制成功';
 
   @override

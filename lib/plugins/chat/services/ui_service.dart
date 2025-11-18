@@ -147,11 +147,11 @@ class UIService {
           tabs: [
             Tab(
               icon: const Icon(Icons.chat_bubble_outline),
-              text: l10n.channelsTab ?? 'Channels',
+              text: l10n.channelsTab,
             ),
             Tab(
               icon: const Icon(Icons.timeline),
-              text: l10n.timelineTab ?? 'Timeline',
+              text: l10n.timelineTab,
             ),
           ],
         ),

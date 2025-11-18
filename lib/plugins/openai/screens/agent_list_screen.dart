@@ -4,10 +4,8 @@ import 'package:Memento/plugins/openai/controllers/analysis_preset_controller.da
 import 'package:flutter/material.dart';
 import '../l10n/openai_localizations.dart';
 import '../openai_plugin.dart';
-import '../controllers/tool_app_controller.dart';
 import '../widgets/agent_list_view.dart';
 import '../widgets/agent_grid_view.dart';
-import '../widgets/tool_app_grid_view.dart';
 import '../widgets/analysis_preset_list.dart';
 import '../widgets/basic_info_dialog.dart';
 import '../widgets/filter_dialog.dart';
@@ -27,7 +25,6 @@ class _AgentListScreenState extends State<AgentListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late AgentController _agentController;
-  late ToolAppController _toolAppController;
   late AnalysisPresetController _presetController;
   bool _isGridView = true;
   Set<String> _selectedProviders = {};
@@ -38,7 +35,6 @@ class _AgentListScreenState extends State<AgentListScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _agentController = OpenAIPlugin.instance.controller;
-    _toolAppController = ToolAppController();
     _presetController = AnalysisPresetController();
     _agentController.addListener(_onAgentsChanged);
     _loadAgents();
@@ -219,16 +215,4 @@ class _AgentListScreenState extends State<AgentListScreen>
     );
   }
 
-  Widget _buildToolsBody() {
-    return AnimatedBuilder(
-      animation: _toolAppController,
-      builder: (context, child) {
-        if (_toolAppController.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        return ToolAppGridView(apps: _toolAppController.apps);
-      },
-    );
-  }
 }

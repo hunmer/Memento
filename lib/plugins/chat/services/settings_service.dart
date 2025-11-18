@@ -44,19 +44,19 @@ class SettingsService {
   Future<void> setPlaySoundOnSend(bool value) async {
     _playSoundOnSend = value;
     await _saveSettings();
-    _plugin.notifyListeners();
+    _plugin.refresh();
   }
 
   Future<void> setShowAvatarInChat(bool value) async {
     _showAvatarInChat = value;
     await _saveSettings();
-    _plugin.notifyListeners();
+    _plugin.refresh();
   }
 
   Future<void> setShowAvatarInTimeline(bool value) async {
     _showAvatarInTimeline = value;
     await _saveSettings();
-    _plugin.notifyListeners();
+    _plugin.refresh();
   }
 
   // 保存设置
@@ -78,6 +78,6 @@ class SettingsService {
   Future<void> setTimelineIsGridView(bool value) async {
     _timelineIsGridView = value;
     await _saveSettings();
-    _plugin.notifyListeners();
+    _plugin.refresh();
   }
 }

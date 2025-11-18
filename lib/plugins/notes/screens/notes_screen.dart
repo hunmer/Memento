@@ -41,7 +41,7 @@ class _NotesMainViewState extends NotesMainViewState
                   autofocus: true,
                   decoration: InputDecoration(
                     hintText:
-                        NotesLocalizations.of(context).search ?? 'Search',
+                        NotesLocalizations.of(context).search,
                     border: InputBorder.none,
                   ),
                   onChanged: handleSearch,
@@ -68,8 +68,7 @@ class _NotesMainViewState extends NotesMainViewState
                     child: ListTile(
                       leading: const Icon(Icons.create_new_folder),
                       title: Text(
-                        NotesLocalizations.of(context).newFolder ??
-                            'New Folder',
+                        NotesLocalizations.of(context).newFolder,
                       ),
                     ),
                   ),
@@ -78,7 +77,7 @@ class _NotesMainViewState extends NotesMainViewState
                     child: ListTile(
                       leading: const Icon(Icons.note_add),
                       title: Text(
-                        NotesLocalizations.of(context).newNote ?? 'New Note',
+                        NotesLocalizations.of(context).newNote,
                       ),
                     ),
                   ),
@@ -111,7 +110,7 @@ class _NotesMainViewState extends NotesMainViewState
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              NotesLocalizations.of(context).folders ?? 'Folders',
+              NotesLocalizations.of(context).folders,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
@@ -127,7 +126,7 @@ class _NotesMainViewState extends NotesMainViewState
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              NotesLocalizations.of(context).notes ?? 'Notes',
+              NotesLocalizations.of(context).notes,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
@@ -144,10 +143,8 @@ class _NotesMainViewState extends NotesMainViewState
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 isSearching
-                    ? NotesLocalizations.of(context).noSearchResults ??
-                        'No search results'
-                    : NotesLocalizations.of(context).emptyFolder ??
-                        'Empty folder',
+                    ? NotesLocalizations.of(context).noSearchResults
+                    : NotesLocalizations.of(context).emptyFolder,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),

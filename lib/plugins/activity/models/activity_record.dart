@@ -68,6 +68,7 @@ class ActivityRecord {
       'tags': tags,
       'description': description,
       'mood': mood,
+      // ignore: deprecated_member_use
       'color': color?.value.toString(),
     };
   }

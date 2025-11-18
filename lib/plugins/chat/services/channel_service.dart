@@ -23,7 +23,7 @@ class ChannelService {
   // 设置当前活跃频道
   void setCurrentChannel(Channel? channel) {
     _currentChannel = channel;
-    _plugin.notifyListeners();
+    _plugin.refresh();
   }
 
   ChannelService(this._plugin);
@@ -130,7 +130,7 @@ class ChannelService {
     _channels.sort(Channel.compare);
 
     // 通知监听器数据已更新，确保UI刷新
-    _plugin.notifyListeners();
+    _plugin.refresh();
   }
 
   // 更新频道颜色
@@ -166,7 +166,7 @@ class ChannelService {
     await saveChannel(updatedChannel);
 
     // 确保 UI 得到更新
-    _plugin.notifyListeners();
+    _plugin.refresh();
 
     return updatedChannel;
   }
@@ -196,7 +196,7 @@ class ChannelService {
     await saveChannel(updatedChannel);
 
     // 确保 UI 得到更新
-    _plugin.notifyListeners();
+    _plugin.refresh();
 
     return updatedChannel;
   }
@@ -214,7 +214,7 @@ class ChannelService {
   // 保存消息
   Future<void> saveMessages(String channelId, List<Message> messages) async {
     // 立即通知UI更新，确保消息显示
-    _plugin.notifyListeners();
+    _plugin.refresh();
 
     try {
       // 保存消息
@@ -241,7 +241,7 @@ class ChannelService {
       debugPrint('Error saving messages: $e');
     } finally {
       // 确保无论成功与否都通知UI更新
-      _plugin.notifyListeners();
+      _plugin.refresh();
     }
   }
 
@@ -284,13 +284,13 @@ class ChannelService {
     }
 
     // 立即通知UI更新，确保消息显示
-    _plugin.notifyListeners();
+    _plugin.refresh();
 
     // 异步保存消息列表
     await saveMessages(message.channelId!, _channels[channelIndex].messages);
 
     // 再次通知以确保存储同步后的状态更新
-    _plugin.notifyListeners();
+    _plugin.refresh();
     return true;
   }
 
@@ -309,7 +309,7 @@ class ChannelService {
       saveChannel(_channels[index]);
 
       // 通知监听器数据已更新，以便更新UI
-      _plugin.notifyListeners();
+      _plugin.refresh();
     } catch (e) {
       debugPrint('Error saving draft: $e');
     }
@@ -348,7 +348,7 @@ class ChannelService {
       await _plugin.storage.write('chat/channels', {'channels': channelIds});
 
       // 通知监听器数据已更新
-      _plugin.notifyListeners();
+      _plugin.refresh();
     } catch (e) {
       debugPrint('Error deleting channel: $e');
       rethrow; // 重新抛出异常，让调用者知道删除失败
@@ -372,7 +372,7 @@ class ChannelService {
       }
 
       // 通知监听器数据已更新
-      _plugin.notifyListeners();
+      _plugin.refresh();
 
       debugPrint('Successfully cleared messages for channel $channelId');
     } catch (e) {
@@ -416,11 +416,11 @@ class ChannelService {
       );
 
       // 立即通知UI更新，确保消息显示
-      _plugin.notifyListeners();
+      _plugin.refresh();
     } catch (e) {
       debugPrint('Error adding message: $e');
       // 确保即使出错也通知UI更新
-      _plugin.notifyListeners();
+      _plugin.refresh();
     }
   }
 
@@ -454,7 +454,7 @@ class ChannelService {
       _channels.sort(Channel.compare);
 
       // 通知监听器数据已更新
-      _plugin.notifyListeners();
+      _plugin.refresh();
     } catch (e) {
       // 如果创建过程中出现错误，需要清理已创建的内容
       debugPrint('Error creating channel: $e');
@@ -521,7 +521,7 @@ class ChannelService {
         Value<Message>(message, 'onMessageUpdated'),
       );
       // 统一通知UI更新，避免多次触发
-      _plugin.notifyListeners();
+      _plugin.refresh();
     } else {
       debugPrint('无法更新消息：在频道 ${message.channelId} 中未找到ID为 ${message.id} 的消息');
     }

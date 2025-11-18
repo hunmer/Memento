@@ -222,7 +222,7 @@ class _HabitFormState extends State<HabitForm> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value:
+              initialValue:
                   _skills.any((s) => s.id == _selectedSkillId)
                       ? _selectedSkillId
                       : null,

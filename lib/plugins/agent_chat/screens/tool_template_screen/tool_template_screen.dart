@@ -343,7 +343,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                     ),
                   ),
                 );
-              }).toList(),
+                  }),
             ],
           ),
         ),

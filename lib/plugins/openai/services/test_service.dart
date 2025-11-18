@@ -577,12 +577,12 @@ class _TextInputDialogState extends State<_TextInputDialog> {
           builder: (context) {
             final l10n = OpenAILocalizations.of(context);
             return TextButton(
-              child: Text(l10n.close),
               onPressed: _isTesting ? null : () {
                 if (!_isDisposed) {
                   Navigator.of(context).pop();
                 }
               },
+              child: Text(l10n.close),
             );
           }
         ),

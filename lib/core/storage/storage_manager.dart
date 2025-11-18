@@ -176,6 +176,7 @@ class StorageManager {
     return await _storage.loadJson(path, defaultValue);
   }
 
+  // ignore: unintended_html_in_doc_comment
   /// 安全读取JSON数据，确保返回Map<String, dynamic>
   Future<Map<String, dynamic>> readSafeJson(String path) async {
     final dynamic jsonData = await _storage.loadJson(path);

@@ -45,7 +45,7 @@ class ChatController extends ChangeNotifier {
   bool _isSending = false;
 
   /// 选中的文件附件
-  List<File> _selectedFiles = [];
+  final List<File> _selectedFiles = [];
 
   /// 当前输入的文本
   String _inputText = '';

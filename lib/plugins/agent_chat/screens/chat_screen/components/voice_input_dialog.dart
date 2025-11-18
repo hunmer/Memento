@@ -33,8 +33,6 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
   final FocusNode _focusNode = FocusNode();
 
   SpeechRecognitionState _currentState = SpeechRecognitionState.idle;
-  String _recognizedText = '';
-  String _errorMessage = '';
 
   StreamSubscription<String>? _recognitionSubscription;
   StreamSubscription<SpeechRecognitionState>? _stateSubscription;
@@ -66,8 +64,7 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
       // 监听识别结果
       _recognitionSubscription =
           widget.recognitionService.recognitionStream.listen((text) {
-        setState(() {
-          _recognizedText = text;
+            setState(() {
           _textController.text = text;
         });
       });
@@ -86,7 +83,6 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
       // 监听错误
       _errorSubscription = widget.recognitionService.errorStream.listen((error) {
         setState(() {
-          _errorMessage = error;
         });
         _showErrorSnackBar(error);
       });
@@ -100,7 +96,6 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
     try {
       setState(() {
         _isRecording = true;
-        _errorMessage = '';
       });
 
       final success = await widget.recognitionService.startRecording();
@@ -142,7 +137,6 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
     } finally {
       setState(() {
         _isRecording = false;
-        _recognizedText = '';
         _textController.clear();
       });
     }

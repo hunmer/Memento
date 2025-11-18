@@ -548,7 +548,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   child: Text(OpenAILocalizations.of(context).loadingProviders),
                 )
                 : DropdownButtonFormField<String>(
-                  value:
+                  initialValue:
                       _selectedProviderId.isEmpty && _providers.isNotEmpty
                           ? _providers.first.id
                           : _selectedProviderId,

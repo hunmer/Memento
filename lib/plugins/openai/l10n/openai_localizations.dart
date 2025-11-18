@@ -668,11 +668,8 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
   String get addProvider => '添加服务商';
   @override
   String get editProvider => '编辑服务商';
-  @override
   String get saveProvider => '保存服务商';
-  @override
   String get providerLabel => '服务商名称';
-  @override
   String get providerLabelHint => '请输入服务商名称';
   @override
   String get providerLabelError => '请输入服务商名称';
@@ -1147,11 +1144,8 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   String get addProvider => 'Add Provider';
   @override
   String get editProvider => 'Edit Provider';
-  @override
   String get saveProvider => 'Save Provider';
-  @override
   String get providerLabel => 'Provider Name';
-  @override
   String get providerLabelHint => 'Enter provider name';
   @override
   String get providerLabelError => 'Please enter provider name';

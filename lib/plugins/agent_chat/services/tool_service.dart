@@ -306,7 +306,8 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "执行签到操作",');
     buffer.writeln('      "desc": "查找第一个未签到的项目并执行签到",');
-    final checkinExample = '''const items = await Memento.plugins.checkin.getCheckinItems(); const target = items.find(i => !i.isCheckedToday); if (!target) { setResult('所有项目今天都已签到'); } else { const result = await Memento.plugins.checkin.checkin(target.id); setResult(result.success ? \`签到成功: \${target.name}\` : result.message); }''';
+    final checkinExample =
+        '''const items = await Memento.plugins.checkin.getCheckinItems(); const target = items.find(i => !i.isCheckedToday); if (!target) { setResult('所有项目今天都已签到'); } else { const result = await Memento.plugins.checkin.checkin(target.id); setResult(result.success ? `签到成功: \${target.name}` : result.message); }''';
     buffer.writeln('      "data": "${checkinExample.replaceAll('"', '\\"')}"');
     buffer.writeln('    }');
     buffer.writeln('  ]');

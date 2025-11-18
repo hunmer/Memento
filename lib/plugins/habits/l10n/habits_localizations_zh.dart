@@ -256,99 +256,67 @@ class HabitsLocalizationsZh extends HabitsLocalizations {
   String get totalDuration => '总持续时间';
 
   // 新增习惯追踪相关字符串
-  @override
   String get habitTarget => '目标';
 
-  @override
   String get habitTargetHint => '设置你的习惯目标';
 
-  @override
   String get habitProgress => '进度';
 
-  @override
   String get habitReminderTime => '提醒时间';
 
-  @override
   String get habitStartDate => '开始日期';
 
-  @override
   String get habitEndDate => '结束日期';
 
-  @override
   String get habitActiveDays => '活跃天数';
 
-  @override
   String get habitMotivation => '动机';
 
-  @override
   String get habitDifficulty => '难度';
 
-  @override
   String get habitCategory => '类别';
 
-  @override
   String get habitTags => '标签';
 
-  @override
   String get habitNotes => '备注';
 
-  @override
   String get habitLog => '日志';
 
-  @override
   String get habitCalendar => '日历';
 
-  @override
   String get habitAnalytics => '分析';
 
-  @override
   String get habitShare => '分享';
 
-  @override
   String get habitExport => '导出';
 
-  @override
   String get habitImport => '导入';
 
-  @override
   String get habitReset => '重置';
 
-  @override
   String get habitArchive => '归档';
 
-  @override
   String get habitRestore => '恢复';
 
-  @override
   String get habitDuplicate => '复制';
 
-  @override
   String get habitTemplate => '模板';
 
-  @override
   String get habitChallenge => '挑战';
 
-  @override
   String get habitReward => '奖励';
 
-  @override
   String get habitReminderNotification => '提醒通知';
 
-  @override
   String get habitCompletionNotification => '完成通知';
 
-  @override
   String get habitStreakBrokenNotification => '连续记录中断通知';
 
-  @override
   String get habitSettings => '设置';
 
-  @override
   String get habitHelp => '帮助';
 
-  @override
   String get habitFeedback => '反馈';
 
-  @override
   String get habitAbout => '关于';
 }

@@ -57,11 +57,10 @@ mixin NoteOperations on NotesMainViewState {
       builder:
           (context) => AlertDialog(
             title: Text(
-              NotesLocalizations.of(context).deleteNote ?? 'Delete Note',
+              NotesLocalizations.of(context).deleteNote,
             ),
             content: Text(
-              NotesLocalizations.of(context).deleteNoteConfirm ??
-                  'Are you sure you want to delete this note? This action cannot be undone.',
+              NotesLocalizations.of(context).deleteNoteConfirm,
             ),
             actions: [
               TextButton(

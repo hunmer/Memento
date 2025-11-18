@@ -198,7 +198,7 @@ class ContactPromptReplacements {
       // 添加最后联系时间（相对时间）
       final daysSince = DateTime.now().difference(contact.lastContactTime).inDays;
       if (daysSince > 0) {
-        record['lastContact'] = '${daysSince}天前';
+            record['lastContact'] = '$daysSince天前';
       }
 
       return record;

@@ -18,7 +18,6 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
   @override
   String get clearSelection => '清除选择';
 
-  @override
   String get close => '关闭';
 
   @override
@@ -43,9 +42,9 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
   String get editActivity => '编辑活动';
 
   @override
+  // ignore: override_on_non_overriding_member
   String get cancel => '取消';
 
-  @override
   String get save => '保存';
 
   @override
@@ -57,19 +56,14 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
   @override
   String get activityDescription => '活动描述';
 
-  @override
   String get startTime => '开始时间';
 
-  @override
   String get endTime => '结束时间';
 
-  @override
   String get interval => '间隔';
 
-  @override
   String get minutes => '分钟';
 
-  @override
   String get tags => '标签';
 
   @override

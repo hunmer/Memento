@@ -649,7 +649,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
         children: [
           // 脚本类型
           DropdownButtonFormField<String>(
-            value: _selectedType,
+            initialValue: _selectedType,
             decoration: const InputDecoration(
               labelText: '脚本类型',
               prefixIcon: Icon(Icons.category),
@@ -900,7 +900,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: selectedEvent,
+                          initialValue: selectedEvent,
                   decoration: const InputDecoration(
                     hintText: '请选择一个事件',
                     border: OutlineInputBorder(),

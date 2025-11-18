@@ -125,4 +125,9 @@ class CalendarController extends ChangeNotifier {
     ];
     return allEvents;
   }
+
+  // 手动触发刷新（用于外部事件变化时通知监听者）
+  void refresh() {
+    notifyListeners();
+  }
 }

@@ -73,7 +73,7 @@ class _PromptEditorState extends State<PromptEditor> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: prompt.type,
+                          initialValue: prompt.type,
                           decoration: InputDecoration(
                             labelText: l10n.promptTypeLabel,
                             border: const OutlineInputBorder(),

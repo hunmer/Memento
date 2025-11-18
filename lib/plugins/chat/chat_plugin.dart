@@ -101,6 +101,11 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     return channelService.getMessageById(messageId);
   }
 
+  /// 手动触发刷新（用于外部事件变化时通知监听者）
+  void refresh() {
+    notifyListeners();
+  }
+
   @override
   Widget buildSettingsView(BuildContext context) {
     return StatefulBuilder(
@@ -176,7 +181,6 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     // 可选参数
-    final String? avatar = params['avatar'];
 
     final channel = Channel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),

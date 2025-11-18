@@ -146,7 +146,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.category),
               ),
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               items: [
                 DropdownMenuItem<String>(
                   value: null,

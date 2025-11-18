@@ -27,6 +27,7 @@ import 'js_bridge_manager.dart';
 mixin JSBridgePlugin on PluginBase {
   /// 定义插件的 JS API
   ///
+  // ignore: unintended_html_in_doc_comment
   /// 返回 Map<API名称, Dart函数>
   ///
   /// 示例：

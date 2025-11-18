@@ -56,7 +56,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
               // 优先级选择
               DropdownButtonFormField<TaskPriority>(
-                value: _selectedPriority,
+                initialValue: _selectedPriority,
                 decoration: InputDecoration(
                   labelText: TodoLocalizations.of(context).priority,
                 ),

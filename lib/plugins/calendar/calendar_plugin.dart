@@ -136,7 +136,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
         // 监听任务变化
         taskController.addListener(() {
-          controller.notifyListeners();
+          controller.refresh();
         });
       }
     }
@@ -183,7 +183,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
                   controller.addEvent(updatedEvent);
                 }
                 // 强制重建界面
-                controller.notifyListeners();
+                controller.refresh();
               },
             ),
       ),

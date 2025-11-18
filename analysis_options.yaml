@@ -9,7 +9,9 @@
 # packages, and plugins designed to encourage good coding practices.
 analyzer:
   errors:
+    avoid_print: ignore
     constant_identifier_names: ignore
+    invalid_use_of_protected_member: ignore
     unnecessary_null_comparison: ignore
     unnecessary_type_check: ignore
     use_build_context_synchronously: ignore

@@ -180,7 +180,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
   Color _getGridColor(DateTime time) {
     // 检查是否超过当前时间
     if (time.isAfter(DateTime.now())) {
-      return Colors.grey.withOpacity(0.3); // 增加灰色不透明度，使禁用状态更明显
+      return Colors.grey.withValues(alpha: 0.3); // 增加灰色不透明度，使禁用状态更明显
     }
 
     // 检查是否在选择范围内
@@ -191,7 +191,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
           (time.isAfter(end) && time.isBefore(start)) ||
           time.isAtSameMomentAs(start) ||
           time.isAtSameMomentAs(end)) {
-        return Colors.lightBlue.withOpacity(0.3);
+        return Colors.lightBlue.withValues(alpha: 0.3);
       }
     }
 
@@ -202,7 +202,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       return activity.color ?? _getColorFromTags(activity.tags);
     }
 
-    return Colors.grey.withOpacity(0.1);
+    return Colors.grey.withValues(alpha: 0.1);
   }
 
   void _onGridDragEnd() {
@@ -408,7 +408,9 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                                           4.0,
                                         ), // 添加圆角
                                         border: Border.all(
-                                          color: Colors.grey.withOpacity(0.2),
+                                            color: Colors.grey.withValues(
+                                              alpha: 0.2,
+                                            ),
                                           width: 0.5,
                                         ),
                                       ),

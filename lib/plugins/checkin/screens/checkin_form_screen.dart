@@ -174,7 +174,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
         labelText: CheckinLocalizations.of(context).reminderTypeLabel,
         border: const OutlineInputBorder(),
       ),
-      value: _reminderSettings?.type,
+      initialValue: _reminderSettings?.type,
       items: [
         DropdownMenuItem(
           value: null,
@@ -258,7 +258,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
         labelText: CheckinLocalizations.of(context).monthlyReminderDayLabel,
         border: const OutlineInputBorder(),
       ),
-      value: _reminderSettings?.dayOfMonth,
+      initialValue: _reminderSettings?.dayOfMonth,
       items: List.generate(31, (index) {
         return DropdownMenuItem(
           value: index + 1,
