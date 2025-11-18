@@ -202,16 +202,16 @@
       }
     ],
     "returns": {
-      "type": "Boolean",
-      "description": "总是返回 true"
+      "type": "Object",
+      "description": "操作结果对象,成功返回 {success: true, goalId: string},失败返回 {success: false, error: string}"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.tracker.deleteGoal({ goalId: 'goal' });\nsetResult(result);",
-        "comment": "删除目标及其记录"
+        "code": "const result = await Memento.plugins.tracker.deleteGoal({ goalId: 'goal123' });\nif (result.success) {\n  setResult(`成功删除目标: ${result.goalId}`);\n} else {\n  setResult(`删除失败: ${result.error}`);\n}",
+        "comment": "删除目标并处理结果"
       }
     ],
-    "notes": "删除操作不可逆,会同时删除该目标的所有记录数据",
+    "notes": "删除操作不可逆,会同时删除该目标的所有记录数据。如果goalId不存在或删除过程出错,会返回 {success: false, error: string}",
     "enabled": true
   },
   "tracker_recordData": {
@@ -234,6 +234,11 @@
             "optional": false,
             "description": "记录值(必须为正数)"
           },
+          "id": {
+            "type": "String",
+            "optional": true,
+            "description": "自定义记录 ID,不传则自动生成时间戳 ID。如果提供的 ID 已存在会返回错误"
+          },
           "note": {
             "type": "String",
             "optional": true,
@@ -249,19 +254,23 @@
     ],
     "returns": {
       "type": "Object",
-      "description": "创建的 Record 对象,包含 id, goalId, value, note, recordedAt, durationSeconds"
+      "description": "创建的 Record 对象,包含 id(自定义或自动生成的), goalId, value, note, recordedAt, durationSeconds"
     },
     "examples": [
       {
-        "code": "// 添加今日阅读记录\nconst record = await Memento.plugins.tracker.recordData({\n  goalId: 'goal123',\n  value: 30,\n  note: '阅读《代码整洁之道》'\n});\nsetResult(record);",
-        "comment": "添加当前记录"
+        "code": "// 添加今日阅读记录(自动生成ID)\nconst record = await Memento.plugins.tracker.recordData({\n  goalId: 'goal123',\n  value: 30,\n  note: '阅读《代码整洁之道》'\n});\nsetResult(record);",
+        "comment": "添加当前记录(自动ID)"
       },
       {
         "code": "// 添加昨日的记录\nconst timeInfo = await Memento.system.getCurrentTime();\nconst yesterday = new Date(timeInfo.timestamp);\nyesterday.setDate(yesterday.getDate() - 1);\nconst pastTime = yesterday.toISOString().replace(/T.*/, 'T20:00:00.000Z');\nconst pastRecord = await Memento.plugins.tracker.recordData({\n  goalId: 'goal123',\n  value: 45,\n  note: '昨日补记',\n  dateTime: pastTime\n});\nsetResult(pastRecord);",
-        "comment": "补记历史数据"
+        "comment": "补记历史数据(自动ID)"
+      },
+      {
+        "code": "// 使用自定义ID添加记录\nconst customRecord = await Memento.plugins.tracker.recordData({\n  id: 'record123',\n  goalId: 'goal123',\n  value: 25,\n  note: '晨读'\n});\nsetResult(customRecord);",
+        "comment": "使用自定义ID"
       }
     ],
-    "notes": "记录会自动累加到目标的 currentValue,并触发 onRecordAdded 事件供其他插件监听",
+    "notes": "记录会自动累加到目标的 currentValue,并触发 onRecordAdded 事件供其他插件监听。可选传入自定义 id 参数,如果 id 已存在会返回错误信息: {'error': '记录ID已存在: <id>'}",
     "enabled": true
   },
   "tracker_getRecords": {
@@ -323,16 +332,16 @@
       }
     ],
     "returns": {
-      "type": "Boolean",
-      "description": "总是返回 true"
+      "type": "Object",
+      "description": "操作结果对象,成功返回 {success: true, recordId: string},失败返回 {success: false, error: string}"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.tracker.deleteRecord({ recordId: 'record123' });\nsetResult(result);",
-        "comment": "删除指定记录"
+        "code": "const result = await Memento.plugins.tracker.deleteRecord({ recordId: 'record123' });\nif (result.success) {\n  setResult(`成功删除记录: ${result.recordId}`);\n} else {\n  setResult(`删除失败: ${result.error}`);\n}",
+        "comment": "删除记录并处理结果"
       }
     ],
-    "notes": "删除记录会自动从目标的 currentValue 中减去对应的 value 值",
+    "notes": "删除记录会自动从目标的 currentValue 中减去对应的 value 值。如果recordId不存在或删除过程出错,会返回 {success: false, error: string}",
     "enabled": true
   },
   "tracker_getProgress": {

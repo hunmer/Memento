@@ -917,11 +917,8 @@ class MobileJSEngine implements JSEngine {
       _runtime.evaluate(
         'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
       );
-      _runtime.evaluate('globalThis.__TEMP_RESULT__ = $resultJson;');
-      _runtime.evaluate(
-        "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
-        "delete globalThis.__TEMP_RESULT__;",
-      );
+      // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
+      _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};');
 
       print('[JS Bridge] 插件分析结果已返回: ${resultJson.substring(0, resultJson.length > 100 ? 100 : resultJson.length)}...');
     } catch (e) {
