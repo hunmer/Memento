@@ -55,7 +55,9 @@ class AgentListItem extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: _getColorForServiceProvider(agent.serviceProviderId).withOpacity(0.5),
+                  color: _getColorForServiceProvider(
+                    agent.serviceProviderId,
+                  ).withValues(alpha: 0.5),
                   width: 2,
                 ),
               ),

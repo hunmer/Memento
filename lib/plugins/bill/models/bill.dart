@@ -76,6 +76,7 @@ class Bill {
       'tag': tag,
       'accountId': accountId,
       'icon': icon.codePoint,
+      // ignore: deprecated_member_use
       'iconColor': iconColor.value,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),

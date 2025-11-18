@@ -162,7 +162,7 @@ class CheckinDetailScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
-                            color: checkinItem.color.withOpacity(0.1),
+                              color: checkinItem.color.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(

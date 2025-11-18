@@ -34,7 +34,7 @@ class DatePickerDialog extends StatelessWidget {
             return ListTile(
               title: Text(formatDateFull(date)),
               selected: isSelected,
-              tileColor: isSelected ? Colors.blue.withOpacity(0.1) : null,
+              tileColor: isSelected ? Colors.blue.withValues(alpha: 0.1) : null,
               onTap: () {
                 onDateSelected(date);
                 Navigator.of(context).pop();

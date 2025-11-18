@@ -57,6 +57,7 @@ class BillModel {
       'iconCodePoint': icon.codePoint,
       'iconFontFamily': icon.fontFamily,
       'iconFontPackage': icon.fontPackage,
+      // ignore: deprecated_member_use
       'colorValue': color.value,
       'category': category,
       'note': note,

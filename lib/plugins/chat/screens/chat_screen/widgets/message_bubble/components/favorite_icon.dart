@@ -21,7 +21,9 @@ class FavoriteIcon extends StatelessWidget {
           size: 16.0,
           color: isFavorite 
               ? Theme.of(context).colorScheme.primary 
-              : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+                  : Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
         ),
       ),
     );

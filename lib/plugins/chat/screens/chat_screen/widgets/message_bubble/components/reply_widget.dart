@@ -29,12 +29,16 @@ class ReplyWidget extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color:
-                highlightColor?.withOpacity(0.1) ??
-                theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                highlightColor?.withValues(alpha: 0.1) ??
+                theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
             border: Border.all(
               color:
-                  highlightColor?.withOpacity(0.3) ??
-                  theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  highlightColor?.withValues(alpha: 0.3) ??
+                  theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
               width: 1,
             ),
           ),
@@ -50,7 +54,8 @@ class ReplyWidget extends StatelessWidget {
                     Icon(
                       Icons.reply,
                       size: 12,
-                      color: theme.colorScheme.onSurfaceVariant.withOpacity(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 
                         0.7,
                       ),
                     ),
@@ -75,7 +80,9 @@ class ReplyWidget extends StatelessWidget {
                   replyMessage.content,
                   style: TextStyle(
                     fontSize: 11,
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.8,
+                    ),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

@@ -36,7 +36,9 @@ class _CalendarScreenState extends State<CalendarScreen>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color:
-            isSelected ? Theme.of(context).primaryColor.withOpacity(0.3) : null,
+            isSelected
+                ? Theme.of(context).primaryColor.withValues(alpha: 0.3)
+                : null,
       ),
       child: Stack(
         children: [

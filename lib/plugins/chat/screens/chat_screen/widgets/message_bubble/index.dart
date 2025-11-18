@@ -90,6 +90,7 @@ class _MessageBubbleState extends State<MessageBubble> {
 
   @override
   void dispose() {
+    // ignore: deprecated_member_use_from_same_package
     eventManager.unsubscribeById(_messageUpdateSubscriptionId);
     super.dispose();
   }

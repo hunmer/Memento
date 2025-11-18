@@ -29,7 +29,7 @@ class AudioMessageBubble extends StatelessWidget {
         isCurrentUser ? Theme.of(context).primaryColor : Colors.grey.shade700;
     final backgroundColor =
         isCurrentUser
-            ? Theme.of(context).primaryColor.withOpacity(0.1)
+            ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
             : Colors.grey.shade200;
     final progressColor =
         isCurrentUser ? Theme.of(context).primaryColor : Colors.grey.shade500;

@@ -71,7 +71,10 @@ class GoalCard extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.7),
+                    ],
                   ),
                 ),
                 child: Padding(
@@ -100,7 +103,7 @@ class GoalCard extends StatelessWidget {
                                     Shadow(
                                       offset: const Offset(1.0, 1.0),
                                       blurRadius: 3.0,
-                                      color: Colors.black.withOpacity(0.5),
+                                      color: Colors.black.withValues(alpha: 0.5),
                                     ),
                                   ],
                                 ),
@@ -169,7 +172,7 @@ class GoalCard extends StatelessWidget {
                       const SizedBox(height: 12),
                       LinearProgressIndicator(
                         value: progress,
-                        backgroundColor: Colors.white.withOpacity(0.3),
+                        backgroundColor: Colors.white.withValues(alpha: 0.3),
                         color:
                             isCompleted
                                 ? Colors.green
@@ -234,7 +237,7 @@ class GoalCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2), // 加深阴影增强对比
+            color: Colors.black.withValues(alpha: 0.2), // 加深阴影增强对比
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -257,7 +260,7 @@ class GoalCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: (isCompleted ? Colors.green : Theme.of(context).primaryColor)
-            .withOpacity(0.15),
+            .withValues(alpha: 0.15),
       ),
     );
   }

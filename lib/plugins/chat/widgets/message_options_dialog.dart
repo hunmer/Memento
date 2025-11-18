@@ -350,7 +350,7 @@ class MessageOptionsDialog extends StatelessWidget {
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: color, size: 24),

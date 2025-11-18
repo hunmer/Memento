@@ -98,9 +98,9 @@ class EntryDetailContent extends StatelessWidget {
                             Colors.primaries.length];
                     return Chip(
                       label: Text(tag),
-                      backgroundColor: color.withOpacity(0.2),
+                      backgroundColor: color.withValues(alpha: 0.2),
                       labelStyle: TextStyle(color: color),
-                      side: BorderSide(color: color.withOpacity(0.5)),
+                      side: BorderSide(color: color.withValues(alpha: 0.5)),
                     );
                   }).toList(),
             ),

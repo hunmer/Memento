@@ -157,7 +157,7 @@ class TimelineMessageCard extends StatelessWidget {
                       ),
                       margin: EdgeInsets.only(right: isGridView ? 4 : 8),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.2),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
