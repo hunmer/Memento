@@ -10,7 +10,7 @@
     "examples": [
       {
         "title": "获取所有联系人",
-        "code": "const contacts = await Memento.plugins.contact.getContacts();\nsetResult(JSON.stringify(contacts, null, 2));"
+        "code": "const contacts = await Memento.plugins.contact.getContacts({});\nsetResult(JSON.stringify(contacts, null, 2));"
       }
     ],
     "notes": "返回所有联系人信息",
@@ -29,7 +29,7 @@
     "examples": [
       {
         "title": "获取联系人详情",
-        "code": "const contact = await Memento.plugins.contact.getContact('contact123');\nif (contact.error) {\n  setResult('联系人不存在');\n} else {\n  setResult(JSON.stringify(contact, null, 2));\n}"
+        "code": "const contact = await Memento.plugins.contact.getContact({contactId: 'contact123'});\nif (contact.error) {\n  setResult('联系人不存在');\n} else {\n  setResult(JSON.stringify(contact, null, 2));\n}"
       }
     ],
     "notes": "如联系人不存在，返回对象包含 error 字段",
@@ -54,11 +54,11 @@
     "examples": [
       {
         "title": "创建简单联系人",
-        "code": "const contact = await Memento.plugins.contact.createContact('张三', '13800138000');\nsetResult(`联系人已创建: ${contact.name}`);"
+        "code": "const contact = await Memento.plugins.contact.createContact({name: '张三', phone: '13800138000'});\nsetResult(`联系人已创建: ${contact.name}`);"
       },
       {
         "title": "创建完整联系人",
-        "code": "const contact = await Memento.plugins.contact.createContact('李四', '13900139000', null, '北京市海淀区', '重要客户', ['朋友', '客户'], {公司: '北京科技', 职位: '经理'});\nsetResult(`联系人ID: ${contact.id}`);"
+        "code": "const contact = await Memento.plugins.contact.createContact({\n  name: '李四',\n  phone: '13900139000',\n  address: '北京市海淀区',\n  notes: '重要客户',\n  tags: ['朋友', '客户'],\n  customFields: {公司: '北京科技', 职位: '经理'}\n});\nsetResult(`联系人ID: ${contact.id}`);"
       }
     ],
     "notes": "姓名和电话号码必填，其他字段可选",
@@ -84,7 +84,7 @@
     "examples": [
       {
         "title": "更新联系人电话",
-        "code": "const updated = await Memento.plugins.contact.updateContact('contact123', null, '13700137000');\nsetResult(`电话已更新: ${updated.phone}`);"
+        "code": "const updated = await Memento.plugins.contact.updateContact({contactId: 'contact123', phone: '13700137000'});\nsetResult(`电话已更新: ${updated.phone}`);"
       }
     ],
     "notes": "仅更新提供的字段，其他字段保持不变",
@@ -103,7 +103,7 @@
     "examples": [
       {
         "title": "删除联系人",
-        "code": "const success = await Memento.plugins.contact.deleteContact('contact123');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const success = await Memento.plugins.contact.deleteContact({contactId: 'contact123'});\nsetResult(success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆，会同时删除该联系人的所有交互记录",
@@ -125,11 +125,11 @@
     "examples": [
       {
         "title": "添加简单交互记录",
-        "code": "const record = await Memento.plugins.contact.addInteraction('contact123', '电话沟通了项目进度');\nsetResult(`交互记录已添加: ${record.id}`);"
+        "code": "const record = await Memento.plugins.contact.addInteraction({contactId: 'contact123', notes: '电话沟通了项目进度'});\nsetResult(`交互记录已添加: ${record.id}`);"
       },
       {
         "title": "添加多人交互记录",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst timestamp = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T14:00:00.000Z');\nconst record = await Memento.plugins.contact.addInteraction('contact123', '三方会议讨论合作', timestamp, ['contact456', 'contact789']);\nsetResult('已记录多人会议');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst timestamp = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T14:00:00.000Z');\nconst record = await Memento.plugins.contact.addInteraction({\n  contactId: 'contact123',\n  notes: '三方会议讨论合作',\n  dateStr: timestamp,\n  participants: ['contact456', 'contact789']\n});\nsetResult('已记录多人会议');"
       }
     ],
     "notes": "添加交互记录会自动更新联系人的 lastContactTime 字段",
@@ -148,7 +148,7 @@
     "examples": [
       {
         "title": "获取交互记录",
-        "code": "const records = await Memento.plugins.contact.getInteractions('contact123');\nsetResult(`共有 ${records.length} 条交互记录`);"
+        "code": "const records = await Memento.plugins.contact.getInteractions({contactId: 'contact123'});\nsetResult(`共有 ${records.length} 条交互记录`);"
       }
     ],
     "notes": "按交互日期倒序排列",
@@ -167,7 +167,7 @@
     "examples": [
       {
         "title": "删除交互记录",
-        "code": "const success = await Memento.plugins.contact.deleteInteraction('record456');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const success = await Memento.plugins.contact.deleteInteraction({interactionId: 'record456'});\nsetResult(success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆",
@@ -184,7 +184,7 @@
     "examples": [
       {
         "title": "获取最近联系人数",
-        "code": "const count = await Memento.plugins.contact.getRecentContacts();\nsetResult(`最近一个月联系了 ${count} 个人`);"
+        "code": "const count = await Memento.plugins.contact.getRecentContacts({});\nsetResult(`最近一个月联系了 ${count} 个人`);"
       }
     ],
     "notes": "统计 lastContactTime 在最近 30 天内的联系人数量",
@@ -201,7 +201,7 @@
     "examples": [
       {
         "title": "获取所有标签",
-        "code": "const tags = await Memento.plugins.contact.getAllTags();\nsetResult(tags.join(', '));"
+        "code": "const tags = await Memento.plugins.contact.getAllTags({});\nsetResult(tags.join(', '));"
       }
     ],
     "notes": "返回去重后的标签列表",

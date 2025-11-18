@@ -611,9 +611,13 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取指定仓库的详细信息（包含物品）
-  /// 参数: warehouseId - 仓库ID
-  /// 返回: 仓库的完整JSON数据
-  Future<String> _jsGetWarehouse(String warehouseId) async {
+  Future<String> _jsGetWarehouse(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? warehouseId = params['warehouseId'];
+    if (warehouseId == null || warehouseId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: warehouseId'});
+    }
+
     final warehouse = getWarehouse(warehouseId);
     if (warehouse == null) {
       return jsonEncode({'error': '仓库不存在', 'warehouseId': warehouseId});
@@ -623,13 +627,17 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 创建新仓库
-  /// 参数: title - 仓库名称, iconCode (可选) - 图标代码, colorValue (可选) - 颜色值
-  /// 返回: 新建仓库的JSON数据
-  Future<String> _jsCreateWarehouse(
-    String title, [
-    int? iconCode,
-    int? colorValue,
-  ]) async {
+  Future<String> _jsCreateWarehouse(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    // 可选参数
+    final int? iconCode = params['iconCode'];
+    final int? colorValue = params['colorValue'];
+
     final warehouse = Warehouse(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
@@ -647,18 +655,22 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新仓库信息
-  /// 参数: warehouseId - 仓库ID, title (可选) - 新名称, iconCode (可选) - 图标代码, colorValue (可选) - 颜色值
-  /// 返回: 更新后的仓库JSON数据
-  Future<String> _jsUpdateWarehouse(
-    String warehouseId, {
-    String? title,
-    int? iconCode,
-    int? colorValue,
-  }) async {
+  Future<String> _jsUpdateWarehouse(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? warehouseId = params['warehouseId'];
+    if (warehouseId == null || warehouseId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: warehouseId'});
+    }
+
     final warehouse = getWarehouse(warehouseId);
     if (warehouse == null) {
       return jsonEncode({'error': '仓库不存在', 'warehouseId': warehouseId});
     }
+
+    // 可选参数
+    final String? title = params['title'];
+    final int? iconCode = params['iconCode'];
+    final int? colorValue = params['colorValue'];
 
     final updatedWarehouse = warehouse.copyWith(
       title: title,
@@ -674,9 +686,13 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除仓库
-  /// 参数: warehouseId - 仓库ID
-  /// 返回: 操作结果
-  Future<String> _jsDeleteWarehouse(String warehouseId) async {
+  Future<String> _jsDeleteWarehouse(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? warehouseId = params['warehouseId'];
+    if (warehouseId == null || warehouseId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: warehouseId'});
+    }
+
     try {
       await deleteWarehouse(warehouseId);
       return jsonEncode({'success': true, 'warehouseId': warehouseId});
@@ -686,9 +702,13 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 清空仓库（删除所有物品）
-  /// 参数: warehouseId - 仓库ID
-  /// 返回: 操作结果
-  Future<String> _jsClearWarehouse(String warehouseId) async {
+  Future<String> _jsClearWarehouse(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? warehouseId = params['warehouseId'];
+    if (warehouseId == null || warehouseId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: warehouseId'});
+    }
+
     try {
       await clearWarehouse(warehouseId);
       return jsonEncode({'success': true, 'warehouseId': warehouseId});
@@ -698,12 +718,13 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取物品列表
-  /// 参数: warehouseId (可选) - 仓库ID，如果不提供则返回所有物品
-  /// 返回: 物品JSON数组
-  Future<String> _jsGetGoods([String? warehouseId]) async {
+  Future<String> _jsGetGoods(Map<String, dynamic> params) async {
+    // 可选参数
+    final String? warehouseId = params['warehouseId'];
+
     List<Map<String, dynamic>> goodsJsonList = [];
 
-    if (warehouseId != null) {
+    if (warehouseId != null && warehouseId.isNotEmpty) {
       // 获取指定仓库的物品
       final warehouse = getWarehouse(warehouseId);
       if (warehouse != null) {
@@ -720,9 +741,13 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取指定物品的详细信息
-  /// 参数: itemId - 物品ID
-  /// 返回: 物品的完整JSON数据（包含所属仓库ID）
-  Future<String> _jsGetGoodsItem(String itemId) async {
+  Future<String> _jsGetGoodsItem(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? itemId = params['itemId'];
+    if (itemId == null || itemId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: itemId'});
+    }
+
     final result = findGoodsItemById(itemId);
     if (result == null) {
       return jsonEncode({'error': '物品不存在', 'itemId': itemId});
@@ -734,14 +759,20 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 创建新物品
-  /// 参数: warehouseId - 仓库ID, itemData - 物品数据（JSON字符串）
-  /// 返回: 新建物品的JSON数据
-  Future<String> _jsCreateGoodsItem(
-    String warehouseId,
-    String itemData,
-  ) async {
+  Future<String> _jsCreateGoodsItem(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? warehouseId = params['warehouseId'];
+    final String? itemDataStr = params['itemData'];
+
+    if (warehouseId == null || warehouseId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: warehouseId'});
+    }
+    if (itemDataStr == null || itemDataStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: itemData'});
+    }
+
     try {
-      final data = jsonDecode(itemData) as Map<String, dynamic>;
+      final data = jsonDecode(itemDataStr) as Map<String, dynamic>;
 
       // 确保有ID和标题
       if (!data.containsKey('title') || data['title'] == null) {
@@ -762,9 +793,18 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新物品
-  /// 参数: itemId - 物品ID, itemData - 更新的物品数据（JSON字符串）
-  /// 返回: 更新后的物品JSON数据
-  Future<String> _jsUpdateGoodsItem(String itemId, String itemData) async {
+  Future<String> _jsUpdateGoodsItem(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? itemId = params['itemId'];
+    final String? itemDataStr = params['itemData'];
+
+    if (itemId == null || itemId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: itemId'});
+    }
+    if (itemDataStr == null || itemDataStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: itemData'});
+    }
+
     try {
       // 查找物品
       final result = findGoodsItemById(itemId);
@@ -773,7 +813,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       // 解析更新数据
-      final updateData = jsonDecode(itemData) as Map<String, dynamic>;
+      final updateData = jsonDecode(itemDataStr) as Map<String, dynamic>;
 
       // 合并现有数据和更新数据
       final currentJson = result.item.toJson();
@@ -791,9 +831,13 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除物品
-  /// 参数: itemId - 物品ID
-  /// 返回: 操作结果
-  Future<String> _jsDeleteGoodsItem(String itemId) async {
+  Future<String> _jsDeleteGoodsItem(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? itemId = params['itemId'];
+    if (itemId == null || itemId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: itemId'});
+    }
+
     try {
       // 查找物品所在的仓库
       final result = findGoodsItemById(itemId);
@@ -813,13 +857,17 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 添加使用记录
-  /// 参数: itemId - 物品ID, date (可选) - 使用日期ISO字符串, note (可选) - 备注
-  /// 返回: 更新后的物品JSON数据
-  Future<String> _jsAddUsageRecord(
-    String itemId, [
-    String? dateStr,
-    String? note,
-  ]) async {
+  Future<String> _jsAddUsageRecord(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? itemId = params['itemId'];
+    if (itemId == null || itemId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: itemId'});
+    }
+
+    // 可选参数
+    final String? dateStr = params['dateStr'];
+    final String? note = params['note'];
+
     try {
       // 查找物品
       final result = findGoodsItemById(itemId);

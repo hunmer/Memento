@@ -158,7 +158,13 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 获取指定笔记本详情
-  Future<String> _jsGetNotebook(String notebookId) async {
+  Future<String> _jsGetNotebook(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+
     final notebook = _controller.getNotebook(notebookId);
     if (notebook == null || notebook.id.isEmpty) {
       return jsonEncode({'error': '笔记本不存在'});
@@ -175,7 +181,17 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 创建笔记本
-  Future<String> _jsCreateNotebook(String title, [int? iconCodePoint, int? colorValue]) async {
+  Future<String> _jsCreateNotebook(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    // 可选参数
+    final int? iconCodePoint = params['iconCodePoint'];
+    final int? colorValue = params['colorValue'];
+
     final icon = iconCodePoint != null
         ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
         : Icons.book;
@@ -198,10 +214,22 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 更新笔记本
-  Future<String> _jsUpdateNotebook(String notebookId, Map<String, dynamic> updates) async {
+  Future<String> _jsUpdateNotebook(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+
     final notebook = _controller.getNotebook(notebookId);
     if (notebook == null || notebook.id.isEmpty) {
       return jsonEncode({'error': '笔记本不存在'});
+    }
+
+    // 可选参数（从 updates 子对象获取）
+    final Map<String, dynamic>? updates = params['updates'];
+    if (updates == null) {
+      return jsonEncode({'error': '缺少必需参数: updates'});
     }
 
     // 应用更新
@@ -220,13 +248,28 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 删除笔记本
-  Future<String> _jsDeleteNotebook(String notebookId) async {
+  Future<String> _jsDeleteNotebook(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+
     await _controller.deleteNotebook(notebookId);
     return jsonEncode({'success': true});
   }
 
   /// 获取节点列表（可选父节点ID）
-  Future<String> _jsGetNodes(String notebookId, [String? parentId]) async {
+  Future<String> _jsGetNodes(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+
+    // 可选参数
+    final String? parentId = params['parentId'];
+
     final notebook = _controller.getNotebook(notebookId);
     if (notebook == null || notebook.id.isEmpty) {
       return jsonEncode({'error': '笔记本不存在'});
@@ -249,7 +292,18 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 获取节点详情
-  Future<String> _jsGetNode(String notebookId, String nodeId) async {
+  Future<String> _jsGetNode(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    final String? nodeId = params['nodeId'];
+
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+    if (nodeId == null || nodeId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: nodeId'});
+    }
+
     final node = _controller.findNodeById(notebookId, nodeId);
     if (node == null) {
       return jsonEncode({'error': '节点不存在'});
@@ -259,7 +313,19 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 创建节点
-  Future<String> _jsCreateNode(String notebookId, Map<String, dynamic> nodeData) async {
+  Future<String> _jsCreateNode(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+
+    // nodeData 是必需参数
+    final Map<String, dynamic>? nodeData = params['nodeData'];
+    if (nodeData == null) {
+      return jsonEncode({'error': '缺少必需参数: nodeData'});
+    }
+
     final newNode = Node(
       id: const Uuid().v4(),
       title: nodeData['title'] ?? '新节点',
@@ -294,10 +360,27 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 更新节点
-  Future<String> _jsUpdateNode(String notebookId, String nodeId, Map<String, dynamic> updates) async {
+  Future<String> _jsUpdateNode(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    final String? nodeId = params['nodeId'];
+
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+    if (nodeId == null || nodeId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: nodeId'});
+    }
+
     final node = _controller.findNodeById(notebookId, nodeId);
     if (node == null) {
       return jsonEncode({'error': '节点不存在'});
+    }
+
+    // 可选参数（从 updates 子对象获取）
+    final Map<String, dynamic>? updates = params['updates'];
+    if (updates == null) {
+      return jsonEncode({'error': '缺少必需参数: updates'});
     }
 
     // 应用更新
@@ -336,13 +419,39 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 删除节点
-  Future<String> _jsDeleteNode(String notebookId, String nodeId) async {
+  Future<String> _jsDeleteNode(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    final String? nodeId = params['nodeId'];
+
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+    if (nodeId == null || nodeId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: nodeId'});
+    }
+
     await _controller.deleteNode(notebookId, nodeId);
     return jsonEncode({'success': true});
   }
 
   /// 移动节点到新的父节点下
-  Future<String> _jsMoveNode(String notebookId, String nodeId, String newParentId) async {
+  Future<String> _jsMoveNode(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    final String? nodeId = params['nodeId'];
+    final String? newParentId = params['newParentId'];
+
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+    if (nodeId == null || nodeId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: nodeId'});
+    }
+    if (newParentId == null) {
+      return jsonEncode({'error': '缺少必需参数: newParentId'});
+    }
+
     final node = _controller.findNodeById(notebookId, nodeId);
     if (node == null) {
       return jsonEncode({'error': '节点不存在'});
@@ -380,7 +489,13 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 获取完整节点树
-  Future<String> _jsGetNodeTree(String notebookId) async {
+  Future<String> _jsGetNodeTree(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+
     final notebook = _controller.getNotebook(notebookId);
     if (notebook == null || notebook.id.isEmpty) {
       return jsonEncode({'error': '笔记本不存在'});
@@ -394,7 +509,18 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 获取节点路径
-  Future<String> _jsGetNodePath(String notebookId, String nodeId) async {
+  Future<String> _jsGetNodePath(Map<String, dynamic> params) async {
+    // 必需参数验证
+    final String? notebookId = params['notebookId'];
+    final String? nodeId = params['nodeId'];
+
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+    if (nodeId == null || nodeId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: nodeId'});
+    }
+
     final pathTitles = _controller.getNodePath(notebookId, nodeId);
     final pathIds = _controller.getNodePathIds(notebookId, nodeId);
 

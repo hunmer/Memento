@@ -9,7 +9,7 @@
     },
     "examples": [
       {
-        "code": "const products = await Memento.plugins.store.getProducts();\nsetResult(products);",
+        "code": "const products = await Memento.plugins.store.getProducts({});\nsetResult(products);",
         "comment": "获取所有商品"
       }
     ],
@@ -33,7 +33,7 @@
     },
     "examples": [
       {
-        "code": "const product = await Memento.plugins.store.getProduct('1731473170123');\nsetResult(product);",
+        "code": "const product = await Memento.plugins.store.getProduct({productId: '1731473170123'});\nsetResult(product);",
         "comment": "获取指定商品信息"
       }
     ],
@@ -99,7 +99,7 @@
     },
     "examples": [
       {
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst newProduct = await Memento.plugins.store.createProduct(\n  '迟到豁免卡',\n  '可豁免一次迟到',\n  30,\n  20,\n  startDate,\n  endDate,\n  60,\n  'assets/late_pass.png'\n);\nsetResult(newProduct);",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst newProduct = await Memento.plugins.store.createProduct({\n  name: '迟到豁免卡',\n  description: '可豁免一次迟到',\n  price: 30,\n  stock: 20,\n  exchangeStart: startDate,\n  exchangeEnd: endDate,\n  useDuration: 60,\n  image: 'assets/late_pass.png'\n});\nsetResult(newProduct);",
         "comment": "创建今年有效的新商品"
       }
     ],
@@ -171,7 +171,7 @@
     },
     "examples": [
       {
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst updated = await Memento.plugins.store.updateProduct(\n  '1731473170123',\n  '免作业卡(升级版)',\n  '可免除两次作业',\n  100,\n  5,\n  startDate,\n  endDate,\n  60\n);\nsetResult(updated);",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst startDate = `${year}-01-01T00:00:00.000Z`;\nconst endDate = `${year}-12-31T23:59:59.999Z`;\nconst updated = await Memento.plugins.store.updateProduct({\n  productId: '1731473170123',\n  name: '免作业卡(升级版)',\n  description: '可免除两次作业',\n  price: 100,\n  stock: 5,\n  exchangeStart: startDate,\n  exchangeEnd: endDate,\n  useDuration: 60\n});\nsetResult(updated);",
         "comment": "更新商品信息（今年有效期）"
       }
     ],
@@ -195,7 +195,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.deleteProduct('1731473170123');\nsetResult(result);",
+        "code": "const result = await Memento.plugins.store.deleteProduct({productId: '1731473170123'});\nsetResult(result);",
         "comment": "归档商品"
       }
     ],
@@ -219,7 +219,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.redeem('1731473170123');\nconst data = JSON.parse(result);\nconst msg = data.success ? `兑换成功!剩余积分: ${data.currentPoints}` : `兑换失败: ${data.message}`;\nsetResult(msg);",
+        "code": "const result = await Memento.plugins.store.redeem({productId: '1731473170123'});\nconst data = JSON.parse(result);\nconst msg = data.success ? `兑换成功!剩余积分: ${data.currentPoints}` : `兑换失败: ${data.message}`;\nsetResult(msg);",
         "comment": "兑换商品"
       }
     ],
@@ -236,7 +236,7 @@
     },
     "examples": [
       {
-        "code": "const points = await Memento.plugins.store.getPoints();\nsetResult(points);",
+        "code": "const points = await Memento.plugins.store.getPoints({});\nsetResult(points);",
         "comment": "查询积分余额"
       }
     ],
@@ -266,11 +266,11 @@
     },
     "examples": [
       {
-        "code": "// 增加积分\nconst result1 = await Memento.plugins.store.addPoints(50, '完成任务奖励');\nsetResult(result1);",
+        "code": "// 增加积分\nconst result1 = await Memento.plugins.store.addPoints({points: 50, reason: '完成任务奖励'});\nsetResult(result1);",
         "comment": "增加积分"
       },
       {
-        "code": "// 扣除积分\nconst result2 = await Memento.plugins.store.addPoints(-20, '购买道具');\nsetResult(result2);",
+        "code": "// 扣除积分\nconst result2 = await Memento.plugins.store.addPoints({points: -20, reason: '购买道具'});\nsetResult(result2);",
         "comment": "扣除积分"
       }
     ],
@@ -287,7 +287,7 @@
     },
     "examples": [
       {
-        "code": "const history = await Memento.plugins.store.getRedeemHistory();\nsetResult(history);",
+        "code": "const history = await Memento.plugins.store.getRedeemHistory({});\nsetResult(history);",
         "comment": "查询兑换记录"
       }
     ],
@@ -304,7 +304,7 @@
     },
     "examples": [
       {
-        "code": "const logs = await Memento.plugins.store.getPointsHistory();\nsetResult(logs);",
+        "code": "const logs = await Memento.plugins.store.getPointsHistory({});\nsetResult(logs);",
         "comment": "查询积分记录"
       }
     ],
@@ -321,7 +321,7 @@
     },
     "examples": [
       {
-        "code": "const items = await Memento.plugins.store.getUserItems();\nsetResult(items);",
+        "code": "const items = await Memento.plugins.store.getUserItems({});\nsetResult(items);",
         "comment": "查询拥有的物品"
       }
     ],
@@ -345,7 +345,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.useItem('1731473170456');\nconst data = JSON.parse(result);\nconst msg = data.success ? '使用成功' : `使用失败: ${data.message}`;\nsetResult(msg);",
+        "code": "const result = await Memento.plugins.store.useItem({itemId: '1731473170456'});\nconst data = JSON.parse(result);\nconst msg = data.success ? '使用成功' : `使用失败: ${data.message}`;\nsetResult(msg);",
         "comment": "使用物品"
       }
     ],
@@ -369,7 +369,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.archiveProduct('1731473170123');\nsetResult(result);",
+        "code": "const result = await Memento.plugins.store.archiveProduct({productId: '1731473170123'});\nsetResult(result);",
         "comment": "归档商品"
       }
     ],
@@ -393,7 +393,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.store.restoreProduct('1731473170123');\nsetResult(result);",
+        "code": "const result = await Memento.plugins.store.restoreProduct({productId: '1731473170123'});\nsetResult(result);",
         "comment": "恢复归档商品"
       }
     ],
@@ -410,7 +410,7 @@
     },
     "examples": [
       {
-        "code": "const archived = await Memento.plugins.store.getArchivedProducts();\nsetResult(archived);",
+        "code": "const archived = await Memento.plugins.store.getArchivedProducts({});\nsetResult(archived);",
         "comment": "查询归档商品"
       }
     ],

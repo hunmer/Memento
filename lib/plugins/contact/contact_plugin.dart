@@ -183,14 +183,18 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取所有联系人
-  Future<String> _jsGetContacts() async {
+  Future<String> _jsGetContacts(Map<String, dynamic> params) async {
     final contacts = await _controller.getAllContacts();
     return jsonEncode(contacts.map((c) => c.toJson()).toList());
   }
 
   /// 获取联系人详情
-  /// 参数: contactId
-  Future<String> _jsGetContact(String contactId) async {
+  Future<String> _jsGetContact(Map<String, dynamic> params) async {
+    final String? contactId = params['contactId'];
+    if (contactId == null || contactId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: contactId'});
+    }
+
     final contact = await _controller.getContact(contactId);
     if (contact == null) {
       return jsonEncode({'error': 'Contact not found'});
@@ -199,16 +203,29 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 创建联系人
-  /// 参数: name, phone, [avatar], [address], [notes], [tags], [customFields]
-  Future<String> _jsCreateContact(
-    String name,
-    String phone, [
-    String? avatar,
-    String? address,
-    String? notes,
-    List<dynamic>? tags,
-    Map<dynamic, dynamic>? customFields,
-  ]) async {
+  Future<String> _jsCreateContact(Map<String, dynamic> params) async {
+    // 提取必需参数
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    final String? phone = params['phone'];
+    if (phone == null || phone.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: phone'});
+    }
+
+    // 提取可选参数
+    final String? avatar = params['avatar'];
+    final String? address = params['address'];
+    final String? notes = params['notes'];
+    final List<String>? tags = params['tags'] != null
+        ? List<String>.from(params['tags'])
+        : null;
+    final Map<String, String>? customFields = params['customFields'] != null
+        ? Map<String, String>.from(params['customFields'])
+        : null;
+
     final uuid = const Uuid();
     final contact = Contact(
       id: uuid.v4(),
@@ -219,11 +236,8 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       notes: notes,
       icon: Icons.person,
       iconColor: color,
-      tags: tags?.map((t) => t.toString()).toList() ?? [],
-      customFields: customFields?.map(
-            (key, value) => MapEntry(key.toString(), value.toString()),
-          ) ??
-          {},
+      tags: tags ?? [],
+      customFields: customFields ?? {},
     );
 
     await _controller.addContact(contact);
@@ -231,21 +245,30 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新联系人
-  /// 参数: contactId, [name], [phone], [avatar], [address], [notes], [tags], [customFields]
-  Future<String> _jsUpdateContact(
-    String contactId, {
-    String? name,
-    String? phone,
-    String? avatar,
-    String? address,
-    String? notes,
-    List<dynamic>? tags,
-    Map<dynamic, dynamic>? customFields,
-  }) async {
+  Future<String> _jsUpdateContact(Map<String, dynamic> params) async {
+    // 提取必需参数
+    final String? contactId = params['contactId'];
+    if (contactId == null || contactId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: contactId'});
+    }
+
     final contact = await _controller.getContact(contactId);
     if (contact == null) {
       return jsonEncode({'error': 'Contact not found'});
     }
+
+    // 提取可选参数
+    final String? name = params['name'];
+    final String? phone = params['phone'];
+    final String? avatar = params['avatar'];
+    final String? address = params['address'];
+    final String? notes = params['notes'];
+    final List<String>? tags = params['tags'] != null
+        ? List<String>.from(params['tags'])
+        : null;
+    final Map<String, String>? customFields = params['customFields'] != null
+        ? Map<String, String>.from(params['customFields'])
+        : null;
 
     final updatedContact = contact.copyWith(
       name: name,
@@ -253,10 +276,8 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       avatar: avatar,
       address: address,
       notes: notes,
-      tags: tags?.map((t) => t.toString()).toList(),
-      customFields: customFields?.map(
-        (key, value) => MapEntry(key.toString(), value.toString()),
-      ),
+      tags: tags,
+      customFields: customFields,
     );
 
     await _controller.updateContact(updatedContact);
@@ -264,8 +285,12 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除联系人
-  /// 参数: contactId
-  Future<bool> _jsDeleteContact(String contactId) async {
+  Future<bool> _jsDeleteContact(Map<String, dynamic> params) async {
+    final String? contactId = params['contactId'];
+    if (contactId == null || contactId.isEmpty) {
+      return false;
+    }
+
     try {
       await _controller.deleteContact(contactId);
       return true;
@@ -275,13 +300,24 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 添加交互记录
-  /// 参数: contactId, notes, [date], [participants]
-  Future<String> _jsAddInteraction(
-    String contactId,
-    String notes, [
-    String? dateStr,
-    List<dynamic>? participants,
-  ]) async {
+  Future<String> _jsAddInteraction(Map<String, dynamic> params) async {
+    // 提取必需参数
+    final String? contactId = params['contactId'];
+    if (contactId == null || contactId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: contactId'});
+    }
+
+    final String? notes = params['notes'];
+    if (notes == null || notes.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notes'});
+    }
+
+    // 提取可选参数
+    final String? dateStr = params['dateStr'];
+    final List<String>? participants = params['participants'] != null
+        ? List<String>.from(params['participants'])
+        : null;
+
     final uuid = const Uuid();
     final date = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
 
@@ -290,7 +326,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       contactId: contactId,
       date: date,
       notes: notes,
-      participants: participants?.map((p) => p.toString()).toList() ?? [],
+      participants: participants ?? [],
     );
 
     await _controller.addInteraction(interaction);
@@ -298,16 +334,24 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取交互记录
-  /// 参数: contactId
-  Future<String> _jsGetInteractions(String contactId) async {
+  Future<String> _jsGetInteractions(Map<String, dynamic> params) async {
+    final String? contactId = params['contactId'];
+    if (contactId == null || contactId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: contactId'});
+    }
+
     final interactions =
         await _controller.getInteractionsByContactId(contactId);
     return jsonEncode(interactions.map((i) => i.toJson()).toList());
   }
 
   /// 删除交互记录
-  /// 参数: interactionId
-  Future<bool> _jsDeleteInteraction(String interactionId) async {
+  Future<bool> _jsDeleteInteraction(Map<String, dynamic> params) async {
+    final String? interactionId = params['interactionId'];
+    if (interactionId == null || interactionId.isEmpty) {
+      return false;
+    }
+
     try {
       await _controller.deleteInteraction(interactionId);
       return true;
@@ -317,12 +361,12 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取最近联系的联系人数量
-  Future<int> _jsGetRecentContacts() async {
+  Future<int> _jsGetRecentContacts(Map<String, dynamic> params) async {
     return await _controller.getRecentlyContactedCount();
   }
 
   /// 获取所有标签
-  Future<String> _jsGetAllTags() async {
+  Future<String> _jsGetAllTags(Map<String, dynamic> params) async {
     final tags = await _controller.getAllTags();
     return jsonEncode(tags);
   }

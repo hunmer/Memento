@@ -31,11 +31,11 @@
     "examples": [
       {
         "title": "创建简单数据库",
-        "code": "const db = await Memento.plugins.database.createDatabase('我的数据库', '用于记录信息');\nsetResult(`数据库已创建: ${db.name}`);"
+        "code": "const db = await Memento.plugins.database.createDatabase({name: '我的数据库', description: '用于记录信息'});\nsetResult(`数据库已创建: ${db.name}`);"
       },
       {
         "title": "创建带字段的数据库",
-        "code": "const fields = JSON.stringify([{name: '标题', type: 'Text'}, {name: '日期', type: 'Date'}]);\nconst db = await Memento.plugins.database.createDatabase('任务库', '任务管理', fields);\nsetResult(`数据库${db.id}已创建`);"
+        "code": "const fields = JSON.stringify([{name: '标题', type: 'Text'}, {name: '日期', type: 'Date'}]);\nconst db = await Memento.plugins.database.createDatabase({name: '任务库', description: '任务管理', fieldsJson: fields});\nsetResult(`数据库${db.id}已创建`);"
       }
     ],
     "notes": "字段类型支持: Text, Long Text, Integer, Checkbox, Dropdown, Date, Time, Date/Time, Image, URL, Rating, Password",
@@ -57,7 +57,7 @@
     "examples": [
       {
         "title": "更新数据库名称",
-        "code": "const updated = await Memento.plugins.database.updateDatabase('db123', '新名称');\nsetResult(`数据库已更新: ${updated.name}`);"
+        "code": "const updated = await Memento.plugins.database.updateDatabase({databaseId: 'db123', name: '新名称'});\nsetResult(`数据库已更新: ${updated.name}`);"
       }
     ],
     "notes": "仅更新提供的字段，未提供的字段保持不变",
@@ -76,7 +76,7 @@
     "examples": [
       {
         "title": "删除数据库",
-        "code": "const success = await Memento.plugins.database.deleteDatabase('db123');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const success = await Memento.plugins.database.deleteDatabase({databaseId: 'db123'});\nsetResult(success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆，会同时删除该数据库下的所有记录",
@@ -96,11 +96,11 @@
     "examples": [
       {
         "title": "获取所有记录",
-        "code": "const records = await Memento.plugins.database.getRecords('db123');\nsetResult(`共有 ${records.length} 条记录`);"
+        "code": "const records = await Memento.plugins.database.getRecords({databaseId: 'db123'});\nsetResult(`共有 ${records.length} 条记录`);"
       },
       {
         "title": "获取最新10条记录",
-        "code": "const latest = await Memento.plugins.database.getRecords('db123', 10);\nsetResult(JSON.stringify(latest, null, 2));"
+        "code": "const latest = await Memento.plugins.database.getRecords({databaseId: 'db123', limit: 10});\nsetResult(JSON.stringify(latest, null, 2));"
       }
     ],
     "notes": "字段数据存储在 fields 对象中，键为字段名，值为字段值",
@@ -120,7 +120,7 @@
     "examples": [
       {
         "title": "创建记录",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst fields = JSON.stringify({标题: '新任务', 日期: today, 完成: false});\nconst record = await Memento.plugins.database.createRecord('db123', fields);\nsetResult(`记录已创建: ${record.id}`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst fields = JSON.stringify({标题: '新任务', 日期: today, 完成: false});\nconst record = await Memento.plugins.database.createRecord({databaseId: 'db123', fieldsJson: fields});\nsetResult(`记录已创建: ${record.id}`);"
       }
     ],
     "notes": "字段名必须与数据库定义的字段名匹配，字段值类型需符合字段类型定义",
@@ -141,7 +141,7 @@
     "examples": [
       {
         "title": "更新记录",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst updates = JSON.stringify({完成: true, 完成日期: today});\nconst record = await Memento.plugins.database.updateRecord('db123', 'rec456', updates);\nsetResult('记录已更新');"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst updates = JSON.stringify({完成: true, 完成日期: today});\nconst record = await Memento.plugins.database.updateRecord({databaseId: 'db123', recordId: 'rec456', fieldsJson: updates});\nsetResult('记录已更新');"
       }
     ],
     "notes": "仅更新提供的字段，其他字段保持不变",
@@ -161,7 +161,7 @@
     "examples": [
       {
         "title": "删除记录",
-        "code": "const success = await Memento.plugins.database.deleteRecord('db123', 'rec456');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const success = await Memento.plugins.database.deleteRecord({databaseId: 'db123', recordId: 'rec456'});\nsetResult(success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆",
@@ -181,11 +181,11 @@
     "examples": [
       {
         "title": "无条件查询（获取所有）",
-        "code": "const all = await Memento.plugins.database.query('db123');\nsetResult(`共 ${all.length} 条记录`);"
+        "code": "const all = await Memento.plugins.database.query({databaseId: 'db123'});\nsetResult(`共 ${all.length} 条记录`);"
       },
       {
         "title": "条件查询",
-        "code": "const filters = JSON.stringify({完成: false, 优先级: '高'});\nconst urgent = await Memento.plugins.database.query('db123', filters);\nsetResult(`未完成的高优先级任务: ${urgent.length} 条`);"
+        "code": "const filters = JSON.stringify({完成: false, 优先级: '高'});\nconst urgent = await Memento.plugins.database.query({databaseId: 'db123', filtersJson: filters});\nsetResult(`未完成的高优先级任务: ${urgent.length} 条`);"
       }
     ],
     "notes": "过滤条件为精确匹配（字段值必须完全相等），如不提供条件则返回所有记录",
@@ -205,11 +205,11 @@
     "examples": [
       {
         "title": "获取数据库总数",
-        "code": "const count = await Memento.plugins.database.getCount('databases');\nsetResult(`系统中有 ${count} 个数据库`);"
+        "code": "const count = await Memento.plugins.database.getCount({type: 'databases'});\nsetResult(`系统中有 ${count} 个数据库`);"
       },
       {
         "title": "获取记录数",
-        "code": "const count = await Memento.plugins.database.getCount('records', 'db123');\nsetResult(`该数据库有 ${count} 条记录`);"
+        "code": "const count = await Memento.plugins.database.getCount({type: 'records', databaseId: 'db123'});\nsetResult(`该数据库有 ${count} 条记录`);"
       }
     ],
     "notes": "type 参数只接受 'databases' 或 'records' 两个值",

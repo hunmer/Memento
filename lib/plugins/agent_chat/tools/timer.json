@@ -9,7 +9,7 @@
     },
     "examples": [
       {
-        "code": "const timers = await Memento.plugins.timer.getTimers();\nsetResult(timers);",
+        "code": "const timers = await Memento.plugins.timer.getTimers({});\nsetResult(timers);",
         "comment": "获取所有计时器"
       }
     ],
@@ -51,11 +51,11 @@
     },
     "examples": [
       {
-        "code": "// 创建正计时 60 秒\nconst result = await Memento.plugins.timer.createTimer('学习计时', 60, 'countUp', '工作');\nsetResult(result);",
+        "code": "// 创建正计时 60 秒\nconst result = await Memento.plugins.timer.createTimer({\n  name: '学习计时',\n  duration: 60,\n  type: 'countUp',\n  group: '工作'\n});\nsetResult(result);",
         "comment": "创建正计时"
       },
       {
-        "code": "// 创建倒计时 300 秒(5分钟)\nconst result2 = await Memento.plugins.timer.createTimer('午休提醒', 300, 'countDown');\nsetResult(result2);",
+        "code": "// 创建倒计时 300 秒(5分钟)\nconst result2 = await Memento.plugins.timer.createTimer({\n  name: '午休提醒',\n  duration: 300,\n  type: 'countDown'\n});\nsetResult(result2);",
         "comment": "创建倒计时"
       }
     ],
@@ -79,7 +79,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.deleteTimer('1705300800000');\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.deleteTimer({timerId: '1705300800000'});\nsetResult(result);",
         "comment": "删除计时器"
       }
     ],
@@ -103,7 +103,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.startTimer('1705300800000');\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.startTimer({timerId: '1705300800000'});\nsetResult(result);",
         "comment": "启动计时器"
       }
     ],
@@ -127,7 +127,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.pauseTimer('1705300800000');\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.pauseTimer({timerId: '1705300800000'});\nsetResult(result);",
         "comment": "暂停计时器"
       }
     ],
@@ -151,7 +151,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.stopTimer('1705300800000');\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.stopTimer({timerId: '1705300800000'});\nsetResult(result);",
         "comment": "停止计时器"
       }
     ],
@@ -175,7 +175,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.resetTimer('1705300800000');\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.resetTimer({timerId: '1705300800000'});\nsetResult(result);",
         "comment": "重置计时器"
       }
     ],
@@ -199,7 +199,7 @@
     },
     "examples": [
       {
-        "code": "const status = await Memento.plugins.timer.getTimerStatus('1705300800000');\nsetResult(status);",
+        "code": "const status = await Memento.plugins.timer.getTimerStatus({timerId: '1705300800000'});\nsetResult(status);",
         "comment": "查询计时器状态"
       }
     ],
@@ -216,7 +216,7 @@
     },
     "examples": [
       {
-        "code": "const history = await Memento.plugins.timer.getHistory();\nsetResult(history);",
+        "code": "const history = await Memento.plugins.timer.getHistory({});\nsetResult(history);",
         "comment": "查询历史记录"
       }
     ],

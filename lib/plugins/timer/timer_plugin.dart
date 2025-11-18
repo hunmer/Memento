@@ -231,7 +231,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取计时器列表
-  Future<String> _jsGetTimers() async {
+  Future<String> _jsGetTimers(Map<String, dynamic> params) async {
     final timers = _tasks.map((task) => {
       'id': task.id,
       'name': task.name,
@@ -262,8 +262,26 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 创建计时器
-  /// 参数: name(String), duration(int秒), type(String: countUp/countDown/pomodoro), group(String)
-  Future<String> _jsCreateTimer(String name, int durationSeconds, String type, [String? group]) async {
+  Future<String> _jsCreateTimer(Map<String, dynamic> params) async {
+    // 提取必需参数
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    final int? durationSeconds = params['duration'];
+    if (durationSeconds == null) {
+      return jsonEncode({'error': '缺少必需参数: duration'});
+    }
+
+    final String? type = params['type'];
+    if (type == null || type.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: type'});
+    }
+
+    // 提取可选参数
+    final String? group = params['group'];
+
     // 解析计时器类型
     TimerType timerType;
     try {
@@ -308,8 +326,12 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除计时器
-  /// 参数: timerId(String)
-  Future<String> _jsDeleteTimer(String timerId) async {
+  Future<String> _jsDeleteTimer(Map<String, dynamic> params) async {
+    final String? timerId = params['timerId'];
+    if (timerId == null || timerId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: timerId'});
+    }
+
     await removeTask(timerId);
 
     return jsonEncode({
@@ -319,8 +341,12 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 启动计时器
-  /// 参数: timerId(String)
-  Future<String> _jsStartTimer(String timerId) async {
+  Future<String> _jsStartTimer(Map<String, dynamic> params) async {
+    final String? timerId = params['timerId'];
+    if (timerId == null || timerId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: timerId'});
+    }
+
     final task = _tasks.firstWhere(
       (t) => t.id == timerId,
       orElse: () => throw Exception('计时器不存在'),
@@ -338,8 +364,12 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 暂停计时器
-  /// 参数: timerId(String)
-  Future<String> _jsPauseTimer(String timerId) async {
+  Future<String> _jsPauseTimer(Map<String, dynamic> params) async {
+    final String? timerId = params['timerId'];
+    if (timerId == null || timerId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: timerId'});
+    }
+
     final task = _tasks.firstWhere(
       (t) => t.id == timerId,
       orElse: () => throw Exception('计时器不存在'),
@@ -357,8 +387,12 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 停止计时器
-  /// 参数: timerId(String)
-  Future<String> _jsStopTimer(String timerId) async {
+  Future<String> _jsStopTimer(Map<String, dynamic> params) async {
+    final String? timerId = params['timerId'];
+    if (timerId == null || timerId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: timerId'});
+    }
+
     final task = _tasks.firstWhere(
       (t) => t.id == timerId,
       orElse: () => throw Exception('计时器不存在'),
@@ -377,8 +411,12 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 重置计时器
-  /// 参数: timerId(String)
-  Future<String> _jsResetTimer(String timerId) async {
+  Future<String> _jsResetTimer(Map<String, dynamic> params) async {
+    final String? timerId = params['timerId'];
+    if (timerId == null || timerId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: timerId'});
+    }
+
     final task = _tasks.firstWhere(
       (t) => t.id == timerId,
       orElse: () => throw Exception('计时器不存在'),
@@ -395,8 +433,12 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取计时器状态
-  /// 参数: timerId(String)
-  Future<String> _jsGetTimerStatus(String timerId) async {
+  Future<String> _jsGetTimerStatus(Map<String, dynamic> params) async {
+    final String? timerId = params['timerId'];
+    if (timerId == null || timerId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: timerId'});
+    }
+
     final task = _tasks.firstWhere(
       (t) => t.id == timerId,
       orElse: () => throw Exception('计时器不存在'),
@@ -438,8 +480,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取计时历史
-  /// 返回所有已完成的计时器任务
-  Future<String> _jsGetHistory() async {
+  Future<String> _jsGetHistory(Map<String, dynamic> params) async {
     final completedTasks = _tasks.where((task) => task.isCompleted).map((task) => {
       'id': task.id,
       'name': task.name,

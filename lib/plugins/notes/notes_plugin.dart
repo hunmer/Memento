@@ -214,11 +214,14 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     });
   }
 
-  /// 获取笔记列表（可选参数：folderId）
-  Future<String> _jsGetNotes([String? folderId]) async {
+  /// 获取笔记列表
+  Future<String> _jsGetNotes(Map<String, dynamic> params) async {
     if (!_isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
+
+    // 提取可选参数
+    final String? folderId = params['folderId'];
 
     List<dynamic> notesJson;
     if (folderId != null) {
@@ -235,9 +238,15 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取单个笔记详情
-  Future<String> _jsGetNote(String noteId) async {
+  Future<String> _jsGetNote(Map<String, dynamic> params) async {
     if (!_isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
+    }
+
+    // 提取必需参数并验证
+    final String? noteId = params['noteId'];
+    if (noteId == null || noteId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: noteId'});
     }
 
     // 在所有笔记中查找
@@ -251,15 +260,25 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 创建新笔记
-  Future<String> _jsCreateNote(
-    String title,
-    String content, [
-    String? folderId,
-    List<String>? tags,
-  ]) async {
+  Future<String> _jsCreateNote(Map<String, dynamic> params) async {
     if (!_isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
+
+    // 提取必需参数并验证
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final String? content = params['content'];
+    if (content == null) {
+      return jsonEncode({'error': '缺少必需参数: content'});
+    }
+
+    // 提取可选参数
+    final String? folderId = params['folderId'];
+    final List<String>? tags = params['tags'];
 
     // 如果没有指定文件夹，使用根文件夹
     final targetFolderId = folderId ?? 'root';
@@ -277,15 +296,29 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 更新笔记
-  Future<String> _jsUpdateNote(
-    String noteId,
-    String title,
-    String content, [
-    List<String>? tags,
-  ]) async {
+  Future<String> _jsUpdateNote(Map<String, dynamic> params) async {
     if (!_isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
+
+    // 提取必需参数并验证
+    final String? noteId = params['noteId'];
+    if (noteId == null || noteId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: noteId'});
+    }
+
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final String? content = params['content'];
+    if (content == null) {
+      return jsonEncode({'error': '缺少必需参数: content'});
+    }
+
+    // 提取可选参数
+    final List<String>? tags = params['tags'];
 
     // 查找笔记
     final allNotes = controller.searchNotes(query: '');
@@ -307,8 +340,14 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除笔记
-  Future<bool> _jsDeleteNote(String noteId) async {
+  Future<bool> _jsDeleteNote(Map<String, dynamic> params) async {
     if (!_isInitialized) {
+      return false;
+    }
+
+    // 提取必需参数并验证
+    final String? noteId = params['noteId'];
+    if (noteId == null || noteId.isEmpty) {
       return false;
     }
 
@@ -317,15 +356,21 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 搜索笔记
-  Future<String> _jsSearchNotes(
-    String keyword, [
-    List<String>? tags,
-    String? startDate,
-    String? endDate,
-  ]) async {
+  Future<String> _jsSearchNotes(Map<String, dynamic> params) async {
     if (!_isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
+
+    // 提取必需参数并验证
+    final String? keyword = params['keyword'];
+    if (keyword == null) {
+      return jsonEncode({'error': '缺少必需参数: keyword'});
+    }
+
+    // 提取可选参数
+    final List<String>? tags = params['tags'];
+    final String? startDate = params['startDate'];
+    final String? endDate = params['endDate'];
 
     // 解析日期
     DateTime? start;
@@ -349,7 +394,7 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取所有文件夹
-  Future<String> _jsGetFolders() async {
+  Future<String> _jsGetFolders(Map<String, dynamic> params) async {
     if (!_isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
@@ -359,9 +404,15 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取单个文件夹详情
-  Future<String> _jsGetFolder(String folderId) async {
+  Future<String> _jsGetFolder(Map<String, dynamic> params) async {
     if (!_isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
+    }
+
+    // 提取必需参数并验证
+    final String? folderId = params['folderId'];
+    if (folderId == null || folderId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: folderId'});
     }
 
     final folder = controller.getFolder(folderId);
@@ -373,18 +424,38 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 创建文件夹
-  Future<String> _jsCreateFolder(String name, [String? parentId]) async {
+  Future<String> _jsCreateFolder(Map<String, dynamic> params) async {
     if (!_isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
+
+    // 提取必需参数并验证
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    // 提取可选参数
+    final String? parentId = params['parentId'];
 
     final folder = await controller.createFolder(name, parentId);
     return jsonEncode(folder.toJson());
   }
 
   /// 重命名文件夹
-  Future<bool> _jsRenameFolder(String folderId, String newName) async {
+  Future<bool> _jsRenameFolder(Map<String, dynamic> params) async {
     if (!_isInitialized) {
+      return false;
+    }
+
+    // 提取必需参数并验证
+    final String? folderId = params['folderId'];
+    if (folderId == null || folderId.isEmpty) {
+      return false;
+    }
+
+    final String? newName = params['newName'];
+    if (newName == null || newName.isEmpty) {
       return false;
     }
 
@@ -393,8 +464,14 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除文件夹（递归删除子文件夹和笔记）
-  Future<bool> _jsDeleteFolder(String folderId) async {
+  Future<bool> _jsDeleteFolder(Map<String, dynamic> params) async {
     if (!_isInitialized) {
+      return false;
+    }
+
+    // 提取必需参数并验证
+    final String? folderId = params['folderId'];
+    if (folderId == null || folderId.isEmpty) {
       return false;
     }
 
@@ -403,9 +480,15 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取文件夹中的笔记
-  Future<String> _jsGetFolderNotes(String folderId) async {
+  Future<String> _jsGetFolderNotes(Map<String, dynamic> params) async {
     if (!_isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
+    }
+
+    // 提取必需参数并验证
+    final String? folderId = params['folderId'];
+    if (folderId == null || folderId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: folderId'});
     }
 
     final notes = controller.getFolderNotes(folderId);
@@ -413,8 +496,19 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 移动笔记到其他文件夹
-  Future<bool> _jsMoveNote(String noteId, String targetFolderId) async {
+  Future<bool> _jsMoveNote(Map<String, dynamic> params) async {
     if (!_isInitialized) {
+      return false;
+    }
+
+    // 提取必需参数并验证
+    final String? noteId = params['noteId'];
+    if (noteId == null || noteId.isEmpty) {
+      return false;
+    }
+
+    final String? targetFolderId = params['targetFolderId'];
+    if (targetFolderId == null || targetFolderId.isEmpty) {
       return false;
     }
 

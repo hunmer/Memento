@@ -442,14 +442,14 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取所有事件（包括 Todo 任务事件）
-  Future<String> _jsGetEvents() async {
+  Future<String> _jsGetEvents(Map<String, dynamic> params) async {
     final events = controller.getAllEvents();
     final eventsJson = events.map((e) => e.toJson()).toList();
     return jsonEncode(eventsJson);
   }
 
   /// 获取今日事件
-  Future<String> _jsGetTodayEvents() async {
+  Future<String> _jsGetTodayEvents(Map<String, dynamic> params) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
@@ -464,8 +464,18 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 根据日期范围获取事件
-  /// 参数：startDate (ISO8601), endDate (ISO8601)
-  Future<String> _jsGetEventsByDateRange(String startDateStr, String endDateStr) async {
+  Future<String> _jsGetEventsByDateRange(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? startDateStr = params['startDate'];
+    if (startDateStr == null || startDateStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: startDate'});
+    }
+
+    final String? endDateStr = params['endDate'];
+    if (endDateStr == null || endDateStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: endDate'});
+    }
+
     final startDate = DateTime.parse(startDateStr);
     final endDate = DateTime.parse(endDateStr);
 
@@ -479,17 +489,29 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 创建事件
-  /// 参数：title, description, startTime (ISO8601), endTime (ISO8601, optional),
-  ///       iconCodePoint (int, optional), colorValue (int, optional), reminderMinutes (int, optional)
-  Future<String> _jsCreateEvent(
-    String title,
-    String description,
-    String startTimeStr, [
-    String? endTimeStr,
-    int? iconCodePoint,
-    int? colorValue,
-    int? reminderMinutes,
-  ]) async {
+  Future<String> _jsCreateEvent(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final String? description = params['description'];
+    if (description == null) {
+      return jsonEncode({'error': '缺少必需参数: description'});
+    }
+
+    final String? startTimeStr = params['startTime'];
+    if (startTimeStr == null || startTimeStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: startTime'});
+    }
+
+    // 提取可选参数
+    final String? endTimeStr = params['endTime'];
+    final int? iconCodePoint = params['iconCodePoint'];
+    final int? colorValue = params['colorValue'];
+    final int? reminderMinutes = params['reminderMinutes'];
+
     final startTime = DateTime.parse(startTimeStr);
     final endTime = endTimeStr != null ? DateTime.parse(endTimeStr) : null;
 
@@ -512,19 +534,22 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新事件
-  /// 参数：eventId, title (optional), description (optional), startTime (ISO8601, optional),
-  ///       endTime (ISO8601, optional), iconCodePoint (int, optional),
-  ///       colorValue (int, optional), reminderMinutes (int, optional)
-  Future<String> _jsUpdateEvent(
-    String eventId, [
-    String? title,
-    String? description,
-    String? startTimeStr,
-    String? endTimeStr,
-    int? iconCodePoint,
-    int? colorValue,
-    int? reminderMinutes,
-  ]) async {
+  Future<String> _jsUpdateEvent(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? eventId = params['eventId'];
+    if (eventId == null || eventId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: eventId'});
+    }
+
+    // 提取可选参数
+    final String? title = params['title'];
+    final String? description = params['description'];
+    final String? startTimeStr = params['startTime'];
+    final String? endTimeStr = params['endTime'];
+    final int? iconCodePoint = params['iconCodePoint'];
+    final int? colorValue = params['colorValue'];
+    final int? reminderMinutes = params['reminderMinutes'];
+
     // 查找事件
     final existingEvent = controller.events.firstWhere(
       (e) => e.id == eventId,
@@ -549,8 +574,13 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除事件
-  /// 参数：eventId
-  Future<bool> _jsDeleteEvent(String eventId) async {
+  Future<bool> _jsDeleteEvent(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? eventId = params['eventId'];
+    if (eventId == null || eventId.isEmpty) {
+      return false;
+    }
+
     final event = controller.events.firstWhere(
       (e) => e.id == eventId,
       orElse: () => throw Exception('Event not found: $eventId'),
@@ -561,8 +591,13 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 完成事件
-  /// 参数：eventId
-  Future<String> _jsCompleteEvent(String eventId) async {
+  Future<String> _jsCompleteEvent(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? eventId = params['eventId'];
+    if (eventId == null || eventId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: eventId'});
+    }
+
     final event = controller.events.firstWhere(
       (e) => e.id == eventId,
       orElse: () => throw Exception('Event not found: $eventId'),
@@ -578,7 +613,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取已完成事件
-  Future<String> _jsGetCompletedEvents() async {
+  Future<String> _jsGetCompletedEvents(Map<String, dynamic> params) async {
     final events = controller.completedEvents;
     final eventsJson = events.map((e) => e.toJson()).toList();
     return jsonEncode(eventsJson);

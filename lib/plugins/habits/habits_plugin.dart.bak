@@ -396,29 +396,17 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     return jsonEncode(skill.toMap());
   }
 
-  /// 更新技能
-  Future<String> _jsUpdateSkill(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? skillId = params['skillId'];
-    if (skillId == null) {
-      return jsonEncode({'error': '缺少必需参数: skillId'});
-    }
+  /// 更新���能
+  Future<String> _jsUpdateSkill(String skillId, Map<String, dynamic> updates) async {
+    final existingSkill = _skillController.getSkillById(skillId);
 
-    try {
-      final existingSkill = _skillController.getSkillById(skillId);
+    // 合并现有数据和更新数据
+    final skillMap = existingSkill.toMap();
+    skillMap.addAll(updates);
 
-      // 合并现有数据和更新数据
-      final skillMap = existingSkill.toMap();
-      final updates = Map<String, dynamic>.from(params);
-      updates.remove('skillId');
-      skillMap.addAll(updates);
-
-      final updatedSkill = Skill.fromMap(skillMap);
-      await _skillController.saveSkill(updatedSkill);
-      return jsonEncode(updatedSkill.toMap());
-    } catch (e) {
-      return jsonEncode({'error': 'Skill not found: $skillId'});
-    }
+    final updatedSkill = Skill.fromMap(skillMap);
+    await _skillController.saveSkill(updatedSkill);
+    return jsonEncode(updatedSkill.toMap());
   }
 
   /// 删除技能
@@ -434,52 +422,36 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 打卡（创建完成记录）
-  Future<String> _jsCheckIn(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
-    // 可选参数
-    final int? durationSeconds = params['durationSeconds'];
-    final String? notes = params['notes'];
-
+  Future<String> _jsCheckIn(
+    String habitId, {
+    int? durationSeconds,
+    String? notes,
+  }) async {
     final habits = _habitController.getHabits();
-    try {
-      final habit = habits.firstWhere((h) => h.id == habitId);
+    final habit = habits.firstWhere(
+      (h) => h.id == habitId,
+      orElse: () => throw Exception('Habit not found: $habitId'),
+    );
 
-      final recordId = DateTime.now().millisecondsSinceEpoch.toString();
-      final duration = durationSeconds != null
-          ? Duration(seconds: durationSeconds)
-          : Duration(minutes: habit.durationMinutes);
+    final recordId = DateTime.now().millisecondsSinceEpoch.toString();
+    final duration = durationSeconds != null
+        ? Duration(seconds: durationSeconds)
+        : Duration(minutes: habit.durationMinutes);
 
-      final record = CompletionRecord(
-        id: recordId,
-        parentId: habitId,
-        date: DateTime.now(),
-        duration: duration,
-        notes: notes ?? '',
-      );
+    final record = CompletionRecord(
+      id: recordId,
+      parentId: habitId,
+      date: DateTime.now(),
+      duration: duration,
+      notes: notes ?? '',
+    );
 
-      await _recordController.saveCompletionRecord(habitId, record);
-      return jsonEncode(record.toMap());
-    } catch (e) {
-      return jsonEncode({'error': 'Habit not found: $habitId'});
-    }
+    await _recordController.saveCompletionRecord(habitId, record);
+    return jsonEncode(record.toMap());
   }
 
   /// 获取完成记录
-  Future<String> _jsGetCompletionRecords(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
-    // 可选参数
-    final int? limit = params['limit'];
-
+  Future<String> _jsGetCompletionRecords(String habitId, [int? limit]) async {
     final records = await _recordController.getHabitCompletionRecords(habitId);
 
     // 如果指定了 limit，只返回最新的 N 条记录
@@ -491,25 +463,13 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 删除完成记录
-  Future<bool> _jsDeleteCompletionRecord(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? recordId = params['recordId'];
-    if (recordId == null) {
-      return false;
-    }
-
+  Future<bool> _jsDeleteCompletionRecord(String recordId) async {
     await _recordController.deleteCompletionRecord(recordId);
     return true;
   }
 
   /// 获取统计信息
-  Future<String> _jsGetStats(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
+  Future<String> _jsGetStats(String habitId) async {
     final totalDuration = await _recordController.getTotalDuration(habitId);
     final completionCount = await _recordController.getCompletionCount(habitId);
 
@@ -521,7 +481,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 获取今日需要打卡的习惯
-  Future<String> _jsGetTodayHabits(Map<String, dynamic> params) async {
+  Future<String> _jsGetTodayHabits() async {
     final habits = _habitController.getHabits();
     final today = DateTime.now().weekday % 7; // 转换为 0-6 (周日-周六)
 
@@ -534,49 +494,33 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 启动计时器
-  Future<String> _jsStartTimer(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
-    // 可选参数
-    final int? initialSeconds = params['initialSeconds'];
-
+  Future<String> _jsStartTimer(String habitId, [int? initialSeconds]) async {
     final habits = _habitController.getHabits();
-    try {
-      final habit = habits.firstWhere((h) => h.id == habitId);
+    final habit = habits.firstWhere(
+      (h) => h.id == habitId,
+      orElse: () => throw Exception('Habit not found: $habitId'),
+    );
 
-      final initialDuration = initialSeconds != null
-          ? Duration(seconds: initialSeconds)
-          : Duration(minutes: habit.durationMinutes);
+    final initialDuration = initialSeconds != null
+        ? Duration(seconds: initialSeconds)
+        : Duration(minutes: habit.durationMinutes);
 
-      // 启动计时器（使用空回调，因为 JS API 不需要实时更新）
-      _timerController.startTimer(
-        habit,
-        (elapsedSeconds) {}, // 空回调
-        initialDuration: initialDuration,
-      );
+    // 启动计时器（使用空回调，因为 JS API 不需要实时更新）
+    _timerController.startTimer(
+      habit,
+      (elapsedSeconds) {}, // 空回调
+      initialDuration: initialDuration,
+    );
 
-      return jsonEncode({
-        'habitId': habitId,
-        'status': 'started',
-        'initialSeconds': initialDuration.inSeconds,
-      });
-    } catch (e) {
-      return jsonEncode({'error': 'Habit not found: $habitId'});
-    }
+    return jsonEncode({
+      'habitId': habitId,
+      'status': 'started',
+      'initialSeconds': initialDuration.inSeconds,
+    });
   }
 
   /// 停止计时器
-  Future<String> _jsStopTimer(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
+  Future<String> _jsStopTimer(String habitId) async {
     _timerController.stopTimer(habitId);
 
     return jsonEncode({
@@ -586,13 +530,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 获取计时器状态
-  Future<String> _jsGetTimerStatus(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
+  Future<String> _jsGetTimerStatus(String habitId) async {
     final timerData = _timerController.getTimerData(habitId);
     final isRunning = _timerController.isHabitTiming(habitId);
 

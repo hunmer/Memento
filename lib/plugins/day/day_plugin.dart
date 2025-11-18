@@ -204,25 +204,31 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取所有纪念日
-  Future<String> _jsGetMemorialDays() async {
+  Future<String> _jsGetMemorialDays(Map<String, dynamic> params) async {
     final days = _controller.memorialDays;
     return jsonEncode(days.map((d) => d.toJson()).toList());
   }
 
   /// 创建纪念日
-  /// @param name 纪念日名称
-  /// @param date 目标日期 (格式: YYYY-MM-DD)
-  /// @param notes 笔记列表 (可选,JSON 数组字符串)
-  /// @param backgroundColor 背景颜色值 (可选,整数)
-  Future<String> _jsCreateMemorialDay(
-    String name,
-    String date, [
-    String? notesJson,
-    int? backgroundColor,
-  ]) async {
+  Future<String> _jsCreateMemorialDay(Map<String, dynamic> params) async {
     try {
+      // 必需参数验证
+      final String? name = params['name'];
+      if (name == null) {
+        return jsonEncode({'error': '缺少必需参数: name'});
+      }
+
+      final String? date = params['date'];
+      if (date == null) {
+        return jsonEncode({'error': '缺少必需参数: date'});
+      }
+
       // 解析日期
       final targetDate = DateTime.parse(date);
+
+      // 可选参数
+      final String? notesJson = params['notesJson'];
+      final int? backgroundColor = params['backgroundColor'];
 
       // 解析笔记
       List<String> notes = [];
@@ -264,22 +270,23 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新纪念日
-  /// @param id 纪念日 ID
-  /// @param name 新名称 (可选)
-  /// @param date 新目标日期 (可选,格式: YYYY-MM-DD)
-  /// @param notesJson 新笔记列表 (可选,JSON 数组字符串)
-  /// @param backgroundColor 新背景颜色值 (可选,整数)
-  Future<String> _jsUpdateMemorialDay(
-    String id, [
-    String? name,
-    String? date,
-    String? notesJson,
-    int? backgroundColor,
-  ]) async {
+  Future<String> _jsUpdateMemorialDay(Map<String, dynamic> params) async {
     try {
+      // 必需参数验证
+      final String? id = params['id'];
+      if (id == null) {
+        return jsonEncode({'error': '缺少必需参数: id'});
+      }
+
       // 查找现有纪念日
       final existingDay = _controller.memorialDays
           .firstWhere((d) => d.id == id, orElse: () => throw Exception('未找到 ID 为 $id 的纪念日'));
+
+      // 可选参数
+      final String? name = params['name'];
+      final String? date = params['date'];
+      final String? notesJson = params['notesJson'];
+      final int? backgroundColor = params['backgroundColor'];
 
       // 解析新日期
       DateTime? targetDate;
@@ -325,9 +332,14 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除纪念日
-  /// @param id 纪念日 ID
-  Future<String> _jsDeleteMemorialDay(String id) async {
+  Future<String> _jsDeleteMemorialDay(Map<String, dynamic> params) async {
     try {
+      // 必需参数验证
+      final String? id = params['id'];
+      if (id == null) {
+        return jsonEncode({'error': '缺少必需参数: id'});
+      }
+
       await _controller.deleteMemorialDay(id);
       return jsonEncode({
         'success': true,
@@ -342,10 +354,14 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取距离指定日期的天数
-  /// @param date 目标日期 (格式: YYYY-MM-DD)
-  /// @return 天数 (负数表示已过期)
-  Future<String> _jsGetDaysUntil(String date) async {
+  Future<String> _jsGetDaysUntil(Map<String, dynamic> params) async {
     try {
+      // 必需参数验证
+      final String? date = params['date'];
+      if (date == null) {
+        return jsonEncode({'error': '缺少必需参数: date'});
+      }
+
       final targetDate = DateTime.parse(date);
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -367,9 +383,11 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取即将到来的纪念日
-  /// @param withinDays 天数范围 (默认 7 天)
-  Future<String> _jsGetUpcomingDays([int withinDays = 7]) async {
+  Future<String> _jsGetUpcomingDays(Map<String, dynamic> params) async {
     try {
+      // 可选参数
+      final int withinDays = params['withinDays'] ?? 7;
+
       final upcomingDays = _controller.memorialDays
           .where((day) {
             final daysRemaining = day.daysRemaining;

@@ -234,7 +234,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取所有目标
-  Future<String> _jsGetGoals([String? status, String? group]) async {
+  Future<String> _jsGetGoals(Map<String, dynamic> params) async {
+    // 提取可选参数
+    final String? status = params['status'];
+    final String? group = params['group'];
+
     List<Goal> goals;
 
     // 根据状态筛选
@@ -253,7 +257,13 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取单个目标详情
-  Future<String> _jsGetGoal(String goalId) async {
+  Future<String> _jsGetGoal(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? goalId = params['goalId'];
+    if (goalId == null || goalId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: goalId'});
+    }
+
     final goals = await _controller.getAllGoals();
     final goal = goals.firstWhere(
       (g) => g.id == goalId,
@@ -263,14 +273,28 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 创建目标
-  Future<String> _jsCreateGoal(
-    String name,
-    String unitType,
-    double targetValue, [
-    String? group,
-    String? icon,
-    String? dateType,
-  ]) async {
+  Future<String> _jsCreateGoal(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    final String? unitType = params['unitType'];
+    if (unitType == null || unitType.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: unitType'});
+    }
+
+    final double? targetValue = params['targetValue'];
+    if (targetValue == null) {
+      return jsonEncode({'error': '缺少必需参数: targetValue'});
+    }
+
+    // 提取可选参数
+    final String? group = params['group'];
+    final String? icon = params['icon'];
+    final String? dateType = params['dateType'];
+
     final goal = Goal(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
@@ -291,34 +315,42 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 更新目标
-  Future<String> _jsUpdateGoal(String goalId, String updateJson) async {
+  Future<String> _jsUpdateGoal(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? goalId = params['goalId'];
+    if (goalId == null || goalId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: goalId'});
+    }
+
+    final Map<String, dynamic>? updateJson = params['updateJson'];
+    if (updateJson == null) {
+      return jsonEncode({'error': '缺少必需参数: updateJson'});
+    }
+
     final goals = await _controller.getAllGoals();
     final oldGoal = goals.firstWhere(
       (g) => g.id == goalId,
       orElse: () => throw ArgumentError('Goal not found: $goalId'),
     );
 
-    // 解析更新数据
-    final updates = jsonDecode(updateJson) as Map<String, dynamic>;
-
     // 合并更新
     final newGoal = Goal(
       id: oldGoal.id,
-      name: updates['name'] ?? oldGoal.name,
-      icon: updates['icon'] ?? oldGoal.icon,
-      iconColor: updates['iconColor'] ?? oldGoal.iconColor,
-      unitType: updates['unitType'] ?? oldGoal.unitType,
-      targetValue: updates['targetValue'] ?? oldGoal.targetValue,
-      currentValue: updates['currentValue'] ?? oldGoal.currentValue,
-      dateSettings: updates['dateSettings'] != null
-          ? DateSettings.fromJson(updates['dateSettings'])
+      name: updateJson['name'] ?? oldGoal.name,
+      icon: updateJson['icon'] ?? oldGoal.icon,
+      iconColor: updateJson['iconColor'] ?? oldGoal.iconColor,
+      unitType: updateJson['unitType'] ?? oldGoal.unitType,
+      targetValue: updateJson['targetValue'] ?? oldGoal.targetValue,
+      currentValue: updateJson['currentValue'] ?? oldGoal.currentValue,
+      dateSettings: updateJson['dateSettings'] != null
+          ? DateSettings.fromJson(updateJson['dateSettings'])
           : oldGoal.dateSettings,
-      reminderTime: updates['reminderTime'] ?? oldGoal.reminderTime,
-      isLoopReset: updates['isLoopReset'] ?? oldGoal.isLoopReset,
+      reminderTime: updateJson['reminderTime'] ?? oldGoal.reminderTime,
+      isLoopReset: updateJson['isLoopReset'] ?? oldGoal.isLoopReset,
       createdAt: oldGoal.createdAt,
-      group: updates['group'] ?? oldGoal.group,
-      imagePath: updates['imagePath'] ?? oldGoal.imagePath,
-      progressColor: updates['progressColor'] ?? oldGoal.progressColor,
+      group: updateJson['group'] ?? oldGoal.group,
+      imagePath: updateJson['imagePath'] ?? oldGoal.imagePath,
+      progressColor: updateJson['progressColor'] ?? oldGoal.progressColor,
     );
 
     await _controller.updateGoal(goalId, newGoal);
@@ -326,18 +358,34 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除目标
-  Future<bool> _jsDeleteGoal(String goalId) async {
+  Future<bool> _jsDeleteGoal(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? goalId = params['goalId'];
+    if (goalId == null || goalId.isEmpty) {
+      return false;
+    }
+
     await _controller.deleteGoal(goalId);
     return true;
   }
 
   /// 记录数据
-  Future<String> _jsRecordData(
-    String goalId,
-    double value, [
-    String? note,
-    String? dateTime,
-  ]) async {
+  Future<String> _jsRecordData(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? goalId = params['goalId'];
+    if (goalId == null || goalId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: goalId'});
+    }
+
+    final double? value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    // 提取可选参数
+    final String? note = params['note'];
+    final String? dateTime = params['dateTime'];
+
     final goals = await _controller.getAllGoals();
     final goal = goals.firstWhere(
       (g) => g.id == goalId,
@@ -357,7 +405,16 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取目标的记录列表
-  Future<String> _jsGetRecords(String goalId, [int? limit]) async {
+  Future<String> _jsGetRecords(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? goalId = params['goalId'];
+    if (goalId == null || goalId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: goalId'});
+    }
+
+    // 提取可选参数
+    final int? limit = params['limit'];
+
     final records = await _controller.getRecordsForGoal(goalId);
 
     // 按时间倒序排列
@@ -372,13 +429,25 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除记录
-  Future<bool> _jsDeleteRecord(String recordId) async {
+  Future<bool> _jsDeleteRecord(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? recordId = params['recordId'];
+    if (recordId == null || recordId.isEmpty) {
+      return false;
+    }
+
     await _controller.deleteRecord(recordId);
     return true;
   }
 
   /// 获取目标进度
-  Future<String> _jsGetProgress(String goalId) async {
+  Future<String> _jsGetProgress(Map<String, dynamic> params) async {
+    // 提取必需参数并验证
+    final String? goalId = params['goalId'];
+    if (goalId == null || goalId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: goalId'});
+    }
+
     final goals = await _controller.getAllGoals();
     final goal = goals.firstWhere(
       (g) => g.id == goalId,
@@ -398,7 +467,10 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取统计信息
-  Future<String> _jsGetStats([String? goalId]) async {
+  Future<String> _jsGetStats(Map<String, dynamic> params) async {
+    // 提取可选参数
+    final String? goalId = params['goalId'];
+
     if (goalId != null && goalId.isNotEmpty) {
       // 返回单个目标的统计信息
       final goals = await _controller.getAllGoals();

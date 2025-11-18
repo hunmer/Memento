@@ -10,7 +10,7 @@
     "examples": [
       {
         "title": "获取所有账户",
-        "code": "const accounts = await Memento.plugins.bill.getAccounts();\nsetResult(accounts, null, 2);"
+        "code": "const accounts = await Memento.plugins.bill.getAccounts({});\nsetResult(accounts, null, 2);"
       }
     ],
     "notes": "返回的账户对象不包含 bills 字段，如需获取账单请使用 getBills",
@@ -31,11 +31,11 @@
     "examples": [
       {
         "title": "创建简单账户",
-        "code": "const account = await Memento.plugins.bill.createAccount('现金账户');\nsetResult(`账户已创建: ${account.title}`);"
+        "code": "const account = await Memento.plugins.bill.createAccount({title: '现金账户'});\nsetResult(`账户已创建: ${account.title}`);"
       },
       {
         "title": "创建带图标和颜色的账户",
-        "code": "const account = await Memento.plugins.bill.createAccount('信用卡', 58837, 4280391411);\nsetResult(`账户ID: ${account.id}`);"
+        "code": "const account = await Memento.plugins.bill.createAccount({title: '信用卡', iconCodePoint: 58837, backgroundColor: 4280391411});\nsetResult(`账户ID: ${account.id}`);"
       }
     ],
     "notes": "不提供图标和颜色时使用默认值（account_balance_wallet 图标，绿色背景）",
@@ -57,7 +57,7 @@
     "examples": [
       {
         "title": "更新账户名称",
-        "code": "const updated = await Memento.plugins.bill.updateAccount('acc123', '支付宝账户');\nsetResult(`账户已更新: ${updated.title}`);"
+        "code": "const updated = await Memento.plugins.bill.updateAccount({accountId: 'acc123', title: '支付宝账户'});\nsetResult(`账户已更新: ${updated.title}`);"
       }
     ],
     "notes": "仅更新提供的字段，未提供的字段保持不变",
@@ -76,7 +76,7 @@
     "examples": [
       {
         "title": "删除账户",
-        "code": "const success = await Memento.plugins.bill.deleteAccount('acc123');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const success = await Memento.plugins.bill.deleteAccount({accountId: 'acc123'});\nsetResult(success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆，会同时删除该账户下的所有账单",
@@ -97,15 +97,15 @@
     "examples": [
       {
         "title": "获取所有账单",
-        "code": "const bills = await Memento.plugins.bill.getBills();\nsetResult(`共有 ${bills.length} 条账单`);"
+        "code": "const bills = await Memento.plugins.bill.getBills({});\nsetResult(`共有 ${bills.length} 条账单`);"
       },
       {
         "title": "获取指定账户的账单",
-        "code": "const bills = await Memento.plugins.bill.getBills('acc123');\nsetResult(JSON.stringify(bills, null, 2));"
+        "code": "const bills = await Memento.plugins.bill.getBills({accountId: 'acc123'});\nsetResult(JSON.stringify(bills, null, 2));"
       },
       {
         "title": "获取本月账单",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst bills = await Memento.plugins.bill.getBills(null, startDate, endDate);\nsetResult(`本月共 ${bills.length} 条账单`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst bills = await Memento.plugins.bill.getBills({startDate, endDate});\nsetResult(`本月共 ${bills.length} 条账单`);"
       }
     ],
     "notes": "金额字段：正数表示收入，负数表示支出",
@@ -130,11 +130,11 @@
     "examples": [
       {
         "title": "创建收入账单",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst bill = await Memento.plugins.bill.createBill('acc123', 5000, '工资', '月度工资', today);\nsetResult(`账单已创建: ${bill.id}`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst bill = await Memento.plugins.bill.createBill({accountId: 'acc123', amount: 5000, category: '工资', title: '月度工资', date: today});\nsetResult(`账单已创建: ${bill.id}`);"
       },
       {
         "title": "创建支出账单",
-        "code": "const bill = await Memento.plugins.bill.createBill('acc123', -120, '餐饮', '午餐', null, '公司食堂');\nsetResult('已记录午餐支出 120元');"
+        "code": "const bill = await Memento.plugins.bill.createBill({accountId: 'acc123', amount: -120, category: '餐饮', title: '午餐', note: '公司食堂'});\nsetResult('已记录午餐支出 120元');"
       }
     ],
     "notes": "金额为正数记录收入，负数记录支出；不提供日期时使用当天日期",
@@ -160,7 +160,7 @@
     "examples": [
       {
         "title": "更新账单金额",
-        "code": "const updated = await Memento.plugins.bill.updateBill('bill456', 'acc123', -150);\nsetResult(`金额已更新为: ${updated.amount}`);"
+        "code": "const updated = await Memento.plugins.bill.updateBill({billId: 'bill456', accountId: 'acc123', amount: -150});\nsetResult(`金额已更新为: ${updated.amount}`);"
       }
     ],
     "notes": "仅更新提供的字段，其他字段保持不变",
@@ -180,7 +180,7 @@
     "examples": [
       {
         "title": "删除账单",
-        "code": "const success = await Memento.plugins.bill.deleteBill('acc123', 'bill456');\nsetResult(success ? '删除成功' : '删除失败');"
+        "code": "const success = await Memento.plugins.bill.deleteBill({accountId: 'acc123', billId: 'bill456'});\nsetResult(success ? '删除成功' : '删除失败');"
       }
     ],
     "notes": "删除操作不可逆",
@@ -201,11 +201,11 @@
     "examples": [
       {
         "title": "获取本月统计",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst stats = await Memento.plugins.bill.getStats(startDate, endDate);\nsetResult(`本月收入: ${stats.totalIncome}, 支出: ${stats.totalExpense}, 余额: ${stats.balance}`);"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst stats = await Memento.plugins.bill.getStats({startDate, endDate});\nsetResult(`本月收入: ${stats.totalIncome}, 支出: ${stats.totalExpense}, 余额: ${stats.balance}`);"
       },
       {
         "title": "获取全部统计",
-        "code": "const stats = await Memento.plugins.bill.getStats();\nsetResult(JSON.stringify(stats, null, 2));"
+        "code": "const stats = await Memento.plugins.bill.getStats({});\nsetResult(JSON.stringify(stats, null, 2));"
       }
     ],
     "notes": "统计信息还包括 todayFinance（今日财务）、monthFinance（本月财务）、monthBillCount（本月记账数）",
@@ -226,7 +226,7 @@
     "examples": [
       {
         "title": "获取本月分类统计",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst catStats = await Memento.plugins.bill.getCategoryStats(startDate, endDate);\nsetResult(JSON.stringify(catStats, null, 2));"
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst catStats = await Memento.plugins.bill.getCategoryStats({startDate, endDate});\nsetResult(JSON.stringify(catStats, null, 2));"
       }
     ],
     "notes": "返回示例: {\"工资\": 5000.00, \"餐饮\": -800.00, \"交通\": -200.00}",

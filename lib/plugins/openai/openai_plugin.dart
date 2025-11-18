@@ -184,7 +184,7 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取所有 AI 助手列表
-  Future<String> _jsGetAgents() async {
+  Future<String> _jsGetAgents(Map<String, dynamic> params) async {
     try {
       final controller = AgentController();
       final agents = await controller.loadAgents();
@@ -195,8 +195,13 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取指定助手信息
-  /// @param agentId 助手ID
-  Future<String> _jsGetAgent(String agentId) async {
+  Future<String> _jsGetAgent(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? agentId = params['agentId'];
+    if (agentId == null) {
+      return jsonEncode({'error': '缺少必需参数: agentId'});
+    }
+
     try {
       final controller = AgentController();
       final agent = await controller.getAgent(agentId);
@@ -210,14 +215,21 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 发送消息给 AI
-  /// @param agentId 助手ID
-  /// @param message 消息内容
-  /// @param context (可选) 上下文消息数组 (JSON 字符串)
-  Future<String> _jsSendMessage(
-    String agentId,
-    String message, [
-    String? contextJson,
-  ]) async {
+  Future<String> _jsSendMessage(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? agentId = params['agentId'];
+    final String? message = params['message'];
+
+    if (agentId == null) {
+      return jsonEncode({'error': '缺少必需参数: agentId'});
+    }
+    if (message == null) {
+      return jsonEncode({'error': '缺少必需参数: message'});
+    }
+
+    // 可选参数
+    final String? contextJson = params['contextJson'];
+
     try {
       // 获取助手信息
       final controller = AgentController();
@@ -276,7 +288,7 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取所有服务商
-  Future<String> _jsGetProviders() async {
+  Future<String> _jsGetProviders(Map<String, dynamic> params) async {
     try {
       final controller = ServiceProviderController();
       final providers = await controller.loadProviders();
@@ -287,8 +299,13 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 测试服务商连接
-  /// @param providerId 服务商ID（实际上是 label）
-  Future<String> _jsTestProvider(String providerId) async {
+  Future<String> _jsTestProvider(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? providerId = params['providerId'];
+    if (providerId == null) {
+      return jsonEncode({'error': '缺少必需参数: providerId'});
+    }
+
     try {
       final controller = ServiceProviderController();
       await controller.loadProviders();
