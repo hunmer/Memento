@@ -1,21 +1,4 @@
 {
-  "testSync": {
-    "title": "测试同步",
-    "description": "测试日历相册插件的同步功能",
-    "parameters": [],
-    "returns": {
-      "type": "Object",
-      "description": "测试结果对象，包含 status、message、timestamp 字段"
-    },
-    "examples": [
-      {
-        "title": "测试同步",
-        "code": "const result = await Memento.plugins.calendar_album.testSync({});\nsetResult(JSON.stringify(result, null, 2));"
-      }
-    ],
-    "notes": "用于调试和验证插件功能",
-    "enabled": true
-  },
   "getEntries": {
     "title": "获取所有日记",
     "description": "获取所有日记条目（按创建时间倒序）",

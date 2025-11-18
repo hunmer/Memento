@@ -285,17 +285,17 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除联系人
-  Future<bool> _jsDeleteContact(Map<String, dynamic> params) async {
-    final String? contactId = params['contactId'];
-    if (contactId == null || contactId.isEmpty) {
-      return false;
-    }
-
+  Future<String> _jsDeleteContact(Map<String, dynamic> params) async {
     try {
+      final String? contactId = params['contactId'];
+      if (contactId == null || contactId.isEmpty) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: contactId'});
+      }
+
       await _controller.deleteContact(contactId);
-      return true;
+      return jsonEncode({'success': true, 'contactId': contactId});
     } catch (e) {
-      return false;
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
   }
 
@@ -346,17 +346,17 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除交互记录
-  Future<bool> _jsDeleteInteraction(Map<String, dynamic> params) async {
-    final String? interactionId = params['interactionId'];
-    if (interactionId == null || interactionId.isEmpty) {
-      return false;
-    }
-
+  Future<String> _jsDeleteInteraction(Map<String, dynamic> params) async {
     try {
+      final String? interactionId = params['interactionId'];
+      if (interactionId == null || interactionId.isEmpty) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: interactionId'});
+      }
+
       await _controller.deleteInteraction(interactionId);
-      return true;
+      return jsonEncode({'success': true, 'interactionId': interactionId});
     } catch (e) {
-      return false;
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
   }
 

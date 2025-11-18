@@ -1,21 +1,4 @@
 {
-  "testSync": {
-    "title": "测试同步",
-    "description": "测试物品插件的数据同步功能",
-    "parameters": [],
-    "returns": {
-      "type": "string",
-      "description": "同步测试结果信息"
-    },
-    "examples": [
-      {
-        "title": "测试同步",
-        "code": "const result = await Memento.plugins.goods.testSync();\nsetResult(result);"
-      }
-    ],
-    "notes": "用于调试和验证数据同步功能",
-    "enabled": true
-  },
   "getWarehouses": {
     "title": "获取所有仓库",
     "description": "获取所有物品仓库的列表（不含物品数据）",

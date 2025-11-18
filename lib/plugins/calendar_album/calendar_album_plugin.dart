@@ -226,8 +226,6 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   @override
   Map<String, Function> defineJSAPI() {
     return {
-      // 测试API（同步）
-      'testSync': _jsTestSync,
 
       // 日记相关
       'getEntries': _jsGetEntries,
@@ -252,16 +250,6 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   // ==================== JS API 实现 ====================
-
-  /// 同步测试 API
-  /// @param params - 参数对象（无参数）
-  String _jsTestSync(Map<String, dynamic> params) {
-    return jsonEncode({
-      'status': 'ok',
-      'message': '日历相册插件同步测试成功！',
-      'timestamp': DateTime.now().toIso8601String(),
-    });
-  }
 
   /// 获取所有日记条目
   /// @param params - 参数对象（无参数）

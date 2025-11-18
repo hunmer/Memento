@@ -450,19 +450,23 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除商品（归档）
-  Future<bool> _jsDeleteProduct(Map<String, dynamic> params) async {
-    final String? productId = params['productId'];
-    if (productId == null || productId.isEmpty) {
-      throw Exception('缺少必需参数: productId');
+  Future<String> _jsDeleteProduct(Map<String, dynamic> params) async {
+    try {
+      final String? productId = params['productId'];
+      if (productId == null || productId.isEmpty) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: productId'});
+      }
+
+      final product = controller.products.firstWhere(
+        (p) => p.id == productId,
+        orElse: () => throw Exception('商品不存在: $productId'),
+      );
+
+      await controller.archiveProduct(product);
+      return jsonEncode({'success': true, 'productId': productId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
-
-    final product = controller.products.firstWhere(
-      (p) => p.id == productId,
-      orElse: () => throw Exception('商品不存在: $productId'),
-    );
-
-    await controller.archiveProduct(product);
-    return true;
   }
 
   /// 兑换商品
@@ -548,35 +552,43 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 归档商品
-  Future<bool> _jsArchiveProduct(Map<String, dynamic> params) async {
-    final String? productId = params['productId'];
-    if (productId == null || productId.isEmpty) {
-      throw Exception('缺少必需参数: productId');
+  Future<String> _jsArchiveProduct(Map<String, dynamic> params) async {
+    try {
+      final String? productId = params['productId'];
+      if (productId == null || productId.isEmpty) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: productId'});
+      }
+
+      final product = controller.products.firstWhere(
+        (p) => p.id == productId,
+        orElse: () => throw Exception('商品不存在: $productId'),
+      );
+
+      await controller.archiveProduct(product);
+      return jsonEncode({'success': true, 'productId': productId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
-
-    final product = controller.products.firstWhere(
-      (p) => p.id == productId,
-      orElse: () => throw Exception('商品不存在: $productId'),
-    );
-
-    await controller.archiveProduct(product);
-    return true;
   }
 
   /// 恢复归档商品
-  Future<bool> _jsRestoreProduct(Map<String, dynamic> params) async {
-    final String? productId = params['productId'];
-    if (productId == null || productId.isEmpty) {
-      throw Exception('缺少必需参数: productId');
+  Future<String> _jsRestoreProduct(Map<String, dynamic> params) async {
+    try {
+      final String? productId = params['productId'];
+      if (productId == null || productId.isEmpty) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: productId'});
+      }
+
+      final product = controller.archivedProducts.firstWhere(
+        (p) => p.id == productId,
+        orElse: () => throw Exception('归档商品不存在: $productId'),
+      );
+
+      await controller.restoreProduct(product);
+      return jsonEncode({'success': true, 'productId': productId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
-
-    final product = controller.archivedProducts.firstWhere(
-      (p) => p.id == productId,
-      orElse: () => throw Exception('归档商品不存在: $productId'),
-    );
-
-    await controller.restoreProduct(product);
-    return true;
   }
 
   /// 获取归档商品列表

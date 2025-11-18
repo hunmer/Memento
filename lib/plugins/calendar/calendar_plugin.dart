@@ -574,20 +574,24 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除事件
-  Future<bool> _jsDeleteEvent(Map<String, dynamic> params) async {
-    // 提取必需参数并验证
-    final String? eventId = params['eventId'];
-    if (eventId == null || eventId.isEmpty) {
-      return false;
+  Future<String> _jsDeleteEvent(Map<String, dynamic> params) async {
+    try {
+      // 提取必需参数并验证
+      final String? eventId = params['eventId'];
+      if (eventId == null || eventId.isEmpty) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: eventId'});
+      }
+
+      final event = controller.events.firstWhere(
+        (e) => e.id == eventId,
+        orElse: () => throw Exception('Event not found: $eventId'),
+      );
+
+      controller.deleteEvent(event);
+      return jsonEncode({'success': true, 'eventId': eventId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
-
-    final event = controller.events.firstWhere(
-      (e) => e.id == eventId,
-      orElse: () => throw Exception('Event not found: $eventId'),
-    );
-
-    controller.deleteEvent(event);
-    return true;
   }
 
   /// 完成事件

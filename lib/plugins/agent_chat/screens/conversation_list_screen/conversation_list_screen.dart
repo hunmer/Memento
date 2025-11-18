@@ -4,6 +4,7 @@ import '../../controllers/conversation_controller.dart';
 import '../../models/conversation.dart';
 import '../chat_screen/chat_screen.dart';
 import '../agent_chat_settings_screen.dart';
+import '../tool_management_screen/tool_management_screen.dart';
 
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
@@ -76,6 +77,16 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     );
   }
 
+  /// 打开工具管理页面
+  void _openToolManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ToolManagementScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,6 +118,12 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: _toggleSearch,
+          ),
+          // 工具管理按钮
+          IconButton(
+            icon: const Icon(Icons.build),
+            tooltip: '工具管理',
+            onPressed: _openToolManagement,
           ),
           // 设置按钮
           IconButton(

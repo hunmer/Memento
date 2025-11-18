@@ -326,17 +326,21 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 删除习惯
-  Future<bool> _jsDeleteHabit(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return false;
-    }
+  Future<String> _jsDeleteHabit(Map<String, dynamic> params) async {
+    try {
+      // 必需参数
+      final String? habitId = params['habitId'];
+      if (habitId == null) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: habitId'});
+      }
 
-    await _habitController.deleteHabit(habitId);
-    // 同时删除该习惯的所有完成记录
-    await _recordController.clearAllCompletionRecords(habitId);
-    return true;
+      await _habitController.deleteHabit(habitId);
+      // 同时删除该习惯的所有完成记录
+      await _recordController.clearAllCompletionRecords(habitId);
+      return jsonEncode({'success': true, 'habitId': habitId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
+    }
   }
 
   /// 获取所有技能
@@ -422,15 +426,19 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 删除技能
-  Future<bool> _jsDeleteSkill(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? skillId = params['skillId'];
-    if (skillId == null) {
-      return false;
-    }
+  Future<String> _jsDeleteSkill(Map<String, dynamic> params) async {
+    try {
+      // 必需参数
+      final String? skillId = params['skillId'];
+      if (skillId == null) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: skillId'});
+      }
 
-    await _skillController.deleteSkill(skillId);
-    return true;
+      await _skillController.deleteSkill(skillId);
+      return jsonEncode({'success': true, 'skillId': skillId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
+    }
   }
 
   /// 打卡（创建完成记录）
@@ -491,15 +499,19 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 删除完成记录
-  Future<bool> _jsDeleteCompletionRecord(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? recordId = params['recordId'];
-    if (recordId == null) {
-      return false;
-    }
+  Future<String> _jsDeleteCompletionRecord(Map<String, dynamic> params) async {
+    try {
+      // 必需参数
+      final String? recordId = params['recordId'];
+      if (recordId == null) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: recordId'});
+      }
 
-    await _recordController.deleteCompletionRecord(recordId);
-    return true;
+      await _recordController.deleteCompletionRecord(recordId);
+      return jsonEncode({'success': true, 'recordId': recordId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
+    }
   }
 
   /// 获取统计信息

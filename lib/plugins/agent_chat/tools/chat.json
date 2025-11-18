@@ -1,21 +1,4 @@
 {
-  "testSync": {
-    "title": "测试同步",
-    "description": "测试聊天插件的同步功能",
-    "parameters": [],
-    "returns": {
-      "type": "Object",
-      "description": "测试结果对象"
-    },
-    "examples": [
-      {
-        "title": "测试同步",
-        "code": "const result = await Memento.plugins.chat.testSync();\nsetResult(JSON.stringify(result, null, 2));"
-      }
-    ],
-    "notes": "用于调试和验证插件功能",
-    "enabled": true
-  },
   "getChannels": {
     "title": "获取所有频道",
     "description": "获取所有聊天频道的列表",
@@ -46,7 +29,7 @@
     "examples": [
       {
         "title": "创建频道",
-        "code": "const channel = await Memento.plugins.chat.createChannel({name: '工作交流'});\nsetResult(`频道已创建: ${channel.name}`);"
+        "code": "const channel = await Memento.plugins.chat.createChannel({name: '工作交流'});\nsetResult(`频道已创建: ${channel.title}`);"
       }
     ],
     "notes": "新创建的频道初始为空，不包含任何消息",

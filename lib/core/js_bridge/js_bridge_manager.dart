@@ -125,8 +125,20 @@ class JSBridgeManager {
         try {
           final args = [a, b, c, d, e].where((arg) => arg != null).toList();
 
+          // 如果没有参数，传递一个空的 Map（插件方法通常期望 Map<String, dynamic> params）
+          // 如果有一个参数且是 Map，直接传递
+          // 否则传递空 Map（期望 JavaScript 调用时传递对象参数）
+          final Map<String, dynamic> paramsMap;
+          if (args.isEmpty) {
+            paramsMap = {};
+          } else if (args.length == 1 && args[0] is Map<String, dynamic>) {
+            paramsMap = args[0] as Map<String, dynamic>;
+          } else {
+            paramsMap = {};
+          }
+
           // 直接调用 Dart 函数并返回（可能是同步值或 Future）
-          final result = Function.apply(dartFunction, args);
+          final result = Function.apply(dartFunction, [paramsMap]);
 
           // 如果是 Future，包装为返回序列化结果的 Future
           if (result is Future) {

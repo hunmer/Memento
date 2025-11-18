@@ -269,15 +269,19 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除数据库
-  Future<bool> _jsDeleteDatabase(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? databaseId = params['databaseId'];
-    if (databaseId == null) {
-      return false;
-    }
+  Future<String> _jsDeleteDatabase(Map<String, dynamic> params) async {
+    try {
+      // 必需参数
+      final String? databaseId = params['databaseId'];
+      if (databaseId == null) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: databaseId'});
+      }
 
-    await service.deleteDatabase(databaseId);
-    return true;
+      await service.deleteDatabase(databaseId);
+      return jsonEncode({'success': true, 'databaseId': databaseId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
+    }
   }
 
   /// 获取数据库的所有记录
@@ -376,19 +380,26 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除记录
-  Future<bool> _jsDeleteRecord(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? databaseId = params['databaseId'];
-    final String? recordId = params['recordId'];
+  Future<String> _jsDeleteRecord(Map<String, dynamic> params) async {
+    try {
+      // 必需参数
+      final String? databaseId = params['databaseId'];
+      final String? recordId = params['recordId'];
 
-    if (databaseId == null || recordId == null) {
-      return false;
+      if (databaseId == null) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: databaseId'});
+      }
+      if (recordId == null) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: recordId'});
+      }
+
+      // 先加载数据库到 controller
+      await controller.loadDatabase(databaseId);
+      await controller.deleteRecord(recordId);
+      return jsonEncode({'success': true, 'databaseId': databaseId, 'recordId': recordId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
-
-    // 先加载数据库到 controller
-    await controller.loadDatabase(databaseId);
-    await controller.deleteRecord(recordId);
-    return true;
   }
 
   /// 查询记录

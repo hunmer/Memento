@@ -341,14 +341,18 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   /// 删除账户
   /// @param params.accountId 账户ID (必需)
-  Future<bool> _jsDeleteAccount(Map<String, dynamic> params) async {
-    final String? accountId = params['accountId'];
-    if (accountId == null || accountId.isEmpty) {
-      throw '缺少必需参数: accountId';
-    }
+  Future<String> _jsDeleteAccount(Map<String, dynamic> params) async {
+    try {
+      final String? accountId = params['accountId'];
+      if (accountId == null || accountId.isEmpty) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: accountId'});
+      }
 
-    await _billController.deleteAccount(accountId);
-    return true;
+      await _billController.deleteAccount(accountId);
+      return jsonEncode({'success': true, 'accountId': accountId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
+    }
   }
 
   /// 获取账单列表
@@ -525,19 +529,23 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   /// 删除账单
   /// @param params.accountId 账户ID (必需)
   /// @param params.billId 账单ID (必需)
-  Future<bool> _jsDeleteBill(Map<String, dynamic> params) async {
-    final String? accountId = params['accountId'];
-    if (accountId == null || accountId.isEmpty) {
-      throw '缺少必需参数: accountId';
-    }
+  Future<String> _jsDeleteBill(Map<String, dynamic> params) async {
+    try {
+      final String? accountId = params['accountId'];
+      if (accountId == null || accountId.isEmpty) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: accountId'});
+      }
 
-    final String? billId = params['billId'];
-    if (billId == null || billId.isEmpty) {
-      throw '缺少必需参数: billId';
-    }
+      final String? billId = params['billId'];
+      if (billId == null || billId.isEmpty) {
+        return jsonEncode({'success': false, 'error': '缺少必需参数: billId'});
+      }
 
-    await _billController.deleteBill(accountId, billId);
-    return true;
+      await _billController.deleteBill(accountId, billId);
+      return jsonEncode({'success': true, 'accountId': accountId, 'billId': billId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': e.toString()});
+    }
   }
 
   /// 获取统计信息

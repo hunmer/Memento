@@ -146,7 +146,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取所有笔记本列表
-  Future<String> _jsGetNotebooks() async {
+  Future<String> _jsGetNotebooks(Map<String, dynamic> params) async {
     final notebooks = _controller.notebooks;
     return jsonEncode(notebooks.map((nb) => {
       'id': nb.id,

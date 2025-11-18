@@ -40,7 +40,7 @@ mixin JSBridgePlugin on PluginBase {
   ///   };
   /// }
   ///
-  /// Future<String> _jsGetChannels() async {
+  /// Future<String> _jsGetChannels(Map<String, dynamic> params) async {
   ///   final channels = await getChannels();
   ///   return jsonEncode(channels.map((c) => c.toJson()).toList());
   /// }

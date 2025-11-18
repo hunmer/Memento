@@ -180,8 +180,6 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   @override
   Map<String, Function> defineJSAPI() {
     return {
-      // 测试API（同步）
-      'testSync': _jsTestSync,
 
       // 笔记相关
       'getNotes': _jsGetNotes,
@@ -203,17 +201,6 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   // ==================== JS API 实现 ====================
-
-  /// 同步测试 API
-  String _jsTestSync() {
-    return jsonEncode({
-      'status': 'ok',
-      'message': '笔记插件 JS API 测试成功！',
-      'timestamp': DateTime.now().toIso8601String(),
-      'plugin': id,
-    });
-  }
-
   /// 获取笔记列表
   Future<String> _jsGetNotes(Map<String, dynamic> params) async {
     if (!_isInitialized) {
@@ -340,19 +327,23 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 删除笔记
-  Future<bool> _jsDeleteNote(Map<String, dynamic> params) async {
+  Future<String> _jsDeleteNote(Map<String, dynamic> params) async {
     if (!_isInitialized) {
-      return false;
+      return jsonEncode({'success': false, 'error': '插件未初始化'});
     }
 
     // 提取必需参数并验证
     final String? noteId = params['noteId'];
     if (noteId == null || noteId.isEmpty) {
-      return false;
+      return jsonEncode({'success': false, 'error': '缺少必需参数: noteId'});
     }
 
-    await controller.deleteNote(noteId);
-    return true;
+    try {
+      await controller.deleteNote(noteId);
+      return jsonEncode({'success': true, 'noteId': noteId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '删除失败: ${e.toString()}'});
+    }
   }
 
   /// 搜索笔记
@@ -443,40 +434,48 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 重命名文件夹
-  Future<bool> _jsRenameFolder(Map<String, dynamic> params) async {
+  Future<String> _jsRenameFolder(Map<String, dynamic> params) async {
     if (!_isInitialized) {
-      return false;
+      return jsonEncode({'success': false, 'error': '插件未初始化'});
     }
 
     // 提取必需参数并验证
     final String? folderId = params['folderId'];
     if (folderId == null || folderId.isEmpty) {
-      return false;
+      return jsonEncode({'success': false, 'error': '缺少必需参数: folderId'});
     }
 
     final String? newName = params['newName'];
     if (newName == null || newName.isEmpty) {
-      return false;
+      return jsonEncode({'success': false, 'error': '缺少必需参数: newName'});
     }
 
-    await controller.renameFolder(folderId, newName);
-    return true;
+    try {
+      await controller.renameFolder(folderId, newName);
+      return jsonEncode({'success': true, 'folderId': folderId, 'newName': newName});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '重命名失败: ${e.toString()}'});
+    }
   }
 
   /// 删除文件夹（递归删除子文件夹和笔记）
-  Future<bool> _jsDeleteFolder(Map<String, dynamic> params) async {
+  Future<String> _jsDeleteFolder(Map<String, dynamic> params) async {
     if (!_isInitialized) {
-      return false;
+      return jsonEncode({'success': false, 'error': '插件未初始化'});
     }
 
     // 提取必需参数并验证
     final String? folderId = params['folderId'];
     if (folderId == null || folderId.isEmpty) {
-      return false;
+      return jsonEncode({'success': false, 'error': '缺少必需参数: folderId'});
     }
 
-    await controller.deleteFolder(folderId);
-    return true;
+    try {
+      await controller.deleteFolder(folderId);
+      return jsonEncode({'success': true, 'folderId': folderId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '删除失败: ${e.toString()}'});
+    }
   }
 
   /// 获取文件夹中的笔记
@@ -496,23 +495,27 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 移动笔记到其他文件夹
-  Future<bool> _jsMoveNote(Map<String, dynamic> params) async {
+  Future<String> _jsMoveNote(Map<String, dynamic> params) async {
     if (!_isInitialized) {
-      return false;
+      return jsonEncode({'success': false, 'error': '插件未初始化'});
     }
 
     // 提取必需参数并验证
     final String? noteId = params['noteId'];
     if (noteId == null || noteId.isEmpty) {
-      return false;
+      return jsonEncode({'success': false, 'error': '缺少必需参数: noteId'});
     }
 
     final String? targetFolderId = params['targetFolderId'];
     if (targetFolderId == null || targetFolderId.isEmpty) {
-      return false;
+      return jsonEncode({'success': false, 'error': '缺少必需参数: targetFolderId'});
     }
 
-    await controller.moveNote(noteId, targetFolderId);
-    return true;
+    try {
+      await controller.moveNote(noteId, targetFolderId);
+      return jsonEncode({'success': true, 'noteId': noteId, 'targetFolderId': targetFolderId});
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '移动失败: ${e.toString()}'});
+    }
   }
 }
