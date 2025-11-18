@@ -21,12 +21,11 @@ class MemorialDay {
     Color? backgroundColor,
     this.backgroundImageUrl,
     int? sortIndex,
-  }) : 
-    id = id ?? const Uuid().v4(),
-    creationDate = creationDate ?? DateTime.now(),
-    notes = notes ?? [],
-    backgroundColor = backgroundColor ?? _getRandomColor(),
-    sortIndex = sortIndex ?? 0;
+  }) : id = id ?? const Uuid().v4(),
+       creationDate = creationDate ?? DateTime.now(),
+       notes = notes ?? [],
+       backgroundColor = backgroundColor ?? _getRandomColor(),
+       sortIndex = sortIndex ?? 0;
 
   // 计算剩余天数
   int get daysRemaining {
@@ -72,6 +71,7 @@ class MemorialDay {
       'creationDate': creationDate.toIso8601String(),
       'targetDate': targetDate.toIso8601String(),
       'notes': notes,
+      // ignore: deprecated_member_use
       'backgroundColor': backgroundColor.value,
       'backgroundImageUrl': backgroundImageUrl,
       'sortIndex': sortIndex,
@@ -124,7 +124,7 @@ class MemorialDay {
   static List<MemorialDay> generateTestData() {
     final now = DateTime.now();
     final random = Random();
-    
+
     return [
       MemorialDay(
         title: '新年倒计时',

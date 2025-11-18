@@ -256,8 +256,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                                                   fit: BoxFit.cover,
                                                   colorFilter: ColorFilter.mode(
                                                     Colors.black.withValues(
-                                                      alpha: 
-                                                      0.3,
+                                                      alpha: 0.3,
                                                     ),
                                                     BlendMode.darken,
                                                   ),
@@ -302,11 +301,9 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                                           }
                                         },
                                       )
-                                      : Container(
-                                        child: const Icon(
-                                          Icons.auto_awesome,
-                                          size: 48,
-                                        ),
+                                      : const Icon(
+                                        Icons.auto_awesome,
+                                        size: 48,
                                       ),
                             ),
                             IconButton(

@@ -27,6 +27,9 @@ class MobileJSEngine implements JSEngine {
   // 插件分析回调函数（由 OpenAI 插件注入）
   Future<String> Function(String methodName, Map<String, dynamic> params)? _onPluginAnalysis;
 
+  // Location 回调函数（用于获取位置）
+  Future<Map<String, dynamic>?> Function(String mode)? _onLocation;
+
   @override
   bool get isSupported => true; // Android/iOS/Desktop 都支持
 
@@ -66,6 +69,13 @@ class MobileJSEngine implements JSEngine {
     Future<String> Function(String, Map<String, dynamic>) handler,
   ) {
     _onPluginAnalysis = handler;
+  }
+
+  /// 设置 Location 回调
+  void setLocationHandler(
+    Future<Map<String, dynamic>?> Function(String) handler,
+  ) {
+    _onLocation = handler;
   }
 
   @override
@@ -181,6 +191,33 @@ class MobileJSEngine implements JSEngine {
           };
 
           sendMessage('_flutterDialog', JSON.stringify({ callId: callId, config: config }));
+
+          // 标记此 Promise 正在等待
+          if (!globalThis.__PENDING_CALLS__) {
+            globalThis.__PENDING_CALLS__ = {};
+          }
+          globalThis.__PENDING_CALLS__[resultKey] = {
+            resolve: null,
+            reject: null,
+            timestamp: Date.now()
+          };
+
+          return new Promise(function(resolve, reject) {
+            globalThis.__PENDING_CALLS__[resultKey].resolve = resolve;
+            globalThis.__PENDING_CALLS__[resultKey].reject = reject;
+          });
+        },
+
+        // Location 获取位置
+        getLocation: function(mode) {
+          var callId = Date.now() + '_' + Math.floor(Math.random() * 1000000);
+          var resultKey = '_flutterLocation_callback_' + callId;
+
+          var config = {
+            mode: mode || 'manual'  // 默认为 manual 模式
+          };
+
+          sendMessage('_flutterLocation', JSON.stringify({ callId: callId, config: config }));
 
           // 标记此 Promise 正在等待
           if (!globalThis.__PENDING_CALLS__) {
@@ -338,6 +375,22 @@ class MobileJSEngine implements JSEngine {
           null,
           error: '调用失败: $e',
         );
+      }
+    });
+
+    // Location 处理器
+    _runtime.onMessage('_flutterLocation', (dynamic data) {
+      try {
+        final callId = data['callId'];
+        final config = data['config'];
+        final mode = config['mode'] as String? ?? 'manual';
+
+        print('[JS Bridge] Location: mode=$mode');
+
+        // 调用 Flutter Location 选择器
+        _showLocation(callId, mode);
+      } catch (e) {
+        print('[JS Bridge] Location 错误: $e');
       }
     });
   }
@@ -783,6 +836,58 @@ class MobileJSEngine implements JSEngine {
       }
     } else {
       print('[JS Bridge] Dialog 未设置处理器');
+    }
+  }
+
+  /// 显示 Location 选择器
+  Future<void> _showLocation(String callId, String mode) async {
+    if (_onLocation != null) {
+      try {
+        final result = await _onLocation!(mode);
+
+        // 将结果返回给 JavaScript
+        final resultKey = '_flutterLocation_callback_$callId';
+        final resultJson = jsonEncode(result);
+
+        _runtime.evaluate(
+          'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
+        );
+        _runtime.evaluate('globalThis.__TEMP_RESULT__ = $resultJson;');
+        _runtime.evaluate(
+          "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
+          "delete globalThis.__TEMP_RESULT__;",
+        );
+
+        print('[JS Bridge] Location 结果已返回: $resultJson');
+      } catch (e) {
+        print('[JS Bridge] Location 执行错误: $e');
+        // 返回错误
+        final resultKey = '_flutterLocation_callback_$callId';
+        final errorJson = jsonEncode({'error': e.toString()});
+
+        _runtime.evaluate(
+          'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
+        );
+        _runtime.evaluate('globalThis.__TEMP_RESULT__ = $errorJson;');
+        _runtime.evaluate(
+          "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
+          "delete globalThis.__TEMP_RESULT__;",
+        );
+      }
+    } else {
+      print('[JS Bridge] Location 未设置处理器');
+      // 返回错误
+      final resultKey = '_flutterLocation_callback_$callId';
+      final errorJson = jsonEncode({'error': '未设置处理器'});
+
+      _runtime.evaluate(
+        'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
+      );
+      _runtime.evaluate('globalThis.__TEMP_RESULT__ = $errorJson;');
+      _runtime.evaluate(
+        "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
+        "delete globalThis.__TEMP_RESULT__;",
+      );
     }
   }
 

@@ -336,6 +336,12 @@ class JSBridgeManager {
         namespace.system.getTimestamp = function() {
           return Memento_system_getTimestamp();
         };
+
+        // 获取位置信息
+        namespace.system.getLocation = function(mode) {
+          // 使用 flutter.getLocation 获取位置
+          return flutter.getLocation(mode);
+        };
       })();
     ''');
   }

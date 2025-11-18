@@ -362,9 +362,15 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
 
     // 提取可选参数
     final String? image = params['image'];
+    final String? customId = params['id'];
+
+    // 使用自定义ID或生成新ID
+    final String productId = customId != null && customId.isNotEmpty
+        ? customId
+        : DateTime.now().millisecondsSinceEpoch.toString();
 
     final product = Product(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: productId,
       name: name,
       description: description,
       image: image ?? '',

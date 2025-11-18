@@ -33,6 +33,7 @@ class _TimerDialogState extends State<TimerDialog> {
   final TextEditingController _notesController = TextEditingController();
   String _lastSavedNotes = '';
 
+  // ignore: prefer_typing_uninitialized_variables
   var _timer;
 
   @override

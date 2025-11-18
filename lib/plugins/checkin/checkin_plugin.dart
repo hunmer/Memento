@@ -303,18 +303,25 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 获取签到项目列表
   Future<String> _jsGetCheckinItems(Map<String, dynamic> params) async {
-    final items = _checkinItems.map((item) => {
-      'id': item.id,
-      'name': item.name,
-      'group': item.group,
-      'description': item.description,
-      'icon': item.icon.codePoint,
-      'color': '0x${item.color.value.toRadixString(16).padLeft(8, '0')}',
-      'frequency': item.frequency,
-      'consecutiveDays': item.getConsecutiveDays(),
-      'isCheckedToday': item.isCheckedToday(),
-      'lastCheckinDate': item.lastCheckinDate?.toIso8601String(),
-    }).toList();
+    final items =
+        _checkinItems
+            .map(
+              (item) => {
+                'id': item.id,
+                'name': item.name,
+                'group': item.group,
+                'description': item.description,
+                'icon': item.icon.codePoint,
+                // ignore: deprecated_member_use
+                'color':
+                    '0x${item.color.value.toRadixString(16).padLeft(8, '0')}',
+                'frequency': item.frequency,
+                'consecutiveDays': item.getConsecutiveDays(),
+                'isCheckedToday': item.isCheckedToday(),
+                'lastCheckinDate': item.lastCheckinDate?.toIso8601String(),
+              },
+            )
+            .toList();
 
     return jsonEncode(items);
   }
@@ -334,10 +341,7 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
     // 检查今天是否已签到
     if (item.isCheckedToday()) {
-      return jsonEncode({
-        'success': false,
-        'message': '今天已经签到过了',
-      });
+      return jsonEncode({'success': false, 'message': '今天已经签到过了'});
     }
 
     // 可选参数
@@ -437,8 +441,10 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({
         'itemId': itemId,
         'itemName': item.name,
-        'totalCheckins': item.checkInRecords.values
-            .fold<int>(0, (sum, records) => sum + records.length),
+        'totalCheckins': item.checkInRecords.values.fold<int>(
+          0,
+          (sum, records) => sum + records.length,
+        ),
         'consecutiveDays': item.getConsecutiveDays(),
         'isCheckedToday': item.isCheckedToday(),
         'lastCheckinDate': item.lastCheckinDate?.toIso8601String(),
@@ -449,9 +455,10 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
         'totalItems': _checkinItems.length,
         'todayCheckins': getTodayCheckins(),
         'totalCheckins': getTotalCheckins(),
-        'completionRate': _checkinItems.isEmpty
-            ? 0.0
-            : getTodayCheckins() / _checkinItems.length,
+        'completionRate':
+            _checkinItems.isEmpty
+                ? 0.0
+                : getTodayCheckins() / _checkinItems.length,
       });
     }
   }
@@ -466,10 +473,7 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
     // 检查名称是否重复
     if (_checkinItems.any((item) => item.name == name)) {
-      return jsonEncode({
-        'success': false,
-        'message': '签到项目名称已存在: $name',
-      });
+      return jsonEncode({'success': false, 'message': '签到项目名称已存在: $name'});
     }
 
     // 可选参数
@@ -479,10 +483,7 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
     // 检查自定义ID是否已存在
     if (id != null && _checkinItems.any((item) => item.id == id)) {
-      return jsonEncode({
-        'success': false,
-        'message': '签到项目ID已存在: $id',
-      });
+      return jsonEncode({'success': false, 'message': '签到项目ID已存在: $id'});
     }
 
     // 创建新项目

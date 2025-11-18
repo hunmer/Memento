@@ -8,7 +8,6 @@ import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'l10n/diary_localizations.dart';
 import 'controls/prompt_controller.dart';
 import 'screens/diary_calendar_screen.dart';
-import 'dart:io';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'models/diary_entry.dart';
@@ -159,9 +158,10 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
       final allEntries = await DiaryUtils.loadDiaryEntries();
 
       // 过滤本月的日记并计算有日记的天数
-      final currentMonthDates = allEntries.keys.where((date) {
-        return date.year == now.year && date.month == now.month;
-      }).toSet();
+      final currentMonthDates =
+          allEntries.keys.where((date) {
+            return date.year == now.year && date.month == now.month;
+          }).toSet();
 
       completedDays = currentMonthDates.length;
     } catch (e) {
@@ -179,9 +179,14 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   // 更新今日缓存
   void _updateTodayCache(DateTime date, int wordCount) {
     final today = DateTime(date.year, date.month, date.day);
-    final cachedDay = _cacheDateToday != null
-        ? DateTime(_cacheDateToday!.year, _cacheDateToday!.month, _cacheDateToday!.day)
-        : null;
+    final cachedDay =
+        _cacheDateToday != null
+            ? DateTime(
+              _cacheDateToday!.year,
+              _cacheDateToday!.month,
+              _cacheDateToday!.day,
+            )
+            : null;
 
     // 如果是新的一天，重置缓存
     if (cachedDay == null || !cachedDay.isAtSameMomentAs(today)) {
@@ -196,9 +201,10 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   // 更新本月缓存
   void _updateMonthCache(DateTime date, int? wordCount, (int, int)? progress) {
     final month = DateTime(date.year, date.month);
-    final cachedMonth = _cacheDateMonth != null
-        ? DateTime(_cacheDateMonth!.year, _cacheDateMonth!.month)
-        : null;
+    final cachedMonth =
+        _cacheDateMonth != null
+            ? DateTime(_cacheDateMonth!.year, _cacheDateMonth!.month)
+            : null;
 
     // 如果是新的月份，重置缓存
     if (cachedMonth == null || !cachedMonth.isAtSameMomentAs(month)) {
@@ -217,9 +223,14 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     // 检查缓存是否是今天的
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final cachedDay = _cacheDateToday != null
-        ? DateTime(_cacheDateToday!.year, _cacheDateToday!.month, _cacheDateToday!.day)
-        : null;
+    final cachedDay =
+        _cacheDateToday != null
+            ? DateTime(
+              _cacheDateToday!.year,
+              _cacheDateToday!.month,
+              _cacheDateToday!.day,
+            )
+            : null;
 
     if (cachedDay != null && cachedDay.isAtSameMomentAs(today)) {
       return _cachedTodayWordCount;
@@ -236,9 +247,10 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     // 检查缓存是否是本月的
     final now = DateTime.now();
     final month = DateTime(now.year, now.month);
-    final cachedMonth = _cacheDateMonth != null
-        ? DateTime(_cacheDateMonth!.year, _cacheDateMonth!.month)
-        : null;
+    final cachedMonth =
+        _cacheDateMonth != null
+            ? DateTime(_cacheDateMonth!.year, _cacheDateMonth!.month)
+            : null;
 
     if (cachedMonth != null && cachedMonth.isAtSameMomentAs(month)) {
       return _cachedMonthWordCount;
@@ -255,9 +267,10 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     // 检查缓存是否是本月的
     final now = DateTime.now();
     final month = DateTime(now.year, now.month);
-    final cachedMonth = _cacheDateMonth != null
-        ? DateTime(_cacheDateMonth!.year, _cacheDateMonth!.month)
-        : null;
+    final cachedMonth =
+        _cacheDateMonth != null
+            ? DateTime(_cacheDateMonth!.year, _cacheDateMonth!.month)
+            : null;
 
     if (cachedMonth != null && cachedMonth.isAtSameMomentAs(month)) {
       return _cachedMonthProgress;
@@ -455,22 +468,16 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取指定日期范围的日记
   /// 参数: {"startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD"}
   /// 返回: JSON 字符串，包含日记列表
-  Future<Map<String, dynamic>> _jsGetDiaries(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsGetDiaries(
+    Map<String, dynamic> params,
+  ) async {
     try {
       // 验证必需参数
       if (!params.containsKey('startDate')) {
-        return {
-          'error': '缺少必需参数: startDate',
-          'total': 0,
-          'diaries': [],
-        };
+        return {'error': '缺少必需参数: startDate', 'total': 0, 'diaries': []};
       }
       if (!params.containsKey('endDate')) {
-        return {
-          'error': '缺少必需参数: endDate',
-          'total': 0,
-          'diaries': [],
-        };
+        return {'error': '缺少必需参数: endDate', 'total': 0, 'diaries': []};
       }
 
       final startDate = params['startDate'] as String;
@@ -482,32 +489,34 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
       final allEntries = await DiaryUtils.loadDiaryEntries();
 
       // 过滤日期范围
-      final filteredEntries = allEntries.entries
-          .where((entry) =>
-              !entry.key.isBefore(start) && !entry.key.isAfter(end))
-          .toList()
-        ..sort((a, b) => a.key.compareTo(b.key)); // 按日期排序
+      final filteredEntries =
+          allEntries.entries
+              .where(
+                (entry) =>
+                    !entry.key.isBefore(start) && !entry.key.isAfter(end),
+              )
+              .toList()
+            ..sort((a, b) => a.key.compareTo(b.key)); // 按日期排序
 
       return {
         'total': filteredEntries.length,
-        'diaries': filteredEntries
-            .map((entry) => {
-                  'date': entry.key.toIso8601String().split('T')[0],
-                  'title': entry.value.title,
-                  'content': entry.value.content,
-                  'mood': entry.value.mood,
-                  'wordCount': entry.value.content.length,
-                  'createdAt': entry.value.createdAt.toIso8601String(),
-                  'updatedAt': entry.value.updatedAt.toIso8601String(),
-                })
-            .toList(),
+        'diaries':
+            filteredEntries
+                .map(
+                  (entry) => {
+                    'date': entry.key.toIso8601String().split('T')[0],
+                    'title': entry.value.title,
+                    'content': entry.value.content,
+                    'mood': entry.value.mood,
+                    'wordCount': entry.value.content.length,
+                    'createdAt': entry.value.createdAt.toIso8601String(),
+                    'updatedAt': entry.value.updatedAt.toIso8601String(),
+                  },
+                )
+                .toList(),
       };
     } catch (e) {
-      return {
-        'error': '获取日记失败: $e',
-        'total': 0,
-        'diaries': [],
-      };
+      return {'error': '获取日记失败: $e', 'total': 0, 'diaries': []};
     }
   }
 
@@ -518,10 +527,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     try {
       // 验证必需参数
       if (!params.containsKey('date')) {
-        return {
-          'exists': false,
-          'error': '缺少必需参数: date',
-        };
+        return {'exists': false, 'error': '缺少必需参数: date'};
       }
 
       final date = params['date'] as String;
@@ -529,10 +535,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
       final entry = await DiaryUtils.loadDiaryEntry(dateTime);
 
       if (entry == null) {
-        return {
-          'exists': false,
-          'error': '该日期没有日记',
-        };
+        return {'exists': false, 'error': '该日期没有日记'};
       }
 
       return {
@@ -546,10 +549,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         'updatedAt': entry.updatedAt.toIso8601String(),
       };
     } catch (e) {
-      return {
-        'exists': false,
-        'error': '获取日记失败: $e',
-      };
+      return {'exists': false, 'error': '获取日记失败: $e'};
     }
   }
 
@@ -560,22 +560,16 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     try {
       // 验证必需参数
       if (!params.containsKey('date')) {
-        return {
-          'success': false,
-          'error': '缺少必需参数: date',
-        };
+        return {'success': false, 'error': '缺少必需参数: date'};
       }
       if (!params.containsKey('content')) {
-        return {
-          'success': false,
-          'error': '缺少必需参数: content',
-        };
+        return {'success': false, 'error': '缺少必需参数: content'};
       }
 
       final date = params['date'] as String;
       final content = params['content'] as String;
-      final title = params['title'] as String? ?? '';  // 可选，默认为空字符串
-      final mood = params['mood'] as String?;  // 可选，默认为 null
+      final title = params['title'] as String? ?? ''; // 可选，默认为空字符串
+      final mood = params['mood'] as String?; // 可选，默认为 null
 
       final dateTime = DateTime.parse(date);
 
@@ -586,30 +580,22 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         mood: mood,
       );
 
-      return {
-        'success': true,
-        'message': '日记保存成功',
-        'date': date,
-      };
+      return {'success': true, 'message': '日记保存成功', 'date': date};
     } catch (e) {
-      return {
-        'success': false,
-        'error': '保存日记失败: $e',
-      };
+      return {'success': false, 'error': '保存日记失败: $e'};
     }
   }
 
   /// 删除日记
   /// 参数: {"date": "YYYY-MM-DD"}
   /// 返回: JSON 字符串，包含成功状态
-  Future<Map<String, dynamic>> _jsDeleteDiary(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsDeleteDiary(
+    Map<String, dynamic> params,
+  ) async {
     try {
       // 验证必需参数
       if (!params.containsKey('date')) {
-        return {
-          'success': false,
-          'error': '缺少必需参数: date',
-        };
+        return {'success': false, 'error': '缺少必需参数: date'};
       }
 
       final date = params['date'] as String;
@@ -622,17 +608,16 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         'date': date,
       };
     } catch (e) {
-      return {
-        'success': false,
-        'error': '删除日记失败: $e',
-      };
+      return {'success': false, 'error': '删除日记失败: $e'};
     }
   }
 
   /// 获取今日统计
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: JSON 字符串，包含今日字数
-  Future<Map<String, dynamic>> _jsGetTodayStats(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsGetTodayStats(
+    Map<String, dynamic> params,
+  ) async {
     try {
       final wordCount = await getTodayWordCount();
       final today = DateTime.now();
@@ -642,17 +627,16 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         'wordCount': wordCount,
       };
     } catch (e) {
-      return {
-        'error': '获取今日统计失败: $e',
-        'wordCount': 0,
-      };
+      return {'error': '获取今日统计失败: $e', 'wordCount': 0};
     }
   }
 
   /// 获取本月统计
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: JSON 字符串，包含本月字数和进度
-  Future<Map<String, dynamic>> _jsGetMonthStats(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsGetMonthStats(
+    Map<String, dynamic> params,
+  ) async {
     try {
       final monthWordCount = await getMonthWordCount();
       final progress = await getMonthProgress();
@@ -664,9 +648,10 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         'wordCount': monthWordCount,
         'completedDays': progress.$1,
         'totalDays': progress.$2,
-        'progress': progress.$2 > 0
-            ? (progress.$1 / progress.$2 * 100).toStringAsFixed(1)
-            : '0.0',
+        'progress':
+            progress.$2 > 0
+                ? (progress.$1 / progress.$2 * 100).toStringAsFixed(1)
+                : '0.0',
       };
     } catch (e) {
       return {
@@ -698,18 +683,19 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取本月进度（直接返回对象）
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: 对象，包含 completedDays 和 totalDays
-  Future<Map<String, int>> _jsGetMonthProgress(Map<String, dynamic> params) async {
+  Future<Map<String, int>> _jsGetMonthProgress(
+    Map<String, dynamic> params,
+  ) async {
     final progress = await getMonthProgress();
-    return {
-      'completedDays': progress.$1,
-      'totalDays': progress.$2,
-    };
+    return {'completedDays': progress.$1, 'totalDays': progress.$2};
   }
 
   /// 加载日记条目（直接操作方法）
   /// 参数: {"dateStr": "YYYY-MM-DD"}
   /// 返回: 日记对象或 null
-  Future<Map<String, dynamic>?> _jsLoadDiaryEntry(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>?> _jsLoadDiaryEntry(
+    Map<String, dynamic> params,
+  ) async {
     try {
       if (!params.containsKey('dateStr')) {
         return {'error': '缺少必需参数: dateStr'};
@@ -732,7 +718,9 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   /// 保存日记条目（直接操作方法）
   /// 参数: {"dateStr": "YYYY-MM-DD", "content": "内容", "title": "标题（可选）", "mood": "心情（可选）"}
   /// 返回: 保存后的日记对象
-  Future<Map<String, dynamic>> _jsSaveDiaryEntry(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsSaveDiaryEntry(
+    Map<String, dynamic> params,
+  ) async {
     try {
       if (!params.containsKey('dateStr') || !params.containsKey('content')) {
         return {'error': '缺少必需参数: dateStr 或 content'};
@@ -744,12 +732,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
       final mood = params['mood'] as String?;
 
       final date = DateTime.parse(dateStr);
-      await DiaryUtils.saveDiaryEntry(
-        date,
-        content,
-        title: title,
-        mood: mood,
-      );
+      await DiaryUtils.saveDiaryEntry(date, content, title: title, mood: mood);
 
       final entry = await DiaryUtils.loadDiaryEntry(date);
       return entry?.toJson() ?? {'error': '保存后无法读取日记'};
@@ -797,7 +780,9 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取日记统计（直接操作方法）
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: 统计对象
-  Future<Map<String, dynamic>> _jsGetDiaryStats(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> _jsGetDiaryStats(
+    Map<String, dynamic> params,
+  ) async {
     return await DiaryUtils.getDiaryStats();
   }
 }
