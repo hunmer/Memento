@@ -95,16 +95,25 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
         title: const Text('选择插件'),
         content: SizedBox(
           width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: pluginIds.length,
-            itemBuilder: (context, index) {
-              final pluginId = pluginIds[index];
-              return ListTile(
-                title: Text(pluginId),
-                onTap: () => Navigator.pop(context, pluginId),
-              );
-            },
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.trackpad,
+              },
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: pluginIds.length,
+              itemBuilder: (context, index) {
+                final pluginId = pluginIds[index];
+                return ListTile(
+                  title: Text(pluginId),
+                  onTap: () => Navigator.pop(context, pluginId),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -327,6 +336,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
           dragDevices: {
             PointerDeviceKind.touch,
             PointerDeviceKind.mouse,
+            PointerDeviceKind.trackpad,
           },
           scrollbars: false,
         ),
@@ -474,8 +484,17 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                 Expanded(
                   child: _allPluginTools.isEmpty
                       ? const Center(child: Text('暂无工具配置'))
-                      : ListView(
-                          children: _buildPluginSections(),
+                      : ScrollConfiguration(
+                          behavior: ScrollConfiguration.of(context).copyWith(
+                            dragDevices: {
+                              PointerDeviceKind.touch,
+                              PointerDeviceKind.mouse,
+                              PointerDeviceKind.trackpad,
+                            },
+                          ),
+                          child: ListView(
+                            children: _buildPluginSections(),
+                          ),
                         ),
                 ),
 
@@ -631,10 +650,18 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                     ),
                   ),
                 )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: disabledTools.length,
-                  itemBuilder: (context, index) {
+              : ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context).copyWith(
+                    dragDevices: {
+                      PointerDeviceKind.touch,
+                      PointerDeviceKind.mouse,
+                      PointerDeviceKind.trackpad,
+                    },
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: disabledTools.length,
+                    itemBuilder: (context, index) {
                     final item = disabledTools[index];
                     final pluginId = item['pluginId'] as String;
                     final toolId = item['toolId'] as String;
@@ -693,6 +720,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                     );
                   },
                 ),
+              ),
         ),
         actions: [
           if (disabledTools.isNotEmpty)

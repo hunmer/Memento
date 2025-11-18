@@ -75,10 +75,11 @@ class NodesController extends ChangeNotifier {
   Future<void> addNotebook(
     String title,
     IconData icon, {
+    String? id,
     Color color = Colors.blue,
   }) async {
     final newNotebook = Notebook(
-      id: const Uuid().v4(),
+      id: id ?? const Uuid().v4(),
       title: title,
       icon: icon,
       color: color,
