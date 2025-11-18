@@ -4,8 +4,8 @@
     "description": "获取所有计时器任务列表",
     "parameters": [],
     "returns": {
-      "type": "String",
-      "description": "TimerTask 对象数组的 JSON 字符串"
+      "type": "Object",
+      "description": "TimerTask 对象数组"
     },
     "examples": [
       {
@@ -43,23 +43,33 @@
         "type": "String",
         "optional": true,
         "description": "分组名称,默认为 '默认'"
+      },
+      {
+        "name": "id",
+        "type": "String",
+        "optional": true,
+        "description": "自定义计时器ID,如不提供则自动生成时间戳ID。注意:ID必须唯一,重复的ID会返回错误"
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "创建结果的 JSON 字符串,包含 success, taskId, message"
+      "type": "Object",
+      "description": "创建结果对象,包含 success, taskId, message"
     },
     "examples": [
       {
         "code": "// 创建正计时 60 秒\nconst result = await Memento.plugins.timer.createTimer({\n  name: '学习计时',\n  duration: 60,\n  type: 'countUp',\n  group: '工作'\n});\nsetResult(result);",
-        "comment": "创建正计时"
+        "comment": "创建正计时(自动生成ID)"
       },
       {
         "code": "// 创建倒计时 300 秒(5分钟)\nconst result2 = await Memento.plugins.timer.createTimer({\n  name: '午休提醒',\n  duration: 300,\n  type: 'countDown'\n});\nsetResult(result2);",
-        "comment": "创建倒计时"
+        "comment": "创建倒计时(自动生成ID)"
+      },
+      {
+        "code": "// 创建带自定义ID的计时器\nconst result3 = await Memento.plugins.timer.createTimer({\n  id: 'timer123',\n  name: '自定义ID计时器',\n  duration: 120,\n  type: 'countUp',\n  group: '测试'\n});\nsetResult(result3);",
+        "comment": "创建带自定义ID的计时器"
       }
     ],
-    "notes": "创建后自动生成唯一 taskId(UUID v4)。正计时从 0 开始向上计时,倒计时从设定时间向下计时,番茄钟需要额外配置工作/休息时长",
+    "notes": "如果不提供id参数,系统会自动生成唯一的时间戳ID。如果提供了自定义ID,必须确保该ID在系统中不存在,否则会返回错误。正计时从 0 开始向上计时,倒计时从设定时间向下计时,番茄钟需要额外配置工作/休息时长",
     "enabled": true
   },
   "timer_deleteTimer": {
@@ -74,12 +84,12 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "删除结果的 JSON 字符串,包含 success, message"
+      "type": "Object",
+      "description": "删除结果对象,包含 success, message"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.deleteTimer({timerId: '1705300800000'});\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.deleteTimer({timerId: 'timer123'});\nsetResult(result);",
         "comment": "删除计时器"
       }
     ],
@@ -98,12 +108,12 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "启动结果的 JSON 字符串,包含 success, message, taskId, isRunning"
+      "type": "Object",
+      "description": "启动结果对象,包含 success, message, taskId, isRunning"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.startTimer({timerId: '1705300800000'});\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.startTimer({timerId: 'timer123'});\nsetResult(result);",
         "comment": "启动计时器"
       }
     ],
@@ -122,12 +132,12 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "暂停结果的 JSON 字符串,包含 success, message, taskId, isRunning"
+      "type": "Object",
+      "description": "暂停结果对象,包含 success, message, taskId, isRunning"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.pauseTimer({timerId: '1705300800000'});\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.pauseTimer({timerId: 'timer123'});\nsetResult(result);",
         "comment": "暂停计时器"
       }
     ],
@@ -146,12 +156,12 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "停止结果的 JSON 字符串,包含 success, message, taskId, isRunning"
+      "type": "Object",
+      "description": "停止结果对象,包含 success, message, taskId, isRunning"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.stopTimer({timerId: '1705300800000'});\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.stopTimer({timerId: 'timer123'});\nsetResult(result);",
         "comment": "停止计时器"
       }
     ],
@@ -170,12 +180,12 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "重置结果的 JSON 字符串,包含 success, message, taskId"
+      "type": "Object",
+      "description": "重置结果对象,包含 success, message, taskId"
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.timer.resetTimer({timerId: '1705300800000'});\nsetResult(result);",
+        "code": "const result = await Memento.plugins.timer.resetTimer({timerId: 'timer123'});\nsetResult(result);",
         "comment": "重置计时器"
       }
     ],
@@ -194,12 +204,12 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "计时器状态的 JSON 字符串,包含任务信息、当前进度、活动子计时器等"
+      "type": "Object",
+      "description": "计时器状态对象,包含任务信息、当前进度、活动子计时器等"
     },
     "examples": [
       {
-        "code": "const status = await Memento.plugins.timer.getTimerStatus({timerId: '1705300800000'});\nsetResult(status);",
+        "code": "const status = await Memento.plugins.timer.getTimerStatus({timerId: 'timer123'});\nsetResult(status);",
         "comment": "查询计时器状态"
       }
     ],
@@ -211,8 +221,8 @@
     "description": "获取所有已完成的计时器任务历史",
     "parameters": [],
     "returns": {
-      "type": "String",
-      "description": "历史记录的 JSON 字符串,包含 total(总数) 和 tasks(任务列表)"
+      "type": "Object",
+      "description": "历史记录对象,包含 total(总数) 和 tasks(任务列表)"
     },
     "examples": [
       {

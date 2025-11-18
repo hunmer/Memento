@@ -135,7 +135,7 @@ class JSUIHandlers {
   }
 
   /// Dialog 处理器
-  Future<String?> _handleDialog(
+  Future<dynamic> _handleDialog(
     String? title,
     String? content,
     List<Map<String, dynamic>> actions,
@@ -144,7 +144,7 @@ class JSUIHandlers {
       return null;
     }
 
-    final result = await showDialog<String>(
+    final result = await showDialog<dynamic>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -152,7 +152,8 @@ class JSUIHandlers {
           content: content != null ? Text(content) : null,
           actions: actions.map((action) {
             final text = action['text'] as String? ?? '';
-            final value = action['value'] as String?;
+            // value 可以是任意类型（布尔值、数字、字符串等）
+            final value = action['value'];
             final isDestructive = action['isDestructive'] as bool? ?? false;
 
             return TextButton(
