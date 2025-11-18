@@ -171,9 +171,10 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     try {
       // 可选参数
+      final String? channelId = params['channelId'];
 
       final channel = Channel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: channelId ?? DateTime.now().millisecondsSinceEpoch.toString(), // 支持自定义频道ID，默认使用时间戳
         title: name,
         icon: Icons.chat, // 默认图标
         messages: [], // 空消息列表

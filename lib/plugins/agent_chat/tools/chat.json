@@ -20,7 +20,8 @@
     "title": "创建频道",
     "description": "创建一个新的聊天频道",
     "parameters": [
-      {"name": "name", "type": "string", "required": true, "description": "频道名称"}
+      {"name": "name", "type": "string", "required": true, "description": "频道名称"},
+      {"name": "channelId", "type": "string", "required": false, "description": "频道ID（可选，不传则自动生成）"}
     ],
     "returns": {
       "type": "Object",
@@ -28,11 +29,15 @@
     },
     "examples": [
       {
-        "title": "创建频道",
+        "title": "创建频道（自动生成ID）",
         "code": "const channel = await Memento.plugins.chat.createChannel({name: '工作交流'});\nsetResult(`频道已创建: ${channel.title}`);"
+      },
+      {
+        "title": "创建频道（指定ID）",
+        "code": "const channel = await Memento.plugins.chat.createChannel({name: '测试频道', channelId: 'channel123'});\nsetResult(`频道已创建: ${channel.title} (ID: ${channel.id})`);"
       }
     ],
-    "notes": "新创建的频道初始为空，不包含任何消息",
+    "notes": "新创建的频道初始为空，不包含任何消息。支持传入自定义频道ID，方便调试和测试",
     "enabled": true
   },
   "deleteChannel": {
