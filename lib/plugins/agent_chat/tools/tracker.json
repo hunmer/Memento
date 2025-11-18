@@ -23,8 +23,8 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "Goal 对象数组的 JSON 字符串,包含目标的完整信息"
+      "type": "Object",
+      "description": "Goal 对象数组,包含目标的完整信息"
     },
     "examples": [
       {
@@ -66,13 +66,13 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "Goal 对象的 JSON 字符串"
+      "type": "Object",
+      "description": "Goal 对象"
     },
     "examples": [
       {
-        "code": "const goal = await Memento.plugins.tracker.getGoal({ goalId: '1736950800000' });\nconst goalData = JSON.parse(goal);\nconst result = `目标名称: ${goalData.name}, 进度: ${goalData.currentValue}/${goalData.targetValue}`;\nsetResult(result);",
-        "comment": "获取并解析目标信息"
+        "code": "const goal = await Memento.plugins.tracker.getGoal({ goalId: 'goal123' });\nconst result = `目标名称: ${goal.name}, 进度: ${goal.currentValue}/${goal.targetValue}`;\nsetResult(result);",
+        "comment": "获取目标信息"
       }
     ],
     "notes": "如果目标不存在,会抛出 ArgumentError: Goal not found: <goalId>",
@@ -103,6 +103,11 @@
             "optional": false,
             "description": "目标值(必须大于 0)"
           },
+          "id": {
+            "type": "String",
+            "optional": true,
+            "description": "自定义目标 ID,不传则自动生成时间戳 ID。如果提供的 ID 已存在会返回错误"
+          },
           "group": {
             "type": "String",
             "optional": true,
@@ -122,20 +127,20 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "创建的 Goal 对象的 JSON 字符串,包含自动生成的 id 和 createdAt"
+      "type": "Object",
+      "description": "创建的 Goal 对象,包含 id(自定义或自动生成的) 和 createdAt"
     },
     "examples": [
       {
-        "code": "// 创建每日阅读目标\nconst goal = await Memento.plugins.tracker.createGoal({\n  name: '每日阅读',\n  unitType: '分钟',\n  targetValue: 30,\n  group: '学习'\n});\nsetResult(goal);",
-        "comment": "创建每日目标"
+        "code": "// 创建每日阅读目标(自动生成ID)\nconst goal = await Memento.plugins.tracker.createGoal({\n  name: '每日阅读',\n  unitType: '分钟',\n  targetValue: 30,\n  group: '学习'\n});\nsetResult(goal);",
+        "comment": "创建每日目标(自动ID)"
       },
       {
-        "code": "// 创建每周运动目标\nconst weeklyGoal = await Memento.plugins.tracker.createGoal({\n  name: '每周运动',\n  unitType: '小时',\n  targetValue: 5,\n  group: '健康',\n  dateType: 'weekly'\n});\nsetResult(weeklyGoal);",
-        "comment": "创建每周目标"
+        "code": "// 创建每周运动目标(自定义ID)\nconst weeklyGoal = await Memento.plugins.tracker.createGoal({\n  id: 'goal123',\n  name: '每周运动',\n  unitType: '小时',\n  targetValue: 5,\n  group: '健康',\n  dateType: 'weekly'\n});\nsetResult(weeklyGoal);",
+        "comment": "创建每周目标(自定义ID)"
       }
     ],
-    "notes": "目标创建后 currentValue 初始为 0,isLoopReset 默认为 true",
+    "notes": "目标创建后 currentValue 初始为 0,isLoopReset 默认为 true。可选传入自定义 id 参数,如果 id 已存在会返回错误信息: {'error': '目标ID已存在: <id>'}",
     "enabled": true
   },
   "tracker_updateGoal": {
@@ -162,16 +167,16 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "更新后的 Goal 对象的 JSON 字符串"
+      "type": "Object",
+      "description": "更新后的 Goal 对象"
     },
     "examples": [
       {
-        "code": "// 更新目标名称和目标值\nconst updated = await Memento.plugins.tracker.updateGoal({\n  goalId: '1736950800000',\n  updateJson: {\n    name: '每日深度阅读',\n    targetValue: 60\n  }\n});\nsetResult(updated);",
+        "code": "// 更新目标名称和目标值\nconst updated = await Memento.plugins.tracker.updateGoal({\n  goalId: 'goal123',\n  updateJson: {\n    name: '每日深度阅读',\n    targetValue: 60\n  }\n});\nsetResult(updated);",
         "comment": "更新基本信息"
       },
       {
-        "code": "// 更新提醒时间和分组\nconst updated2 = await Memento.plugins.tracker.updateGoal({\n  goalId: '1736950800000',\n  updateJson: {\n    reminderTime: '20:00',\n    group: '个人成长'\n  }\n});\nsetResult(updated2);",
+        "code": "// 更新提醒时间和分组\nconst updated2 = await Memento.plugins.tracker.updateGoal({\n  goalId: 'goal123',\n  updateJson: {\n    reminderTime: '20:00',\n    group: '个人成长'\n  }\n});\nsetResult(updated2);",
         "comment": "更新提醒设置"
       }
     ],
@@ -202,7 +207,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.tracker.deleteGoal({ goalId: '1736950800000' });\nsetResult(result);",
+        "code": "const result = await Memento.plugins.tracker.deleteGoal({ goalId: 'goal' });\nsetResult(result);",
         "comment": "删除目标及其记录"
       }
     ],
@@ -243,16 +248,16 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "创建的 Record 对象的 JSON 字符串,包含 id, goalId, value, note, recordedAt, durationSeconds"
+      "type": "Object",
+      "description": "创建的 Record 对象,包含 id, goalId, value, note, recordedAt, durationSeconds"
     },
     "examples": [
       {
-        "code": "// 添加今日阅读记录\nconst record = await Memento.plugins.tracker.recordData({\n  goalId: '1736950800000',\n  value: 30,\n  note: '阅读《代码整洁之道》'\n});\nsetResult(record);",
+        "code": "// 添加今日阅读记录\nconst record = await Memento.plugins.tracker.recordData({\n  goalId: 'goal123',\n  value: 30,\n  note: '阅读《代码整洁之道》'\n});\nsetResult(record);",
         "comment": "添加当前记录"
       },
       {
-        "code": "// 添加昨日的记录\nconst timeInfo = await Memento.system.getCurrentTime();\nconst yesterday = new Date(timeInfo.timestamp);\nyesterday.setDate(yesterday.getDate() - 1);\nconst pastTime = yesterday.toISOString().replace(/T.*/, 'T20:00:00.000Z');\nconst pastRecord = await Memento.plugins.tracker.recordData({\n  goalId: '1736950800000',\n  value: 45,\n  note: '昨日补记',\n  dateTime: pastTime\n});\nsetResult(pastRecord);",
+        "code": "// 添加昨日的记录\nconst timeInfo = await Memento.system.getCurrentTime();\nconst yesterday = new Date(timeInfo.timestamp);\nyesterday.setDate(yesterday.getDate() - 1);\nconst pastTime = yesterday.toISOString().replace(/T.*/, 'T20:00:00.000Z');\nconst pastRecord = await Memento.plugins.tracker.recordData({\n  goalId: 'goal123',\n  value: 45,\n  note: '昨日补记',\n  dateTime: pastTime\n});\nsetResult(pastRecord);",
         "comment": "补记历史数据"
       }
     ],
@@ -283,16 +288,16 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "Record 对象数组的 JSON 字符串,按时间倒序排列"
+      "type": "Object",
+      "description": "Record 对象数组,按时间倒序排列"
     },
     "examples": [
       {
-        "code": "// 获取所有记录\nconst allRecords = await Memento.plugins.tracker.getRecords({ goalId: '1736950800000' });\nsetResult(allRecords);",
+        "code": "// 获取所有记录\nconst allRecords = await Memento.plugins.tracker.getRecords({ goalId: 'goal123' });\nsetResult(allRecords);",
         "comment": "获取全部记录"
       },
       {
-        "code": "// 获取最近 10 条记录\nconst recentRecords = await Memento.plugins.tracker.getRecords({ goalId: '1736950800000', limit: 10 });\nconst records = JSON.parse(recentRecords);\nconst result = records.map(record => `${record.recordedAt}: ${record.value} ${record.note || ''}`).join('\\n');\nsetResult(result);",
+        "code": "// 获取最近 10 条记录\nconst recentRecords = await Memento.plugins.tracker.getRecords({ goalId: 'goal123', limit: 10 });\nconst result = recentRecords.map(record => `${record.recordedAt}: ${record.value} ${record.note || ''}`).join('\\n');\nsetResult(result);",
         "comment": "获取最新记录"
       }
     ],
@@ -323,7 +328,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.tracker.deleteRecord({ recordId: '1736951000000' });\nsetResult(result);",
+        "code": "const result = await Memento.plugins.tracker.deleteRecord({ recordId: 'record123' });\nsetResult(result);",
         "comment": "删除指定记录"
       }
     ],
@@ -349,12 +354,12 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "进度信息的 JSON 字符串,包含 goalId, currentValue, targetValue, progress, percentage, isCompleted"
+      "type": "Object",
+      "description": "进度信息对象,包含 goalId, currentValue, targetValue, progress, percentage, isCompleted"
     },
     "examples": [
       {
-        "code": "const progress = await Memento.plugins.tracker.getProgress({ goalId: '1736950800000' });\nconst progressData = JSON.parse(progress);\nconst result = `进度: ${progressData.percentage}%\\n完成状态: ${progressData.isCompleted ? '已完成' : '进行中'}`;\nsetResult(result);",
+        "code": "const progress = await Memento.plugins.tracker.getProgress({ goalId: 'goal123' });\nconst result = `进度: ${progress.percentage}%\\n完成状态: ${progress.isCompleted ? '已完成' : '进行中'}`;\nsetResult(result);",
         "comment": "查询目标进度"
       }
     ],
@@ -380,16 +385,16 @@
       }
     ],
     "returns": {
-      "type": "String",
-      "description": "统计信息的 JSON 字符串,全局统计和单目标统计返回格式不同"
+      "type": "Object",
+      "description": "统计信息对象,全局统计和单目标统计返回格式不同"
     },
     "examples": [
       {
-        "code": "// 获取全局统计\nconst stats = await Memento.plugins.tracker.getStats({});\nconst statsData = JSON.parse(stats);\nconst result = `总目标数: ${statsData.totalGoals}\\n今日完成: ${statsData.todayCompleted}\\n本月完成: ${statsData.monthCompleted}\\n整体进度: ${(statsData.overallProgress * 100).toFixed(1)}%\\n分组列表: ${statsData.groups.join(', ')}`;\nsetResult(result);",
+        "code": "// 获取全局统计\nconst stats = await Memento.plugins.tracker.getStats({});\nconst result = `总目标数: ${stats.totalGoals}\\n今日完成: ${stats.todayCompleted}\\n本月完成: ${stats.monthCompleted}\\n整体进度: ${(stats.overallProgress * 100).toFixed(1)}%\\n分组列表: ${stats.groups.join(', ')}`;\nsetResult(result);",
         "comment": "全局统计"
       },
       {
-        "code": "// 获取单个目标统计\nconst goalStats = await Memento.plugins.tracker.getStats({ goalId: '1736950800000' });\nconst goalStatsData = JSON.parse(goalStats);\nconst result = `目标名称: ${goalStatsData.goalName}\\n总记录数: ${goalStatsData.totalRecords}\\n累计值: ${goalStatsData.totalValue}`;\nsetResult(result);",
+        "code": "// 获取单个目标统计\nconst goalStats = await Memento.plugins.tracker.getStats({ goalId: 'goal123' });\nconst result = `目标名称: ${goalStats.goalName}\\n总记录数: ${goalStats.totalRecords}\\n累计值: ${goalStats.totalValue}`;\nsetResult(result);",
         "comment": "单目标统计"
       }
     ],

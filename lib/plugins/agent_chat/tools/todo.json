@@ -71,7 +71,7 @@
     },
     "examples": [
       {
-        "code": "const task = await Memento.plugins.todo.getTask({ taskId: '550e8400-e29b-41d4-a716-446655440000' });\nsetResult(task);",
+        "code": "const task = await Memento.plugins.todo.getTask({ taskId: 'task123' });\nsetResult(task);",
         "comment": "获取指定任务的详情"
       }
     ],
@@ -80,7 +80,7 @@
   },
   "todo_getTodayTasks": {
     "title": "获取今日任务",
-    "description": "获取今天截止或今天开始的所有任务。",
+    "description": "获取日期范围包含今天的所有任务。包括:1)今天开始的任务 2)今天截止的任务 3)跨越今天的任务(开始日期≤今天≤截止日期)。",
     "parameters": [
       {
         "name": "params",
@@ -99,7 +99,7 @@
         "comment": "获取今日任务"
       }
     ],
-    "notes": "无需参数,返回今天截止或今天开始的所有任务。",
+    "notes": "无需参数,返回所有日期范围包含今天的任务。例如:一个从昨天到明天的任务,也会被认为是今日任务。",
     "enabled": true
   },
   "todo_getOverdueTasks": {
@@ -224,11 +224,11 @@
     },
     "examples": [
       {
-        "code": "const updated = await Memento.plugins.todo.updateTask({\n  taskId: 'task-id-here',\n  updates: {\n    title: '新标题',\n    priority: 'high',\n    tags: ['工作', '紧急', '重要']\n  }\n});\nsetResult(updated);",
+        "code": "const updated = await Memento.plugins.todo.updateTask({\n  taskId: 'task123',\n  updates: {\n    title: '新标题',\n    priority: 'high',\n    tags: ['工作', '紧急', '重要']\n  }\n});\nsetResult(updated);",
         "comment": "更新任务标题和优先级"
       },
       {
-        "code": "const updated2 = await Memento.plugins.todo.updateTask({\n  taskId: 'task-id-here',\n  updates: { status: 'inProgress' }\n});\nsetResult(updated2);",
+        "code": "const updated2 = await Memento.plugins.todo.updateTask({\n  taskId: 'task123',\n  updates: { status: 'inProgress' }\n});\nsetResult(updated2);",
         "comment": "更新任务状态"
       }
     ],
@@ -259,7 +259,7 @@
     },
     "examples": [
       {
-        "code": "const result = await Memento.plugins.todo.deleteTask({ taskId: 'task-id-here' });\nsetResult(result);",
+        "code": "const result = await Memento.plugins.todo.deleteTask({ taskId: 'task123' });\nsetResult(result);",
         "comment": "删除任务"
       }
     ],
@@ -290,7 +290,7 @@
     },
     "examples": [
       {
-        "code": "const task = await Memento.plugins.todo.completeTask({ taskId: 'task-id-here' });\nsetResult(task);",
+        "code": "const task = await Memento.plugins.todo.completeTask({ taskId: 'task123' });\nsetResult(task);",
         "comment": "完成任务"
       }
     ],

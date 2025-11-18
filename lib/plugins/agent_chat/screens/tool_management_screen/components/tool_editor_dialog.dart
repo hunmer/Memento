@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -654,20 +655,32 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
       return;
     }
 
-    // 显示加载对话框
+    // 用于控制是否已取消
+    bool isCancelled = false;
+
+    // 显示加载对话框（带取消按钮）
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
+      builder: (context) => Center(
         child: Card(
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('正在执行 JS 代码...'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                const Text('正在执行 JS 代码...'),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.cancel),
+                  label: const Text('取消'),
+                  onPressed: () {
+                    isCancelled = true;
+                    Navigator.pop(context);
+                  },
+                ),
               ],
             ),
           ),
@@ -676,8 +689,18 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
     );
 
     try {
-      // 执行 JS 代码
-      final result = await JSBridgeManager.instance.evaluate(code);
+      // 执行 JS 代码，设置30秒超时
+      final result = await JSBridgeManager.instance
+          .evaluate(code)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('JS 代码执行超时（超过30秒）');
+            },
+          );
+
+      // 如果已取消，则不处理结果
+      if (isCancelled) return;
 
       // 关闭加载对话框
       if (mounted) {
@@ -707,7 +730,19 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
       } else {
         _showTestResult('执行失败', result.error ?? '未知错误');
       }
+    } on TimeoutException catch (e) {
+      // 如果已取消，则不显示超时消息
+      if (isCancelled) return;
+
+      // 关闭加载对话框
+      if (mounted) {
+        Navigator.pop(context);
+      }
+      _showTestResult('执行超时', e.message ?? '代码执行时间过长');
     } catch (e) {
+      // 如果已取消，则不显示错误消息
+      if (isCancelled) return;
+
       // 关闭加载对话框
       if (mounted) {
         Navigator.pop(context);

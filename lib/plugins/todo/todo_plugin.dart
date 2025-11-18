@@ -242,31 +242,46 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
   }
 
-  /// 获取今日任务（今天截止或今天开始的任务）
+  /// 获取今日任务（任务日期范围包含今天的任务）
   /// 参数对象: {} (无需参数,但保持接口一致性)
   Future<String> _jsGetTodayTasks(Map<String, dynamic> params) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
     final todayTasks = taskController.tasks.where((task) {
-      // 检查截止日期是否是今天
-      if (task.dueDate != null) {
-        final dueDay = DateTime(
-          task.dueDate!.year,
-          task.dueDate!.month,
-          task.dueDate!.day,
-        );
-        if (dueDay == today) return true;
+      // 如果任务既没有开始日期也没有截止日期,不算今日任务
+      if (task.startDate == null && task.dueDate == null) {
+        return false;
       }
 
-      // 检查开始日期是否是今天
-      if (task.startDate != null) {
-        final startDay = DateTime(
-          task.startDate!.year,
-          task.startDate!.month,
-          task.startDate!.day,
-        );
-        if (startDay == today) return true;
+      // 标准化日期(去掉时间部分)
+      final startDay = task.startDate != null
+          ? DateTime(
+              task.startDate!.year,
+              task.startDate!.month,
+              task.startDate!.day,
+            )
+          : null;
+
+      final dueDay = task.dueDate != null
+          ? DateTime(
+              task.dueDate!.year,
+              task.dueDate!.month,
+              task.dueDate!.day,
+            )
+          : null;
+
+      // 检查任务的日期范围是否包含今天
+      // 条件:startDate <= today 且 dueDate >= today
+      if (startDay != null && dueDay != null) {
+        // 两个日期都存在:检查今天是否在范围内
+        return !startDay.isAfter(today) && !dueDay.isBefore(today);
+      } else if (startDay != null) {
+        // 只有开始日期:检查是否已开始(开始日期 <= 今天)
+        return !startDay.isAfter(today);
+      } else if (dueDay != null) {
+        // 只有截止日期:检查是否未过期(截止日期 >= 今天)
+        return !dueDay.isBefore(today);
       }
 
       return false;

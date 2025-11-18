@@ -116,18 +116,21 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         actions: [
           // 搜索按钮
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              size: 24,
+            ),
             onPressed: _toggleSearch,
           ),
           // 工具管理按钮
           IconButton(
-            icon: const Icon(Icons.build),
+            icon: const Icon(Icons.build, size: 24),
             tooltip: '工具管理',
             onPressed: _openToolManagement,
           ),
           // 设置按钮
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings, size: 24),
             onPressed: _openSettings,
           ),
         ],

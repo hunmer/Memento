@@ -164,15 +164,27 @@ class JSBridgeManager {
 
       // 在插件命名空间下创建代理
       // 直接返回内层 Promise，不使用 await（避免事件循环阻塞）
+      // 自动将 JSON 字符串解析为对象
       await _engine!.evaluateDirect('''
         (function() {
           var namespace = globalThis.Memento;
 
-          // 直接返回 Promise，让调用者处理
+          // 返回 Promise 并自动解析 JSON 返回值
           namespace.plugins.${plugin.id}.$apiName = function() {
             var args = Array.prototype.slice.call(arguments);
-            // 直接返回 Promise（不 await）
-            return Memento_${plugin.id}_$apiName.apply(null, args);
+            // 调用底层函数并自动解析 JSON 字符串
+            return Memento_${plugin.id}_$apiName.apply(null, args).then(function(result) {
+              // 如果返回值是字符串，尝试解析为 JSON
+              if (typeof result === 'string') {
+                try {
+                  return JSON.parse(result);
+                } catch (e) {
+                  // 解析失败，返回原始字符串
+                  return result;
+                }
+              }
+              return result;
+            });
           };
         })();
       ''');
@@ -341,6 +353,19 @@ class JSBridgeManager {
         namespace.system.getLocation = function(mode) {
           // 使用 flutter.getLocation 获取位置
           return flutter.getLocation(mode);
+        };
+
+        // 创建 UI 插件命名空间，将 flutter.* 方法代理到 Memento.plugins.ui.*
+        namespace.plugins.ui = {
+          toast: function(message, options) {
+            return flutter.toast(message, options);
+          },
+          alert: function(message, options) {
+            return flutter.alert(message, options);
+          },
+          dialog: function(options) {
+            return flutter.dialog(options);
+          }
         };
       })();
     ''');

@@ -18,7 +18,7 @@ class MobileJSEngine implements JSEngine {
     String? cancelText,
     bool showCancel,
   })? _onAlert;
-  Future<String?> Function(
+  Future<dynamic> Function(
     String? title,
     String? content,
     List<Map<String, dynamic>> actions,
@@ -54,7 +54,7 @@ class MobileJSEngine implements JSEngine {
 
   /// 设置 Dialog 回调
   void setDialogHandler(
-    Future<String?> Function(
+    Future<dynamic> Function(
       String?,
       String?,
       List<Map<String, dynamic>>,
@@ -293,7 +293,9 @@ class MobileJSEngine implements JSEngine {
       try {
         final config = data['config'];
         final message = config['message'] as String;
-        final duration = config['duration'] as String;
+        // duration 可以是字符串 ('short', 'long') 或数字 (毫秒数)
+        final durationValue = config['duration'];
+        final duration = durationValue is String ? durationValue : durationValue.toString();
         final gravity = config['gravity'] as String;
 
         print('[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity)');
@@ -791,11 +793,8 @@ class MobileJSEngine implements JSEngine {
         _runtime.evaluate(
           'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
         );
-        _runtime.evaluate('globalThis.__TEMP_RESULT__ = $resultJson;');
-        _runtime.evaluate(
-          "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
-          "delete globalThis.__TEMP_RESULT__;",
-        );
+        // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
+        _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};');
 
         print('[JS Bridge] Alert 结果已返回: $resultJson');
       } catch (e) {
@@ -819,16 +818,14 @@ class MobileJSEngine implements JSEngine {
 
         // 将结果返回给 JavaScript
         final resultKey = '_flutterDialog_callback_$callId';
+        // 序列化结果（保持 JSON 字符串格式，稍后在 JS 端解析）
         final resultJson = jsonEncode(result);
 
         _runtime.evaluate(
           'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
         );
-        _runtime.evaluate('globalThis.__TEMP_RESULT__ = $resultJson;');
-        _runtime.evaluate(
-          "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
-          "delete globalThis.__TEMP_RESULT__;",
-        );
+        // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
+        _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};');
 
         print('[JS Bridge] Dialog 结果已返回: $resultJson');
       } catch (e) {
@@ -852,11 +849,8 @@ class MobileJSEngine implements JSEngine {
         _runtime.evaluate(
           'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
         );
-        _runtime.evaluate('globalThis.__TEMP_RESULT__ = $resultJson;');
-        _runtime.evaluate(
-          "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
-          "delete globalThis.__TEMP_RESULT__;",
-        );
+        // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
+        _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};');
 
         print('[JS Bridge] Location 结果已返回: $resultJson');
       } catch (e) {
@@ -868,11 +862,8 @@ class MobileJSEngine implements JSEngine {
         _runtime.evaluate(
           'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
         );
-        _runtime.evaluate('globalThis.__TEMP_RESULT__ = $errorJson;');
-        _runtime.evaluate(
-          "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
-          "delete globalThis.__TEMP_RESULT__;",
-        );
+        // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
+        _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(errorJson)};');
       }
     } else {
       print('[JS Bridge] Location 未设置处理器');
@@ -883,11 +874,8 @@ class MobileJSEngine implements JSEngine {
       _runtime.evaluate(
         'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
       );
-      _runtime.evaluate('globalThis.__TEMP_RESULT__ = $errorJson;');
-      _runtime.evaluate(
-        "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
-        "delete globalThis.__TEMP_RESULT__;",
-      );
+      // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
+      _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(errorJson)};');
     }
   }
 
