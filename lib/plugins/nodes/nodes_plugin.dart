@@ -189,6 +189,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
     }
 
     // 可选参数
+    final String? id = params['id'];
     final int? iconCodePoint = params['iconCodePoint'];
     final int? colorValue = params['colorValue'];
 
@@ -197,13 +198,19 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
         : Icons.book;
     final color = colorValue != null ? Color(colorValue) : Colors.blue;
 
-    await _controller.addNotebook(title, icon, color: color);
+    await _controller.addNotebook(title, icon, id: id, color: color);
 
-    // 查找刚创建的笔记本
-    final notebook = _controller.notebooks.firstWhere(
-      (nb) => nb.title == title,
-      orElse: () => Notebook(id: '', title: ''),
-    );
+    // 查找刚创建的笔记本（如果提供了ID则用ID查找，否则用标题查找）
+    final notebook = id != null
+        ? _controller.getNotebook(id)
+        : _controller.notebooks.firstWhere(
+            (nb) => nb.title == title,
+            orElse: () => Notebook(id: '', title: ''),
+          );
+
+    if (notebook == null || notebook.id.isEmpty) {
+      return jsonEncode({'error': '创建笔记本失败'});
+    }
 
     return jsonEncode({
       'id': notebook.id,
@@ -326,8 +333,11 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: nodeData'});
     }
 
+    // 可选的自定义 ID，未提供则自动生成
+    final String nodeId = nodeData['id'] ?? const Uuid().v4();
+
     final newNode = Node(
-      id: const Uuid().v4(),
+      id: nodeId,
       title: nodeData['title'] ?? '新节点',
       createdAt: DateTime.now(),
       tags: (nodeData['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],

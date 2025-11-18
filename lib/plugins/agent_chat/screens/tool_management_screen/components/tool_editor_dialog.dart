@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../../../models/tool_config.dart';
 import '../../../../../core/js_bridge/js_bridge_manager.dart';
@@ -687,14 +689,35 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
 
   /// 显示测试结果对话框
   void _showTestResult(String title, String message) {
+    // 尝试格式化 JSON
+    String formattedMessage = message;
+    try {
+      // 尝试解析 JSON
+      final decoded = jsonDecode(message);
+      // 使用缩进格式化 JSON
+      const encoder = JsonEncoder.withIndent('  ');
+      formattedMessage = encoder.convert(decoded);
+    } catch (e) {
+      // 不是有效的 JSON，使用原始消息
+      formattedMessage = message;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(title),
-        content: SingleChildScrollView(
-          child: SelectableText(
-            message,
+        content: SizedBox(
+          width: double.maxFinite,
+          child: TextField(
+            controller: TextEditingController(text: formattedMessage),
+            readOnly: true,
+            maxLines: null,
+            minLines: 10,
             style: const TextStyle(fontFamily: 'monospace'),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.all(12),
+            ),
           ),
         ),
         actions: [

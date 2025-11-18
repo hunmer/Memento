@@ -40,6 +40,7 @@
     "description": "创建一个新的笔记本",
     "parameters": [
       {"name": "title", "type": "string", "required": true, "description": "笔记本名称"},
+      {"name": "id", "type": "string", "required": false, "description": "笔记本ID（可选，用于调试时指定固定ID，如'nb123'）"},
       {"name": "iconCodePoint", "type": "number", "required": false, "description": "图标代码"},
       {"name": "colorValue", "type": "number", "required": false, "description": "颜色值"}
     ],
@@ -51,9 +52,13 @@
       {
         "title": "创建笔记本",
         "code": "const nb = await Memento.plugins.nodes.createNotebook({title: '工作笔记'});\nsetResult(`笔记本已创建: ${nb.title}`);"
+      },
+      {
+        "title": "创建笔记本（指定ID）",
+        "code": "const nb = await Memento.plugins.nodes.createNotebook({id: 'nb123', title: '测试笔记本'});\nsetResult(`笔记本已创建，ID: ${nb.id}`);"
       }
     ],
-    "notes": "新创建的笔记本初始为空，不包含任何节点",
+    "notes": "新创建的笔记本初始为空，不包含任何节点。可通过 id 参数指定自定义ID，方便调试",
     "enabled": true
   },
   "updateNotebook": {
@@ -144,7 +149,7 @@
     "description": "在指定笔记本中创建新节点",
     "parameters": [
       {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
-      {"name": "nodeData", "type": "object", "required": true, "description": "节点数据对象"}
+      {"name": "nodeData", "type": "object", "required": true, "description": "节点数据对象，可包含以下字段: id (可选，自定义节点ID如'node456'), title, notes, parentId, status, tags, customFields 等"}
     ],
     "returns": {
       "type": "Object",
@@ -158,9 +163,13 @@
       {
         "title": "创建子节点",
         "code": "const child = await Memento.plugins.nodes.createNode({\n  notebookId: 'nb123',\n  nodeData: {title: '1.1 小节', parentId: 'parentNodeId', status: 'todo'}\n});\nsetResult(`子节点ID: ${child.id}`);"
+      },
+      {
+        "title": "创建节点（指定ID）",
+        "code": "const node = await Memento.plugins.nodes.createNode({\n  notebookId: 'nb123',\n  nodeData: {id: 'node456', title: '测试节点', notes: '用于调试的固定ID节点'}\n});\nsetResult(`节点已创建，ID: ${node.id}`);"
       }
     ],
-    "notes": "支持无限层级嵌套，通过 parentId 构建树形结构",
+    "notes": "支持无限层级嵌套，通过 parentId 构建树形结构。可在 nodeData 中指定 id 字段来使用自定义ID，方便调试",
     "enabled": true
   },
   "updateNode": {
