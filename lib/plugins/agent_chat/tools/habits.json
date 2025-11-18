@@ -41,6 +41,7 @@
     "parameters": [
       {"name": "title", "type": "string", "required": true, "description": "习惯名称"},
       {"name": "durationMinutes", "type": "number", "required": true, "description": "目标时长（分钟）"},
+      {"name": "id", "type": "string", "required": false, "description": "自定义习惯ID，不提供则自动生成"},
       {"name": "skillId", "type": "string", "required": false, "description": "关联的技能ID"},
       {"name": "notes", "type": "string", "required": false, "description": "备注"},
       {"name": "group", "type": "string", "required": false, "description": "分组"},
@@ -62,6 +63,10 @@
       {
         "title": "创建关联技能的习惯",
         "code": "const habit = await Memento.plugins.habits.createHabit({title: '编程练习', durationMinutes: 60, skillId: 'skill123', reminderDays: [1,2,3,4,5]});\nsetResult(`习惯ID: ${habit.id}`);"
+      },
+      {
+        "title": "创建带自定义ID的习惯",
+        "code": "const habit = await Memento.plugins.habits.createHabit({id: 'habit_reading_001', title: '晨读', durationMinutes: 45});\nsetResult(`习惯已创建: ${habit.id} - ${habit.title}`);"
       }
     ],
     "notes": "习惯可关联技能，完成记录会自动累积到技能的总时长（一万小时定律）",
@@ -156,6 +161,7 @@
     "description": "创建一个新的技能",
     "parameters": [
       {"name": "title", "type": "string", "required": true, "description": "技能名称"},
+      {"name": "id", "type": "string", "required": false, "description": "自定义技能ID，不提供则自动生成"},
       {"name": "description", "type": "string", "required": false, "description": "技能描述"},
       {"name": "notes", "type": "string", "required": false, "description": "备注"},
       {"name": "group", "type": "string", "required": false, "description": "分组"},
@@ -176,6 +182,10 @@
       {
         "title": "创建默认目标的技能",
         "code": "const skill = await Memento.plugins.habits.createSkill({title: '绘画'});\nsetResult(`技能ID: ${skill.id}`);"
+      },
+      {
+        "title": "创建带自定义ID的技能",
+        "code": "const skill = await Memento.plugins.habits.createSkill({id: 'skill_programming_001', title: '高级编程', description: '深入学习编程技能', targetMinutes: 10000});\nsetResult(`技能已创建: ${skill.id} - ${skill.title}`);"
       }
     ],
     "notes": "新创建的技能初始 totalMinutes 为 0，需通过完成关联习惯来累积时长",

@@ -114,7 +114,7 @@ class GoodsItem {
           json['purchaseDate'] != null
               ? DateTime.parse(json['purchaseDate'] as String)
               : null,
-      purchasePrice: json['purchasePrice'] as double?,
+      purchasePrice: json['purchasePrice'] != null ? (json['purchasePrice'] as num)?.toDouble() : null,
       usageRecords:
           (json['usageRecords'] as List?)
               ?.map((e) => UsageRecord.fromJson(e))
