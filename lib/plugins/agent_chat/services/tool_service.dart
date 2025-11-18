@@ -271,7 +271,7 @@ class ToolService {
 
     // 使用示例
     buffer.writeln('### 💡 使用示例\n');
-    buffer.writeln('**示例 1：查询今天的任务（使用系统时间）**\n');
+    buffer.writeln('**示例 1：查询今天的任务**\n');
     buffer.writeln('```json');
     buffer.writeln('{');
     buffer.writeln('  "steps": [');
@@ -279,20 +279,20 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "获取今日任务",');
     buffer.writeln('      "desc": "查询今天的所有待办任务",');
-    buffer.writeln(r'      "data": "const time = await Memento.system.getCurrentTime(); const tasks = await Memento.plugins.todo.getTodayTasks(); const result = `今天是${time.month}月${time.day}日，有 ${tasks.length} 个任务`; setResult(result);"');
+    buffer.writeln(r'      "data": "const time = await Memento.system.getCurrentTime(); const tasks = await Memento.plugins.todo.getTodayTasks(); return `今天是${time.month}月${time.day}日，有 ${tasks.length} 个任务`;"');
     buffer.writeln('    }');
     buffer.writeln('  ]');
     buffer.writeln('}');
     buffer.writeln('```\n');
-    buffer.writeln('**示例 2：获取当前时间（直接回答，无需工具步骤）**\n');
+    buffer.writeln('**示例 2：查询并处理数据**\n');
     buffer.writeln('```json');
     buffer.writeln('{');
     buffer.writeln('  "steps": [');
     buffer.writeln('    {');
     buffer.writeln('      "method": "run_js",');
-    buffer.writeln('      "title": "获取当前时间",');
-    buffer.writeln('      "desc": "查询系统当前时间",');
-    buffer.writeln(r'      "data": "const time = await Memento.system.getCurrentTime(); const msg = `现在是 ${time.year}年${time.month}月${time.day}日 ${time.hour}:${time.minute}:${time.second}`; setResult(msg);"');
+    buffer.writeln('      "title": "统计任务情况",');
+    buffer.writeln('      "desc": "获取并统计今日任务",');
+    buffer.writeln(r'      "data": "const tasks = await Memento.plugins.todo.getTodayTasks(); return { total: tasks.length, completed: tasks.filter(t => t.completed).length };"');
     buffer.writeln('    }');
     buffer.writeln('  ]');
     buffer.writeln('}');
@@ -307,7 +307,7 @@ class ToolService {
     buffer.writeln('      "title": "执行签到操作",');
     buffer.writeln('      "desc": "查找第一个未签到的项目并执行签到",');
     final checkinExample =
-        '''const items = await Memento.plugins.checkin.getCheckinItems(); const target = items.find(i => !i.isCheckedToday); if (!target) { setResult('所有项目今天都已签到'); } else { const result = await Memento.plugins.checkin.checkin(target.id); setResult(result.success ? `签到成功: \${target.name}` : result.message); }''';
+        '''const items = await Memento.plugins.checkin.getCheckinItems(); const target = items.find(i => !i.isCheckedToday); if (!target) { return '所有项目今天都已签到'; } const result = await Memento.plugins.checkin.checkin(target.id); return result.success ? `签到成功: \${target.name}` : result.message;''';
     buffer.writeln('      "data": "${checkinExample.replaceAll('"', '\\"')}"');
     buffer.writeln('    }');
     buffer.writeln('  ]');
@@ -322,7 +322,7 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "创建明天的任务",');
     buffer.writeln('      "desc": "获取明天日期并创建任务",');
-    final createTaskExample = '''const time = await Memento.system.getCurrentTime(); const tomorrow = time.timestamp + 24 * 60 * 60 * 1000; const result = await Memento.plugins.todo.createTask('New Task', { dueDate: tomorrow }); setResult(result.success ? 'Task created successfully' : 'Failed to create task');''';
+    final createTaskExample = '''const time = await Memento.system.getCurrentTime(); const tomorrow = time.timestamp + 24 * 60 * 60 * 1000; const result = await Memento.plugins.todo.createTask('New Task', { dueDate: tomorrow }); return result.success ? 'Task created successfully' : 'Failed to create task';''';
     buffer.writeln('      "data": "${createTaskExample.replaceAll('"', '\\"')}"');
     buffer.writeln('    }');
     buffer.writeln('  ]');
@@ -331,7 +331,7 @@ class ToolService {
 
     buffer.writeln('### ⚠️ 注意事项\n');
     buffer.writeln('1. **系统 API 直接调用**: `Memento.system.*` API 不需要作为单独的工具步骤，直接在代码中调用');
-    buffer.writeln('2. **必须使用 setResult()**: JavaScript 代码最后必须调用 `setResult()` 返回结果');
+    buffer.writeln('2. **返回结果**: JavaScript 代码必须使用 `return` 返回结果');
     buffer.writeln('3. **JSON 字符串转义**: data 字段中的 JavaScript 代码需要正确转义引号');
     buffer.writeln('4. **异步操作**: 所有插件方法都是异步的，必须使用 `await`');
     buffer.writeln('5. **避免硬编码时间**: 不要在代码中硬编码日期时间字符串，使用 `Memento.system.getCurrentTime()` 获取\n');
@@ -406,16 +406,12 @@ class ToolService {
 
 **示例**：查询今天的任务
 ```javascript
-// ✅ 正确：在代码中直接调用系统 API
 const time = await Memento.system.getCurrentTime();
 const tasks = await Memento.plugins.todo.getTodayTasks();
-const result = `今天是 ${time.month}月${time.day}日，有 ${tasks.length} 个任务`;
-setResult(result);
-
-// ❌ 错误：不要将获取时间作为单独步骤
+return `今天是 ${time.month}月${time.day}日，有 ${tasks.length} 个任务`;
 ```
 
-使用 `setResult()` 返回结果。
+使用 `return` 返回结果。
 ''';
   }
 
@@ -561,7 +557,7 @@ setResult(result);
     buffer.writeln('  ]');
     buffer.writeln('}');
     buffer.writeln('```\n');
-    buffer.writeln('⚠️ **重要**: JavaScript 代码最后必须调用 `setResult()` 返回结果！\n');
+    buffer.writeln('⚠️ **重要**: JavaScript 代码必须使用 `return` 返回结果！\n');
 
     return buffer.toString();
   }

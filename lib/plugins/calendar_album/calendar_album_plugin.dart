@@ -254,7 +254,8 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 同步测试 API
-  String _jsTestSync() {
+  /// @param params - 参数对象（无参数）
+  String _jsTestSync(Map<String, dynamic> params) {
     return jsonEncode({
       'status': 'ok',
       'message': '日历相册插件同步测试成功！',
@@ -263,8 +264,9 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取所有日记条目
+  /// @param params - 参数对象（无参数）
   /// 返回: List<CalendarEntry> (JSON数组)
-  Future<String> _jsGetEntries() async {
+  Future<String> _jsGetEntries(Map<String, dynamic> params) async {
     final allEntries = <CalendarEntry>[];
     calendarController.entries.forEach((date, entries) {
       allEntries.addAll(entries);
@@ -275,9 +277,14 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取指定日期的日记条目
-  /// @param dateStr - 日期字符串 (YYYY-MM-DD)
+  /// @param params.dateStr - 日期字符串 (YYYY-MM-DD)
   /// 返回: List<CalendarEntry> (JSON数组)
-  Future<String> _jsGetEntriesForDate(String dateStr) async {
+  Future<String> _jsGetEntriesForDate(Map<String, dynamic> params) async {
+    final String? dateStr = params['dateStr'];
+    if (dateStr == null || dateStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: dateStr'});
+    }
+
     try {
       final date = DateTime.parse(dateStr);
       final entries = calendarController.getEntriesForDate(date);
@@ -291,28 +298,33 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 添加日记条目
-  /// @param title - 标题
-  /// @param content - 内容
-  /// @param dateStr - 日期 (可选, 默认今天)
-  /// @param tagsStr - 标签 (可选, 逗号分隔)
-  /// @param location - 位置 (可选)
-  /// @param mood - 心情 (可选)
-  /// @param weather - 天气 (可选)
-  /// @param imageUrlsStr - 图片URL列表 (可选, 逗号分隔)
-  Future<String> _jsAddEntry(
-    String title,
-    String content, [
-    String? dateStr,
-    String? tagsStr,
-    String? location,
-    String? mood,
-    String? weather,
-    String? imageUrlsStr,
-  ]) async {
+  /// @param params.title - 标题
+  /// @param params.content - 内容
+  /// @param params.dateStr - 日期 (可选, 默认今天)
+  /// @param params.tags - 标签数组 (可选)
+  /// @param params.location - 位置 (可选)
+  /// @param params.mood - 心情 (可选)
+  /// @param params.weather - 天气 (可选)
+  /// @param params.imageUrls - 图片URL数组 (可选)
+  Future<String> _jsAddEntry(Map<String, dynamic> params) async {
+    final String? title = params['title'];
+    final String? content = params['content'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+    if (content == null) {
+      return jsonEncode({'error': '缺少必需参数: content'});
+    }
+
     try {
+      final String? dateStr = params['dateStr'];
+      final List<String> tags = params['tags'] != null ? List<String>.from(params['tags']) : [];
+      final String? location = params['location'];
+      final String? mood = params['mood'];
+      final String? weather = params['weather'];
+      final List<String> imageUrls = params['imageUrls'] != null ? List<String>.from(params['imageUrls']) : [];
+
       final createdAt = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
-      final tags = tagsStr?.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList() ?? [];
-      final imageUrls = imageUrlsStr?.split(',').map((u) => u.trim()).where((u) => u.isNotEmpty).toList() ?? [];
 
       final entry = CalendarEntry.create(
         title: title,
@@ -336,24 +348,20 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新日记条目
-  /// @param entryId - 日记ID
-  /// @param title - 新标题 (可选)
-  /// @param content - 新内容 (可选)
-  /// @param tagsStr - 新标签 (可选, 逗号分隔)
-  /// @param location - 新位置 (可选)
-  /// @param mood - 新心情 (可选)
-  /// @param weather - 新天气 (可选)
-  /// @param imageUrlsStr - 新图片URL列表 (可选, 逗号分隔)
-  Future<String> _jsUpdateEntry(
-    String entryId, [
-    String? title,
-    String? content,
-    String? tagsStr,
-    String? location,
-    String? mood,
-    String? weather,
-    String? imageUrlsStr,
-  ]) async {
+  /// @param params.entryId - 日记ID
+  /// @param params.title - 新标题 (可选)
+  /// @param params.content - 新内容 (可选)
+  /// @param params.tags - 新标签数组 (可选)
+  /// @param params.location - 新位置 (可选)
+  /// @param params.mood - 新心情 (可选)
+  /// @param params.weather - 新天气 (可选)
+  /// @param params.imageUrls - 新图片URL数组 (可选)
+  Future<String> _jsUpdateEntry(Map<String, dynamic> params) async {
+    final String? entryId = params['entryId'];
+    if (entryId == null || entryId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: entryId'});
+    }
+
     try {
       final entry = calendarController.getEntryById(entryId);
       if (entry == null) {
@@ -363,18 +371,13 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
         });
       }
 
-      final tags =
-          tagsStr
-              ?.split(',')
-              .map((t) => t.trim())
-              .where((t) => t.isNotEmpty)
-              .toList();
-      final imageUrls =
-          imageUrlsStr
-              ?.split(',')
-              .map((u) => u.trim())
-              .where((u) => u.isNotEmpty)
-              .toList();
+      final String? title = params['title'];
+      final String? content = params['content'];
+      final List<String>? tags = params['tags'] != null ? List<String>.from(params['tags']) : null;
+      final String? location = params['location'];
+      final String? mood = params['mood'];
+      final String? weather = params['weather'];
+      final List<String>? imageUrls = params['imageUrls'] != null ? List<String>.from(params['imageUrls']) : null;
 
       final updatedEntry = entry.copyWith(
         title: title,
@@ -398,8 +401,16 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除日记条目
-  /// @param entryId - 日记ID
-  Future<String> _jsDeleteEntry(String entryId) async {
+  /// @param params.entryId - 日记ID
+  Future<String> _jsDeleteEntry(Map<String, dynamic> params) async {
+    final String? entryId = params['entryId'];
+    if (entryId == null || entryId.isEmpty) {
+      return jsonEncode({
+        'success': false,
+        'error': '缺少必需参数: entryId',
+      });
+    }
+
     try {
       final entry = calendarController.getEntryById(entryId);
       if (entry == null) {
@@ -425,8 +436,13 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 根据ID获取日记条目
-  /// @param entryId - 日记ID
-  Future<String> _jsGetEntryById(String entryId) async {
+  /// @param params.entryId - 日记ID
+  Future<String> _jsGetEntryById(Map<String, dynamic> params) async {
+    final String? entryId = params['entryId'];
+    if (entryId == null || entryId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: entryId'});
+    }
+
     final entry = calendarController.getEntryById(entryId);
     if (entry == null) {
       return jsonEncode({
@@ -438,25 +454,31 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取所有标签
+  /// @param params - 参数对象（无参数）
   /// 返回: List<String> (JSON数组)
-  Future<String> _jsGetTags() async {
+  Future<String> _jsGetTags(Map<String, dynamic> params) async {
     final tags = tagController.tags;
     return jsonEncode(tags);
   }
 
   /// 根据单个标签获取日记
-  /// @param tag - 标签名称
+  /// @param params.tag - 标签名称
   /// 返回: List<CalendarEntry> (JSON数组)
-  Future<String> _jsGetEntriesByTag(String tag) async {
+  Future<String> _jsGetEntriesByTag(Map<String, dynamic> params) async {
+    final String? tag = params['tag'];
+    if (tag == null || tag.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: tag'});
+    }
+
     final entries = calendarController.getEntriesByTag(tag);
     return jsonEncode(entries.map((e) => e.toJson()).toList());
   }
 
   /// 根据多个标签获取日记 (AND逻辑)
-  /// @param tagsStr - 标签列表 (逗号分隔)
+  /// @param params.tags - 标签数组
   /// 返回: List<CalendarEntry> (JSON数组)
-  Future<String> _jsGetEntriesByTags(String tagsStr) async {
-    final tags = tagsStr.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
+  Future<String> _jsGetEntriesByTags(Map<String, dynamic> params) async {
+    final List<String> tags = params['tags'] != null ? List<String>.from(params['tags']) : [];
     if (tags.isEmpty) {
       return jsonEncode([]);
     }
@@ -465,17 +487,27 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取所有照片URL
+  /// @param params - 参数对象（无参数）
   /// 返回: List<String> (JSON数组)
-  Future<String> _jsGetPhotos() async {
+  Future<String> _jsGetPhotos(Map<String, dynamic> params) async {
     final photos = calendarController.getAllImages();
     return jsonEncode(photos);
   }
 
   /// 根据日期范围获取照片
-  /// @param startDateStr - 开始日期 (YYYY-MM-DD)
-  /// @param endDateStr - 结束日期 (YYYY-MM-DD)
+  /// @param params.startDate - 开始日期 (YYYY-MM-DD)
+  /// @param params.endDate - 结束日期 (YYYY-MM-DD)
   /// 返回: List<{date: String, imageUrl: String, entryId: String}> (JSON数组)
-  Future<String> _jsGetPhotosByDateRange(String startDateStr, String endDateStr) async {
+  Future<String> _jsGetPhotosByDateRange(Map<String, dynamic> params) async {
+    final String? startDateStr = params['startDate'];
+    final String? endDateStr = params['endDate'];
+    if (startDateStr == null || startDateStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: startDate'});
+    }
+    if (endDateStr == null || endDateStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: endDate'});
+    }
+
     try {
       final startDate = DateTime.parse(startDateStr);
       final endDate = DateTime.parse(endDateStr);
@@ -509,8 +541,9 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取统计信息
+  /// @param params - 参数对象（无参数）
   /// 返回: {todayCount, last7DaysCount, totalCount, tagCount, photoCount}
-  Future<String> _jsGetStatistics() async {
+  Future<String> _jsGetStatistics(Map<String, dynamic> params) async {
     final stats = {
       'todayCount': calendarController.getTodayEntriesCount(),
       'last7DaysCount': calendarController.getLast7DaysEntriesCount(),

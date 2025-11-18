@@ -36,7 +36,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
   Color _selectedColor = Colors.blue;
   DateTime _selectedDate = DateTime.now();
 
-  final List<String> _availableTags = [
+  final List<String> _availableTags = <String>[
     '未分类',
     '食品',
     '交通',
@@ -67,6 +67,11 @@ class _BillEditScreenState extends State<BillEditScreen> {
       _selectedIcon = widget.bill!.icon;
       _selectedColor = widget.bill!.iconColor;
       _selectedDate = widget.bill!.date;
+
+      // 如果账单的分类不在预定义列表中，添加进去，避免 DropdownButton 报错
+      if (_tag != null && !_availableTags.contains(_tag)) {
+        _availableTags.add(_tag!);
+      }
     }
   }
 

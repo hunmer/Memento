@@ -279,6 +279,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   /// 创建账户
   /// @param params.title 账户名称 (必需)
+  /// @param params.id 账户ID (可选，不传则自动生成 UUID)
   /// @param params.iconCodePoint 图标代码点 (可选，默认 Icons.account_balance_wallet)
   /// @param params.backgroundColor 背景颜色值 (可选，默认绿色)
   Future<String> _jsCreateAccount(Map<String, dynamic> params) async {
@@ -287,10 +288,12 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: title'});
     }
 
+    final String? id = params['id'];
     final int? iconCodePoint = params['iconCodePoint'];
     final int? backgroundColor = params['backgroundColor'];
 
     final account = Account(
+      id: id,
       title: title,
       icon: iconCodePoint != null
           ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
@@ -406,7 +409,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: accountId'});
     }
 
-    final double? amount = params['amount'];
+    final double? amount = (params['amount'] as num?)?.toDouble();
     if (amount == null) {
       return jsonEncode({'error': '缺少必需参数: amount'});
     }
@@ -487,7 +490,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       orElse: () => throw '账单不存在',
     );
 
-    final double? amount = params['amount'];
+    final double? amount = (params['amount'] as num?)?.toDouble();
     final String? category = params['category'];
     final String? title = params['title'];
     final String? date = params['date'];
