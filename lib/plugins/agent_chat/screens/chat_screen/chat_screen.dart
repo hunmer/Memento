@@ -7,6 +7,7 @@ import '../../services/conversation_service.dart';
 import '../../services/tool_template_service.dart';
 import '../../services/message_detail_service.dart';
 import '../../../../core/storage/storage_manager.dart';
+import '../../../../core/js_bridge/js_bridge_manager.dart';
 import 'components/message_bubble.dart';
 import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
@@ -34,6 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
   late final ChatController _controller;
   late final ToolTemplateService _templateService;
   final ScrollController _scrollController = ScrollController();
+  bool _uiHandlersRegistered = false;
 
   @override
   void initState() {
@@ -41,6 +43,16 @@ class _ChatScreenState extends State<ChatScreen> {
     debugPrint(
       '🎬 ChatScreen initState: conversationId=${widget.conversation.id}, agentId=${widget.conversation.agentId}',
     );
+
+    // 在第一帧渲染后注册 UI 处理器
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_uiHandlersRegistered && mounted) {
+        JSBridgeManager.instance.registerUIHandlers(context);
+        _uiHandlersRegistered = true;
+        debugPrint('✓ ChatScreen: UI 处理器已注册');
+      }
+    });
+
     _initializeController();
   }
 

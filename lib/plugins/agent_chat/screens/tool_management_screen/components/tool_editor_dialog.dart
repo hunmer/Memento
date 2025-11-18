@@ -47,9 +47,21 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
   // Tab 控制器
   late TabController _tabController;
 
+  // UI 处理器注册状态
+  bool _uiHandlersRegistered = false;
+
   @override
   void initState() {
     super.initState();
+
+    // 在第一帧渲染后注册 UI 处理器
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_uiHandlersRegistered && mounted) {
+        JSBridgeManager.instance.registerUIHandlers(context);
+        _uiHandlersRegistered = true;
+        debugPrint('✓ ToolEditorDialog: UI 处理器已注册');
+      }
+    });
 
     // 初始化 Tab 控制器（4个Tab：基本信息、参数列表、返回值、示例代码）
     // 默认激活"示例代码"tab以方便调试
