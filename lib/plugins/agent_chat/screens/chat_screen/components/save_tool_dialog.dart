@@ -8,11 +8,13 @@ import '../../../services/tool_template_service.dart';
 class SaveToolDialog extends StatefulWidget {
   final ChatMessage message;
   final ToolTemplateService templateService;
+  final List<Map<String, String>> declaredTools;
 
   const SaveToolDialog({
     super.key,
     required this.message,
     required this.templateService,
+    this.declaredTools = const [],
   });
 
   @override
@@ -22,14 +24,17 @@ class SaveToolDialog extends StatefulWidget {
 class _SaveToolDialogState extends State<SaveToolDialog> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _tagController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
   String? _errorMessage;
+  final List<String> _tags = [];
 
   @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
+    _tagController.dispose();
     super.dispose();
   }
 
@@ -118,6 +123,91 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
                 },
               ),
 
+              // 声明的工具（如果有）
+              if (widget.declaredTools.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(
+                  '声明使用的工具 (${widget.declaredTools.length})',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: widget.declaredTools.map((tool) {
+                      return Chip(
+                        avatar: const Icon(Icons.build, size: 16),
+                        label: Text(
+                          tool['toolName'] ?? tool['toolId'] ?? '',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 16),
+
+              // 标签输入
+              Text(
+                '标签（可选）',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _tagController,
+                      decoration: InputDecoration(
+                        hintText: '输入标签后按回车添加',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.label),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: _addTag,
+                          tooltip: '添加标签',
+                        ),
+                      ),
+                      onSubmitted: (_) => _addTag(),
+                    ),
+                  ),
+                ],
+              ),
+              if (_tags.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _tags.map((tag) {
+                    return Chip(
+                      label: Text(tag),
+                      onDeleted: () {
+                        setState(() {
+                          _tags.remove(tag);
+                        });
+                      },
+                      deleteIcon: const Icon(Icons.close, size: 16),
+                    );
+                  }).toList(),
+                ),
+              ],
+
               // 错误信息
               if (_errorMessage != null) ...[
                 const SizedBox(height: 12),
@@ -171,6 +261,17 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
     );
   }
 
+  /// 添加标签
+  void _addTag() {
+    final tag = _tagController.text.trim();
+    if (tag.isNotEmpty && !_tags.contains(tag)) {
+      setState(() {
+        _tags.add(tag);
+        _tagController.clear();
+      });
+    }
+  }
+
   /// 保存工具
   Future<void> _saveTool() async {
     if (!_formKey.currentState!.validate()) return;
@@ -193,6 +294,8 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
         name: name,
         description: description.isEmpty ? null : description,
         steps: steps,
+        declaredTools: widget.declaredTools,
+        tags: _tags,
       );
 
       if (mounted) {
@@ -217,13 +320,15 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
 Future<bool?> showSaveToolDialog(
   BuildContext context,
   ChatMessage message,
-  ToolTemplateService templateService,
-) {
+  ToolTemplateService templateService, {
+  List<Map<String, String>> declaredTools = const [],
+}) {
   return showDialog<bool>(
     context: context,
     builder: (context) => SaveToolDialog(
       message: message,
       templateService: templateService,
+      declaredTools: declaredTools,
     ),
   );
 }

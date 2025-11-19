@@ -28,6 +28,12 @@ class SavedToolTemplate {
   /// 使用次数
   int usageCount;
 
+  /// 用户声明使用的工具列表
+  final List<Map<String, String>> declaredTools;
+
+  /// 标签列表
+  final List<String> tags;
+
   SavedToolTemplate({
     required this.id,
     required this.name,
@@ -36,6 +42,8 @@ class SavedToolTemplate {
     required this.createdAt,
     this.lastUsedAt,
     this.usageCount = 0,
+    this.declaredTools = const [],
+    this.tags = const [],
   });
 
   /// 创建新模板
@@ -43,6 +51,8 @@ class SavedToolTemplate {
     required String name,
     String? description,
     required List<ToolCallStep> steps,
+    List<Map<String, String>>? declaredTools,
+    List<String>? tags,
   }) {
     return SavedToolTemplate(
       id: _uuid.v4(),
@@ -51,6 +61,8 @@ class SavedToolTemplate {
       steps: steps,
       createdAt: DateTime.now(),
       usageCount: 0,
+      declaredTools: declaredTools ?? [],
+      tags: tags ?? [],
     );
   }
 
@@ -68,6 +80,14 @@ class SavedToolTemplate {
           ? DateTime.parse(json['lastUsedAt'] as String)
           : null,
       usageCount: json['usageCount'] as int? ?? 0,
+      declaredTools: (json['declaredTools'] as List<dynamic>?)
+              ?.map((e) => Map<String, String>.from(e as Map))
+              .toList() ??
+          [],
+      tags: (json['tags'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
     );
   }
 
@@ -81,6 +101,8 @@ class SavedToolTemplate {
       'createdAt': createdAt.toIso8601String(),
       if (lastUsedAt != null) 'lastUsedAt': lastUsedAt!.toIso8601String(),
       'usageCount': usageCount,
+      if (declaredTools.isNotEmpty) 'declaredTools': declaredTools,
+      if (tags.isNotEmpty) 'tags': tags,
     };
   }
 
@@ -91,6 +113,8 @@ class SavedToolTemplate {
     List<ToolCallStep>? steps,
     DateTime? lastUsedAt,
     int? usageCount,
+    List<Map<String, String>>? declaredTools,
+    List<String>? tags,
   }) {
     return SavedToolTemplate(
       id: id,
@@ -100,6 +124,8 @@ class SavedToolTemplate {
       createdAt: createdAt,
       lastUsedAt: lastUsedAt ?? this.lastUsedAt,
       usageCount: usageCount ?? this.usageCount,
+      declaredTools: declaredTools ?? this.declaredTools,
+      tags: tags ?? this.tags,
     );
   }
 

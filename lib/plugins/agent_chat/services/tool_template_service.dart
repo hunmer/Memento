@@ -23,13 +23,23 @@ class ToolTemplateService extends ChangeNotifier {
   /// 确保模板已加载
   Future<void> ensureInitialized() => _initialLoadFuture;
 
-  /// 获取模板列表，可选关键词过滤
-  Future<List<SavedToolTemplate>> fetchTemplates({String? query}) async {
+  /// 获取模板列表，可选关键词和标签过滤
+  Future<List<SavedToolTemplate>> fetchTemplates({
+    String? query,
+    String? tag,
+  }) async {
     await ensureInitialized();
     if (query == null || query.trim().isEmpty) {
-      return templates;
+      if (tag == null || tag.trim().isEmpty) {
+        return templates;
+      }
+      return filterByTag(tag.trim());
     }
-    return searchTemplates(query.trim());
+    var result = searchTemplates(query.trim());
+    if (tag != null && tag.trim().isNotEmpty) {
+      result = result.where((t) => t.tags.contains(tag.trim())).toList();
+    }
+    return result;
   }
 
   /// 克隆模板步骤，确保去除执行态字段
@@ -92,6 +102,8 @@ class ToolTemplateService extends ChangeNotifier {
     required String name,
     String? description,
     required List<ToolCallStep> steps,
+    List<Map<String, String>>? declaredTools,
+    List<String>? tags,
   }) async {
     // 检查名称是否已存在
     if (_templates.any((t) => t.name == name)) {
@@ -102,6 +114,8 @@ class ToolTemplateService extends ChangeNotifier {
       name: name,
       description: description,
       steps: _normalizeSteps(steps),
+      declaredTools: declaredTools,
+      tags: tags,
     );
 
     _templates.insert(0, template);
@@ -186,6 +200,21 @@ class ToolTemplateService extends ChangeNotifier {
       return t.name.toLowerCase().contains(lowerQuery) ||
           (t.description?.toLowerCase().contains(lowerQuery) ?? false);
     }).toList();
+  }
+
+  /// 根据标签过滤模板
+  List<SavedToolTemplate> filterByTag(String tag) {
+    return _templates.where((t) => t.tags.contains(tag)).toList();
+  }
+
+  /// 获取所有标签（去重排序）
+  List<String> getAllTags() {
+    final allTags = <String>{};
+    for (var template in _templates) {
+      allTags.addAll(template.tags);
+    }
+    final sortedTags = allTags.toList()..sort();
+    return sortedTags;
   }
 
   List<ToolCallStep> _normalizeSteps(List<ToolCallStep> steps) {
