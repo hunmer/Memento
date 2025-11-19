@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:async';
 import 'package:openai_dart/openai_dart.dart';
 import '../models/ai_agent.dart';
-import '../controllers/prompt_replacement_controller.dart';
 import 'prompt_preset_service.dart';
 import 'dart:developer' as developer;
 
@@ -123,25 +122,11 @@ class RequestService {
     String input,
     AIAgent agent, {
     File? imageFile,
-    bool replacePrompt = true,
     List<ChatCompletionMessage>? contextMessages,
   }) async {
     try {
       developer.log('开始聊天请求: ${agent.id}', name: 'RequestService');
       developer.log('用户输入: $input', name: 'RequestService');
-
-      // 处理prompt替换
-      String processedInput = input;
-      if (replacePrompt) {
-        try {
-          processedInput = await PromptReplacementController().processPrompt(
-            input,
-          );
-          developer.log('Prompt替换结果: $processedInput', name: 'RequestService');
-        } catch (e) {
-          developer.log('Prompt替换失败: $e', name: 'RequestService', error: e);
-        }
-      }
 
       final client = _getClient(agent);
 
@@ -161,7 +146,7 @@ class RequestService {
             ChatCompletionMessage.system(content: effectiveSystemPrompt),
             ChatCompletionMessage.user(
               content: ChatCompletionUserMessageContent.parts([
-                ChatCompletionMessageContentPart.text(text: processedInput),
+                ChatCompletionMessageContentPart.text(text: input),
                 ChatCompletionMessageContentPart.image(
                   imageUrl: ChatCompletionMessageImageUrl(
                     url: 'data:image/jpeg;base64,$base64Image',
@@ -187,7 +172,7 @@ class RequestService {
         // 添加当前用户消息
         messages.add(
           ChatCompletionMessage.user(
-            content: ChatCompletionUserMessageContent.string(processedInput),
+            content: ChatCompletionUserMessageContent.string(input),
           ),
         );
 
@@ -236,7 +221,6 @@ class RequestService {
   /// [onComplete] - 完成时的回调
   /// [vision] - 是否启用vision模式
   /// [filePath] - 图片文件路径（vision模式下使用）
-  /// [replacePrompt] - 是否启用prompt替换
   /// [contextMessages] - 上下文消息列表，包含system消息和历史消息，按时间从旧到新排序
   /// [responseFormat] - 响应格式（用于 Structured Outputs）
   /// [shouldCancel] - 检查是否应该取消的函数
@@ -248,7 +232,6 @@ class RequestService {
     required Function() onComplete,
     bool vision = false,
     String? filePath,
-    bool replacePrompt = true,
     List<ChatCompletionMessage>? contextMessages,
     ResponseFormat? responseFormat,
     bool Function()? shouldCancel,
@@ -336,25 +319,6 @@ class RequestService {
         } else {
           onError('图片文件不存在: $filePath');
           return;
-        }
-      } else if (prompt != null && replacePrompt) {
-        // 非Vision模式下，如果有prompt且需要替换，则处理最后一个用户消息
-        try {
-          final processedPrompt = await PromptReplacementController()
-              .processPrompt(prompt);
-          for (int i = messages.length - 1; i >= 0; i--) {
-            if (messages[i].role == ChatCompletionMessageRole.user) {
-              messages[i] = ChatCompletionMessage.user(
-                content: ChatCompletionUserMessageContent.string(
-                  processedPrompt,
-                ),
-              );
-              break;
-            }
-          }
-          developer.log('Prompt替换结果: $processedPrompt', name: 'RequestService');
-        } catch (e) {
-          developer.log('Prompt替换失败: $e', name: 'RequestService', error: e);
         }
       }
 

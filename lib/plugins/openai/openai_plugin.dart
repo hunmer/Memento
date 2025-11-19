@@ -229,7 +229,6 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
         onComplete: () {
           // 完成回调
         },
-        replacePrompt: false, // JS API 不自动替换 prompt
       ).timeout(
         const Duration(seconds: 30),
         onTimeout: () {
@@ -301,7 +300,6 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
       final response = await RequestService.chat(
         'Hello',
         testAgent,
-        replacePrompt: false,
       ).timeout(
         const Duration(seconds: 10),
         onTimeout: () => throw Exception('Connection timeout'),

@@ -529,7 +529,6 @@ class ChatController extends ChangeNotifier {
                     _processNormalResponse(aiMessageId, secondResponse);
                   }
                 },
-                replacePrompt: false,
               );
             } catch (e) {
               debugPrint('第二阶段请求失败: $e');
@@ -550,7 +549,6 @@ class ChatController extends ChangeNotifier {
             _processNormalResponse(aiMessageId, firstResponse);
           }
         },
-        replacePrompt: false,
       );
     } catch (e) {
       debugPrint('请求AI回复失败: $e');
