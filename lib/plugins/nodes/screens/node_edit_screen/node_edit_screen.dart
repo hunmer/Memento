@@ -239,37 +239,115 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
     return Column(
       children: [
         // Quill 工具栏
-        quill.QuillToolbar.simple(
-          controller: _quillController,
-          configurations: const quill.QuillSimpleToolbarConfigurations(
-            showAlignmentButtons: true,
-            showBackgroundColorButton: true,
-            showBoldButton: true,
-            showCenterAlignment: true,
-            showClearFormat: true,
-            showColorButton: true,
-            showCodeBlock: true,
-            showDirection: false,
-            showDividers: true,
-            showFontFamily: false,
-            showFontSize: true,
-            showHeaderStyle: true,
-            showIndent: true,
-            showInlineCode: true,
-            showItalicButton: true,
-            showJustifyAlignment: true,
-            showLeftAlignment: true,
-            showLink: true,
-            showListBullets: true,
-            showListCheck: true,
-            showListNumbers: true,
-            showQuote: true,
-            showRightAlignment: true,
-            showSmallButton: false,
-            showStrikeThrough: true,
-            showSubscript: false,
-            showSuperscript: false,
-            showUnderLineButton: true,
+        Container(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              children: [
+                // 历史操作
+                quill.QuillToolbarHistoryButton(
+                  isUndo: true,
+                  controller: _quillController,
+                ),
+                quill.QuillToolbarHistoryButton(
+                  isUndo: false,
+                  controller: _quillController,
+                ),
+                const VerticalDivider(),
+
+                // 文本样式
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _quillController,
+                  attribute: quill.Attribute.bold,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _quillController,
+                  attribute: quill.Attribute.italic,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _quillController,
+                  attribute: quill.Attribute.underline,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _quillController,
+                  attribute: quill.Attribute.strikeThrough,
+                ),
+                quill.QuillToolbarClearFormatButton(
+                  controller: _quillController,
+                ),
+                const VerticalDivider(),
+
+                // 标题样式
+                quill.QuillToolbarSelectHeaderStyleDropdownButton(
+                  controller: _quillController,
+                ),
+                const VerticalDivider(),
+
+                // 颜色
+                quill.QuillToolbarColorButton(
+                  controller: _quillController,
+                  isBackground: false,
+                ),
+                quill.QuillToolbarColorButton(
+                  controller: _quillController,
+                  isBackground: true,
+                ),
+                const VerticalDivider(),
+
+                // 对齐方式
+                quill.QuillToolbarSelectAlignmentButton(
+                  controller: _quillController,
+                ),
+                const VerticalDivider(),
+
+                // 列表
+                quill.QuillToolbarToggleCheckListButton(
+                  controller: _quillController,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _quillController,
+                  attribute: quill.Attribute.ul,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _quillController,
+                  attribute: quill.Attribute.ol,
+                ),
+                const VerticalDivider(),
+
+                // 代码和引用
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _quillController,
+                  attribute: quill.Attribute.inlineCode,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _quillController,
+                  attribute: quill.Attribute.codeBlock,
+                ),
+                quill.QuillToolbarToggleStyleButton(
+                  controller: _quillController,
+                  attribute: quill.Attribute.blockQuote,
+                ),
+                const VerticalDivider(),
+
+                // 缩进
+                quill.QuillToolbarIndentButton(
+                  controller: _quillController,
+                  isIncrease: true,
+                ),
+                quill.QuillToolbarIndentButton(
+                  controller: _quillController,
+                  isIncrease: false,
+                ),
+                const VerticalDivider(),
+
+                // 链接
+                quill.QuillToolbarLinkStyleButton(
+                  controller: _quillController,
+                ),
+              ],
+            ),
           ),
         ),
         const Divider(height: 1),
@@ -279,7 +357,7 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
             padding: const EdgeInsets.all(16),
             child: quill.QuillEditor.basic(
               controller: _quillController,
-              configurations: const quill.QuillEditorConfigurations(
+              config: const quill.QuillEditorConfig(
                 padding: EdgeInsets.zero,
                 placeholder: '请输入笔记内容...',
               ),

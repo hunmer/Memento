@@ -74,11 +74,6 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     return BillLocalizations.of(context).name;
   }
 
-  Future<void> uninstall() async {
-    _promptController.unregisterPromptMethods();
-    _promptController.dispose();
-  }
-
   @override
   Widget buildMainView(BuildContext context) {
     return BillMainView();

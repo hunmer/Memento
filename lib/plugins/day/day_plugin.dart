@@ -69,8 +69,6 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
     _controller = DayController();
     await _controller.initialize();
 
-    // 初始化prompt控制器
-
     _isInitialized = true;
 
     // 注册 JS API（最后一步）
@@ -407,7 +405,6 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   void dispose() {
-    // 注销prompt替换方法
-    _promptController.unregisterPromptMethods();
+    // Cleanup resources if needed
   }
 }

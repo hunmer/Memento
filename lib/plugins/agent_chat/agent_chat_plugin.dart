@@ -58,20 +58,6 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
     // 初始化工具服务
     await ToolService.initialize();
-
-    // 注册插件分析处理器（如果 OpenAI 插件可用）
-    final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
-    if (openaiPlugin != null) {
-      JSBridgeManager.instance.registerPluginAnalysisHandler(
-        (methodName, params) async {
-          // 调用 OpenAI 插件的 Prompt 替换控制器
-          return await openaiPlugin.getPromptReplacementController().executeMethod(
-            methodName,
-            params,
-          );
-        },
-      );
-    }
   }
 
   @override

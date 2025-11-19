@@ -86,6 +86,9 @@ abstract class DiaryLocalizations {
 
   String get cannotSelectFutureDate;
   String get myDiary;
+  String get deleteDiary;
+  String get confirmDeleteDiary;
+  String get deleteDiaryMessage;
 }
 
 class _DiaryLocalizationsDelegate

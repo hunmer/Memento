@@ -30,7 +30,6 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   StoreController? _controller;
-  StorePromptController? _promptController;
   bool _isInitialized = false;
 
   /// 获取商店控制器
@@ -69,10 +68,6 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       await loadSettings(defaultPointSettings);
       _controller = StoreController(this);
       await _controller!.loadFromStorage();
-
-      // 初始化积分奖励事件处理器
-
-      _promptController!.initialize();
 
       _isInitialized = true;
 

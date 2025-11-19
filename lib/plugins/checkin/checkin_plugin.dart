@@ -144,11 +144,6 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   @override
-  Future<void> uninstall() async {
-    _promptController.unregisterPromptMethods();
-  }
-
-  @override
   Widget buildMainView(BuildContext context) {
     return const CheckinMainView();
   }

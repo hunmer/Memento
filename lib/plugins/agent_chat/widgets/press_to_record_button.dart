@@ -197,26 +197,34 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
     final buttonColor = _isRecording
         ? (widget.recordingColor ?? Colors.red)
         : (widget.color ?? Theme.of(context).iconTheme.color);
+    final tooltipText = widget.tooltip ?? (_isRecording ? '松开停止录音' : '长按开始录音');
 
-    return GestureDetector(
-      onLongPressStart: (_) => _startRecording(),
-      onLongPressEnd: (_) => _stopRecording(),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        child: IconButton(
-          icon: AnimatedScale(
-            scale: _isRecording ? 1.2 : 1.0,
-            duration: const Duration(milliseconds: 200),
-            child: IconTheme(
-              data: IconThemeData(
-                color: buttonColor,
-                size: widget.size,
+    return Tooltip(
+      message: tooltipText,
+      child: GestureDetector(
+        onLongPressStart: (_) => _startRecording(),
+        onLongPressEnd: (_) => _stopRecording(),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: widget.enabled && _isInitialized ? () {} : null,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(8.0),
+              child: AnimatedScale(
+                scale: _isRecording ? 1.2 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                child: IconTheme(
+                  data: IconThemeData(
+                    color: buttonColor,
+                    size: widget.size ?? 24.0,
+                  ),
+                  child: iconWidget,
+                ),
               ),
-              child: iconWidget,
             ),
           ),
-          onPressed: widget.enabled && _isInitialized ? null : null,
-          tooltip: widget.tooltip ?? (_isRecording ? '松开停止录音' : '长按开始录音'),
         ),
       ),
     );

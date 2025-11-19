@@ -129,4 +129,13 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
 
   @override
   String get recentlyUsed => '最近使用';
+
+  @override
+  String get deleteDiary => '删除日记';
+
+  @override
+  String get confirmDeleteDiary => '确认删除';
+
+  @override
+  String get deleteDiaryMessage => '确定要删除这篇日记吗？此操作无法撤销。';
 }
