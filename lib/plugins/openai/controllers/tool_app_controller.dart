@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/tool_app.dart';
-import 'plugin_analysis_controller.dart';
 
 class ToolAppController extends ChangeNotifier {
   List<ToolApp> _apps = [];
@@ -40,7 +39,8 @@ class ToolAppController extends ChangeNotifier {
   void handleAppClick(BuildContext context, String appId) {
     switch (appId) {
       case 'plugin-analysis':
-        PluginAnalysisController().showPluginAnalysisDialog(context);
+        // 插件分析功能已移除
+        debugPrint('Plugin analysis feature has been removed');
         break;
     }
   }

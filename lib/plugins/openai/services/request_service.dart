@@ -199,6 +199,7 @@ class RequestService {
   /// [replacePrompt] - 是否启用prompt替换
   /// [contextMessages] - 上下文消息列表，包含system消息和历史消息，按时间从旧到新排序
   /// [responseFormat] - 响应格式（用于 Structured Outputs）
+  /// [shouldCancel] - 检查是否应该取消的函数
   static Future<void> streamResponse({
     required AIAgent agent,
     String? prompt,
@@ -210,6 +211,7 @@ class RequestService {
     bool replacePrompt = true,
     List<ChatCompletionMessage>? contextMessages,
     ResponseFormat? responseFormat,
+    bool Function()? shouldCancel,
   }) async {
     try {
       // 如果提供了contextMessages，直接使用它作为消息列表
@@ -314,6 +316,13 @@ class RequestService {
       String finalResponse = '';
 
       await for (final res in stream) {
+        // 检查是否应该取消
+        if (shouldCancel != null && shouldCancel()) {
+          developer.log('流式响应被用户取消', name: 'RequestService');
+          onError('已取消发送');
+          return;
+        }
+
         final content = res.choices.first.delta.content;
         if (content != null) {
           totalChars += content.length;

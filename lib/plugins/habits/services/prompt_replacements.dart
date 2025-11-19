@@ -18,15 +18,18 @@ class HabitsPromptReplacements {
   /// - mode: 数据模式 (summary/compact/full, 默认summary)
   /// - startDate: 开始日期 (可选, YYYY-MM-DD 格式)
   /// - endDate: 结束日期 (可选, YYYY-MM-DD 格式)
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total, completions, totalTime, currentStreak } }
   /// - compact: 简化记录 { sum: {...}, recs: [...] } (无notes)
   /// - full: 完整数据 (包含所有字段)
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> getHabits(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final dateRange =
           params['startDate'] != null || params['endDate'] != null
               ? _parseDateRange(params)
@@ -39,14 +42,61 @@ class HabitsPromptReplacements {
       final recordController = _plugin.getRecordController();
       final skillController = _plugin.getSkillController();
 
-      // 4. 根据模式转换数据
-      final result = await _convertByMode(
-        habits,
-        recordController,
-        skillController,
-        mode,
-        dateRange,
-      );
+      // 4. 根据 customFields 或 mode 转换数据
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数（白名单模式）
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        // 构建完整数据用于字段过滤
+        final fullRecords = <Map<String, dynamic>>[];
+        for (final habit in habits) {
+          final habitMap = habit.toMap();
+          // 获取完成记录
+          final records = await recordController.getHabitCompletionRecords(habit.id);
+          final filteredRecords = dateRange != null
+              ? records.where((r) {
+                return r.date.isAfter(
+                      dateRange['startDate']!.subtract(const Duration(seconds: 1)),
+                    ) &&
+                    r.date.isBefore(
+                      dateRange['endDate']!.add(const Duration(days: 1)),
+                    );
+              }).toList()
+              : records;
+          // 添加统计信息
+          habitMap['completionCount'] = filteredRecords.length;
+          habitMap['totalDuration'] = filteredRecords.fold<int>(
+            0,
+            (sum, r) => sum + r.duration.inMinutes,
+          );
+          // 获取技能名称
+          if (habit.skillId != null) {
+            try {
+              final skill = skillController.getSkillById(habit.skillId);
+              habitMap['skillName'] = skill.title;
+            } catch (_) {}
+          }
+          fullRecords.add(habitMap);
+        }
+        final filteredRecords = FieldUtils.simplifyRecords(
+          fullRecords,
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = await _convertByMode(
+          habits,
+          recordController,
+          skillController,
+          mode,
+          dateRange,
+        );
+      }
 
       // 5. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);

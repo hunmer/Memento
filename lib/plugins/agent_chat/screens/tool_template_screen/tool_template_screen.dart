@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/tool_template_service.dart';
 import '../../models/saved_tool_template.dart';
+import '../chat_screen/components/save_tool_dialog.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 /// 工具模板管理界面
@@ -228,7 +229,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
-        onTap: () => _showTemplateDetail(template),
+        onTap: () => _editTemplate(template),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -269,22 +270,22 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                     icon: const Icon(Icons.more_vert),
                     onSelected: (value) {
                       switch (value) {
+                        case 'edit':
+                          _editTemplate(template);
+                          break;
                         case 'delete':
                           _deleteTemplate(template);
-                          break;
-                        case 'detail':
-                          _showTemplateDetail(template);
                           break;
                       }
                     },
                     itemBuilder: (context) => [
                       const PopupMenuItem(
-                        value: 'detail',
+                        value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.info_outline, size: 18),
+                            Icon(Icons.edit, size: 18, color: Colors.blue),
                             SizedBox(width: 8),
-                            Text('查看详情'),
+                            Text('编辑', style: TextStyle(color: Colors.blue)),
                           ],
                         ),
                       ),
@@ -427,124 +428,18 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
     }
   }
 
-  /// 显示模板详情
-  void _showTemplateDetail(SavedToolTemplate template) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(template.name),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (template.description != null) ...[
-                Text(
-                  template.description!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-              ],
-              const SizedBox(height: 8),
-
-              // 显示声明的工具
-              if (template.declaredTools.isNotEmpty) ...[
-                Text(
-                  '声明的工具 (${template.declaredTools.length})',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: template.declaredTools.map((tool) {
-                    return Chip(
-                      avatar: const Icon(Icons.build, size: 16),
-                      label: Text(
-                        tool['toolName'] ?? tool['toolId'] ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      visualDensity: VisualDensity.compact,
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-              ],
-
-              const SizedBox(height: 8),
-              Text(
-                '工具步骤 (${template.steps.length})',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ...template.steps.asMap().entries.map((entry) {
-                final index = entry.key;
-                final step = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${index + 1}. ${step.title}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (step.desc.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            step.desc,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
-                  }),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
-          ),
-          if (widget.onUseTemplate != null)
-            FilledButton.icon(
-              onPressed: () {
-                Navigator.pop(context);
-                widget.onUseTemplate!(template);
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('使用'),
-            ),
-        ],
-      ),
+  /// 编辑模板
+  Future<void> _editTemplate(SavedToolTemplate template) async {
+    final result = await showEditToolDialog(
+      context,
+      template,
+      widget.templateService,
     );
+
+    if (result == true && mounted) {
+      // 编辑成功，界面会自动更新（通过监听器）
+      setState(() {});
+    }
   }
 
   /// 删除模板

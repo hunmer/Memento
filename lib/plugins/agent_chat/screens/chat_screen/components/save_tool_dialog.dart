@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
 import '../../../models/chat_message.dart';
+import '../../../models/saved_tool_template.dart';
 import '../../../services/tool_template_service.dart';
 
-/// 保存工具对话框
+/// 保存/编辑工具对话框
 ///
-/// 用于输入工具模板名称和描述
+/// 用于输入工具模板名称和描述，支持创建和编辑两种模式
 class SaveToolDialog extends StatefulWidget {
-  final ChatMessage message;
+  final ChatMessage? message;
   final ToolTemplateService templateService;
   final List<Map<String, String>> declaredTools;
+  final SavedToolTemplate? editingTemplate;
 
   const SaveToolDialog({
     super.key,
-    required this.message,
+    this.message,
     required this.templateService,
     this.declaredTools = const [],
+    this.editingTemplate,
   });
+
+  /// 是否为编辑模式
+  bool get isEditMode => editingTemplate != null;
 
   @override
   State<SaveToolDialog> createState() => _SaveToolDialogState();
@@ -31,6 +37,18 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
   final List<String> _tags = [];
 
   @override
+  void initState() {
+    super.initState();
+    // 如果是编辑模式，回显数据
+    if (widget.isEditMode) {
+      final template = widget.editingTemplate!;
+      _nameController.text = template.name;
+      _descriptionController.text = template.description ?? '';
+      _tags.addAll(template.tags);
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
@@ -40,12 +58,19 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final stepsCount = widget.isEditMode
+        ? widget.editingTemplate!.steps.length
+        : (widget.message?.toolCall?.steps.length ?? 0);
+
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.save, color: Colors.blue),
-          SizedBox(width: 8),
-          Text('保存工具'),
+          Icon(
+            widget.isEditMode ? Icons.edit : Icons.save,
+            color: Colors.blue,
+          ),
+          const SizedBox(width: 8),
+          Text(widget.isEditMode ? '编辑工具模板' : '保存工具'),
         ],
       ),
       content: SingleChildScrollView(
@@ -69,7 +94,9 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '将保存 ${widget.message.toolCall?.steps.length ?? 0} 个工具调用步骤',
+                        widget.isEditMode
+                            ? '编辑模板信息 (包含 $stepsCount 个工具调用步骤)'
+                            : '将保存 $stepsCount 个工具调用步骤',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.blue[900],
@@ -99,6 +126,19 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
                   if (value.trim().length > 50) {
                     return '名称不能超过50个字符';
                   }
+                  // 编辑模式下，允许保留原名称
+                  if (widget.isEditMode) {
+                    final originalName = widget.editingTemplate!.name;
+                    if (value.trim() == originalName) {
+                      return null;
+                    }
+                  }
+                  // 检查名称是否已存在
+                  final exists = widget.templateService.templates
+                      .any((t) => t.name == value.trim());
+                  if (exists) {
+                    return '该名称已存在';
+                  }
                   return null;
                 },
               ),
@@ -124,10 +164,10 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
               ),
 
               // 声明的工具（如果有）
-              if (widget.declaredTools.isNotEmpty) ...[
+              if (_getDeclaredTools().isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(
-                  '声明使用的工具 (${widget.declaredTools.length})',
+                  '声明使用的工具 (${_getDeclaredTools().length})',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -144,7 +184,7 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: widget.declaredTools.map((tool) {
+                    children: _getDeclaredTools().map((tool) {
                       return Chip(
                         avatar: const Icon(Icons.build, size: 16),
                         label: Text(
@@ -261,6 +301,14 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
     );
   }
 
+  /// 获取声明的工具列表
+  List<Map<String, String>> _getDeclaredTools() {
+    if (widget.isEditMode) {
+      return widget.editingTemplate!.declaredTools;
+    }
+    return widget.declaredTools;
+  }
+
   /// 添加标签
   void _addTag() {
     final tag = _tagController.text.trim();
@@ -272,7 +320,7 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
     }
   }
 
-  /// 保存工具
+  /// 保存或更新工具
   Future<void> _saveTool() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -284,28 +332,52 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
     try {
       final name = _nameController.text.trim();
       final description = _descriptionController.text.trim();
-      final steps = widget.message.toolCall?.steps ?? [];
 
-      if (steps.isEmpty) {
-        throw Exception('没有可保存的工具步骤');
-      }
-
-      await widget.templateService.createTemplate(
-        name: name,
-        description: description.isEmpty ? null : description,
-        steps: steps,
-        declaredTools: widget.declaredTools,
-        tags: _tags,
-      );
-
-      if (mounted) {
-        Navigator.pop(context, true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('工具 "$name" 保存成功'),
-            backgroundColor: Colors.green,
-          ),
+      if (widget.isEditMode) {
+        // 编辑模式：更新现有模板
+        final template = widget.editingTemplate!;
+        final updatedTemplate = template.copyWith(
+          name: name,
+          description: description.isEmpty ? null : description,
+          tags: _tags,
         );
+
+        await widget.templateService.updateTemplate(updatedTemplate);
+
+        if (mounted) {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('工具模板 "$name" 更新成功'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // 创建模式：新建模板
+        final steps = widget.message?.toolCall?.steps ?? [];
+
+        if (steps.isEmpty) {
+          throw Exception('没有可保存的工具步骤');
+        }
+
+        await widget.templateService.createTemplate(
+          name: name,
+          description: description.isEmpty ? null : description,
+          steps: steps,
+          declaredTools: _getDeclaredTools(),
+          tags: _tags,
+        );
+
+        if (mounted) {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('工具 "$name" 保存成功'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       setState(() {
@@ -329,6 +401,21 @@ Future<bool?> showSaveToolDialog(
       message: message,
       templateService: templateService,
       declaredTools: declaredTools,
+    ),
+  );
+}
+
+/// 显示编辑工具模板对话框
+Future<bool?> showEditToolDialog(
+  BuildContext context,
+  SavedToolTemplate template,
+  ToolTemplateService templateService,
+) {
+  return showDialog<bool>(
+    context: context,
+    builder: (context) => SaveToolDialog(
+      templateService: templateService,
+      editingTemplate: template,
     ),
   );
 }

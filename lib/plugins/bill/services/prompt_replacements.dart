@@ -18,15 +18,18 @@ class BillPromptReplacements {
   /// - startDate: 开始日期 (可选, YYYY-MM-DD 格式)
   /// - endDate: 结束日期 (可选, YYYY-MM-DD 格式)
   /// - mode: 数据模式 (summary/compact/full, 默认summary)
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total, inc, exp, net }, topCat: [...] }
   /// - compact: 简化记录 { sum: {...}, recs: [...] }
   /// - full: 完整数据 (包含所有字段)
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> getBills(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final dateRange = _parseDateRange(params);
 
       // 2. 调用 jsAPI 获取账单数据
@@ -35,8 +38,24 @@ class BillPromptReplacements {
         dateRange['endDate'],
       );
 
-      // 3. 根据模式转换数据
-      final result = _convertByMode(allBills, mode);
+      // 3. 应用字段过滤
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数（白名单模式）
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        final filteredRecords = FieldUtils.simplifyRecords(
+          allBills,
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = _convertByMode(allBills, mode);
+      }
 
       // 4. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);

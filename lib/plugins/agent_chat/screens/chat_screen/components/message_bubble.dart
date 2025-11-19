@@ -21,6 +21,7 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(String messageId)? onDelete;
   final Future<void> Function(String messageId)? onRegenerate;
   final Future<void> Function(ChatMessage message)? onSaveTool;
+  final Future<void> Function(String messageId)? onRerunTool;
   final bool hasAgent;
   final StorageManager? storage;
 
@@ -31,6 +32,7 @@ class MessageBubble extends StatelessWidget {
     this.onDelete,
     this.onRegenerate,
     this.onSaveTool,
+    this.onRerunTool,
     this.hasAgent = true,
     this.storage,
   });
@@ -421,6 +423,9 @@ class MessageBubble extends StatelessWidget {
           case 'save_tool':
             onSaveTool?.call(message);
             break;
+          case 'rerun_tool':
+            onRerunTool?.call(message.id);
+            break;
           case 'view_details':
             _showToolDetailDialog(context);
             break;
@@ -469,6 +474,17 @@ class MessageBubble extends StatelessWidget {
                     Icon(Icons.save, size: 18, color: Colors.blue),
                     SizedBox(width: 8),
                     Text('保存工具', style: TextStyle(color: Colors.blue)),
+                  ],
+                ),
+              ),
+            if (!message.isUser && isToolCallMessage && onRerunTool != null)
+              const PopupMenuItem(
+                value: 'rerun_tool',
+                child: Row(
+                  children: [
+                    Icon(Icons.replay, size: 18, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Text('重新执行工具', style: TextStyle(color: Colors.orange)),
                   ],
                 ),
               ),

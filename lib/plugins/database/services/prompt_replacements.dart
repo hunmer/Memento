@@ -49,16 +49,19 @@ class DatabasePromptReplacements {
   /// 参数:
   /// - databaseId: 数据库ID (可选，留空则获取所有数据库的记录)
   /// - mode: 数据模式 (summary/compact/full, 默认summary)
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   /// - limit: 记录数量限制 (默认100)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total, timeRange } }
   /// - compact: 简化记录 { sum: {...}, recs: [...] } (仅关键字段)
   /// - full: 完整记录数据
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> getRecords(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final databaseId = params['databaseId'] as String?;
       final limit = (params['limit'] as num?)?.toInt() ?? 100;
 
@@ -78,8 +81,24 @@ class DatabasePromptReplacements {
         records = records.sublist(records.length - limit);
       }
 
-      // 4. 根据模式转换数据
-      final result = _convertRecordsByMode(records, mode);
+      // 4. 应用字段过滤
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数（白名单模式）
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        final filteredRecords = FieldUtils.simplifyRecords(
+          records,
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = _convertRecordsByMode(records, mode);
+      }
 
       // 5. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);
@@ -135,15 +154,18 @@ class DatabasePromptReplacements {
   /// - databaseId: 数据库ID (必需)
   /// - filters: 过滤条件 (JSON格式，例如：{"字段名": "值"})
   /// - mode: 数据模式 (summary/compact/full, 默认compact)
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total } }
   /// - compact: 简化记录 { sum: {...}, recs: [...] }
   /// - full: 完整记录数据
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> queryRecords(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final databaseId = params['databaseId'] as String?;
       final filtersStr = params['filters'] as String? ?? '{}';
 
@@ -173,8 +195,24 @@ class DatabasePromptReplacements {
         records = _filterRecords(records, filters);
       }
 
-      // 5. 根据模式转换数据
-      final result = _convertRecordsByMode(records, mode);
+      // 5. 应用字段过滤
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数（白名单模式）
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        final filteredRecords = FieldUtils.simplifyRecords(
+          records,
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = _convertRecordsByMode(records, mode);
+      }
 
       // 6. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);
@@ -244,15 +282,18 @@ class DatabasePromptReplacements {
   /// - startDate: 开始日期 (可选，格式：YYYY-MM-DD)
   /// - endDate: 结束日期 (可选，格式：YYYY-MM-DD)
   /// - mode: 数据模式 (summary/compact/full, 默认compact)
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total, dateRange } }
   /// - compact: 简化记录 { sum: {...}, recs: [...] }
   /// - full: 完整记录数据
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> getRecordsByDateRange(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final databaseId = params['databaseId'] as String?;
       final startDateStr = params['startDate'] as String?;
       final endDateStr = params['endDate'] as String?;
@@ -296,8 +337,24 @@ class DatabasePromptReplacements {
         records = _filterRecordsByDateRange(records, startDate, endDate);
       }
 
-      // 5. 根据模式转换数据
-      final result = _convertRecordsByMode(records, mode);
+      // 5. 应用字段过滤
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数（白名单模式）
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        final filteredRecords = FieldUtils.simplifyRecords(
+          records,
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = _convertRecordsByMode(records, mode);
+      }
 
       // 6. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);

@@ -477,6 +477,43 @@ return result;
 
     final buffer = StringBuffer();
     buffer.writeln('\n## 📚 工具详细文档\n');
+
+    // 添加字段过滤机制说明
+    buffer.writeln('### ⚙️ 字段过滤机制（减少 Token 消耗）\n');
+    buffer.writeln('**所有返回数据的插件方法**都支持以下可选参数来优化返回的数据量：\n');
+    buffer.writeln('#### 参数说明\n');
+    buffer.writeln('1. **mode** (字符串): 数据模式');
+    buffer.writeln('   - `"summary"` 或 `"s"`: 仅返回统计数据（推荐：最省 Token）');
+    buffer.writeln('   - `"compact"` 或 `"c"`: 返回简化字段的记录列表（平衡）');
+    buffer.writeln('   - `"full"` 或 `"f"`: 返回完整数据（默认）');
+    buffer.writeln('');
+    buffer.writeln('2. **fields** (数组): 直接指定返回字段（优先级高于 mode）');
+    buffer.writeln('   - 示例: `fields: ["id", "title", "start", "end"]`');
+    buffer.writeln('   - 只返回指定字段，其他字段忽略\n');
+    buffer.writeln('#### 使用建议\n');
+    buffer.writeln('- 当只需要统计时，使用 `mode: "summary"`');
+    buffer.writeln('- 当需要列表但不需要详细描述时，使用 `mode: "compact"`');
+    buffer.writeln('- 当需要特定字段时，使用 `fields: [...]`');
+    buffer.writeln('- Token 节省比例：summary(90%) > compact(75%) > full(0%)\n');
+    buffer.writeln('#### 使用示例\n');
+    buffer.writeln('```javascript');
+    buffer.writeln('// 示例1: 使用 mode 参数获取摘要数据（最省 Token）');
+    buffer.writeln('const summary = await Memento.plugins.activity.getActivities({');
+    buffer.writeln('  startDate: "2025-01-01",');
+    buffer.writeln('  endDate: "2025-01-31",');
+    buffer.writeln('  mode: "summary"  // 仅返回统计数据');
+    buffer.writeln('});');
+    buffer.writeln('// 返回: { sum: { total: 50, dur: 3600, avg: 72 } }\n');
+    buffer.writeln('// 示例2: 使用 fields 参数指定返回字段');
+    buffer.writeln('const compactData = await Memento.plugins.activity.getActivities({');
+    buffer.writeln('  startDate: "2025-01-01",');
+    buffer.writeln('  endDate: "2025-01-31",');
+    buffer.writeln('  fields: ["id", "title", "start", "end", "dur"]  // 只返回这些字段');
+    buffer.writeln('});');
+    buffer.writeln('// 返回: { recs: [{ id, title, start, end, dur }, ...] }');
+    buffer.writeln('```\n');
+    buffer.writeln('---\n');
+
     buffer.writeln('### 系统 API（始终可用）\n');
     buffer.writeln('在生成的 JavaScript 代码中，你可以**直接调用**以下系统 API：\n');
     buffer.writeln('- `await Memento.system.getCurrentTime()` - 获取当前完整时间信息');

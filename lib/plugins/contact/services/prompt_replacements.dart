@@ -18,15 +18,18 @@ class ContactPromptReplacements {
   /// - mode: 数据模式 (summary/compact/full, 默认summary)
   /// - tag: 标签筛选 (可选)
   /// - uncontactedDays: 未联系天数筛选 (可选)
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total, groups }, topGroups: [...] }
   /// - compact: 简化记录 { sum: {...}, recs: [...] } (无notes/address)
   /// - full: 完整数据 (包含所有字段)
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> getContacts(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final String? tag = params['tag'] as String?;
       final int? uncontactedDays = params['uncontactedDays'] as int?;
 
@@ -47,8 +50,36 @@ class ContactPromptReplacements {
         ).toList();
       }
 
-      // 4. 根据模式转换数据
-      final result = await _convertByMode(filteredContacts, mode);
+      // 4. 根据 customFields 或 mode 转换数据
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数（白名单模式）
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        // 转换联系人为 JSON Map
+        final contactJsonList = <Map<String, dynamic>>[];
+        for (final contact in filteredContacts) {
+          final contactMap = contact.toJson();
+          // 添加交互记录数量
+          final interactions = await _plugin.controller.getInteractionsByContactId(contact.id);
+          contactMap['interactionCount'] = interactions.length;
+          // 转换时间戳为可读格式
+          contactMap['createdTime'] = FieldUtils.formatDateTime(contact.createdTime);
+          contactMap['lastContactTime'] = FieldUtils.formatDateTime(contact.lastContactTime);
+          contactJsonList.add(contactMap);
+        }
+        final filteredRecords = FieldUtils.simplifyRecords(
+          contactJsonList,
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = await _convertByMode(filteredContacts, mode);
+      }
 
       // 5. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);

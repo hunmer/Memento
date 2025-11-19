@@ -44,6 +44,9 @@ class ChatController extends ChangeNotifier {
   /// 是否正在发送消息
   bool _isSending = false;
 
+  /// 是否正在取消发送
+  bool _isCancelling = false;
+
   /// 选中的文件附件
   final List<File> _selectedFiles = [];
 
@@ -68,6 +71,7 @@ class ChatController extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSending => _isSending;
+  bool get isCancelling => _isCancelling;
   AIAgent? get currentAgent => _currentAgent;
   List<File> get selectedFiles => _selectedFiles;
   String get inputText => _inputText;
@@ -202,6 +206,15 @@ class ChatController extends ChangeNotifier {
 
   // ========== 消息操作 ==========
 
+  /// 取消正在发送的消息
+  void cancelSending() {
+    if (!_isSending) return;
+
+    _isCancelling = true;
+    notifyListeners();
+    debugPrint('🛑 用户请求取消发送消息');
+  }
+
   /// 发送消息
   Future<void> sendMessage() async {
     if (_inputText.trim().isEmpty || _isSending) return;
@@ -210,6 +223,7 @@ class ChatController extends ChangeNotifier {
     }
 
     _isSending = true;
+    _isCancelling = false; // 重置取消标志
     notifyListeners();
 
     try {
@@ -277,6 +291,7 @@ class ChatController extends ChangeNotifier {
       rethrow;
     } finally {
       _isSending = false;
+      _isCancelling = false;
       notifyListeners();
     }
   }
@@ -367,6 +382,7 @@ class ChatController extends ChangeNotifier {
                 ),
               )
             : null,
+        shouldCancel: () => _isCancelling, // 传递取消检查函数
         onToken: (token) {
           buffer.write(token);
           tokenCount++;
@@ -464,6 +480,7 @@ class ChatController extends ChangeNotifier {
                     schema: ToolService.toolCallSchema,
                   ),
                 ),
+                shouldCancel: () => _isCancelling, // 传递取消检查函数
                 onToken: (token) {
                   buffer.write(token);
                   tokenCount++;
@@ -1013,10 +1030,14 @@ class ChatController extends ChangeNotifier {
         final step = toolCall.steps[i];
         debugPrint('  步骤 ${i + 1}: ${step.title}');
 
-        // 更新步骤为执行中
+        // 更新步骤为执行中（创建新的列表以触发UI更新）
         step.status = ToolCallStatus.running;
-        updatedMessage = updatedMessage.copyWith(toolCall: toolCall);
+        final updatedSteps = List<ToolCallStep>.from(toolCall.steps);
+        updatedMessage = updatedMessage.copyWith(
+          toolCall: ToolCallResponse(steps: updatedSteps),
+        );
         await messageService.updateMessage(updatedMessage);
+        notifyListeners(); // 立即通知UI更新
 
         // 执行工具调用
         if (step.method == 'run_js') {
@@ -1024,22 +1045,30 @@ class ChatController extends ChangeNotifier {
             final result = await ToolService.executeJsCode(step.data);
             debugPrint('  ✅ 步骤 ${i + 1} 执行成功');
 
-            // 更新步骤为成功
+            // 更新步骤为成功（创建新的列表以触发UI更新）
             step.result = result;
             step.status = ToolCallStatus.success;
-            updatedMessage = updatedMessage.copyWith(toolCall: toolCall);
+            final successSteps = List<ToolCallStep>.from(toolCall.steps);
+            updatedMessage = updatedMessage.copyWith(
+              toolCall: ToolCallResponse(steps: successSteps),
+            );
             await messageService.updateMessage(updatedMessage);
+            notifyListeners(); // 立即通知UI更新
 
             // 收集工具结果到buffer
             toolResultsBuffer.writeln('步骤 ${i + 1}: ${step.title}');
             toolResultsBuffer.writeln('结果: $result');
             toolResultsBuffer.writeln();
           } catch (e) {
-            // 更新步骤为失败
+            // 更新步骤为失败（创建新的列表以触发UI更新）
             step.error = e.toString();
             step.status = ToolCallStatus.failed;
-            updatedMessage = updatedMessage.copyWith(toolCall: toolCall);
+            final failedSteps = List<ToolCallStep>.from(toolCall.steps);
+            updatedMessage = updatedMessage.copyWith(
+              toolCall: ToolCallResponse(steps: failedSteps),
+            );
             await messageService.updateMessage(updatedMessage);
+            notifyListeners(); // 立即通知UI更新
 
             // 收集错误到buffer
             toolResultsBuffer.writeln('步骤 ${i + 1}: ${step.title}');
@@ -1359,23 +1388,29 @@ class ChatController extends ChangeNotifier {
     for (var i = 0; i < steps.length; i++) {
       final step = steps[i];
 
-      // 更新步骤状态为运行中
+      // 更新步骤状态为运行中（创建新的列表以触发UI更新）
       step.status = ToolCallStatus.running;
-      await _updateMessageToolSteps(messageId, steps);
+      final runningSteps = List<ToolCallStep>.from(steps);
+      await _updateMessageToolSteps(messageId, runningSteps);
+      notifyListeners(); // 立即通知UI更新
 
       try {
         // 执行步骤
         final result = await ToolService.executeToolStep(step);
 
-        // 更新步骤状态为成功
+        // 更新步骤状态为成功（创建新的列表以触发UI更新）
         step.status = ToolCallStatus.success;
         step.result = result;
-        await _updateMessageToolSteps(messageId, steps);
+        final successSteps = List<ToolCallStep>.from(steps);
+        await _updateMessageToolSteps(messageId, successSteps);
+        notifyListeners(); // 立即通知UI更新
       } catch (e) {
-        // 更新步骤状态为失败
+        // 更新步骤状态为失败（创建新的列表以触发UI更新）
         step.status = ToolCallStatus.failed;
         step.error = e.toString();
-        await _updateMessageToolSteps(messageId, steps);
+        final failedSteps = List<ToolCallStep>.from(steps);
+        await _updateMessageToolSteps(messageId, failedSteps);
+        notifyListeners(); // 立即通知UI更新
         break; // 停止执行后续步骤
       }
     }
@@ -1404,6 +1439,46 @@ class ChatController extends ChangeNotifier {
       );
       await messageService.updateMessage(updatedMessage);
       notifyListeners();
+    }
+  }
+
+  /// 重新执行工具调用
+  Future<void> rerunToolCall(String messageId) async {
+    try {
+      // 获取消息
+      final message = messageService.getMessage(conversation.id, messageId);
+      if (message == null) {
+        throw Exception('消息不存在');
+      }
+
+      // 检查是否有工具调用
+      if (message.toolCall == null || message.toolCall!.steps.isEmpty) {
+        throw Exception('该消息不包含工具调用');
+      }
+
+      debugPrint('🔄 开始重新执行工具调用, messageId=${messageId.substring(0, 8)}');
+
+      // 重置所有步骤状态
+      final resetSteps = message.toolCall!.steps.map((step) {
+        return step.withoutRuntimeState(state: ToolCallStatus.pending);
+      }).toList();
+
+      // 更新消息
+      var updatedMessage = message.copyWith(
+        toolCall: ToolCallResponse(steps: resetSteps),
+      );
+      await messageService.updateMessage(updatedMessage);
+      notifyListeners();
+
+      debugPrint('✅ 步骤状态已重置, 开始重新执行 ${resetSteps.length} 个步骤');
+
+      // 重新执行所有步骤
+      await _executeToolSteps(messageId, resetSteps);
+
+      debugPrint('✅ 工具调用重新执行完成');
+    } catch (e) {
+      debugPrint('❌ 重新执行工具调用失败: $e');
+      rethrow;
     }
   }
 
