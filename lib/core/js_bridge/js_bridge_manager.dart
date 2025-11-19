@@ -22,6 +22,11 @@ class JSBridgeManager {
   bool _initialized = false;
   final Map<String, PluginBase> _registeredPlugins = {};
 
+  // 工具调用上下文管理
+  final Map<String, Map<String, dynamic>> _toolCallContexts = {};
+  String? _currentToolCallId;
+  int _currentStepIndex = -1;
+
   /// 初始化 JS 引擎
   Future<void> initialize() async {
     if (_initialized) return;
@@ -237,6 +242,9 @@ class JSBridgeManager {
 
     // 注册系统级 API
     await _registerSystemAPIs();
+
+    // 注册工具调用 API
+    await _registerToolCallAPIs();
   }
 
   /// 注册系统级 API（时间、设备信息等）
@@ -382,6 +390,108 @@ class JSBridgeManager {
     ''');
   }
 
+  /// 注册工具调用 API（步骤间结果传递）
+  Future<void> _registerToolCallAPIs() async {
+    if (_engine == null) return;
+
+    // 1. setResult - 设置结果
+    await _engine!.registerFunction('Memento_toolCall_setResult', ([dynamic a]) async {
+      try {
+        final params = a as Map<String, dynamic>?;
+        if (params == null) {
+          throw Exception('setResult 需要参数对象 {id?, value}');
+        }
+
+        final id = params['id'] as String?;
+        final value = params['value'];
+
+        if (value == null) {
+          throw Exception('setResult 需要提供 value 参数');
+        }
+
+        setToolCallResult(id, value);
+        return jsonEncode({'success': true});
+      } catch (e) {
+        print('[ToolCall API] setResult 失败: $e');
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 2. getResult - 获取结果
+    await _engine!.registerFunction('Memento_toolCall_getResult', ([dynamic a]) async {
+      try {
+        final params = a as Map<String, dynamic>?;
+        if (params == null) {
+          throw Exception('getResult 需要参数对象 {id?, step?, default?}');
+        }
+
+        final id = params['id'] as String?;
+        final step = params['step'] as int?;
+        final defaultValue = params['default'];
+
+        final result = getToolCallResult(id, step, defaultValue);
+
+        // 序列化结果
+        return _serializeResult(result);
+      } catch (e) {
+        print('[ToolCall API] getResult 失败: $e');
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 在 JS 中创建 toolCall API 代理
+    await _engine!.evaluateDirect('''
+      (function() {
+        var namespace = globalThis.Memento;
+
+        // 创建 toolCall 命名空间
+        namespace.toolCall = {};
+
+        // setResult API
+        namespace.toolCall.setResult = function(params) {
+          if (!params || typeof params !== 'object') {
+            throw new Error('setResult 需要参数对象 {id?, value}');
+          }
+          return Memento_toolCall_setResult(params).then(function(result) {
+            if (typeof result === 'string') {
+              try {
+                return JSON.parse(result);
+              } catch (e) {
+                return result;
+              }
+            }
+            return result;
+          });
+        };
+
+        // getResult API
+        namespace.toolCall.getResult = function(params) {
+          if (!params || typeof params !== 'object') {
+            throw new Error('getResult 需要参数对象 {id?, step?, default?}');
+          }
+          return Memento_toolCall_getResult(params).then(function(result) {
+            if (typeof result === 'string') {
+              try {
+                return JSON.parse(result);
+              } catch (e) {
+                return result;
+              }
+            }
+            return result;
+          });
+        };
+
+        // getCurrentStep - 获取当前步骤索引（只读）
+        namespace.toolCall.getCurrentStep = function() {
+          // 这个值由 Dart 端在执行时设置，这里只是占位
+          return -1;
+        };
+      })();
+    ''');
+
+    print('✓ 工具调用 API 已注册 (setResult/getResult)');
+  }
+
   /// 获取平台名称
   String _getPlatformName() {
     if (kIsWeb) return 'web';
@@ -444,6 +554,93 @@ class JSBridgeManager {
 
   /// 获取所有已注册的插件 ID
   List<String> get registeredPluginIds => _registeredPlugins.keys.toList();
+
+  // ==================== 工具调用上下文管理 ====================
+
+  /// 初始化工具调用上下文
+  void initToolCallContext(String toolCallId) {
+    _toolCallContexts[toolCallId] = {};
+    print('[JSBridge] 初始化工具调用上下文: $toolCallId');
+  }
+
+  /// 清除工具调用上下文
+  void clearToolCallContext(String toolCallId) {
+    _toolCallContexts.remove(toolCallId);
+    if (_currentToolCallId == toolCallId) {
+      _currentToolCallId = null;
+      _currentStepIndex = -1;
+    }
+    print('[JSBridge] 清除工具调用上下文: $toolCallId');
+  }
+
+  /// 设置当前执行上下文（工具调用ID和步骤索引）
+  void setCurrentExecution(String toolCallId, int stepIndex) {
+    _currentToolCallId = toolCallId;
+    _currentStepIndex = stepIndex;
+  }
+
+  /// 在工具调用上下文中设置结果
+  ///
+  /// 从 JavaScript 中调用: await Memento.toolCall.setResult({id: 'myKey', value: {...}})
+  /// 从 Dart 中调用: jsBridge.setToolCallResult('myKey', value)
+  void setToolCallResult(String? id, dynamic value) {
+    if (_currentToolCallId == null) {
+      throw Exception('没有活动的工具调用上下文');
+    }
+
+    final context = _toolCallContexts[_currentToolCallId];
+    if (context == null) {
+      throw Exception('工具调用上下文不存在: $_currentToolCallId');
+    }
+
+    // 使用自定义 ID 或当前步骤索引作为键
+    final key = id ?? 'step_$_currentStepIndex';
+    context[key] = value;
+    print('[JSBridge] 设置结果: $key = $value');
+  }
+
+  /// 从工具调用上下文中获取结果
+  ///
+  /// 从 JavaScript 中调用:
+  /// - await Memento.toolCall.getResult({id: 'myKey'})
+  /// - await Memento.toolCall.getResult({step: 0})
+  /// - await Memento.toolCall.getResult({id: 'myKey', default: {}})
+  /// 从 Dart 中调用: jsBridge.getToolCallResult('myKey', null, defaultValue)
+  dynamic getToolCallResult(String? id, int? step, dynamic defaultValue) {
+    if (_currentToolCallId == null) {
+      if (defaultValue != null) {
+        return defaultValue;
+      }
+      throw Exception('没有活动的工具调用上下文');
+    }
+
+    final context = _toolCallContexts[_currentToolCallId];
+    if (context == null) {
+      if (defaultValue != null) {
+        return defaultValue;
+      }
+      throw Exception('工具调用上下文不存在: $_currentToolCallId');
+    }
+
+    // 优先使用 ID，其次使用步骤索引
+    String key;
+    if (id != null) {
+      key = id;
+    } else if (step != null) {
+      key = 'step_$step';
+    } else {
+      throw Exception('必须提供 id 或 step 参数');
+    }
+
+    // 获取结果，如果不存在则返回默认值
+    final result = context[key];
+    if (result == null && defaultValue != null) {
+      return defaultValue;
+    }
+
+    print('[JSBridge] 获取结果: $key = $result');
+    return result;
+  }
 
   /// 释放资源
   Future<void> dispose() async {

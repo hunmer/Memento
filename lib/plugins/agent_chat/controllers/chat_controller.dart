@@ -20,6 +20,7 @@ import '../services/tool_service.dart';
 import '../services/tool_template_service.dart';
 import '../services/message_detail_service.dart';
 import '../../../utils/file_picker_helper.dart';
+import '../../../core/js_bridge/js_bridge_manager.dart';
 
 /// 聊天控制器
 ///
@@ -1024,6 +1025,10 @@ class ChatController extends ChangeNotifier {
       final toolResultsBuffer = StringBuffer();
       debugPrint('🚀 开始执行 ${toolCall.steps.length} 个步骤');
 
+      // 初始化工具调用上下文（用于步骤间结果传递）
+      final jsBridge = JSBridgeManager.instance;
+      jsBridge.initToolCallContext(messageId);
+
       for (int i = 0; i < toolCall.steps.length; i++) {
         final step = toolCall.steps[i];
         debugPrint('  步骤 ${i + 1}: ${step.title}');
@@ -1040,8 +1045,21 @@ class ChatController extends ChangeNotifier {
         // 执行工具调用
         if (step.method == 'run_js') {
           try {
+            // 设置当前执行上下文（供 JavaScript 中的 setResult/getResult 使用）
+            jsBridge.setCurrentExecution(messageId, i);
+
             final result = await ToolService.executeJsCode(step.data);
             debugPrint('  ✅ 步骤 ${i + 1} 执行成功');
+
+            // 自动将步骤结果保存到上下文（供后续步骤通过索引获取）
+            try {
+              // 尝试解析结果为 JSON 对象
+              final parsedResult = jsonDecode(result);
+              jsBridge.setToolCallResult('step_$i', parsedResult);
+            } catch (e) {
+              // 如果不是 JSON，直接保存原始字符串
+              jsBridge.setToolCallResult('step_$i', result);
+            }
 
             // 更新步骤为成功（创建新的列表以触发UI更新）
             step.result = result;
@@ -1081,6 +1099,9 @@ class ChatController extends ChangeNotifier {
             );
             await messageService.updateMessage(updatedMessage);
 
+            // 清除工具调用上下文
+            jsBridge.clearToolCallContext(messageId);
+
             // 完成消息生成（失败）
             messageService.completeAIMessage(conversation.id, messageId);
             return; // 中断流程
@@ -1098,6 +1119,10 @@ class ChatController extends ChangeNotifier {
       // 5. 所有工具调用成功，将结果发送给 AI 继续生成
       final toolResultMessage = _buildToolResultMessage(toolCall.steps);
       debugPrint('🤖 准备让AI继续生成回复');
+
+      // 清除工具调用上下文（所有步骤已执行完成）
+      jsBridge.clearToolCallContext(messageId);
+
       await _continueWithToolResult(
         messageId,
         toolResultMessage,
@@ -1106,6 +1131,11 @@ class ChatController extends ChangeNotifier {
     } catch (e) {
       // 解析失败
       final errorContent = '❌ 工具调用处理失败: $e';
+
+      // 清除工具调用上下文
+      final jsBridge = JSBridgeManager.instance;
+      jsBridge.clearToolCallContext(messageId);
+
       messageService.updateAIMessageContent(
         conversation.id,
         messageId,

@@ -86,6 +86,7 @@ dependencies:
   flutter_image_compress: ^2.3.0
   json_dynamic_widget: ^12.0.0
   flutter_markdown: ^0.7.4  # For agent_chat plugin Markdown rendering
+  flutter_tts: ^4.2.0  # Text-to-Speech for TTS plugin
 
 dev_dependencies:
   flutter_test:
