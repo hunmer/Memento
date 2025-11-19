@@ -117,5 +117,97 @@
     ],
     "notes": "必需参数: name(项目名称);可选参数: id(自定义ID)、group(分组)、description(描述);项目名称和ID都不能与现有项目重复;如果不提供id会自动生成时间戳ID;创建后会自动保存到存储",
     "enabled": true
+  },
+  "findCheckinItemBy": {
+    "title": "通用签到项目查找",
+    "description": "根据自定义条件查找签到项目（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name、group）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个签到项目对象或 null；findAll=true 时返回签到项目数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找签到项目",
+        "code": "const item = await Memento.plugins.checkin.findCheckinItemBy({field: 'id', value: 'item123'});\nif (item) {\n  setResult(`找到签到项目: ${item.name}，连续签到: ${item.consecutiveDays}天`);\n} else {\n  setResult('未找到该签到项目');\n}"
+      },
+      {
+        "title": "查找所有健康分组的签到项目",
+        "code": "const items = await Memento.plugins.checkin.findCheckinItemBy({field: 'group', value: '健康习惯', findAll: true});\nconst checkedToday = items.filter(i => i.isCheckedToday).length;\nsetResult(`健康习惯分组有 ${items.length} 个项目，今天已签到 ${checkedToday} 个`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历签到项目列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findCheckinItemById": {
+    "title": "根据ID查找签到项目",
+    "description": "快速根据签到项目ID查找单个项目（findCheckinItemBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "签到项目ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的签到项目对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的签到项目",
+        "code": "const item = await Memento.plugins.checkin.findCheckinItemById({id: 'item123'});\nif (item) {\n  setResult(`项目名称: ${item.name}, 连续签到: ${item.consecutiveDays}天, 今日已签: ${item.isCheckedToday ? '是' : '否'}`);\n} else {\n  setResult('签到项目不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findCheckinItemBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findCheckinItemByName": {
+    "title": "根据名称查找签到项目",
+    "description": "根据签到项目名称查找项目（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "签到项目名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个签到项目或 null；findAll=true 时返回签到项目数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配签到项目名称",
+        "code": "const item = await Memento.plugins.checkin.findCheckinItemByName({name: '早起'});\nsetResult(item ? `项目ID: ${item.id}，连续: ${item.consecutiveDays}天` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的签到项目",
+        "code": "const items = await Memento.plugins.checkin.findCheckinItemByName({name: '跑步', fuzzy: true, findAll: true});\nconst totalDays = items.reduce((sum, i) => sum + (i.consecutiveDays || 0), 0);\nsetResult(`找到 ${items.length} 个跑步相关签到项目，累积连续: ${totalDays}天`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "findCheckinItemsByGroup": {
+    "title": "根据分组查找签到项目",
+    "description": "查找指定分组的所有签到项目",
+    "parameters": [
+      {"name": "group", "type": "string", "required": true, "description": "分组名称"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "该分组的签到项目列表"
+    },
+    "examples": [
+      {
+        "title": "查找健康习惯分组的所有签到项目",
+        "code": "const items = await Memento.plugins.checkin.findCheckinItemsByGroup({group: '健康习惯'});\nconst checkedToday = items.filter(i => i.isCheckedToday);\nsetResult(`健康习惯分组有 ${items.length} 个项目，今天已完成 ${checkedToday.length} 个`);"
+      },
+      {
+        "title": "统计技能提升分组的签到情况",
+        "code": "const items = await Memento.plugins.checkin.findCheckinItemsByGroup({group: '技能提升'});\nconst avgConsecutive = items.reduce((sum, i) => sum + (i.consecutiveDays || 0), 0) / items.length;\nsetResult(`技能提升分组有 ${items.length} 个项目，平均连续: ${avgConsecutive.toFixed(1)}天`);"
+      }
+    ],
+    "notes": "等价于 findCheckinItemBy({field: 'group', value: group, findAll: true})",
+    "enabled": true
   }
 }

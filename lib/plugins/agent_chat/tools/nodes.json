@@ -276,5 +276,146 @@
     ],
     "notes": "路径数组按从根到叶的顺序排列，fullPath 为完整的路径字符串（用 / 分隔）",
     "enabled": true
+  },
+  "findNotebookBy": {
+    "title": "通用笔记本查找",
+    "description": "根据自定义条件查找笔记本（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个笔记本对象或 null；findAll=true 时返回笔记本数组"
+    },
+    "examples": [
+      {
+        "title": "根据ID查找笔记本",
+        "code": "const notebook = await Memento.plugins.nodes.findNotebookBy({field: 'id', value: 'nb123'});\nif (notebook) {\n  setResult(`找到笔记本: ${notebook.title}，节点数: ${notebook.nodeCount}`);\n} else {\n  setResult('未找到该笔记本');\n}"
+      },
+      {
+        "title": "查找所有工作相关的笔记本",
+        "code": "const notebooks = await Memento.plugins.nodes.findNotebookBy({field: 'title', value: '工作笔记', findAll: true});\nsetResult(`找到 ${notebooks.length} 个工作笔记本`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历笔记本列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findNotebookById": {
+    "title": "根据ID查找笔记本",
+    "description": "快速根据笔记本ID查找单个笔记本（findNotebookBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "笔记本ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的笔记本对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的笔记本",
+        "code": "const notebook = await Memento.plugins.nodes.findNotebookById({id: 'nb123'});\nif (notebook) {\n  setResult(`笔记本名称: ${notebook.title}, 节点数: ${notebook.nodeCount}`);\n} else {\n  setResult('笔记本不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findNotebookBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findNotebookByTitle": {
+    "title": "根据标题查找笔记本",
+    "description": "根据笔记本标题查找笔记本（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "笔记本标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个笔记本或 null；findAll=true 时返回笔记本数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配笔记本标题",
+        "code": "const notebook = await Memento.plugins.nodes.findNotebookByTitle({title: '工作笔记'});\nsetResult(notebook ? `笔记本ID: ${notebook.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的笔记本",
+        "code": "const notebooks = await Memento.plugins.nodes.findNotebookByTitle({title: '学习', fuzzy: true, findAll: true});\nconst totalNodes = notebooks.reduce((sum, nb) => sum + nb.nodeCount, 0);\nsetResult(`找到 ${notebooks.length} 个学习相关笔记本，共 ${totalNodes} 个节点`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "findNodeBy": {
+    "title": "通用节点查找",
+    "description": "根据自定义条件在指定笔记本中查找节点（支持单条/多条结果，会递归搜索所有子节点）",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、status）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个节点对象或 null；findAll=true 时返回节点数组"
+    },
+    "examples": [
+      {
+        "title": "根据状态查找所有待办节点",
+        "code": "const nodes = await Memento.plugins.nodes.findNodeBy({notebookId: 'nb123', field: 'status', value: 'todo', findAll: true});\nsetResult(`找到 ${nodes.length} 个待办节点`);"
+      },
+      {
+        "title": "根据ID查找节点",
+        "code": "const node = await Memento.plugins.nodes.findNodeBy({notebookId: 'nb123', field: 'id', value: 'node456'});\nif (node) {\n  setResult(`找到节点: ${node.title}`);\n} else {\n  setResult('未找到该节点');\n}"
+      }
+    ],
+    "notes": "会递归搜索整个节点树，包括所有子节点；返回的节点不包含 children 字段",
+    "enabled": true
+  },
+  "findNodeById": {
+    "title": "根据ID查找节点",
+    "description": "快速根据节点ID在指定笔记本中查找单个节点（findNodeBy 的便捷方法）",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "nodeId", "type": "string", "required": true, "description": "节点ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的节点对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的节点",
+        "code": "const node = await Memento.plugins.nodes.findNodeById({notebookId: 'nb123', nodeId: 'node456'});\nif (node) {\n  setResult(`节点标题: ${node.title}, 状态: ${node.status}`);\n} else {\n  setResult('节点不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findNodeBy({notebookId, field: 'id', value: nodeId})",
+    "enabled": true
+  },
+  "findNodeByTitle": {
+    "title": "根据标题查找节点",
+    "description": "根据节点标题在指定笔记本中查找节点（支持精确匹配或模糊匹配，会递归搜索所有子节点）",
+    "parameters": [
+      {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
+      {"name": "title", "type": "string", "required": true, "description": "节点标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个节点或 null；findAll=true 时返回节点数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配节点标题",
+        "code": "const node = await Memento.plugins.nodes.findNodeByTitle({notebookId: 'nb123', title: '第一章'});\nsetResult(node ? `节点ID: ${node.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的节点",
+        "code": "const nodes = await Memento.plugins.nodes.findNodeByTitle({notebookId: 'nb123', title: '重要', fuzzy: true, findAll: true});\nconst todoCount = nodes.filter(n => n.status === 'todo').length;\nsetResult(`找到 ${nodes.length} 个包含'重要'的节点，其中 ${todoCount} 个待办`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes；会递归搜索整个节点树",
+    "enabled": true
   }
 }

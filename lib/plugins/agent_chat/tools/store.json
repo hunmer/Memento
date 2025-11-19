@@ -426,5 +426,118 @@
     ],
     "notes": "归档商品不会在普通商品列表中显示",
     "enabled": true
+  },
+  "store_findProductBy": {
+    "title": "通用商品查找",
+    "description": "根据自定义条件查找商品（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个商品对象或 null；findAll=true 时返回商品数组"
+    },
+    "examples": [
+      {
+        "code": "const product = await Memento.plugins.store.findProductBy({field: 'id', value: 'product123'});\nif (product) {\n  setResult(`找到商品: ${product.name}，价格: ${product.price}`);\n} else {\n  setResult('未找到该商品');\n}",
+        "comment": "根据ID查找商品"
+      },
+      {
+        "code": "const products = await Memento.plugins.store.findProductBy({field: 'name', value: '优惠券', findAll: true});\nsetResult(`找到 ${products.length} 个优惠券商品`);\n",
+        "comment": "查找所有名称匹配的商品"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历商品列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "store_findProductById": {
+    "title": "根据ID查找商品",
+    "description": "快速根据商品ID查找单个商品（findProductBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "商品ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的商品对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "code": "const product = await Memento.plugins.store.findProductById({id: 'product123'});\nif (product) {\n  setResult(`商品名称: ${product.name}, 库存: ${product.stock}`);\n} else {\n  setResult('商品不存在');\n}",
+        "comment": "查找指定ID的商品"
+      }
+    ],
+    "notes": "等价于 findProductBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "store_findProductByName": {
+    "title": "根据名称查找商品",
+    "description": "根据商品名称查找商品（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "商品名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个商品或 null；findAll=true 时返回商品数组"
+    },
+    "examples": [
+      {
+        "code": "const product = await Memento.plugins.store.findProductByName({name: '休假券'});\nsetResult(product ? `商品ID: ${product.id}, 价格: ${product.price}` : '未找到');",
+        "comment": "精确匹配商品名称"
+      },
+      {
+        "code": "const products = await Memento.plugins.store.findProductByName({name: '券', fuzzy: true, findAll: true});\nconst totalStock = products.reduce((sum, p) => sum + p.stock, 0);\nsetResult(`找到 ${products.length} 个包含'券'的商品，总库存: ${totalStock}`);\n",
+        "comment": "模糊匹配查找所有包含关键词的商品"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "store_findUserItemBy": {
+    "title": "通用用户物品查找",
+    "description": "根据自定义条件查找用户物品（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、productId）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个用户物品对象或 null；findAll=true 时返回用户物品数组"
+    },
+    "examples": [
+      {
+        "code": "const item = await Memento.plugins.store.findUserItemBy({field: 'id', value: 'item123'});\nif (item) {\n  setResult(`物品: ${item.productName}，剩余次数: ${item.remainingUses}`);\n} else {\n  setResult('未找到该物品');\n}",
+        "comment": "根据ID查找用户物品"
+      },
+      {
+        "code": "const items = await Memento.plugins.store.findUserItemBy({field: 'productId', value: 'product123', findAll: true});\nsetResult(`该商品已兑换 ${items.length} 次`);\n",
+        "comment": "查找某个商品的所有兑换记录"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历用户物品列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "store_findUserItemById": {
+    "title": "根据ID查找用户物品",
+    "description": "快速根据物品ID查找单个用户物品（findUserItemBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "物品ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的用户物品对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "code": "const item = await Memento.plugins.store.findUserItemById({id: 'item123'});\nif (item) {\n  setResult(`物品名称: ${item.productName}, 到期时间: ${item.expiresAt}`);\n} else {\n  setResult('物品不存在');\n}",
+        "comment": "查找指定ID的用户物品"
+      }
+    ],
+    "notes": "等价于 findUserItemBy({field: 'id', value: id})",
+    "enabled": true
   }
 }

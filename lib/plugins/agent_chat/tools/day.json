@@ -194,7 +194,7 @@
       },
       {
         "title": "模糊匹配纪念日名称",
-        "code": "const days = await Memento.plugins.day.findMemorialDayByName({name: '生日', fuzzy: true, findAll: true});\nsetResult(`找到 ${days.length} 个包含"生日"的纪念日`);"
+        "code": "const days = await Memento.plugins.day.findMemorialDayByName({name: '生日', fuzzy: true, findAll: true});\nsetResult(`找到 ${days.length} 个包含【生日】的纪念日`);"
       }
     ],
     "notes": "精确匹配使用 ===,模糊匹配使用 includes",

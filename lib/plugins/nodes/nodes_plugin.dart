@@ -135,6 +135,14 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       // 树结构相关
       'getNodeTree': _jsGetNodeTree,
       'getNodePath': _jsGetNodePath,
+
+      // 查找方法
+      'findNotebookBy': _jsFindNotebookBy,
+      'findNotebookById': _jsFindNotebookById,
+      'findNotebookByTitle': _jsFindNotebookByTitle,
+      'findNodeBy': _jsFindNodeBy,
+      'findNodeById': _jsFindNodeById,
+      'findNodeByTitle': _jsFindNodeByTitle,
     };
   }
 
@@ -534,6 +542,273 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       'ids': pathIds,
       'fullPath': pathTitles.join(' / '),
     });
+  }
+
+  // ==================== 查找方法 ====================
+
+  /// 通用笔记本查找
+  Future<String> _jsFindNotebookBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final notebooks = _controller.notebooks;
+    final matches = <Notebook>[];
+
+    for (var notebook in notebooks) {
+      bool isMatch = false;
+
+      switch (field.toLowerCase()) {
+        case 'id':
+          isMatch = notebook.id == value;
+          break;
+        case 'title':
+          isMatch = notebook.title == value;
+          break;
+        default:
+          // 尝试通过反射或直接比较
+          isMatch = false;
+      }
+
+      if (isMatch) {
+        if (!findAll) {
+          return jsonEncode({
+            'id': notebook.id,
+            'title': notebook.title,
+            'icon': notebook.icon.codePoint,
+            'color': notebook.color.value,
+            'nodeCount': _countAllNodes(notebook.nodes),
+          });
+        }
+        matches.add(notebook);
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matches.map((nb) => {
+        'id': nb.id,
+        'title': nb.title,
+        'icon': nb.icon.codePoint,
+        'color': nb.color.value,
+        'nodeCount': _countAllNodes(nb.nodes),
+      }).toList());
+    }
+
+    return jsonEncode(null);
+  }
+
+  /// 根据ID查找笔记本
+  Future<String> _jsFindNotebookById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final notebook = _controller.getNotebook(id);
+    if (notebook == null || notebook.id.isEmpty) {
+      return jsonEncode(null);
+    }
+
+    return jsonEncode({
+      'id': notebook.id,
+      'title': notebook.title,
+      'icon': notebook.icon.codePoint,
+      'color': notebook.color.value,
+      'nodeCount': _countAllNodes(notebook.nodes),
+    });
+  }
+
+  /// 根据标题查找笔记本
+  Future<String> _jsFindNotebookByTitle(Map<String, dynamic> params) async {
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final notebooks = _controller.notebooks;
+    final matches = <Notebook>[];
+
+    for (var notebook in notebooks) {
+      final isMatch = fuzzy
+          ? notebook.title.toLowerCase().contains(title.toLowerCase())
+          : notebook.title == title;
+
+      if (isMatch) {
+        if (!findAll) {
+          return jsonEncode({
+            'id': notebook.id,
+            'title': notebook.title,
+            'icon': notebook.icon.codePoint,
+            'color': notebook.color.value,
+            'nodeCount': _countAllNodes(notebook.nodes),
+          });
+        }
+        matches.add(notebook);
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matches.map((nb) => {
+        'id': nb.id,
+        'title': nb.title,
+        'icon': nb.icon.codePoint,
+        'color': nb.color.value,
+        'nodeCount': _countAllNodes(nb.nodes),
+      }).toList());
+    }
+
+    return jsonEncode(null);
+  }
+
+  /// 通用节点查找
+  Future<String> _jsFindNodeBy(Map<String, dynamic> params) async {
+    final String? notebookId = params['notebookId'];
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final notebook = _controller.getNotebook(notebookId);
+    if (notebook == null || notebook.id.isEmpty) {
+      return jsonEncode({'error': '���记本不存在'});
+    }
+
+    final matches = <Node>[];
+
+    void searchNodes(List<Node> nodes) {
+      for (var node in nodes) {
+        bool isMatch = false;
+
+        switch (field.toLowerCase()) {
+          case 'id':
+            isMatch = node.id == value;
+            break;
+          case 'title':
+            isMatch = node.title == value;
+            break;
+          case 'status':
+            isMatch = node.status.toString().split('.').last == value;
+            break;
+          default:
+            isMatch = false;
+        }
+
+        if (isMatch) {
+          if (!findAll) {
+            return;
+          }
+          matches.add(node);
+        }
+
+        searchNodes(node.children);
+      }
+    }
+
+    searchNodes(notebook.nodes);
+
+    if (!findAll && matches.isNotEmpty) {
+      return jsonEncode(_nodeToJson(matches.first, includeChildren: false));
+    }
+
+    if (findAll) {
+      return jsonEncode(matches.map((n) => _nodeToJson(n, includeChildren: false)).toList());
+    }
+
+    return jsonEncode(null);
+  }
+
+  /// 根据ID查找节点
+  Future<String> _jsFindNodeById(Map<String, dynamic> params) async {
+    final String? notebookId = params['notebookId'];
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+
+    final String? nodeId = params['nodeId'];
+    if (nodeId == null || nodeId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: nodeId'});
+    }
+
+    final node = _controller.findNodeById(notebookId, nodeId);
+    if (node == null) {
+      return jsonEncode(null);
+    }
+
+    return jsonEncode(_nodeToJson(node, includeChildren: false));
+  }
+
+  /// 根据标题查找节点
+  Future<String> _jsFindNodeByTitle(Map<String, dynamic> params) async {
+    final String? notebookId = params['notebookId'];
+    if (notebookId == null || notebookId.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: notebookId'});
+    }
+
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final notebook = _controller.getNotebook(notebookId);
+    if (notebook == null || notebook.id.isEmpty) {
+      return jsonEncode({'error': '笔记本不存在'});
+    }
+
+    final matches = <Node>[];
+
+    void searchNodes(List<Node> nodes) {
+      for (var node in nodes) {
+        final isMatch = fuzzy
+            ? node.title.toLowerCase().contains(title.toLowerCase())
+            : node.title == title;
+
+        if (isMatch) {
+          matches.add(node);
+          if (!findAll) {
+            return;
+          }
+        }
+
+        searchNodes(node.children);
+      }
+    }
+
+    searchNodes(notebook.nodes);
+
+    if (!findAll && matches.isNotEmpty) {
+      return jsonEncode(_nodeToJson(matches.first, includeChildren: false));
+    }
+
+    if (findAll) {
+      return jsonEncode(matches.map((n) => _nodeToJson(n, includeChildren: false)).toList());
+    }
+
+    return jsonEncode(null);
   }
 
   // ==================== 辅助方法 ====================

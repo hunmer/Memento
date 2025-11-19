@@ -217,7 +217,7 @@
       },
       {
         "title": "模糊匹配频道标题",
-        "code": "const channels = await Memento.plugins.chat.findChannelByTitle({title: '工作', fuzzy: true, findAll: true});\nsetResult(`找到 ${channels.length} 个包含"工作"的频道`);"
+        "code": "const channels = await Memento.plugins.chat.findChannelByTitle({title: '工作', fuzzy: true, findAll: true});\nsetResult(`找到 ${channels.length} 个包含【工作】的频道`);"
       }
     ],
     "notes": "精确匹配使用 ===，模糊匹配使用 includes",

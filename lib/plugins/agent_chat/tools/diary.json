@@ -279,5 +279,74 @@
     ],
     "notes": "统计所有历史日记的数据；这是非 JS API 方法，直接返回对象",
     "enabled": true
+  },
+  "findDiaryBy": {
+    "title": "通用日记查找",
+    "description": "根据自定义条件查找日记（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：date、title、content、mood）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个日记对象或 null；findAll=true 时返回日记数组"
+    },
+    "examples": [
+      {
+        "title": "根据日期查找日记",
+        "code": "const diary = await Memento.plugins.diary.findDiaryBy({field: 'date', value: '2025-01-15'});\nif (diary) {\n  setResult(`找到日记: ${diary.title || '无标题'}，字数: ${diary.wordCount}`);\n} else {\n  setResult('未找到该日期的日记');\n}"
+      },
+      {
+        "title": "查找所有带特定心情的日记",
+        "code": "const diaries = await Memento.plugins.diary.findDiaryBy({field: 'mood', value: '😊', findAll: true});\nsetResult(`找到 ${diaries.length} 篇开心的日记`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历日记列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findDiaryByDate": {
+    "title": "根据日期查找日记",
+    "description": "快速根据日期查找单条日记（findDiaryBy 的便捷方法）",
+    "parameters": [
+      {"name": "date", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的日记对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定日期的日记",
+        "code": "const diary = await Memento.plugins.diary.findDiaryByDate({date: '2025-01-15'});\nif (diary) {\n  setResult(`日记标题: ${diary.title || '无标题'}, 内容: ${diary.content.substring(0, 50)}...`);\n} else {\n  setResult('该日期没有日记');\n}"
+      }
+    ],
+    "notes": "等价于 getDiary 或 findDiaryBy({field: 'date', value: date})",
+    "enabled": true
+  },
+  "findDiaryByTitle": {
+    "title": "根据标题查找日记",
+    "description": "根据日记标题查找日记（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "日记标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个日记或 null；findAll=true 时返回日记数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配日记标题",
+        "code": "const diary = await Memento.plugins.diary.findDiaryByTitle({title: '美好的一天'});\nsetResult(diary ? `找到日记，日期: ${diary.date}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的日记",
+        "code": "const diaries = await Memento.plugins.diary.findDiaryByTitle({title: '工作', fuzzy: true, findAll: true});\nconst totalWords = diaries.reduce((sum, d) => sum + (d.wordCount || 0), 0);\nsetResult(`找到 ${diaries.length} 篇包含"工作"的日记，共 ${totalWords} 字`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
   }
 }
