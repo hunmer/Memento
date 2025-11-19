@@ -6,7 +6,6 @@ import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
 import 'l10n/notes_localizations.dart';
-import 'controls/prompt_controller.dart';
 
 class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   static NotesPlugin? _instance;
@@ -26,7 +25,6 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   late NotesController controller;
-  late NotesPromptController _promptController;
   bool _isInitialized = false;
 
   @override
@@ -43,9 +41,6 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     controller = NotesController(storage);
     await controller.initialize();
 
-    // 初始化 Prompt 控制器
-    _promptController = NotesPromptController(this);
-    _promptController.initialize();
 
     _isInitialized = true;
 

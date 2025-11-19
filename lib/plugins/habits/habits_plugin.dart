@@ -13,7 +13,6 @@ import 'package:Memento/plugins/habits/controllers/completion_record_controller.
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/widgets/habits_home.dart';
-import 'package:Memento/plugins/habits/controls/prompt_controller.dart';
 
 class HabitsMainView extends StatefulWidget {
   const HabitsMainView({super.key});

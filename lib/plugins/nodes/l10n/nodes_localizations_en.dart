@@ -183,4 +183,10 @@ class NodesLocalizationsEn extends NodesLocalizations {
 
   @override
   String get addNotebook => 'Add notebook';
+
+  @override
+  String get basicInfo => 'Basic Info';
+
+  @override
+  String get dateAndFields => 'Date & Fields';
 }

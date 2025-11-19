@@ -14,7 +14,6 @@ import './widgets/event_detail_card.dart';
 import './services/todo_event_service.dart';
 import '../todo/todo_plugin.dart';
 import './l10n/calendar_localizations.dart';
-import './controls/prompt_controller.dart';
 
 class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   // 总控制器，管理所有日历相关服务
