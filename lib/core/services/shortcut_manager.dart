@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:universal_platform/universal_platform.dart';
 import 'package:flutter_shortcut_plus/flutter_shortcut.dart';
 import 'package:Memento/core/event/event.dart';
 
@@ -13,8 +15,19 @@ class AppShortcutManager {
   factory AppShortcutManager() => _instance;
   AppShortcutManager._internal();
 
+  /// 检查当前平台是否支持快捷方式
+  bool get isSupported {
+    // flutter_shortcut_plus 仅支持 Android 和 iOS
+    return !kIsWeb && (UniversalPlatform.isAndroid || UniversalPlatform.isIOS);
+  }
+
   /// 初始化快捷方式监听
   void initialize() {
+    if (!isSupported) {
+      debugPrint('Shortcut功能在当前平台不支持，已跳过初始化');
+      return;
+    }
+
     try {
       FlutterShortcut.initialize(debug: true);
       FlutterShortcut.listenAction((action) {
@@ -44,7 +57,7 @@ class AppShortcutManager {
       eventManager.subscribe('shortcut_action', _handleAction);
     } catch (e) {
       debugPrint('Failed to initialize shortcut listener: $e');
-      rethrow;
+      // 不再抛出异常，避免影响应用启动
     }
   }
 
@@ -73,6 +86,11 @@ class AppShortcutManager {
     String? icon,
     ShortcutIconAsset iconAsset = ShortcutIconAsset.flutterAsset,
   }) {
+    if (!isSupported) {
+      debugPrint('Shortcut功能在当前平台不支持');
+      return;
+    }
+
     try {
       FlutterShortcut.pushShortcutItem(
         shortcut: ShortcutItem(
@@ -86,7 +104,6 @@ class AppShortcutManager {
       debugPrint('Added shortcut: $id ($action)');
     } catch (e) {
       debugPrint('Failed to add shortcut: $e');
-      rethrow;
     }
   }
 
@@ -98,6 +115,11 @@ class AppShortcutManager {
     String? icon,
     ShortcutIconAsset? iconAsset,
   }) {
+    if (!isSupported) {
+      debugPrint('Shortcut功能在当前平台不支持');
+      return;
+    }
+
     try {
       FlutterShortcut.updateShortcutItem(
         shortcut: ShortcutItem(
@@ -111,29 +133,36 @@ class AppShortcutManager {
       debugPrint('Updated shortcut: $id');
     } catch (e) {
       debugPrint('Failed to update shortcut: $e');
-      rethrow;
     }
   }
 
   /// 批量设置快捷方式
   void setShortcuts(List<ShortcutItem> items) {
+    if (!isSupported) {
+      debugPrint('Shortcut功能在当前平台不支持');
+      return;
+    }
+
     try {
       FlutterShortcut.setShortcutItems(shortcutItems: items);
       debugPrint('Set ${items.length} shortcuts');
     } catch (e) {
       debugPrint('Failed to set shortcuts: $e');
-      rethrow;
     }
   }
 
   /// 清除所有快捷方式
   void clearShortcuts() {
+    if (!isSupported) {
+      debugPrint('Shortcut功能在当前平台不支持');
+      return;
+    }
+
     try {
       FlutterShortcut.clearShortcutItems();
       debugPrint('Cleared all shortcuts');
     } catch (e) {
       debugPrint('Failed to clear shortcuts: $e');
-      rethrow;
     }
   }
 }

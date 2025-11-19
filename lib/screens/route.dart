@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
+import 'package:Memento/plugins/tts/screens/tts_services_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
@@ -56,6 +57,7 @@ class AppRoutes extends NavigatorObserver {
   static const String goods = '/goods';
   static const String habits = '/habits';
   static const String nodes = '/nodes';
+  static const String tts = '/tts';
   static const String notes = '/notes';
   static const String openai = '/openai';
   static const String scriptsCenter = '/scripts_center';
@@ -82,6 +84,8 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const HomeScreen());
       case 'chat':
         return _createRoute(const ChatMainView());
+      case 'tts':
+        return _createRoute(const TTSServicesScreen());
       case 'diary':
         return _createRoute(const DiaryMainView());
       case 'activity':
@@ -150,6 +154,7 @@ class AppRoutes extends NavigatorObserver {
     calendarAlbum: (context) => const CalendarAlbumMainView(),
     contact: (context) => const ContactMainView(),
     database: (context) => const DatabaseMainView(),
+    tts: (context) => const TTSServicesScreen(),
     day: (context) => const DayMainView(),
     goods: (context) => const GoodsMainView(),
     habits: (context) => const HabitsMainView(),

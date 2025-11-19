@@ -72,6 +72,7 @@ class TTSPlugin extends BasePlugin {
   }
 
   /// 初始化默认数据
+  @override
   Future<void> initializeDefaultData() async {
     final services = await managerService.getAllServices();
 

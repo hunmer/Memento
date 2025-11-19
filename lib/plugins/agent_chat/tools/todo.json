@@ -380,11 +380,11 @@
     },
     "examples": [
       {
-        "title": "查找所有带"工作"标签的任务",
+        "title": "查找所有带工作标签的任务",
         "code": "const tasks = await Memento.plugins.todo.findTasksByTag({tag: '工作'});\nsetResult(`找到 ${tasks.length} 个工作任务`);"
       },
       {
-        "title": "查找带"紧急"标签且未完成的任务",
+        "title": "查找带紧急标签且未完成的任务",
         "code": "const tasks = await Memento.plugins.todo.findTasksByTag({tag: '紧急', status: 'todo'});\nsetResult(`找到 ${tasks.length} 个紧急待办任务`);"
       }
     ],

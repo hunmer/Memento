@@ -343,7 +343,7 @@
       },
       {
         "title": "模糊匹配查找所有包含关键词的日记",
-        "code": "const diaries = await Memento.plugins.diary.findDiaryByTitle({title: '工作', fuzzy: true, findAll: true});\nconst totalWords = diaries.reduce((sum, d) => sum + (d.wordCount || 0), 0);\nsetResult(`找到 ${diaries.length} 篇包含"工作"的日记，共 ${totalWords} 字`);"
+        "code": "const diaries = await Memento.plugins.diary.findDiaryByTitle({title: '工作', fuzzy: true, findAll: true});\nconst totalWords = diaries.reduce((sum, d) => sum + (d.wordCount || 0), 0);\nsetResult(`找到 ${diaries.length} 篇包含'工作'的日记，共 ${totalWords} 字`);"
       }
     ],
     "notes": "精确匹配使用 ===，模糊匹配使用 includes",
