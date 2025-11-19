@@ -184,12 +184,54 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取所有联系人
+  /// 支持分页参数: offset, count
   Future<String> _jsGetContacts(Map<String, dynamic> params) async {
     final contacts = await _controller.getAllContacts();
-    return jsonEncode(contacts.map((c) => c.toJson()).toList());
+    final contactsJson = contacts.map((c) => c.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        contactsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    return jsonEncode(contactsJson);
   }
 
   /// 获取联系人详情
@@ -348,6 +390,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取交互记录
+  /// 支持分页参数: offset, count
   Future<String> _jsGetInteractions(Map<String, dynamic> params) async {
     final String? contactId = params['contactId'];
     if (contactId == null || contactId.isEmpty) {
@@ -357,7 +400,22 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
     final interactions = await _controller.getInteractionsByContactId(
       contactId,
     );
-    return jsonEncode(interactions.map((i) => i.toJson()).toList());
+    final interactionsJson = interactions.map((i) => i.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        interactionsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    return jsonEncode(interactionsJson);
   }
 
   /// 删除交互记录
@@ -389,6 +447,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== 联系人查找方法 ====================
 
   /// 通用联系人查找
+  /// 支持分页参数: offset, count (仅 findAll=true 时有效)
   Future<String> _jsFindContactBy(Map<String, dynamic> params) async {
     try {
       final String? field = params['field'];
@@ -402,6 +461,8 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       final bool findAll = params['findAll'] ?? false;
+      final int? offset = params['offset'];
+      final int? count = params['count'];
 
       final contacts = await _controller.getAllContacts();
       final List<Contact> matchedContacts = [];
@@ -415,7 +476,19 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       if (findAll) {
-        return jsonEncode(matchedContacts.map((c) => c.toJson()).toList());
+        final contactsJson = matchedContacts.map((c) => c.toJson()).toList();
+
+        // 检查是否需要分页
+        if (offset != null || count != null) {
+          final paginated = _paginate(
+            contactsJson,
+            offset: offset ?? 0,
+            count: count ?? 100,
+          );
+          return jsonEncode(paginated);
+        }
+
+        return jsonEncode(contactsJson);
       } else {
         return matchedContacts.isEmpty
             ? jsonEncode(null)
@@ -442,6 +515,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 根据姓名查找联系人
+  /// 支持分页参数: offset, count (仅 findAll=true 时有效)
   Future<String> _jsFindContactByName(Map<String, dynamic> params) async {
     try {
       final String? name = params['name'];
@@ -451,6 +525,8 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
 
       final bool fuzzy = params['fuzzy'] ?? false;
       final bool findAll = params['findAll'] ?? false;
+      final int? offset = params['offset'];
+      final int? count = params['count'];
 
       final contacts = await _controller.getAllContacts();
       final List<Contact> matchedContacts = [];
@@ -467,7 +543,19 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       if (findAll) {
-        return jsonEncode(matchedContacts.map((c) => c.toJson()).toList());
+        final contactsJson = matchedContacts.map((c) => c.toJson()).toList();
+
+        // 检查是否需要分页
+        if (offset != null || count != null) {
+          final paginated = _paginate(
+            contactsJson,
+            offset: offset ?? 0,
+            count: count ?? 100,
+          );
+          return jsonEncode(paginated);
+        }
+
+        return jsonEncode(contactsJson);
       } else {
         return matchedContacts.isEmpty
             ? jsonEncode(null)
@@ -481,6 +569,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== 交互记录查找方法 ====================
 
   /// 通用交互记录查找
+  /// 支持分页参数: offset, count (仅 findAll=true 时有效)
   Future<String> _jsFindInteractionBy(Map<String, dynamic> params) async {
     try {
       final String? field = params['field'];
@@ -494,6 +583,8 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       final bool findAll = params['findAll'] ?? false;
+      final int? offset = params['offset'];
+      final int? count = params['count'];
 
       final interactions = await _controller.getAllInteractions();
       final List<InteractionRecord> matchedInteractions = [];
@@ -508,8 +599,19 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       if (findAll) {
-        return jsonEncode(
-            matchedInteractions.map((i) => i.toJson()).toList());
+        final interactionsJson = matchedInteractions.map((i) => i.toJson()).toList();
+
+        // 检查是否需要分页
+        if (offset != null || count != null) {
+          final paginated = _paginate(
+            interactionsJson,
+            offset: offset ?? 0,
+            count: count ?? 100,
+          );
+          return jsonEncode(paginated);
+        }
+
+        return jsonEncode(interactionsJson);
       } else {
         return matchedInteractions.isEmpty
             ? jsonEncode(null)

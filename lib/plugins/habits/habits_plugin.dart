@@ -221,13 +221,56 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取所有习惯
+  /// 支持分页参数: offset, count
   Future<String> _jsGetHabits(Map<String, dynamic> params) async {
     // 确保习惯数据已加载完成
     final habits = await _habitController.loadHabits();
-    return jsonEncode(habits.map((h) => h.toMap()).toList());
+    final habitsJson = habits.map((h) => h.toMap()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        habitsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(habitsJson);
   }
 
   /// 根据ID获取习惯
@@ -363,10 +406,27 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 获取所有技能
+  /// 支持分页参数: offset, count
   Future<String> _jsGetSkills(Map<String, dynamic> params) async {
     // 确保技能数据已加载完成
     final skills = await _skillController.loadSkills();
-    return jsonEncode(skills.map((s) => s.toMap()).toList());
+    final skillsJson = skills.map((s) => s.toMap()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        skillsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(skillsJson);
   }
 
   /// 根据ID获取技能
@@ -513,6 +573,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 获取完成记录
+  /// 支持分页参数: offset, count
   Future<String> _jsGetCompletionRecords(Map<String, dynamic> params) async {
     // 必需参数
     final String? habitId = params['habitId'];
@@ -531,7 +592,23 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
             ? records.sublist(records.length - limit)
             : records;
 
-    return jsonEncode(resultRecords.map((r) => r.toMap()).toList());
+    final recordsJson = resultRecords.map((r) => r.toMap()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        recordsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(recordsJson);
   }
 
   /// 删除完成记录
@@ -569,6 +646,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   /// 获取今日需要打卡的习惯
+  /// 支持分页参数: offset, count
   Future<String> _jsGetTodayHabits(Map<String, dynamic> params) async {
     // 确保习惯数据已加载完成
     final habits = await _habitController.loadHabits();
@@ -580,7 +658,23 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
           return habit.intervalDays == 0 || habit.reminderDays.contains(today);
         }).toList();
 
-    return jsonEncode(todayHabits.map((h) => h.toMap()).toList());
+    final todayHabitsJson = todayHabits.map((h) => h.toMap()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        todayHabitsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(todayHabitsJson);
   }
 
   /// 启动计时器

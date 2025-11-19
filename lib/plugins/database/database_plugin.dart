@@ -187,12 +187,54 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取所有数据库
+  /// 支持分页参数: offset, count
   Future<String> _jsGetDatabases(Map<String, dynamic> params) async {
     final databases = await service.getAllDatabases();
-    return jsonEncode(databases.map((db) => db.toMap()).toList());
+    final databasesJson = databases.map((db) => db.toMap()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        databasesJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    return jsonEncode(databasesJson);
   }
 
   /// 创建数据库
@@ -290,6 +332,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取数据库的所有记录
+  /// 支持分页参数: offset, count
   Future<String> _jsGetRecords(Map<String, dynamic> params) async {
     // 必需参数
     final String? databaseId = params['databaseId'];
@@ -299,6 +342,8 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
 
     // 可选参数
     final int? limit = params['limit'];
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     var records = await controller.getRecords(databaseId);
 
@@ -307,7 +352,19 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       records = records.sublist(records.length - limit);
     }
 
-    return jsonEncode(records.map((r) => r.toMap()).toList());
+    final recordsJson = records.map((r) => r.toMap()).toList();
+
+    // 检查是否需要分页
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        recordsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    return jsonEncode(recordsJson);
   }
 
   /// 创建记录
@@ -424,6 +481,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 查询记录
+  /// 支持分页参数: offset, count
   Future<String> _jsQuery(Map<String, dynamic> params) async {
     // 必需参数
     final String? databaseId = params['databaseId'];
@@ -433,6 +491,8 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
 
     // 可选参数
     final String? filtersJson = params['filtersJson'];
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     var records = await controller.getRecords(databaseId);
 
@@ -460,7 +520,19 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       }
     }
 
-    return jsonEncode(records.map((r) => r.toMap()).toList());
+    final recordsJson = records.map((r) => r.toMap()).toList();
+
+    // 检查是否需要分页
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        recordsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    return jsonEncode(recordsJson);
   }
 
   /// 获取数据库或记录数量
@@ -486,6 +558,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   // ==================== 数据库查找方法 ====================
 
   /// 通用数据库查找
+  /// 支持分页参数: offset, count (仅 findAll=true 时有效)
   Future<String> _jsFindDatabaseBy(Map<String, dynamic> params) async {
     try {
       final String? field = params['field'];
@@ -499,6 +572,8 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       }
 
       final bool findAll = params['findAll'] ?? false;
+      final int? offset = params['offset'];
+      final int? count = params['count'];
 
       final databases = await service.getAllDatabases();
       final List<DatabaseModel> matchedDatabases = [];
@@ -512,7 +587,19 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       }
 
       if (findAll) {
-        return jsonEncode(matchedDatabases.map((db) => db.toMap()).toList());
+        final databasesJson = matchedDatabases.map((db) => db.toMap()).toList();
+
+        // 检查是否需要分页
+        if (offset != null || count != null) {
+          final paginated = _paginate(
+            databasesJson,
+            offset: offset ?? 0,
+            count: count ?? 100,
+          );
+          return jsonEncode(paginated);
+        }
+
+        return jsonEncode(databasesJson);
       } else {
         return matchedDatabases.isEmpty
             ? jsonEncode(null)
@@ -541,6 +628,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 根据名称查找数据库
+  /// 支持分页参数: offset, count (仅 findAll=true 时有效)
   Future<String> _jsFindDatabaseByName(Map<String, dynamic> params) async {
     try {
       final String? name = params['name'];
@@ -550,6 +638,8 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
 
       final bool fuzzy = params['fuzzy'] ?? false;
       final bool findAll = params['findAll'] ?? false;
+      final int? offset = params['offset'];
+      final int? count = params['count'];
 
       final databases = await service.getAllDatabases();
       final List<DatabaseModel> matchedDatabases = [];
@@ -566,7 +656,19 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       }
 
       if (findAll) {
-        return jsonEncode(matchedDatabases.map((db) => db.toMap()).toList());
+        final databasesJson = matchedDatabases.map((db) => db.toMap()).toList();
+
+        // 检查是否需要分页
+        if (offset != null || count != null) {
+          final paginated = _paginate(
+            databasesJson,
+            offset: offset ?? 0,
+            count: count ?? 100,
+          );
+          return jsonEncode(paginated);
+        }
+
+        return jsonEncode(databasesJson);
       } else {
         return matchedDatabases.isEmpty
             ? jsonEncode(null)
@@ -580,6 +682,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   // ==================== 记录查找方法 ====================
 
   /// 通用记录查找
+  /// 支持分页参数: offset, count (仅 findAll=true 时有效)
   Future<String> _jsFindRecordBy(Map<String, dynamic> params) async {
     try {
       final String? databaseId = params['databaseId'];
@@ -598,6 +701,8 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       }
 
       final bool findAll = params['findAll'] ?? false;
+      final int? offset = params['offset'];
+      final int? count = params['count'];
 
       final records = await controller.getRecords(databaseId);
       final List<Record> matchedRecords = [];
@@ -620,7 +725,19 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       }
 
       if (findAll) {
-        return jsonEncode(matchedRecords.map((r) => r.toMap()).toList());
+        final recordsJson = matchedRecords.map((r) => r.toMap()).toList();
+
+        // 检查是否需要分页
+        if (offset != null || count != null) {
+          final paginated = _paginate(
+            recordsJson,
+            offset: offset ?? 0,
+            count: count ?? 100,
+          );
+          return jsonEncode(paginated);
+        }
+
+        return jsonEncode(recordsJson);
       } else {
         return matchedRecords.isEmpty
             ? jsonEncode(null)

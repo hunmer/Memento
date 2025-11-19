@@ -363,20 +363,12 @@ class ChatController extends ChangeNotifier {
 
           // 生成模版列表 Prompt
           final templatePrompt = ToolService.getToolTemplatePrompt(templates);
-          final originalSystemPrompt = contextMessages[0].content;
-
-          contextMessages[0] = ChatCompletionMessage.system(
-            content:
-                originalSystemPrompt is String
-                    ? originalSystemPrompt + templatePrompt
-                    : templatePrompt,
-          );
 
           // 清空 buffer
           buffer.clear();
           tokenCount = 0;
 
-          // 第零阶段：请求 AI 匹配模版
+          // 第零阶段：请求 AI 匹配模版（使用占位符方式）
           await RequestService.streamResponse(
             agent: _currentAgent!,
             prompt: null,
@@ -390,6 +382,9 @@ class ChatController extends ChangeNotifier {
                 schema: ToolService.toolTemplateMatchSchema,
               ),
             ),
+            additionalPrompts: {
+              'tool_templates': templatePrompt,
+            },
             shouldCancel: () => _isCancelling,
             onToken: (token) {
               buffer.write(token);
@@ -454,21 +449,6 @@ class ChatController extends ChangeNotifier {
         }
       }
 
-      // ========== 第一阶段：发送简要索引 ==========
-      if (enableToolCalling &&
-          _currentAgent!.enableFunctionCalling &&
-          contextMessages.isNotEmpty) {
-        final toolBriefPrompt = ToolService.getToolBriefPrompt();
-        final originalSystemPrompt = contextMessages[0].content;
-
-        contextMessages[0] = ChatCompletionMessage.system(
-          content:
-              originalSystemPrompt is String
-                  ? originalSystemPrompt + toolBriefPrompt
-                  : toolBriefPrompt,
-        );
-      }
-
       // 保存上下文消息（用于后续保存详细数据）
       _contextMessagesCache[aiMessageId] = List.from(contextMessages);
 
@@ -476,7 +456,12 @@ class ChatController extends ChangeNotifier {
       final imageFiles =
           files.where((f) => FilePickerHelper.isImageFile(f)).toList();
 
-      // 第一阶段：流式接收 AI 回复
+      // 准备工具简要索引 Prompt（用于第一阶段）
+      final toolBriefPrompt = (enableToolCalling && _currentAgent!.enableFunctionCalling)
+          ? ToolService.getToolBriefPrompt()
+          : '';
+
+      // 第一阶段：流式接收 AI 回复（使用占位符方式）
       await RequestService.streamResponse(
         agent: _currentAgent!,
         prompt: null,
@@ -495,6 +480,11 @@ class ChatController extends ChangeNotifier {
                   ),
                 )
                 : null,
+        additionalPrompts: toolBriefPrompt.isNotEmpty
+            ? {
+                'tool_brief': toolBriefPrompt,
+              }
+            : null,
         shouldCancel: () => _isCancelling, // 传递取消检查函数
         onToken: (token) {
           buffer.write(token);
@@ -565,11 +555,11 @@ class ChatController extends ChangeNotifier {
                 ChatCompletionMessage.assistant(content: firstResponse),
               );
 
-              // 添加详细文档请求
+              // 添加用户请求
               contextMessages.add(
                 ChatCompletionMessage.user(
                   content: ChatCompletionUserMessageContent.string(
-                    '$detailPrompt\n\n请根据文档生成工具调用代码。',
+                    '请根据文档生成工具调用代码。',
                   ),
                 ),
               );
@@ -579,12 +569,15 @@ class ChatController extends ChangeNotifier {
               tokenCount = 0;
               isCollectingToolCall = false;
 
-              // 第二阶段：请求生成工具调用代码
+              // 第二阶段：请求生成工具调用代码（使用占位符方式）
               await RequestService.streamResponse(
                 agent: _currentAgent!,
                 prompt: null,
                 contextMessages: contextMessages,
                 vision: false,
+                additionalPrompts: {
+                  'tool_detail': detailPrompt,
+                },
                 // 使用 JSON Schema 强制返回工具调用格式
                 responseFormat: ResponseFormat.jsonSchema(
                   jsonSchema: JsonSchemaObject(
