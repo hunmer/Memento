@@ -19,6 +19,16 @@ extension TTSServiceTypeExtension on TTSServiceType {
     }
   }
 
+  /// 获取类型显示名称
+  String get displayName {
+    switch (this) {
+      case TTSServiceType.system:
+        return '系统语音';
+      case TTSServiceType.http:
+        return 'HTTP服务';
+    }
+  }
+
   /// 从字符串转换
   static TTSServiceType fromString(String value) {
     switch (value) {
