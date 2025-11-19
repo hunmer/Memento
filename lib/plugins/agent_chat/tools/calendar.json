@@ -1,56 +1,112 @@
 {
   "getEvents": {
     "title": "获取所有事件",
-    "description": "获取所有日历事件（包括 Todo 任务事件）",
-    "parameters": [],
+    "description": "获取所有日历事件（包括 Todo 任务事件），支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "事件列表，每个元素包含 id、title、description、startTime、endTime 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回事件数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "获取所有事件",
         "code": "const events = await Memento.plugins.calendar.getEvents();\nsetResult(JSON.stringify(events, null, 2));"
+      },
+      {
+        "title": "分页获取事件（前20个）",
+        "code": "const result = await Memento.plugins.calendar.getEvents({offset: 0, count: 20});\nsetResult(`共 ${result.total} 个事件，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "分页获取事件（第二页）",
+        "code": "const result = await Memento.plugins.calendar.getEvents({offset: 20, count: 20});\nsetResult(`还有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "遍历所有事件（分页加载）",
+        "code": "let allEvents = [];\nlet offset = 0;\nconst count = 50;\n\nwhile (true) {\n  const result = await Memento.plugins.calendar.getEvents({offset, count});\n  allEvents = allEvents.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allEvents.length} 个事件`);"
       }
     ],
-    "notes": "返回的事件包括普通日历事件（source='default'）和来自 Todo 插件的任务事件（source='todo'）",
+    "notes": "返回的事件包括普通日历事件（source='default'）和来自 Todo 插件的任务事件（source='todo'）。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "getTodayEvents": {
     "title": "获取今日事件",
-    "description": "获取今天的所有日历事件",
-    "parameters": [],
+    "description": "获取今天的所有日历事件，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "今日事件列表"
+      "type": "Array|Object",
+      "description": "无分页参数时返回事件数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "获取今日事件",
         "code": "const todayEvents = await Memento.plugins.calendar.getTodayEvents();\nsetResult(`今天有 ${todayEvents.length} 个事件`);"
+      },
+      {
+        "title": "分页获取今日事件（前10个）",
+        "code": "const result = await Memento.plugins.calendar.getTodayEvents({offset: 0, count: 10});\nsetResult(`今天共 ${result.total} 个事件，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "分页获取今日事件（第二页）",
+        "code": "const result = await Memento.plugins.calendar.getTodayEvents({offset: 10, count: 10});\nsetResult(`还有更多: ${result.hasMore}`);"
       }
     ],
-    "notes": "返回今天 00:00:00 到 23:59:59 之间的所有事件",
+    "notes": "返回今天 00:00:00 到 23:59:59 之间的所有事件。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "getEventsByDateRange": {
     "title": "获取日期范围内的事件",
-    "description": "获取指定日期范围内的事件",
+    "description": "获取指定日期范围内的事件，支持分页",
     "parameters": [
       {"name": "startDate", "type": "string", "required": true, "description": "开始日期（ISO8601 格式，如：2025-01-15T00:00:00.000Z）"},
-      {"name": "endDate", "type": "string", "required": true, "description": "结束日期（ISO8601 格式）"}
+      {"name": "endDate", "type": "string", "required": true, "description": "结束日期（ISO8601 格式）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "指定范围内的事件列表"
+      "type": "Array|Object",
+      "description": "无分页参数时返回事件数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "获取本周事件",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst startDate = weekStart.toISOString().split('T')[0] + 'T00:00:00.000Z';\nconst endDate = weekEnd.toISOString().split('T')[0] + 'T23:59:59.000Z';\nconst events = await Memento.plugins.calendar.getEventsByDateRange({startDate: startDate, endDate: endDate});\nsetResult(`本周有 ${events.length} 个事件`);"
+      },
+      {
+        "title": "分页获取本周事件",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst startDate = weekStart.toISOString().split('T')[0] + 'T00:00:00.000Z';\nconst endDate = weekEnd.toISOString().split('T')[0] + 'T23:59:59.000Z';\nconst result = await Memento.plugins.calendar.getEventsByDateRange({startDate, endDate, offset: 0, count: 20});\nsetResult(`本周共 ${result.total} 个事件，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "遍历本月所有事件（分页加载）",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01T00:00:00.000Z`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}T23:59:59.000Z`;\n\nlet allEvents = [];\nlet offset = 0;\nconst count = 30;\n\nwhile (true) {\n  const result = await Memento.plugins.calendar.getEventsByDateRange({startDate, endDate, offset, count});\n  allEvents = allEvents.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`本月共加载 ${allEvents.length} 个事件`);"
       }
     ],
-    "notes": "日期需要使用 ISO8601 格式，可使用 JavaScript 的 Date.toISOString() 生成",
+    "notes": "日期需要使用 ISO8601 格式，可使用 JavaScript 的 Date.toISOString() 生成。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "createEvent": {
@@ -148,32 +204,55 @@
   },
   "getCompletedEvents": {
     "title": "获取已完成事件",
-    "description": "获取所有已完成的事件列表",
-    "parameters": [],
+    "description": "获取所有已完成的事件列表，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "已完成事件列表，包含 completedTime 字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回事件数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "获取已完成事件",
         "code": "const completed = await Memento.plugins.calendar.getCompletedEvents();\nsetResult(`共有 ${completed.length} 个已完成事件`);"
+      },
+      {
+        "title": "分页获取已完成事件（前20个）",
+        "code": "const result = await Memento.plugins.calendar.getCompletedEvents({offset: 0, count: 20});\nsetResult(`共 ${result.total} 个已完成事件，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "分页获取已完成事件（第二页）",
+        "code": "const result = await Memento.plugins.calendar.getCompletedEvents({offset: 20, count: 20});\nsetResult(`还有更多: ${result.hasMore}`);"
       }
     ],
-    "notes": "已完成事件按完成时间倒序排列",
+    "notes": "已完成事件按完成时间倒序排列。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "findEventBy": {
     "title": "通用事件查找",
-    "description": "根据自定义条件查找事件（支持单条/多条结果）",
+    "description": "根据自定义条件查找事件（支持单条/多条结果），支持分页",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、description、source）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个事件对象或 null；findAll=true 时返回事件数组"
+      "description": "findAll=false 时返回单个事件对象或 null；findAll=true 且无分页参数时返回事件数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -183,9 +262,13 @@
       {
         "title": "查找所有来自 Todo 的事件",
         "code": "const events = await Memento.plugins.calendar.findEventBy({field: 'source', value: 'todo', findAll: true});\nsetResult(`找到 ${events.length} 个 Todo 任务事件`);"
+      },
+      {
+        "title": "分页查找所有来自 Todo 的事件",
+        "code": "const result = await Memento.plugins.calendar.findEventBy({field: 'source', value: 'todo', findAll: true, offset: 0, count: 20});\nsetResult(`共 ${result.total} 个 Todo 任务事件，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历事件列表；支持任意字段匹配；包括普通事件和 Todo 任务事件",
+    "notes": "简化查找逻辑，避免手动遍历事件列表；支持任意字段匹配；包括普通事件和 Todo 任务事件。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "findEventById": {
@@ -209,15 +292,17 @@
   },
   "findEventByTitle": {
     "title": "根据标题查找事件",
-    "description": "根据事件标题查找事件（支持精确匹配或模糊匹配）",
+    "description": "根据事件标题查找事件（支持精确匹配或模糊匹配），支持分页",
     "parameters": [
       {"name": "title", "type": "string", "required": true, "description": "事件标题"},
       {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个事件或 null；findAll=true 时返回事件数组"
+      "description": "findAll=false 时返回单个事件或 null；findAll=true 且无分页参数时返回事件数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -227,9 +312,13 @@
       {
         "title": "模糊匹配查找所有包含关键词的事件",
         "code": "const events = await Memento.plugins.calendar.findEventByTitle({title: '会议', fuzzy: true, findAll: true});\nsetResult(`找到 ${events.length} 个包含【会议】的事件`);"
+      },
+      {
+        "title": "分页模糊匹配事件标题",
+        "code": "const result = await Memento.plugins.calendar.findEventByTitle({title: '会议', fuzzy: true, findAll: true, offset: 0, count: 20});\nsetResult(`共 ${result.total} 个包含【会议】的事件，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   }
 }

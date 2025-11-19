@@ -1,19 +1,44 @@
 {
   "getAccounts": {
     "title": "获取所有账户",
-    "description": "获取所有账户的列表（不含账单数据）",
-    "parameters": [],
+    "description": "获取所有账户的列表（不含账单数据），支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "账户列表，每个元素包含 id、title、totalAmount 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回账户数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "获取所有账户",
-        "code": "const accounts = await Memento.plugins.bill.getAccounts({});\nsetResult(accounts, null, 2);"
+        "code": "const accounts = await Memento.plugins.bill.getAccounts({});\nsetResult(JSON.stringify(accounts, null, 2));"
+      },
+      {
+        "title": "分页获取账户（前10个）",
+        "code": "const result = await Memento.plugins.bill.getAccounts({offset: 0, count: 10});\nsetResult(`共 ${result.total} 个账户，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "分页获取账户（第二页）",
+        "code": "const result = await Memento.plugins.bill.getAccounts({offset: 10, count: 10});\nsetResult(`还有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "遍历所有账户（分页加载）",
+        "code": "let allAccounts = [];\nlet offset = 0;\nconst count = 20;\n\nwhile (true) {\n  const result = await Memento.plugins.bill.getAccounts({offset, count});\n  allAccounts = allAccounts.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allAccounts.length} 个账户`);"
       }
     ],
-    "notes": "返回的账户对象不包含 bills 字段，如需获取账单请使用 getBills",
+    "notes": "返回的账户对象不包含 bills 字段，如需获取账单请使用 getBills。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "createAccount": {
@@ -89,15 +114,17 @@
   },
   "getBills": {
     "title": "获取账单列表",
-    "description": "获取账单列表，支持按账户和日期范围筛选",
+    "description": "获取账单列表，支持按账户和日期范围筛选，支持分页",
     "parameters": [
       {"name": "accountId", "type": "string", "required": false, "description": "账户ID（不传则返回所有账户的账单）"},
       {"name": "startDate", "type": "string", "required": false, "description": "开始日期（格式：YYYY-MM-DD）"},
-      {"name": "endDate", "type": "string", "required": false, "description": "结束日期（格式：YYYY-MM-DD）"}
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期（格式：YYYY-MM-DD）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "账单列表，每条记录包含 id、title、amount、category、date 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回账单数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -111,9 +138,21 @@
       {
         "title": "获取本月账单",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst bills = await Memento.plugins.bill.getBills({startDate, endDate});\nsetResult(`本月共 ${bills.length} 条账单`);"
+      },
+      {
+        "title": "分页获取账单（前20条）",
+        "code": "const result = await Memento.plugins.bill.getBills({offset: 0, count: 20});\nsetResult(`共 ${result.total} 条账单，当前返回 ${result.data.length} 条`);"
+      },
+      {
+        "title": "分页获取本月账单（第二页）",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst result = await Memento.plugins.bill.getBills({startDate, endDate, offset: 20, count: 20});\nsetResult(`还有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "遍历所有账单（分页加载）",
+        "code": "let allBills = [];\nlet offset = 0;\nconst count = 50;\n\nwhile (true) {\n  const result = await Memento.plugins.bill.getBills({offset, count});\n  allBills = allBills.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allBills.length} 条账单`);"
       }
     ],
-    "notes": "金额字段：正数表示收入，负数表示支出",
+    "notes": "金额字段：正数表示收入，负数表示支出。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "createBill": {
@@ -248,15 +287,17 @@
   },
   "findAccountBy": {
     "title": "通用账户查找",
-    "description": "根据自定义条件查找账户（支持单条/多条结果）",
+    "description": "根据自定义条件查找账户（支持单条/多条结果），支持分页",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、totalAmount）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个账户对象或 null；findAll=true 时返回账户数组"
+      "description": "findAll=false 时返回单个账户对象或 null；findAll=true 且无分页参数时返回账户数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -270,9 +311,13 @@
       {
         "title": "查找所有余额大于1000的账户",
         "code": "const accounts = await Memento.plugins.bill.getAccounts({});\nconst richAccounts = accounts.filter(acc => acc.totalAmount > 1000);\nsetResult(`找到 ${richAccounts.length} 个账户`);"
+      },
+      {
+        "title": "分页查找所有匹配的账户",
+        "code": "const result = await Memento.plugins.bill.findAccountBy({field: 'title', value: '现金', findAll: true, offset: 0, count: 10});\nsetResult(`共 ${result.total} 个匹配账户，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历账户列表；支持任意字段匹配；对于数值比较等复杂条件，建议先用 getAccounts 获取后自行 filter",
+    "notes": "简化查找逻辑，避免手动遍历账户列表；支持任意字段匹配；对于数值比较等复杂条件，建议先用 getAccounts 获取后自行 filter。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "findAccountById": {
@@ -296,15 +341,17 @@
   },
   "findAccountByName": {
     "title": "根据名称查找账户",
-    "description": "根据账户名称查找账户（支持精确匹配或模糊匹配）",
+    "description": "根据账户名称查找账户（支持精确匹配或模糊匹配），支持分页",
     "parameters": [
       {"name": "name", "type": "string", "required": true, "description": "账户名称"},
       {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个账户或 null；findAll=true 时返回账户数组"
+      "description": "findAll=false 时返回单个账户或 null；findAll=true 且无分页参数时返回账户数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -314,23 +361,29 @@
       {
         "title": "模糊匹配账户名",
         "code": "const accounts = await Memento.plugins.bill.findAccountByName({name: '现金', fuzzy: true, findAll: true});\nsetResult(`找到 ${accounts.length} 个包含现金的账户`);"
+      },
+      {
+        "title": "分页模糊匹配账户名",
+        "code": "const result = await Memento.plugins.bill.findAccountByName({name: '银行', fuzzy: true, findAll: true, offset: 0, count: 10});\nsetResult(`共 ${result.total} 个匹配账户，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "findBillBy": {
     "title": "通用账单查找",
-    "description": "根据自定义条件查找账单（支持单条/多条结果）",
+    "description": "根据自定义条件查找账单（支持单条/多条结果），支持分页",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、category、amount）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
       {"name": "accountId", "type": "string", "required": false, "description": "限定在特定账户内查找（可选）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个账单或 null；findAll=true 时返回账单数组"
+      "description": "findAll=false 时返回单个账单或 null；findAll=true 且无分页参数时返回账单数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -344,9 +397,13 @@
       {
         "title": "在指定账户中查找账单",
         "code": "const bill = await Memento.plugins.bill.findBillBy({field: 'title', value: '午餐', accountId: 'acc123'});\nsetResult(bill ? `找到账单，金额: ${bill.amount}` : '未找到');"
+      },
+      {
+        "title": "分页查找特定分类的账单",
+        "code": "const result = await Memento.plugins.bill.findBillBy({field: 'category', value: '交通', findAll: true, offset: 0, count: 20});\nsetResult(`共 ${result.total} 条交通账单，当前返回 ${result.data.length} 条`);"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历账单列表；accountId 可选，不传则在所有账户中查找",
+    "notes": "简化查找逻辑，避免手动遍历账单列表；accountId 可选，不传则在所有账户中查找。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "findBillById": {
@@ -371,16 +428,18 @@
   },
   "findBillByTitle": {
     "title": "根据标题查找账单",
-    "description": "根据账单标题查找账单（支持精确匹配或模糊匹配）",
+    "description": "根据账单标题查找账单（支持精确匹配或模糊匹配），支持分页",
     "parameters": [
       {"name": "title", "type": "string", "required": true, "description": "账单标题"},
       {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false）"},
       {"name": "accountId", "type": "string", "required": false, "description": "限定在特定账户内查找（可选）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个账单或 null；findAll=true 时返回账单数组"
+      "description": "findAll=false 时返回单个账单或 null；findAll=true 且无分页参数时返回账单数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -390,23 +449,29 @@
       {
         "title": "模糊匹配查找所有包含关键词的账单",
         "code": "const bills = await Memento.plugins.bill.findBillByTitle({title: '地铁', fuzzy: true, findAll: true});\nconst total = bills.reduce((sum, b) => sum + b.amount, 0);\nsetResult(`找到 ${bills.length} 条地铁相关账单，合计: ${total}`);"
+      },
+      {
+        "title": "分页模糊匹配账单标题",
+        "code": "const result = await Memento.plugins.bill.findBillByTitle({title: '餐', fuzzy: true, findAll: true, offset: 0, count: 20});\nsetResult(`共 ${result.total} 条相关账单，当前返回 ${result.data.length} 条`);"
       }
     ],
-    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "findBillsByCategory": {
     "title": "根据分类查找账单",
-    "description": "查找指定分类的所有账单",
+    "description": "查找指定分类的所有账单，支持分页",
     "parameters": [
       {"name": "category", "type": "string", "required": true, "description": "分类名称"},
       {"name": "accountId", "type": "string", "required": false, "description": "限定在特定账户内查找（可选）"},
       {"name": "startDate", "type": "string", "required": false, "description": "开始日期（格式：YYYY-MM-DD）"},
-      {"name": "endDate", "type": "string", "required": false, "description": "结束日期（格式：YYYY-MM-DD）"}
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期（格式：YYYY-MM-DD）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "该分类的所有账单列表"
+      "type": "Array|Object",
+      "description": "无分页参数时返回账单数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -416,9 +481,17 @@
       {
         "title": "查找本月工资收入",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst bills = await Memento.plugins.bill.findBillsByCategory({category: '工资', startDate, endDate});\nconst total = bills.reduce((sum, b) => sum + b.amount, 0);\nsetResult(`本月工资: ${total}`);"
+      },
+      {
+        "title": "分页查找餐饮账单",
+        "code": "const result = await Memento.plugins.bill.findBillsByCategory({category: '餐饮', offset: 0, count: 20});\nsetResult(`共 ${result.total} 条餐饮账单，当前返回 ${result.data.length} 条`);"
+      },
+      {
+        "title": "分页查找本月交通账单",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst result = await Memento.plugins.bill.findBillsByCategory({category: '交通', startDate, endDate, offset: 0, count: 20});\nsetResult(`本月交通账单共 ${result.total} 条，当前返回 ${result.data.length} 条`);"
       }
     ],
-    "notes": "等价于 findBillBy({field: 'category', value: category, findAll: true}) 但支持日期过滤",
+    "notes": "等价于 findBillBy({field: 'category', value: category, findAll: true}) 但支持日期过滤。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   }
 }

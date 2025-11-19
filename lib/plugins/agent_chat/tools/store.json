@@ -1,19 +1,40 @@
 {
   "store_getProducts": {
     "title": "获取商品列表",
-    "description": "获取所有可兑换的商品列表",
-    "parameters": [],
+    "description": "获取所有可兑换的商品列表，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "optional": true,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "optional": true,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "Product 对象数组"
+      "type": "Array|Object",
+      "description": "无分页参数时返回商品数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "code": "const products = await Memento.plugins.store.getProducts({});\nsetResult(products);",
         "comment": "获取所有商品"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.getProducts({offset: 0, count: 20});\nsetResult(`共 ${result.total} 个商品，当前返回 ${result.data.length} 个`);" ,
+        "comment": "分页获取商品（前20个）"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.getProducts({offset: 20, count: 20});\nsetResult(`还有更多: ${result.hasMore}`);" ,
+        "comment": "获取第二页商品"
       }
     ],
-    "notes": "返回的 Product 对象包含: id, name, description, image, stock, price, exchange_start, exchange_end, use_duration",
+    "notes": "返回的 Product 对象包含: id, name, description, image, stock, price, exchange_start, exchange_end, use_duration。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "store_getProduct": {
@@ -289,53 +310,116 @@
   },
   "store_getRedeemHistory": {
     "title": "获取兑换历史",
-    "description": "获取用户的所有兑换记录",
-    "parameters": [],
+    "description": "获取用户的所有兑换记录，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "optional": true,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "optional": true,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "UserItem 对象数组"
+      "type": "Array|Object",
+      "description": "无分页参数时返回兑换记录数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "code": "const history = await Memento.plugins.store.getRedeemHistory({});\nsetResult(history);",
-        "comment": "查询兑换记录"
+        "comment": "查询所有兑换记录"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.getRedeemHistory({offset: 0, count: 10});\nsetResult(`共 ${result.total} 条兑换记录，当前返回 ${result.data.length} 条`);" ,
+        "comment": "分页获取兑换历史（前10条）"
+      },
+      {
+        "code": "let allHistory = [];\nlet offset = 0;\nconst count = 50;\n\nwhile (true) {\n  const result = await Memento.plugins.store.getRedeemHistory({offset, count});\n  allHistory = allHistory.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allHistory.length} 条兑换记录`);" ,
+        "comment": "遍历所有兑换记录（分页加载）"
       }
     ],
-    "notes": "返回的 UserItem 包含: id, product_id, remaining, expire_date, purchase_date, purchase_price, product_snapshot(商品快照)",
+    "notes": "返回的 UserItem 包含: id, product_id, remaining, expire_date, purchase_date, purchase_price, product_snapshot(商品快照)。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "store_getPointsHistory": {
     "title": "获取积分历史",
-    "description": "获取所有积分变动记录",
-    "parameters": [],
+    "description": "获取所有积分变动记录，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "optional": true,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "optional": true,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "PointsLog 对象数组"
+      "type": "Array|Object",
+      "description": "无分页参数时返回积分记录数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "code": "const logs = await Memento.plugins.store.getPointsHistory({});\nsetResult(logs);",
-        "comment": "查询积分记录"
+        "comment": "查询所有积分记录"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.getPointsHistory({offset: 0, count: 20});\nsetResult(`共 ${result.total} 条积分记录，当前返回 ${result.data.length} 条`);" ,
+        "comment": "分页获取积分历史（前20条）"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.getPointsHistory({offset: 20, count: 20});\nsetResult(`还有更多: ${result.hasMore}`);" ,
+        "comment": "获取第二页积分记录"
       }
     ],
-    "notes": "返回的 PointsLog 包含: id, type(获得/消耗), value, reason, timestamp",
+    "notes": "返回的 PointsLog 包含: id, type(获得/消耗), value, reason, timestamp。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "store_getUserItems": {
     "title": "获取用户物品",
-    "description": "获取用户拥有的所有物品",
-    "parameters": [],
+    "description": "获取用户拥有的所有物品，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "optional": true,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "optional": true,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "UserItem 对象数组"
+      "type": "Array|Object",
+      "description": "无分页参数时返回物品数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "code": "const items = await Memento.plugins.store.getUserItems({});\nsetResult(items);",
-        "comment": "查询拥有的物品"
+        "comment": "查询所有拥有的物品"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.getUserItems({offset: 0, count: 10});\nsetResult(`共 ${result.total} 个物品，当前返回 ${result.data.length} 个`);" ,
+        "comment": "分页获取用户物品（前10个）"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.getUserItems({offset: 10, count: 10});\nsetResult(`还有更多: ${result.hasMore}`);" ,
+        "comment": "获取第二页用户物品"
       }
     ],
-    "notes": "仅返回未过期且剩余次数大于 0 的物品",
+    "notes": "仅返回未过期且剩余次数大于 0 的物品。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "store_useItem": {
@@ -412,32 +496,55 @@
   },
   "store_getArchivedProducts": {
     "title": "获取归档商品",
-    "description": "获取所有已归档的商品列表",
-    "parameters": [],
+    "description": "获取所有已归档的商品列表，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "optional": true,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "optional": true,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "Product 对象数组"
+      "type": "Array|Object",
+      "description": "无分页参数时返回归档商品数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "code": "const archived = await Memento.plugins.store.getArchivedProducts({});\nsetResult(archived);",
-        "comment": "查询归档商品"
+        "comment": "查询所有归档商品"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.getArchivedProducts({offset: 0, count: 10});\nsetResult(`共 ${result.total} 个归档商品，当前返回 ${result.data.length} 个`);" ,
+        "comment": "分页获取归档商品（前10个）"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.getArchivedProducts({offset: 10, count: 10});\nsetResult(`还有更多: ${result.hasMore}`);" ,
+        "comment": "获取第二页归档商品"
       }
     ],
-    "notes": "归档商品不会在普通商品列表中显示",
+    "notes": "归档商品不会在普通商品列表中显示。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "store_findProductBy": {
     "title": "通用商品查找",
-    "description": "根据自定义条件查找商品（支持单条/多条结果）",
+    "description": "根据自定义条件查找商品（支持单条/多条结果），支持分页",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "optional": true, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个商品对象或 null；findAll=true 时返回商品数组"
+      "description": "findAll=false 时返回单个商品对象或 null；findAll=true 且无分页参数时返回商品数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -447,9 +554,13 @@
       {
         "code": "const products = await Memento.plugins.store.findProductBy({field: 'name', value: '优惠券', findAll: true});\nsetResult(`找到 ${products.length} 个优惠券商品`);\n",
         "comment": "查找所有名称匹配的商品"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.findProductBy({field: 'name', value: '券', findAll: true, offset: 0, count: 10});\nsetResult(`共 ${result.total} 个匹配商品，当前返回 ${result.data.length} 个`);" ,
+        "comment": "分页查找商品（前10个）"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历商品列表；支持任意字段匹配",
+    "notes": "简化查找逻辑，避免手动遍历商品列表；支持任意字段匹配。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "store_findProductById": {
@@ -473,15 +584,17 @@
   },
   "store_findProductByName": {
     "title": "根据名称查找商品",
-    "description": "根据商品名称查找商品（支持精确匹配或模糊匹配）",
+    "description": "根据商品名称查找商品（支持精确匹配或模糊匹配），支持分页",
     "parameters": [
       {"name": "name", "type": "string", "required": true, "description": "商品名称"},
       {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "optional": true, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个商品或 null；findAll=true 时返回商品数组"
+      "description": "findAll=false 时返回单个商品或 null；findAll=true 且无分页参数时返回商品数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -491,22 +604,28 @@
       {
         "code": "const products = await Memento.plugins.store.findProductByName({name: '券', fuzzy: true, findAll: true});\nconst totalStock = products.reduce((sum, p) => sum + p.stock, 0);\nsetResult(`找到 ${products.length} 个包含'券'的商品，总库存: ${totalStock}`);\n",
         "comment": "模糊匹配查找所有包含关键词的商品"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.findProductByName({name: '券', fuzzy: true, findAll: true, offset: 0, count: 10});\nsetResult(`共 ${result.total} 个匹配商品，当前返回 ${result.data.length} 个`);" ,
+        "comment": "分页查找商品（前10个）"
       }
     ],
-    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "store_findUserItemBy": {
     "title": "通用用户物品查找",
-    "description": "根据自定义条件查找用户物品（支持单条/多条结果）",
+    "description": "根据自定义条件查找用户物品（支持单条/多条结果），支持分页",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、productId）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "optional": true, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个用户物品对象或 null；findAll=true 时返回用户物品数组"
+      "description": "findAll=false 时返回单个用户物品对象或 null；findAll=true 且无分页参数时返回用户物品数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -516,9 +635,13 @@
       {
         "code": "const items = await Memento.plugins.store.findUserItemBy({field: 'productId', value: 'product123', findAll: true});\nsetResult(`该商品已兑换 ${items.length} 次`);\n",
         "comment": "查找某个商品的所有兑换记录"
+      },
+      {
+        "code": "const result = await Memento.plugins.store.findUserItemBy({field: 'productId', value: 'product123', findAll: true, offset: 0, count: 10});\nsetResult(`共 ${result.total} 个匹配物品，当前返回 ${result.data.length} 个`);" ,
+        "comment": "分页查找用户物品（前10个）"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历用户物品列表；支持任意字段匹配",
+    "notes": "简化查找逻辑，避免手动遍历用户物品列表；支持任意字段匹配。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "store_findUserItemById": {
