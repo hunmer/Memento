@@ -14,6 +14,7 @@ import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
+import 'package:Memento/plugins/tts/l10n/tts_localizations.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
 import 'package:Memento/screens/settings_screen/l10n/settings_screen_localizations.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_localizations.dart';
@@ -64,6 +65,7 @@ import 'screens/settings_screen/controllers/auto_update_controller.dart'; // 自
 import 'plugins/database/database_plugin.dart';
 import 'plugins/scripts_center/scripts_center_plugin.dart'; // 脚本中心插件
 import 'plugins/agent_chat/agent_chat_plugin.dart'; // Agent Chat插件
+import 'plugins/tts/tts_plugin.dart'; // TTS语音朗读插件
 import 'utils/image_utils.dart'; // 图片工具类
 
 
@@ -184,6 +186,7 @@ void main() async {
       CalendarPlugin(),
       CalendarAlbumPlugin(),
       ScriptsCenterPlugin(), // 脚本中心插件
+      TTSPlugin(), // TTS语音朗读插件
     ];
 
     // 遍历并注册插件
@@ -342,6 +345,7 @@ class _MyAppState extends State<MyApp> {
               ContactLocalizations.delegate,
               TrackerLocalizations.delegate,
               HabitsLocalizations.delegate,
+              TTSLocalizations.delegate,
               ImagePickerLocalizations.delegate,
               SettingsScreenLocalizations.delegate,
               DataManagementLocalizations.delegate,

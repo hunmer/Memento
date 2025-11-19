@@ -209,7 +209,7 @@ class ToolService {
     buffer.writeln('\n### 🚫 严格禁止的行为');
     buffer.writeln('1. **禁止硬编码日期时间**：');
     buffer.writeln('   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`');
-    buffer.writeln('   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = \`\${time.year}-\${String(time.month).padStart(2, \'0\')}-\${String(time.day).padStart(2, \'0\')}\``');
+    buffer.writeln('   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = `\${time.year}-\${String(time.month).padStart(2, "0")}-\${String(time.day).padStart(2, "0")}`');
     buffer.writeln('2. **禁止使用占位符变量**：');
     buffer.writeln('   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`');
     buffer.writeln('   - ✅ 正确：先查询获取真实数据，然后使用实际的ID');
@@ -221,6 +221,16 @@ class ToolService {
     buffer.writeln('- `await Memento.system.formatDate(dateInput, format)` - 格式化日期');
     buffer.writeln('- `await Memento.system.getDeviceInfo()` - 获取设备信息');
     buffer.writeln('- `await Memento.system.getAppInfo()` - 获取应用信息');
+    buffer.writeln('\n### 步骤间结果传递 API（多步骤协作）\n');
+    buffer.writeln('当工具调用包含多个步骤时，可以使用以下 API 在步骤之间传递数据：\n');
+    buffer.writeln('- `await Memento.toolCall.setResult({id?, value})` - 保存结果供后续步骤使用');
+    buffer.writeln('  - `id` (可选): 自定义结果 ID，如 "userData"、"taskList"');
+    buffer.writeln('  - `value` (必需): 要保存的数据（任意 JSON 可序列化对象）');
+    buffer.writeln('- `await Memento.toolCall.getResult({id?, step?, default?})` - 获取之前步骤的结果');
+    buffer.writeln('  - `id` (可选): 结果 ID');
+    buffer.writeln('  - `step` (可选): 步骤索引（从 0 开始），如 `{step: 0}` 获取第一个步骤的结果');
+    buffer.writeln('  - `default` (可选): 默认值，结果不存在时返回');
+    buffer.writeln('\n**自动保存**：每个步骤执行成功后，结果会自动保存到 `step_N`（N 为步骤索引）');
     buffer.writeln('\n你可以调用以下插件功能来获取数据或执行操作。');
     buffer.writeln('\n### 🎯 run_js 工具用途说明\n');
     buffer.writeln('**JavaScript 代码可用于**:');
@@ -324,7 +334,29 @@ class ToolService {
     buffer.writeln('  ]');
     buffer.writeln('}');
     buffer.writeln('```\n');
-    buffer.writeln('**示例 4：多步骤操作链（查询条件+创建）**\n');
+    buffer.writeln('**示例 4：步骤间数据传递（查询→分析→生成报告）**\n');
+    buffer.writeln('使用 setResult/getResult 在步骤之间传递数据：\n');
+    buffer.writeln('```json');
+    buffer.writeln('{');
+    buffer.writeln('  "steps": [');
+    buffer.writeln('    {');
+    buffer.writeln('      "method": "run_js",');
+    buffer.writeln('      "title": "查询今日任务",');
+    buffer.writeln('      "desc": "获取今天的任务列表",');
+    final step1Example = '''const tasks = await Memento.plugins.todo.getTodayTasks(); await Memento.toolCall.setResult({id: 'todayTasks', value: tasks}); return `已获取 \${tasks.length} 个任务`;''';
+    buffer.writeln('      "data": "${step1Example.replaceAll('"', '\\"')}"');
+    buffer.writeln('    },');
+    buffer.writeln('    {');
+    buffer.writeln('      "method": "run_js",');
+    buffer.writeln('      "title": "统计任务情况",');
+    buffer.writeln('      "desc": "分析任务完成情况",');
+    final step2Example = '''const tasks = await Memento.toolCall.getResult({id: 'todayTasks'}); const completed = tasks.filter(t => t.completed).length; const rate = (completed / tasks.length * 100).toFixed(1); return `完成率: \${rate}%`;''';
+    buffer.writeln('      "data": "${step2Example.replaceAll('"', '\\"')}"');
+    buffer.writeln('    }');
+    buffer.writeln('  ]');
+    buffer.writeln('}');
+    buffer.writeln('```\n');
+    buffer.writeln('**示例 5：多步骤操作链（查询条件+创建）**\n');
     buffer.writeln('当用户说"创建明天的任务"时，直接完成创建，不要询问确认：\n');
     buffer.writeln('```json');
     buffer.writeln('{');
@@ -386,6 +418,19 @@ class ToolService {
 - `await Memento.system.getDeviceInfo()` - 获取设备信息
 - `await Memento.system.getAppInfo()` - 获取应用信息
 
+### 步骤间结果传递 API（多步骤协作）
+
+当工具调用包含多个步骤时，可以使用以下 API 在步骤之间传递数据：
+
+- `await Memento.toolCall.setResult({id?, value})` - 保存结果供后续步骤使用
+  - `id` (可选): 自定义结果 ID
+  - `value` (必需): 要保存的数据
+- `await Memento.toolCall.getResult({id?, step?, default?})` - 获取之前步骤的结果
+  - `id` (可选): 结果 ID
+  - `step` (可选): 步骤索引（从 0 开始）
+  - `default` (可选): 默认值
+
+**自动保存**：每个步骤执行成功后，结果会自动保存到 `step_N`
 
 ### 🎯 run_js 工具用途说明
 
@@ -544,7 +589,7 @@ return result;
     buffer.writeln('1. **绝对禁止硬编码日期时间**：');
     buffer.writeln('   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`');
     buffer.writeln('   - ❌ 错误：在生成日记内容、任务标题等地方使用你知识中的日期');
-    buffer.writeln('   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = \`\${time.year}-\${String(time.month).padStart(2, \'0\')}-\${String(time.day).padStart(2, \'0\')}\``');
+    buffer.writeln('   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = `\${time.year}-\${String(time.month).padStart(2, "0")}-\${String(time.day).padStart(2, "0")}`');
     buffer.writeln('   - ✅ 正确：在生成的内容中使用系统API返回的真实日期');
     buffer.writeln('2. **绝对禁止使用占位符变量**：');
     buffer.writeln('   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`');
@@ -564,6 +609,30 @@ return result;
     buffer.writeln('- `await Memento.system.getDeviceInfo()` - 获取设备信息');
     buffer.writeln('- `await Memento.system.getAppInfo()` - 获取应用信息\n');
     buffer.writeln('⚠️ **重要**：不要将系统 API 作为单独的步骤，而是在需要时直接在代码中调用！\n');
+    buffer.writeln('### 步骤间结果传递 API（多步骤数据共享）\n');
+    buffer.writeln('当需要在多个步骤之间传递数据时，使用以下 API：\n');
+    buffer.writeln('**设置结果**：');
+    buffer.writeln('```javascript');
+    buffer.writeln('await Memento.toolCall.setResult({');
+    buffer.writeln('  id: "myData",    // 可选：自定义 ID');
+    buffer.writeln('  value: dataObj   // 必需：要保存的数据');
+    buffer.writeln('});');
+    buffer.writeln('```\n');
+    buffer.writeln('**获取结果**：');
+    buffer.writeln('```javascript');
+    buffer.writeln('// 方式1: 通过自定义 ID');
+    buffer.writeln('const data = await Memento.toolCall.getResult({id: "myData"});');
+    buffer.writeln('');
+    buffer.writeln('// 方式2: 通过步骤索引（0 = 第一个步骤）');
+    buffer.writeln('const prevResult = await Memento.toolCall.getResult({step: 0});');
+    buffer.writeln('');
+    buffer.writeln('// 方式3: 带默认值（防止获取失败）');
+    buffer.writeln('const config = await Memento.toolCall.getResult({');
+    buffer.writeln('  id: "config",');
+    buffer.writeln('  default: {theme: "light"}');
+    buffer.writeln('});');
+    buffer.writeln('```\n');
+    buffer.writeln('**自动保存**：每个步骤的结果会自动保存到 `step_N`，可直接通过索引获取。\n');
 
     // 添加插件别名映射
     buffer.write(ToolConfigManager.generatePluginAliasesPrompt());
