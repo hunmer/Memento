@@ -223,6 +223,15 @@ abstract class OpenAILocalizations {
   String get unsavedHeaderWarning;
 
   String get discard;
+
+  // Prompt Preset
+  String get promptPresetManagement;
+  String get promptPresetManagementDescription;
+  String get promptPreset;
+  String get selectPromptPreset;
+  String get noPreset;
+  String get promptPresetActiveHint;
+  String get promptContent;
 }
 
 /// 中文实现
@@ -695,6 +704,22 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
   String get unsavedHeaderWarning => 'Header 输入框中有未添加的内容,确定要放弃这些更改吗?';
   @override
   String get discard => '放弃';
+
+  // Prompt Preset
+  @override
+  String get promptPresetManagement => 'Prompt 预设管理';
+  @override
+  String get promptPresetManagementDescription => '管理可复用的系统提示词模板';
+  @override
+  String get promptPreset => 'Prompt 预设';
+  @override
+  String get selectPromptPreset => '选择 Prompt 预设';
+  @override
+  String get noPreset => '无预设';
+  @override
+  String get promptPresetActiveHint => '已选择预设，此字段内容将被忽略';
+  @override
+  String get promptContent => 'Prompt 内容';
 }
 
 /// 英文实现
@@ -1171,6 +1196,22 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   String get unsavedHeaderWarning => 'There are unsaved changes in the header input fields. Do you want to discard these changes?';
   @override
   String get discard => 'Discard';
+
+  // Prompt Preset
+  @override
+  String get promptPresetManagement => 'Prompt Preset Management';
+  @override
+  String get promptPresetManagementDescription => 'Manage reusable system prompt templates';
+  @override
+  String get promptPreset => 'Prompt Preset';
+  @override
+  String get selectPromptPreset => 'Select Prompt Preset';
+  @override
+  String get noPreset => 'No Preset';
+  @override
+  String get promptPresetActiveHint => 'Preset selected, this field will be ignored';
+  @override
+  String get promptContent => 'Prompt Content';
 }
 
 /// 本地化代理

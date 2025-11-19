@@ -4,9 +4,27 @@ import 'dart:async';
 import 'package:openai_dart/openai_dart.dart';
 import '../models/ai_agent.dart';
 import '../controllers/prompt_replacement_controller.dart';
+import 'prompt_preset_service.dart';
 import 'dart:developer' as developer;
 
 class RequestService {
+  /// 获取有效的系统提示词
+  /// 如果 agent 设置了 promptPresetId，则返回预设的内容
+  /// 否则返回 agent 原有的 systemPrompt
+  static Future<String> getEffectiveSystemPrompt(AIAgent agent) async {
+    if (agent.promptPresetId != null && agent.promptPresetId!.isNotEmpty) {
+      final presetContent = await PromptPresetService().getPresetContent(agent.promptPresetId);
+      if (presetContent != null && presetContent.isNotEmpty) {
+        developer.log(
+          '使用预设 Prompt: ${agent.promptPresetId}',
+          name: 'RequestService',
+        );
+        return presetContent;
+      }
+    }
+    return agent.systemPrompt;
+  }
+
   /// 处理思考内容，将<think>标签转换为Markdown格式
   static String processThinkingContent(String content) {
     // 使用正则表达式匹配<think>标签内的内容
@@ -108,6 +126,9 @@ class RequestService {
 
       final client = _getClient(agent);
 
+      // 获取有效的系统提示词（可能是预设）
+      final effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
+
       late final CreateChatCompletionRequest request;
 
       if (imageFile != null) {
@@ -118,7 +139,7 @@ class RequestService {
         request = CreateChatCompletionRequest(
           model: ChatCompletionModel.modelId(agent.model),
           messages: [
-            ChatCompletionMessage.system(content: agent.systemPrompt),
+            ChatCompletionMessage.system(content: effectiveSystemPrompt),
             ChatCompletionMessage.user(
               content: ChatCompletionUserMessageContent.parts([
                 ChatCompletionMessageContentPart.text(text: processedInput),
@@ -136,7 +157,7 @@ class RequestService {
       } else {
         // 构建消息列表
         final List<ChatCompletionMessage> messages = [
-          ChatCompletionMessage.system(content: agent.systemPrompt),
+          ChatCompletionMessage.system(content: effectiveSystemPrompt),
         ];
 
         // 添加上下文消息（如果有）
@@ -214,6 +235,9 @@ class RequestService {
     bool Function()? shouldCancel,
   }) async {
     try {
+      // 获取有效的系统提示词（可能是预设）
+      final effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
+
       // 如果提供了contextMessages，直接使用它作为消息列表
       List<ChatCompletionMessage> messages = [];
       if (contextMessages != null && contextMessages.isNotEmpty) {
@@ -221,7 +245,7 @@ class RequestService {
       } else if (prompt != null) {
         // 如果没有提供contextMessages但有prompt，则创建基本的消息列表
         messages = [
-          ChatCompletionMessage.system(content: agent.systemPrompt),
+          ChatCompletionMessage.system(content: effectiveSystemPrompt),
           ChatCompletionMessage.user(
             content: ChatCompletionUserMessageContent.string(prompt),
           ),
