@@ -1,19 +1,40 @@
 {
   "getAgents": {
     "title": "获取所有AI助手",
-    "description": "获取所有已配置的AI助手列表",
-    "parameters": [],
+    "description": "获取所有已配置的AI助手列表，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "AI助手列表，每个元素包含 id、name、model、serviceProviderId 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回助手数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "获取所有AI助手",
         "code": "const agents = await Memento.plugins.openai.getAgents();\nsetResult(JSON.stringify(agents, null, 2));"
+      },
+      {
+        "title": "分页获取助手（前10个）",
+        "code": "const result = await Memento.plugins.openai.getAgents({offset: 0, count: 10});\nsetResult(`共 ${result.total} 个助手，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "获取第二页助手",
+        "code": "const result = await Memento.plugins.openai.getAgents({offset: 10, count: 10});\nsetResult(`还有更多: ${result.hasMore}`);"
       }
     ],
-    "notes": "返回所有已配置的AI助手，包括服务商信息",
+    "notes": "返回所有已配置的AI助手，包括服务商信息。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "getAgent": {
@@ -62,19 +83,40 @@
   },
   "getProviders": {
     "title": "获取所有服务商",
-    "description": "获取所有已配置的AI服务商列表",
-    "parameters": [],
+    "description": "获取所有已配置的AI服务商列表，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "服务商列表，每个元素包含 id、label、baseUrl 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回服务商数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "获取所有服务商",
         "code": "const providers = await Memento.plugins.openai.getProviders();\nsetResult(JSON.stringify(providers, null, 2));"
+      },
+      {
+        "title": "分页获取服务商（前5个）",
+        "code": "const result = await Memento.plugins.openai.getProviders({offset: 0, count: 5});\nsetResult(`共 ${result.total} 个服务商，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "遍历所有服务商（分页加载）",
+        "code": "let allProviders = [];\nlet offset = 0;\nconst count = 10;\n\nwhile (true) {\n  const result = await Memento.plugins.openai.getProviders({offset, count});\n  allProviders = allProviders.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allProviders.length} 个服务商`);"
       }
     ],
-    "notes": "返回所有已配置的AI服务商，包括 OpenAI、Ollama、Claude 等",
+    "notes": "返回所有已配置的AI服务商，包括 OpenAI、Ollama、Claude 等。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "testProvider": {

@@ -259,7 +259,7 @@ class RequestService {
         // 替换 {agent_prompt} 占位符为原始 agent prompt
         effectiveSystemPrompt = effectiveSystemPrompt.replaceAll('{agent_prompt}', originalAgentPrompt);
 
-        // 替换其他占位符
+        // 替换 additionalPrompts 中提供的占位符
         additionalPrompts.forEach((placeholder, content) {
           final fullPlaceholder = '{$placeholder}';
           if (content.isNotEmpty) {
@@ -271,8 +271,29 @@ class RequestService {
           } else {
             // 如果内容为空，移除占位符
             effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(fullPlaceholder, '');
+            developer.log(
+              '替换占位符 $fullPlaceholder (内容为空)',
+              name: 'RequestService',
+            );
           }
         });
+
+        // 定义所有标准工具占位符
+        final standardToolPlaceholders = ['tool_templates', 'tool_brief', 'tool_detail'];
+
+        // 替换所有未在 additionalPrompts 中提供的标准占位符为空字符串
+        for (final placeholder in standardToolPlaceholders) {
+          if (!additionalPrompts.containsKey(placeholder)) {
+            final fullPlaceholder = '{$placeholder}';
+            if (effectiveSystemPrompt.contains(fullPlaceholder)) {
+              effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(fullPlaceholder, '');
+              developer.log(
+                '替换未提供的标准占位符 $fullPlaceholder 为空字符串',
+                name: 'RequestService',
+              );
+            }
+          }
+        }
 
         developer.log(
           '应用占位符后的 systemPrompt 长度: ${effectiveSystemPrompt.length}',

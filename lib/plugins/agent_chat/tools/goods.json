@@ -1,19 +1,44 @@
 {
   "getWarehouses": {
     "title": "获取所有仓库",
-    "description": "获取所有物品仓库的列表（不含物品数据）",
-    "parameters": [],
+    "description": "获取所有物品仓库的列表（不含物品数据），支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Array",
-      "description": "仓库列表，每个元素包含 id、title等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回仓库数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "获取所有仓库",
         "code": "const warehouses = await Memento.plugins.goods.getWarehouses();\nsetResult(JSON.stringify(warehouses, null, 2));"
+      },
+      {
+        "title": "分页获取仓库（前20个）",
+        "code": "const result = await Memento.plugins.goods.getWarehouses({offset: 0, count: 20});\nsetResult(`共 ${result.total} 个仓库，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "分页获取仓库（第二页）",
+        "code": "const result = await Memento.plugins.goods.getWarehouses({offset: 20, count: 20});\nsetResult(`还有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "遍历所有仓库（分页加载）",
+        "code": "let allWarehouses = [];\nlet offset = 0;\nconst count = 50;\n\nwhile (true) {\n  const result = await Memento.plugins.goods.getWarehouses({offset, count});\n  allWarehouses = allWarehouses.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allWarehouses.length} 个仓库`);"
       }
     ],
-    "notes": "返回的仓库对象不包含 items 字段，如需获取物品请使用 getGoods",
+    "notes": "返回的仓库对象不包含 items 字段，如需获取物品请使用 getGoods。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-100 条数据",
     "enabled": true
   },
   "getWarehouse": {
@@ -123,13 +148,25 @@
   },
   "getGoods": {
     "title": "获取物品列表",
-    "description": "获取指定仓库或所有仓库中的物品",
+    "description": "获取指定仓库或所有仓库中的物品，支持分页",
     "parameters": [
-      {"name": "warehouseId", "type": "string", "required": false, "description": "仓库ID（可选，不提供则返回所有物品）"}
+      {"name": "warehouseId", "type": "string", "required": false, "description": "仓库ID（可选，不提供则返回所有物品）"},
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
     ],
     "returns": {
-      "type": "Array",
-      "description": "物品列表，每个元素包含 id、title、customFields 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回物品数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -139,9 +176,21 @@
       {
         "title": "获取所有物品",
         "code": "const items = await Memento.plugins.goods.getGoods({});\nsetResult(`总共有 ${items.length} 件物品`);"
+      },
+      {
+        "title": "分页获取物品（前30个）",
+        "code": "const result = await Memento.plugins.goods.getGoods({warehouseId: 'warehouse123', offset: 0, count: 30});\nsetResult(`共 ${result.total} 件物品，当前返回 ${result.data.length} 件`);"
+      },
+      {
+        "title": "分页获取所有仓库的物品",
+        "code": "const result = await Memento.plugins.goods.getGoods({offset: 0, count: 50});\nconst totalValue = result.data.reduce((sum, item) => sum + (item.purchasePrice || 0), 0);\nsetResult(`当前页物品总价值: ¥${totalValue}`);"
+      },
+      {
+        "title": "遍历所有物品（分页加载）",
+        "code": "let allItems = [];\nlet offset = 0;\nconst count = 50;\n\nwhile (true) {\n  const result = await Memento.plugins.goods.getGoods({offset, count});\n  allItems = allItems.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allItems.length} 件物品`);"
       }
     ],
-    "notes": "返回指定仓库或所有仓库的所有物品",
+    "notes": "返回指定仓库或所有仓库的物品。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-100 条数据",
     "enabled": true
   },
   "getGoodsItem": {

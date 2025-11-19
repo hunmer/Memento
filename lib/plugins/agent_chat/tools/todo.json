@@ -1,7 +1,7 @@
 {
   "todo_getTasks": {
     "title": "获取任务列表",
-    "description": "查询待办任务,支持按状态和优先级筛选。返回任务对象数组。",
+    "description": "查询待办任务,支持按状态和优先级筛选,支持分页。",
     "parameters": [
       {
         "name": "params",
@@ -18,13 +18,23 @@
             "type": "string",
             "optional": true,
             "description": "优先级:'low'(低) | 'medium'(中) | 'high'(高)"
+          },
+          "offset": {
+            "type": "number",
+            "optional": true,
+            "description": "分页起始位置（默认 0）"
+          },
+          "count": {
+            "type": "number",
+            "optional": true,
+            "description": "返回数量（默认 100）"
           }
         }
       }
     ],
     "returns": {
-      "type": "Promise<Array>",
-      "description": "任务对象数组"
+      "type": "Promise<Array|Object>",
+      "description": "无分页参数时返回任务数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -42,9 +52,17 @@
       {
         "code": "const inProgressHigh = await Memento.plugins.todo.getTasks({ status: 'inProgress', priority: 'high' });\nsetResult(inProgressHigh);",
         "comment": "获取进行中的高优先级任务"
+      },
+      {
+        "code": "const result = await Memento.plugins.todo.getTasks({ offset: 0, count: 20 });\nsetResult(`共 ${result.total} 个任务，当前返回 ${result.data.length} 个`);",
+        "comment": "分页获取任务（前20个）"
+      },
+      {
+        "code": "const result = await Memento.plugins.todo.getTasks({ status: 'todo', offset: 20, count: 20 });\nsetResult(`待办任务还有更多: ${result.hasMore}`);",
+        "comment": "分页获取待办任务（第二页）"
       }
     ],
-    "notes": "所有插件方法都是异步的,必须使用 await。返回值为对象。",
+    "notes": "所有插件方法都是异步的,必须使用 await。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-100 条数据。",
     "enabled": true
   },
   "todo_getTask": {
@@ -80,50 +98,82 @@
   },
   "todo_getTodayTasks": {
     "title": "获取今日任务",
-    "description": "获取日期范围包含今天的所有任务。包括:1)今天开始的任务 2)今天截止的任务 3)跨越今天的任务(开始日期≤今天≤截止日期)。",
+    "description": "获取日期范围包含今天的所有任务,支持分页。包括:1)今天开始的任务 2)今天截止的任务 3)跨越今天的任务(开始日期≤今天≤截止日期)。",
     "parameters": [
       {
         "name": "params",
         "type": "object",
         "optional": false,
-        "description": "参数对象(无需实际参数,但保持接口一致性)"
+        "description": "参数对象",
+        "properties": {
+          "offset": {
+            "type": "number",
+            "optional": true,
+            "description": "分页起始位置（默认 0）"
+          },
+          "count": {
+            "type": "number",
+            "optional": true,
+            "description": "返回数量（默认 100）"
+          }
+        }
       }
     ],
     "returns": {
-      "type": "Promise<Array>",
-      "description": "今日任务对象数组"
+      "type": "Promise<Array|Object>",
+      "description": "无分页参数时返回任务数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "code": "const tasks = await Memento.plugins.todo.getTodayTasks({});\nsetResult(tasks);",
-        "comment": "获取今日任务"
+        "comment": "获取今日所有任务"
+      },
+      {
+        "code": "const result = await Memento.plugins.todo.getTodayTasks({ offset: 0, count: 10 });\nsetResult(`今日共 ${result.total} 个任务，当前返回 ${result.data.length} 个`);",
+        "comment": "分页获取今日任务（前10个）"
       }
     ],
-    "notes": "无需参数,返回所有日期范围包含今天的任务。例如:一个从昨天到明天的任务,也会被认为是今日任务。",
+    "notes": "返回所有日期范围包含今天的任务。例如:一个从昨天到明天的任务,也会被认为是今日任务。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据。",
     "enabled": true
   },
   "todo_getOverdueTasks": {
     "title": "获取过期任务",
-    "description": "获取截止日期已过且未完成的任务。",
+    "description": "获取截止日期已过且未完成的任务,支持分页。",
     "parameters": [
       {
         "name": "params",
         "type": "object",
         "optional": false,
-        "description": "参数对象(无需实际参数,但保持接口一致性)"
+        "description": "参数对象",
+        "properties": {
+          "offset": {
+            "type": "number",
+            "optional": true,
+            "description": "分页起始位置（默认 0）"
+          },
+          "count": {
+            "type": "number",
+            "optional": true,
+            "description": "返回数量（默认 100）"
+          }
+        }
       }
     ],
     "returns": {
-      "type": "Promise<Array>",
-      "description": "过期任务对象数组"
+      "type": "Promise<Array|Object>",
+      "description": "无分页参数时返回任务数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "code": "const tasks = await Memento.plugins.todo.getOverdueTasks({});\nsetResult(tasks);",
-        "comment": "获取过期任务"
+        "comment": "获取所有过期任务"
+      },
+      {
+        "code": "const result = await Memento.plugins.todo.getOverdueTasks({ offset: 0, count: 15 });\nsetResult(`共 ${result.total} 个过期任务，当前返回 ${result.data.length} 个，还有更多: ${result.hasMore}`);",
+        "comment": "分页获取过期任务（前15个）"
       }
     ],
-    "notes": "仅返回未完成且截止日期已过的任务。",
+    "notes": "仅返回未完成且截止日期已过的任务。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据。",
     "enabled": true
   },
   "todo_createTask": {
@@ -299,15 +349,17 @@
   },
   "findTaskBy": {
     "title": "通用任务查找",
-    "description": "根据自定义条件查找任务（支持单条/多条结果）",
+    "description": "根据自定义条件查找任务（支持单条/多条结果和分页）",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、status、priority）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个任务对象或 null；findAll=true 时返回任务数组"
+      "description": "findAll=false 时返回单个任务对象或 null；findAll=true 且无分页参数时返回任务数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -317,9 +369,13 @@
       {
         "title": "查找所有高优先级任务",
         "code": "const tasks = await Memento.plugins.todo.findTaskBy({field: 'priority', value: 'high', findAll: true});\nsetResult(`找到 ${tasks.length} 个高优先级任务`);"
+      },
+      {
+        "title": "分页查找高优先级任务",
+        "code": "const result = await Memento.plugins.todo.findTaskBy({field: 'priority', value: 'high', findAll: true, offset: 0, count: 10});\nsetResult(`共 ${result.total} 个高优先级任务，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历任务列表；支持任意字段匹配",
+    "notes": "简化查找逻辑，避免手动遍历任务列表；支持任意字段匹配；分页仅在 findAll=true 时生效，推荐每页 20-50 条数据",
     "enabled": true
   },
   "findTaskById": {
@@ -343,15 +399,17 @@
   },
   "findTaskByTitle": {
     "title": "根据标题查找任务",
-    "description": "根据任务标题查找任务（支持精确匹配或模糊匹配）",
+    "description": "根据任务标题查找任务（支持精确匹配或模糊匹配，支持分页）",
     "parameters": [
       {"name": "title", "type": "string", "required": true, "description": "任务标题"},
       {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个任务或 null；findAll=true 时返回任务数组"
+      "description": "findAll=false 时返回单个任务或 null；findAll=true 且无分页参数时返回任务数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -361,22 +419,28 @@
       {
         "title": "模糊匹配查找所有包含关键词的任务",
         "code": "const tasks = await Memento.plugins.todo.findTaskByTitle({title: '文档', fuzzy: true, findAll: true});\nsetResult(`找到 ${tasks.length} 个包含【文档】的任务`);"
+      },
+      {
+        "title": "分页模糊匹配",
+        "code": "const result = await Memento.plugins.todo.findTaskByTitle({title: '文档', fuzzy: true, findAll: true, offset: 0, count: 10});\nsetResult(`共找到 ${result.total} 个包含【文档】的任务，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "精确匹配使用 ===，模糊匹配使用 contains",
+    "notes": "精确匹配使用 ===，模糊匹配使用 contains；分页仅在 findAll=true 时生效，推荐每页 20-50 条数据",
     "enabled": true
   },
   "findTasksByTag": {
     "title": "根据标签查找任务",
-    "description": "查找包含指定标签的所有任务",
+    "description": "查找包含指定标签的所有任务（支持分页）",
     "parameters": [
       {"name": "tag", "type": "string", "required": true, "description": "标签名称"},
       {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤: 'todo' | 'inProgress' | 'done'"},
-      {"name": "priority", "type": "string", "required": false, "description": "可选的优先级过滤: 'low' | 'medium' | 'high'"}
+      {"name": "priority", "type": "string", "required": false, "description": "可选的优先级过滤: 'low' | 'medium' | 'high'"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "包含该标签的任务列表"
+      "type": "Array|Object",
+      "description": "无分页参数时返回任务数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -386,22 +450,28 @@
       {
         "title": "查找带紧急标签且未完成的任务",
         "code": "const tasks = await Memento.plugins.todo.findTasksByTag({tag: '紧急', status: 'todo'});\nsetResult(`找到 ${tasks.length} 个紧急待办任务`);"
+      },
+      {
+        "title": "分页查找带工作标签的任务",
+        "code": "const result = await Memento.plugins.todo.findTasksByTag({tag: '工作', offset: 0, count: 10});\nsetResult(`共 ${result.total} 个工作任务，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "标签匹配区分大小写；支持额外的状态和优先级过滤",
+    "notes": "标签匹配区分大小写；支持额外的状态和优先级过滤；使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "findTasksByStatus": {
     "title": "根据状态查找任务",
-    "description": "查找指定状态的所有任务（扩展 getTasks 功能）",
+    "description": "查找指定状态的所有任务（支持分页，扩展 getTasks 功能）",
     "parameters": [
       {"name": "status", "type": "string", "required": true, "description": "任务状态: 'todo' | 'inProgress' | 'done'"},
       {"name": "startDate", "type": "string", "required": false, "description": "开始日期过滤（ISO 8601 格式）"},
-      {"name": "endDate", "type": "string", "required": false, "description": "结束日期过滤（ISO 8601 格式）"}
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期过滤（ISO 8601 格式）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "该状态的任务列表"
+      "type": "Array|Object",
+      "description": "无分页参数时返回任务数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -411,21 +481,27 @@
       {
         "title": "查找本周完成的任务",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst tasks = await Memento.plugins.todo.findTasksByStatus({status: 'done', startDate: weekStart.toISOString(), endDate: weekEnd.toISOString()});\nsetResult(`本周完成 ${tasks.length} 个任务`);"
+      },
+      {
+        "title": "分页查找待办任务",
+        "code": "const result = await Memento.plugins.todo.findTasksByStatus({status: 'todo', offset: 0, count: 20});\nsetResult(`共 ${result.total} 个待办任务，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "日期过滤基于任务的 dueDate 或 completedDate 字段",
+    "notes": "日期过滤基于任务的 dueDate 或 completedDate 字段；使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   },
   "findTasksByPriority": {
     "title": "根据优先级查找任务",
-    "description": "查找指定优先级的所有任务",
+    "description": "查找指定优先级的所有任务（支持分页）",
     "parameters": [
       {"name": "priority", "type": "string", "required": true, "description": "优先级: 'low' | 'medium' | 'high'"},
-      {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤"}
+      {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "该优先级的任务列表"
+      "type": "Array|Object",
+      "description": "无分页参数时返回任务数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -435,9 +511,13 @@
       {
         "title": "查找高优先级且待办的任务",
         "code": "const tasks = await Memento.plugins.todo.findTasksByPriority({priority: 'high', status: 'todo'});\nsetResult(`高优先级待办: ${tasks.length} 个任务`);"
+      },
+      {
+        "title": "分页查找高优先级任务",
+        "code": "const result = await Memento.plugins.todo.findTasksByPriority({priority: 'high', offset: 0, count: 15});\nsetResult(`共 ${result.total} 个高优先级任务，当前返回 ${result.data.length} 个，还有更多: ${result.hasMore}`);"
       }
     ],
-    "notes": "支持额外的状态过滤",
+    "notes": "支持额外的状态过滤；使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
     "enabled": true
   }
 }

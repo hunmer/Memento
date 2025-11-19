@@ -368,6 +368,9 @@ class ChatController extends ChangeNotifier {
           buffer.clear();
           tokenCount = 0;
 
+          // 使用 Completer 等待 onComplete 完成
+          final completer = Completer<bool>();
+
           // 第零阶段：请求 AI 匹配模版（使用占位符方式）
           await RequestService.streamResponse(
             agent: _currentAgent!,
@@ -391,61 +394,78 @@ class ChatController extends ChangeNotifier {
               tokenCount++;
             },
             onComplete: () async {
-              final matchResponse = buffer.toString();
-              debugPrint('🔍 [第零阶段] AI 响应: $matchResponse');
+              try {
+                final matchResponse = buffer.toString();
+                debugPrint('🔍 [第零阶段] AI 响应: $matchResponse');
 
-              // 解析匹配结果
-              final matchedIds = ToolService.parseToolTemplateMatch(
-                matchResponse,
-              );
-
-              if (matchedIds != null && matchedIds.isNotEmpty) {
-                debugPrint(
-                  '✅ [第零阶段] 匹配到 ${matchedIds.length} 个模版: ${matchedIds.join(", ")}',
+                // 解析匹配结果
+                final matchedIds = ToolService.parseToolTemplateMatch(
+                  matchResponse,
                 );
 
-                // 过滤出存在的模版
-                final validTemplates = <SavedToolTemplate>[];
-                for (final id in matchedIds) {
-                  try {
-                    final template = await templateService!.getTemplateById(id);
-                    if (template != null) {
-                      validTemplates.add(template);
-                    }
-                  } catch (e) {
-                    debugPrint('⚠️ [第零阶段] 模版 $id 不存在或加载失败: $e');
-                  }
-                }
-
-                if (validTemplates.isNotEmpty) {
-                  // 保存匹配的模版ID到消息
-                  final message = messageService.getMessage(
-                    conversation.id,
-                    aiMessageId,
+                if (matchedIds != null && matchedIds.isNotEmpty) {
+                  debugPrint(
+                    '✅ [第零阶段] 匹配到 ${matchedIds.length} 个模版: ${matchedIds.join(", ")}',
                   );
-                  if (message != null) {
-                    final updatedMessage = message.copyWith(
-                      matchedTemplateIds:
-                          validTemplates.map((t) => t.id).toList(),
-                      content:
-                          '我找到了 ${validTemplates.length} 个相关的工具模版，请选择要执行的模版：',
-                      isGenerating: false,
-                    );
-                    await messageService.updateMessage(updatedMessage);
+
+                  // 过滤出存在的模版
+                  final validTemplates = <SavedToolTemplate>[];
+                  for (final id in matchedIds) {
+                    try {
+                      final template = templateService!.getTemplateById(id);
+                      if (template != null) {
+                        validTemplates.add(template);
+                      }
+                    } catch (e) {
+                      debugPrint('⚠️ [第零阶段] 模版 $id 不存在或加载失败: $e');
+                    }
                   }
 
-                  debugPrint('✅ [第零阶段] 已保存匹配结果，等待用户选择');
-                  return; // 等待用户选择模版
-                }
-              }
+                  if (validTemplates.isNotEmpty) {
+                    // 保存匹配的模版ID到消息
+                    final message = messageService.getMessage(
+                      conversation.id,
+                      aiMessageId,
+                    );
+                    if (message != null) {
+                      final updatedMessage = message.copyWith(
+                        matchedTemplateIds:
+                            validTemplates.map((t) => t.id).toList(),
+                        content:
+                            '我找到了 ${validTemplates.length} 个相关的工具模版，请选择要执行的模版：',
+                        isGenerating: false,
+                      );
+                      await messageService.updateMessage(updatedMessage);
+                    }
 
-              debugPrint('ℹ️ [第零阶段] 未匹配到模版或模版为空，继续第一阶段');
+                    debugPrint('✅ [第零阶段] 已保存匹配结果，等待用户选择');
+                    completer.complete(true); // 完成，标记为匹配到模版
+                    return;
+                  }
+                }
+
+                debugPrint('ℹ️ [第零阶段] 未匹配到模版或模版为空，继续第一阶段');
+                completer.complete(false); // 完成，标记为未匹配
+              } catch (e) {
+                debugPrint('❌ [第零阶段] 处理匹配结果时出错: $e');
+                completer.complete(false);
+              }
             },
-            onError: (String p1) {},
+            onError: (String error) {
+              debugPrint('❌ [第零阶段] AI响应错误: $error');
+              completer.complete(false);
+            },
           );
 
-          // 如果已经return了（有匹配的模版），则不会执行到这里
+          // ⚠️ 关键修复：等待 onComplete 完成并检查结果
+          final templateMatched = await completer.future;
+          if (templateMatched) {
+            debugPrint('🛑 [第零阶段] 已匹配模版，跳过后续阶段');
+            return;
+          }
+
           // 如果没有匹配，继续执行下面的第一阶段
+          debugPrint('➡️ [第零阶段] 未匹配到模版，继续执行第一阶段');
         }
       }
 
@@ -1481,7 +1501,7 @@ class ChatController extends ChangeNotifier {
 
     try {
       // 加载模版
-      final template = await templateService!.getTemplateById(templateId);
+      final template = templateService!.getTemplateById(templateId);
       if (template == null) {
         debugPrint('⚠️ 模版 $templateId 不存在');
         final message = messageService.getMessage(conversation.id, aiMessageId);
