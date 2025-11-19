@@ -565,10 +565,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   child: Text(OpenAILocalizations.of(context).loadingProviders),
                 )
                 : DropdownButtonFormField<String>(
-                  initialValue:
-                      _selectedProviderId.isEmpty && _providers.isNotEmpty
-                          ? _providers.first.id
-                          : _selectedProviderId,
+                  value: _providers.isNotEmpty &&
+                         _providers.any((p) => p.id == _selectedProviderId)
+                      ? _selectedProviderId
+                      : (_providers.isNotEmpty ? _providers.first.id : null),
                   decoration: InputDecoration(
                     labelText: OpenAILocalizations.of(context).serviceProvider,
                   ),
@@ -666,7 +666,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             const SizedBox(height: 16),
             // Prompt 预设选择
             DropdownButtonFormField<String>(
-              value: _selectedPresetId,
+              value: _selectedPresetId != null &&
+                     _presets.any((p) => p.id == _selectedPresetId)
+                  ? _selectedPresetId
+                  : null,
               decoration: InputDecoration(
                 labelText: OpenAILocalizations.of(context).promptPreset,
                 hintText: OpenAILocalizations.of(context).selectPromptPreset,
