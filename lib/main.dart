@@ -25,6 +25,7 @@ import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
 import 'package:Memento/widgets/l10n/location_picker_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
+import 'package:logging/logging.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,6 +123,20 @@ late PermissionController _permissionController;
 void main() async {
   // 确保Flutter绑定初始化
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 配置日志输出
+  Logger.root.level = Level.ALL; // 设置日志级别为 ALL 以显示所有日志
+  Logger.root.onRecord.listen((record) {
+    // 输出日志到控制台
+    debugPrint('[${record.level.name}] ${record.loggerName}: ${record.message}');
+    // 如果有错误或堆栈追踪,也输出
+    if (record.error != null) {
+      debugPrint('Error: ${record.error}');
+    }
+    if (record.stackTrace != null) {
+      debugPrint('StackTrace: ${record.stackTrace}');
+    }
+  });
 
   // 设置首选方向为竖屏
   await SystemChrome.setPreferredOrientations([

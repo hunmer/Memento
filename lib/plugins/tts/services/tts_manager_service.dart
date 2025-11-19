@@ -398,6 +398,7 @@ class TTSManagerService extends ChangeNotifier {
   }
 
   /// 释放资源
+  @override
   Future<void> dispose() async {
     await _currentService?.dispose();
     _currentService = null;

@@ -289,7 +289,7 @@
       },
       {
         "title": "模糊匹配查找所有包含关键词的消息",
-        "code": "const messages = await Memento.plugins.chat.findMessageByContent({content: '项目', fuzzy: true, findAll: true});\nsetResult(`找到 ${messages.length} 条包含"项目"的消息`);"
+        "code": "const messages = await Memento.plugins.chat.findMessageByContent({content: '项目', fuzzy: true, findAll: true});\nsetResult(`找到 ${messages.length} 条包含'项目'的消息`);"
       }
     ],
     "notes": "精确匹配使用 ===，模糊匹配使用 includes",

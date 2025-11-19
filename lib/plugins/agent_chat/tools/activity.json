@@ -252,11 +252,11 @@
     },
     "examples": [
       {
-        "title": "查找所有带"工作"标签的活动",
+        "title": "查找所有带工作标签的活动",
         "code": "const activities = await Memento.plugins.activity.findActivitiesByTag({tag: '工作'});\nsetResult(`找到 ${activities.length} 个工作活动`);"
       },
       {
-        "title": "查找本月带"会议"标签的活动",
+        "title": "查找本月带会议标签的活动",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst activities = await Memento.plugins.activity.findActivitiesByTag({tag: '会议', startDate, endDate});\nconst totalHours = activities.reduce((sum, a) => sum + (a.duration || 0), 0) / 60;\nsetResult(`本月会议 ${activities.length} 个，共 ${totalHours.toFixed(1)} 小时`);"
       }
     ],

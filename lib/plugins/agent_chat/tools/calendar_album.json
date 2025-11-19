@@ -301,7 +301,7 @@
       },
       {
         "title": "模糊匹配查找所有包含关键词的日记",
-        "code": "const entries = await Memento.plugins.calendar_album.findEntryByTitle({title: '旅行', fuzzy: true, findAll: true});\nsetResult(`找到 ${entries.length} 条包含"旅行"的日记`);"
+        "code": "const entries = await Memento.plugins.calendar_album.findEntryByTitle({title: '旅行', fuzzy: true, findAll: true});\nsetResult(`找到 ${entries.length} 条包含'旅行'的日记`);"
       }
     ],
     "notes": "精确匹配使用 ===，模糊匹配使用 includes",

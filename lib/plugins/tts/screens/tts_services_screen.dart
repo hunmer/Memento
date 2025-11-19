@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import '../tts_plugin.dart';
 import '../models/tts_service_config.dart';
 import '../models/tts_service_type.dart';
 import '../l10n/tts_localizations.dart';
+import '../widgets/service_editor_dialog.dart';
 
 /// TTS服务列表界面
 class TTSServicesScreen extends StatefulWidget {
@@ -193,6 +193,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
+                        onTap: () => _editService(service),
                         leading: Icon(
                           service.type == TTSServiceType.system
                               ? Icons.record_voice_over
@@ -237,6 +238,9 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                           icon: const Icon(Icons.more_vert),
                           onSelected: (value) {
                             switch (value) {
+                              case 'edit':
+                                _editService(service);
+                                break;
                               case 'test':
                                 _testService(service);
                                 break;
@@ -252,6 +256,17 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                             }
                           },
                           itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.edit, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(loc.editService),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuDivider(),
                             PopupMenuItem(
                               value: 'test',
                               child: Row(
@@ -312,36 +327,56 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
     );
   }
 
+  /// 创建新服务
   Future<void> _createDefaultService() async {
-    // 简化版:直接创建一个系统TTS服务
-    final newService = TTSServiceConfig(
-      id: const Uuid().v4(),
-      name: '系统语音 ${_services.length + 1}',
-      type: TTSServiceType.system,
-      isDefault: _services.isEmpty,
-      isEnabled: true,
-      pitch: 1.0,
-      speed: 1.0,
-      volume: 1.0,
-      voice: 'zh-CN',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+    final result = await showDialog<TTSServiceConfig>(
+      context: context,
+      builder: (context) => const ServiceEditorDialog(),
     );
 
-    try {
-      await _plugin.managerService.saveService(newService);
-      _loadServices();
+    if (result != null) {
+      try {
+        await _plugin.managerService.saveService(result);
+        _loadServices();
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('服务已添加')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('服务已添加')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('添加失败: $e')),
+          );
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('添加失败: $e')),
-        );
+    }
+  }
+
+  /// 编辑服务
+  Future<void> _editService(TTSServiceConfig service) async {
+    final result = await showDialog<TTSServiceConfig>(
+      context: context,
+      builder: (context) => ServiceEditorDialog(service: service),
+    );
+
+    if (result != null) {
+      try {
+        await _plugin.managerService.saveService(result);
+        _loadServices();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('服务已更新')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('更新失败: $e')),
+          );
+        }
       }
     }
   }

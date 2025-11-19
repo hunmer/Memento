@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
 import 'tts_base_service.dart';
 import '../models/tts_voice.dart';
-import '../models/tts_service_config.dart';
 
 /// HTTP TTS服务实现
 class HttpTTSService extends TTSBaseService {
