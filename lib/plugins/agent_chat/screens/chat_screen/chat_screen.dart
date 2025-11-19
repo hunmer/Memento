@@ -36,6 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
   late final ToolTemplateService _templateService;
   final ScrollController _scrollController = ScrollController();
   bool _uiHandlersRegistered = false;
+  int _lastMessageCount = 0; // 记录上次的消息数量
 
   @override
   void initState() {
@@ -89,10 +90,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _onControllerChanged() {
     if (mounted) {
+      final currentMessageCount = _controller.messages.length;
+      final hasNewMessage = currentMessageCount > _lastMessageCount;
+
       setState(() {});
 
-      // 有新消息时自动滚动到底部
-      if (_controller.messages.isNotEmpty) {
+      // 仅在有新消息添加时自动滚动到底部，消息内容更新时不滚动
+      if (hasNewMessage) {
+        _lastMessageCount = currentMessageCount;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollToBottom();
         });
@@ -325,6 +330,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                     onSaveTool: (message) async {
                                       await _handleSaveTool(message);
                                     },
+                                    onRerunTool: (messageId) async {
+                                      await _handleRerunTool(messageId);
+                                    },
                                   ),
                                 );
                               },
@@ -475,6 +483,32 @@ class _ChatScreenState extends State<ChatScreen> {
       _templateService,
       declaredTools: _controller.selectedTools,
     );
+  }
+
+  /// 处理重新执行工具
+  Future<void> _handleRerunTool(String messageId) async {
+    try {
+      await _controller.rerunToolCall(messageId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('工具重新执行完成'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('重新执行工具失败: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   /// 打开工具模板管理界面

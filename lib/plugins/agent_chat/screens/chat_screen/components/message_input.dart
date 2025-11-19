@@ -342,35 +342,30 @@ class _MessageInputState extends State<MessageInput> {
 
                 const SizedBox(width: 8),
 
-                // 发送按钮
+                // 发送/取消按钮
                 Container(
                   decoration: BoxDecoration(
                     color:
-                        widget.controller.inputText.trim().isEmpty ||
-                                widget.controller.isSending ||
-                                widget.controller.currentAgent == null
-                            ? Colors.grey[300]
-                            : Colors.blue,
+                        widget.controller.isSending
+                            ? Colors.red // 发送中显示红色
+                            : (widget.controller.inputText.trim().isEmpty ||
+                                    widget.controller.currentAgent == null
+                                ? Colors.grey[300]
+                                : Colors.blue),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
                     icon:
                         widget.controller.isSending
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
+                            ? const Icon(Icons.close, color: Colors.white) // 显示取消图标
                             : const Icon(Icons.send, color: Colors.white),
                     onPressed:
-                        widget.controller.inputText.trim().isEmpty ||
-                                widget.controller.isSending ||
-                                widget.controller.currentAgent == null
-                            ? null
-                            : _sendMessage,
+                        widget.controller.isSending
+                            ? () => widget.controller.cancelSending() // 取消发送
+                            : (widget.controller.inputText.trim().isEmpty ||
+                                    widget.controller.currentAgent == null
+                                ? null
+                                : _sendMessage),
                   ),
                 ),
               ],

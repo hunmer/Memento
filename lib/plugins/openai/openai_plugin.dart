@@ -11,7 +11,6 @@ import 'handlers/chat_event_handler.dart';
 import 'controllers/prompt_replacement_controller.dart';
 import 'controllers/agent_controller.dart';
 import 'controllers/service_provider_controller.dart';
-import 'controllers/analysis_preset_controller.dart';
 import 'services/request_service.dart';
 
 class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
@@ -44,9 +43,6 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
     // 初始化聊天事件处理器
     _chatEventHandler.initialize();
     // 初始化prompt替换控制器已在构造函数中完成
-
-    // 初始化分析预设控制器
-    await AnalysisPresetController().loadPresets();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();

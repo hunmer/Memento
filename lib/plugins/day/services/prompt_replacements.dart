@@ -25,15 +25,18 @@ class DayPromptReplacements {
   /// - startDate: 开始日期 (可选, YYYY-MM-DD 格式)
   /// - endDate: 结束日期 (可选, YYYY-MM-DD 格式)
   /// - mode: 数据模式 (summary/compact/full, 默认summary)
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total, upcoming, past } }
   /// - compact: 简化记录 { sum: {...}, recs: [...] }
   /// - full: 完整数据 (包含所有字段)
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> getDays(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final dateRange = _parseDateRange(params);
 
       // 2. 获取所有纪念日
@@ -42,10 +45,41 @@ class DayPromptReplacements {
       // 3. 根据日期范围过滤
       final filteredDays = _filterDaysByRange(allDays, dateRange);
 
-      // 4. 根据模式转换数据
-      final result = _convertByMode(filteredDays, mode);
+      // 4. 转换为 JSON 格式
+      final allDaysJson = filteredDays.map((day) => {
+        'id': day.id,
+        'title': day.title,
+        'date': day.formattedTargetDate,
+        'targetDate': FieldUtils.formatDateTime(day.targetDate),
+        'creationDate': FieldUtils.formatDateTime(day.creationDate),
+        'daysRemaining': day.daysRemaining,
+        'isExpired': day.isExpired,
+        'isToday': day.isToday,
+        if (day.notes.isNotEmpty) 'notes': day.notes,
+        if (day.backgroundColor != null) 'backgroundColor': day.backgroundColor.toARGB32(),
+        if (day.backgroundImageUrl != null && day.backgroundImageUrl!.isNotEmpty) 'backgroundImageUrl': day.backgroundImageUrl!,
+      }).toList();
 
-      // 5. 返回 JSON 字符串
+      // 5. 根据 customFields 或 mode 转换数据
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数（白名单模式）
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        final filteredRecords = FieldUtils.simplifyRecords(
+          allDaysJson,
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = _convertByMode(filteredDays, mode);
+      }
+
+      // 6. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);
     } catch (e) {
       debugPrint('获取纪念日数据失败: $e');

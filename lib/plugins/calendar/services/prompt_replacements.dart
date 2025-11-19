@@ -19,15 +19,18 @@ class CalendarPromptReplacements {
   /// - startDate: 开始日期 (可选, YYYY-MM-DD 格式)
   /// - endDate: 结束日期 (可选, YYYY-MM-DD 格式)
   /// - source: 事件来源筛选 (可选, "default" 或 "todo")
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total, today, upcoming } }
   /// - compact: 简化记录 { sum: {...}, recs: [...] } (无description)
   /// - full: 完整数据 (包含所有字段)
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> getEvents(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final dateRange = params['startDate'] != null || params['endDate'] != null
           ? _parseDateRange(params)
           : null;
@@ -52,8 +55,24 @@ class CalendarPromptReplacements {
         filteredEvents = filteredEvents.where((e) => e.source == source).toList();
       }
 
-      // 4. 根据模式转换数据
-      final result = _convertByMode(filteredEvents, mode);
+      // 4. 应用字段过滤
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        final filteredRecords = FieldUtils.simplifyRecords(
+          filteredEvents.map((e) => e.toJson()).toList(),
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = _convertByMode(filteredEvents, mode);
+      }
 
       // 5. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);

@@ -1,5 +1,5 @@
+import 'dart:convert';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
-import 'package:Memento/plugins/openai/widgets/plugin_analysis_form.dart';
 import 'package:flutter/material.dart';
 import '../models/plugin_analysis_method.dart';
 
@@ -220,19 +220,12 @@ class _PluginMethodSelectionDialogState
                             visualDensity: VisualDensity.compact,
                           ),
                           onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => PluginAnalysisForm(
-                                method: method,
-                                onConfirm: (jsonString) {
-                                  Navigator.pop(context); // 关闭表单对话框
-                                  Navigator.pop(context, {
-                                    'methodName': method.name,
-                                    'jsonString': jsonString,
-                                  }); // 关闭方法选择对话框并返回结果
-                                },
-                              ),
-                            );
+                            // 直接使用默认模板，不打开表单对话框
+                            final jsonString = jsonEncode(method.template);
+                            Navigator.pop(context, {
+                              'methodName': method.name,
+                              'jsonString': jsonString,
+                            });
                           },
                         );
                       },

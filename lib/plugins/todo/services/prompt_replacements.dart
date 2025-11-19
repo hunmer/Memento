@@ -19,15 +19,18 @@ class TodoPromptReplacements {
   /// - status: 状态过滤 (可选, 'todo'/'inProgress'/'done')
   /// - priority: 优先级过滤 (可选, 'low'/'medium'/'high')
   /// - mode: 数据模式 (summary/compact/full, 默认summary)
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total, todo, inProgress, done, overdue } }
   /// - compact: 简化记录 { sum: {...}, recs: [...] } (无description)
   /// - full: 完整数据 (包含所有字段)
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> getTasks(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final statusFilter = _parseStatus(params['status'] as String?);
       final priorityFilter = _parsePriority(params['priority'] as String?);
 
@@ -49,10 +52,29 @@ class TodoPromptReplacements {
         return true;
       }).toList();
 
-      // 4. 根据模式转换数据
-      final result = _convertByMode(filteredTasks, mode);
+      // 4. 转换为 JSON 列表
+      final taskJsonList = filteredTasks.map((t) => t.toJson()).toList();
 
-      // 5. 返回 JSON 字符串
+      // 5. 应用字段过滤
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数（白名单模式）
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        final filteredRecords = FieldUtils.simplifyRecords(
+          taskJsonList,
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = _convertByMode(filteredTasks, mode);
+      }
+
+      // 6. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);
     } catch (e) {
       debugPrint('获取任务数据失败: $e');

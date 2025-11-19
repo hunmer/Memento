@@ -18,15 +18,18 @@ class TrackerPromptReplacements {
   /// - status: 状态过滤 (可选, 'active'/'completed')
   /// - group: 分组过滤 (可选)
   /// - mode: 数据模式 (summary/compact/full, 默认summary)
+  /// - fields: 自定义返回字段列表 (可选, 优先级高于 mode)
   ///
   /// 返回格式:
   /// - summary: 仅统计数据 { sum: { total, active, avgProgress }, topGoals: [...] }
   /// - compact: 简化记录 { sum: {...}, recs: [...] } (无imagePath等)
   /// - full: 完整数据 (包含所有字段)
+  /// - fields: 自定义字段 { recs: [...] } (仅包含指定字段)
   Future<String> getGoals(Map<String, dynamic> params) async {
     try {
       // 1. 解析参数
       final mode = AnalysisModeUtils.parseFromParams(params);
+      final customFields = params['fields'] as List<dynamic>?;
       final status = params['status'] as String?;
       final group = params['group'] as String?;
 
@@ -43,8 +46,25 @@ class TrackerPromptReplacements {
         goals = goals.where((g) => g.group == group).toList();
       }
 
-      // 4. 根据模式转换数据
-      final result = _convertByMode(goals, mode);
+      // 4. 根据 customFields 或 mode 转换数据
+      Map<String, dynamic> result;
+
+      if (customFields != null && customFields.isNotEmpty) {
+        // 优先使用 fields 参数（白名单模式）
+        final fieldList = customFields.map((e) => e.toString()).toList();
+        final goalJsonList = goals.map((g) => g.toJson()).toList();
+        final filteredRecords = FieldUtils.simplifyRecords(
+          goalJsonList,
+          keepFields: fieldList,
+        );
+        result = FieldUtils.buildCompactResponse(
+          {'total': filteredRecords.length},
+          filteredRecords,
+        );
+      } else {
+        // 使用 mode 参数
+        result = _convertByMode(goals, mode);
+      }
 
       // 5. 返回 JSON 字符串
       return FieldUtils.toJsonString(result);
