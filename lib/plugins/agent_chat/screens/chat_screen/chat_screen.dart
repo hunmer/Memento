@@ -8,6 +8,8 @@ import '../../services/tool_template_service.dart';
 import '../../services/message_detail_service.dart';
 import '../../../../core/storage/storage_manager.dart';
 import '../../../../core/js_bridge/js_bridge_manager.dart';
+import '../../../tts/tts_plugin.dart';
+import '../../../../widgets/tts_settings_dialog.dart';
 import 'components/message_bubble.dart';
 import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
@@ -39,6 +41,9 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _uiHandlersRegistered = false;
   int _lastMessageCount = 0; // 记录上次的消息数量
+  bool _autoReadEnabled = false; // 自动朗读开关
+  String? _selectedTTSServiceId; // 选择的TTS服务ID
+  String? _lastReadMessageId; // 上次朗读的消息ID
 
   @override
   void initState() {
@@ -104,6 +109,89 @@ class _ChatScreenState extends State<ChatScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollToBottom();
         });
+      }
+
+      // 检查是否有新的AI消息完成，如果开启了自动朗读则进行朗读
+      if (_autoReadEnabled) {
+        _checkAndReadNewAIMessage();
+      }
+    }
+  }
+
+  /// 检查并朗读新的AI消息
+  void _checkAndReadNewAIMessage() {
+    try {
+      // 获取所有消息
+      final messages = _controller.messages;
+      if (messages.isEmpty) return;
+
+      // 从后往前查找第一条AI消息(非生成中)
+      for (int i = messages.length - 1; i >= 0; i--) {
+        final message = messages[i];
+
+        // 只朗读AI消息，且消息已完成(非生成中)
+        if (!message.isUser && !message.isGenerating) {
+          // 检查是否是新消息(避免重复朗读)
+          if (_lastReadMessageId != message.id && message.content.trim().isNotEmpty) {
+            _lastReadMessageId = message.id;
+
+            // 调用TTS朗读
+            _readMessage(message.content);
+          }
+          break; // 只处理最新的一条AI消息
+        }
+      }
+    } catch (e) {
+      debugPrint('检查并朗读AI消息失败: $e');
+    }
+  }
+
+  /// 朗读消息
+  Future<void> _readMessage(String text) async {
+    try {
+      final ttsPlugin = TTSPlugin.instance;
+      await ttsPlugin.speak(
+        text,
+        serviceId: _selectedTTSServiceId, // 使用选择的服务
+        onStart: () {
+          debugPrint('开始朗读AI消息');
+        },
+        onComplete: () {
+          debugPrint('朗读AI消息完成');
+        },
+        onError: (error) {
+          debugPrint('朗读AI消息出错: $error');
+        },
+      );
+    } catch (e) {
+      debugPrint('调用TTS朗读失败: $e');
+    }
+  }
+
+  /// 打开TTS设置对话框
+  Future<void> _openTTSSettings() async {
+    final result = await showTTSSettingsDialog(
+      context,
+      initialEnabled: _autoReadEnabled,
+      initialServiceId: _selectedTTSServiceId,
+    );
+
+    if (result != null) {
+      setState(() {
+        _autoReadEnabled = result.enabled;
+        _selectedTTSServiceId = result.serviceId;
+      });
+
+      // 显示提示
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result.enabled ? '已开启自动朗读' : '已关闭自动朗读',
+            ),
+            duration: const Duration(seconds: 1),
+          ),
+        );
       }
     }
   }
@@ -176,29 +264,77 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: _openToolTemplateManagement,
             tooltip: '工具模板',
           ),
-          // 工具管理按钮
+          // 自动朗读设置按钮
           IconButton(
-            icon: const Icon(Icons.build_outlined),
-            onPressed: _openToolManagement,
-            tooltip: '工具管理',
+            icon: Icon(
+              _autoReadEnabled ? Icons.volume_up : Icons.volume_off,
+              color: _autoReadEnabled ? Colors.blue : null,
+            ),
+            onPressed: _openTTSSettings,
+            tooltip: '语音播报设置',
           ),
-          // Token统计按钮
-          IconButton(
-            icon: const Icon(Icons.analytics_outlined),
-            onPressed: _showTokenStats,
-            tooltip: 'Token统计',
-          ),
-          // 清空聊天记录按钮
-          IconButton(
-            icon: const Icon(Icons.delete_sweep),
-            onPressed: _showClearMessagesConfirm,
-            tooltip: '清空聊天记录',
-          ),
-          // 设置按钮
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _showSettings,
-            tooltip: '会话设置',
+          // 更多菜单
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            tooltip: '更多',
+            onSelected: (value) {
+              switch (value) {
+                case 'tool_management':
+                  _openToolManagement();
+                  break;
+                case 'token_stats':
+                  _showTokenStats();
+                  break;
+                case 'clear_messages':
+                  _showClearMessagesConfirm();
+                  break;
+                case 'settings':
+                  _showSettings();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'tool_management',
+                child: Row(
+                  children: [
+                    Icon(Icons.build_outlined),
+                    SizedBox(width: 12),
+                    Text('工具管理'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'token_stats',
+                child: Row(
+                  children: [
+                    Icon(Icons.analytics_outlined),
+                    SizedBox(width: 12),
+                    Text('Token统计'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'clear_messages',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_sweep),
+                    SizedBox(width: 12),
+                    Text('清空聊天记录'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'settings',
+                child: Row(
+                  children: [
+                    Icon(Icons.settings),
+                    SizedBox(width: 12),
+                    Text('会话设置'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

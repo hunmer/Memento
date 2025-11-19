@@ -94,7 +94,8 @@ class _MessageInputState extends State<MessageInput> {
     final text = _textController.text;
     widget.controller.setInputText(text);
 
-    final bool isPotentialCommand = text.startsWith('/') && !text.contains('\n');
+    final bool isPotentialCommand =
+        text.startsWith('/') && !text.contains('\n');
     final (commandType, argument) =
         isPotentialCommand ? ChatCommand.parseInput(text) : (null, null);
 
@@ -109,7 +110,10 @@ class _MessageInputState extends State<MessageInput> {
       }
     });
 
-    _handleCommandInputChange(isPotentialCommand ? commandType : null, argument);
+    _handleCommandInputChange(
+      isPotentialCommand ? commandType : null,
+      argument,
+    );
   }
 
   void _handleCommandInputChange(
@@ -164,18 +168,19 @@ class _MessageInputState extends State<MessageInput> {
     widget.controller
         .fetchToolTemplates(keyword: keyword)
         .then((results) {
-      if (!mounted || _commandToolQuery != keyword) return;
-      setState(() {
-        _commandToolResults = results;
-        _isLoadingCommandToolResults = false;
-      });
-    }).catchError((error) {
-      if (!mounted || _commandToolQuery != keyword) return;
-      setState(() {
-        _commandToolResults = [];
-        _isLoadingCommandToolResults = false;
-      });
-    });
+          if (!mounted || _commandToolQuery != keyword) return;
+          setState(() {
+            _commandToolResults = results;
+            _isLoadingCommandToolResults = false;
+          });
+        })
+        .catchError((error) {
+          if (!mounted || _commandToolQuery != keyword) return;
+          setState(() {
+            _commandToolResults = [];
+            _isLoadingCommandToolResults = false;
+          });
+        });
   }
 
   void _onControllerChanged() {
@@ -241,37 +246,6 @@ class _MessageInputState extends State<MessageInput> {
                   onPressed: _showAttachmentMenu,
                   tooltip: '添加附件',
                 ),
-
-                // 语音按钮（长按录音）
-                if (_recognitionService != null)
-                  PressToRecordButton(
-                    textController: _textController,
-                    recognitionService: _recognitionService!,
-                    enabled: widget.controller.currentAgent != null,
-                    tooltip: '长按录音',
-                    onRecognitionComplete: (text) {
-                      // 聚焦到输入框
-                      _focusNode.requestFocus();
-                    },
-                    onError: (error) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('语音识别失败: $error'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    },
-                  )
-                else
-                  IconButton(
-                    icon: const Icon(Icons.mic),
-                    onPressed: widget.controller.currentAgent != null
-                        ? _showVoiceInputDialog
-                        : null,
-                    tooltip: '语音输入（未配置）',
-                  ),
 
                 // 输入框
                 Expanded(
@@ -340,14 +314,45 @@ class _MessageInputState extends State<MessageInput> {
                   ),
                 ),
 
-                const SizedBox(width: 8),
+                // 语音按钮（长按录音）
+                if (_recognitionService != null)
+                  PressToRecordButton(
+                    textController: _textController,
+                    recognitionService: _recognitionService!,
+                    enabled: widget.controller.currentAgent != null,
+                    tooltip: '长按录音',
+                    onRecognitionComplete: (text) {
+                      // 聚焦到输入框
+                      _focusNode.requestFocus();
+                    },
+                    onError: (error) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('语音识别失败: $error'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
+                  )
+                else
+                  IconButton(
+                    icon: const Icon(Icons.mic),
+                    onPressed:
+                        widget.controller.currentAgent != null
+                            ? _showVoiceInputDialog
+                            : null,
+                    tooltip: '语音输入（未配置）',
+                  ),
 
                 // 发送/取消按钮
                 Container(
                   decoration: BoxDecoration(
                     color:
                         widget.controller.isSending
-                            ? Colors.red // 发送中显示红色
+                            ? Colors
+                                .red // 发送中显示红色
                             : (widget.controller.inputText.trim().isEmpty ||
                                     widget.controller.currentAgent == null
                                 ? Colors.grey[300]
@@ -357,11 +362,16 @@ class _MessageInputState extends State<MessageInput> {
                   child: IconButton(
                     icon:
                         widget.controller.isSending
-                            ? const Icon(Icons.close, color: Colors.white) // 显示取消图标
+                            ? const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ) // 显示取消图标
                             : const Icon(Icons.send, color: Colors.white),
                     onPressed:
                         widget.controller.isSending
-                            ? () => widget.controller.cancelSending() // 取消发送
+                            ? () =>
+                                widget.controller
+                                    .cancelSending() // 取消发送
                             : (widget.controller.inputText.trim().isEmpty ||
                                     widget.controller.currentAgent == null
                                 ? null
@@ -634,17 +644,18 @@ class _MessageInputState extends State<MessageInput> {
         await showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => VoiceInputDialog(
-            recognitionService: recognitionService,
-            onRecognitionComplete: (text) {
-              // 将识别的文本填充到输入框
-              _textController.text = text;
-              widget.controller.setInputText(text);
+          builder:
+              (context) => VoiceInputDialog(
+                recognitionService: recognitionService,
+                onRecognitionComplete: (text) {
+                  // 将识别的文本填充到输入框
+                  _textController.text = text;
+                  widget.controller.setInputText(text);
 
-              // 聚焦到输入框
-              _focusNode.requestFocus();
-            },
-          ),
+                  // 聚焦到输入框
+                  _focusNode.requestFocus();
+                },
+              ),
         );
       }
 
@@ -653,10 +664,7 @@ class _MessageInputState extends State<MessageInput> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('打开语音输入失败: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('打开语音输入失败: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -689,10 +697,7 @@ class _MessageInputState extends State<MessageInput> {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
             const SizedBox(width: 12),
-            Text(
-              '正在加载工具模板...',
-              style: TextStyle(color: Colors.grey[700]),
-            ),
+            Text('正在加载工具模板...', style: TextStyle(color: Colors.grey[700])),
           ],
         ),
       );
@@ -770,10 +775,7 @@ class _MessageInputState extends State<MessageInput> {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Text(
                 '找不到 "$keyword"，按 Enter 继续搜索',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             )
           else
@@ -782,7 +784,9 @@ class _MessageInputState extends State<MessageInput> {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 8),
               itemCount:
-                  _commandToolResults.length > 5 ? 5 : _commandToolResults.length,
+                  _commandToolResults.length > 5
+                      ? 5
+                      : _commandToolResults.length,
               itemBuilder: (context, index) {
                 final template = _commandToolResults[index];
                 return _buildToolCommandResultItem(template);
@@ -818,10 +822,7 @@ class _MessageInputState extends State<MessageInput> {
                     const SizedBox(height: 2),
                     Text(
                       template.description!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -907,10 +908,7 @@ class _MessageInputState extends State<MessageInput> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Text(
               '没有找到匹配的工具模板，请尝试其他关键词。',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           ),
         ],
@@ -969,24 +967,25 @@ class _MessageInputState extends State<MessageInput> {
     widget.controller
         .fetchToolTemplates(keyword: normalizedKeyword)
         .then((results) {
-      if (!mounted) return;
-      setState(() {
-        _searchResults = results;
-        _isLoadingToolResults = false;
-      });
-    }).catchError((error) {
-      if (!mounted) return;
-      setState(() {
-        _isLoadingToolResults = false;
-        _searchResults = [];
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('加载工具模板失败: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    });
+          if (!mounted) return;
+          setState(() {
+            _searchResults = results;
+            _isLoadingToolResults = false;
+          });
+        })
+        .catchError((error) {
+          if (!mounted) return;
+          setState(() {
+            _isLoadingToolResults = false;
+            _searchResults = [];
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('加载工具模板失败: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        });
   }
 
   /// 处理模板选择
