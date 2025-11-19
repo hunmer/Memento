@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../models/chat_message.dart';
@@ -23,7 +24,9 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(ChatMessage message)? onSaveTool;
   final Future<void> Function(String messageId)? onRerunTool;
   final Future<void> Function(String messageId, int stepIndex)? onRerunStep;
-  final Future<void> Function(String messageId, String templateId)? onExecuteTemplate; // 执行匹配的模版
+  final Future<void> Function(String messageId, String templateId)?
+  onExecuteTemplate; // 执行匹配的模版
+  final String? Function(String templateId)? getTemplateName; // 获取模版名称
   final bool hasAgent;
   final StorageManager? storage;
 
@@ -37,6 +40,7 @@ class MessageBubble extends StatelessWidget {
     this.onRerunTool,
     this.onRerunStep,
     this.onExecuteTemplate,
+    this.getTemplateName,
     this.hasAgent = true,
     this.storage,
   });
@@ -236,9 +240,10 @@ class MessageBubble extends StatelessWidget {
           ToolCallSteps(
             steps: message.toolCall!.steps,
             isGenerating: message.isGenerating,
-            onRerunStep: onRerunStep != null
-                ? (stepIndex) => onRerunStep!(message.id, stepIndex)
-                : null,
+            onRerunStep:
+                onRerunStep != null
+                    ? (stepIndex) => onRerunStep!(message.id, stepIndex)
+                    : null,
           ),
 
           // 显示AI最终回复
@@ -302,55 +307,64 @@ class MessageBubble extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: message.attachments.map((attachment) {
-        // 图片附件显示缩略图
-        if (attachment.isImage) {
-          return _buildImageAttachment(attachment);
-        }
+      children:
+          message.attachments.map((attachment) {
+            // 图片附件显示缩略图
+            if (attachment.isImage) {
+              return _buildImageAttachment(attachment);
+            }
 
-        // 非图片附件显示文件信息
-        return _buildFileAttachment(attachment);
-      }).toList(),
+            // 非图片附件显示文件信息
+            return _buildFileAttachment(attachment);
+          }).toList(),
     );
   }
 
   /// 构建图片附件
   Widget _buildImageAttachment(FileAttachment attachment) {
     return Builder(
-      builder: (context) => GestureDetector(
-        onTap: () => _viewImage(context, attachment),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            constraints: const BoxConstraints(
-              maxWidth: 200,
-              maxHeight: 200,
-            ),
-            child: Image.file(
-              File(attachment.filePath),
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 200,
-                  height: 150,
-                  color: Colors.grey[300],
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.broken_image, size: 48, color: Colors.grey[600]),
-                      const SizedBox(height: 8),
-                      Text(
-                        '图片加载失败',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+      builder:
+          (context) => GestureDetector(
+            onTap: () => _viewImage(context, attachment),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                constraints: const BoxConstraints(
+                  maxWidth: 200,
+                  maxHeight: 200,
+                ),
+                child: Image.file(
+                  File(attachment.filePath),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 200,
+                      height: 150,
+                      color: Colors.grey[300],
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.broken_image,
+                            size: 48,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '图片加载失败',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              },
+                    );
+                  },
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -366,16 +380,9 @@ class MessageBubble extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.description,
-            size: 16,
-            color: Colors.grey[600],
-          ),
+          Icon(Icons.description, size: 16, color: Colors.grey[600]),
           const SizedBox(width: 4),
-          Text(
-            attachment.fileName,
-            style: const TextStyle(fontSize: 12),
-          ),
+          Text(attachment.fileName, style: const TextStyle(fontSize: 12)),
           const SizedBox(width: 4),
           Text(
             attachment.formattedSize,
@@ -390,12 +397,13 @@ class MessageBubble extends StatelessWidget {
   void _viewImage(BuildContext context, FileAttachment attachment) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => FilePreviewScreen(
-          filePath: attachment.filePath,
-          fileName: attachment.fileName,
-          mimeType: 'image/${_getImageExtension(attachment.fileName)}',
-          fileSize: attachment.fileSize,
-        ),
+        builder:
+            (context) => FilePreviewScreen(
+              filePath: attachment.filePath,
+              fileName: attachment.fileName,
+              mimeType: 'image/${_getImageExtension(attachment.fileName)}',
+              fileSize: attachment.fileSize,
+            ),
       ),
     );
   }
@@ -539,7 +547,10 @@ class MessageBubble extends StatelessWidget {
                 const SizedBox(width: 8),
                 if (!message.isUser)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.orange[100],
                       borderRadius: BorderRadius.circular(4),
@@ -576,10 +587,7 @@ class MessageBubble extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: Text(
                       '${textController.text.length} 字符',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ),
                 ],
@@ -608,9 +616,9 @@ class MessageBubble extends StatelessWidget {
   /// 显示工具调用详情对话框
   Future<void> _showToolDetailDialog(BuildContext context) async {
     if (storage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('无法加载详情数据')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('无法加载详情数据')));
       return;
     }
 
@@ -618,9 +626,7 @@ class MessageBubble extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
     try {
@@ -646,87 +652,366 @@ class MessageBubble extends StatelessWidget {
       if (context.mounted) {
         showDialog(
           context: context,
-          builder: (context) => ToolDetailDialog(
-            detail: detail,
-            toolCallSteps: message.toolCall?.steps,
-          ),
+          builder:
+              (context) => ToolDetailDialog(
+                detail: detail,
+                toolCallSteps: message.toolCall?.steps,
+              ),
         );
       }
     } catch (e) {
       // 关闭加载指示器
       if (context.mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载详情失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('加载详情失败: $e')));
       }
     }
   }
 
   /// 构建模版选择UI
   Widget _buildTemplateSelectionUI() {
+    // 检查模版是否已运行（通过检查是否有工具调用记录）
+    final hasToolCall =
+        message.toolCall != null && message.toolCall!.steps.isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 提示文本
-        if (message.content.isNotEmpty) ...[
-          MarkdownContent(content: message.content),
-          const SizedBox(height: 12),
-        ],
-
-        // 模版选择按钮列表
+        // 模版卡片列表
         ...message.matchedTemplateIds!.map((templateId) {
+          // 获取模版名称
+          final templateName = getTemplateName?.call(templateId) ?? '未知模版';
+          // 判断当前模版是否已运行
+          // 只要有 toolCall，就说明已经执行了
+          final isExecuted = hasToolCall;
+
           return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: onExecuteTemplate != null
-                    ? () => onExecuteTemplate!(message.id, templateId)
-                    : null,
-                style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 模版卡片
+                Container(
                   padding: const EdgeInsets.all(12),
-                  alignment: Alignment.centerLeft,
-                  side: BorderSide(color: Colors.blue[300]!),
-                  backgroundColor: Colors.blue[50],
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.play_circle_outline,
-                      size: 20,
-                      color: Colors.blue[700],
+                  decoration: BoxDecoration(
+                    color: isExecuted ? Colors.green[50] : Colors.blue[50],
+                    border: Border.all(
+                      color:
+                          isExecuted ? Colors.green[300]! : Colors.blue[300]!,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '模版 ID: $templateId',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue[900],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      // 左侧：图标
+                      Icon(
+                        isExecuted
+                            ? Icons.check_circle_outline
+                            : Icons.play_circle_outline,
+                        size: 24,
+                        color:
+                            isExecuted ? Colors.green[700] : Colors.blue[700],
+                      ),
+                      const SizedBox(width: 12),
+
+                      // 中间：模版信息
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              templateName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color:
+                                    isExecuted
+                                        ? Colors.green[900]
+                                        : Colors.blue[900],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '点击执行此模版',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                            const SizedBox(height: 4),
+                            Text(
+                              isExecuted ? '已运行' : '待运行',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color:
+                                    isExecuted
+                                        ? Colors.green[600]
+                                        : Colors.orange[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // 右侧：操作按钮
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 查看结果按钮（仅已运行时显示）
+                          if (isExecuted) ...[
+                            Builder(
+                              builder:
+                                  (context) => IconButton(
+                                    icon: Icon(
+                                      Icons.visibility_outlined,
+                                      size: 20,
+                                    ),
+                                    color: Colors.green[700],
+                                    tooltip: '查看结果',
+                                    onPressed:
+                                        () =>
+                                            _showTemplateResultDialog(context),
+                                  ),
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+
+                          // 运行/重新运行按钮
+                          ElevatedButton.icon(
+                            onPressed:
+                                onExecuteTemplate != null
+                                    ? () => onExecuteTemplate!(
+                                      message.id,
+                                      templateId,
+                                    )
+                                    : null,
+                            icon: Icon(
+                              isExecuted ? Icons.replay : Icons.play_arrow,
+                              size: 16,
+                            ),
+                            label: Text(isExecuted ? '重新运行' : '运行'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  isExecuted
+                                      ? Colors.green[600]
+                                      : Colors.blue[600],
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              textStyle: const TextStyle(fontSize: 13),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+
+                // 分割线（如果有 AI 回复内容）
+                if (message.content.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Divider(color: Colors.grey[300], thickness: 1),
+                  const SizedBox(height: 12),
+                ],
+
+                // AI 最终回复（从 content 中提取，排除工具结果部分）
+                if (message.content.isNotEmpty) _buildFinalReplyContent(),
+              ],
             ),
           );
-        }).toList(),
+        }),
       ],
+    );
+  }
+
+  /// 构建 AI 最终回复内容（排除工具执行结果部分）
+  Widget _buildFinalReplyContent() {
+    String finalReply = message.content;
+
+    // 如果有工具执行结果标记，提取 AI 最终回复部分
+    if (finalReply.contains('[工具执行结果]')) {
+      final aiReplyIndex = finalReply.indexOf('[AI最终回复]');
+      if (aiReplyIndex != -1) {
+        // 提取 [AI最终回复] 之后的内容
+        finalReply =
+            finalReply.substring(aiReplyIndex + '[AI最终回复]'.length).trim();
+      } else {
+        // 如果没有 [AI最终回复] 标记，只显示工具执行结果之前的内容（思考过程）
+        final toolResultIndex = finalReply.indexOf('[工具执行结果]');
+        if (toolResultIndex != -1) {
+          finalReply = finalReply.substring(0, toolResultIndex).trim();
+        }
+      }
+    }
+
+    return MarkdownContent(content: finalReply);
+  }
+
+  /// 显示模版结果对话框
+  void _showTemplateResultDialog(BuildContext context) {
+    // 获取工具调用结果
+    if (message.toolCall == null || message.toolCall!.steps.isEmpty) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  Icons.assessment_outlined,
+                  color: Colors.blue[700],
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                const Text('工具执行结果'),
+              ],
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: message.toolCall!.steps.length,
+                separatorBuilder: (context, index) => const Divider(height: 24),
+                itemBuilder: (context, index) {
+                  final step = message.toolCall!.steps[index];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 步骤标题
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[100],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '步骤 ${index + 1}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue[700],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              step.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // 步骤描述
+                      if (step.desc.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          step.desc,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
+
+                      // 执行结果
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color:
+                              step.status == ToolCallStatus.success
+                                  ? Colors.green[50]
+                                  : step.status == ToolCallStatus.failed
+                                  ? Colors.red[50]
+                                  : Colors.grey[100],
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color:
+                                step.status == ToolCallStatus.success
+                                    ? Colors.green[300]!
+                                    : step.status == ToolCallStatus.failed
+                                    ? Colors.red[300]!
+                                    : Colors.grey[300]!,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  step.status == ToolCallStatus.success
+                                      ? Icons.check_circle
+                                      : step.status == ToolCallStatus.failed
+                                      ? Icons.error
+                                      : Icons.hourglass_empty,
+                                  size: 16,
+                                  color:
+                                      step.status == ToolCallStatus.success
+                                          ? Colors.green[700]
+                                          : step.status == ToolCallStatus.failed
+                                          ? Colors.red[700]
+                                          : Colors.grey[600],
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  step.status == ToolCallStatus.success
+                                      ? '执行成功'
+                                      : step.status == ToolCallStatus.failed
+                                      ? '执行失败'
+                                      : '执行中',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        step.status == ToolCallStatus.success
+                                            ? Colors.green[700]
+                                            : step.status ==
+                                                ToolCallStatus.failed
+                                            ? Colors.red[700]
+                                            : Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (step.result != null || step.error != null) ...[
+                              const SizedBox(height: 8),
+                              const Divider(height: 1),
+                              const SizedBox(height: 8),
+                              SelectableText(
+                                step.error ?? step.result ?? '无结果',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('关闭'),
+              ),
+            ],
+          ),
     );
   }
 
