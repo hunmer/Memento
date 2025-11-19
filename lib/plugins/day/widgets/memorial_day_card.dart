@@ -53,9 +53,10 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
       });
     } else {
       try {
-        _imageProvider = FileImage(
-          File(await ImageUtils.getAbsolutePath(url)),
-        ); // 相对路径加载图片
+        final absolutePath = await ImageUtils.getAbsolutePath(url);
+        setState(() {
+          _imageProvider = FileImage(File(absolutePath));
+        });
       } catch (e) {
         debugPrint('Error loading image: $e');
         setState(() {

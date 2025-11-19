@@ -2,6 +2,7 @@ import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'provider_settings_screen.dart';
 import 'model_list_screen.dart';
+import 'prompt_preset_screen.dart';
 
 class PluginSettingsScreen extends StatelessWidget {
   const PluginSettingsScreen({super.key});
@@ -38,6 +39,23 @@ class PluginSettingsScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ModelListScreen(),
+                ),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.text_snippet),
+            title: Text(OpenAILocalizations.of(context).promptPresetManagement),
+            subtitle: Text(
+              OpenAILocalizations.of(context).promptPresetManagementDescription,
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PromptPresetScreen(),
                 ),
               );
             },

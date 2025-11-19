@@ -44,6 +44,28 @@ class ToolConfigManager {
     'ui',
   ];
 
+  // 插件别名映射（用于帮助AI识别用户的自然语言描述）
+  static const Map<String, List<String>> _pluginAliases = {
+    'bill': ['账单', '记账', '账本', '财务', '消费', '支出', '收入', '花销'],
+    'chat': ['聊天', '频道', '消息', '对话', '会话'],
+    'diary': ['日记', '日志', '记录'],
+    'todo': ['任务', '待办', '清单', '事项', '计划'],
+    'notes': ['笔记', '备忘', '记事'],
+    'activity': ['活动', '事件', '记录活动'],
+    'checkin': ['签到', '打卡', '考勤'],
+    'calendar': ['日历', '日程', '日程表'],
+    'day': ['纪念日', '倒计时', '正计时', '重要日子'],
+    'goods': ['物品', '商品', '东西', '物件'],
+    'habits': ['习惯', '习惯养成', '习惯追踪'],
+    'tracker': ['追踪', '目标', '目标追踪', '统计'],
+    'timer': ['计时', '计时器', '定时', '定时器'],
+    'contact': ['联系人', '通讯录', '人脉'],
+    'store': ['商店', '兑换', '积分商城'],
+    'nodes': ['节点', '树形笔记'],
+    'calendar_album': ['相册', '照片', '图片日记'],
+    'database': ['数据库', '自定义数据'],
+  };
+
   // 是否已初始化
   bool _initialized = false;
 
@@ -534,5 +556,28 @@ class ToolConfigManager {
       'enabled_tools': getToolIndex(enabledOnly: true).length,
       'plugins': pluginsStats,
     };
+  }
+
+  /// 获取插件别名映射（用于生成AI Prompt）
+  static Map<String, List<String>> getPluginAliases() {
+    return Map.from(_pluginAliases);
+  }
+
+  /// 生成插件别名的 Prompt 描述
+  static String generatePluginAliasesPrompt() {
+    final buffer = StringBuffer();
+    buffer.writeln('### 🏷️ 插件别名映射\n');
+    buffer.writeln('当用户使用以下自然语言描述时，请识别对应的插件ID：\n');
+
+    _pluginAliases.forEach((pluginId, aliases) {
+      buffer.writeln('- **$pluginId**: ${aliases.join('、')}');
+    });
+
+    buffer.writeln('\n**示例**：');
+    buffer.writeln('- 用户说"帮我记一笔账" → 使用 `bill` 插件');
+    buffer.writeln('- 用户说"查看今天的任务" → 使用 `todo` 插件');
+    buffer.writeln('- 用户说"给频道发消息" → 使用 `chat` 插件\n');
+
+    return buffer.toString();
   }
 }
