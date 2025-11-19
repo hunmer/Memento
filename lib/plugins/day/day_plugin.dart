@@ -59,7 +59,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return DatabaseLocalizations.of(context).name;
+    return DayLocalizations.of(context).name;
   }
 
   @override

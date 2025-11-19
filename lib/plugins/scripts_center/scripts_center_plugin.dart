@@ -136,6 +136,11 @@ class ScriptsCenterPlugin extends BasePlugin {
   @override
   IconData get icon => Icons.code;
 
+  @override
+  String? getPluginName(context) {
+    return '脚本中心';
+  }
+
   // 获取服务实例的访问器
   ScriptManager get scriptManager => _scriptManager;
   ScriptExecutor get scriptExecutor => _scriptExecutor;

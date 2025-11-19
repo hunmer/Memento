@@ -97,8 +97,8 @@ class FilterOptions {
       fields: fields,
       excludeFields: excludeFields,
       textLengthLimits: textLengthLimits,
-      generateSummary: params['generateSummary'] == true,
-      abbreviateFieldNames: params['abbreviateFieldNames'] == true,
+      generateSummary: params['generateSummary'] ?? true,
+      abbreviateFieldNames: params['abbreviateFieldNames'] ?? false,
     );
   }
 

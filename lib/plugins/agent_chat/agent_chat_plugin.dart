@@ -77,7 +77,7 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
   @override
   String? getPluginName(context) {
     // TODO: 集成国际化后返回翻译后的名称
-    return 'Agent Chat';
+    return 'AI 对话';
   }
 
   @override
