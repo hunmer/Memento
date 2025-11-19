@@ -146,6 +146,16 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       // 用户相关
       'getCurrentUser': _jsGetCurrentUser,
       'getAIUser': _jsGetAIUser,
+
+      // 频道查找方法
+      'findChannelBy': _jsFindChannelBy,
+      'findChannelById': _jsFindChannelById,
+      'findChannelByTitle': _jsFindChannelByTitle,
+
+      // 消息查找方法
+      'findMessageBy': _jsFindMessageBy,
+      'findMessageById': _jsFindMessageById,
+      'findMessageByContent': _jsFindMessageByContent,
     };
   }
 
@@ -314,6 +324,308 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     // 调用者可以根据用户名筛选 AI 用户
     final users = userService.getAllUsers();
     return jsonEncode(users.map((u) => u.toJson()).toList());
+  }
+
+  // ==================== 频道查找方法 ====================
+
+  /// 通用频道查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindChannelBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final channels = channelService.channels;
+    final List<Channel> matchedChannels = [];
+
+    for (final channel in channels) {
+      final channelJson = channel.toJson();
+
+      // 检查字段是否匹配
+      if (channelJson.containsKey(field) && channelJson[field] == value) {
+        matchedChannels.add(channel);
+        if (!findAll) break; // 只找第一个
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedChannels.map((c) => c.toJson()).toList());
+    } else {
+      if (matchedChannels.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedChannels.first.toJson());
+    }
+  }
+
+  /// 根据ID查找频道
+  /// @param params.id 频道ID (必需)
+  Future<String> _jsFindChannelById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final channels = channelService.channels;
+    final channel = channels.firstWhere(
+      (c) => c.id == id,
+      orElse:
+          () => Channel(
+            id: '',
+            title: '',
+            icon: Icons.error,
+            messages: [],
+            backgroundColor: Colors.transparent,
+          ),
+    );
+
+    if (channel.id.isEmpty) {
+      return jsonEncode(null);
+    }
+
+    return jsonEncode(channel.toJson());
+  }
+
+  /// 根据标题查找频道
+  /// @param params.title 频道标题 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindChannelByTitle(Map<String, dynamic> params) async {
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final channels = channelService.channels;
+    final List<Channel> matchedChannels = [];
+
+    for (final channel in channels) {
+      bool matches = false;
+      if (fuzzy) {
+        matches = channel.title.contains(title);
+      } else {
+        matches = channel.title == title;
+      }
+
+      if (matches) {
+        matchedChannels.add(channel);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedChannels.map((c) => c.toJson()).toList());
+    } else {
+      if (matchedChannels.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedChannels.first.toJson());
+    }
+  }
+
+  // ==================== 消息查找方法 ====================
+
+  /// 通用消息查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.channelId 限定在特定频道内查找 (可选)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindMessageBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final String? channelId = params['channelId'];
+    final bool findAll = params['findAll'] ?? false;
+
+    final List<Message> matchedMessages = [];
+
+    // 如果指定了 channelId，只在该频道中查找
+    if (channelId != null && channelId.isNotEmpty) {
+      final messages = await channelService.getChannelMessages(channelId);
+      if (messages != null) {
+        for (final message in messages) {
+          final messageJson = await message.toJson();
+          if (messageJson.containsKey(field) && messageJson[field] == value) {
+            matchedMessages.add(message);
+            if (!findAll) break;
+          }
+        }
+      }
+    } else {
+      // 在所有频道中查找
+      for (final channel in channelService.channels) {
+        final messages = await channelService.getChannelMessages(channel.id);
+        if (messages != null) {
+          for (final message in messages) {
+            final messageJson = await message.toJson();
+            if (messageJson.containsKey(field) && messageJson[field] == value) {
+              matchedMessages.add(message);
+              if (!findAll) break;
+            }
+          }
+        }
+        if (!findAll && matchedMessages.isNotEmpty) break;
+      }
+    }
+
+    if (findAll) {
+      final messagesJsonList = await Future.wait(
+        matchedMessages.map((m) => m.toJson()),
+      );
+      return jsonEncode(messagesJsonList);
+    } else {
+      if (matchedMessages.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(await matchedMessages.first.toJson());
+    }
+  }
+
+  /// 根据ID查找消息
+  /// @param params.id 消息ID (必需)
+  /// @param params.channelId 限定在特定频道内查找 (可选)
+  Future<String> _jsFindMessageById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final String? channelId = params['channelId'];
+
+    Message? foundMessage;
+
+    if (channelId != null && channelId.isNotEmpty) {
+      final messages = await channelService.getChannelMessages(channelId);
+      if (messages != null) {
+        foundMessage = messages.firstWhere(
+          (m) => m.id == id,
+          orElse:
+              () => Message(
+                id: '',
+                content: '',
+                user: userService.currentUser,
+                type: MessageType.sent,
+                date: DateTime.now(),
+              ),
+        );
+      }
+    } else {
+      // 在所有频道中查找
+      for (final channel in channelService.channels) {
+        final messages = await channelService.getChannelMessages(channel.id);
+        if (messages != null) {
+          foundMessage = messages.firstWhere(
+            (m) => m.id == id,
+            orElse:
+                () => Message(
+                  id: '',
+                  content: '',
+                  user: userService.currentUser,
+                  type: MessageType.sent,
+                  date: DateTime.now(),
+                ),
+          );
+          if (foundMessage.id.isNotEmpty) break;
+        }
+      }
+    }
+
+    if (foundMessage == null || foundMessage.id.isEmpty) {
+      return jsonEncode(null);
+    }
+
+    return jsonEncode(await foundMessage.toJson());
+  }
+
+  /// 根据内容查找消息
+  /// @param params.content 消息内容 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.channelId 限定在特定频道内查找 (可选)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindMessageByContent(Map<String, dynamic> params) async {
+    final String? content = params['content'];
+    if (content == null || content.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: content'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final String? channelId = params['channelId'];
+    final bool findAll = params['findAll'] ?? false;
+
+    final List<Message> matchedMessages = [];
+
+    // 如果指定了 channelId，只在该频道中查找
+    if (channelId != null && channelId.isNotEmpty) {
+      final messages = await channelService.getChannelMessages(channelId);
+      if (messages != null) {
+        for (final message in messages) {
+          bool matches = false;
+          if (fuzzy) {
+            matches = message.content.contains(content);
+          } else {
+            matches = message.content == content;
+          }
+
+          if (matches) {
+            matchedMessages.add(message);
+            if (!findAll) break;
+          }
+        }
+      }
+    } else {
+      // 在所有频道中查找
+      for (final channel in channelService.channels) {
+        final messages = await channelService.getChannelMessages(channel.id);
+        if (messages != null) {
+          for (final message in messages) {
+            bool matches = false;
+            if (fuzzy) {
+              matches = message.content.contains(content);
+            } else {
+              matches = message.content == content;
+            }
+
+            if (matches) {
+              matchedMessages.add(message);
+              if (!findAll) break;
+            }
+          }
+        }
+        if (!findAll && matchedMessages.isNotEmpty) break;
+      }
+    }
+
+    if (findAll) {
+      final messagesJsonList = await Future.wait(
+        matchedMessages.map((m) => m.toJson()),
+      );
+      return jsonEncode(messagesJsonList);
+    } else {
+      if (matchedMessages.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(await matchedMessages.first.toJson());
+    }
   }
 
   @override

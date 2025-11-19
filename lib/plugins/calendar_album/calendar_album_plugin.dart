@@ -241,6 +241,11 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
       // 统计相关
       'getStatistics': _jsGetStatistics,
+
+      // 日记查找方法
+      'findEntryBy': _jsFindEntryBy,
+      'findEntryById': _jsFindEntryById,
+      'findEntryByTitle': _jsFindEntryByTitle,
     };
   }
 
@@ -535,5 +540,114 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       'photoCount': calendarController.getAllImages().length,
     };
     return jsonEncode(stats);
+  }
+
+  // ==================== 日记查找方法 ====================
+
+  /// 通用日记查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindEntryBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    // 获取所有日记
+    final allEntries = <CalendarEntry>[];
+    calendarController.entries.forEach((date, entries) {
+      allEntries.addAll(entries);
+    });
+
+    final List<CalendarEntry> matchedEntries = [];
+
+    for (final entry in allEntries) {
+      final entryJson = entry.toJson();
+
+      // 检查字段是否匹配
+      if (entryJson.containsKey(field) && entryJson[field] == value) {
+        matchedEntries.add(entry);
+        if (!findAll) break; // 只找第一个
+      }
+    }
+
+    if (findAll) {
+      final entriesJson = matchedEntries.map((e) => e.toJson()).toList();
+      return jsonEncode(entriesJson);
+    } else {
+      if (matchedEntries.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedEntries.first.toJson());
+    }
+  }
+
+  /// 根据ID查找日记
+  /// @param params.id 日记ID (必需)
+  Future<String> _jsFindEntryById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final entry = calendarController.getEntryById(id);
+    if (entry == null) {
+      return jsonEncode(null);
+    }
+    return jsonEncode(entry.toJson());
+  }
+
+  /// 根据标题查找日记
+  /// @param params.title 日记标题 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindEntryByTitle(Map<String, dynamic> params) async {
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    // 获取所有日记
+    final allEntries = <CalendarEntry>[];
+    calendarController.entries.forEach((date, entries) {
+      allEntries.addAll(entries);
+    });
+
+    final List<CalendarEntry> matchedEntries = [];
+
+    for (final entry in allEntries) {
+      bool matches = false;
+      if (fuzzy) {
+        matches = entry.title.contains(title);
+      } else {
+        matches = entry.title == title;
+      }
+
+      if (matches) {
+        matchedEntries.add(entry);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      final entriesJson = matchedEntries.map((e) => e.toJson()).toList();
+      return jsonEncode(entriesJson);
+    } else {
+      if (matchedEntries.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedEntries.first.toJson());
+    }
   }
 }

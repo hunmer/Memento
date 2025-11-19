@@ -296,5 +296,148 @@
     ],
     "notes": "会自动将 status 设置为 'done',停止计时器,并完成所有子任务。",
     "enabled": true
+  },
+  "findTaskBy": {
+    "title": "通用任务查找",
+    "description": "根据自定义条件查找任务（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、status、priority）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个任务对象或 null；findAll=true 时返回任务数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找任务",
+        "code": "const task = await Memento.plugins.todo.findTaskBy({field: 'id', value: 'task123'});\nif (task) {\n  setResult(`找到任务: ${task.title}`);\n} else {\n  setResult('未找到该任务');\n}"
+      },
+      {
+        "title": "查找所有高优先级任务",
+        "code": "const tasks = await Memento.plugins.todo.findTaskBy({field: 'priority', value: 'high', findAll: true});\nsetResult(`找到 ${tasks.length} 个高优先级任务`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历任务列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findTaskById": {
+    "title": "根据ID查找任务",
+    "description": "快速根据任务ID查找单个任务（findTaskBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "任务ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的任务对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的任务",
+        "code": "const task = await Memento.plugins.todo.findTaskById({id: 'task123'});\nif (task) {\n  setResult(`任务: ${task.title}, 状态: ${task.status}`);\n} else {\n  setResult('任务不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findTaskBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findTaskByTitle": {
+    "title": "根据标题查找任务",
+    "description": "根据任务标题查找任务（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "任务标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个任务或 null；findAll=true 时返回任务数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配任务标题",
+        "code": "const task = await Memento.plugins.todo.findTaskByTitle({title: '完成项目文档'});\nsetResult(task ? `找到任务ID: ${task.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的任务",
+        "code": "const tasks = await Memento.plugins.todo.findTaskByTitle({title: '文档', fuzzy: true, findAll: true});\nsetResult(`找到 ${tasks.length} 个包含"文档"的任务`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 contains",
+    "enabled": true
+  },
+  "findTasksByTag": {
+    "title": "根据标签查找任务",
+    "description": "查找包含指定标签的所有任务",
+    "parameters": [
+      {"name": "tag", "type": "string", "required": true, "description": "标签名称"},
+      {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤: 'todo' | 'inProgress' | 'done'"},
+      {"name": "priority", "type": "string", "required": false, "description": "可选的优先级过滤: 'low' | 'medium' | 'high'"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "包含该标签的任务列表"
+    },
+    "examples": [
+      {
+        "title": "查找所有带"工作"标签的任务",
+        "code": "const tasks = await Memento.plugins.todo.findTasksByTag({tag: '工作'});\nsetResult(`找到 ${tasks.length} 个工作任务`);"
+      },
+      {
+        "title": "查找带"紧急"标签且未完成的任务",
+        "code": "const tasks = await Memento.plugins.todo.findTasksByTag({tag: '紧急', status: 'todo'});\nsetResult(`找到 ${tasks.length} 个紧急待办任务`);"
+      }
+    ],
+    "notes": "标签匹配区分大小写；支持额外的状态和优先级过滤",
+    "enabled": true
+  },
+  "findTasksByStatus": {
+    "title": "根据状态查找任务",
+    "description": "查找指定状态的所有任务（扩展 getTasks 功能）",
+    "parameters": [
+      {"name": "status", "type": "string", "required": true, "description": "任务状态: 'todo' | 'inProgress' | 'done'"},
+      {"name": "startDate", "type": "string", "required": false, "description": "开始日期过滤（ISO 8601 格式）"},
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期过滤（ISO 8601 格式）"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "该状态的任务列表"
+    },
+    "examples": [
+      {
+        "title": "查找所有进行中的任务",
+        "code": "const tasks = await Memento.plugins.todo.findTasksByStatus({status: 'inProgress'});\nsetResult(`进行中: ${tasks.length} 个任务`);"
+      },
+      {
+        "title": "查找本周完成的任务",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst tasks = await Memento.plugins.todo.findTasksByStatus({status: 'done', startDate: weekStart.toISOString(), endDate: weekEnd.toISOString()});\nsetResult(`本周完成 ${tasks.length} 个任务`);"
+      }
+    ],
+    "notes": "日期过滤基于任务的 dueDate 或 completedDate 字段",
+    "enabled": true
+  },
+  "findTasksByPriority": {
+    "title": "根据优先级查找任务",
+    "description": "查找指定优先级的所有任务",
+    "parameters": [
+      {"name": "priority", "type": "string", "required": true, "description": "优先级: 'low' | 'medium' | 'high'"},
+      {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "该优先级的任务列表"
+    },
+    "examples": [
+      {
+        "title": "查找所有高优先级任务",
+        "code": "const tasks = await Memento.plugins.todo.findTasksByPriority({priority: 'high'});\nsetResult(`高优先级: ${tasks.length} 个任务`);"
+      },
+      {
+        "title": "查找高优先级且待办的任务",
+        "code": "const tasks = await Memento.plugins.todo.findTasksByPriority({priority: 'high', status: 'todo'});\nsetResult(`高优先级待办: ${tasks.length} 个任务`);"
+      }
+    ],
+    "notes": "支持额外的状态过滤",
+    "enabled": true
   }
 }

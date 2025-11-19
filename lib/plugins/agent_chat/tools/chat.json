@@ -157,5 +157,142 @@
     ],
     "notes": "返回AI助手的用户信息，isAI 字段为 true",
     "enabled": true
+  },
+  "findChannelBy": {
+    "title": "通用频道查找",
+    "description": "根据自定义条件查找频道（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个频道对象或 null；findAll=true 时返回频道数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找频道",
+        "code": "const channel = await Memento.plugins.chat.findChannelBy({field: 'id', value: 'channel123'});\nif (channel) {\n  setResult(`找到频道: ${channel.title}`);\n} else {\n  setResult('未找到该频道');\n}"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历频道列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findChannelById": {
+    "title": "根据ID查找频道",
+    "description": "快速根据频道ID查找单个频道（findChannelBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "频道ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的频道对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的频道",
+        "code": "const channel = await Memento.plugins.chat.findChannelById({id: 'channel123'});\nif (channel) {\n  setResult(`频道名: ${channel.title}`);\n} else {\n  setResult('频道不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findChannelBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findChannelByTitle": {
+    "title": "根据标题查找频道",
+    "description": "根据频道标题查找频道（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "频道标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个频道或 null；findAll=true 时返回频道数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配频道标题",
+        "code": "const channel = await Memento.plugins.chat.findChannelByTitle({title: '工作交流'});\nsetResult(channel ? `找到频道ID: ${channel.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配频道标题",
+        "code": "const channels = await Memento.plugins.chat.findChannelByTitle({title: '工作', fuzzy: true, findAll: true});\nsetResult(`找到 ${channels.length} 个包含"工作"的频道`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "findMessageBy": {
+    "title": "通用消息查找",
+    "description": "根据自定义条件查找消息（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、content、userId）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "channelId", "type": "string", "required": false, "description": "限定在特定频道内查找（可选）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个消息或 null；findAll=true 时返回消息数组"
+    },
+    "examples": [
+      {
+        "title": "根据ID查找消息",
+        "code": "const message = await Memento.plugins.chat.findMessageBy({field: 'id', value: 'msg123'});\nif (message) {\n  setResult(`消息: ${message.content}`);\n} else {\n  setResult('未找到该消息');\n}"
+      },
+      {
+        "title": "在指定频道中查找消息",
+        "code": "const message = await Memento.plugins.chat.findMessageBy({field: 'content', value: '你好', channelId: 'channel123'});\nsetResult(message ? `找到消息` : '未找到');"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历消息列表；channelId 可选，不传则在所有频道中查找",
+    "enabled": true
+  },
+  "findMessageById": {
+    "title": "根据ID查找消息",
+    "description": "快速根据消息ID查找单个消息（findMessageBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "消息ID"},
+      {"name": "channelId", "type": "string", "required": false, "description": "限定在特定频道内查找（可选，提高性能）"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的消息对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的消息",
+        "code": "const message = await Memento.plugins.chat.findMessageById({id: 'msg123'});\nif (message) {\n  setResult(`消息内容: ${message.content}`);\n} else {\n  setResult('消息不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findMessageBy({field: 'id', value: id, channelId})",
+    "enabled": true
+  },
+  "findMessageByContent": {
+    "title": "根据内容查找消息",
+    "description": "根据消息内容查找消息（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "content", "type": "string", "required": true, "description": "消息内容"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false）"},
+      {"name": "channelId", "type": "string", "required": false, "description": "限定在特定频道内查找（可选）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个消息或 null；findAll=true 时返回消息数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配消息内容",
+        "code": "const message = await Memento.plugins.chat.findMessageByContent({content: '你好'});\nsetResult(message ? `找到消息ID: ${message.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的消息",
+        "code": "const messages = await Memento.plugins.chat.findMessageByContent({content: '项目', fuzzy: true, findAll: true});\nsetResult(`找到 ${messages.length} 条包含"项目"的消息`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
   }
 }

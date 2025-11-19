@@ -162,5 +162,74 @@
     ],
     "notes": "已完成事件按完成时间倒序排列",
     "enabled": true
+  },
+  "findEventBy": {
+    "title": "通用事件查找",
+    "description": "根据自定义条件查找事件（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、description、source）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个事件对象或 null；findAll=true 时返回事件数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找事件",
+        "code": "const event = await Memento.plugins.calendar.findEventBy({field: 'id', value: 'evt123'});\nif (event) {\n  setResult(`找到事件: ${event.title}，开始时间: ${event.startTime}`);\n} else {\n  setResult('未找到该事件');\n}"
+      },
+      {
+        "title": "查找所有来自 Todo 的事件",
+        "code": "const events = await Memento.plugins.calendar.findEventBy({field: 'source', value: 'todo', findAll: true});\nsetResult(`找到 ${events.length} 个 Todo 任务事件`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历事件列表；支持任意字段匹配；包括普通事件和 Todo 任务事件",
+    "enabled": true
+  },
+  "findEventById": {
+    "title": "根据ID查找事件",
+    "description": "快速根据事件ID查找单个事件（findEventBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "事件ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的事件对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的事件",
+        "code": "const event = await Memento.plugins.calendar.findEventById({id: 'evt123'});\nif (event) {\n  setResult(`事件标题: ${event.title}, 开始时间: ${event.startTime}`);\n} else {\n  setResult('事件不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findEventBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findEventByTitle": {
+    "title": "根据标题查找事件",
+    "description": "根据事件标题查找事件（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "事件标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个事件或 null；findAll=true 时返回事件数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配事件标题",
+        "code": "const event = await Memento.plugins.calendar.findEventByTitle({title: '项目会议'});\nsetResult(event ? `开始时间: ${event.startTime}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的事件",
+        "code": "const events = await Memento.plugins.calendar.findEventByTitle({title: '会议', fuzzy: true, findAll: true});\nsetResult(`找到 ${events.length} 个包含"会议"的事件`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
   }
 }

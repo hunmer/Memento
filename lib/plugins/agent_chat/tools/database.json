@@ -223,5 +223,120 @@
     ],
     "notes": "type 参数只接受 'databases' 或 'records' 两个值",
     "enabled": true
+  },
+  "findDatabaseBy": {
+    "title": "通用数据库查找",
+    "description": "根据自定义条件查找数据库（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name、description）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个数据库对象或 null；findAll=true 时返回数据库数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找数据库",
+        "code": "const db = await Memento.plugins.database.findDatabaseBy({field: 'id', value: 'db123'});\nif (db) {\n  setResult(`找到数据库: ${db.name}`);\n} else {\n  setResult('未找到该数据库');\n}"
+      },
+      {
+        "title": "查找所有包含特定描述的数据库",
+        "code": "const databases = await Memento.plugins.database.findDatabaseBy({field: 'description', value: '任务管理', findAll: true});\nsetResult(`找到 ${databases.length} 个数据库`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历数据库列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findDatabaseById": {
+    "title": "根据ID查找数据库",
+    "description": "快速根据数据库ID查找单个数据库（findDatabaseBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "数据库ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的数据库对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的数据库",
+        "code": "const db = await Memento.plugins.database.findDatabaseById({id: 'db123'});\nif (db) {\n  setResult(`数据库名称: ${db.name}, 字段数: ${db.fields.length}`);\n} else {\n  setResult('数据库不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findDatabaseBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findDatabaseByName": {
+    "title": "根据名称查找数据库",
+    "description": "根据数据库名称查找数据库（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "数据库名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个数据库或 null；findAll=true 时返回数据库数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配数据库名称",
+        "code": "const db = await Memento.plugins.database.findDatabaseByName({name: '任务管理'});\nsetResult(db ? `数据库ID: ${db.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的数据库",
+        "code": "const databases = await Memento.plugins.database.findDatabaseByName({name: '管理', fuzzy: true, findAll: true});\nsetResult(`找到 ${databases.length} 个包含\"管理\"的数据库`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "findRecordBy": {
+    "title": "通用记录查找",
+    "description": "在指定数据库中根据自定义条件查找记录（支持单条/多条结果）",
+    "parameters": [
+      {"name": "databaseId", "type": "string", "required": true, "description": "数据库ID"},
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、tableId，或自定义字段名）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个记录对象或 null；findAll=true 时返回记录数组"
+    },
+    "examples": [
+      {
+        "title": "根据记录ID查找",
+        "code": "const record = await Memento.plugins.database.findRecordBy({databaseId: 'db123', field: 'id', value: 'rec456'});\nif (record) {\n  setResult(`找到记录: ${JSON.stringify(record.fields)}`);\n} else {\n  setResult('未找到该记录');\n}"
+      },
+      {
+        "title": "查找所有标题为特定值的记录",
+        "code": "const records = await Memento.plugins.database.findRecordBy({databaseId: 'db123', field: '标题', value: '项目任务', findAll: true});\nsetResult(`找到 ${records.length} 条标题为\"项目任务\"的记录`);"
+      }
+    ],
+    "notes": "支持查找记录的内置字段（id、tableId）和自定义字段（存储在 fields 对象中）",
+    "enabled": true
+  },
+  "findRecordById": {
+    "title": "根据ID查找记录",
+    "description": "快速根据记录ID查找单个记录（findRecordBy 的便捷方法）",
+    "parameters": [
+      {"name": "databaseId", "type": "string", "required": true, "description": "数据库ID"},
+      {"name": "id", "type": "string", "required": true, "description": "记录ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的记录对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的记录",
+        "code": "const record = await Memento.plugins.database.findRecordById({databaseId: 'db123', id: 'rec456'});\nif (record) {\n  setResult(`记录字段: ${JSON.stringify(record.fields, null, 2)}`);\n} else {\n  setResult('记录不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findRecordBy({databaseId, field: 'id', value: id})",
+    "enabled": true
   }
 }

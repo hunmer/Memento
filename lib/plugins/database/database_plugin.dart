@@ -175,6 +175,15 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
 
       // 统计功能
       'getCount': _jsGetCount,
+
+      // 数据库查找方法
+      'findDatabaseBy': _jsFindDatabaseBy,
+      'findDatabaseById': _jsFindDatabaseById,
+      'findDatabaseByName': _jsFindDatabaseByName,
+
+      // 记录查找方法
+      'findRecordBy': _jsFindRecordBy,
+      'findRecordById': _jsFindRecordById,
     };
   }
 
@@ -472,5 +481,175 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       return records.length;
     }
     return 0;
+  }
+
+  // ==================== 数据库查找方法 ====================
+
+  /// 通用数据库查找
+  Future<String> _jsFindDatabaseBy(Map<String, dynamic> params) async {
+    try {
+      final String? field = params['field'];
+      if (field == null || field.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: field'});
+      }
+
+      final dynamic value = params['value'];
+      if (value == null) {
+        return jsonEncode({'error': '缺少必需参数: value'});
+      }
+
+      final bool findAll = params['findAll'] ?? false;
+
+      final databases = await service.getAllDatabases();
+      final List<DatabaseModel> matchedDatabases = [];
+
+      for (final database in databases) {
+        final databaseMap = database.toMap();
+        if (databaseMap.containsKey(field) && databaseMap[field] == value) {
+          matchedDatabases.add(database);
+          if (!findAll) break;
+        }
+      }
+
+      if (findAll) {
+        return jsonEncode(matchedDatabases.map((db) => db.toMap()).toList());
+      } else {
+        return matchedDatabases.isEmpty
+            ? jsonEncode(null)
+            : jsonEncode(matchedDatabases.first.toMap());
+      }
+    } catch (e) {
+      return jsonEncode({'error': '查找数据库失败: $e'});
+    }
+  }
+
+  /// 根据 ID 查找数据库
+  Future<String> _jsFindDatabaseById(Map<String, dynamic> params) async {
+    try {
+      final String? id = params['id'];
+      if (id == null || id.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: id'});
+      }
+
+      final databases = await service.getAllDatabases();
+      final database = databases.where((db) => db.id == id).firstOrNull;
+
+      return jsonEncode(database?.toMap());
+    } catch (e) {
+      return jsonEncode({'error': '查找数据库失败: $e'});
+    }
+  }
+
+  /// 根据名称查找数据库
+  Future<String> _jsFindDatabaseByName(Map<String, dynamic> params) async {
+    try {
+      final String? name = params['name'];
+      if (name == null || name.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: name'});
+      }
+
+      final bool fuzzy = params['fuzzy'] ?? false;
+      final bool findAll = params['findAll'] ?? false;
+
+      final databases = await service.getAllDatabases();
+      final List<DatabaseModel> matchedDatabases = [];
+
+      for (final database in databases) {
+        final bool matches = fuzzy
+            ? database.name.toLowerCase().contains(name.toLowerCase())
+            : database.name == name;
+
+        if (matches) {
+          matchedDatabases.add(database);
+          if (!findAll) break;
+        }
+      }
+
+      if (findAll) {
+        return jsonEncode(matchedDatabases.map((db) => db.toMap()).toList());
+      } else {
+        return matchedDatabases.isEmpty
+            ? jsonEncode(null)
+            : jsonEncode(matchedDatabases.first.toMap());
+      }
+    } catch (e) {
+      return jsonEncode({'error': '查找数据库失败: $e'});
+    }
+  }
+
+  // ==================== 记录查找方法 ====================
+
+  /// 通用记录查找
+  Future<String> _jsFindRecordBy(Map<String, dynamic> params) async {
+    try {
+      final String? databaseId = params['databaseId'];
+      if (databaseId == null || databaseId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: databaseId'});
+      }
+
+      final String? field = params['field'];
+      if (field == null || field.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: field'});
+      }
+
+      final dynamic value = params['value'];
+      if (value == null) {
+        return jsonEncode({'error': '缺少必需参数: value'});
+      }
+
+      final bool findAll = params['findAll'] ?? false;
+
+      final records = await controller.getRecords(databaseId);
+      final List<Record> matchedRecords = [];
+
+      for (final record in records) {
+        // 检查内置字段 (id, tableId)
+        final recordMap = record.toMap();
+        if (recordMap.containsKey(field) && recordMap[field] == value) {
+          matchedRecords.add(record);
+          if (!findAll) break;
+          continue;
+        }
+
+        // 检查自定义字段 (存储在 fields 对象中)
+        if (record.fields.containsKey(field) &&
+            record.fields[field] == value) {
+          matchedRecords.add(record);
+          if (!findAll) break;
+        }
+      }
+
+      if (findAll) {
+        return jsonEncode(matchedRecords.map((r) => r.toMap()).toList());
+      } else {
+        return matchedRecords.isEmpty
+            ? jsonEncode(null)
+            : jsonEncode(matchedRecords.first.toMap());
+      }
+    } catch (e) {
+      return jsonEncode({'error': '查找记录失败: $e'});
+    }
+  }
+
+  /// 根据 ID 查找记录
+  Future<String> _jsFindRecordById(Map<String, dynamic> params) async {
+    try {
+      final String? databaseId = params['databaseId'];
+      if (databaseId == null || databaseId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: databaseId'});
+      }
+
+      final String? id = params['id'];
+      if (id == null || id.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: id'});
+      }
+
+      final records = await controller.getRecords(databaseId);
+      final record = records.where((r) => r.id == id).firstOrNull;
+
+      return jsonEncode(record?.toMap());
+    } catch (e) {
+      return jsonEncode({'error': '查找记录失败: $e'});
+    }
   }
 }

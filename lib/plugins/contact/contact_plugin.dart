@@ -172,6 +172,15 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       // 筛选与统计
       'getRecentContacts': _jsGetRecentContacts,
       'getAllTags': _jsGetAllTags,
+
+      // 联系人查找方法
+      'findContactBy': _jsFindContactBy,
+      'findContactById': _jsFindContactById,
+      'findContactByName': _jsFindContactByName,
+
+      // 交互记录查找方法
+      'findInteractionBy': _jsFindInteractionBy,
+      'findInteractionById': _jsFindInteractionById,
     };
   }
 
@@ -375,6 +384,158 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   Future<String> _jsGetAllTags(Map<String, dynamic> params) async {
     final tags = await _controller.getAllTags();
     return jsonEncode(tags);
+  }
+
+  // ==================== 联系人查找方法 ====================
+
+  /// 通用联系人查找
+  Future<String> _jsFindContactBy(Map<String, dynamic> params) async {
+    try {
+      final String? field = params['field'];
+      if (field == null || field.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: field'});
+      }
+
+      final dynamic value = params['value'];
+      if (value == null) {
+        return jsonEncode({'error': '缺少必需参数: value'});
+      }
+
+      final bool findAll = params['findAll'] ?? false;
+
+      final contacts = await _controller.getAllContacts();
+      final List<Contact> matchedContacts = [];
+
+      for (final contact in contacts) {
+        final contactJson = contact.toJson();
+        if (contactJson.containsKey(field) && contactJson[field] == value) {
+          matchedContacts.add(contact);
+          if (!findAll) break;
+        }
+      }
+
+      if (findAll) {
+        return jsonEncode(matchedContacts.map((c) => c.toJson()).toList());
+      } else {
+        return matchedContacts.isEmpty
+            ? jsonEncode(null)
+            : jsonEncode(matchedContacts.first.toJson());
+      }
+    } catch (e) {
+      return jsonEncode({'error': '查找联系人失败: $e'});
+    }
+  }
+
+  /// 根据 ID 查找联系人
+  Future<String> _jsFindContactById(Map<String, dynamic> params) async {
+    try {
+      final String? id = params['id'];
+      if (id == null || id.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: id'});
+      }
+
+      final contact = await _controller.getContact(id);
+      return jsonEncode(contact?.toJson());
+    } catch (e) {
+      return jsonEncode({'error': '查找联系人失败: $e'});
+    }
+  }
+
+  /// 根据姓名查找联系人
+  Future<String> _jsFindContactByName(Map<String, dynamic> params) async {
+    try {
+      final String? name = params['name'];
+      if (name == null || name.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: name'});
+      }
+
+      final bool fuzzy = params['fuzzy'] ?? false;
+      final bool findAll = params['findAll'] ?? false;
+
+      final contacts = await _controller.getAllContacts();
+      final List<Contact> matchedContacts = [];
+
+      for (final contact in contacts) {
+        final bool matches = fuzzy
+            ? contact.name.toLowerCase().contains(name.toLowerCase())
+            : contact.name == name;
+
+        if (matches) {
+          matchedContacts.add(contact);
+          if (!findAll) break;
+        }
+      }
+
+      if (findAll) {
+        return jsonEncode(matchedContacts.map((c) => c.toJson()).toList());
+      } else {
+        return matchedContacts.isEmpty
+            ? jsonEncode(null)
+            : jsonEncode(matchedContacts.first.toJson());
+      }
+    } catch (e) {
+      return jsonEncode({'error': '查找联系人失败: $e'});
+    }
+  }
+
+  // ==================== 交互记录查找方法 ====================
+
+  /// 通用交互记录查找
+  Future<String> _jsFindInteractionBy(Map<String, dynamic> params) async {
+    try {
+      final String? field = params['field'];
+      if (field == null || field.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: field'});
+      }
+
+      final dynamic value = params['value'];
+      if (value == null) {
+        return jsonEncode({'error': '缺少必需参数: value'});
+      }
+
+      final bool findAll = params['findAll'] ?? false;
+
+      final interactions = await _controller.getAllInteractions();
+      final List<InteractionRecord> matchedInteractions = [];
+
+      for (final interaction in interactions) {
+        final interactionJson = interaction.toJson();
+        if (interactionJson.containsKey(field) &&
+            interactionJson[field] == value) {
+          matchedInteractions.add(interaction);
+          if (!findAll) break;
+        }
+      }
+
+      if (findAll) {
+        return jsonEncode(
+            matchedInteractions.map((i) => i.toJson()).toList());
+      } else {
+        return matchedInteractions.isEmpty
+            ? jsonEncode(null)
+            : jsonEncode(matchedInteractions.first.toJson());
+      }
+    } catch (e) {
+      return jsonEncode({'error': '查找交互记录失败: $e'});
+    }
+  }
+
+  /// 根据 ID 查找交互记录
+  Future<String> _jsFindInteractionById(Map<String, dynamic> params) async {
+    try {
+      final String? id = params['id'];
+      if (id == null || id.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: id'});
+      }
+
+      final interactions = await _controller.getAllInteractions();
+      final interaction =
+          interactions.where((i) => i.id == id).firstOrNull;
+
+      return jsonEncode(interaction?.toJson());
+    } catch (e) {
+      return jsonEncode({'error': '查找交互记录失败: $e'});
+    }
   }
 }
 

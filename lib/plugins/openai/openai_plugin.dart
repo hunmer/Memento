@@ -7,6 +7,7 @@ import '../../core/config_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'screens/agent_list_screen.dart';
 import 'screens/plugin_settings_screen.dart';
+import 'screens/prompt_preset_screen.dart';
 import 'handlers/chat_event_handler.dart';
 import 'controllers/agent_controller.dart';
 import 'controllers/service_provider_controller.dart';
@@ -401,8 +402,40 @@ class OpenAIMainView extends StatefulWidget {
 }
 
 class _OpenAIMainViewState extends State<OpenAIMainView> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = const [
+    AgentListScreen(),
+    PromptPresetScreen(),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return const AgentListScreen();
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.smart_toy_outlined),
+            selectedIcon: const Icon(Icons.smart_toy),
+            label: OpenAILocalizations.of(context).agentsTab,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.text_snippet_outlined),
+            selectedIcon: const Icon(Icons.text_snippet),
+            label: OpenAILocalizations.of(context).promptPreset,
+          ),
+        ],
+      ),
+    );
   }
 }
