@@ -151,13 +151,17 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   /// 获取所有笔记本列表
   Future<String> _jsGetNotebooks(Map<String, dynamic> params) async {
     final notebooks = _controller.notebooks;
-    return jsonEncode(notebooks.map((nb) => {
+    final notebookList = notebooks.map((nb) => {
       'id': nb.id,
       'title': nb.title,
       'icon': nb.icon.codePoint,
       'color': nb.color.value,
       'nodeCount': _countAllNodes(nb.nodes),
-    }).toList());
+    }).toList();
+
+    // 应用分页
+    final result = _paginate(notebookList, params);
+    return jsonEncode(result);
   }
 
   /// 获取指定笔记本详情
@@ -298,7 +302,11 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       nodes = parentNode.children;
     }
 
-    return jsonEncode(nodes.map((n) => _nodeToJson(n, includeChildren: false)).toList());
+    final nodeList = nodes.map((n) => _nodeToJson(n, includeChildren: false)).toList();
+
+    // 应用分页
+    final result = _paginate(nodeList, params);
+    return jsonEncode(result);
   }
 
   /// 获取节点详情
@@ -858,6 +866,33 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return NodeStatus.values[status];
     }
     return NodeStatus.none;
+  }
+
+  /// 分页辅助方法
+  ///
+  /// 根据 offset 和 count 参数对列表进行分页
+  /// - 如果 offset 和 count 都为 null,返回原格式(列表)
+  /// - 如果提供了分页参数,返回包含 items、total、offset、count 的对象
+  dynamic _paginate(List<dynamic> items, Map<String, dynamic> params) {
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    // 无分页参数:返回原格式(列表)
+    if (offset == null && count == null) {
+      return items;
+    }
+
+    // 有分页参数:返回分页对象
+    final int actualOffset = offset ?? 0;
+    final int actualCount = count ?? items.length;
+    final List<dynamic> paginatedItems = items.skip(actualOffset).take(actualCount).toList();
+
+    return {
+      'items': paginatedItems,
+      'total': items.length,
+      'offset': actualOffset,
+      'count': paginatedItems.length,
+    };
   }
 
   // 计算所有笔记本中的节点总数

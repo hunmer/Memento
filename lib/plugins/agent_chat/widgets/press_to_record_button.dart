@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/speech/speech_recognition_service.dart';
 import '../services/speech/speech_recognition_state.dart';
 
-/// 长按录音按钮组件
+/// 点击录音按钮组件
 ///
 /// 功能：
-/// - 长按开始录音，松手停止录音
+/// - 点击开始录音，再次点击停止录音
+/// - 移动端支持震动反馈
 /// - 实时将识别结果输出到目标输入框
 /// - 显示录音状态视觉反馈
 /// - 可自定义图标、颜色、大小
@@ -165,6 +168,20 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
     }
   }
 
+  /// 切换录音状态（点击时调用）
+  Future<void> _toggleRecording() async {
+    // 在移动端触发震动反馈
+    if (Platform.isAndroid || Platform.isIOS) {
+      HapticFeedback.mediumImpact();
+    }
+
+    if (_isRecording) {
+      await _stopRecording();
+    } else {
+      await _startRecording();
+    }
+  }
+
   /// 录音完成时的处理
   void _onRecordingComplete() {
     if (_recognizedText.isNotEmpty) {
@@ -197,31 +214,27 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
     final buttonColor = _isRecording
         ? (widget.recordingColor ?? Colors.red)
         : (widget.color ?? Theme.of(context).iconTheme.color);
-    final tooltipText = widget.tooltip ?? (_isRecording ? '松开停止录音' : '长按开始录音');
+    final tooltipText = widget.tooltip ?? (_isRecording ? '点击停止录音' : '点击开始录音');
 
     return Tooltip(
       message: tooltipText,
-      child: GestureDetector(
-        onLongPressStart: (_) => _startRecording(),
-        onLongPressEnd: (_) => _stopRecording(),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: widget.enabled && _isInitialized ? () {} : null,
-            child: AnimatedContainer(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: widget.enabled && _isInitialized ? _toggleRecording : null,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(8.0),
+            child: AnimatedScale(
+              scale: _isRecording ? 1.2 : 1.0,
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(8.0),
-              child: AnimatedScale(
-                scale: _isRecording ? 1.2 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                child: IconTheme(
-                  data: IconThemeData(
-                    color: buttonColor,
-                    size: widget.size ?? 24.0,
-                  ),
-                  child: iconWidget,
+              child: IconTheme(
+                data: IconThemeData(
+                  color: buttonColor,
+                  size: widget.size ?? 24.0,
                 ),
+                child: iconWidget,
               ),
             ),
           ),

@@ -19,12 +19,14 @@ class ChatScreen extends StatefulWidget {
   final Conversation conversation;
   final StorageManager storage;
   final ConversationService? conversationService;
+  final Map<String, dynamic> Function()? getSettings; // 获取插件设置的回调
 
   const ChatScreen({
     super.key,
     required this.conversation,
     required this.storage,
     this.conversationService,
+    this.getSettings,
   });
 
   @override
@@ -68,6 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ConversationService(storage: widget.storage),
       messageDetailService: MessageDetailService(storage: widget.storage),
       templateService: _templateService,
+      getSettings: widget.getSettings,
     );
 
     // 在 initialize 之前添加监听器，确保状态变化能触发界面更新
@@ -335,6 +338,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                     },
                                     onRerunStep: (messageId, stepIndex) async {
                                       await _handleRerunStep(messageId, stepIndex);
+                                    },
+                                    onExecuteTemplate: (messageId, templateId) async {
+                                      await _controller.executeMatchedTemplate(messageId, templateId);
                                     },
                                   ),
                                 );

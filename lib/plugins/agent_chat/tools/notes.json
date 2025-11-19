@@ -1,18 +1,20 @@
 {
   "notes_getNotes": {
     "title": "获取笔记列表",
-    "description": "获取笔记列表，可选择指定文件夹ID来筛选特定文件夹中的笔记。",
+    "description": "获取笔记列表，可选择指定文件夹ID来筛选特定文件夹中的笔记，支持分页。",
     "parameters": [
       {
         "name": "folderId",
         "type": "string",
         "optional": true,
         "description": "文件夹 ID，不传则返回所有笔记"
-      }
+      },
+      {"name": "offset", "type": "number", "optional": true, "description": "分页偏移量（跳过的记录数，默认0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回的记录数（默认全部）"}
     ],
     "returns": {
-      "type": "Promise<Array>",
-      "description": "笔记对象数组"
+      "type": "Promise<Array|Object>",
+      "description": "无分页参数时返回笔记数组；有分页参数时返回对象{items: [], total, offset, count}"
     },
     "examples": [
       {
@@ -22,9 +24,13 @@
       {
         "code": "const folderNotes = await Memento.plugins.notes.getNotes({ folderId: 'folder' });\nsetResult(folderNotes);",
         "comment": "获取指定文件夹的笔记"
+      },
+      {
+        "code": "const result = await Memento.plugins.notes.getNotes({offset: 0, count: 20});\nsetResult(`共${result.total}条笔记，返回${result.count}条：\\n${JSON.stringify(result.items, null, 2)}`);",
+        "comment": "分页获取笔记（前20条）"
       }
     ],
-    "notes": "",
+    "notes": "支持分页参数offset和count，未提供分页参数时返回原格式（数组）",
     "enabled": true
   },
   "notes_getNote": {
@@ -175,7 +181,7 @@
   },
   "notes_searchNotes": {
     "title": "搜索笔记",
-    "description": "根据关键词、标签和日期范围搜索笔记。",
+    "description": "根据关键词、标签和日期范围搜索笔记，支持分页。",
     "parameters": [
       {
         "name": "keyword",
@@ -200,11 +206,13 @@
         "type": "string",
         "optional": true,
         "description": "结束日期，ISO 8601 格式字符串"
-      }
+      },
+      {"name": "offset", "type": "number", "optional": true, "description": "分页偏移量（跳过的记录数，默认0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回的记录数（默认全部）"}
     ],
     "returns": {
-      "type": "Promise<Array>",
-      "description": "匹配的笔记对象数组"
+      "type": "Promise<Array|Object>",
+      "description": "无分页参数时返回笔记数组；有分页参数时返回对象{items: [], total, offset, count}"
     },
     "examples": [
       {
@@ -222,26 +230,37 @@
       {
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startTime = `${year}-${month}-01T00:00:00Z`;\nconst endTime = `${year}-${month}-${String(lastDay).padStart(2, '0')}T23:59:59Z`;\nconst results4 = await Memento.plugins.notes.searchNotes({ keyword: '会议', tags: ['工作', '产品'], startDate: startTime, endDate: endTime });\nsetResult(results4);",
         "comment": "组合搜索：关键词 + 标签 + 本月日期范围"
+      },
+      {
+        "code": "const result = await Memento.plugins.notes.searchNotes({keyword: '', offset: 0, count: 20});\nsetResult(`搜索结果共${result.total}条，返回${result.count}条：\\n${JSON.stringify(result.items, null, 2)}`);",
+        "comment": "分页搜索（前20条）"
       }
     ],
-    "notes": "标签过滤是\"或\"逻辑，任一标签匹配即可。日期范围基于创建时间。",
+    "notes": "标签过滤是\"或\"逻辑，任一标签匹配即可。日期范围基于创建时间。支持分页参数offset和count，未提供分页参数时返回原格式（数组）",
     "enabled": true
   },
   "notes_getFolders": {
     "title": "获取所有文件夹",
-    "description": "获取所有笔记文件夹的列表。",
-    "parameters": [],
+    "description": "获取所有笔记文件夹的列表，支持分页。",
+    "parameters": [
+      {"name": "offset", "type": "number", "optional": true, "description": "分页偏移量（跳过的记录数，默认0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回的记录数（默认全部）"}
+    ],
     "returns": {
-      "type": "Promise<Array>",
-      "description": "文件夹对象数组"
+      "type": "Promise<Array|Object>",
+      "description": "无分页参数时返回文件夹数组；有分页参数时返回对象{items: [], total, offset, count}"
     },
     "examples": [
       {
         "code": "const folders = await Memento.plugins.notes.getFolders();\nsetResult(folders);",
         "comment": "获取所有文件夹"
+      },
+      {
+        "code": "const result = await Memento.plugins.notes.getFolders({offset: 0, count: 10});\nsetResult(`共${result.total}个文件夹，返回${result.count}个：\\n${JSON.stringify(result.items, null, 2)}`);",
+        "comment": "分页获取文件夹（前10个）"
       }
     ],
-    "notes": "返回值包含所有文件夹，包括 root 根文件夹。",
+    "notes": "返回值包含所有文件夹，包括 root 根文件夹。支持分页参数offset和count，未提供分页参数时返回原格式（数组）",
     "enabled": true
   },
   "notes_getFolder": {

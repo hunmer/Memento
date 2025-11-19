@@ -159,12 +159,55 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取所有频道
+  /// 支持分页参数: offset, count
   Future<String> _jsGetChannels(Map<String, dynamic> params) async {
     final channels = channelService.channels;
-    return jsonEncode(channels.map((c) => c.toJson()).toList());
+    final channelJsonList = channels.map((c) => c.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        channelJsonList,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(channelJsonList);
   }
 
   /// 创建频道
@@ -258,6 +301,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取频道消息
+  /// 支持分页参数: offset, count (或旧版 limit)
   Future<String> _jsGetMessages(Map<String, dynamic> params) async {
     // 必需参数验证
     final String? channelId = params['channelId'];
@@ -265,23 +309,40 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: channelId'});
     }
 
-    // 可选参数
-    final int? limit = params['limit'];
+    // 分页参数
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+    final int? limit = params['limit']; // 兼容旧版
 
     final messages = await channelService.getChannelMessages(channelId);
     if (messages == null) {
-      return jsonEncode([]);
+      return jsonEncode(offset != null || count != null
+        ? {'data': [], 'total': 0, 'offset': 0, 'count': 0, 'hasMore': false}
+        : []);
     }
-
-    // 如果指定了 limit，只返回最新的 N 条消息
-    final List<Message> resultMessages = limit != null && limit < messages.length
-        ? messages.sublist(messages.length - limit)
-        : messages;
 
     // 序列化所有消息（toJson 返回 Future）
     final messagesJsonList = await Future.wait(
-      resultMessages.map((m) => m.toJson()),
+      messages.map((m) => m.toJson()),
     );
+
+    // 新版分页逻辑
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        messagesJsonList,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版 limit 参数：只返回最新的 N 条消息
+    if (limit != null && limit < messagesJsonList.length) {
+      final limitedMessages = messagesJsonList.sublist(messagesJsonList.length - limit);
+      return jsonEncode(limitedMessages);
+    }
+
+    // 无分页参数时返回全部数据
     return jsonEncode(messagesJsonList);
   }
 
@@ -332,6 +393,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// @param params.field 要匹配的字段名 (必需)
   /// @param params.value 要匹配的值 (必需)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindChannelBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -344,6 +407,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final channels = channelService.channels;
     final List<Channel> matchedChannels = [];
@@ -359,7 +424,19 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     if (findAll) {
-      return jsonEncode(matchedChannels.map((c) => c.toJson()).toList());
+      final channelJsonList = matchedChannels.map((c) => c.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          channelJsonList,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      return jsonEncode(channelJsonList);
     } else {
       if (matchedChannels.isEmpty) {
         return jsonEncode(null);
@@ -400,6 +477,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// @param params.title 频道标题 (必需)
   /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindChannelByTitle(Map<String, dynamic> params) async {
     final String? title = params['title'];
     if (title == null || title.isEmpty) {
@@ -408,6 +487,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final channels = channelService.channels;
     final List<Channel> matchedChannels = [];
@@ -427,7 +508,19 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     if (findAll) {
-      return jsonEncode(matchedChannels.map((c) => c.toJson()).toList());
+      final channelJsonList = matchedChannels.map((c) => c.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          channelJsonList,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      return jsonEncode(channelJsonList);
     } else {
       if (matchedChannels.isEmpty) {
         return jsonEncode(null);
@@ -443,6 +536,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// @param params.value 要匹配的值 (必需)
   /// @param params.channelId 限定在特定频道内查找 (可选)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindMessageBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -456,6 +551,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     final String? channelId = params['channelId'];
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final List<Message> matchedMessages = [];
 
@@ -492,6 +589,17 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       final messagesJsonList = await Future.wait(
         matchedMessages.map((m) => m.toJson()),
       );
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          messagesJsonList,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
       return jsonEncode(messagesJsonList);
     } else {
       if (matchedMessages.isEmpty) {
@@ -562,6 +670,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
   /// @param params.channelId 限定在特定频道内查找 (可选)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindMessageByContent(Map<String, dynamic> params) async {
     final String? content = params['content'];
     if (content == null || content.isEmpty) {
@@ -571,6 +681,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     final bool fuzzy = params['fuzzy'] ?? false;
     final String? channelId = params['channelId'];
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final List<Message> matchedMessages = [];
 
@@ -619,6 +731,17 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       final messagesJsonList = await Future.wait(
         matchedMessages.map((m) => m.toJson()),
       );
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          messagesJsonList,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
       return jsonEncode(messagesJsonList);
     } else {
       if (matchedMessages.isEmpty) {

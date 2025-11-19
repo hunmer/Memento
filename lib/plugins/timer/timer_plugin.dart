@@ -197,6 +197,32 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     await timerController.saveTasks(_tasks);
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位���（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 定义 ====================
 
   @override
@@ -232,6 +258,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取计时器列表
+  /// 支持分页参数: offset, count
   Future<dynamic> _jsGetTimers(Map<String, dynamic> params) async {
     final timers = _tasks.map((task) => {
       'id': task.id,
@@ -259,6 +286,20 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       }).toList(),
     }).toList();
 
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        timers,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return paginated;
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
     return timers;
   }
 
@@ -507,6 +548,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取计时历史
+  /// 支持分页参数: offset, count
   Future<dynamic> _jsGetHistory(Map<String, dynamic> params) async {
     final completedTasks = _tasks.where((task) => task.isCompleted).map((task) => {
       'id': task.id,
@@ -523,6 +565,26 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       }).toList(),
     }).toList();
 
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        completedTasks,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return {
+        'data': paginated['data'],
+        'total': paginated['total'],
+        'offset': paginated['offset'],
+        'count': paginated['count'],
+        'hasMore': paginated['hasMore'],
+      };
+    }
+
+    // 兼容旧版本：无分页参数时返回原格式
     return {
       'total': completedTasks.length,
       'tasks': completedTasks,
@@ -532,6 +594,11 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== 查找方法 ====================
 
   /// 通用计时器查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<dynamic> _jsFindTimerBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -544,6 +611,8 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final matches = <Map<String, dynamic>>[];
 
@@ -583,6 +652,16 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     if (findAll) {
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          matches,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return paginated;
+      }
+
       return matches;
     }
 
@@ -619,6 +698,11 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 根据名称查找计时器
+  /// @param params.name 计时器名称 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<dynamic> _jsFindTimerByName(Map<String, dynamic> params) async {
     final String? name = params['name'];
     if (name == null || name.isEmpty) {
@@ -627,6 +711,8 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final matches = <Map<String, dynamic>>[];
 
@@ -653,6 +739,16 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     if (findAll) {
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          matches,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return paginated;
+      }
+
       return matches;
     }
 
@@ -660,11 +756,17 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 根据分组查找计时器
+  /// @param params.group 分组名称 (必需)
+  /// @param params.offset 分页起始位置 (可选)
+  /// @param params.count 分页返回数量 (可选，默认 100)
   Future<dynamic> _jsFindTimersByGroup(Map<String, dynamic> params) async {
     final String? group = params['group'];
     if (group == null || group.isEmpty) {
       return {'error': '缺少必需参数: group'};
     }
+
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final matches = _tasks.where((task) => task.group == group).map((task) => {
       'id': task.id,
@@ -674,6 +776,16 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       'group': task.group,
       'isRunning': task.isRunning,
     }).toList();
+
+    // 检查是否需要分页
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        matches,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return paginated;
+    }
 
     return matches;
   }

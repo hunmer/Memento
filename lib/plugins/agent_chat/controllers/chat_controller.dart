@@ -31,6 +31,7 @@ class ChatController extends ChangeNotifier {
   final ConversationService conversationService;
   final MessageDetailService messageDetailService;
   final ToolTemplateService? templateService;
+  final Map<String, dynamic> Function()? getSettings; // 获取插件设置的回调
   bool _conversationServiceInitialized = false;
 
   /// 当前会话（可变，用于存储最新的会话数据）
@@ -66,6 +67,7 @@ class ChatController extends ChangeNotifier {
     required this.conversationService,
     required this.messageDetailService,
     this.templateService,
+    this.getSettings,
   });
 
   // ========== Getters ==========
@@ -245,9 +247,7 @@ class ChatController extends ChangeNotifier {
         content: _inputText.trim(),
         tokenCount: TokenCounterService.estimateTokenCount(_inputText),
         attachments: await _processAttachments(),
-      ).copyWith(
-        metadata: metadata.isNotEmpty ? metadata : null,
-      );
+      ).copyWith(metadata: metadata.isNotEmpty ? metadata : null);
 
       // 保存用户消息
       await messageService.addMessage(userMessage);
@@ -327,7 +327,7 @@ class ChatController extends ChangeNotifier {
     return attachments;
   }
 
-  /// 请求AI回复（两阶段工具调用）
+  /// 请求AI回复（三阶段工具调用：模版匹配 → 工具需求 → 工具调用）
   Future<void> _requestAIResponse(
     String aiMessageId,
     String userInput,
@@ -344,6 +344,116 @@ class ChatController extends ChangeNotifier {
       // 构建上下文消息
       final contextMessages = _buildContextMessages(userInput);
 
+      // ========== 第零阶段：工具模版匹配（可选）==========
+      final settings = getSettings?.call() ?? {};
+      final preferToolTemplates =
+          settings['preferToolTemplates'] as bool? ?? false;
+
+      if (preferToolTemplates &&
+          enableToolCalling &&
+          _currentAgent!.enableFunctionCalling &&
+          templateService != null) {
+        debugPrint('🔍 [第零阶段] 开始工具模版匹配...');
+
+        // 获取所有工具模版
+        final templates = await templateService!.fetchTemplates();
+
+        if (templates.isNotEmpty) {
+          debugPrint('🔍 [第零阶段] 找到 ${templates.length} 个工具模版');
+
+          // 生成模版列表 Prompt
+          final templatePrompt = ToolService.getToolTemplatePrompt(templates);
+          final originalSystemPrompt = contextMessages[0].content;
+
+          contextMessages[0] = ChatCompletionMessage.system(
+            content:
+                originalSystemPrompt is String
+                    ? originalSystemPrompt + templatePrompt
+                    : templatePrompt,
+          );
+
+          // 清空 buffer
+          buffer.clear();
+          tokenCount = 0;
+
+          // 第零阶段：请求 AI 匹配模版
+          await RequestService.streamResponse(
+            agent: _currentAgent!,
+            prompt: null,
+            contextMessages: contextMessages,
+            vision: false,
+            responseFormat: ResponseFormat.jsonSchema(
+              jsonSchema: JsonSchemaObject(
+                name: 'ToolTemplateMatch',
+                description: '工具模版匹配结果',
+                strict: true,
+                schema: ToolService.toolTemplateMatchSchema,
+              ),
+            ),
+            shouldCancel: () => _isCancelling,
+            onToken: (token) {
+              buffer.write(token);
+              tokenCount++;
+            },
+            onComplete: () async {
+              final matchResponse = buffer.toString();
+              debugPrint('🔍 [第零阶段] AI 响应: $matchResponse');
+
+              // 解析匹配结果
+              final matchedIds = ToolService.parseToolTemplateMatch(
+                matchResponse,
+              );
+
+              if (matchedIds != null && matchedIds.isNotEmpty) {
+                debugPrint(
+                  '✅ [第零阶段] 匹配到 ${matchedIds.length} 个模版: ${matchedIds.join(", ")}',
+                );
+
+                // 过滤出存在的模版
+                final validTemplates = <SavedToolTemplate>[];
+                for (final id in matchedIds) {
+                  try {
+                    final template = await templateService!.getTemplateById(id);
+                    if (template != null) {
+                      validTemplates.add(template);
+                    }
+                  } catch (e) {
+                    debugPrint('⚠️ [第零阶段] 模版 $id 不存在或加载失败: $e');
+                  }
+                }
+
+                if (validTemplates.isNotEmpty) {
+                  // 保存匹配的模版ID到消息
+                  final message = messageService.getMessage(
+                    conversation.id,
+                    aiMessageId,
+                  );
+                  if (message != null) {
+                    final updatedMessage = message.copyWith(
+                      matchedTemplateIds:
+                          validTemplates.map((t) => t.id).toList(),
+                      content:
+                          '我找到了 ${validTemplates.length} 个相关的工具模版，请选择要执行的模版：',
+                      isGenerating: false,
+                    );
+                    await messageService.updateMessage(updatedMessage);
+                  }
+
+                  debugPrint('✅ [第零阶段] 已保存匹配结果，等待用户选择');
+                  return; // 等待用户选择模版
+                }
+              }
+
+              debugPrint('ℹ️ [第零阶段] 未匹配到模版或模版为空，继续第一阶段');
+            },
+            onError: (String p1) {},
+          );
+
+          // 如果已经return了（有匹配的模版），则不会执行到这里
+          // 如果没有匹配，继续执行下面的第一阶段
+        }
+      }
+
       // ========== 第一阶段：发送简要索引 ==========
       if (enableToolCalling &&
           _currentAgent!.enableFunctionCalling &&
@@ -352,9 +462,10 @@ class ChatController extends ChangeNotifier {
         final originalSystemPrompt = contextMessages[0].content;
 
         contextMessages[0] = ChatCompletionMessage.system(
-          content: originalSystemPrompt is String
-              ? originalSystemPrompt + toolBriefPrompt
-              : toolBriefPrompt,
+          content:
+              originalSystemPrompt is String
+                  ? originalSystemPrompt + toolBriefPrompt
+                  : toolBriefPrompt,
         );
       }
 
@@ -373,16 +484,17 @@ class ChatController extends ChangeNotifier {
         vision: imageFiles.isNotEmpty,
         filePath: imageFiles.isNotEmpty ? imageFiles.first.path : null,
         // 如果启用工具调用,使用 JSON Schema 强制返回工具请求格式
-        responseFormat: enableToolCalling && _currentAgent!.enableFunctionCalling
-            ? ResponseFormat.jsonSchema(
-                jsonSchema: JsonSchemaObject(
-                  name: 'ToolRequest',
-                  description: '工具需求请求',
-                  strict: true,
-                  schema: ToolService.toolRequestSchema,
-                ),
-              )
-            : null,
+        responseFormat:
+            enableToolCalling && _currentAgent!.enableFunctionCalling
+                ? ResponseFormat.jsonSchema(
+                  jsonSchema: JsonSchemaObject(
+                    name: 'ToolRequest',
+                    description: '工具需求请求',
+                    strict: true,
+                    schema: ToolService.toolRequestSchema,
+                  ),
+                )
+                : null,
         shouldCancel: () => _isCancelling, // 传递取消检查函数
         onToken: (token) {
           buffer.write(token);
@@ -444,8 +556,9 @@ class ChatController extends ChangeNotifier {
 
             // ========== 第二阶段：追加详细文档 ==========
             try {
-              final detailPrompt =
-                  await ToolService.getToolDetailPrompt(toolRequest);
+              final detailPrompt = await ToolService.getToolDetailPrompt(
+                toolRequest,
+              );
 
               // 添加 AI 第一次回复到上下文
               contextMessages.add(
@@ -517,7 +630,10 @@ class ChatController extends ChangeNotifier {
                     '抱歉，生成工具调用时出现错误：$error',
                     0,
                   );
-                  messageService.completeAIMessage(conversation.id, aiMessageId);
+                  messageService.completeAIMessage(
+                    conversation.id,
+                    aiMessageId,
+                  );
                 },
                 onComplete: () async {
                   final secondResponse = buffer.toString();
@@ -598,13 +714,13 @@ class ChatController extends ChangeNotifier {
       // 如果有选中的工具，添加工具提示
       final tools = selectedTools;
       if (tools.isNotEmpty) {
-        final toolNames = tools.map((t) => t['toolName'] ?? t['toolId']).join('、');
+        final toolNames = tools
+            .map((t) => t['toolName'] ?? t['toolId'])
+            .join('、');
         systemPrompt += '\n\n用户希望使用以下工具: $toolNames';
       }
 
-      messages.add(
-        ChatCompletionMessage.system(content: systemPrompt),
-      );
+      messages.add(ChatCompletionMessage.system(content: systemPrompt));
     }
 
     // 获取历史消息（排除正在生成的消息，保留子消息以避免丢失工具结果）
@@ -622,9 +738,10 @@ class ChatController extends ChangeNotifier {
     }
 
     // 如果找到分隔符，只获取分隔符之后的消息
-    final messagesAfterDivider = lastDividerIndex >= 0
-        ? historyMessages.sublist(lastDividerIndex + 1)
-        : historyMessages;
+    final messagesAfterDivider =
+        lastDividerIndex >= 0
+            ? historyMessages.sublist(lastDividerIndex + 1)
+            : historyMessages;
 
     // 获取最后 N 条消息（从分隔符之后的消息中选取）
     final contextMessages =
@@ -640,7 +757,8 @@ class ChatController extends ChangeNotifier {
 
       if (msg.isUser) {
         // 检查消息是否包含图片附件
-        final imageAttachments = msg.attachments.where((a) => a.isImage).toList();
+        final imageAttachments =
+            msg.attachments.where((a) => a.isImage).toList();
 
         if (imageAttachments.isNotEmpty) {
           // 包含图片：使用 parts 格式
@@ -825,7 +943,10 @@ class ChatController extends ChangeNotifier {
   }
 
   /// 移除选中的工具
-  Future<void> removeToolFromConversation(String pluginId, String toolId) async {
+  Future<void> removeToolFromConversation(
+    String pluginId,
+    String toolId,
+  ) async {
     await _ensureConversationServiceReady();
 
     final currentTools = selectedTools;
@@ -1291,7 +1412,8 @@ class ChatController extends ChangeNotifier {
       );
 
       // 清理多余的空行
-      thinkingProcess = thinkingProcess.replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
+      thinkingProcess =
+          thinkingProcess.replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
 
       // 格式化完整AI输入
       final fullAIInput = _formatContextMessages(messageId);
@@ -1354,6 +1476,84 @@ class ChatController extends ChangeNotifier {
 
   // ========== 工具模板执行 ==========
 
+  /// 执行用户选择的匹配模版（第零阶段匹配后调用）
+  Future<void> executeMatchedTemplate(
+    String aiMessageId,
+    String templateId,
+  ) async {
+    if (templateService == null) {
+      debugPrint('⚠️ ToolTemplateService 不可用');
+      return;
+    }
+
+    try {
+      // 加载模版
+      final template = await templateService!.getTemplateById(templateId);
+      if (template == null) {
+        debugPrint('⚠️ 模版 $templateId 不存在');
+        final message = messageService.getMessage(conversation.id, aiMessageId);
+        if (message != null) {
+          await messageService.updateMessage(
+            message.copyWith(content: '错误：选择的模版不存在', isGenerating: false),
+          );
+        }
+        return;
+      }
+
+      debugPrint('✅ 执行匹配的模版: ${template.name}');
+
+      // 克隆步骤
+      final steps = _cloneTemplateSteps(template);
+
+      // 标记模板使用
+      await templateService!.markTemplateAsUsed(template.id);
+
+      // 更新AI消息，显示正在执行
+      final message = messageService.getMessage(conversation.id, aiMessageId);
+      if (message != null) {
+        await messageService.updateMessage(
+          message.copyWith(
+            content: '正在执行工具模版: ${template.name}',
+            isGenerating: true,
+            toolCall: ToolCallResponse(steps: steps),
+            matchedTemplateIds: null, // 清除匹配列表
+          ),
+        );
+      }
+
+      // 执行工具步骤
+      await _executeToolSteps(aiMessageId, steps);
+
+      // 构建执行结果摘要
+      final resultSummary = _buildToolResultMessage(steps);
+
+      // 更新消息内容
+      final updatedMessage = messageService.getMessage(
+        conversation.id,
+        aiMessageId,
+      );
+      if (updatedMessage != null) {
+        await messageService.updateMessage(
+          updatedMessage.copyWith(
+            content: '已执行工具模版: ${template.name}\n\n执行结果：\n$resultSummary',
+          ),
+        );
+      }
+
+      // 让AI基于工具执行结果继续生成回复
+      debugPrint('🤖 工具模版执行完成，让AI基于结果继续生成回复...');
+      await _continueWithToolResult(aiMessageId, resultSummary, resultSummary);
+    } catch (e) {
+      debugPrint('❌ 执行匹配模版失败: $e');
+      final message = messageService.getMessage(conversation.id, aiMessageId);
+      if (message != null) {
+        await messageService.updateMessage(
+          message.copyWith(content: '执行模版时出错: $e', isGenerating: false),
+        );
+      }
+    }
+  }
+
   /// 在请求 AI 之前先执行选中的工具模板
   Future<void> _executeToolTemplateBeforeAI(
     ChatMessage userMessage,
@@ -1382,8 +1582,10 @@ class ChatController extends ChangeNotifier {
 
     // 汇总执行结果
     final summary = _buildToolResultMessage(steps);
-    final latestToolMessage =
-        messageService.getMessage(conversation.id, toolMessage.id);
+    final latestToolMessage = messageService.getMessage(
+      conversation.id,
+      toolMessage.id,
+    );
     if (latestToolMessage != null) {
       await messageService.updateMessage(
         latestToolMessage.copyWith(content: summary),
@@ -1446,9 +1648,7 @@ class ChatController extends ChangeNotifier {
     // 完成消息生成
     final message = messageService.getMessage(conversation.id, messageId);
     if (message != null) {
-      final completedMessage = message.copyWith(
-        isGenerating: false,
-      );
+      final completedMessage = message.copyWith(isGenerating: false);
       await messageService.updateMessage(completedMessage);
     }
 
@@ -1487,9 +1687,10 @@ class ChatController extends ChangeNotifier {
       debugPrint('🔄 开始重新执行工具调用, messageId=${messageId.substring(0, 8)}');
 
       // 重置所有步骤状态
-      final resetSteps = message.toolCall!.steps.map((step) {
-        return step.withoutRuntimeState(state: ToolCallStatus.pending);
-      }).toList();
+      final resetSteps =
+          message.toolCall!.steps.map((step) {
+            return step.withoutRuntimeState(state: ToolCallStatus.pending);
+          }).toList();
 
       // 更新消息
       var updatedMessage = message.copyWith(

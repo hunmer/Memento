@@ -23,6 +23,7 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(ChatMessage message)? onSaveTool;
   final Future<void> Function(String messageId)? onRerunTool;
   final Future<void> Function(String messageId, int stepIndex)? onRerunStep;
+  final Future<void> Function(String messageId, String templateId)? onExecuteTemplate; // 执行匹配的模版
   final bool hasAgent;
   final StorageManager? storage;
 
@@ -35,6 +36,7 @@ class MessageBubble extends StatelessWidget {
     this.onSaveTool,
     this.onRerunTool,
     this.onRerunStep,
+    this.onExecuteTemplate,
     this.hasAgent = true,
     this.storage,
   });
@@ -99,6 +101,10 @@ class MessageBubble extends StatelessWidget {
                             ),
                           ],
                         )
+                      else if (message.matchedTemplateIds != null &&
+                          message.matchedTemplateIds!.isNotEmpty)
+                        // 显示模版选择按钮
+                        _buildTemplateSelectionUI()
                       else if (isToolCallMessage)
                         // 如果是工具调用消息,显示工具调用步骤
                         _buildToolCallContent()
@@ -655,6 +661,73 @@ class MessageBubble extends StatelessWidget {
         );
       }
     }
+  }
+
+  /// 构建模版选择UI
+  Widget _buildTemplateSelectionUI() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 提示文本
+        if (message.content.isNotEmpty) ...[
+          MarkdownContent(content: message.content),
+          const SizedBox(height: 12),
+        ],
+
+        // 模版选择按钮列表
+        ...message.matchedTemplateIds!.map((templateId) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: onExecuteTemplate != null
+                    ? () => onExecuteTemplate!(message.id, templateId)
+                    : null,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.all(12),
+                  alignment: Alignment.centerLeft,
+                  side: BorderSide(color: Colors.blue[300]!),
+                  backgroundColor: Colors.blue[50],
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.play_circle_outline,
+                      size: 20,
+                      color: Colors.blue[700],
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '模版 ID: $templateId',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[900],
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '点击执行此模版',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ],
+    );
   }
 
   /// 格式化时间

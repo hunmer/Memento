@@ -1,19 +1,36 @@
 {
   "timer_getTimers": {
     "title": "获取计时器列表",
-    "description": "获取所有计时器任务列表",
-    "parameters": [],
+    "description": "获取所有计时器任务列表,支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "optional": true,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "optional": true,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
-      "type": "Object",
-      "description": "TimerTask 对象数组"
+      "type": "Array|Object",
+      "description": "无分页参数时返回 TimerTask 对象数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "code": "const timers = await Memento.plugins.timer.getTimers({});\nsetResult(timers);",
         "comment": "获取所有计时器"
+      },
+      {
+        "code": "const result = await Memento.plugins.timer.getTimers({offset: 0, count: 20});\nsetResult(`共 ${result.total} 个计时器，当前返回 ${result.data.length} 个`);",
+        "comment": "分页获取计时器（前20个）"
       }
     ],
-    "notes": "返回的 TimerTask 包含: id, name, color, icon, group, isRunning, repeatCount, remainingRepeatCount, enableNotification, createdAt, timerItems(子计时器列表)",
+    "notes": "返回的 TimerTask 包含: id, name, color, icon, group, isRunning, repeatCount, remainingRepeatCount, enableNotification, createdAt, timerItems(子计时器列表)。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-100 条数据。",
     "enabled": true
   },
   "timer_createTimer": {
@@ -218,32 +235,51 @@
   },
   "timer_getHistory": {
     "title": "获取历史记录",
-    "description": "获取所有已完成的计时器任务历史",
-    "parameters": [],
+    "description": "获取所有已完成的计时器任务历史,支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "optional": true,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "optional": true,
+        "description": "返回数量（默认 100）"
+      }
+    ],
     "returns": {
       "type": "Object",
-      "description": "历史记录对象,包含 total(总数) 和 tasks(任务列表)"
+      "description": "无分页参数时返回 {total, tasks}；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "code": "const history = await Memento.plugins.timer.getHistory({});\nsetResult(history);",
         "comment": "查询历史记录"
+      },
+      {
+        "code": "const result = await Memento.plugins.timer.getHistory({offset: 0, count: 10});\nsetResult(`共完成 ${result.total} 个任务，当前返回 ${result.count} 个`);",
+        "comment": "分页获取历史记录"
       }
     ],
-    "notes": "返回的每个任务包含: id, name, group, createdAt, totalDuration(总时长), timerItems(子计时器信息)",
+    "notes": "返回的每个任务包含: id, name, group, createdAt, totalDuration(总时长), timerItems(子计时器信息)。使用分页参数可以控制返回数据量。",
     "enabled": true
   },
   "timer_findTimerBy": {
     "title": "通用计时器查找",
-    "description": "根据自定义条件查找计时器（支持单条/多条结果）",
+    "description": "根据自定义条件查找计时器（支持单条/多条结果和分页）",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name、group）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个计时器对象或 null；findAll=true 时返回计时器数组"
+      "description": "findAll=false 时返回单个计时器对象或 null；findAll=true 且无分页参数时返回计时器数组；findAll=true 且有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -253,9 +289,13 @@
       {
         "code": "const timers = await Memento.plugins.timer.findTimerBy({field: 'group', value: '健身', findAll: true});\nsetResult(`健身分组有 ${timers.length} 个计时器`);\n",
         "comment": "查找所有分组匹配的计时器"
+      },
+      {
+        "code": "const result = await Memento.plugins.timer.findTimerBy({field: 'group', value: '学习', findAll: true, offset: 0, count: 5});\nsetResult(`学习分组共 ${result.total} 个计时器，当前返回 ${result.data.length} 个`);\n",
+        "comment": "分页查找分组匹配的计时器"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历计时器列表；支持任意字段匹配",
+    "notes": "简化查找逻辑，避免手动遍历计时器列表；支持任意字段匹配；findAll=true 时支持分页参数",
     "enabled": true
   },
   "timer_findTimerById": {
@@ -279,15 +319,17 @@
   },
   "timer_findTimerByName": {
     "title": "根据名称查找计时器",
-    "description": "根据计时器名称查找计时器（支持精确匹配或模糊匹配）",
+    "description": "根据计时器名称查找计时器（支持精确匹配或模糊匹配，支持分页）",
     "parameters": [
       {"name": "name", "type": "string", "required": true, "description": "计时器名称"},
       {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "optional": true, "description": "分页起始位置（默认 0，仅 findAll=true 时有效）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回数量（默认 100，仅 findAll=true 时有效）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个计时器或 null；findAll=true 时返回计时器数组"
+      "description": "findAll=false 时返回单个计时器或 null；findAll=true 无分页参数时返回计时器数组；findAll=true 有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -297,20 +339,26 @@
       {
         "code": "const timers = await Memento.plugins.timer.findTimerByName({name: '训练', fuzzy: true, findAll: true});\nconst runningCount = timers.filter(t => t.isRunning).length;\nsetResult(`找到 ${timers.length} 个包含'训练'的计时器，其中 ${runningCount} 个正在运行`);\n",
         "comment": "模糊匹配查找所有包含关键词的计时器"
+      },
+      {
+        "code": "const result = await Memento.plugins.timer.findTimerByName({name: '训练', fuzzy: true, findAll: true, offset: 0, count: 10});\nsetResult(`找到 ${result.total} 个匹配的计时器，当前返回 ${result.count} 个，还有更多: ${result.hasMore}`);\n",
+        "comment": "分页查询包含关键词的计时器"
       }
     ],
-    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes；分页仅在 findAll=true 时生效",
     "enabled": true
   },
   "timer_findTimersByGroup": {
     "title": "根据分组查找计时器",
-    "description": "查找指定分组的所有计时器",
+    "description": "查找指定分组的所有计时器（支持分页）",
     "parameters": [
-      {"name": "group", "type": "string", "required": true, "description": "分组名称"}
+      {"name": "group", "type": "string", "required": true, "description": "分组名称"},
+      {"name": "offset", "type": "number", "optional": true, "description": "分页起始位置（默认 0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "该分组的计时器列表"
+      "type": "Array|Object",
+      "description": "无分页参数时返回计时器数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -320,9 +368,13 @@
       {
         "code": "const timers = await Memento.plugins.timer.findTimersByGroup({group: '工作'});\nsetResult(`工作分组有 ${timers.length} 个计时器`);\n",
         "comment": "统计工作分组的计时器数量"
+      },
+      {
+        "code": "const result = await Memento.plugins.timer.findTimersByGroup({group: '学习', offset: 0, count: 5});\nsetResult(`学习分组共 ${result.total} 个计时器，当前显示前 ${result.count} 个`);\n",
+        "comment": "分页查询学习分组的计时器"
       }
     ],
-    "notes": "等价于 findTimerBy({field: 'group', value: group, findAll: true})",
+    "notes": "等价于 findTimerBy({field: 'group', value: group, findAll: true})；支持分页参数",
     "enabled": true
   }
 }

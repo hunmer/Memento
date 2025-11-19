@@ -216,6 +216,32 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     );
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 定义 ====================
 
   @override
@@ -252,8 +278,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== JS API 实现 ====================
 
   /// 获取所有日记条目
-  /// @param params - 参数对象（无参数）
-  /// 返回: List<CalendarEntry> (JSON数组)
+  /// 支持分页参数: offset, count
   Future<String> _jsGetEntries(Map<String, dynamic> params) async {
     final allEntries = <CalendarEntry>[];
     calendarController.entries.forEach((date, entries) {
@@ -261,7 +286,24 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     });
     // 按创建时间倒序排序
     allEntries.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return jsonEncode(allEntries.map((e) => e.toJson()).toList());
+
+    final entriesJson = allEntries.map((e) => e.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        entriesJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(entriesJson);
   }
 
   /// 获取指定日期的日记条目
@@ -450,42 +492,82 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 根据单个标签获取日记
-  /// @param params.tag - 标签名称
-  /// 返回: List<CalendarEntry> (JSON数组)
+  /// 支持分页参数: offset, count
   Future<String> _jsGetEntriesByTag(Map<String, dynamic> params) async {
     final String? tag = params['tag'];
     if (tag == null || tag.isEmpty) {
       return jsonEncode({'error': '缺少必需参数: tag'});
     }
 
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
     final entries = calendarController.getEntriesByTag(tag);
-    return jsonEncode(entries.map((e) => e.toJson()).toList());
+    final entriesJson = entries.map((e) => e.toJson()).toList();
+
+    // 检查是否需要分页
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        entriesJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    return jsonEncode(entriesJson);
   }
 
   /// 根据多个标签获取日记 (AND逻辑)
-  /// @param params.tags - 标签数组
-  /// 返回: List<CalendarEntry> (JSON数组)
+  /// 支持分页参数: offset, count
   Future<String> _jsGetEntriesByTags(Map<String, dynamic> params) async {
     final List<String> tags = params['tags'] != null ? List<String>.from(params['tags']) : [];
     if (tags.isEmpty) {
       return jsonEncode([]);
     }
+
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
     final entries = calendarController.getEntriesByTags(tags);
-    return jsonEncode(entries.map((e) => e.toJson()).toList());
+    final entriesJson = entries.map((e) => e.toJson()).toList();
+
+    // 检查是否需要分页
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        entriesJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    return jsonEncode(entriesJson);
   }
 
   /// 获取所有照片URL
-  /// @param params - 参数对象（无参数）
-  /// 返回: List<String> (JSON数组)
+  /// 支持分页参数: offset, count
   Future<String> _jsGetPhotos(Map<String, dynamic> params) async {
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
     final photos = calendarController.getAllImages();
+
+    // 检查是否需要分页
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        photos,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
     return jsonEncode(photos);
   }
 
   /// 根据日期范围获取照片
-  /// @param params.startDate - 开始日期 (YYYY-MM-DD)
-  /// @param params.endDate - 结束日期 (YYYY-MM-DD)
-  /// 返回: List<{date: String, imageUrl: String, entryId: String}> (JSON数组)
+  /// 支持分页参数: offset, count
   Future<String> _jsGetPhotosByDateRange(Map<String, dynamic> params) async {
     final String? startDateStr = params['startDate'];
     final String? endDateStr = params['endDate'];
@@ -495,6 +577,9 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     if (endDateStr == null || endDateStr.isEmpty) {
       return jsonEncode({'error': '缺少必需参数: endDate'});
     }
+
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     try {
       final startDate = DateTime.parse(startDateStr);
@@ -518,6 +603,16 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
           }
         }
       });
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          photos,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
 
       return jsonEncode(photos);
     } catch (e) {
@@ -548,6 +643,8 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// @param params.field 要匹配的字段名 (必需)
   /// @param params.value 要匹配的值 (必需)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindEntryBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -560,6 +657,8 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     // 获取所有日记
     final allEntries = <CalendarEntry>[];
@@ -581,6 +680,17 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
     if (findAll) {
       final entriesJson = matchedEntries.map((e) => e.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          entriesJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
       return jsonEncode(entriesJson);
     } else {
       if (matchedEntries.isEmpty) {
@@ -609,6 +719,8 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// @param params.title 日记标题 (必需)
   /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页偏移量 (可选，与 count 配合使用)
+  /// @param params.count 分页数量 (可选，默认 100)
   Future<String> _jsFindEntryByTitle(Map<String, dynamic> params) async {
     final String? title = params['title'];
     if (title == null || title.isEmpty) {
@@ -617,6 +729,8 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     // 获取所有日记
     final allEntries = <CalendarEntry>[];
@@ -642,6 +756,14 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
     if (findAll) {
       final entriesJson = matchedEntries.map((e) => e.toJson()).toList();
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          entriesJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
       return jsonEncode(entriesJson);
     } else {
       if (matchedEntries.isEmpty) {

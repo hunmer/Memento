@@ -338,6 +338,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             conversation: latestConversation,
             storage: _controller.storage,
             conversationService: _controller.conversationService,
+            getSettings: () => AgentChatPlugin.instance.settings,
           ),
         ),
       );

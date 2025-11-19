@@ -204,6 +204,34 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   // ==================== JS API 实现 ====================
+
+  /// 分页辅助方法
+  ///
+  /// 根据 offset 和 count 参数对列表进行分页
+  /// - 如果 offset 和 count 都为 null,返回原格式(列表)
+  /// - 如果提供了分页参数,返回包含 items、total、offset、count 的对象
+  dynamic _paginate(List<dynamic> items, Map<String, dynamic> params) {
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    // 无分页参数:返回原格式(列表)
+    if (offset == null && count == null) {
+      return items;
+    }
+
+    // 有分页参数:返回分页对象
+    final int actualOffset = offset ?? 0;
+    final int actualCount = count ?? items.length;
+    final List<dynamic> paginatedItems = items.skip(actualOffset).take(actualCount).toList();
+
+    return {
+      'items': paginatedItems,
+      'total': items.length,
+      'offset': actualOffset,
+      'count': paginatedItems.length,
+    };
+  }
+
   /// 获取笔记列表
   Future<String> _jsGetNotes(Map<String, dynamic> params) async {
     if (!_isInitialized) {
@@ -224,7 +252,9 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       notesJson = allNotes.map((n) => n.toJson()).toList();
     }
 
-    return jsonEncode(notesJson);
+    // 应用分页
+    final result = _paginate(notesJson, params);
+    return jsonEncode(result);
   }
 
   /// 获取单个笔记详情
@@ -396,7 +426,11 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       endDate: end,
     );
 
-    return jsonEncode(notes.map((n) => n.toJson()).toList());
+    final notesJson = notes.map((n) => n.toJson()).toList();
+
+    // 应用分页
+    final result = _paginate(notesJson, params);
+    return jsonEncode(result);
   }
 
   /// 获取所有文件夹
@@ -406,7 +440,11 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     final folders = controller.getAllFolders();
-    return jsonEncode(folders.map((f) => f.toJson()).toList());
+    final foldersJson = folders.map((f) => f.toJson()).toList();
+
+    // 应用分页
+    final result = _paginate(foldersJson, params);
+    return jsonEncode(result);
   }
 
   /// 获取单个文件夹详情
@@ -511,7 +549,11 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     final notes = controller.getFolderNotes(folderId);
-    return jsonEncode(notes.map((n) => n.toJson()).toList());
+    final notesJson = notes.map((n) => n.toJson()).toList();
+
+    // 应用分页
+    final result = _paginate(notesJson, params);
+    return jsonEncode(result);
   }
 
   /// 移动笔记到其他文件夹

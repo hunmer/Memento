@@ -1,19 +1,26 @@
 {
   "getNotebooks": {
     "title": "获取所有笔记本",
-    "description": "获取所有笔记本的列表",
-    "parameters": [],
+    "description": "获取所有笔记本的列表，支持分页",
+    "parameters": [
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（跳过的记录数，默认0）"},
+      {"name": "count", "type": "number", "required": "false", "description": "返回的记录数（默认全部）"}
+    ],
     "returns": {
-      "type": "Array",
-      "description": "笔记本列表，每个元素包含 id、title等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回笔记本数组；有分页参数时返回对象{items: [], total, offset, count}"
     },
     "examples": [
       {
         "title": "获取所有笔记本",
         "code": "const notebooks = await Memento.plugins.nodes.getNotebooks();\nsetResult(JSON.stringify(notebooks, null, 2));"
+      },
+      {
+        "title": "分页获取笔记本（前10个）",
+        "code": "const result = await Memento.plugins.nodes.getNotebooks({offset: 0, count: 10});\nsetResult(`共${result.total}个笔记本，返回${result.count}个：\\n${JSON.stringify(result.items, null, 2)}`);"
       }
     ],
-    "notes": "返回所有笔记本，不包含其中的节点数据",
+    "notes": "返回所有笔记本，不包含其中的节点数据。支持分页参数offset和count，未提供分页参数时返回原格式（数组）",
     "enabled": true
   },
   "getNotebook": {
@@ -102,14 +109,16 @@
   },
   "getNodes": {
     "title": "获取节点列表",
-    "description": "获取指定笔记本中的节点（可指定父节点）",
+    "description": "获取指定笔记本中的节点（可指定父节点），支持分页",
     "parameters": [
       {"name": "notebookId", "type": "string", "required": true, "description": "笔记本ID"},
-      {"name": "parentId", "type": "string", "required": false, "description": "父节点ID（可选，不提供则返回根节点）"}
+      {"name": "parentId", "type": "string", "required": false, "description": "父节点ID（可选，不提供则返回根节点）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（跳过的记录数，默认0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回的记录数（默认全部）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "节点列表，每个元素包含 id、title等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回节点数组；有分页参数时返回对象{items: [], total, offset, count}"
     },
     "examples": [
       {
@@ -119,9 +128,13 @@
       {
         "title": "获取子节点",
         "code": "const nodes = await Memento.plugins.nodes.getNodes({notebookId: 'nb123', parentId: 'node456'});\nsetResult(`共有 ${nodes.length} 个子节点`);"
+      },
+      {
+        "title": "分页获取根节点（前20个）",
+        "code": "const result = await Memento.plugins.nodes.getNodes({notebookId: 'nb123', offset: 0, count: 20});\nsetResult(`共${result.total}个根节点，返回${result.count}个：\\n${JSON.stringify(result.items, null, 2)}`);"
       }
     ],
-    "notes": "返回扁平列表，如需树形结构请使用 getNodeTree",
+    "notes": "返回扁平列表，如需树形结构请使用 getNodeTree。支持分页参数offset和count，未提供分页参数时返回原格式（数组）",
     "enabled": true
   },
   "getNode": {

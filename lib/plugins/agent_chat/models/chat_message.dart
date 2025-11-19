@@ -39,6 +39,9 @@ class ChatMessage {
   /// 工具调用（仅 AI 消息，当 AI 返回工具调用时使用）
   ToolCallResponse? toolCall;
 
+  /// 匹配的工具模版ID列表（仅 AI 消息，第零阶段模版匹配结果）
+  List<String>? matchedTemplateIds;
+
   /// 父消息ID（用于建立消息父子关系）
   String? parentId;
 
@@ -57,6 +60,7 @@ class ChatMessage {
     this.isGenerating = false,
     this.metadata,
     this.toolCall,
+    this.matchedTemplateIds,
     this.parentId,
     this.isSessionDivider = false,
   });
@@ -133,6 +137,9 @@ class ChatMessage {
       toolCall: json['toolCall'] != null
           ? ToolCallResponse.fromJson(json['toolCall'] as Map<String, dynamic>)
           : null,
+      matchedTemplateIds: (json['matchedTemplateIds'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList(),
       parentId: json['parentId'] as String?,
       isSessionDivider: json['isSessionDivider'] as bool? ?? false,
     );
@@ -152,6 +159,8 @@ class ChatMessage {
       'isGenerating': isGenerating,
       if (metadata != null) 'metadata': metadata,
       if (toolCall != null) 'toolCall': toolCall!.toJson(),
+      if (matchedTemplateIds != null && matchedTemplateIds!.isNotEmpty)
+        'matchedTemplateIds': matchedTemplateIds,
       if (parentId != null) 'parentId': parentId,
       'isSessionDivider': isSessionDivider,
     };
@@ -166,6 +175,7 @@ class ChatMessage {
     bool? isGenerating,
     Map<String, dynamic>? metadata,
     ToolCallResponse? toolCall,
+    List<String>? matchedTemplateIds,
     String? parentId,
     bool? isSessionDivider,
   }) {
@@ -181,6 +191,7 @@ class ChatMessage {
       isGenerating: isGenerating ?? this.isGenerating,
       metadata: metadata ?? this.metadata,
       toolCall: toolCall ?? this.toolCall,
+      matchedTemplateIds: matchedTemplateIds ?? this.matchedTemplateIds,
       parentId: parentId ?? this.parentId,
       isSessionDivider: isSessionDivider ?? this.isSessionDivider,
     );
