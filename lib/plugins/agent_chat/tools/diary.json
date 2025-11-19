@@ -1,26 +1,32 @@
 {
   "getDiaries": {
     "title": "获取日记列表",
-    "description": "获取指定日期范围内的日记列表",
+    "description": "获取指定日期范围内的日记列表,支持分页查询",
     "parameters": [
       {"name": "startDate", "type": "string", "required": true, "description": "开始日期（格式：YYYY-MM-DD）"},
-      {"name": "endDate", "type": "string", "required": true, "description": "结束日期（格式：YYYY-MM-DD）"}
+      {"name": "endDate", "type": "string", "required": true, "description": "结束日期（格式：YYYY-MM-DD）"},
+      {"name": "offset", "type": "number", "required": false, "description": "偏移量(起始索引),用于分页,默认不分页"},
+      {"name": "count", "type": "number", "required": false, "description": "每页数量,默认20条,仅在提供offset时生效"}
     ],
     "returns": {
       "type": "Object",
-      "description": "包含日记列表的对象，格式：{total: number, diaries: Array}"
+      "description": "无分页参数时返回{total: number, diaries: Array};有分页参数时返回{total: number, offset: number, count: number, hasMore: boolean, diaries: Array}"
     },
     "examples": [
       {
-        "title": "获取本月所有日记",
+        "title": "获取本月所有日记(无分页)",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startDate = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-01`;\nconst endDate = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst result = await Memento.plugins.diary.getDiaries({startDate, endDate});\nif (result.error) {\n  setResult(`错误: ${result.error}`);\n} else {\n  setResult(`共找到 ${result.total} 篇日记`);\n}"
       },
       {
         "title": "获取最近7天的日记",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst endDate = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst startDateTime = new Date(timeInfo.year, timeInfo.month - 1, timeInfo.day - 7);\nconst startDate = `${startDateTime.getFullYear()}-${String(startDateTime.getMonth() + 1).padStart(2, '0')}-${String(startDateTime.getDate()).padStart(2, '0')}`;\nconst result = await Memento.plugins.diary.getDiaries({startDate, endDate});\nif (result.error) {\n  setResult(`错误: ${result.error}`);\n} else {\n  const summary = result.diaries.map(d => `${d.date}: ${d.title || '无标题'} (${d.wordCount}字)`).join('\\n');\n  setResult(summary || '无日记记录');\n}"
+      },
+      {
+        "title": "分页获取日记(第1页,每页5条)",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startDate = `${timeInfo.year}-01-01`;\nconst endDate = `${timeInfo.year}-12-31`;\nconst result = await Memento.plugins.diary.getDiaries({startDate, endDate, offset: 0, count: 5});\nif (result.error) {\n  setResult(`错误: ${result.error}`);\n} else {\n  setResult(`共 ${result.total} 条,当前显示 ${result.diaries.length} 条,是否有更多: ${result.hasMore}`);\n}"
       }
     ],
-    "notes": "返回的日记按日期升序排列，每条日记包含 date、title、content、mood、wordCount、createdAt、updatedAt 字段",
+    "notes": "不提供offset和count参数时返回所有日记(向后兼容);提供分页参数时返回包含total、offset、count、hasMore的对象;日记按日期升序排列，每条日记包含 date、title、content、mood、wordCount、createdAt、updatedAt 字段",
     "enabled": true
   },
   "getDiary": {

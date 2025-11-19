@@ -22,6 +22,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
   bool _obscureSecretKey = true;
   bool _isLoading = false;
   bool _hasChanges = false;
+  bool _preferToolTemplates = false; // 优先使用工具模版开关
 
   @override
   void initState() {
@@ -66,6 +67,9 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
         _secretIdController.text = asrConfig['secretId'] as String? ?? '';
         _secretKeyController.text = asrConfig['secretKey'] as String? ?? '';
       }
+
+      // 加载工具模版设置
+      _preferToolTemplates = settings['preferToolTemplates'] as bool? ?? false;
     } catch (e) {
       _showError('加载设置失败: $e');
     } finally {
@@ -99,11 +103,15 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
       };
 
       debugPrint('🔧 [设置页面] 准备保存配置: appId=${asrConfig['appId']}');
-      await widget.plugin.updateSettings({'asrConfig': asrConfig});
+      await widget.plugin.updateSettings({
+        'asrConfig': asrConfig,
+        'preferToolTemplates': _preferToolTemplates,
+      });
 
       // 验证保存后立即读取
       final savedConfig = widget.plugin.settings['asrConfig'];
       debugPrint('🔧 [设置页面] 保存后验证: $savedConfig');
+      debugPrint('🔧 [设置页面] 工具模版设置: $_preferToolTemplates');
 
       setState(() {
         _hasChanges = false;
@@ -173,6 +181,41 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 工具调用设置标题
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            '工具调用设置',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+
+        // 优先使用工具模版开关
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Card(
+            child: SwitchListTile(
+              title: const Text('优先使用工具模版'),
+              subtitle: const Text(
+                '开启后，AI 会优先尝试匹配已保存的工具模版，提升响应速度。如无匹配则继续正常的工具调用流程。',
+              ),
+              value: _preferToolTemplates,
+              onChanged: (value) {
+                setState(() {
+                  _preferToolTemplates = value;
+                  _hasChanges = true;
+                });
+              },
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 24),
+        const Divider(),
+        const SizedBox(height: 8),
+
         // 语音识别设置标题
         Padding(
           padding: const EdgeInsets.all(16.0),

@@ -458,8 +458,39 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
 
   // ==================== JS API 实现 ====================
 
+  /// 分页辅助方法
+  /// @param items 要分页的列表
+  /// @param offset 偏移量(起始索引)
+  /// @param count 每页数量
+  /// @returns 分页结果对象或原始列表(向后兼容)
+  Map<String, dynamic> _paginate(
+    List<Map<String, dynamic>> items,
+    int? offset,
+    int? count,
+  ) {
+    // 如果没有提供分页参数,返回原始格式(向后兼容)
+    if (offset == null && count == null) {
+      return {'items': items};
+    }
+
+    final int actualOffset = offset ?? 0;
+    final int actualCount = count ?? 20; // 默认每页20条
+
+    final int total = items.length;
+    final int start = actualOffset.clamp(0, total);
+    final int end = (start + actualCount).clamp(0, total);
+
+    return {
+      'items': items.sublist(start, end),
+      'total': total,
+      'offset': actualOffset,
+      'count': actualCount,
+      'hasMore': end < total,
+    };
+  }
+
   /// 获取指定日期范围的日记
-  /// 参数: {"startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD"}
+  /// 参数: {"startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "offset": number, "count": number}
   /// 返回: JSON 字符串，包含日记列表
   Future<Map<String, dynamic>> _jsGetDiaries(
     Map<String, dynamic> params,
@@ -491,22 +522,41 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
               .toList()
             ..sort((a, b) => a.key.compareTo(b.key)); // 按日期排序
 
+      final diariesList = filteredEntries
+          .map(
+            (entry) => {
+              'date': entry.key.toIso8601String().split('T')[0],
+              'title': entry.value.title,
+              'content': entry.value.content,
+              'mood': entry.value.mood,
+              'wordCount': entry.value.content.length,
+              'createdAt': entry.value.createdAt.toIso8601String(),
+              'updatedAt': entry.value.updatedAt.toIso8601String(),
+            },
+          )
+          .toList();
+
+      // 支持分页参数
+      final int? offset = params['offset'];
+      final int? count = params['count'];
+
+      final paginationResult = _paginate(diariesList, offset, count);
+
+      // 向后兼容:如果没有分页参数,返回原格式
+      if (offset == null && count == null) {
+        return {
+          'total': diariesList.length,
+          'diaries': diariesList,
+        };
+      }
+
+      // 有分页参数时,返回分页格式
       return {
-        'total': filteredEntries.length,
-        'diaries':
-            filteredEntries
-                .map(
-                  (entry) => {
-                    'date': entry.key.toIso8601String().split('T')[0],
-                    'title': entry.value.title,
-                    'content': entry.value.content,
-                    'mood': entry.value.mood,
-                    'wordCount': entry.value.content.length,
-                    'createdAt': entry.value.createdAt.toIso8601String(),
-                    'updatedAt': entry.value.updatedAt.toIso8601String(),
-                  },
-                )
-                .toList(),
+        'total': paginationResult['total'],
+        'offset': paginationResult['offset'],
+        'count': paginationResult['count'],
+        'hasMore': paginationResult['hasMore'],
+        'diaries': paginationResult['items'],
       };
     } catch (e) {
       return {'error': '获取日记失败: $e', 'total': 0, 'diaries': []};

@@ -439,16 +439,59 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取所有事件（包括 Todo 任务事件）
+  /// 支持分页参数: offset, count
   Future<String> _jsGetEvents(Map<String, dynamic> params) async {
     final events = controller.getAllEvents();
     final eventsJson = events.map((e) => e.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        eventsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
     return jsonEncode(eventsJson);
   }
 
   /// 获取今日事件
+  /// 支持分页参数: offset, count
   Future<String> _jsGetTodayEvents(Map<String, dynamic> params) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -460,10 +503,26 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     }).toList();
 
     final eventsJson = events.map((e) => e.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        eventsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
     return jsonEncode(eventsJson);
   }
 
   /// 根据日期范围获取事件
+  /// 支持分页参数: offset, count
   Future<String> _jsGetEventsByDateRange(Map<String, dynamic> params) async {
     // 提取必需参数并验证
     final String? startDateStr = params['startDate'];
@@ -485,6 +544,21 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     }).toList();
 
     final eventsJson = events.map((e) => e.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        eventsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
     return jsonEncode(eventsJson);
   }
 
@@ -617,9 +691,25 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取已完成事件
+  /// 支持分页参数: offset, count
   Future<String> _jsGetCompletedEvents(Map<String, dynamic> params) async {
     final events = controller.completedEvents;
     final eventsJson = events.map((e) => e.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        eventsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
     return jsonEncode(eventsJson);
   }
 
@@ -629,6 +719,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   /// @param params.field 要匹配的字段名 (必需)
   /// @param params.value 要匹配的值 (必需)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindEventBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -641,6 +733,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final events = controller.getAllEvents();
     final List<CalendarEvent> matchedEvents = [];
@@ -657,6 +751,17 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
     if (findAll) {
       final eventsJson = matchedEvents.map((e) => e.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          eventsJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
       return jsonEncode(eventsJson);
     } else {
       if (matchedEvents.isEmpty) {
@@ -688,6 +793,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   /// @param params.title 事件标题 (必需)
   /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindEventByTitle(Map<String, dynamic> params) async {
     final String? title = params['title'];
     if (title == null || title.isEmpty) {
@@ -696,6 +803,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final events = controller.getAllEvents();
     final List<CalendarEvent> matchedEvents = [];
@@ -716,6 +825,17 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
     if (findAll) {
       final eventsJson = matchedEvents.map((e) => e.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          eventsJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
       return jsonEncode(eventsJson);
     } else {
       if (matchedEvents.isEmpty) {

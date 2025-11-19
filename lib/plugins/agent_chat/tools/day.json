@@ -1,19 +1,30 @@
 {
   "getMemorialDays": {
     "title": "获取所有纪念日",
-    "description": "获取所有纪念日的列表",
-    "parameters": [],
+    "description": "获取所有纪念日的列表,支持分页查询",
+    "parameters": [
+      {"name": "offset", "type": "number", "required": false, "description": "偏移量(起始索引),用于分页,默认不分页"},
+      {"name": "count", "type": "number", "required": false, "description": "每页数量,默认20条,仅在提供offset时生效"}
+    ],
     "returns": {
-      "type": "Array",
-      "description": "纪念日列表,每个元素包含 id、title、date、type、notifyDaysBefore 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回纪念日数组;有分页参数时返回对象{items: Array, total: number, offset: number, count: number, hasMore: boolean}"
     },
     "examples": [
       {
-        "title": "获取所有纪念日",
+        "title": "获取所有纪念日(无分页)",
         "code": "const days = await Memento.plugins.day.getMemorialDays({});\nsetResult(JSON.stringify(days, null, 2));"
+      },
+      {
+        "title": "分页获取纪念日(第1页,每页10条)",
+        "code": "const result = await Memento.plugins.day.getMemorialDays({offset: 0, count: 10});\nsetResult(`共 ${result.total} 条,当前显示 ${result.items.length} 条,是否有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "分页获取纪念日(第2页)",
+        "code": "const result = await Memento.plugins.day.getMemorialDays({offset: 10, count: 10});\nsetResult(JSON.stringify(result.items, null, 2));"
       }
     ],
-    "notes": "返回所有已创建的纪念日,包括倒计时和正计时类型",
+    "notes": "不提供offset和count参数时返回所有纪念日数组(向后兼容);提供分页参数时返回包含items、total、offset、count、hasMore的对象",
     "enabled": true
   },
   "createMemorialDay": {

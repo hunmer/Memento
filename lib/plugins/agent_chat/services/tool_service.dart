@@ -9,6 +9,20 @@ class ToolService {
   static String? _cachedToolBriefPrompt;
   static bool _initialized = false;
 
+  /// 第零阶段 JSON Schema - 工具模版匹配
+  static const Map<String, dynamic> toolTemplateMatchSchema = {
+    'type': 'object',
+    'properties': {
+      'use_tool_temps': {
+        'type': 'array',
+        'description': '匹配的工具模版ID列表',
+        'items': {'type': 'string'},
+      },
+    },
+    'required': ['use_tool_temps'],
+    'additionalProperties': false,
+  };
+
   /// 第一阶段 JSON Schema - 工具需求
   static const Map<String, dynamic> toolRequestSchema = {
     'type': 'object',
@@ -756,6 +770,109 @@ return result;
       return tools.map((e) => e.toString()).toList();
     } catch (e) {
       print('[ToolService] 解析工具需求失败: $e');
+      return null;
+    }
+  }
+
+  // ==================== 工具模版匹配支持（第零阶段）====================
+
+  /// 生成工具模版列表 Prompt（第零阶段）
+  ///
+  /// 参数：
+  /// - templates: 工具模版列表（需要从 ToolTemplateService 获取）
+  ///
+  /// 返回格式化的模版列表字符串，用于让 AI 匹配合适的模版
+  static String getToolTemplatePrompt(List<dynamic> templates) {
+    if (templates.isEmpty) {
+      return '';
+    }
+
+    final buffer = StringBuffer();
+    buffer.writeln('\n## 📋 可用工具模版');
+    buffer.writeln('\n以下是已保存的工具模版列表。请分析用户的需求，判断是否有合适的模版可以直接使用。');
+    buffer.writeln('如果有匹配的模版，返回：');
+    buffer.writeln('```json');
+    buffer.writeln('{"use_tool_temps": ["template_id1", "template_id2"]}');
+    buffer.writeln('```');
+    buffer.writeln('\n如果没有合适的模版，返回空数组：');
+    buffer.writeln('```json');
+    buffer.writeln('{"use_tool_temps": []}');
+    buffer.writeln('```\n');
+    buffer.writeln('### 工具模版列表\n');
+
+    // 格式化模版列表为 [['id', 'title', 'desc'], ...]
+    for (final template in templates) {
+      // template 可能是 SavedToolTemplate 对象，需要访问其属性
+      final id = template.id ?? 'unknown';
+      final name = template.name ?? '未命名模版';
+      final description = template.description ?? '无描述';
+
+      buffer.writeln('**$id**: $name');
+      buffer.writeln('  描述: $description');
+
+      // 显示声明的工具
+      if (template.declaredTools != null && template.declaredTools.isNotEmpty) {
+        final toolNames = template.declaredTools
+            .map((t) => t['toolName'] ?? t['toolId'])
+            .join(', ');
+        buffer.writeln('  使用工具: $toolNames');
+      }
+
+      buffer.writeln();
+    }
+
+    buffer.writeln('### 匹配规则\n');
+    buffer.writeln('- 如果用户的需求与某个模版的功能完全一致，返回该模版的ID');
+    buffer.writeln('- 可以返回多个模版ID（如果用户需求可以拆分为多个任务）');
+    buffer.writeln('- 如果不确定或没有合适的模版，返回空数组');
+    buffer.writeln('- 优先选择最近使用过的模版（根据 lastUsedAt 字段）');
+
+    return buffer.toString();
+  }
+
+  /// 解析 AI 返回的工具模版匹配结果
+  static List<String>? parseToolTemplateMatch(String response) {
+    try {
+      // 尝试从 ```json ... ``` 中提取
+      final jsonBlockMatch = RegExp(
+        r'```json\s*(\{[\s\S]*?\})\s*```',
+        multiLine: true,
+      ).firstMatch(response);
+
+      String? jsonStr;
+      if (jsonBlockMatch != null) {
+        jsonStr = jsonBlockMatch.group(1);
+      } else {
+        // 尝试提取直接的 JSON
+        final directJsonMatch = RegExp(
+          r'\{\s*"use_tool_temps"\s*:\s*\[[\s\S]*?\]\s*\}',
+          multiLine: true,
+        ).firstMatch(response);
+        if (directJsonMatch != null) {
+          jsonStr = directJsonMatch.group(0);
+        }
+      }
+
+      if (jsonStr == null) {
+        print('[ToolService] 未找到工具模版匹配 JSON');
+        return null;
+      }
+
+      // 解析 JSON
+      final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+      if (!json.containsKey('use_tool_temps')) {
+        print('[ToolService] JSON 中缺少 use_tool_temps 字段');
+        return null;
+      }
+
+      final templates = json['use_tool_temps'] as List<dynamic>;
+      final templateIds = templates.map((e) => e.toString()).toList();
+
+      print('[ToolService] 成功解析工具模版匹配，匹配到 ${templateIds.length} 个模版');
+      return templateIds;
+
+    } catch (e) {
+      print('[ToolService] 解析工具模版匹配失败: $e');
       return null;
     }
   }

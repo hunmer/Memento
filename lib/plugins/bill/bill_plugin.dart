@@ -264,9 +264,36 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取所有账户(不包含账单数据)
+  /// 支持分页参数: offset, count
   Future<String> _jsGetAccounts(Map<String, dynamic> params) async {
     final accounts = _billController.accounts;
     // 只返回账户基本信息,移除 bills 字段
@@ -275,6 +302,21 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       json.remove('bills');
       return json;
     }).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        accountsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
     return jsonEncode(accountsJson);
   }
 
@@ -360,10 +402,14 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   /// @param params.accountId 账户ID (可选，不传则返回所有账户的账单)
   /// @param params.startDate 开始日期 (可选，格式: YYYY-MM-DD)
   /// @param params.endDate 结束日期 (可选，格式: YYYY-MM-DD)
+  /// @param params.offset 分页起始位置 (可选，默认 0)
+  /// @param params.count 返回数量 (可选，默认 100)
   Future<String> _jsGetBills(Map<String, dynamic> params) async {
     final String? accountId = params['accountId'];
     final String? startDate = params['startDate'];
     final String? endDate = params['endDate'];
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     // 解析日期参数
     DateTime? start;
@@ -397,7 +443,20 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
             ? bills.where((b) => b.accountId == accountId).toList()
             : bills;
 
-    return jsonEncode(filteredBills.map((b) => b.toJson()).toList());
+    final billsJson = filteredBills.map((b) => b.toJson()).toList();
+
+    // 检查是否需要分页
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        billsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(billsJson);
   }
 
   /// 创建账单
@@ -671,6 +730,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   /// @param params.field 要匹配的字段名 (必需)
   /// @param params.value 要匹配的值 (必需)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindAccountBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -683,6 +744,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     }
 
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final accounts = _billController.accounts;
     final List<Account> matchedAccounts = [];
@@ -704,6 +767,17 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
         json.remove('bills');
         return json;
       }).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          accountsJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
       return jsonEncode(accountsJson);
     } else {
       if (matchedAccounts.isEmpty) {
@@ -746,6 +820,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   /// @param params.name 账户名称 (必需)
   /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindAccountByName(Map<String, dynamic> params) async {
     final String? name = params['name'];
     if (name == null || name.isEmpty) {
@@ -754,6 +830,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final accounts = _billController.accounts;
     final List<Account> matchedAccounts = [];
@@ -778,6 +856,17 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
         json.remove('bills');
         return json;
       }).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          accountsJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
       return jsonEncode(accountsJson);
     } else {
       if (matchedAccounts.isEmpty) {
@@ -796,6 +885,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   /// @param params.value 要匹配的值 (必需)
   /// @param params.accountId 限定在特定账户内查找 (可选)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindBillBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -809,6 +900,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     final String? accountId = params['accountId'];
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     // 获取所有账单
     final allBills = await _billController.getBills();
@@ -830,7 +923,19 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     }
 
     if (findAll) {
-      return jsonEncode(matchedBills.map((b) => b.toJson()).toList());
+      final billsJson = matchedBills.map((b) => b.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          billsJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      return jsonEncode(billsJson);
     } else {
       if (matchedBills.isEmpty) {
         return jsonEncode(null);
@@ -873,6 +978,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
   /// @param params.accountId 限定在特定账户内查找 (可选)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
+  /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
   Future<String> _jsFindBillByTitle(Map<String, dynamic> params) async {
     final String? title = params['title'];
     if (title == null || title.isEmpty) {
@@ -882,6 +989,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final bool fuzzy = params['fuzzy'] ?? false;
     final String? accountId = params['accountId'];
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final allBills = await _billController.getBills();
     final List<Bill> matchedBills = [];
@@ -906,7 +1015,19 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     }
 
     if (findAll) {
-      return jsonEncode(matchedBills.map((b) => b.toJson()).toList());
+      final billsJson = matchedBills.map((b) => b.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          billsJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      return jsonEncode(billsJson);
     } else {
       if (matchedBills.isEmpty) {
         return jsonEncode(null);
@@ -920,6 +1041,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   /// @param params.accountId 限定在特定账户内查找 (可选)
   /// @param params.startDate 开始日期 (可选，格式: YYYY-MM-DD)
   /// @param params.endDate 结束日期 (可选，格式: YYYY-MM-DD)
+  /// @param params.offset 分页起始位置 (可选，默认 0)
+  /// @param params.count 返回数量 (可选，默认 100)
   Future<String> _jsFindBillsByCategory(Map<String, dynamic> params) async {
     final String? category = params['category'];
     if (category == null || category.isEmpty) {
@@ -929,6 +1052,8 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final String? accountId = params['accountId'];
     final String? startDate = params['startDate'];
     final String? endDate = params['endDate'];
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     // 解析日期参数
     DateTime? start;
@@ -969,7 +1094,19 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return true;
     }).toList();
 
-    return jsonEncode(matchedBills.map((b) => b.toJson()).toList());
+    final billsJson = matchedBills.map((b) => b.toJson()).toList();
+
+    // 检查是否需要分页
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        billsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    return jsonEncode(billsJson);
   }
 }
 

@@ -1,19 +1,30 @@
 {
   "getChannels": {
     "title": "获取所有频道",
-    "description": "获取所有聊天频道的列表",
-    "parameters": [],
+    "description": "获取所有聊天频道的列表，支持分页",
+    "parameters": [
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"}
+    ],
     "returns": {
-      "type": "Array",
-      "description": "频道列表，每个元素包含 id、name、lastMessage 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回频道数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "获取所有频道",
         "code": "const channels = await Memento.plugins.chat.getChannels();\nsetResult(JSON.stringify(channels, null, 2));"
+      },
+      {
+        "title": "分页获取频道（前10个）",
+        "code": "const result = await Memento.plugins.chat.getChannels({offset: 0, count: 10});\nsetResult(`共 ${result.total} 个频道，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "分页获取频道（第二页）",
+        "code": "const result = await Memento.plugins.chat.getChannels({offset: 10, count: 10});\nsetResult(`还有更多: ${result.hasMore}`);"
       }
     ],
-    "notes": "返回所有聊天频道，不包含具体的消息内容",
+    "notes": "返回所有聊天频道，不包含具体的消息内容。使用分页参数可以控制返回数据量。",
     "enabled": true
   },
   "createChannel": {
@@ -82,14 +93,16 @@
   },
   "getMessages": {
     "title": "获取频道消息",
-    "description": "获取指定频道的所有消息",
+    "description": "获取指定频道的消息，支持分页",
     "parameters": [
       {"name": "channelId", "type": "string", "required": true, "description": "频道ID"},
-      {"name": "limit", "type": "number", "required": false, "description": "限制返回的消息数量"}
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"},
+      {"name": "limit", "type": "number", "required": false, "description": "【旧版】限制返回最新的N条消息"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "消息列表，每条消息包含 id、content、userId、timestamp 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回消息数组；有分页参数时返回 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -97,11 +110,19 @@
         "code": "const messages = await Memento.plugins.chat.getMessages({channelId: 'channel123'});\nsetResult(`频道共有 ${messages.length} 条消息`);"
       },
       {
-        "title": "获取最新10条消息",
+        "title": "分页获取消息（前50条）",
+        "code": "const result = await Memento.plugins.chat.getMessages({channelId: 'channel123', offset: 0, count: 50});\nsetResult(`共 ${result.total} 条消息，当前返回 ${result.data.length} 条`);"
+      },
+      {
+        "title": "分页获取消息（第二页）",
+        "code": "const result = await Memento.plugins.chat.getMessages({channelId: 'channel123', offset: 50, count: 50});\nif (result.hasMore) {\n  setResult('还有更多消息');\n} else {\n  setResult('已加载全部消息');\n}"
+      },
+      {
+        "title": "获取最新10条消息（旧版兼容）",
         "code": "const messages = await Memento.plugins.chat.getMessages({channelId: 'channel123', limit: 10});\nsetResult(JSON.stringify(messages, null, 2));"
       }
     ],
-    "notes": "消息按时间升序排列",
+    "notes": "消息按时间升序排列。推荐使用 offset/count 分页参数，limit 参数保留用于向后兼容。",
     "enabled": true
   },
   "deleteMessage": {
@@ -160,23 +181,29 @@
   },
   "findChannelBy": {
     "title": "通用频道查找",
-    "description": "根据自定义条件查找频道（支持单条/多条结果）",
+    "description": "根据自定义条件查找频道（支持单条/多条结果，支持分页）",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个频道对象或 null；findAll=true 时返回频道数组"
+      "description": "findAll=false 时返回单个频道对象或 null；findAll=true 时返回频道数组或分页对象 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
         "title": "根据 ID 查找频道",
         "code": "const channel = await Memento.plugins.chat.findChannelBy({field: 'id', value: 'channel123'});\nif (channel) {\n  setResult(`找到频道: ${channel.title}`);\n} else {\n  setResult('未找到该频道');\n}"
+      },
+      {
+        "title": "分页查找所有匹配的频道",
+        "code": "const result = await Memento.plugins.chat.findChannelBy({field: 'type', value: 'group', findAll: true, offset: 0, count: 20});\nsetResult(`找到 ${result.total} 个群组频道，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历频道列表；支持任意字段匹配",
+    "notes": "简化查找逻辑，避免手动遍历频道列表；支持任意字段匹配；使用分页参数可以控制返回数据量",
     "enabled": true
   },
   "findChannelById": {
@@ -200,15 +227,17 @@
   },
   "findChannelByTitle": {
     "title": "根据标题查找频道",
-    "description": "根据频道标题查找频道（支持精确匹配或模糊匹配）",
+    "description": "根据频道标题查找频道（支持精确匹配或模糊匹配，支持分页）",
     "parameters": [
       {"name": "title", "type": "string", "required": true, "description": "频道标题"},
       {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个频道或 null；findAll=true 时返回频道数组"
+      "description": "findAll=false 时返回单个频道或 null；findAll=true 时返回频道数组或分页对象 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -218,23 +247,29 @@
       {
         "title": "模糊匹配频道标题",
         "code": "const channels = await Memento.plugins.chat.findChannelByTitle({title: '工作', fuzzy: true, findAll: true});\nsetResult(`找到 ${channels.length} 个包含【工作】的频道`);"
+      },
+      {
+        "title": "分页模糊匹配频道标题",
+        "code": "const result = await Memento.plugins.chat.findChannelByTitle({title: '工作', fuzzy: true, findAll: true, offset: 0, count: 10});\nsetResult(`找到 ${result.total} 个频道，当前返回 ${result.data.length} 个`);"
       }
     ],
-    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes；使用分页参数可以控制返回数据量",
     "enabled": true
   },
   "findMessageBy": {
     "title": "通用消息查找",
-    "description": "根据自定义条件查找消息（支持单条/多条结果）",
+    "description": "根据自定义条件查找消息（支持单条/多条结果，支持分页）",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、content、userId）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
       {"name": "channelId", "type": "string", "required": false, "description": "限定在特定频道内查找（可选）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个消息或 null；findAll=true 时返回消息数组"
+      "description": "findAll=false 时返回单个消息或 null；findAll=true 时返回消息数组或分页对象 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -244,9 +279,13 @@
       {
         "title": "在指定频道中查找消息",
         "code": "const message = await Memento.plugins.chat.findMessageBy({field: 'content', value: '你好', channelId: 'channel123'});\nsetResult(message ? `找到消息` : '未找到');"
+      },
+      {
+        "title": "分页查找用户的所有消息",
+        "code": "const result = await Memento.plugins.chat.findMessageBy({field: 'userId', value: 'user123', findAll: true, offset: 0, count: 50});\nsetResult(`找到 ${result.total} 条消息，当前返回 ${result.data.length} 条`);"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历消息列表；channelId 可选，不传则在所有频道中查找",
+    "notes": "简化查找逻辑，避免手动遍历消息列表；channelId 可选，不传则在所有频道中查找；使用分页参数可以控制返回数据量",
     "enabled": true
   },
   "findMessageById": {
@@ -271,16 +310,18 @@
   },
   "findMessageByContent": {
     "title": "根据内容查找消息",
-    "description": "根据消息内容查找消息（支持精确匹配或模糊匹配）",
+    "description": "根据消息内容查找消息（支持精确匹配或模糊匹配，支持分页）",
     "parameters": [
       {"name": "content", "type": "string", "required": true, "description": "消息内容"},
       {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false）"},
       {"name": "channelId", "type": "string", "required": false, "description": "限定在特定频道内查找（可选）"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "返回数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个消息或 null；findAll=true 时返回消息数组"
+      "description": "findAll=false 时返回单个消息或 null；findAll=true 时返回消息数组或分页对象 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -290,9 +331,13 @@
       {
         "title": "模糊匹配查找所有包含关键词的消息",
         "code": "const messages = await Memento.plugins.chat.findMessageByContent({content: '项目', fuzzy: true, findAll: true});\nsetResult(`找到 ${messages.length} 条包含'项目'的消息`);"
+      },
+      {
+        "title": "分页模糊匹配消息",
+        "code": "const result = await Memento.plugins.chat.findMessageByContent({content: '项目', fuzzy: true, findAll: true, offset: 0, count: 20});\nsetResult(`找到 ${result.total} 条消息，当前返回 ${result.data.length} 条，还有更多: ${result.hasMore}`);"
       }
     ],
-    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes；使用分页参数可以控制返回数据量",
     "enabled": true
   }
 }

@@ -202,10 +202,54 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
 
   // ==================== JS API 实现 ====================
 
+  /// 分页辅助方法
+  /// @param items 要分页的列表
+  /// @param offset 偏移量(起始索引)
+  /// @param count 每页数量
+  /// @returns 分页结果对象或原始列表(向后兼容)
+  Map<String, dynamic> _paginate(
+    List<Map<String, dynamic>> items,
+    int? offset,
+    int? count,
+  ) {
+    // 如果没有提供分页参数,返回原始格式(向后兼容)
+    if (offset == null && count == null) {
+      return {'items': items};
+    }
+
+    final int actualOffset = offset ?? 0;
+    final int actualCount = count ?? 20; // 默认每页20条
+
+    final int total = items.length;
+    final int start = actualOffset.clamp(0, total);
+    final int end = (start + actualCount).clamp(0, total);
+
+    return {
+      'items': items.sublist(start, end),
+      'total': total,
+      'offset': actualOffset,
+      'count': actualCount,
+      'hasMore': end < total,
+    };
+  }
+
   /// 获取所有纪念日
   Future<String> _jsGetMemorialDays(Map<String, dynamic> params) async {
     final days = _controller.memorialDays;
-    return jsonEncode(days.map((d) => d.toJson()).toList());
+    final daysList = days.map((d) => d.toJson()).toList();
+
+    // 支持分页参数
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    final result = _paginate(daysList, offset, count);
+
+    // 向后兼容:如果没有分页参数,返回原始数组格式
+    if (offset == null && count == null) {
+      return jsonEncode(daysList);
+    }
+
+    return jsonEncode(result);
   }
 
   /// 创建纪念日

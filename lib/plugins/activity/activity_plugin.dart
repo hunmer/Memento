@@ -95,16 +95,59 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取指定日期的活动列表
-  /// 参数: params - { date?: string } (YYYY-MM-DD 格式, 默认今天)
+  /// 参数: params - { date?: string, offset?: number, count?: number } (YYYY-MM-DD 格式, 默认今天)
+  /// 支持分页参数: offset, count
   Future<String> _jsGetActivities(Map<String, dynamic> params) async {
     try {
       final dateStr = params['date'] as String?;
       final date = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
       final activities = await _activityService.getActivitiesForDate(date);
-      return jsonEncode(activities.map((a) => a.toJson()).toList());
+      final activitiesJson = activities.map((a) => a.toJson()).toList();
+
+      // 检查是否需要分页
+      final int? offset = params['offset'];
+      final int? count = params['count'];
+
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          activitiesJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      // 兼容旧版本：无分页参数时返回全部数据
+      return jsonEncode(activitiesJson);
     } catch (e) {
       return jsonEncode({'error': '获取活动失败: $e'});
     }

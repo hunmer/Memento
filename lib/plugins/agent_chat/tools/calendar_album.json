@@ -1,19 +1,26 @@
 {
   "getEntries": {
     "title": "获取所有日记",
-    "description": "获取所有日记条目（按创建时间倒序）",
-    "parameters": [],
+    "description": "获取所有日记条目（按创建时间倒序）。支持分页查询，提供 offset 或 count 参数时返回分页对象（包含 data、total、offset、count、hasMore）；不提供时返回完整数组。",
+    "parameters": [
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（默认 100）"}
+    ],
     "returns": {
-      "type": "Array",
-      "description": "日记列表，每个元素包含 id、title、content、tags、createdAt 等字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回日记数组；有分页参数时返回对象 {data: 日记数组, total: 总数, offset: 偏移量, count: 返回数量, hasMore: 是否还有更多}"
     },
     "examples": [
       {
-        "title": "获取所有日记",
+        "title": "获取所有日记（无分页）",
         "code": "const entries = await Memento.plugins.calendar_album.getEntries({});\nsetResult(JSON.stringify(entries, null, 2));"
+      },
+      {
+        "title": "分页获取日记（第1页，每页10条）",
+        "code": "const result = await Memento.plugins.calendar_album.getEntries({offset: 0, count: 10});\nsetResult(`第1页: ${result.data.length}条, 共${result.total}条, 还有更多: ${result.hasMore}`);"
       }
     ],
-    "notes": "日记内容为 Markdown 格式",
+    "notes": "日记内容为 Markdown 格式；分页从 offset=0 开始",
     "enabled": true
   },
   "getEntriesForDate": {
@@ -148,54 +155,73 @@
   },
   "getEntriesByTag": {
     "title": "根据标签获取日记",
-    "description": "获取包含指定标签的所有日记",
+    "description": "获取包含指定标签的所有日记。支持分页查询，提供 offset 或 count 参数时返回分页对象；不提供时返回完整数组。",
     "parameters": [
-      {"name": "tag", "type": "string", "required": true, "description": "标签名称"}
+      {"name": "tag", "type": "string", "required": true, "description": "标签名称"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "包含该标签的日记列表"
+      "type": "Array|Object",
+      "description": "无分页参数时返回日记数组；有分页参数时返回对象 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
-        "title": "获取生活类日记",
+        "title": "获取生活类日记（无分页）",
         "code": "const entries = await Memento.plugins.calendar_album.getEntriesByTag({ tag: '生活' });\nsetResult(`共有 ${entries.length} 条生活类日记`);"
+      },
+      {
+        "title": "分页获取生活类日记",
+        "code": "const result = await Memento.plugins.calendar_album.getEntriesByTag({ tag: '生活', offset: 0, count: 20 });\nsetResult(`第1页: ${result.data.length}条, 共${result.total}条`);"
       }
     ],
-    "notes": "单标签筛选",
+    "notes": "单标签筛选；按创建时间倒序",
     "enabled": true
   },
   "getEntriesByTags": {
     "title": "根据多标签获取日记（AND逻辑）",
-    "description": "获取同时包含所有指定标签的日记",
+    "description": "获取同时包含所有指定标签的日记。支持分页查询，提供 offset 或 count 参数时返回分页对象；不提供时返回完整数组。",
     "parameters": [
-      {"name": "tags", "type": "array", "required": true, "description": "标签数组"}
+      {"name": "tags", "type": "array", "required": true, "description": "标签数组"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "同时包含所有标签的日记列表"
+      "type": "Array|Object",
+      "description": "无分页参数时返回日记数组；有分页参数时返回对象 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
-        "title": "获取同时包含多个标签的日记",
+        "title": "获取同时包含多个标签的日记（无分页）",
         "code": "const entries = await Memento.plugins.calendar_album.getEntriesByTags({ tags: ['生活', '心情'] });\nsetResult(`共有 ${entries.length} 条同时标记为生活和心情的日记`);"
+      },
+      {
+        "title": "分页获取多标签日记",
+        "code": "const result = await Memento.plugins.calendar_album.getEntriesByTags({ tags: ['生活', '心情'], offset: 0, count: 10 });\nsetResult(`找到 ${result.total} 条，当前页 ${result.count} 条`);"
       }
     ],
-    "notes": "AND 逻辑：只返回同时包含所有指定标签的日记",
+    "notes": "AND 逻辑：只返回同时包含所有指定标签的日记；按创建时间倒序",
     "enabled": true
   },
   "getPhotos": {
     "title": "获取所有照片",
-    "description": "获取所有日记中的照片URL列表",
-    "parameters": [],
+    "description": "获取所有日记中的照片URL列表。支持分页查询，提供 offset 或 count 参数时返回分页对象；不提供时返回完整数组。",
+    "parameters": [
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（默认 100）"}
+    ],
     "returns": {
-      "type": "Array",
-      "description": "照片URL字符串数组"
+      "type": "Array|Object",
+      "description": "无分页参数时返回照片URL数组；有分页参数时返回对象 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
-        "title": "获取所有照片",
+        "title": "获取所有照片（无分页）",
         "code": "const photos = await Memento.plugins.calendar_album.getPhotos({});\nsetResult(`共有 ${photos.length} 张照片`);"
+      },
+      {
+        "title": "分页获取照片",
+        "code": "const result = await Memento.plugins.calendar_album.getPhotos({offset: 0, count: 50});\nsetResult(`第1页: ${result.data.length}张, 共${result.total}张`);"
       }
     ],
     "notes": "包括直接上传的图片和 Markdown 内容中提取的图片",
@@ -203,19 +229,25 @@
   },
   "getPhotosByDateRange": {
     "title": "根据日期范围获取照片",
-    "description": "获取指定日期范围内的照片信息",
+    "description": "获取指定日期范围内的照片信息。支持分页查询，提供 offset 或 count 参数时返回分页对象；不提供时返回完整数组。",
     "parameters": [
       {"name": "startDate", "type": "string", "required": true, "description": "开始日期（格式：YYYY-MM-DD）"},
-      {"name": "endDate", "type": "string", "required": true, "description": "结束日期（格式：YYYY-MM-DD）"}
+      {"name": "endDate", "type": "string", "required": true, "description": "结束日期（格式：YYYY-MM-DD）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（默认 100）"}
     ],
     "returns": {
-      "type": "Array",
-      "description": "照片信息列表，每个元素包含 date、imageUrl、entryId、entryTitle 字段"
+      "type": "Array|Object",
+      "description": "无分页参数时返回照片信息数组；有分页参数时返回对象 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
-        "title": "获取本月的照片",
+        "title": "获取本月的照片（无分页）",
         "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst photos = await Memento.plugins.calendar_album.getPhotosByDateRange({ startDate, endDate });\nsetResult(JSON.stringify(photos, null, 2));"
+      },
+      {
+        "title": "分页获取日期范围照片",
+        "code": "const result = await Memento.plugins.calendar_album.getPhotosByDateRange({ startDate: '2025-01-01', endDate: '2025-01-31', offset: 0, count: 20 });\nsetResult(`第1页: ${result.data.length}张, 共${result.total}张`);"
       }
     ],
     "notes": "返回照片的日期、URL、所属日记ID和标题",
@@ -240,15 +272,17 @@
   },
   "findEntryBy": {
     "title": "通用日记查找",
-    "description": "根据自定义条件查找日记（支持单条/多条结果）",
+    "description": "根据自定义条件查找日记（支持单条/多条结果）。当 findAll=true 且提供分页参数时，返回分页对象；否则返回原格式。",
     "parameters": [
       {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、location、mood、weather）"},
       {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
-      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（仅 findAll=true 时有效，默认 100）"}
     ],
     "returns": {
       "type": "Object|Array|null",
-      "description": "findAll=false 时返回单个日记对象或 null；findAll=true 时返回日记数组"
+      "description": "findAll=false 时返回单个日记或 null；findAll=true 无分页时返回日记数组；findAll=true 有分页时返回对象 {data, total, offset, count, hasMore}"
     },
     "examples": [
       {
@@ -256,11 +290,15 @@
         "code": "const entry = await Memento.plugins.calendar_album.findEntryBy({field: 'id', value: 'entry123'});\nif (entry) {\n  setResult(`找到日记: ${entry.title}`);\n} else {\n  setResult('未找到该日记');\n}"
       },
       {
-        "title": "查找所有心情为开心的日记",
+        "title": "查找所有心情为开心的日记（无分页）",
         "code": "const entries = await Memento.plugins.calendar_album.findEntryBy({field: 'mood', value: '😊', findAll: true});\nsetResult(`找到 ${entries.length} 条开心的日记`);"
+      },
+      {
+        "title": "分页查找所有心情为开心的日记",
+        "code": "const result = await Memento.plugins.calendar_album.findEntryBy({field: 'mood', value: '😊', findAll: true, offset: 0, count: 10});\nsetResult(`第1页: ${result.data.length}条, 共${result.total}条`);"
       }
     ],
-    "notes": "简化查找逻辑，避免手动遍历日记列表；支持任意字段匹配",
+    "notes": "简化查找逻辑，避免手动遍历日记列表；支持任意字段匹配；分页仅在 findAll=true 时生效",
     "enabled": true
   },
   "findEntryById": {
