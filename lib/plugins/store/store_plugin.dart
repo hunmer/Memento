@@ -289,6 +289,13 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       'archiveProduct': _jsArchiveProduct,
       'restoreProduct': _jsRestoreProduct,
       'getArchivedProducts': _jsGetArchivedProducts,
+
+      // 查找方法
+      'findProductBy': _jsFindProductBy,
+      'findProductById': _jsFindProductById,
+      'findProductByName': _jsFindProductByName,
+      'findUserItemBy': _jsFindUserItemBy,
+      'findUserItemById': _jsFindUserItemById,
     };
   }
 
@@ -593,5 +600,168 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   Future<String> _jsGetArchivedProducts(Map<String, dynamic> params) async {
     final products = controller.archivedProducts;
     return jsonEncode(products.map((p) => p.toJson()).toList());
+  }
+
+  // ==================== 查找方法 ====================
+
+  /// 通用商品查找
+  Future<String> _jsFindProductBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final products = controller.products;
+    final matches = <Product>[];
+
+    for (var product in products) {
+      bool isMatch = false;
+
+      switch (field.toLowerCase()) {
+        case 'id':
+          isMatch = product.id == value;
+          break;
+        case 'name':
+          isMatch = product.name == value;
+          break;
+        default:
+          isMatch = false;
+      }
+
+      if (isMatch) {
+        if (!findAll) {
+          return jsonEncode(product.toJson());
+        }
+        matches.add(product);
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matches.map((p) => p.toJson()).toList());
+    }
+
+    return jsonEncode(null);
+  }
+
+  /// 根据ID查找商品
+  Future<String> _jsFindProductById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    try {
+      final product = controller.products.firstWhere(
+        (p) => p.id == id,
+        orElse: () => throw Exception('商品不存在'),
+      );
+      return jsonEncode(product.toJson());
+    } catch (e) {
+      return jsonEncode(null);
+    }
+  }
+
+  /// 根据名称查找商品
+  Future<String> _jsFindProductByName(Map<String, dynamic> params) async {
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final products = controller.products;
+    final matches = <Product>[];
+
+    for (var product in products) {
+      final isMatch = fuzzy
+          ? product.name.toLowerCase().contains(name.toLowerCase())
+          : product.name == name;
+
+      if (isMatch) {
+        if (!findAll) {
+          return jsonEncode(product.toJson());
+        }
+        matches.add(product);
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matches.map((p) => p.toJson()).toList());
+    }
+
+    return jsonEncode(null);
+  }
+
+  /// 通用用户物品查找
+  Future<String> _jsFindUserItemBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final items = controller.userItems;
+    final matches = [];
+
+    for (var item in items) {
+      bool isMatch = false;
+
+      switch (field.toLowerCase()) {
+        case 'id':
+          isMatch = item.id == value;
+          break;
+        case 'productid':
+          isMatch = item.productId == value;
+          break;
+        default:
+          isMatch = false;
+      }
+
+      if (isMatch) {
+        if (!findAll) {
+          return jsonEncode(item.toJson());
+        }
+        matches.add(item);
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matches.map((i) => i.toJson()).toList());
+    }
+
+    return jsonEncode(null);
+  }
+
+  /// 根据ID查找用户物品
+  Future<String> _jsFindUserItemById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    try {
+      final item = controller.userItems.firstWhere(
+        (i) => i.id == id,
+        orElse: () => throw Exception('物品不存在'),
+      );
+      return jsonEncode(item.toJson());
+    } catch (e) {
+      return jsonEncode(null);
+    }
   }
 }

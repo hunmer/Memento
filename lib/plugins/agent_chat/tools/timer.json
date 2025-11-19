@@ -232,5 +232,97 @@
     ],
     "notes": "返回的每个任务包含: id, name, group, createdAt, totalDuration(总时长), timerItems(子计时器信息)",
     "enabled": true
+  },
+  "timer_findTimerBy": {
+    "title": "通用计时器查找",
+    "description": "根据自定义条件查找计时器（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name、group）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个计时器对象或 null；findAll=true 时返回计时器数组"
+    },
+    "examples": [
+      {
+        "code": "const timer = await Memento.plugins.timer.findTimerBy({field: 'id', value: 'timer123'});\nif (timer) {\n  setResult(`找到计时器: ${timer.name}，运行中: ${timer.isRunning}`);\n} else {\n  setResult('未找到该计时器');\n}",
+        "comment": "根据ID查找计时器"
+      },
+      {
+        "code": "const timers = await Memento.plugins.timer.findTimerBy({field: 'group', value: '健身', findAll: true});\nsetResult(`健身分组有 ${timers.length} 个计时器`);\n",
+        "comment": "查找所有分组匹配的计时器"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历计时器列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "timer_findTimerById": {
+    "title": "根据ID查找计时器",
+    "description": "快速根据计时器ID查找单个计时器（findTimerBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "计时器ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的计时器对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "code": "const timer = await Memento.plugins.timer.findTimerById({id: 'timer123'});\nif (timer) {\n  setResult(`计时器名称: ${timer.name}, 分组: ${timer.group}`);\n} else {\n  setResult('计时器不存在');\n}",
+        "comment": "查找指定ID的计时器"
+      }
+    ],
+    "notes": "等价于 findTimerBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "timer_findTimerByName": {
+    "title": "根据名称查找计时器",
+    "description": "根据计时器名称查找计时器（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "计时器名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个计时器或 null；findAll=true 时返回计时器数组"
+    },
+    "examples": [
+      {
+        "code": "const timer = await Memento.plugins.timer.findTimerByName({name: '番茄工作法'});\nsetResult(timer ? `计时器ID: ${timer.id}` : '未找到');",
+        "comment": "精确匹配计时器名称"
+      },
+      {
+        "code": "const timers = await Memento.plugins.timer.findTimerByName({name: '训练', fuzzy: true, findAll: true});\nconst runningCount = timers.filter(t => t.isRunning).length;\nsetResult(`找到 ${timers.length} 个包含'训练'的计时器，其中 ${runningCount} 个正在运行`);\n",
+        "comment": "模糊匹配查找所有包含关键词的计时器"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "timer_findTimersByGroup": {
+    "title": "根据分组查找计时器",
+    "description": "查找指定分组的所有计时器",
+    "parameters": [
+      {"name": "group", "type": "string", "required": true, "description": "分组名称"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "该分组的计时器列表"
+    },
+    "examples": [
+      {
+        "code": "const timers = await Memento.plugins.timer.findTimersByGroup({group: '学习'});\nconst runningTimers = timers.filter(t => t.isRunning);\nsetResult(`学习分组有 ${timers.length} 个计时器，正在运行 ${runningTimers.length} 个`);\n",
+        "comment": "查找学习分组的所有计时器"
+      },
+      {
+        "code": "const timers = await Memento.plugins.timer.findTimersByGroup({group: '工作'});\nsetResult(`工作分组有 ${timers.length} 个计时器`);\n",
+        "comment": "统计工作分组的计时器数量"
+      }
+    ],
+    "notes": "等价于 findTimerBy({field: 'group', value: group, findAll: true})",
+    "enabled": true
   }
 }

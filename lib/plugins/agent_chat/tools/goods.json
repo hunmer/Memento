@@ -331,7 +331,7 @@
       },
       {
         "title": "模糊匹配仓库名",
-        "code": "const warehouses = await Memento.plugins.goods.findWarehouseByName({name: '房', fuzzy: true, findAll: true});\nsetResult(`找到 ${warehouses.length} 个包含"房"的仓库`);"
+        "code": "const warehouses = await Memento.plugins.goods.findWarehouseByName({name: '房', fuzzy: true, findAll: true});\nsetResult(`找到 ${warehouses.length} 个包含【房】的仓库`);"
       }
     ],
     "notes": "精确匹配使用 ===，模糊匹配使用 includes",

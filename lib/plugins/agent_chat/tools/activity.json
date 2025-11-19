@@ -164,5 +164,103 @@
     ],
     "notes": "最多保留10个最近使用的标签，新使用的标签会排在前面",
     "enabled": true
+  },
+  "findActivityBy": {
+    "title": "通用活动查找",
+    "description": "根据自定义条件查找活动（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、description）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "date", "type": "string", "required": false, "description": "限定在特定日期查找（格式：YYYY-MM-DD，可选）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个活动对象或 null；findAll=true 时返回活动数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找活动",
+        "code": "const activity = await Memento.plugins.activity.findActivityBy({field: 'id', value: 'activity123'});\nif (activity) {\n  setResult(`找到活动: ${activity.title}，时长: ${activity.duration}分钟`);\n} else {\n  setResult('未找到该活动');\n}"
+      },
+      {
+        "title": "查找今天所有包含特定标题的活动",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst activities = await Memento.plugins.activity.findActivityBy({field: 'title', value: '会议', date: today, findAll: true});\nsetResult(`今天有 ${activities.length} 个会议活动`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历活动列表；date 可选，不传则在所有日期中查找",
+    "enabled": true
+  },
+  "findActivityById": {
+    "title": "根据ID查找活动",
+    "description": "快速根据活动ID查找单个活动（findActivityBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "活动ID"},
+      {"name": "date", "type": "string", "required": false, "description": "限定在特定日期查找（可选，提高性能）"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的活动对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的活动",
+        "code": "const activity = await Memento.plugins.activity.findActivityById({id: 'activity123'});\nif (activity) {\n  setResult(`活动标题: ${activity.title}, 开始时间: ${activity.startTime}, 结束时间: ${activity.endTime}`);\n} else {\n  setResult('活动不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findActivityBy({field: 'id', value: id, date})",
+    "enabled": true
+  },
+  "findActivityByTitle": {
+    "title": "根据标题查找活动",
+    "description": "根据活动标题查找活动（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "活动标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "date", "type": "string", "required": false, "description": "限定在特定日期查找（可选）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个活动或 null；findAll=true 时返回活动数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配活动标题",
+        "code": "const activity = await Memento.plugins.activity.findActivityByTitle({title: '晨间会议'});\nsetResult(activity ? `活动时间: ${activity.startTime}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的活动",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst activities = await Memento.plugins.activity.findActivityByTitle({title: '会议', fuzzy: true, date: today, findAll: true});\nconst totalMinutes = activities.reduce((sum, a) => sum + (a.duration || 0), 0);\nsetResult(`今天有 ${activities.length} 个会议活动，共 ${totalMinutes} 分钟`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "findActivitiesByTag": {
+    "title": "根据标签查找活动",
+    "description": "查找包含指定标签的所有活动",
+    "parameters": [
+      {"name": "tag", "type": "string", "required": true, "description": "标签名称"},
+      {"name": "date", "type": "string", "required": false, "description": "限定在特定日期查找（可选）"},
+      {"name": "startDate", "type": "string", "required": false, "description": "开始日期（格式：YYYY-MM-DD）"},
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "包含该标签的活动列表"
+    },
+    "examples": [
+      {
+        "title": "查找所有带"工作"标签的活动",
+        "code": "const activities = await Memento.plugins.activity.findActivitiesByTag({tag: '工作'});\nsetResult(`找到 ${activities.length} 个工作活动`);"
+      },
+      {
+        "title": "查找本月带"会议"标签的活动",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst activities = await Memento.plugins.activity.findActivitiesByTag({tag: '会议', startDate, endDate});\nconst totalHours = activities.reduce((sum, a) => sum + (a.duration || 0), 0) / 60;\nsetResult(`本月会议 ${activities.length} 个，共 ${totalHours.toFixed(1)} 小时`);"
+      }
+    ],
+    "notes": "标签匹配区分大小写；支持日期范围过滤",
+    "enabled": true
   }
 }

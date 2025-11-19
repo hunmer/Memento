@@ -220,6 +220,12 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
       // 历史记录
       'getHistory': _jsGetHistory,
+
+      // 查找方法
+      'findTimerBy': _jsFindTimerBy,
+      'findTimerById': _jsFindTimerById,
+      'findTimerByName': _jsFindTimerByName,
+      'findTimersByGroup': _jsFindTimersByGroup,
     };
   }
 
@@ -521,5 +527,154 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       'total': completedTasks.length,
       'tasks': completedTasks,
     };
+  }
+
+  // ==================== 查找方法 ====================
+
+  /// 通用计时器查找
+  Future<dynamic> _jsFindTimerBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return {'error': '缺少必需参数: field'};
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return {'error': '缺少必需参数: value'};
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final matches = <Map<String, dynamic>>[];
+
+    for (var task in _tasks) {
+      bool isMatch = false;
+
+      switch (field.toLowerCase()) {
+        case 'id':
+          isMatch = task.id == value;
+          break;
+        case 'name':
+          isMatch = task.name == value;
+          break;
+        case 'group':
+          isMatch = task.group == value;
+          break;
+        default:
+          isMatch = false;
+      }
+
+      if (isMatch) {
+        final taskData = {
+          'id': task.id,
+          'name': task.name,
+          'color': task.color.toARGB32(),
+          'icon': task.icon.codePoint,
+          'group': task.group,
+          'isRunning': task.isRunning,
+          'repeatCount': task.repeatCount,
+        };
+
+        if (!findAll) {
+          return taskData;
+        }
+        matches.add(taskData);
+      }
+    }
+
+    if (findAll) {
+      return matches;
+    }
+
+    return null;
+  }
+
+  /// 根据ID查找计时器
+  Future<dynamic> _jsFindTimerById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return {'error': '缺少必需参数: id'};
+    }
+
+    try {
+      final task = _tasks.firstWhere(
+        (t) => t.id == id,
+        orElse: () => throw Exception('计时器不存在'),
+      );
+
+      return {
+        'id': task.id,
+        'name': task.name,
+        'color': task.color.toARGB32(),
+        'icon': task.icon.codePoint,
+        'group': task.group,
+        'isRunning': task.isRunning,
+        'repeatCount': task.repeatCount,
+        'remainingRepeatCount': task.remainingRepeatCount,
+        'createdAt': task.createdAt.toIso8601String(),
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 根据名称查找计时器
+  Future<dynamic> _jsFindTimerByName(Map<String, dynamic> params) async {
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return {'error': '缺少必需参数: name'};
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final matches = <Map<String, dynamic>>[];
+
+    for (var task in _tasks) {
+      final isMatch = fuzzy
+          ? task.name.toLowerCase().contains(name.toLowerCase())
+          : task.name == name;
+
+      if (isMatch) {
+        final taskData = {
+          'id': task.id,
+          'name': task.name,
+          'color': task.color.toARGB32(),
+          'icon': task.icon.codePoint,
+          'group': task.group,
+          'isRunning': task.isRunning,
+        };
+
+        if (!findAll) {
+          return taskData;
+        }
+        matches.add(taskData);
+      }
+    }
+
+    if (findAll) {
+      return matches;
+    }
+
+    return null;
+  }
+
+  /// 根据分组查找计时器
+  Future<dynamic> _jsFindTimersByGroup(Map<String, dynamic> params) async {
+    final String? group = params['group'];
+    if (group == null || group.isEmpty) {
+      return {'error': '缺少必需参数: group'};
+    }
+
+    final matches = _tasks.where((task) => task.group == group).map((task) => {
+      'id': task.id,
+      'name': task.name,
+      'color': task.color.toARGB32(),
+      'icon': task.icon.codePoint,
+      'group': task.group,
+      'isRunning': task.isRunning,
+    }).toList();
+
+    return matches;
   }
 }

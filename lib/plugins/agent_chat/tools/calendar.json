@@ -226,7 +226,7 @@
       },
       {
         "title": "模糊匹配查找所有包含关键词的事件",
-        "code": "const events = await Memento.plugins.calendar.findEventByTitle({title: '会议', fuzzy: true, findAll: true});\nsetResult(`找到 ${events.length} 个包含"会议"的事件`);"
+        "code": "const events = await Memento.plugins.calendar.findEventByTitle({title: '会议', fuzzy: true, findAll: true});\nsetResult(`找到 ${events.length} 个包含【会议】的事件`);"
       }
     ],
     "notes": "精确匹配使用 ===，模糊匹配使用 includes",

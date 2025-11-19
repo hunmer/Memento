@@ -360,7 +360,7 @@
       },
       {
         "title": "模糊匹配查找所有包含关键词的任务",
-        "code": "const tasks = await Memento.plugins.todo.findTaskByTitle({title: '文档', fuzzy: true, findAll: true});\nsetResult(`找到 ${tasks.length} 个包含"文档"的任务`);"
+        "code": "const tasks = await Memento.plugins.todo.findTaskByTitle({title: '文档', fuzzy: true, findAll: true});\nsetResult(`找到 ${tasks.length} 个包含【文档】的任务`);"
       }
     ],
     "notes": "精确匹配使用 ===，模糊匹配使用 contains",

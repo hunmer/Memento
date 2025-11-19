@@ -409,5 +409,144 @@
     ],
     "notes": "全局统计包含: totalGoals, todayCompleted, monthCompleted, monthAdded, todayRecords, overallProgress, groups。单目标统计包含: goalId, goalName, totalRecords, totalValue, currentValue, targetValue, progress, isCompleted",
     "enabled": true
+  },
+  "tracker_findGoalBy": {
+    "title": "通用目标查找",
+    "description": "根据自定义条件查找目标（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name、group、unitType）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个目标对象或 null；findAll=true 时返回目标数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找目标",
+        "code": "const goal = await Memento.plugins.tracker.findGoalBy({field: 'id', value: 'goal123'});\nif (goal) {\n  setResult(`找到目标: ${goal.name}，进度: ${goal.currentValue}/${goal.targetValue}`);\n} else {\n  setResult('未找到该目标');\n}"
+      },
+      {
+        "title": "查找所有学习分组的目标",
+        "code": "const goals = await Memento.plugins.tracker.findGoalBy({field: 'group', value: '学习', findAll: true});\nsetResult(`学习分组有 ${goals.length} 个目标`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历目标列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "tracker_findGoalById": {
+    "title": "根据ID查找目标",
+    "description": "快速根据目标ID查找单个目标（findGoalBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "目标ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的目标对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的目标",
+        "code": "const goal = await Memento.plugins.tracker.findGoalById({id: 'goal123'});\nif (goal) {\n  setResult(`目标名称: ${goal.name}, 单位: ${goal.unitType}, 进度: ${goal.currentValue}/${goal.targetValue}`);\n} else {\n  setResult('目标不存在');\n}"
+      }
+    ],
+    "notes": "等价于 getGoal 或 findGoalBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "tracker_findGoalByName": {
+    "title": "根据名称查找目标",
+    "description": "根据目标名称查找目标（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "目标名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个目标或 null；findAll=true 时返回目标数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配目标名称",
+        "code": "const goal = await Memento.plugins.tracker.findGoalByName({name: '每日阅读'});\nsetResult(goal ? `目标ID: ${goal.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的目标",
+        "code": "const goals = await Memento.plugins.tracker.findGoalByName({name: '阅读', fuzzy: true, findAll: true});\nconst totalProgress = goals.reduce((sum, g) => sum + (g.currentValue || 0), 0);\nsetResult(`找到 ${goals.length} 个阅读相关目标，总进度: ${totalProgress}`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "tracker_findGoalsByGroup": {
+    "title": "根据分组查找目标",
+    "description": "查找指定分组的所有目标",
+    "parameters": [
+      {"name": "group", "type": "string", "required": true, "description": "分组名称"},
+      {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤: 'active' | 'completed'"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "该分组的目标列表"
+    },
+    "examples": [
+      {
+        "title": "查找学习分组的所有目标",
+        "code": "const goals = await Memento.plugins.tracker.findGoalsByGroup({group: '学习'});\nsetResult(`学习分组有 ${goals.length} 个目标`);"
+      },
+      {
+        "title": "查找健康分组的活跃目标",
+        "code": "const goals = await Memento.plugins.tracker.findGoalsByGroup({group: '健康', status: 'active'});\nconst avgProgress = goals.reduce((sum, g) => sum + (g.currentValue / g.targetValue), 0) / goals.length;\nsetResult(`健康分组有 ${goals.length} 个活跃目标，平均进度: ${(avgProgress * 100).toFixed(1)}%`);"
+      }
+    ],
+    "notes": "等价于 getGoals({group}) 但更语义化；支持额外的状态过滤",
+    "enabled": true
+  },
+  "tracker_findRecordBy": {
+    "title": "通用记录查找",
+    "description": "根据自定义条件查找记录（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、goalId、value、note）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "goalId", "type": "string", "required": false, "description": "限定在特定目标内查找（可选）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个记录或 null；findAll=true 时返回记录数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找记录",
+        "code": "const record = await Memento.plugins.tracker.findRecordBy({field: 'id', value: 'record123'});\nif (record) {\n  setResult(`记录值: ${record.value}, 备注: ${record.note || '无'}`);\n} else {\n  setResult('未找到该记录');\n}"
+      },
+      {
+        "title": "查找特定目标的所有大于30的记录",
+        "code": "const allRecords = await Memento.plugins.tracker.getRecords({goalId: 'goal123'});\nconst largeRecords = allRecords.filter(r => r.value > 30);\nsetResult(`找到 ${largeRecords.length} 条大于30的记录`);"
+      }
+    ],
+    "notes": "简化查找逻辑；goalId 可选，不传则在所有目标的记录中查找",
+    "enabled": true
+  },
+  "tracker_findRecordById": {
+    "title": "根据ID查找记录",
+    "description": "快速根据记录ID查找单个记录（findRecordBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "记录ID"},
+      {"name": "goalId", "type": "string", "required": false, "description": "限定在特定目标内查找（可选，提高性能）"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的记录对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的记录",
+        "code": "const record = await Memento.plugins.tracker.findRecordById({id: 'record123'});\nif (record) {\n  setResult(`记录值: ${record.value}, 时间: ${record.recordedAt}, 备注: ${record.note || '无'}`);\n} else {\n  setResult('记录不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findRecordBy({field: 'id', value: id, goalId})",
+    "enabled": true
   }
 }
