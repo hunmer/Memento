@@ -823,25 +823,94 @@ class MessageBubble extends StatelessWidget {
 
   /// 构建 AI 最终回复内容（排除工具执行结果部分）
   Widget _buildFinalReplyContent() {
-    String finalReply = message.content;
+    String content = message.content;
 
-    // 如果有工具执行结果标记，提取 AI 最终回复部分
-    if (finalReply.contains('[工具执行结果]')) {
-      final aiReplyIndex = finalReply.indexOf('[AI最终回复]');
-      if (aiReplyIndex != -1) {
-        // 提取 [AI最终回复] 之后的内容
-        finalReply =
-            finalReply.substring(aiReplyIndex + '[AI最终回复]'.length).trim();
-      } else {
-        // 如果没有 [AI最终回复] 标记，只显示工具执行结果之前的内容（思考过程）
-        final toolResultIndex = finalReply.indexOf('[工具执行结果]');
-        if (toolResultIndex != -1) {
-          finalReply = finalReply.substring(0, toolResultIndex).trim();
+    // 支持多种格式的工具结果分隔符
+    final markers = ['[工具执行结果]', '工具执行结果:', '工具执行结果：'];
+
+    int toolResultIndex = -1;
+    for (var marker in markers) {
+      final index = content.indexOf(marker);
+      if (index != -1) {
+        toolResultIndex = index;
+        break;
+      }
+    }
+
+    // 没有找到工具结果标记，直接显示内容
+    if (toolResultIndex == -1) {
+      return MarkdownContent(content: content);
+    }
+
+    // 找到工具结果后面的内容
+    final afterToolResult = content.substring(toolResultIndex);
+
+    // 查找结束标记（如 "请根据以上工具执行结果直接回答用户的问题" 后的内容）
+    final promptEndMarkers = [
+      '请根据以上工具执行结果直接回答用户的问题，不要再次调用工具。',
+      '请根据以上工具执行结果直接回答用户的问题',
+    ];
+
+    int finalReplyStart = -1;
+
+    // 首先尝试查找 [AI最终回复] 标记
+    final aiReplyIndex = content.indexOf('[AI最终回复]');
+    if (aiReplyIndex != -1) {
+      finalReplyStart = aiReplyIndex + '[AI最终回复]'.length;
+    } else {
+      // 尝试查找提示词结束标记后的内容
+      for (var marker in promptEndMarkers) {
+        final index = afterToolResult.indexOf(marker);
+        if (index != -1) {
+          finalReplyStart = toolResultIndex + index + marker.length;
+          break;
         }
       }
     }
 
-    return MarkdownContent(content: finalReply);
+    if (finalReplyStart != -1) {
+      // 找到了最终回复的开始位置
+      final finalReply = content.substring(finalReplyStart).trim();
+
+      if (finalReply.isEmpty) {
+        // 最终回复为空，显示加载状态
+        return _buildToolLoadingState();
+      } else {
+        // 显示最终回复
+        return MarkdownContent(content: finalReply);
+      }
+    } else {
+      // 没有找到最终回复，说明还在执行中，显示加载状态
+      return _buildToolLoadingState();
+    }
+  }
+
+  /// 构建工具执行时的加载状态
+  Widget _buildToolLoadingState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.blue[700],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'AI正在构建答案...',
+              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// 显示模版结果对话框
