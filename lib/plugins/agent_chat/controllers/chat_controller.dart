@@ -361,6 +361,35 @@ class ChatController extends ChangeNotifier {
         if (templates.isNotEmpty) {
           debugPrint('🔍 [第零阶段] 找到 ${templates.length} 个工具模版');
 
+          // 优先尝试精确匹配：使用用户输入标题直接匹配模版名称
+          final exactMatchTemplate =
+              templateService!.getTemplateByName(userInput.trim());
+
+          if (exactMatchTemplate != null) {
+            debugPrint(
+              '✅ [第零阶段-精确匹配] 找到完全匹配的模版: ${exactMatchTemplate.name} (ID: ${exactMatchTemplate.id})',
+            );
+
+            // 直接使用该模版，跳过 AI 调用
+            final message = messageService.getMessage(
+              conversation.id,
+              aiMessageId,
+            );
+            if (message != null) {
+              final updatedMessage = message.copyWith(
+                matchedTemplateIds: [exactMatchTemplate.id],
+                content: '我找到了完全匹配的工具模版「${exactMatchTemplate.name}」，请选择是否执行：',
+                isGenerating: false,
+              );
+              await messageService.updateMessage(updatedMessage);
+            }
+
+            debugPrint('✅ [第零阶段-精确匹配] 已保存匹配结果，等待用户选择');
+            return; // 直接返回，跳过后续的 AI 调用和第一阶段
+          }
+
+          debugPrint('ℹ️ [第零阶段-精确匹配] 未找到精确匹配，继续 AI 匹配流程');
+
           // 生成模版列表 Prompt
           final templatePrompt = ToolService.getToolTemplatePrompt(templates);
 
