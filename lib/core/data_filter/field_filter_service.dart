@@ -7,6 +7,8 @@
 /// - 统计摘要生成
 library;
 
+import 'dart:convert';
+
 import '../analysis/field_utils.dart';
 import 'filter_options.dart';
 
@@ -26,7 +28,7 @@ class FieldFilterService {
 
   /// 过滤数据（统一入口）
   ///
-  /// [data] 原始数据（支持 List、Map、基本类型）
+  /// [data] 原始数据（支持 List、Map、基本类型、JSON字符串）
   /// [options] 过滤选项
   ///
   /// 返回过滤后的数据
@@ -39,17 +41,36 @@ class FieldFilterService {
       return data;
     }
 
+    // 如果是 JSON 字符串，先尝试解析
+    dynamic parsedData = data;
+    if (data is String) {
+      try {
+        // 使用 dart:convert 解析 JSON
+        parsedData = _parseJson(data);
+      } catch (e) {
+        // 如果解析失败，可能是普通字符串，直接返回
+        return data;
+      }
+    }
+
     // 根据数据类型分发处理
-    if (data is List) {
-      return _filterList(data, options);
-    } else if (data is Map<String, dynamic>) {
-      return _filterMap(data, options);
-    } else if (data is Map) {
-      return _filterMap(Map<String, dynamic>.from(data), options);
+    if (parsedData is List) {
+      return _filterList(parsedData, options);
+    } else if (parsedData is Map<String, dynamic>) {
+      return _filterMap(parsedData, options);
+    } else if (parsedData is Map) {
+      return _filterMap(Map<String, dynamic>.from(parsedData), options);
     } else {
       // 基本类型直接返回
-      return data;
+      return parsedData;
     }
+  }
+
+  /// 解析 JSON 字符串
+  ///
+  /// 尝试将字符串解析为 List 或 Map
+  static dynamic _parseJson(String jsonStr) {
+    return jsonDecode(jsonStr);
   }
 
   /// 过滤列表数据

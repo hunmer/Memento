@@ -283,5 +283,5 @@ class StoreLocalizationsZh extends StoreLocalizations {
   @override
   String get remainingQuantityLabel => '剩余数量';
   @override
-  String get name => '积分商城';
+  String get name => '商店';
 }

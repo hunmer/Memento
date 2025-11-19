@@ -4,7 +4,7 @@ class HabitsLocalizationsZh extends HabitsLocalizations {
   HabitsLocalizationsZh() : super('zh');
 
   @override
-  String get name => '习惯追踪';
+  String get name => '习惯';
 
   @override
   String get habitsList => '习惯列表';
