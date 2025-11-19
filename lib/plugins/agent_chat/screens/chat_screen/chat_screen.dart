@@ -342,6 +342,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                     onExecuteTemplate: (messageId, templateId) async {
                                       await _controller.executeMatchedTemplate(messageId, templateId);
                                     },
+                                    getTemplateName: (templateId) {
+                                      return _controller.templateService?.getTemplateById(templateId)?.name;
+                                    },
                                   ),
                                 );
                               },
