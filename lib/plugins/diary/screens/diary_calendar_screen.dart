@@ -39,8 +39,19 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   }
 
   void _onDayClicked(DateTime selectedDay, DateTime focusedDay) {
-    // 检查选择的日期是否大于今天
-    if (selectedDay.isAfter(DateTime.now())) {
+    // 标准化今天的日期（仅保留年月日，去除时分秒）
+    final today = DateTime.now();
+    final normalizedToday = DateTime(today.year, today.month, today.day);
+
+    // 标准化选中的日期
+    final normalizedSelectedDay = DateTime(
+      selectedDay.year,
+      selectedDay.month,
+      selectedDay.day,
+    );
+
+    // 检查选择的日期是否大于今天（使用标准化后的日期比较）
+    if (normalizedSelectedDay.isAfter(normalizedToday)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(DiaryLocalizations.of(context).cannotSelectFutureDate),
@@ -49,13 +60,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       );
       return;
     }
-
-    // 标准化选中的日期
-    final normalizedSelectedDay = DateTime(
-      selectedDay.year,
-      selectedDay.month,
-      selectedDay.day,
-    );
 
     // 导航到日记编辑界面
     Navigator.of(context)

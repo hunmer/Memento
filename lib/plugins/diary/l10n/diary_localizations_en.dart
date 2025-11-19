@@ -128,4 +128,13 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
 
   @override
   String get recentlyUsed => 'Recently Used';
+
+  @override
+  String get deleteDiary => 'Delete Diary';
+
+  @override
+  String get confirmDeleteDiary => 'Confirm Delete';
+
+  @override
+  String get deleteDiaryMessage => 'Are you sure you want to delete this diary? This action cannot be undone.';
 }

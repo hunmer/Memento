@@ -92,9 +92,6 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     // 注册 JS API（最后一步）
     await registerJSAPI();
 
-    // 初始化 Prompt Controller
-    final promptController = HabitsPromptController(this);
-    promptController.initialize();
   }
 
   TimerController get timerController => _timerController;

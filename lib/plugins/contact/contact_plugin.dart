@@ -37,10 +37,6 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
-
-    // 初始化 Prompt Controller
-    final promptController = ContactPromptController(this);
-    promptController.initialize();
   }
 
   @override

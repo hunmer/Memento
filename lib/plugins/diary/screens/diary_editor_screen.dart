@@ -105,6 +105,39 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
     );
   }
 
+  void _showDeleteConfirmation() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(DiaryLocalizations.of(context).confirmDeleteDiary),
+            content: Text(DiaryLocalizations.of(context).deleteDiaryMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () async {
+                  // 关闭对话框
+                  Navigator.pop(context);
+                  // 删除日记
+                  await DiaryUtils.deleteDiaryEntry(widget.date);
+                  // 返回上一级
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: Text(DiaryLocalizations.of(context).confirmDeleteDiary),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,6 +170,11 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
                     : const Icon(Icons.mood),
             onPressed: _showMoodSelector,
             tooltip: DiaryLocalizations.of(context).moodSelectorTooltip,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: _showDeleteConfirmation,
+            tooltip: DiaryLocalizations.of(context).deleteDiary,
           ),
         ],
       ),

@@ -285,8 +285,6 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     // 确保日记数据目录存在
     await storage.createDirectory('diary');
 
-    // 初始化 prompt 控制器
-
     // 注册 JS API（最后一步）
     await registerJSAPI();
   }
@@ -301,8 +299,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   Future<void> dispose() async {
-    _promptController.unregisterPromptMethods();
-    _promptController.dispose();
+    // 清理资源
   }
 
   @override

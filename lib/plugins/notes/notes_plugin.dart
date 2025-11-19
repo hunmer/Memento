@@ -162,8 +162,6 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   @override
   Future<void> uninstall() async {
-    _promptController.unregisterPromptMethods();
-    _promptController.dispose();
     await super.uninstall();
   }
 

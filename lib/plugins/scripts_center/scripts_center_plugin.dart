@@ -124,8 +124,6 @@ class ScriptsCenterPlugin extends BasePlugin {
   late ScriptManager _scriptManager;
   late ScriptExecutor _scriptExecutor;
 
-  // Prompt 控制器
-
   // 事件订阅ID列表
   final List<String> _subscriptionIds = [];
 
@@ -399,7 +397,6 @@ class ScriptsCenterPlugin extends BasePlugin {
 
   void dispose() {
     _clearTriggers();
-    _promptController.dispose();
     _scriptExecutor.dispose();
     _scriptManager.dispose();
   }
