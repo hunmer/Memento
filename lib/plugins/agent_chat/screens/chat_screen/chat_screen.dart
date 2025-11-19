@@ -333,6 +333,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                     onRerunTool: (messageId) async {
                                       await _handleRerunTool(messageId);
                                     },
+                                    onRerunStep: (messageId, stepIndex) async {
+                                      await _handleRerunStep(messageId, stepIndex);
+                                    },
                                   ),
                                 );
                               },
@@ -503,6 +506,32 @@ class _ChatScreenState extends State<ChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('重新执行工具失败: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// 处理重新执行单个步骤
+  Future<void> _handleRerunStep(String messageId, int stepIndex) async {
+    try {
+      await _controller.rerunSingleStep(messageId, stepIndex);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('步骤 ${stepIndex + 1} 重新执行完成'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('重新执行步骤失败: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),

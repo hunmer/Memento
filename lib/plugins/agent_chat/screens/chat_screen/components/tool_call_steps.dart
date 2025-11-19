@@ -7,11 +7,13 @@ import '../../../models/tool_call_step.dart';
 class ToolCallSteps extends StatefulWidget {
   final List<ToolCallStep> steps;
   final bool isGenerating;
+  final void Function(int stepIndex)? onRerunStep;
 
   const ToolCallSteps({
     super.key,
     required this.steps,
     this.isGenerating = false,
+    this.onRerunStep,
   });
 
   @override
@@ -258,6 +260,34 @@ class _ToolCallStepsState extends State<ToolCallSteps> {
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.red[900],
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  // 重新执行按钮
+                  if (!widget.isGenerating && widget.onRerunStep != null) ...[
+                    const SizedBox(height: 12),
+                    const Divider(height: 1),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => widget.onRerunStep!(index),
+                        icon: const Icon(Icons.replay, size: 16),
+                        label: const Text('重新执行此步骤'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange[50],
+                          foregroundColor: Colors.orange[700],
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            side: BorderSide(color: Colors.orange[300]!),
+                          ),
                         ),
                       ),
                     ),
