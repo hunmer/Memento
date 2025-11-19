@@ -177,4 +177,10 @@ class NodesLocalizationsZh extends NodesLocalizations {
 
   @override
   String get addNotebook => '添加笔记本';
+
+  @override
+  String get basicInfo => '基本信息';
+
+  @override
+  String get dateAndFields => '时间与字段';
 }

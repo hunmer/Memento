@@ -6,7 +6,6 @@ import 'package:uuid/uuid.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
-import 'controls/prompt_controller.dart';
 import 'controllers/nodes_controller.dart';
 import 'screens/notebooks_screen.dart';
 import 'l10n/nodes_localizations.dart';
@@ -51,7 +50,6 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   late NodesController _controller;
-  late NodesPromptController _promptController;
   bool _isInitialized = false;
 
   NodesPlugin();
@@ -68,9 +66,6 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   Future<void> initialize() async {
     _controller = NodesController(storage);
 
-    // 初始化 Prompt 控制器
-    _promptController = NodesPromptController();
-    _promptController.initialize();
 
     _isInitialized = true;
 

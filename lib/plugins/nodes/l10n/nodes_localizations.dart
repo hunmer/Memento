@@ -127,6 +127,10 @@ abstract class NodesLocalizations {
   String get addChildNode;
 
   String get addSiblingNode;
+
+  String get basicInfo;
+
+  String get dateAndFields;
 }
 
 class _NodesLocalizationsDelegate

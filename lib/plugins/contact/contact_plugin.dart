@@ -15,7 +15,6 @@ import 'widgets/contact_card.dart';
 import 'widgets/contact_form.dart';
 import 'widgets/filter_dialog.dart';
 import 'package:uuid/uuid.dart';
-import 'controls/prompt_controller.dart';
 
 class ContactPlugin extends BasePlugin with JSBridgePlugin {
   late ContactController _controller;

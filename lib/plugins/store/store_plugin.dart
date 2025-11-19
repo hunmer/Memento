@@ -9,7 +9,6 @@ import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/widgets/point_settings_view.dart';
 import 'package:Memento/plugins/store/models/product.dart';
-import 'package:Memento/plugins/store/controls/prompt_controller.dart';
 
 /// 物品兑换插件
 class StorePlugin extends BasePlugin with JSBridgePlugin {
@@ -73,8 +72,6 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
 
       // 初始化积分奖励事件处理器
 
-      // 初始化 Prompt 控制器
-      _promptController = StorePromptController(this);
       _promptController!.initialize();
 
       _isInitialized = true;

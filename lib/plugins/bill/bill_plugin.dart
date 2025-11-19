@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
 import 'controls/bill_controller.dart';
-import 'controls/prompt_controller.dart';
 import 'screens/bill_list_screen.dart';
 import 'screens/bill_stats_screen.dart';
 import 'screens/account_list_screen.dart';
@@ -28,7 +27,6 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   late final BillController _billController;
-  late final PromptController _promptController;
 
   BillPlugin() {
     _billController = BillController();
@@ -57,9 +55,6 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     _billController.setPlugin(this);
     _billController.initialize();
 
-    // 初始化 Prompt 控制器
-    _promptController = PromptController(this);
-    _promptController.initialize();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();

@@ -8,7 +8,6 @@ import 'l10n/activity_localizations.dart';
 import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_statistics_screen.dart';
 import 'services/activity_service.dart';
-import 'controls/prompt_controller.dart';
 import 'models/activity_record.dart';
 
 class ActivityPlugin extends BasePlugin with JSBridgePlugin {
@@ -30,7 +29,6 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   late ActivityService _activityService;
-  late ActivityPromptController _promptController;
   bool _isInitialized = false;
 
   // 缓存今日统计数据（用于同步访问）
@@ -75,9 +73,6 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     // 注册 JS API
     await registerJSAPI();
 
-    // 初始化Prompt控制器（必须在 jsAPI 注册之后）
-    _promptController = ActivityPromptController(this);
-    _promptController.initialize();
   }
 
   @override

@@ -8,7 +8,6 @@ import '../../core/js_bridge/js_bridge_plugin.dart';
 import '../base_plugin.dart';
 import 'screens/day_home_screen.dart';
 import 'controllers/day_controller.dart';
-import 'controls/prompt_controller.dart';
 import 'models/memorial_day.dart';
 
 /// 纪念日插件主视图
@@ -38,7 +37,6 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   late DayController _controller;
-  late PromptController _promptController;
   bool _isInitialized = false;
 
   @override
@@ -72,8 +70,6 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
     await _controller.initialize();
 
     // 初始化prompt控制器
-    _promptController = PromptController();
-    _promptController.initialize();
 
     _isInitialized = true;
 

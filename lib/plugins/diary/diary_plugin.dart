@@ -6,7 +6,6 @@ import '../../core/config_manager.dart';
 import '../../core/event/event.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'l10n/diary_localizations.dart';
-import 'controls/prompt_controller.dart';
 import 'screens/diary_calendar_screen.dart';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
@@ -57,7 +56,6 @@ class _DiaryMainViewState extends State<DiaryMainView> {
 }
 
 class DiaryPlugin extends BasePlugin with JSBridgePlugin {
-  late final DiaryPromptController _promptController;
   static DiaryPlugin? _instance;
   static DiaryPlugin get instance {
     if (_instance == null) {
@@ -288,8 +286,6 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     await storage.createDirectory('diary');
 
     // 初始化 prompt 控制器
-    _promptController = DiaryPromptController(this);
-    _promptController.initialize();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
