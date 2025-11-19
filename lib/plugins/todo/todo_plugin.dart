@@ -162,6 +162,14 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       'updateTask': _jsUpdateTask,
       'deleteTask': _jsDeleteTask,
       'completeTask': _jsCompleteTask,
+
+      // 任务查找方法
+      'findTaskBy': _jsFindTaskBy,
+      'findTaskById': _jsFindTaskById,
+      'findTaskByTitle': _jsFindTaskByTitle,
+      'findTasksByTag': _jsFindTasksByTag,
+      'findTasksByStatus': _jsFindTasksByStatus,
+      'findTasksByPriority': _jsFindTasksByPriority,
     };
   }
 
@@ -530,5 +538,271 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     } catch (e) {
       return jsonEncode({'error': '完成任务失败: $e'});
     }
+  }
+
+  // ==================== 任务查找方法 ====================
+
+  /// 通用任务查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindTaskBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final tasks = taskController.tasks;
+    final List<Task> matchedTasks = [];
+
+    for (final task in tasks) {
+      final taskJson = task.toJson();
+
+      // 检查字段是否匹配
+      if (taskJson.containsKey(field) && taskJson[field] == value) {
+        matchedTasks.add(task);
+        if (!findAll) break; // 只找第一个
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedTasks.map((t) => t.toJson()).toList());
+    } else {
+      if (matchedTasks.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedTasks.first.toJson());
+    }
+  }
+
+  /// 根据ID查找任务
+  /// @param params.id 任务ID (必需)
+  Future<String> _jsFindTaskById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    try {
+      final task = taskController.tasks.firstWhere((t) => t.id == id);
+      return jsonEncode(task.toJson());
+    } catch (e) {
+      return jsonEncode(null);
+    }
+  }
+
+  /// 根据标题查找任务
+  /// @param params.title 任务标题 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindTaskByTitle(Map<String, dynamic> params) async {
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final tasks = taskController.tasks;
+    final List<Task> matchedTasks = [];
+
+    for (final task in tasks) {
+      bool matches = false;
+      if (fuzzy) {
+        matches = task.title.contains(title);
+      } else {
+        matches = task.title == title;
+      }
+
+      if (matches) {
+        matchedTasks.add(task);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedTasks.map((t) => t.toJson()).toList());
+    } else {
+      if (matchedTasks.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedTasks.first.toJson());
+    }
+  }
+
+  /// 根据标签查找任务
+  /// @param params.tag 标签名称 (必需)
+  /// @param params.status 可选的状态过滤
+  /// @param params.priority 可选的优先级过滤
+  Future<String> _jsFindTasksByTag(Map<String, dynamic> params) async {
+    final String? tag = params['tag'];
+    if (tag == null || tag.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: tag'});
+    }
+
+    final String? statusStr = params['status'];
+    final String? priorityStr = params['priority'];
+
+    List<Task> tasks = taskController.tasks.where((t) => t.tags.contains(tag)).toList();
+
+    // 状态过滤
+    if (statusStr != null && statusStr.isNotEmpty) {
+      TaskStatus? status;
+      switch (statusStr.toLowerCase()) {
+        case 'todo':
+          status = TaskStatus.todo;
+          break;
+        case 'inprogress':
+        case 'in_progress':
+          status = TaskStatus.inProgress;
+          break;
+        case 'done':
+          status = TaskStatus.done;
+          break;
+      }
+      if (status != null) {
+        tasks = tasks.where((t) => t.status == status).toList();
+      }
+    }
+
+    // 优先级过滤
+    if (priorityStr != null && priorityStr.isNotEmpty) {
+      TaskPriority? priority;
+      switch (priorityStr.toLowerCase()) {
+        case 'low':
+          priority = TaskPriority.low;
+          break;
+        case 'medium':
+          priority = TaskPriority.medium;
+          break;
+        case 'high':
+          priority = TaskPriority.high;
+          break;
+      }
+      if (priority != null) {
+        tasks = tasks.where((t) => t.priority == priority).toList();
+      }
+    }
+
+    return jsonEncode(tasks.map((t) => t.toJson()).toList());
+  }
+
+  /// 根据状态查找任务
+  /// @param params.status 任务状态 (必需)
+  /// @param params.startDate 开始日期过滤 (可选)
+  /// @param params.endDate 结束日期过滤 (可选)
+  Future<String> _jsFindTasksByStatus(Map<String, dynamic> params) async {
+    final String? statusStr = params['status'];
+    if (statusStr == null || statusStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: status'});
+    }
+
+    TaskStatus? status;
+    switch (statusStr.toLowerCase()) {
+      case 'todo':
+        status = TaskStatus.todo;
+        break;
+      case 'inprogress':
+      case 'in_progress':
+        status = TaskStatus.inProgress;
+        break;
+      case 'done':
+        status = TaskStatus.done;
+        break;
+    }
+
+    if (status == null) {
+      return jsonEncode({'error': '无效的状态值: $statusStr'});
+    }
+
+    List<Task> tasks = taskController.tasks.where((t) => t.status == status).toList();
+
+    // 日期过滤
+    final String? startDateStr = params['startDate'];
+    final String? endDateStr = params['endDate'];
+
+    if (startDateStr != null || endDateStr != null) {
+      DateTime? startDate;
+      DateTime? endDate;
+
+      if (startDateStr != null && startDateStr.isNotEmpty) {
+        startDate = DateTime.tryParse(startDateStr);
+      }
+      if (endDateStr != null && endDateStr.isNotEmpty) {
+        endDate = DateTime.tryParse(endDateStr);
+      }
+
+      tasks = tasks.where((task) {
+        final taskDate = task.completedDate ?? task.dueDate;
+        if (taskDate == null) return false;
+
+        if (startDate != null && taskDate.isBefore(startDate)) return false;
+        if (endDate != null && taskDate.isAfter(endDate)) return false;
+
+        return true;
+      }).toList();
+    }
+
+    return jsonEncode(tasks.map((t) => t.toJson()).toList());
+  }
+
+  /// 根据优先级查找任务
+  /// @param params.priority 优先级 (必需)
+  /// @param params.status 可选的状态过滤
+  Future<String> _jsFindTasksByPriority(Map<String, dynamic> params) async {
+    final String? priorityStr = params['priority'];
+    if (priorityStr == null || priorityStr.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: priority'});
+    }
+
+    TaskPriority? priority;
+    switch (priorityStr.toLowerCase()) {
+      case 'low':
+        priority = TaskPriority.low;
+        break;
+      case 'medium':
+        priority = TaskPriority.medium;
+        break;
+      case 'high':
+        priority = TaskPriority.high;
+        break;
+    }
+
+    if (priority == null) {
+      return jsonEncode({'error': '无效的优先级值: $priorityStr'});
+    }
+
+    List<Task> tasks = taskController.tasks.where((t) => t.priority == priority).toList();
+
+    // 可选的状态过滤
+    final String? statusStr = params['status'];
+    if (statusStr != null && statusStr.isNotEmpty) {
+      TaskStatus? status;
+      switch (statusStr.toLowerCase()) {
+        case 'todo':
+          status = TaskStatus.todo;
+          break;
+        case 'inprogress':
+        case 'in_progress':
+          status = TaskStatus.inProgress;
+          break;
+        case 'done':
+          status = TaskStatus.done;
+          break;
+      }
+      if (status != null) {
+        tasks = tasks.where((t) => t.status == status).toList();
+      }
+    }
+
+    return jsonEncode(tasks.map((t) => t.toJson()).toList());
   }
 }

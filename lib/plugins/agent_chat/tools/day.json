@@ -130,5 +130,74 @@
     ],
     "notes": "默认查询未来7天内的纪念日,按时间从近到远排序",
     "enabled": true
+  },
+  "findMemorialDayBy": {
+    "title": "通用纪念日查找",
+    "description": "根据自定义条件查找纪念日(支持单条/多条结果)",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名(如: id、title)"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项(默认 false,只返回第一个)"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个纪念日对象或 null; findAll=true 时返回纪念日数组"
+    },
+    "examples": [
+      {
+        "title": "根据ID查找纪念日",
+        "code": "const day = await Memento.plugins.day.findMemorialDayBy({field: 'id', value: 'day123'});\nif (day) {\n  setResult(`找到纪念日: ${day.title},距离还有 ${day.daysRemaining} 天`);\n} else {\n  setResult('未找到该纪念日');\n}"
+      },
+      {
+        "title": "根据名称查找纪念日",
+        "code": "const day = await Memento.plugins.day.findMemorialDayBy({field: 'title', value: '春节'});\nsetResult(day ? `纪念日ID: ${day.id}` : '未找到');"
+      }
+    ],
+    "notes": "简化查找逻辑,避免手动遍历纪念日列表;支持任意字段匹配",
+    "enabled": true
+  },
+  "findMemorialDayById": {
+    "title": "根据ID查找纪念日",
+    "description": "快速根据纪念日ID查找单个纪念日(findMemorialDayBy 的便捷方法)",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "纪念日ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的纪念日对象,未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的纪念日",
+        "code": "const day = await Memento.plugins.day.findMemorialDayById({id: 'day123'});\nif (day) {\n  setResult(`纪念日名称: ${day.title},目标日期: ${day.targetDate},距离还有: ${day.daysRemaining} 天`);\n} else {\n  setResult('纪念日不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findMemorialDayBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findMemorialDayByName": {
+    "title": "根据名称查找纪念日",
+    "description": "根据纪念日名称查找纪念日(支持精确匹配或模糊匹配)",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "纪念日名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配(默认 false,精确匹配)"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项(默认 false)"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个纪念日或 null; findAll=true 时返回纪念日数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配纪念日名称",
+        "code": "const day = await Memento.plugins.day.findMemorialDayByName({name: '春节'});\nsetResult(day ? `找到纪念日ID: ${day.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配纪念日名称",
+        "code": "const days = await Memento.plugins.day.findMemorialDayByName({name: '生日', fuzzy: true, findAll: true});\nsetResult(`找到 ${days.length} 个包含"生日"的纪念日`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===,模糊匹配使用 includes",
+    "enabled": true
   }
 }

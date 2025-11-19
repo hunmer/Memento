@@ -182,6 +182,11 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       'deleteNote': _jsDeleteNote,
       'searchNotes': _jsSearchNotes,
 
+      // 笔记查找辅助方法
+      'findNoteBy': _jsFindNoteBy,
+      'findNoteById': _jsFindNoteById,
+      'findNoteByTitle': _jsFindNoteByTitle,
+
       // 文件夹相关
       'getFolders': _jsGetFolders,
       'getFolder': _jsGetFolder,
@@ -190,6 +195,11 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       'deleteFolder': _jsDeleteFolder,
       'getFolderNotes': _jsGetFolderNotes,
       'moveNote': _jsMoveNote,
+
+      // 文件夹查找辅助方法
+      'findFolderBy': _jsFindFolderBy,
+      'findFolderById': _jsFindFolderById,
+      'findFolderByName': _jsFindFolderByName,
     };
   }
 
@@ -526,6 +536,233 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'success': true, 'noteId': noteId, 'targetFolderId': targetFolderId});
     } catch (e) {
       return jsonEncode({'success': false, 'error': '移动失败: ${e.toString()}'});
+    }
+  }
+
+  // ==================== 笔记查找方法 ====================
+
+  /// 通用笔记查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindNoteBy(Map<String, dynamic> params) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    // 获取所有笔记
+    final allNotes = controller.searchNotes(query: '');
+    final matchedNotes = [];
+
+    for (final note in allNotes) {
+      final noteJson = note.toJson();
+
+      // 检查字段是否匹配
+      if (noteJson.containsKey(field) && noteJson[field] == value) {
+        matchedNotes.add(note);
+        if (!findAll) break; // 只找第一个
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedNotes.map((n) => n.toJson()).toList());
+    } else {
+      if (matchedNotes.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedNotes.first.toJson());
+    }
+  }
+
+  /// 根据ID查找笔记
+  /// @param params.id 笔记ID (必需)
+  Future<String> _jsFindNoteById(Map<String, dynamic> params) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final allNotes = controller.searchNotes(query: '');
+    final note = allNotes.firstWhere(
+      (n) => n.id == id,
+      orElse: () => null as dynamic,
+    );
+
+    if (note == null) {
+      return jsonEncode(null);
+    }
+
+    return jsonEncode(note.toJson());
+  }
+
+  /// 根据标题查找笔记
+  /// @param params.title 笔记标题 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindNoteByTitle(Map<String, dynamic> params) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final allNotes = controller.searchNotes(query: '');
+    final matchedNotes = [];
+
+    for (final note in allNotes) {
+      bool matches = false;
+      if (fuzzy) {
+        matches = note.title.contains(title);
+      } else {
+        matches = note.title == title;
+      }
+
+      if (matches) {
+        matchedNotes.add(note);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedNotes.map((n) => n.toJson()).toList());
+    } else {
+      if (matchedNotes.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedNotes.first.toJson());
+    }
+  }
+
+  // ==================== 文件夹查找方法 ====================
+
+  /// 通用文件夹查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindFolderBy(Map<String, dynamic> params) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final folders = controller.getAllFolders();
+    final matchedFolders = [];
+
+    for (final folder in folders) {
+      final folderJson = folder.toJson();
+
+      // 检查字段是否匹配
+      if (folderJson.containsKey(field) && folderJson[field] == value) {
+        matchedFolders.add(folder);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedFolders.map((f) => f.toJson()).toList());
+    } else {
+      if (matchedFolders.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedFolders.first.toJson());
+    }
+  }
+
+  /// 根据ID查找文件夹
+  /// @param params.id 文件夹ID (必需)
+  Future<String> _jsFindFolderById(Map<String, dynamic> params) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final folder = controller.getFolder(id);
+
+    if (folder == null) {
+      return jsonEncode(null);
+    }
+
+    return jsonEncode(folder.toJson());
+  }
+
+  /// 根据名称查找文件夹
+  /// @param params.name 文件夹名称 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindFolderByName(Map<String, dynamic> params) async {
+    if (!_isInitialized) {
+      return jsonEncode({'error': '插件未初始化'});
+    }
+
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final folders = controller.getAllFolders();
+    final matchedFolders = [];
+
+    for (final folder in folders) {
+      bool matches = false;
+      if (fuzzy) {
+        matches = folder.name.contains(name);
+      } else {
+        matches = folder.name == name;
+      }
+
+      if (matches) {
+        matchedFolders.add(folder);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedFolders.map((f) => f.toJson()).toList());
+    } else {
+      if (matchedFolders.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedFolders.first.toJson());
     }
   }
 }

@@ -245,5 +245,180 @@
     ],
     "notes": "返回示例: {\"工资\": 5000.00, \"餐饮\": -800.00, \"交通\": -200.00}",
     "enabled": true
+  },
+  "findAccountBy": {
+    "title": "通用账户查找",
+    "description": "根据自定义条件查找账户（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、totalAmount）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个账户对象或 null；findAll=true 时返回账户数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找账户",
+        "code": "const account = await Memento.plugins.bill.findAccountBy({field: 'id', value: 'acc123'});\nif (account) {\n  setResult(`找到账户: ${account.title}，余额: ${account.totalAmount}`);\n} else {\n  setResult('未找到该账户');\n}"
+      },
+      {
+        "title": "根据名称查找账户",
+        "code": "const account = await Memento.plugins.bill.findAccountBy({field: 'title', value: '支付宝'});\nsetResult(account ? `账户ID: ${account.id}` : '未找到');"
+      },
+      {
+        "title": "查找所有余额大于1000的账户",
+        "code": "const accounts = await Memento.plugins.bill.getAccounts({});\nconst richAccounts = accounts.filter(acc => acc.totalAmount > 1000);\nsetResult(`找到 ${richAccounts.length} 个账户`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历账户列表；支持任意字段匹配；对于数值比较等复杂条件，建议先用 getAccounts 获取后自行 filter",
+    "enabled": true
+  },
+  "findAccountById": {
+    "title": "根据ID查找账户",
+    "description": "快速根据账户ID查找单个账户（findAccountBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "账户ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的账户对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的账户",
+        "code": "const account = await Memento.plugins.bill.findAccountById({id: 'acc123'});\nif (account) {\n  setResult(`账户名: ${account.title}, 余额: ${account.totalAmount}`);\n} else {\n  setResult('账户不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findAccountBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findAccountByName": {
+    "title": "根据名称查找账户",
+    "description": "根据账户名称查找账户（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "账户名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个账户或 null；findAll=true 时返回账户数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配账户名",
+        "code": "const account = await Memento.plugins.bill.findAccountByName({name: '支付宝账户'});\nsetResult(account ? `找到账户ID: ${account.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配账户名",
+        "code": "const accounts = await Memento.plugins.bill.findAccountByName({name: '现金', fuzzy: true, findAll: true});\nsetResult(`找到 ${accounts.length} 个包含现金的账户`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "findBillBy": {
+    "title": "通用账单查找",
+    "description": "根据自定义条件查找账单（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、category、amount）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "accountId", "type": "string", "required": false, "description": "限定在特定账户内查找（可选）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个账单或 null；findAll=true 时返回账单数组"
+    },
+    "examples": [
+      {
+        "title": "根据ID查找账单",
+        "code": "const bill = await Memento.plugins.bill.findBillBy({field: 'id', value: 'bill123'});\nif (bill) {\n  setResult(`账单: ${bill.title}, 金额: ${bill.amount}`);\n} else {\n  setResult('未找到该账单');\n}"
+      },
+      {
+        "title": "查找特定分类的账单",
+        "code": "const bills = await Memento.plugins.bill.findBillBy({field: 'category', value: '餐饮', findAll: true});\nsetResult(`找到 ${bills.length} 条餐饮账单`);"
+      },
+      {
+        "title": "在指定账户中查找账单",
+        "code": "const bill = await Memento.plugins.bill.findBillBy({field: 'title', value: '午餐', accountId: 'acc123'});\nsetResult(bill ? `找到账单，金额: ${bill.amount}` : '未找到');"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历账单列表；accountId 可选，不传则在所有账户中查找",
+    "enabled": true
+  },
+  "findBillById": {
+    "title": "根据ID查找账单",
+    "description": "快速根据账单ID查找单个账单（findBillBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "账单ID"},
+      {"name": "accountId", "type": "string", "required": false, "description": "限定在特定账户内查找（可选，提高性能）"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的账单对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的账单",
+        "code": "const bill = await Memento.plugins.bill.findBillById({id: 'bill123'});\nif (bill) {\n  setResult(`账单标题: ${bill.title}, 金额: ${bill.amount}, 分类: ${bill.category}`);\n} else {\n  setResult('账单不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findBillBy({field: 'id', value: id, accountId})",
+    "enabled": true
+  },
+  "findBillByTitle": {
+    "title": "根据标题查找账单",
+    "description": "根据账单标题查找账单（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "账单标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false）"},
+      {"name": "accountId", "type": "string", "required": false, "description": "限定在特定账户内查找（可选）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个账单或 null；findAll=true 时返回账单数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配账单标题",
+        "code": "const bill = await Memento.plugins.bill.findBillByTitle({title: '午餐'});\nsetResult(bill ? `金额: ${bill.amount}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的账单",
+        "code": "const bills = await Memento.plugins.bill.findBillByTitle({title: '地铁', fuzzy: true, findAll: true});\nconst total = bills.reduce((sum, b) => sum + b.amount, 0);\nsetResult(`找到 ${bills.length} 条地铁相关账单，合计: ${total}`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "findBillsByCategory": {
+    "title": "根据分类查找账单",
+    "description": "查找指定分类的所有账单",
+    "parameters": [
+      {"name": "category", "type": "string", "required": true, "description": "分类名称"},
+      {"name": "accountId", "type": "string", "required": false, "description": "限定在特定账户内查找（可选）"},
+      {"name": "startDate", "type": "string", "required": false, "description": "开始日期（格式：YYYY-MM-DD）"},
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "该分类的所有账单列表"
+    },
+    "examples": [
+      {
+        "title": "查找所有餐饮账单",
+        "code": "const bills = await Memento.plugins.bill.findBillsByCategory({category: '餐饮'});\nconst total = bills.reduce((sum, b) => sum + b.amount, 0);\nsetResult(`餐饮账单共 ${bills.length} 条，合计: ${total}`);"
+      },
+      {
+        "title": "查找本月工资收入",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst bills = await Memento.plugins.bill.findBillsByCategory({category: '工资', startDate, endDate});\nconst total = bills.reduce((sum, b) => sum + b.amount, 0);\nsetResult(`本月工资: ${total}`);"
+      }
+    ],
+    "notes": "等价于 findBillBy({field: 'category', value: category, findAll: true}) 但支持日期过滤",
+    "enabled": true
   }
 }

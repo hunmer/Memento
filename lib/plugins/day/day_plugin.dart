@@ -192,6 +192,11 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
       // 工具方法
       'getDaysUntil': _jsGetDaysUntil,
       'getUpcomingDays': _jsGetUpcomingDays,
+
+      // 查找方法
+      'findMemorialDayBy': _jsFindMemorialDayBy,
+      'findMemorialDayById': _jsFindMemorialDayById,
+      'findMemorialDayByName': _jsFindMemorialDayByName,
     };
   }
 
@@ -401,6 +406,112 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
         'success': false,
         'error': e.toString(),
       });
+    }
+  }
+
+  // ==================== 查找方法 ====================
+
+  /// 通用纪念日查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindMemorialDayBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final days = _controller.memorialDays;
+    final List<MemorialDay> matchedDays = [];
+
+    for (final day in days) {
+      final dayJson = day.toJson();
+
+      // 检查字段是否匹配
+      if (dayJson.containsKey(field) && dayJson[field] == value) {
+        matchedDays.add(day);
+        if (!findAll) break; // 只找第一个
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedDays.map((d) => d.toJson()).toList());
+    } else {
+      if (matchedDays.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedDays.first.toJson());
+    }
+  }
+
+  /// 根据ID查找纪念日
+  /// @param params.id 纪念日ID (必需)
+  Future<String> _jsFindMemorialDayById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final day = _controller.memorialDays.firstWhere(
+      (d) => d.id == id,
+      orElse: () => MemorialDay(
+        id: '',
+        title: '',
+        targetDate: DateTime.now(),
+      ),
+    );
+
+    if (day.id.isEmpty) {
+      return jsonEncode(null);
+    }
+
+    return jsonEncode(day.toJson());
+  }
+
+  /// 根据名称查找纪念日
+  /// @param params.name 纪念日名称 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindMemorialDayByName(Map<String, dynamic> params) async {
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final days = _controller.memorialDays;
+    final List<MemorialDay> matchedDays = [];
+
+    for (final day in days) {
+      bool matches = false;
+      if (fuzzy) {
+        matches = day.title.contains(name);
+      } else {
+        matches = day.title == name;
+      }
+
+      if (matches) {
+        matchedDays.add(day);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedDays.map((d) => d.toJson()).toList());
+    } else {
+      if (matchedDays.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedDays.first.toJson());
     }
   }
 

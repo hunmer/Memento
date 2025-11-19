@@ -250,6 +250,17 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       // 统计相关
       'getStats': _jsGetStats,
       'getCategoryStats': _jsGetCategoryStats,
+
+      // 账户查找方法
+      'findAccountBy': _jsFindAccountBy,
+      'findAccountById': _jsFindAccountById,
+      'findAccountByName': _jsFindAccountByName,
+
+      // 账单查找方法
+      'findBillBy': _jsFindBillBy,
+      'findBillById': _jsFindBillById,
+      'findBillByTitle': _jsFindBillByTitle,
+      'findBillsByCategory': _jsFindBillsByCategory,
     };
   }
 
@@ -652,6 +663,313 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     }
 
     return jsonEncode(categoryStats);
+  }
+
+  // ==================== 账户查找方法 ====================
+
+  /// 通用账户查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindAccountBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final accounts = _billController.accounts;
+    final List<Account> matchedAccounts = [];
+
+    for (final account in accounts) {
+      final accountJson = account.toJson();
+      accountJson.remove('bills'); // 移除 bills 字段
+
+      // 检查字段是否匹配
+      if (accountJson.containsKey(field) && accountJson[field] == value) {
+        matchedAccounts.add(account);
+        if (!findAll) break; // 只找第一个
+      }
+    }
+
+    if (findAll) {
+      final accountsJson = matchedAccounts.map((a) {
+        final json = a.toJson();
+        json.remove('bills');
+        return json;
+      }).toList();
+      return jsonEncode(accountsJson);
+    } else {
+      if (matchedAccounts.isEmpty) {
+        return jsonEncode(null);
+      }
+      final json = matchedAccounts.first.toJson();
+      json.remove('bills');
+      return jsonEncode(json);
+    }
+  }
+
+  /// 根据ID查找账户
+  /// @param params.id 账户ID (必需)
+  Future<String> _jsFindAccountById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final account = _billController.accounts.firstWhere(
+      (a) => a.id == id,
+      orElse: () => Account(
+        id: '',
+        title: '',
+        icon: Icons.error,
+        backgroundColor: Colors.transparent,
+      ),
+    );
+
+    if (account.id.isEmpty) {
+      return jsonEncode(null);
+    }
+
+    final json = account.toJson();
+    json.remove('bills');
+    return jsonEncode(json);
+  }
+
+  /// 根据名称查找账户
+  /// @param params.name 账户名称 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindAccountByName(Map<String, dynamic> params) async {
+    final String? name = params['name'];
+    if (name == null || name.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: name'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final accounts = _billController.accounts;
+    final List<Account> matchedAccounts = [];
+
+    for (final account in accounts) {
+      bool matches = false;
+      if (fuzzy) {
+        matches = account.title.contains(name);
+      } else {
+        matches = account.title == name;
+      }
+
+      if (matches) {
+        matchedAccounts.add(account);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      final accountsJson = matchedAccounts.map((a) {
+        final json = a.toJson();
+        json.remove('bills');
+        return json;
+      }).toList();
+      return jsonEncode(accountsJson);
+    } else {
+      if (matchedAccounts.isEmpty) {
+        return jsonEncode(null);
+      }
+      final json = matchedAccounts.first.toJson();
+      json.remove('bills');
+      return jsonEncode(json);
+    }
+  }
+
+  // ==================== 账单查找方法 ====================
+
+  /// 通用账单查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.accountId 限定在特定账户内查找 (可选)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindBillBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final String? accountId = params['accountId'];
+    final bool findAll = params['findAll'] ?? false;
+
+    // 获取所有账单
+    final allBills = await _billController.getBills();
+    final List<Bill> matchedBills = [];
+
+    for (final bill in allBills) {
+      // 如果指定了 accountId，先过滤账户
+      if (accountId != null && accountId.isNotEmpty && bill.accountId != accountId) {
+        continue;
+      }
+
+      final billJson = bill.toJson();
+
+      // 检查字段是否匹配
+      if (billJson.containsKey(field) && billJson[field] == value) {
+        matchedBills.add(bill);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedBills.map((b) => b.toJson()).toList());
+    } else {
+      if (matchedBills.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedBills.first.toJson());
+    }
+  }
+
+  /// 根据ID查找账单
+  /// @param params.id 账单ID (必需)
+  /// @param params.accountId 限定在特定账户内查找 (可选)
+  Future<String> _jsFindBillById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final String? accountId = params['accountId'];
+    final allBills = await _billController.getBills();
+
+    Bill? foundBill;
+    for (final bill in allBills) {
+      if (bill.id == id) {
+        if (accountId == null || accountId.isEmpty || bill.accountId == accountId) {
+          foundBill = bill;
+          break;
+        }
+      }
+    }
+
+    if (foundBill == null) {
+      return jsonEncode(null);
+    }
+
+    return jsonEncode(foundBill.toJson());
+  }
+
+  /// 根据标题查找账单
+  /// @param params.title 账单标题 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.accountId 限定在特定账户内查找 (可选)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindBillByTitle(Map<String, dynamic> params) async {
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final String? accountId = params['accountId'];
+    final bool findAll = params['findAll'] ?? false;
+
+    final allBills = await _billController.getBills();
+    final List<Bill> matchedBills = [];
+
+    for (final bill in allBills) {
+      // 如果指定了 accountId，先过滤账户
+      if (accountId != null && accountId.isNotEmpty && bill.accountId != accountId) {
+        continue;
+      }
+
+      bool matches = false;
+      if (fuzzy) {
+        matches = bill.title.contains(title);
+      } else {
+        matches = bill.title == title;
+      }
+
+      if (matches) {
+        matchedBills.add(bill);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      return jsonEncode(matchedBills.map((b) => b.toJson()).toList());
+    } else {
+      if (matchedBills.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedBills.first.toJson());
+    }
+  }
+
+  /// 根据分类查找账单
+  /// @param params.category 分类名称 (必需)
+  /// @param params.accountId 限定在特定账户内查找 (可选)
+  /// @param params.startDate 开始日期 (可选，格式: YYYY-MM-DD)
+  /// @param params.endDate 结束日期 (可选，格式: YYYY-MM-DD)
+  Future<String> _jsFindBillsByCategory(Map<String, dynamic> params) async {
+    final String? category = params['category'];
+    if (category == null || category.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: category'});
+    }
+
+    final String? accountId = params['accountId'];
+    final String? startDate = params['startDate'];
+    final String? endDate = params['endDate'];
+
+    // 解析日期参数
+    DateTime? start;
+    DateTime? end;
+
+    if (startDate != null && startDate.isNotEmpty) {
+      try {
+        start = DateTime.parse(startDate);
+      } catch (e) {
+        return jsonEncode({'error': '日期格式错误: $startDate，应为 YYYY-MM-DD 格式'});
+      }
+    }
+
+    if (endDate != null && endDate.isNotEmpty) {
+      try {
+        end = DateTime.parse(endDate);
+      } catch (e) {
+        return jsonEncode({'error': '日期格式错误: $endDate，应为 YYYY-MM-DD 格式'});
+      }
+    }
+
+    // 获取账单列表
+    final allBills = await _billController.getBills(
+      startDate: start,
+      endDate: end,
+    );
+
+    // 过滤账单
+    final matchedBills = allBills.where((bill) {
+      // 匹配分类
+      if (bill.category != category) return false;
+
+      // 如果指定了 accountId，过滤账户
+      if (accountId != null && accountId.isNotEmpty && bill.accountId != accountId) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+
+    return jsonEncode(matchedBills.map((b) => b.toJson()).toList());
   }
 }
 

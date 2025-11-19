@@ -431,6 +431,11 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
       // 已完成事件
       'getCompletedEvents': _jsGetCompletedEvents,
+
+      // 事件查找方法
+      'findEventBy': _jsFindEventBy,
+      'findEventById': _jsFindEventById,
+      'findEventByTitle': _jsFindEventByTitle,
     };
   }
 
@@ -616,6 +621,108 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     final events = controller.completedEvents;
     final eventsJson = events.map((e) => e.toJson()).toList();
     return jsonEncode(eventsJson);
+  }
+
+  // ==================== 事件查找方法 ====================
+
+  /// 通用事件查找
+  /// @param params.field 要匹配的字段名 (必需)
+  /// @param params.value 要匹配的值 (必需)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindEventBy(Map<String, dynamic> params) async {
+    final String? field = params['field'];
+    if (field == null || field.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: field'});
+    }
+
+    final dynamic value = params['value'];
+    if (value == null) {
+      return jsonEncode({'error': '缺少必需参数: value'});
+    }
+
+    final bool findAll = params['findAll'] ?? false;
+
+    final events = controller.getAllEvents();
+    final List<CalendarEvent> matchedEvents = [];
+
+    for (final event in events) {
+      final eventJson = event.toJson();
+
+      // 检查字段是否匹配
+      if (eventJson.containsKey(field) && eventJson[field] == value) {
+        matchedEvents.add(event);
+        if (!findAll) break; // 只找第一个
+      }
+    }
+
+    if (findAll) {
+      final eventsJson = matchedEvents.map((e) => e.toJson()).toList();
+      return jsonEncode(eventsJson);
+    } else {
+      if (matchedEvents.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedEvents.first.toJson());
+    }
+  }
+
+  /// 根据ID查找事件
+  /// @param params.id 事件ID (必需)
+  Future<String> _jsFindEventById(Map<String, dynamic> params) async {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
+    }
+
+    final events = controller.getAllEvents();
+
+    try {
+      final event = events.firstWhere((e) => e.id == id);
+      return jsonEncode(event.toJson());
+    } catch (e) {
+      return jsonEncode(null);
+    }
+  }
+
+  /// 根据标题查找事件
+  /// @param params.title 事件标题 (必需)
+  /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
+  /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  Future<String> _jsFindEventByTitle(Map<String, dynamic> params) async {
+    final String? title = params['title'];
+    if (title == null || title.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: title'});
+    }
+
+    final bool fuzzy = params['fuzzy'] ?? false;
+    final bool findAll = params['findAll'] ?? false;
+
+    final events = controller.getAllEvents();
+    final List<CalendarEvent> matchedEvents = [];
+
+    for (final event in events) {
+      bool matches = false;
+      if (fuzzy) {
+        matches = event.title.contains(title);
+      } else {
+        matches = event.title == title;
+      }
+
+      if (matches) {
+        matchedEvents.add(event);
+        if (!findAll) break;
+      }
+    }
+
+    if (findAll) {
+      final eventsJson = matchedEvents.map((e) => e.toJson()).toList();
+      return jsonEncode(eventsJson);
+    } else {
+      if (matchedEvents.isEmpty) {
+        return jsonEncode(null);
+      }
+      return jsonEncode(matchedEvents.first.toJson());
+    }
   }
 }
 

@@ -12,15 +12,34 @@ class RequestService {
   /// 如果 agent 设置了 promptPresetId，则返回预设的内容
   /// 否则返回 agent 原有的 systemPrompt
   static Future<String> getEffectiveSystemPrompt(AIAgent agent) async {
+    developer.log(
+      '检查 Agent ${agent.name} 的 Prompt 预设: promptPresetId=${agent.promptPresetId}',
+      name: 'RequestService',
+    );
+
     if (agent.promptPresetId != null && agent.promptPresetId!.isNotEmpty) {
+      developer.log(
+        '正在获取预设 Prompt: ${agent.promptPresetId}',
+        name: 'RequestService',
+      );
       final presetContent = await PromptPresetService().getPresetContent(agent.promptPresetId);
       if (presetContent != null && presetContent.isNotEmpty) {
         developer.log(
-          '使用预设 Prompt: ${agent.promptPresetId}',
+          '✓ 使用预设 Prompt (${agent.promptPresetId}), 长度: ${presetContent.length}字符',
           name: 'RequestService',
         );
         return presetContent;
+      } else {
+        developer.log(
+          '⚠ 预设 ${agent.promptPresetId} 未找到或为空，使用原始 systemPrompt',
+          name: 'RequestService',
+        );
       }
+    } else {
+      developer.log(
+        '未设置预设，使用原始 systemPrompt (长度: ${agent.systemPrompt.length}字符)',
+        name: 'RequestService',
+      );
     }
     return agent.systemPrompt;
   }
@@ -182,7 +201,7 @@ class RequestService {
 
       developer.log('发送请求: ${request.model}', name: 'RequestService');
       developer.log(
-        '系统提示词长度: ${agent.systemPrompt.length}字符',
+        '系统提示词长度: ${effectiveSystemPrompt.length}字符',
         name: 'RequestService',
       );
 
@@ -238,10 +257,33 @@ class RequestService {
       // 获取有效的系统提示词（可能是预设）
       final effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
 
-      // 如果提供了contextMessages，直接使用它作为消息列表
+      // 构建消息列表
       List<ChatCompletionMessage> messages = [];
       if (contextMessages != null && contextMessages.isNotEmpty) {
         messages = List<ChatCompletionMessage>.from(contextMessages);
+
+        // 替换 contextMessages 中的 system 消息为有效的系统提示词
+        bool hasSystemMessage = false;
+        for (int i = 0; i < messages.length; i++) {
+          if (messages[i].role == ChatCompletionMessageRole.system) {
+            messages[i] = ChatCompletionMessage.system(content: effectiveSystemPrompt);
+            hasSystemMessage = true;
+            developer.log(
+              '替换 contextMessages 中的 system 消息为预设 Prompt',
+              name: 'RequestService',
+            );
+            break;
+          }
+        }
+
+        // 如果没有 system 消息，在开头插入
+        if (!hasSystemMessage) {
+          messages.insert(0, ChatCompletionMessage.system(content: effectiveSystemPrompt));
+          developer.log(
+            '在 contextMessages 开头插入预设 Prompt',
+            name: 'RequestService',
+          );
+        }
       } else if (prompt != null) {
         // 如果没有提供contextMessages但有prompt，则创建基本的消息列表
         messages = [

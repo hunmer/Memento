@@ -237,5 +237,74 @@
     ],
     "notes": "包含今日、近7天、总数、标签数、照片数等统计信息",
     "enabled": true
+  },
+  "findEntryBy": {
+    "title": "通用日记查找",
+    "description": "根据自定义条件查找日记（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、location、mood、weather）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个日记对象或 null；findAll=true 时返回日记数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找日记",
+        "code": "const entry = await Memento.plugins.calendar_album.findEntryBy({field: 'id', value: 'entry123'});\nif (entry) {\n  setResult(`找到日记: ${entry.title}`);\n} else {\n  setResult('未找到该日记');\n}"
+      },
+      {
+        "title": "查找所有心情为开心的日记",
+        "code": "const entries = await Memento.plugins.calendar_album.findEntryBy({field: 'mood', value: '😊', findAll: true});\nsetResult(`找到 ${entries.length} 条开心的日记`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历日记列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findEntryById": {
+    "title": "根据ID查找日记",
+    "description": "快速根据日记ID查找单个日记（findEntryBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "日记ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的日记对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的日记",
+        "code": "const entry = await Memento.plugins.calendar_album.findEntryById({id: 'entry123'});\nif (entry) {\n  setResult(`日记标题: ${entry.title}, 内容: ${entry.content.substring(0, 50)}...`);\n} else {\n  setResult('日记不存在');\n}"
+      }
+    ],
+    "notes": "等价于 getEntryById，但遵循统一命名规范",
+    "enabled": true
+  },
+  "findEntryByTitle": {
+    "title": "根据标题查找日记",
+    "description": "根据日记标题查找日记（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "日记标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个日记或 null；findAll=true 时返回日记数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配日记标题",
+        "code": "const entry = await Memento.plugins.calendar_album.findEntryByTitle({title: '美好的一天'});\nsetResult(entry ? `找到日记，创建时间: ${entry.createdAt}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的日记",
+        "code": "const entries = await Memento.plugins.calendar_album.findEntryByTitle({title: '旅行', fuzzy: true, findAll: true});\nsetResult(`找到 ${entries.length} 条包含"旅行"的日记`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
   }
 }

@@ -419,5 +419,143 @@
     ],
     "notes": "移动操作会更新笔记的 folderId 属性。",
     "enabled": true
+  },
+  "notes_findNoteBy": {
+    "title": "通用笔记查找",
+    "description": "根据自定义条件查找笔记（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、folderId、content）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个笔记对象或 null；findAll=true 时返回笔记数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找笔记",
+        "code": "const note = await Memento.plugins.notes.findNoteBy({field: 'id', value: 'note123'});\nif (note) {\n  setResult(`找到笔记: ${note.title}`);\n} else {\n  setResult('未找到该笔记');\n}"
+      },
+      {
+        "title": "查找指定文件夹的所有笔记",
+        "code": "const notes = await Memento.plugins.notes.findNoteBy({field: 'folderId', value: 'folder123', findAll: true});\nsetResult(`找到 ${notes.length} 条笔记`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历笔记列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "notes_findNoteById": {
+    "title": "根据ID查找笔记",
+    "description": "快速根据笔记ID查找单个笔记（findNoteBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "笔记ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的笔记对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的笔记",
+        "code": "const note = await Memento.plugins.notes.findNoteById({id: 'note123'});\nif (note) {\n  setResult(`笔记标题: ${note.title}, 内容长度: ${note.content.length}`);\n} else {\n  setResult('笔记不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findNoteBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "notes_findNoteByTitle": {
+    "title": "根据标题查找笔记",
+    "description": "根据笔记标题查找笔记（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "笔记标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个笔记或 null；findAll=true 时返回笔记数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配笔记标题",
+        "code": "const note = await Memento.plugins.notes.findNoteByTitle({title: '项目计划'});\nsetResult(note ? `找到笔记ID: ${note.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的笔记",
+        "code": "const notes = await Memento.plugins.notes.findNoteByTitle({title: '会议', fuzzy: true, findAll: true});\nsetResult(`找到 ${notes.length} 条包含会议的笔记`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 contains",
+    "enabled": true
+  },
+  "notes_findFolderBy": {
+    "title": "通用文件夹查找",
+    "description": "根据自定义条件查找文件夹（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name、parentId）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个文件夹对象或 null；findAll=true 时返回文件夹数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找文件夹",
+        "code": "const folder = await Memento.plugins.notes.findFolderBy({field: 'id', value: 'folder123'});\nif (folder) {\n  setResult(`找到文件夹: ${folder.name}`);\n} else {\n  setResult('未找到该文件夹');\n}"
+      },
+      {
+        "title": "查找某个文件夹的所有子文件夹",
+        "code": "const subFolders = await Memento.plugins.notes.findFolderBy({field: 'parentId', value: 'folder123', findAll: true});\nsetResult(`找到 ${subFolders.length} 个子文件夹`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历文件夹列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "notes_findFolderById": {
+    "title": "根据ID查找文件夹",
+    "description": "快速根据文件夹ID查找单个文件夹（findFolderBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "文件夹ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的文件夹对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的文件夹",
+        "code": "const folder = await Memento.plugins.notes.findFolderById({id: 'folder123'});\nif (folder) {\n  setResult(`文件夹名称: ${folder.name}`);\n} else {\n  setResult('文件夹不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findFolderBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "notes_findFolderByName": {
+    "title": "根据名称查找文件夹",
+    "description": "根据文件夹名称查找文件夹（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "文件夹名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个文件夹或 null；findAll=true 时返回文件夹数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配文件夹名",
+        "code": "const folder = await Memento.plugins.notes.findFolderByName({name: '工作笔记'});\nsetResult(folder ? `找到文件夹ID: ${folder.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的文件夹",
+        "code": "const folders = await Memento.plugins.notes.findFolderByName({name: '项目', fuzzy: true, findAll: true});\nsetResult(`找到 ${folders.length} 个包含项目的文件夹`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 contains",
+    "enabled": true
   }
 }
