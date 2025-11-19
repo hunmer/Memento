@@ -215,9 +215,36 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取所有目标
+  /// 支持分页参数: offset, count
   Future<dynamic> _jsGetGoals(Map<String, dynamic> params) async {
     // 提取可选参数
     final String? status = params['status'];
@@ -237,7 +264,22 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       goals = goals.where((g) => g.group == group).toList();
     }
 
-    return goals.map((g) => g.toJson()).toList();
+    final goalsJson = goals.map((g) => g.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      return _paginate(
+        goalsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return goalsJson;
   }
 
   /// 获取单个目标详情
@@ -434,6 +476,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取目标的记录列表
+  /// 支持分页参数: offset, count
   Future<dynamic> _jsGetRecords(Map<String, dynamic> params) async {
     // 提取必需参数并验证
     final String? goalId = params['goalId'];
@@ -443,18 +486,32 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     // 提取可选参数
     final int? limit = params['limit'];
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final records = await _controller.getRecordsForGoal(goalId);
 
     // 按时间倒序排列
     records.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
 
-    // 如果指定了 limit，只返回最新的 N 条记录
+    // 如果指定了 limit，只返回最新的 N 条记录（向后兼容）
     final List<Record> resultRecords = limit != null && limit < records.length
         ? records.sublist(0, limit)
         : records;
 
-    return resultRecords.map((r) => r.toJson()).toList();
+    final recordsJson = resultRecords.map((r) => r.toJson()).toList();
+
+    // 检查是否需要分页
+    if (offset != null || count != null) {
+      return _paginate(
+        recordsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return recordsJson;
   }
 
   /// 删除记录

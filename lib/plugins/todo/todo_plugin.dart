@@ -173,12 +173,40 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取任务列表
   /// 参数对象: {
   ///   status: 'todo' | 'inProgress' | 'in_progress' | 'done' (可选),
-  ///   priority: 'low' | 'medium' | 'high' (可选)
+  ///   priority: 'low' | 'medium' | 'high' (可选),
+  ///   offset: number (可选, 分页起始位置),
+  ///   count: number (可选, 返回数量)
   /// }
   Future<String> _jsGetTasks(Map<String, dynamic> params) async {
     List<Task> tasks = taskController.tasks;
@@ -225,7 +253,23 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       }
     }
 
-    return jsonEncode(tasks.map((t) => t.toJson()).toList());
+    final tasksJson = tasks.map((t) => t.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        tasksJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(tasksJson);
   }
 
   /// 获取任务详情
@@ -246,7 +290,7 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取今日任务（任务日期范围包含今天的任务）
-  /// 参数对象: {} (无需参数,但保持接口一致性)
+  /// 参数对象: { offset: number (可选), count: number (可选) }
   Future<String> _jsGetTodayTasks(Map<String, dynamic> params) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -290,11 +334,27 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return false;
     }).toList();
 
-    return jsonEncode(todayTasks.map((t) => t.toJson()).toList());
+    final tasksJson = todayTasks.map((t) => t.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        tasksJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(tasksJson);
   }
 
   /// 获取过期任务（截止日期已过且未完成）
-  /// 参数对象: {} (无需参数,但保持接口一致性)
+  /// 参数对象: { offset: number (可选), count: number (可选) }
   Future<String> _jsGetOverdueTasks(Map<String, dynamic> params) async {
     final now = DateTime.now();
 
@@ -310,7 +370,23 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return false;
     }).toList();
 
-    return jsonEncode(overdueTasks.map((t) => t.toJson()).toList());
+    final tasksJson = overdueTasks.map((t) => t.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        tasksJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(tasksJson);
   }
 
   /// 创建任务
@@ -546,6 +622,8 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// @param params.field 要匹配的字段名 (必需)
   /// @param params.value 要匹配的值 (必需)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置（仅 findAll=true 时有效）
+  /// @param params.count 返回数量（仅 findAll=true 时有效）
   Future<String> _jsFindTaskBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -558,6 +636,8 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final tasks = taskController.tasks;
     final List<Task> matchedTasks = [];
@@ -573,7 +653,19 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     if (findAll) {
-      return jsonEncode(matchedTasks.map((t) => t.toJson()).toList());
+      final tasksJson = matchedTasks.map((t) => t.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          tasksJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      return jsonEncode(tasksJson);
     } else {
       if (matchedTasks.isEmpty) {
         return jsonEncode(null);
@@ -602,6 +694,8 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// @param params.title 任务标题 (必需)
   /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
+  /// @param params.offset 分页起始位置（仅 findAll=true 时有效）
+  /// @param params.count 返回数量（仅 findAll=true 时有效）
   Future<String> _jsFindTaskByTitle(Map<String, dynamic> params) async {
     final String? title = params['title'];
     if (title == null || title.isEmpty) {
@@ -610,6 +704,8 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final tasks = taskController.tasks;
     final List<Task> matchedTasks = [];
@@ -629,7 +725,19 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     if (findAll) {
-      return jsonEncode(matchedTasks.map((t) => t.toJson()).toList());
+      final tasksJson = matchedTasks.map((t) => t.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          tasksJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      return jsonEncode(tasksJson);
     } else {
       if (matchedTasks.isEmpty) {
         return jsonEncode(null);
@@ -642,6 +750,8 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// @param params.tag 标签名称 (必需)
   /// @param params.status 可选的状态过滤
   /// @param params.priority 可选的优先级过滤
+  /// @param params.offset 分页起始位置
+  /// @param params.count 返回数量
   Future<String> _jsFindTasksByTag(Map<String, dynamic> params) async {
     final String? tag = params['tag'];
     if (tag == null || tag.isEmpty) {
@@ -692,13 +802,31 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       }
     }
 
-    return jsonEncode(tasks.map((t) => t.toJson()).toList());
+    final tasksJson = tasks.map((t) => t.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        tasksJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(tasksJson);
   }
 
   /// 根据状态查找任务
   /// @param params.status 任务状态 (必需)
   /// @param params.startDate 开始日期过滤 (可选)
   /// @param params.endDate 结束日期过滤 (可选)
+  /// @param params.offset 分页起始位置
+  /// @param params.count 返回数量
   Future<String> _jsFindTasksByStatus(Map<String, dynamic> params) async {
     final String? statusStr = params['status'];
     if (statusStr == null || statusStr.isEmpty) {
@@ -751,12 +879,30 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       }).toList();
     }
 
-    return jsonEncode(tasks.map((t) => t.toJson()).toList());
+    final tasksJson = tasks.map((t) => t.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        tasksJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(tasksJson);
   }
 
   /// 根据优先级查找任务
   /// @param params.priority 优先级 (必需)
   /// @param params.status 可选的状态过滤
+  /// @param params.offset 分页起始位置
+  /// @param params.count 返回数量
   Future<String> _jsFindTasksByPriority(Map<String, dynamic> params) async {
     final String? priorityStr = params['priority'];
     if (priorityStr == null || priorityStr.isEmpty) {
@@ -803,6 +949,22 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       }
     }
 
-    return jsonEncode(tasks.map((t) => t.toJson()).toList());
+    final tasksJson = tasks.map((t) => t.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        tasksJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(tasksJson);
   }
 }

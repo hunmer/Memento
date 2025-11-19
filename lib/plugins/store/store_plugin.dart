@@ -299,12 +299,55 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
+  // ==================== 分页控制器 ====================
+
+  /// 分页控制器 - 对列表进行分页处理
+  /// @param list 原始数据列表
+  /// @param offset 起始位置（默认 0）
+  /// @param count 返回数量（默认 100）
+  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  Map<String, dynamic> _paginate<T>(
+    List<T> list, {
+    int offset = 0,
+    int count = 100,
+  }) {
+    final total = list.length;
+    final start = offset.clamp(0, total);
+    final end = (start + count).clamp(start, total);
+    final data = list.sublist(start, end);
+
+    return {
+      'data': data,
+      'total': total,
+      'offset': start,
+      'count': data.length,
+      'hasMore': end < total,
+    };
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取所有商品列表
+  /// 支持分页参数: offset, count
   Future<String> _jsGetProducts(Map<String, dynamic> params) async {
     final products = controller.products;
-    return jsonEncode(products.map((p) => p.toJson()).toList());
+    final productsJson = products.map((p) => p.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        productsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(productsJson);
   }
 
   /// 获取商品详情
@@ -520,21 +563,72 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取兑换历史（用户物品）
+  /// 支持分页参数: offset, count
   Future<String> _jsGetRedeemHistory(Map<String, dynamic> params) async {
     final items = controller.userItems;
-    return jsonEncode(items.map((item) => item.toJson()).toList());
+    final itemsJson = items.map((item) => item.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        itemsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(itemsJson);
   }
 
   /// 获取积分历史
+  /// 支持分页参数: offset, count
   Future<String> _jsGetPointsHistory(Map<String, dynamic> params) async {
     final logs = controller.pointsLogs;
-    return jsonEncode(logs.map((log) => log.toJson()).toList());
+    final logsJson = logs.map((log) => log.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        logsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(logsJson);
   }
 
   /// 获取用户物品
+  /// 支持分页参数: offset, count
   Future<String> _jsGetUserItems(Map<String, dynamic> params) async {
     final items = controller.userItems;
-    return jsonEncode(items.map((item) => item.toJson()).toList());
+    final itemsJson = items.map((item) => item.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        itemsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(itemsJson);
   }
 
   /// 使用物品
@@ -597,14 +691,32 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取归档商品列表
+  /// 支持分页参数: offset, count
   Future<String> _jsGetArchivedProducts(Map<String, dynamic> params) async {
     final products = controller.archivedProducts;
-    return jsonEncode(products.map((p) => p.toJson()).toList());
+    final productsJson = products.map((p) => p.toJson()).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        productsJson,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(productsJson);
   }
 
   // ==================== 查找方法 ====================
 
   /// 通用商品查找
+  /// 支持分页参数: offset, count（仅 findAll=true 时有效）
   Future<String> _jsFindProductBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -617,6 +729,8 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     }
 
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final products = controller.products;
     final matches = <Product>[];
@@ -644,7 +758,19 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     }
 
     if (findAll) {
-      return jsonEncode(matches.map((p) => p.toJson()).toList());
+      final matchesJson = matches.map((p) => p.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          matchesJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      return jsonEncode(matchesJson);
     }
 
     return jsonEncode(null);
@@ -669,6 +795,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 根据名称查找商品
+  /// 支持分页参数: offset, count（仅 findAll=true 时有效）
   Future<String> _jsFindProductByName(Map<String, dynamic> params) async {
     final String? name = params['name'];
     if (name == null || name.isEmpty) {
@@ -677,6 +804,8 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
 
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final products = controller.products;
     final matches = <Product>[];
@@ -695,13 +824,26 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     }
 
     if (findAll) {
-      return jsonEncode(matches.map((p) => p.toJson()).toList());
+      final matchesJson = matches.map((p) => p.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          matchesJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      return jsonEncode(matchesJson);
     }
 
     return jsonEncode(null);
   }
 
   /// 通用用户物品查找
+  /// 支持分页参数: offset, count（仅 findAll=true 时有效）
   Future<String> _jsFindUserItemBy(Map<String, dynamic> params) async {
     final String? field = params['field'];
     if (field == null || field.isEmpty) {
@@ -714,6 +856,8 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     }
 
     final bool findAll = params['findAll'] ?? false;
+    final int? offset = params['offset'];
+    final int? count = params['count'];
 
     final items = controller.userItems;
     final matches = [];
@@ -741,7 +885,19 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     }
 
     if (findAll) {
-      return jsonEncode(matches.map((i) => i.toJson()).toList());
+      final matchesJson = matches.map((i) => i.toJson()).toList();
+
+      // 检查是否需要分页
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          matchesJson,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode(paginated);
+      }
+
+      return jsonEncode(matchesJson);
     }
 
     return jsonEncode(null);

@@ -224,6 +224,7 @@ class RequestService {
   /// [contextMessages] - 上下文消息列表，包含system消息和历史消息，按时间从旧到新排序
   /// [responseFormat] - 响应格式（用于 Structured Outputs）
   /// [shouldCancel] - 检查是否应该取消的函数
+  /// [additionalPrompts] - 额外的 prompt 部分，使用占位符替换（如 {tool_templates}, {tool_brief}）
   static Future<void> streamResponse({
     required AIAgent agent,
     String? prompt,
@@ -235,24 +236,63 @@ class RequestService {
     List<ChatCompletionMessage>? contextMessages,
     ResponseFormat? responseFormat,
     bool Function()? shouldCancel,
+    Map<String, String>? additionalPrompts,
   }) async {
     try {
       // 获取有效的系统提示词（可能是预设）
-      final effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
+      var effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
+
+      // 处理占位符替换
+      if (additionalPrompts != null && additionalPrompts.isNotEmpty) {
+        // 保存原始的 agent prompt
+        final originalAgentPrompt = effectiveSystemPrompt;
+
+        // 如果 effectiveSystemPrompt 中没有任何占位符，使用默认模板
+        if (!effectiveSystemPrompt.contains('{agent_prompt}') &&
+            !effectiveSystemPrompt.contains('{tool_templates}') &&
+            !effectiveSystemPrompt.contains('{tool_brief}') &&
+            !effectiveSystemPrompt.contains('{tool_detail}')) {
+          // 构建默认模板：原始prompt + 工具相关占位符
+          effectiveSystemPrompt = '{agent_prompt}\n{tool_templates}{tool_brief}{tool_detail}';
+        }
+
+        // 替换 {agent_prompt} 占位符为原始 agent prompt
+        effectiveSystemPrompt = effectiveSystemPrompt.replaceAll('{agent_prompt}', originalAgentPrompt);
+
+        // 替换其他占位符
+        additionalPrompts.forEach((placeholder, content) {
+          final fullPlaceholder = '{$placeholder}';
+          if (content.isNotEmpty) {
+            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(fullPlaceholder, content);
+            developer.log(
+              '替换占位符 $fullPlaceholder (长度: ${content.length})',
+              name: 'RequestService',
+            );
+          } else {
+            // 如果内容为空，移除占位符
+            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(fullPlaceholder, '');
+          }
+        });
+
+        developer.log(
+          '应用占位符后的 systemPrompt 长度: ${effectiveSystemPrompt.length}',
+          name: 'RequestService',
+        );
+      }
 
       // 构建消息列表
       List<ChatCompletionMessage> messages = [];
       if (contextMessages != null && contextMessages.isNotEmpty) {
         messages = List<ChatCompletionMessage>.from(contextMessages);
 
-        // 替换 contextMessages 中的 system 消息为有效的系统提示词
+        // 替换 contextMessages 中的 system 消息为处理后的系统提示词
         bool hasSystemMessage = false;
         for (int i = 0; i < messages.length; i++) {
           if (messages[i].role == ChatCompletionMessageRole.system) {
             messages[i] = ChatCompletionMessage.system(content: effectiveSystemPrompt);
             hasSystemMessage = true;
             developer.log(
-              '替换 contextMessages 中的 system 消息为预设 Prompt',
+              '替换 contextMessages 中的 system 消息（已应用占位符）',
               name: 'RequestService',
             );
             break;
@@ -263,7 +303,7 @@ class RequestService {
         if (!hasSystemMessage) {
           messages.insert(0, ChatCompletionMessage.system(content: effectiveSystemPrompt));
           developer.log(
-            '在 contextMessages 开头插入预设 Prompt',
+            '在 contextMessages 开头插入 system 消息（已应用占位符）',
             name: 'RequestService',
           );
         }
