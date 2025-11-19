@@ -204,12 +204,20 @@ class ToolService {
     buffer.writeln('\n## 🛠️ 可用工具列表');
     buffer.writeln('\n### ⚠️ 重要提示');
     buffer.writeln('\n作为 AI 助手，你**无法直接获取**以下类型的信息：');
-    buffer.writeln('1. **当前时间**：你无法感知时间流逝，不能硬编码日期时间字符串');
+    buffer.writeln('1. **当前时间**：你无法感知时间流逝，**绝对禁止**硬编码日期时间字符串（如 "2025-01-15"、"今天是1月15日"）');
     buffer.writeln('2. **用户数据**：所有用户的任务、笔记、日记等数据都存储在本地，必须使用插件工具获取');
+    buffer.writeln('\n### 🚫 严格禁止的行为');
+    buffer.writeln('1. **禁止硬编码日期时间**：');
+    buffer.writeln('   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`');
+    buffer.writeln('   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = \`\${time.year}-\${String(time.month).padStart(2, \'0\')}-\${String(time.day).padStart(2, \'0\')}\``');
+    buffer.writeln('2. **禁止使用占位符变量**：');
+    buffer.writeln('   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`');
+    buffer.writeln('   - ✅ 正确：先查询获取真实数据，然后使用实际的ID');
+    buffer.writeln('   - ✅ 示例：`const channels = await Memento.plugins.chat.getChannels(); const firstChannel = channels[0]; await Memento.plugins.chat.sendMessage({channelId: firstChannel.id, content: "消息内容"})`');
     buffer.writeln('\n### 系统 API（在 JavaScript 代码中直接调用）');
-    buffer.writeln('\n当需要时间或设备信息时，**直接在 JavaScript 代码中调用**，不要作为单独的步骤：');
-    buffer.writeln('- `await Memento.system.getCurrentTime()` - 获取当前时间');
-    buffer.writeln('- `await Memento.system.getTimestamp()` - 获取时间戳');
+    buffer.writeln('\n当需要时间或设备信息时，**必须在 JavaScript 代码中调用系统API**，不要作为单独的步骤：');
+    buffer.writeln('- `await Memento.system.getCurrentTime()` - **必须使用此API获取当前时间**，返回 `{timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName}`');
+    buffer.writeln('- `await Memento.system.getTimestamp()` - 获取当前时间戳（毫秒）');
     buffer.writeln('- `await Memento.system.formatDate(dateInput, format)` - 格式化日期');
     buffer.writeln('- `await Memento.system.getDeviceInfo()` - 获取设备信息');
     buffer.writeln('- `await Memento.system.getAppInfo()` - 获取应用信息');
@@ -242,6 +250,9 @@ class ToolService {
     buffer.writeln('  ]');
     buffer.writeln('}');
     buffer.writeln('```\n');
+
+    // 添加插件别名映射
+    buffer.write(ToolConfigManager.generatePluginAliasesPrompt());
 
     // 从配置加载工具列表
     final allPluginTools = ToolConfigManager.instance.getAllPluginTools();
@@ -330,11 +341,16 @@ class ToolService {
     buffer.writeln('```\n');
 
     buffer.writeln('### ⚠️ 注意事项\n');
-    buffer.writeln('1. **系统 API 直接调用**: `Memento.system.*` API 不需要作为单独的工具步骤，直接在代码中调用');
-    buffer.writeln('2. **返回结果**: JavaScript 代码必须先调用 `setResult(result)` 设置返回值，然后 `return result`');
-    buffer.writeln('3. **JSON 字符串转义**: data 字段中的 JavaScript 代码需要正确转义引号');
-    buffer.writeln('4. **异步操作**: 所有插件方法都是异步的，必须使用 `await`');
-    buffer.writeln('5. **避免硬编码时间**: 不要在代码中硬编码日期时间字符串，使用 `Memento.system.getCurrentTime()` 获取\n');
+    buffer.writeln('1. **🚫 绝对禁止硬编码日期时间**：任何涉及日期时间的代码，必须使用 `await Memento.system.getCurrentTime()` 获取当前时间');
+    buffer.writeln('   - 生成日记内容时，使用系统API获取的真实日期，不要使用你知识中的日期');
+    buffer.writeln('   - 创建任务、账单等需要日期的操作，都必须先调用系统API');
+    buffer.writeln('2. **🚫 绝对禁止使用占位符**：不允许使用 "your_xxx_id"、"请填入xxx" 等占位符');
+    buffer.writeln('   - 如果用户未指定ID，优先遍历已有数据选择合适的（第一个、最近的、符合条件的）');
+    buffer.writeln('   - 如果没有数据，应该先创建数据再执行操作，或者返回明确的错误提示');
+    buffer.writeln('3. **系统 API 直接调用**: `Memento.system.*` API 不需要作为单独的工具步骤，直接在代码中调用');
+    buffer.writeln('4. **返回结果**: JavaScript 代码必须先调用 `setResult(result)` 设置返回值，然后 `return result`');
+    buffer.writeln('5. **JSON 字符串转义**: data 字段中的 JavaScript 代码需要正确转义引号');
+    buffer.writeln('6. **异步操作**: 所有插件方法都是异步的，必须使用 `await`\n');
 
     return buffer.toString();
   }
@@ -348,14 +364,24 @@ class ToolService {
 ### ⚠️ 重要提示
 
 作为 AI 助手，你**无法直接获取**以下类型的信息：
-1. **当前时间**：你无法感知时间流逝，不能硬编码日期时间字符串
+1. **当前时间**：你无法感知时间流逝，**绝对禁止**硬编码日期时间字符串（如 "2025-01-15"、"今天是1月15日"）
 2. **用户数据**：所有用户的任务、笔记、日记等数据都存储在本地，必须使用插件工具获取
+
+### 🚫 严格禁止的行为
+1. **禁止硬编码日期时间**：
+   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`
+   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = \`${time.year}-${String(time.month).padStart(2, '0')}-${String(time.day).padStart(2, '0')}\``
+2. **禁止使用占位符变量**：
+   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`
+   - ✅ 正确：先查询获取真实数据，然后使用实际的ID
+   - ✅ 策略：用户未指定时，优先选择第一个、最近的、或符合条件的数据
+   - ✅ 策略：如果没有可用数据，先创建数据再执行操作，或返回明确错误
 
 ### 系统 API（在 JavaScript 代码中直接调用）
 
-当需要时间或设备信息时，**直接在 JavaScript 代码中调用**，不要作为单独的步骤：
-- `await Memento.system.getCurrentTime()` - 获取当前时间
-- `await Memento.system.getTimestamp()` - 获取时间戳
+当需要时间或设备信息时，**必须在 JavaScript 代码中调用系统API**，不要作为单独的步骤：
+- `await Memento.system.getCurrentTime()` - **必须使用此API获取当前时间**，返回 `{timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName}`
+- `await Memento.system.getTimestamp()` - 获取当前时间戳（毫秒）
 - `await Memento.system.formatDate(dateInput, format)` - 格式化日期
 - `await Memento.system.getDeviceInfo()` - 获取设备信息
 - `await Memento.system.getAppInfo()` - 获取应用信息
@@ -514,10 +540,23 @@ return result;
     buffer.writeln('```\n');
     buffer.writeln('---\n');
 
+    buffer.writeln('### 🚫 严格禁止的行为\n');
+    buffer.writeln('1. **绝对禁止硬编码日期时间**：');
+    buffer.writeln('   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`');
+    buffer.writeln('   - ❌ 错误：在生成日记内容、任务标题等地方使用你知识中的日期');
+    buffer.writeln('   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = \`\${time.year}-\${String(time.month).padStart(2, \'0\')}-\${String(time.day).padStart(2, \'0\')}\``');
+    buffer.writeln('   - ✅ 正确：在生成的内容中使用系统API返回的真实日期');
+    buffer.writeln('2. **绝对禁止使用占位符变量**：');
+    buffer.writeln('   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`');
+    buffer.writeln('   - ✅ 正确：`const channels = await Memento.plugins.chat.getChannels(); if (channels.length > 0) { const channelId = channels[0].id; ... }`');
+    buffer.writeln('   - ✅ 策略：用户未指定时，优先选择第一个、最近的、或符合条件的数据');
+    buffer.writeln('   - ✅ 策略：如果没有可用数据，先创建数据再执行操作，或返回明确错误\n');
+
     buffer.writeln('### 系统 API（始终可用）\n');
-    buffer.writeln('在生成的 JavaScript 代码中，你可以**直接调用**以下系统 API：\n');
-    buffer.writeln('- `await Memento.system.getCurrentTime()` - 获取当前完整时间信息');
+    buffer.writeln('在生成的 JavaScript 代码中，你**必须使用**以下系统 API 获取时间信息：\n');
+    buffer.writeln('- `await Memento.system.getCurrentTime()` - **必须使用此API获取当前时间**');
     buffer.writeln('  - 返回：`{ timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName }`');
+    buffer.writeln('  - 用途：生成日记、任务、账单等任何需要日期的内容');
     buffer.writeln('- `await Memento.system.getTimestamp()` - 获取当前时间戳（毫秒）');
     buffer.writeln('- `await Memento.system.formatDate(dateInput, format)` - 格式化日期');
     buffer.writeln('  - dateInput: 时间戳（毫秒）或 ISO 字符串');
@@ -525,6 +564,10 @@ return result;
     buffer.writeln('- `await Memento.system.getDeviceInfo()` - 获取设备信息');
     buffer.writeln('- `await Memento.system.getAppInfo()` - 获取应用信息\n');
     buffer.writeln('⚠️ **重要**：不要将系统 API 作为单独的步骤，而是在需要时直接在代码中调用！\n');
+
+    // 添加插件别名映射
+    buffer.write(ToolConfigManager.generatePluginAliasesPrompt());
+
     buffer.writeln('---\n');
     buffer.writeln('以下是你需要的插件工具的详细使用说明：\n');
 

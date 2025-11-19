@@ -34,6 +34,7 @@ class AIAgent {
   final Color? iconColor;
   final String? avatarUrl;
   final bool enableFunctionCalling;
+  final String? promptPresetId;
 
   const AIAgent({
     required this.id,
@@ -57,6 +58,7 @@ class AIAgent {
     this.iconColor,
     this.avatarUrl,
     this.enableFunctionCalling = false,
+    this.promptPresetId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -81,6 +83,7 @@ class AIAgent {
     'iconColor': iconColor?.value,
     'avatarUrl': avatarUrl,
     'enableFunctionCalling': enableFunctionCalling,
+    'promptPresetId': promptPresetId,
   };
 
   factory AIAgent.fromJson(Map<String, dynamic> json) => AIAgent(
@@ -105,6 +108,7 @@ class AIAgent {
     iconColor: json['iconColor'] != null ? Color(json['iconColor'] as int) : null,
     avatarUrl: json['avatarUrl'] as String?,
     enableFunctionCalling: json['enableFunctionCalling'] as bool? ?? false,
+    promptPresetId: json['promptPresetId'] as String?,
   );
 
   /// 创建一个新的 AIAgent 实例，可以选择性地更新某些字段
@@ -130,6 +134,7 @@ class AIAgent {
     double? presencePenalty,
     List<String>? stop,
     bool? enableFunctionCalling,
+    String? promptPresetId,
   }) {
     return AIAgent(
       id: id ?? this.id,
@@ -153,6 +158,7 @@ class AIAgent {
       presencePenalty: presencePenalty ?? this.presencePenalty,
       stop: stop ?? this.stop,
       enableFunctionCalling: enableFunctionCalling ?? this.enableFunctionCalling,
+      promptPresetId: promptPresetId ?? this.promptPresetId,
     );
   }
 }

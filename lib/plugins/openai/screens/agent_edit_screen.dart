@@ -7,9 +7,11 @@ import '../../../widgets/image_picker_dialog.dart';
 import '../models/ai_agent.dart';
 import '../models/service_provider.dart';
 import '../models/llm_models.dart';
+import '../models/prompt_preset.dart';
 import '../openai_plugin.dart';
 import '../controllers/provider_controller.dart';
 import '../services/test_service.dart';
+import '../services/prompt_preset_service.dart';
 import '../../../core/plugin_manager.dart';
 import 'model_search_screen.dart';
 
@@ -52,10 +54,16 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   List<ServiceProvider> _providers = [];
   bool _isLoadingProviders = true;
 
+  // Prompt 预设相关
+  final PromptPresetService _presetService = PromptPresetService();
+  List<PromptPreset> _presets = [];
+  String? _selectedPresetId;
+
   @override
   void initState() {
     super.initState();
     _loadProviders();
+    _loadPresets();
     if (widget.agent != null) {
       _nameController.text = widget.agent!.name;
       _descriptionController.text = widget.agent!.description;
@@ -69,6 +77,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       _headersController.text = _formatHeaders(widget.agent!.headers);
       _tags.addAll(widget.agent!.tags);
       _enableFunctionCalling = widget.agent!.enableFunctionCalling;
+      _selectedPresetId = widget.agent!.promptPresetId;
+    }
+  }
+
+  Future<void> _loadPresets() async {
+    _presets = await _presetService.loadPresets();
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -245,6 +261,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       iconColor: _selectedIconColor,
       avatarUrl: _avatarUrl,
       enableFunctionCalling: _enableFunctionCalling,
+      promptPresetId: _selectedPresetId,
     );
 
     try {
@@ -647,14 +664,51 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               },
             ),
             const SizedBox(height: 16),
+            // Prompt 预设选择
+            DropdownButtonFormField<String>(
+              value: _selectedPresetId,
+              decoration: InputDecoration(
+                labelText: OpenAILocalizations.of(context).promptPreset,
+                hintText: OpenAILocalizations.of(context).selectPromptPreset,
+              ),
+              items: [
+                DropdownMenuItem<String>(
+                  value: null,
+                  child: Text(OpenAILocalizations.of(context).noPreset),
+                ),
+                ..._presets.map((preset) {
+                  return DropdownMenuItem<String>(
+                    value: preset.id,
+                    child: Text(preset.name),
+                  );
+                }),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedPresetId = value;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _promptController,
               decoration: InputDecoration(
                 labelText: OpenAILocalizations.of(context).systemPrompt,
                 hintText: OpenAILocalizations.of(context).enterSystemPrompt,
+                helperText: _selectedPresetId != null
+                    ? OpenAILocalizations.of(context).promptPresetActiveHint
+                    : null,
+                helperStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
               maxLines: 5,
+              enabled: _selectedPresetId == null,
               validator: (value) {
+                // 如果选择了预设，不需要验证原有的 prompt
+                if (_selectedPresetId != null) {
+                  return null;
+                }
                 if (value == null || value.isEmpty) {
                   return OpenAILocalizations.of(
                     context,
