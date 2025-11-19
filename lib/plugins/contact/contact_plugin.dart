@@ -164,7 +164,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       'updateContact': _jsUpdateContact,
       'deleteContact': _jsDeleteContact,
 
-      // 交���记录相关
+      // 记录相关
       'addInteraction': _jsAddInteraction,
       'getInteractions': _jsGetInteractions,
       'deleteInteraction': _jsDeleteInteraction,

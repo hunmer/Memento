@@ -710,7 +710,6 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 child: const Text('清空'),
               ),
             ],
