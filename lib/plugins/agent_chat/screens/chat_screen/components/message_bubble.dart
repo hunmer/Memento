@@ -22,6 +22,7 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(String messageId)? onRegenerate;
   final Future<void> Function(ChatMessage message)? onSaveTool;
   final Future<void> Function(String messageId)? onRerunTool;
+  final Future<void> Function(String messageId, int stepIndex)? onRerunStep;
   final bool hasAgent;
   final StorageManager? storage;
 
@@ -33,6 +34,7 @@ class MessageBubble extends StatelessWidget {
     this.onRegenerate,
     this.onSaveTool,
     this.onRerunTool,
+    this.onRerunStep,
     this.hasAgent = true,
     this.storage,
   });
@@ -228,6 +230,9 @@ class MessageBubble extends StatelessWidget {
           ToolCallSteps(
             steps: message.toolCall!.steps,
             isGenerating: message.isGenerating,
+            onRerunStep: onRerunStep != null
+                ? (stepIndex) => onRerunStep!(message.id, stepIndex)
+                : null,
           ),
 
           // 显示AI最终回复

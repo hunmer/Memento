@@ -6,6 +6,7 @@ import 'platform/js_engine_factory.dart';
 import 'platform/mobile_js_engine.dart';
 import 'js_ui_handlers.dart';
 import '../plugin_base.dart';
+import '../data_filter/field_filter_service.dart';
 
 /// 全局 JS 桥接管理器
 class JSBridgeManager {
@@ -119,7 +120,7 @@ class JSBridgeManager {
       final dartFunction = entry.value;
 
       // 包装函数：直接返回原始结果或 Future
-      // 不使用 async，让 mobile_js_engine 统一处理异步
+      // 集成字段过滤器，支持 mode/fields/excludeFields 参数
       dynamic wrappedFunction(
           [dynamic a, dynamic b, dynamic c, dynamic d, dynamic e]) {
         try {
@@ -137,21 +138,31 @@ class JSBridgeManager {
             paramsMap = {};
           }
 
+          // 提取过滤参数（避免传递给底层方法）
+          final originalParams = Map<String, dynamic>.from(paramsMap);
+          final cleanedParams = FieldFilterService.cleanParams(paramsMap);
+
           // 直接调用 Dart 函数并返回（可能是同步值或 Future）
-          final result = Function.apply(dartFunction, [paramsMap]);
+          final result = Function.apply(dartFunction, [cleanedParams]);
 
           // 如果是 Future，包装为返回序列化结果的 Future
           if (result is Future) {
             return result.then((awaitedResult) {
-              return _serializeResult(awaitedResult);
+              // 应用字段过滤器
+              final filtered = FieldFilterService.filterFromParams(
+                awaitedResult,
+                originalParams,
+              );
+              return _serializeResult(filtered);
             }).catchError((e) {
               print('JS API Error [${plugin.id}.$apiName]: $e');
               return jsonEncode({'error': e.toString()});
             });
           }
 
-          // 同步结果直接序列化
-          return _serializeResult(result);
+          // 同步结果：应用过滤器后序列化
+          final filtered = FieldFilterService.filterFromParams(result, originalParams);
+          return _serializeResult(filtered);
         } catch (e) {
           print('JS API Error [${plugin.id}.$apiName]: $e');
           return jsonEncode({'error': e.toString()});

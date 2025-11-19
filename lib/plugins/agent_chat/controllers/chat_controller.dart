@@ -1482,6 +1482,78 @@ class ChatController extends ChangeNotifier {
     }
   }
 
+  /// 重新执行单个工具调用步骤
+  Future<void> rerunSingleStep(String messageId, int stepIndex) async {
+    try {
+      // 获取消息
+      final message = messageService.getMessage(conversation.id, messageId);
+      if (message == null) {
+        throw Exception('消息不存在');
+      }
+
+      // 检查是否有工具调用
+      if (message.toolCall == null || message.toolCall!.steps.isEmpty) {
+        throw Exception('该消息不包含工具调用');
+      }
+
+      if (stepIndex < 0 || stepIndex >= message.toolCall!.steps.length) {
+        throw Exception('步骤索引超出范围');
+      }
+
+      debugPrint(
+        '🔄 开始重新执行步骤 $stepIndex, messageId=${messageId.substring(0, 8)}',
+      );
+
+      final steps = List<ToolCallStep>.from(message.toolCall!.steps);
+      final targetStep = steps[stepIndex];
+
+      // 重置该步骤状态
+      steps[stepIndex] = targetStep.withoutRuntimeState(
+        state: ToolCallStatus.pending,
+      );
+
+      // 更新消息
+      var updatedMessage = message.copyWith(
+        toolCall: ToolCallResponse(steps: steps),
+      );
+      await messageService.updateMessage(updatedMessage);
+      notifyListeners();
+
+      debugPrint('✅ 步骤 $stepIndex 状态已重置, 开始执行');
+
+      // 重新执行该步骤
+      steps[stepIndex].status = ToolCallStatus.running;
+      await _updateMessageToolSteps(messageId, steps);
+      notifyListeners();
+
+      try {
+        // 执行步骤
+        final result = await ToolService.executeToolStep(steps[stepIndex]);
+
+        // 更新步骤状态为成功
+        steps[stepIndex].status = ToolCallStatus.success;
+        steps[stepIndex].result = result;
+        steps[stepIndex].error = null; // 清除之前的错误
+        await _updateMessageToolSteps(messageId, steps);
+        notifyListeners();
+
+        debugPrint('✅ 步骤 $stepIndex 重新执行成功');
+      } catch (e) {
+        // 更新步骤状态为失败
+        steps[stepIndex].status = ToolCallStatus.failed;
+        steps[stepIndex].error = e.toString();
+        await _updateMessageToolSteps(messageId, steps);
+        notifyListeners();
+
+        debugPrint('❌ 步骤 $stepIndex 重新执行失败: $e');
+        rethrow;
+      }
+    } catch (e) {
+      debugPrint('❌ 重新执行单个步骤失败: $e');
+      rethrow;
+    }
+  }
+
   @override
   void dispose() {
     // 清理资源
