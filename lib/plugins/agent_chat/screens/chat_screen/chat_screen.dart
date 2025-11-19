@@ -469,7 +469,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// 处理保存工具
   Future<void> _handleSaveTool(ChatMessage message) async {
-    await showSaveToolDialog(context, message, _templateService);
+    await showSaveToolDialog(
+      context,
+      message,
+      _templateService,
+      declaredTools: _controller.selectedTools,
+    );
   }
 
   /// 打开工具模板管理界面

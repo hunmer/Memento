@@ -20,6 +20,7 @@ class ToolTemplateScreen extends StatefulWidget {
 
 class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
   String _searchQuery = '';
+  String? _selectedTag;
 
   @override
   void initState() {
@@ -41,34 +42,137 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final templates = _searchQuery.isEmpty
-        ? widget.templateService.templates
-        : widget.templateService.searchTemplates(_searchQuery);
+    // 应用搜索和标签过滤
+    var templates = widget.templateService.templates;
+
+    if (_searchQuery.isNotEmpty) {
+      templates = widget.templateService.searchTemplates(_searchQuery);
+    }
+
+    if (_selectedTag != null) {
+      templates = templates.where((t) => t.tags.contains(_selectedTag)).toList();
+    }
+
+    final allTags = widget.templateService.getAllTags();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('工具模板'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: '搜索工具模板...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
+        actions: [
+          // 标签过滤按钮
+          if (allTags.isNotEmpty)
+            PopupMenuButton<String?>(
+              icon: Icon(
+                Icons.filter_list,
+                color: _selectedTag != null ? Colors.blue : null,
               ),
-              onChanged: (value) {
+              tooltip: '按标签过滤',
+              onSelected: (tag) {
                 setState(() {
-                  _searchQuery = value;
+                  _selectedTag = tag;
                 });
               },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: null,
+                  child: Row(
+                    children: [
+                      Icon(Icons.clear, size: 18),
+                      SizedBox(width: 8),
+                      Text('全部'),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
+                ...allTags.map((tag) {
+                  final count = widget.templateService.templates
+                      .where((t) => t.tags.contains(tag))
+                      .length;
+                  return PopupMenuItem(
+                    value: tag,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.label,
+                          size: 18,
+                          color: _selectedTag == tag
+                              ? Colors.blue
+                              : Colors.grey,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(tag),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            count.toString(),
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
             ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(_selectedTag != null ? 100 : 60),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: '搜索工具模板...',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                ),
+              ),
+              // 当前选中的标签
+              if (_selectedTag != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                  child: Row(
+                    children: [
+                      const Text(
+                        '当前过滤：',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      const SizedBox(width: 8),
+                      Chip(
+                        avatar: const Icon(Icons.label, size: 16),
+                        label: Text(_selectedTag!),
+                        onDeleted: () {
+                          setState(() {
+                            _selectedTag = null;
+                          });
+                        },
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -236,8 +340,54 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                       '使用 ${template.usageCount} 次',
                       Colors.green,
                     ),
+                  if (template.declaredTools.isNotEmpty)
+                    _buildInfoChip(
+                      Icons.build_circle,
+                      '${template.declaredTools.length} 个工具',
+                      Colors.orange,
+                    ),
                 ],
               ),
+
+              // 标签
+              if (template.tags.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: template.tags.map((tag) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.blue.shade200),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.label,
+                            size: 12,
+                            color: Colors.blue.shade700,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            tag,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.blue.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ],
           ),
         ),
@@ -299,6 +449,36 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                 const SizedBox(height: 16),
                 const Divider(),
               ],
+              const SizedBox(height: 8),
+
+              // 显示声明的工具
+              if (template.declaredTools.isNotEmpty) ...[
+                Text(
+                  '声明的工具 (${template.declaredTools.length})',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: template.declaredTools.map((tool) {
+                    return Chip(
+                      avatar: const Icon(Icons.build, size: 16),
+                      label: Text(
+                        tool['toolName'] ?? tool['toolId'] ?? '',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      visualDensity: VisualDensity.compact,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+              ],
+
               const SizedBox(height: 8),
               Text(
                 '工具步骤 (${template.steps.length})',
