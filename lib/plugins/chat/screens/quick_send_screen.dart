@@ -42,7 +42,7 @@ class _QuickSendScreenState extends State<QuickSendScreen> {
       }
 
       // 查找指定的频道
-      final channel = plugin.channelController.channels
+      final channel = plugin.channelService.channels
           .firstWhere((c) => c.id == widget.channelId);
 
       setState(() {
@@ -130,7 +130,7 @@ class _QuickSendScreenState extends State<QuickSendScreen> {
 
   Widget _buildChannelList() {
     final plugin = ChatPlugin.instance;
-    final channels = plugin.channelController.channels;
+    final channels = plugin.channelService.channels;
 
     if (channels.isEmpty) {
       return Center(
@@ -163,16 +163,16 @@ class _QuickSendScreenState extends State<QuickSendScreen> {
         final channel = channels[index];
         return ListTile(
           leading: CircleAvatar(
-            backgroundColor: channel.color,
+            backgroundColor: channel.backgroundColor,
             child: Icon(
               channel.icon,
               color: Colors.white,
             ),
           ),
-          title: Text(channel.name),
-          subtitle: channel.description != null && channel.description!.isNotEmpty
+          title: Text(channel.title),
+          subtitle: channel.messages.isNotEmpty
               ? Text(
-                  channel.description!,
+                  channel.messages.last.content,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 )

@@ -15,7 +15,7 @@ class ChatWidgetService {
   static Future<void> updateWidget() async {
     try {
       final plugin = ChatPlugin.instance;
-      final channels = plugin.channelController.channels;
+      final channels = plugin.channelService.channels;
 
       // 获取最近使用的频道（按最后消息时间排序）
       final recentChannels = _getRecentChannels(channels);
@@ -23,9 +23,9 @@ class ChatWidgetService {
       // 序列化频道数据
       final channelsData = recentChannels.map((c) => {
         'id': c.id,
-        'name': c.name,
+        'name': c.title,
         'iconCodePoint': c.icon.codePoint,
-        'colorValue': c.color.value,
+        'colorValue': c.backgroundColor.value,
         'lastMessage': c.messages.isNotEmpty ? c.messages.last.content : '',
         'unreadCount': 0, // TODO: 实现未读计数
       }).toList();
@@ -53,10 +53,10 @@ class ChatWidgetService {
     final sorted = List<Channel>.from(channels);
     sorted.sort((a, b) {
       final aTime = a.messages.isNotEmpty
-          ? a.messages.last.sentTime
+          ? a.messages.last.date
           : DateTime.fromMillisecondsSinceEpoch(0);
       final bTime = b.messages.isNotEmpty
-          ? b.messages.last.sentTime
+          ? b.messages.last.date
           : DateTime.fromMillisecondsSinceEpoch(0);
       return bTime.compareTo(aTime);
     });

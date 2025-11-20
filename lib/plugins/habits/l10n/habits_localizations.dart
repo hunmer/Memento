@@ -84,7 +84,6 @@ abstract class HabitsLocalizations {
   String get habitNotFoundCannotBeEmpty;
   String get habitAlreadyExistsCannotBeEmpty;
 
-  @override
   String get deleteHabitConfirmation =>
       'Are you sure you want to delete habit "\${habit.name}"? This action cannot be undone.';
 

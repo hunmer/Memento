@@ -24,6 +24,7 @@ class _FilterDialogState extends State<FilterDialog> {
   late Set<String> _selectedProviders;
   late Set<String> _selectedTags;
   late final OpenAIPlugin _plugin;
+  // ignore: prefer_typing_uninitialized_variables
   late final _controller;
   final ProviderController _providerController = ProviderController();
   List<String> _allTags = [];

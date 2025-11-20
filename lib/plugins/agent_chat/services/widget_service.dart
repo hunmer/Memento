@@ -24,10 +24,9 @@ class AgentChatWidgetService {
       final conversationsData = recentConversations.map((c) => {
         'id': c.id,
         'title': c.title,
-        'lastMessage': c.lastMessage?.content ?? '',
-        'lastMessageTime': c.lastMessage?.timestamp.toIso8601String() ?? '',
-        'messageCount': c.messages.length,
-        'groupName': c.groupName,
+        'lastMessage': c.lastMessagePreview ?? '',
+        'lastMessageTime': c.lastMessageAt.toIso8601String(),
+        'groupName': c.groups.isNotEmpty ? c.groups.first : '',
       }).toList();
 
       // 保存到 SharedPreferences（Android）/ UserDefaults（iOS）
@@ -52,9 +51,7 @@ class AgentChatWidgetService {
     // 按最后消息时间排序
     final sorted = List<Conversation>.from(conversations);
     sorted.sort((a, b) {
-      final aTime = a.lastMessage?.timestamp ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final bTime = b.lastMessage?.timestamp ?? DateTime.fromMillisecondsSinceEpoch(0);
-      return bTime.compareTo(aTime);
+      return b.lastMessageAt.compareTo(a.lastMessageAt);
     });
 
     return sorted.take(_maxRecentConversations).toList();

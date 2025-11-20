@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
@@ -70,7 +69,6 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   Future<void> initialize() async {
     await TrackerNotificationUtils.initialize();
     await _controller.loadInitialData();
-
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
@@ -196,7 +194,6 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   @override
   Map<String, Function> defineJSAPI() {
     return {
-
       // 目标相关
       'getGoals': _jsGetGoals,
       'getGoal': _jsGetGoal,
@@ -271,11 +268,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final int? count = params['count'];
 
     if (offset != null || count != null) {
-      return _paginate(
-        goalsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
+      return _paginate(goalsJson, offset: offset ?? 0, count: count ?? 100);
     }
 
     // 兼容旧版本：无分页参数时返回全部数据
@@ -316,9 +309,10 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     if (targetValueRaw == null) {
       return {'error': '缺少必需参数: targetValue'};
     }
-    final double targetValue = targetValueRaw is int
-        ? targetValueRaw.toDouble()
-        : targetValueRaw as double;
+    final double targetValue =
+        targetValueRaw is int
+            ? targetValueRaw.toDouble()
+            : targetValueRaw as double;
 
     // 提取可选参数
     final String? customId = params['id']; // 支持自定义ID
@@ -327,9 +321,10 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final String? dateType = params['dateType'];
 
     // 如果提供了自定义ID，使用自定义ID；否则使用时间戳生成
-    final goalId = customId?.isNotEmpty == true
-        ? customId!
-        : DateTime.now().millisecondsSinceEpoch.toString();
+    final goalId =
+        customId?.isNotEmpty == true
+            ? customId!
+            : DateTime.now().millisecondsSinceEpoch.toString();
 
     // 检查ID是否已存在
     final existingGoals = await _controller.getAllGoals();
@@ -344,9 +339,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       unitType: unitType,
       targetValue: targetValue,
       currentValue: 0,
-      dateSettings: DateSettings(
-        type: dateType ?? 'daily',
-      ),
+      dateSettings: DateSettings(type: dateType ?? 'daily'),
       isLoopReset: true,
       createdAt: DateTime.now(),
       group: group ?? '默认',
@@ -393,9 +386,10 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       unitType: updateJson['unitType'] ?? oldGoal.unitType,
       targetValue: getDoubleValue('targetValue', oldGoal.targetValue),
       currentValue: getDoubleValue('currentValue', oldGoal.currentValue),
-      dateSettings: updateJson['dateSettings'] != null
-          ? DateSettings.fromJson(updateJson['dateSettings'])
-          : oldGoal.dateSettings,
+      dateSettings:
+          updateJson['dateSettings'] != null
+              ? DateSettings.fromJson(updateJson['dateSettings'])
+              : oldGoal.dateSettings,
       reminderTime: updateJson['reminderTime'] ?? oldGoal.reminderTime,
       isLoopReset: updateJson['isLoopReset'] ?? oldGoal.isLoopReset,
       createdAt: oldGoal.createdAt,
@@ -437,9 +431,8 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     if (valueRaw == null) {
       return {'error': '缺少必需参数: value'};
     }
-    final double value = valueRaw is int
-        ? valueRaw.toDouble()
-        : valueRaw as double;
+    final double value =
+        valueRaw is int ? valueRaw.toDouble() : valueRaw as double;
 
     // 提取可选参数
     final String? customId = params['id']; // 支持自定义ID
@@ -453,9 +446,10 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     );
 
     // 如果提供了自定义ID，使用自定义ID；否则使用时间戳生成
-    final recordId = customId?.isNotEmpty == true
-        ? customId!
-        : DateTime.now().millisecondsSinceEpoch.toString();
+    final recordId =
+        customId?.isNotEmpty == true
+            ? customId!
+            : DateTime.now().millisecondsSinceEpoch.toString();
 
     // 检查ID是否已存在
     final existingRecords = await _controller.getRecordsForGoal(goalId);
@@ -495,19 +489,16 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     records.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
 
     // 如果指定了 limit，只返回最新的 N 条记录（向后兼容）
-    final List<Record> resultRecords = limit != null && limit < records.length
-        ? records.sublist(0, limit)
-        : records;
+    final List<Record> resultRecords =
+        limit != null && limit < records.length
+            ? records.sublist(0, limit)
+            : records;
 
     final recordsJson = resultRecords.map((r) => r.toJson()).toList();
 
     // 检查是否需要分页
     if (offset != null || count != null) {
-      return _paginate(
-        recordsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
+      return _paginate(recordsJson, offset: offset ?? 0, count: count ?? 100);
     }
 
     // 兼容旧版本：无分页参数时返回全部数据

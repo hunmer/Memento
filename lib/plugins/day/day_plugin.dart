@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/day/l10n/day_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
@@ -294,23 +293,16 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
         title: name,
         targetDate: targetDate,
         notes: notes,
-        backgroundColor: backgroundColor != null
-            ? Color(backgroundColor)
-            : null,
+        backgroundColor:
+            backgroundColor != null ? Color(backgroundColor) : null,
       );
 
       // 添加到控制器
       await _controller.addMemorialDay(memorialDay);
 
-      return jsonEncode({
-        'success': true,
-        'data': memorialDay.toJson(),
-      });
+      return jsonEncode({'success': true, 'data': memorialDay.toJson()});
     } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': e.toString(),
-      });
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
   }
 
@@ -324,8 +316,10 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       // 查找现有纪念日
-      final existingDay = _controller.memorialDays
-          .firstWhere((d) => d.id == id, orElse: () => throw Exception('未找到 ID 为 $id 的纪念日'));
+      final existingDay = _controller.memorialDays.firstWhere(
+        (d) => d.id == id,
+        orElse: () => throw Exception('未找到 ID 为 $id 的纪念日'),
+      );
 
       // 可选参数
       final String? name = params['name'];
@@ -357,22 +351,15 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
         title: name,
         targetDate: targetDate,
         notes: notes,
-        backgroundColor: backgroundColor != null
-            ? Color(backgroundColor)
-            : null,
+        backgroundColor:
+            backgroundColor != null ? Color(backgroundColor) : null,
       );
 
       await _controller.updateMemorialDay(updatedDay);
 
-      return jsonEncode({
-        'success': true,
-        'data': updatedDay.toJson(),
-      });
+      return jsonEncode({'success': true, 'data': updatedDay.toJson()});
     } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': e.toString(),
-      });
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
   }
 
@@ -386,15 +373,9 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       await _controller.deleteMemorialDay(id);
-      return jsonEncode({
-        'success': true,
-        'message': '纪念日已删除',
-      });
+      return jsonEncode({'success': true, 'message': '纪念日已删除'});
     } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': e.toString(),
-      });
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
   }
 
@@ -410,7 +391,11 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
       final targetDate = DateTime.parse(date);
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      final target = DateTime(targetDate.year, targetDate.month, targetDate.day);
+      final target = DateTime(
+        targetDate.year,
+        targetDate.month,
+        targetDate.day,
+      );
       final days = target.difference(today).inDays;
 
       return jsonEncode({
@@ -420,10 +405,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
         'isToday': days == 0,
       });
     } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': e.toString(),
-      });
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
   }
 
@@ -433,12 +415,11 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
       // 可选参数
       final int withinDays = params['withinDays'] ?? 7;
 
-      final upcomingDays = _controller.memorialDays
-          .where((day) {
+      final upcomingDays =
+          _controller.memorialDays.where((day) {
             final daysRemaining = day.daysRemaining;
             return daysRemaining >= 0 && daysRemaining <= withinDays;
-          })
-          .toList();
+          }).toList();
 
       return jsonEncode({
         'success': true,
@@ -446,10 +427,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
         'days': upcomingDays.map((d) => d.toJson()).toList(),
       });
     } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': e.toString(),
-      });
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
   }
 
@@ -505,11 +483,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
 
     final day = _controller.memorialDays.firstWhere(
       (d) => d.id == id,
-      orElse: () => MemorialDay(
-        id: '',
-        title: '',
-        targetDate: DateTime.now(),
-      ),
+      orElse: () => MemorialDay(id: '', title: '', targetDate: DateTime.now()),
     );
 
     if (day.id.isEmpty) {
