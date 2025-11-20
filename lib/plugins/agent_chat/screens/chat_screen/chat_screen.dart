@@ -78,20 +78,25 @@ class _ChatScreenState extends State<ChatScreen> {
       getSettings: widget.getSettings,
     );
 
-    // 在 initialize 之前添加监听器，确保状态变化能触发界面更新
-    _controller.addListener(_onControllerChanged);
-    _controller.messageService.addListener(_onControllerChanged);
-
     debugPrint('🚀 开始初始化ChatController');
     await _controller.initialize();
     debugPrint(
       '✅ ChatController初始化完成, currentAgent=${_controller.currentAgent?.name}',
     );
 
-    // 初始化完成后滚动到底部
+    // 初始化完成后在下一帧添加监听器，避免在build期间触发setState
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToBottom();
+        if (mounted) {
+          _controller.addListener(_onControllerChanged);
+          _controller.messageService.addListener(_onControllerChanged);
+          // 触发一次更新以显示初始化后的数据
+          if (mounted) {
+            setState(() {});
+          }
+          // 滚动到底部
+          _scrollToBottom();
+        }
       });
     }
   }

@@ -125,6 +125,7 @@ abstract class OpenAILocalizations {
   String get testInput;
   String get loadLastInput;
   String get clearInput;
+  String get clearOutput;
   String get selectImage;
   String get noImageSelected;
   String get selectedImage;
@@ -545,6 +546,9 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
 
   @override
   String get clearInput => '清空输入';
+
+  @override
+  String get clearOutput => '清空输出';
 
   @override
   String get selectImage => '选择图片';
@@ -1038,6 +1042,9 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
 
   @override
   String get clearInput => 'Clear Input';
+
+  @override
+  String get clearOutput => 'Clear Output';
 
   @override
   String get selectImage => 'Select Image';
