@@ -1,4 +1,5 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/chat/screens/quick_send_screen.dart';
 import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:Memento/plugins/tts/screens/tts_services_screen.dart';
@@ -12,6 +13,7 @@ import 'package:Memento/screens/notification_test/notification_test_page.dart';
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
+import 'package:Memento/plugins/agent_chat/screens/voice_quick_screen.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
@@ -71,6 +73,10 @@ class AppRoutes extends NavigatorObserver {
   // Agent Chat 子页面路由
   static const String toolTemplate = '/tool_template';
   static const String toolManagement = '/tool_management';
+
+  // 桌面小组件快捷路由
+  static const String quickSend = '/quick_send';
+  static const String voiceQuick = '/voice_quick';
 
   // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page) {
@@ -140,6 +146,14 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const JsonDynamicTestScreen());
       case 'notification_test':
         return _createRoute(const NotificationTestPage());
+      case 'quick_send':
+        // 从参数中获取频道ID
+        final channelId = settings.arguments as String?;
+        return _createRoute(QuickSendScreen(channelId: channelId));
+      case 'voice_quick':
+        // 从参数中获取对话ID
+        final conversationId = settings.arguments as String?;
+        return _createRoute(VoiceQuickScreen(conversationId: conversationId));
       default:
         return _createRoute(
           Scaffold(

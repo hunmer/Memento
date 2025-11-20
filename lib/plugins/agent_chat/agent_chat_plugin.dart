@@ -8,6 +8,7 @@ import 'screens/conversation_list_screen/conversation_list_screen.dart';
 import 'screens/agent_chat_settings_screen.dart';
 import 'services/tool_service.dart';
 import 'services/tool_template_service.dart';
+import 'services/widget_service.dart';
 import '../openai/openai_plugin.dart';
 // import 'l10n/agent_chat_localizations.dart';
 
@@ -66,6 +67,9 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
     // 初始化工具服务
     await ToolService.initialize();
+
+    // 初始化小组件服务
+    await AgentChatWidgetService.initialize();
   }
 
   @override
