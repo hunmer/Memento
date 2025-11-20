@@ -5,6 +5,7 @@ import '../models/channel.dart';
 import '../models/message.dart';
 import '../chat_plugin.dart';
 import '../../../core/event/event.dart';
+import 'widget_service.dart';
 
 /// 负责管理频道相关的功能
 class ChannelService {
@@ -291,6 +292,10 @@ class ChannelService {
 
     // 再次通知以确保存储同步后的状态更新
     _plugin.refresh();
+
+    // 更新桌面小组件
+    ChatWidgetService.updateWidget();
+
     return true;
   }
 
@@ -567,6 +572,9 @@ class ChannelService {
       );
       // 统一通知UI更新，避免多次触发
       _plugin.refresh();
+
+      // 更新桌面小组件
+      ChatWidgetService.updateWidget();
     } else {
       debugPrint('无法更新消息：在频道 ${message.channelId} 中未找到ID为 ${message.id} 的消息');
     }
