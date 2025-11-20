@@ -1,0 +1,76 @@
+[
+  {
+    "id": "default-nodes-notebooks",
+    "name": "查看所有笔记本",
+    "description": "获取所有笔记本列表",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取笔记本列表",
+        "desc": "查询所有笔记本",
+        "data": "const notebooks = await Memento.plugins.nodes.getNotebooks();\n\nreturn {\n  count: notebooks.length,\n  notebooks: notebooks.map(n => ({\n    id: n.id,\n    name: n.name,\n    nodeCount: n.nodeCount\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["nodes", "笔记本", "列表"],
+    "declaredTools": [
+      {"id": "nodes_getNotebooks", "name": "获取笔记本列表"}
+    ]
+  },
+  {
+    "id": "default-nodes-create-notebook",
+    "name": "创建笔记本",
+    "description": "创建一个新的笔记本",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建笔记本",
+        "desc": "创建\"工作笔记\"笔记本",
+        "data": "const notebook = await Memento.plugins.nodes.createNotebook({\n  name: '工作笔记'\n});\n\nreturn {\n  success: true,\n  notebook: {\n    id: notebook.id,\n    name: notebook.name\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["nodes", "创建", "笔记本"],
+    "declaredTools": [
+      {"id": "nodes_createNotebook", "name": "创建笔记本"}
+    ]
+  },
+  {
+    "id": "default-nodes-tree",
+    "name": "获取节点树",
+    "description": "获取笔记本的节点树结构",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取节点树",
+        "desc": "查询笔记本节点树",
+        "data": "const notebooks = await Memento.plugins.nodes.getNotebooks();\nconst notebook = notebooks[0];\n\nif (!notebook) {\n  return { success: false, message: '没有笔记本' };\n}\n\nconst tree = await Memento.plugins.nodes.getTree({\n  notebookId: notebook.id\n});\n\nreturn {\n  notebookName: notebook.name,\n  tree: tree\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["nodes", "节点", "树"],
+    "declaredTools": [
+      {"id": "nodes_getNotebooks", "name": "获取笔记本列表"},
+      {"id": "nodes_getTree", "name": "获取节点树"}
+    ]
+  },
+  {
+    "id": "default-nodes-create-node",
+    "name": "创建节点",
+    "description": "在笔记本中创建新节点",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建节点",
+        "desc": "创建新节点",
+        "data": "const notebooks = await Memento.plugins.nodes.getNotebooks();\nconst notebook = notebooks[0];\n\nif (!notebook) {\n  return { success: false, message: '没有笔记本' };\n}\n\nconst node = await Memento.plugins.nodes.createNode({\n  notebookId: notebook.id,\n  title: '新节点',\n  content: '节点内容'\n});\n\nreturn {\n  success: true,\n  node: {\n    id: node.id,\n    title: node.title\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["nodes", "创建", "节点"],
+    "declaredTools": [
+      {"id": "nodes_getNotebooks", "name": "获取笔记本列表"},
+      {"id": "nodes_createNode", "name": "创建节点"}
+    ]
+  }
+]

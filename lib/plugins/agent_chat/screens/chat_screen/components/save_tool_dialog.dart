@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/chat_message.dart';
 import '../../../models/saved_tool_template.dart';
+import '../../../models/tool_call_step.dart';
 import '../../../services/tool_template_service.dart';
 
 /// 保存/编辑工具对话框
@@ -35,6 +36,7 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
   bool _isSaving = false;
   String? _errorMessage;
   final List<String> _tags = [];
+  final List<ToolCallStep> _steps = [];
 
   @override
   void initState() {
@@ -45,6 +47,21 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
       _nameController.text = template.name;
       _descriptionController.text = template.description ?? '';
       _tags.addAll(template.tags);
+      // 深拷贝步骤
+      _steps.addAll(template.steps.map((s) => ToolCallStep(
+            method: s.method,
+            title: s.title,
+            desc: s.desc,
+            data: s.data,
+          )));
+    } else if (widget.message?.toolCall?.steps != null) {
+      // 创建模式：从消息中获取步骤
+      _steps.addAll(widget.message!.toolCall!.steps.map((s) => ToolCallStep(
+            method: s.method,
+            title: s.title,
+            desc: s.desc,
+            data: s.data,
+          )));
     }
   }
 
@@ -58,9 +75,7 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final stepsCount = widget.isEditMode
-        ? widget.editingTemplate!.steps.length
-        : (widget.message?.toolCall?.steps.length ?? 0);
+    final stepsCount = _steps.length;
 
     return AlertDialog(
       title: Row(
@@ -248,6 +263,58 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
                 ),
               ],
 
+              const SizedBox(height: 16),
+
+              // 步骤编辑区域
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '执行步骤 (${_steps.length})',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _addStep,
+                    icon: const Icon(Icons.add_circle_outline),
+                    tooltip: '添加步骤',
+                    color: Colors.blue,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // 步骤列表
+              if (_steps.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      '暂无步骤，点击上方按钮添加',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: ReorderableListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _steps.length,
+                    onReorder: _onReorderSteps,
+                    itemBuilder: (context, index) {
+                      return _buildStepEditor(index);
+                    },
+                  ),
+                ),
+
               // 错误信息
               if (_errorMessage != null) ...[
                 const SizedBox(height: 12),
@@ -320,6 +387,130 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
     }
   }
 
+  /// 添加步骤
+  void _addStep() {
+    setState(() {
+      _steps.add(ToolCallStep(
+        method: 'run_js',
+        title: '',
+        desc: '',
+        data: '',
+      ));
+    });
+  }
+
+  /// 删除步骤
+  void _deleteStep(int index) {
+    setState(() {
+      _steps.removeAt(index);
+    });
+  }
+
+  /// 重新排序步骤
+  void _onReorderSteps(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) newIndex--;
+      final step = _steps.removeAt(oldIndex);
+      _steps.insert(newIndex, step);
+    });
+  }
+
+  /// 更新步骤
+  void _updateStep(int index, {String? title, String? desc, String? data}) {
+    setState(() {
+      _steps[index] = ToolCallStep(
+        method: _steps[index].method,
+        title: title ?? _steps[index].title,
+        desc: desc ?? _steps[index].desc,
+        data: data ?? _steps[index].data,
+      );
+    });
+  }
+
+  /// 构建步骤编辑器
+  Widget _buildStepEditor(int index) {
+    final step = _steps[index];
+
+    return Card(
+      key: ValueKey(index),
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ExpansionTile(
+        leading: ReorderableDragStartListener(
+          index: index,
+          child: const Icon(Icons.drag_handle, color: Colors.grey),
+        ),
+        title: Text(
+          step.title.isNotEmpty ? step.title : '步骤 ${index + 1}',
+          style: const TextStyle(fontSize: 14),
+        ),
+        subtitle: step.desc.isNotEmpty
+            ? Text(
+                step.desc,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              )
+            : null,
+        trailing: IconButton(
+          onPressed: () => _deleteStep(index),
+          icon: const Icon(Icons.delete_outline, size: 20),
+          color: Colors.red,
+          tooltip: '删除步骤',
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 标题输入
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: '步骤标题',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  controller: TextEditingController(text: step.title),
+                  onChanged: (value) => _updateStep(index, title: value),
+                ),
+                const SizedBox(height: 12),
+
+                // 描述输入
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: '步骤描述',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  controller: TextEditingController(text: step.desc),
+                  onChanged: (value) => _updateStep(index, desc: value),
+                ),
+                const SizedBox(height: 12),
+
+                // 代码输入
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'JavaScript 代码',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                    hintText: 'const result = await Memento.plugins...',
+                  ),
+                  controller: TextEditingController(text: step.data),
+                  maxLines: 8,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                  ),
+                  onChanged: (value) => _updateStep(index, data: value),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// 保存或更新工具
   Future<void> _saveTool() async {
     if (!_formKey.currentState!.validate()) return;
@@ -333,6 +524,18 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
       final name = _nameController.text.trim();
       final description = _descriptionController.text.trim();
 
+      // 验证步骤
+      if (_steps.isEmpty) {
+        throw Exception('至少需要一个步骤');
+      }
+
+      // 验证每个步骤都有代码
+      for (var i = 0; i < _steps.length; i++) {
+        if (_steps[i].data.trim().isEmpty) {
+          throw Exception('步骤 ${i + 1} 的代码不能为空');
+        }
+      }
+
       if (widget.isEditMode) {
         // 编辑模式：更新现有模板
         final template = widget.editingTemplate!;
@@ -340,6 +543,7 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
           name: name,
           description: description.isEmpty ? null : description,
           tags: _tags,
+          steps: _steps,
         );
 
         await widget.templateService.updateTemplate(updatedTemplate);
@@ -355,16 +559,10 @@ class _SaveToolDialogState extends State<SaveToolDialog> {
         }
       } else {
         // 创建模式：新建模板
-        final steps = widget.message?.toolCall?.steps ?? [];
-
-        if (steps.isEmpty) {
-          throw Exception('没有可保存的工具步骤');
-        }
-
         await widget.templateService.createTemplate(
           name: name,
           description: description.isEmpty ? null : description,
-          steps: steps,
+          steps: _steps,
           declaredTools: _getDeclaredTools(),
           tags: _tags,
         );

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "default-album-today",
+    "name": "查看今日照片",
+    "description": "获取今天的照片日记",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取今日照片",
+        "desc": "查询今天的照片日记",
+        "data": "const today = new Date().toISOString().split('T')[0];\nconst photos = await Memento.plugins.calendarAlbum.getPhotos({\n  date: today\n});\n\nreturn {\n  count: photos.length,\n  photos: photos.map(p => ({\n    id: p.id,\n    caption: p.caption,\n    tags: p.tags\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["album", "今日", "照片"],
+    "declaredTools": [
+      {"id": "calendarAlbum_getPhotos", "name": "获取照片"}
+    ]
+  },
+  {
+    "id": "default-album-tags",
+    "name": "查看相册标签",
+    "description": "获取所有照片标签",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取标签列表",
+        "desc": "查询所有标签",
+        "data": "const tags = await Memento.plugins.calendarAlbum.getTags();\n\nreturn {\n  count: tags.length,\n  tags: tags\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["album", "标签", "列表"],
+    "declaredTools": [
+      {"id": "calendarAlbum_getTags", "name": "获取标签"}
+    ]
+  },
+  {
+    "id": "default-album-stats",
+    "name": "相册统计",
+    "description": "获取相册统计信息",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取统计数据",
+        "desc": "查询相册统计",
+        "data": "const stats = await Memento.plugins.calendarAlbum.getStats();\n\nreturn {\n  totalPhotos: stats.totalPhotos,\n  totalDays: stats.totalDays,\n  tagCount: stats.tagCount\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["album", "统计", "数据"],
+    "declaredTools": [
+      {"id": "calendarAlbum_getStats", "name": "获取统计"}
+    ]
+  }
+]

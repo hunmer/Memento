@@ -1,0 +1,56 @@
+[
+  {
+    "id": "default-calendar-today",
+    "name": "查看今日安排",
+    "description": "获取今天的日历事件",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取今日事件",
+        "desc": "查询今天的安排",
+        "data": "const today = new Date();\ntoday.setHours(0, 0, 0, 0);\nconst tomorrow = new Date(today);\ntomorrow.setDate(tomorrow.getDate() + 1);\n\nconst events = await Memento.plugins.calendar.getEvents({\n  startDate: today.toISOString(),\n  endDate: tomorrow.toISOString()\n});\n\nreturn {\n  count: events.length,\n  events: events.map(e => ({\n    id: e.id,\n    title: e.title,\n    startTime: e.startTime,\n    endTime: e.endTime\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["calendar", "今日", "安排"],
+    "declaredTools": [
+      {"id": "calendar_getEvents", "name": "获取事件列表"}
+    ]
+  },
+  {
+    "id": "default-calendar-week",
+    "name": "查看本周事件",
+    "description": "获取本周的日历事件",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取本周事件",
+        "desc": "查询本周的安排",
+        "data": "const now = new Date();\nconst weekStart = new Date(now);\nweekStart.setDate(now.getDate() - now.getDay());\nweekStart.setHours(0, 0, 0, 0);\n\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 7);\n\nconst events = await Memento.plugins.calendar.getEvents({\n  startDate: weekStart.toISOString(),\n  endDate: weekEnd.toISOString()\n});\n\nreturn {\n  count: events.length,\n  events: events.map(e => ({\n    id: e.id,\n    title: e.title,\n    date: e.startTime\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["calendar", "本周", "事件"],
+    "declaredTools": [
+      {"id": "calendar_getEvents", "name": "获取事件列表"}
+    ]
+  },
+  {
+    "id": "default-calendar-create",
+    "name": "创建日历事件",
+    "description": "创建一个新的日历事件",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建事件",
+        "desc": "创建明天下午2点的会议",
+        "data": "const tomorrow = new Date();\ntomorrow.setDate(tomorrow.getDate() + 1);\ntomorrow.setHours(14, 0, 0, 0);\n\nconst endTime = new Date(tomorrow);\nendTime.setHours(15, 0, 0, 0);\n\nconst event = await Memento.plugins.calendar.createEvent({\n  title: '项目会议',\n  startTime: tomorrow.toISOString(),\n  endTime: endTime.toISOString()\n});\n\nreturn {\n  success: true,\n  event: {\n    id: event.id,\n    title: event.title,\n    startTime: event.startTime\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["calendar", "创建", "事件"],
+    "declaredTools": [
+      {"id": "calendar_createEvent", "name": "创建事件"}
+    ]
+  }
+]

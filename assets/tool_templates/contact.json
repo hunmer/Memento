@@ -1,0 +1,75 @@
+[
+  {
+    "id": "default-contact-all",
+    "name": "查看所有联系人",
+    "description": "获取所有联系人列表",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取联系人列表",
+        "desc": "查询所有联系人",
+        "data": "const contacts = await Memento.plugins.contact.getContacts();\n\nreturn {\n  count: contacts.length,\n  contacts: contacts.map(c => ({\n    id: c.id,\n    name: c.name,\n    phone: c.phone,\n    email: c.email\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["contact", "联系人", "列表"],
+    "declaredTools": [
+      {"id": "contact_getContacts", "name": "获取联系人列表"}
+    ]
+  },
+  {
+    "id": "default-contact-create",
+    "name": "创建联系人",
+    "description": "创建一个新的联系人",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建联系人",
+        "desc": "添加新联系人",
+        "data": "const contact = await Memento.plugins.contact.createContact({\n  name: '张三',\n  phone: '13800138000',\n  email: 'zhangsan@example.com'\n});\n\nreturn {\n  success: true,\n  contact: {\n    id: contact.id,\n    name: contact.name\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["contact", "创建", "联系人"],
+    "declaredTools": [
+      {"id": "contact_createContact", "name": "创建联系人"}
+    ]
+  },
+  {
+    "id": "default-contact-interaction",
+    "name": "记录交互",
+    "description": "记录与联系人的交互",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "记录交互",
+        "desc": "记录今天一起吃饭",
+        "data": "const contacts = await Memento.plugins.contact.getContacts();\nconst contact = contacts[0];\n\nif (!contact) {\n  return { success: false, message: '没有联系人' };\n}\n\nconst interaction = await Memento.plugins.contact.addInteraction({\n  contactId: contact.id,\n  type: '聚餐',\n  note: '今天一起吃饭'\n});\n\nreturn {\n  success: true,\n  interaction: {\n    contactName: contact.name,\n    type: interaction.type,\n    date: interaction.date\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["contact", "交互", "记录"],
+    "declaredTools": [
+      {"id": "contact_getContacts", "name": "获取联系人列表"},
+      {"id": "contact_addInteraction", "name": "添加交互记录"}
+    ]
+  },
+  {
+    "id": "default-contact-recent",
+    "name": "最近联系",
+    "description": "获取最近联系的人",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取最近联系",
+        "desc": "查询最近联系的人",
+        "data": "const recent = await Memento.plugins.contact.getRecentContacts({\n  limit: 10\n});\n\nreturn {\n  count: recent.length,\n  contacts: recent.map(c => ({\n    name: c.name,\n    lastInteraction: c.lastInteraction\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["contact", "最近", "联系"],
+    "declaredTools": [
+      {"id": "contact_getRecentContacts", "name": "获取最近联系"}
+    ]
+  }
+]

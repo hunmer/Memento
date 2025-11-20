@@ -1,0 +1,75 @@
+[
+  {
+    "id": "default-timer-create-pomodoro",
+    "name": "创建番茄计时器",
+    "description": "创建一个25分钟的专注计时器",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建计时器",
+        "desc": "创建25分钟番茄计时器",
+        "data": "const timer = await Memento.plugins.timer.createTimer({\n  name: '专注工作',\n  duration: 25 * 60,\n  type: 'countdown'\n});\n\nreturn {\n  success: true,\n  timer: {\n    id: timer.id,\n    name: timer.name,\n    duration: '25分钟'\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["timer", "创建", "番茄"],
+    "declaredTools": [
+      {"id": "timer_createTimer", "name": "创建计时器"}
+    ]
+  },
+  {
+    "id": "default-timer-list",
+    "name": "查看所有计时器",
+    "description": "获取所有计时器列表",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取计时器列表",
+        "desc": "查询所有计时器",
+        "data": "const timers = await Memento.plugins.timer.getTimers();\n\nreturn {\n  count: timers.length,\n  timers: timers.map(t => ({\n    id: t.id,\n    name: t.name,\n    duration: Math.floor(t.duration / 60) + '分钟',\n    status: t.status\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["timer", "列表", "查询"],
+    "declaredTools": [
+      {"id": "timer_getTimers", "name": "获取计时器列表"}
+    ]
+  },
+  {
+    "id": "default-timer-start",
+    "name": "启动计时器",
+    "description": "启动指定的计时器",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "启动计时器",
+        "desc": "启动\"工作\"计时器",
+        "data": "const timers = await Memento.plugins.timer.getTimers();\nconst workTimer = timers.find(t => t.name.includes('工作'));\n\nif (!workTimer) {\n  return { success: false, message: '未找到\"工作\"计时器' };\n}\n\nawait Memento.plugins.timer.startTimer({ id: workTimer.id });\n\nreturn {\n  success: true,\n  message: '计时器已启动',\n  timer: {\n    id: workTimer.id,\n    name: workTimer.name\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["timer", "启动", "控制"],
+    "declaredTools": [
+      {"id": "timer_getTimers", "name": "获取计时器列表"},
+      {"id": "timer_startTimer", "name": "启动计时器"}
+    ]
+  },
+  {
+    "id": "default-timer-history",
+    "name": "查看计时历史",
+    "description": "获取计时器使用历史记录",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取计时历史",
+        "desc": "查询计时历史记录",
+        "data": "const history = await Memento.plugins.timer.getHistory();\n\nreturn {\n  count: history.length,\n  history: history.slice(0, 10).map(h => ({\n    timerName: h.timerName,\n    duration: Math.floor(h.duration / 60) + '分钟',\n    date: h.date\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["timer", "历史", "记录"],
+    "declaredTools": [
+      {"id": "timer_getHistory", "name": "获取计时历史"}
+    ]
+  }
+]

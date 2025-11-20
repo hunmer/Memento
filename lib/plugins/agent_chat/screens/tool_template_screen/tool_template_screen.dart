@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/tool_template_service.dart';
 import '../../models/saved_tool_template.dart';
 import '../chat_screen/components/save_tool_dialog.dart';
+import 'components/template_execution_dialog.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 /// 工具模板管理界面
@@ -248,6 +249,13 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                       ),
                     ),
                   ),
+                  // 执行按钮
+                  IconButton(
+                    onPressed: () => _executeTemplate(template),
+                    icon: const Icon(Icons.play_circle_outline),
+                    tooltip: '执行测试',
+                    color: Colors.green,
+                  ),
                   // 使用按钮
                   if (widget.onUseTemplate != null)
                     FilledButton.icon(
@@ -255,7 +263,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                         widget.onUseTemplate!(template);
                         Navigator.pop(context);
                       },
-                      icon: const Icon(Icons.play_arrow, size: 18),
+                      icon: const Icon(Icons.send, size: 18),
                       label: const Text('使用'),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
@@ -487,5 +495,20 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
         }
       }
     }
+  }
+
+  /// 执行模板测试
+  Future<void> _executeTemplate(SavedToolTemplate template) async {
+    // 克隆步骤以避免修改原始模板
+    final steps = widget.templateService.cloneTemplateSteps(template);
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => TemplateExecutionDialog(
+        templateName: template.name,
+        steps: steps,
+      ),
+    );
   }
 }
