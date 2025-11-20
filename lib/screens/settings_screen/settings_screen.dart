@@ -302,6 +302,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/json_dynamic_test');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: const Text('通知测试'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/notification_test');
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.info),
