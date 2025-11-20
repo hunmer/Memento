@@ -146,10 +146,12 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const JsonDynamicTestScreen());
       case 'notification_test':
         return _createRoute(const NotificationTestPage());
+      case '/quick_send':
       case 'quick_send':
         // 从参数中获取频道ID
         final channelId = settings.arguments as String?;
         return _createRoute(QuickSendScreen(channelId: channelId));
+      case '/voice_quick':
       case 'voice_quick':
         // 从参数中获取对话ID
         final conversationId = settings.arguments as String?;
@@ -191,6 +193,8 @@ class AppRoutes extends NavigatorObserver {
     jsConsole: (context) => const JSConsoleScreen(),
     jsonDynamicTest: (context) => const JsonDynamicTestScreen(),
     notificationTest: (context) => const NotificationTestPage(),
+    quickSend: (context) => const QuickSendScreen(channelId: null),
+    voiceQuick: (context) => const VoiceQuickScreen(conversationId: null),
   };
 
   static String get initialRoute => home;

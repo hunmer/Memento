@@ -27,6 +27,7 @@ import 'package:Memento/widgets/l10n/location_picker_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 import 'package:logging/logging.dart';
+import 'package:home_widget/home_widget.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -229,6 +230,9 @@ void main() async {
     final updateController = AutoUpdateController.instance;
     updateController.initialize();
 
+    // 设置桌面小组件点击监听器
+    await _setupWidgetClickListener();
+
     // 延迟备份服务初始化到Widget构建完成后
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final context = navigatorKey.currentContext;
@@ -283,6 +287,51 @@ Future<void> _initializeHomeWidgets() async {
   } catch (e) {
     debugPrint('主页小组件系统初始化失败: $e');
   }
+}
+
+/// 设置桌面小组件点击监听器
+Future<void> _setupWidgetClickListener() async {
+  // 初始化 HomeWidget (必须在监听前调用)
+  await HomeWidget.setAppGroupId('group.github.hunmer.memento');
+
+  // 监听小组件点击事件
+  HomeWidget.widgetClicked.listen((Uri? uri) {
+    if (uri != null) {
+      debugPrint('收到桌面小组件点击事件: $uri');
+      debugPrint('URI path: ${uri.path}');
+      debugPrint('URI query: ${uri.query}');
+
+      // 解析 URI 路径和参数
+      // 例如: memento://widget/quick_send?channelId=xxx
+      // path 会包含 /quick_send，需要移除前面的路径
+      String routePath = uri.path;
+
+      // 移除 /widget 前缀（如果存在）
+      if (routePath.startsWith('/widget/')) {
+        routePath = routePath.substring(7); // 移除 "/widget"，保留 /quick_send
+      } else if (routePath.startsWith('widget/')) {
+        routePath = '/${routePath.substring(7)}'; // 添加前导斜杠
+      }
+
+      debugPrint('处理后的路由路径: $routePath');
+
+      // 提取参数
+      final queryParams = uri.queryParameters;
+      String? argument;
+      if (queryParams.containsKey('channelId')) {
+        argument = queryParams['channelId'];
+      } else if (queryParams.containsKey('conversationId')) {
+        argument = queryParams['conversationId'];
+      }
+
+      debugPrint('导航到路由: $routePath, 参数: $argument');
+
+      // 使用全局导航键进行路由跳转
+      navigatorKey.currentState?.pushNamed(routePath, arguments: argument);
+    }
+  });
+
+  debugPrint('桌面小组件点击监听器已设置');
 }
 
 class MyApp extends StatefulWidget {

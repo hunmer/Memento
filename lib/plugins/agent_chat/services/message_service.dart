@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../models/chat_message.dart';
 import 'token_counter_service.dart';
+import 'widget_service.dart';
 
 /// 消息服务
 ///
@@ -75,6 +76,9 @@ class MessageService extends ChangeNotifier {
     _messageCache[conversationId]!.add(message);
     await _saveMessages(conversationId);
     notifyListeners();
+
+    // 更新桌面小组件
+    AgentChatWidgetService.updateWidget();
   }
 
   /// 更新消息

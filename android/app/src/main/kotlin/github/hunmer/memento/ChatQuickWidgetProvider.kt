@@ -95,8 +95,9 @@ class ChatQuickWidgetProvider : AppWidgetProvider() {
                         val colorValue = channel.optInt("colorValue", 0xFF5C6BC0.toInt())
                         // views.setInt(channelIconId, "setBackgroundColor", colorValue)
 
-                        // 设置点击事件 - 跳转到 quick_send 界面
-                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                        // 设置点击事件 - 使用 home_widget 方式跳转到 quick_send 界面
+                        val intent = Intent(context, MainActivity::class.java).apply {
+                            action = Intent.ACTION_VIEW
                             data = Uri.parse("memento://widget/quick_send?channelId=$channelId")
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         }
@@ -116,7 +117,8 @@ class ChatQuickWidgetProvider : AppWidgetProvider() {
                 }
 
                 // 设置"选择频道"按钮点击事件 - 打开应用但不指定频道
-                val newChannelIntent = Intent(Intent.ACTION_VIEW).apply {
+                val newChannelIntent = Intent(context, MainActivity::class.java).apply {
+                    action = Intent.ACTION_VIEW
                     data = Uri.parse("memento://widget/quick_send")
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 }
