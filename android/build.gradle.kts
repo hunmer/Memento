@@ -27,6 +27,15 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// 配置所有任务的重复文件处理策略
+tasks.withType<Copy> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType<Jar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
