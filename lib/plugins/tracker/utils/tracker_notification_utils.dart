@@ -1,31 +1,43 @@
-import '../../../core/notification_manager.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:Memento/core/notification_controller.dart';
 import 'package:logging/logging.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/material.dart';
 
 class TrackerNotificationUtils {
   static final _logger = Logger('TrackerNotificationUtils');
-  static const String _channelId = 'tracker_channel';
+  static const String _channelKey = 'tracker_channel';
   static const String _channelName = '目标跟踪提醒';
   static const String _channelDescription = '用于目标跟踪的提醒通知';
 
   static Future<void> initialize({
     Function(String?)? onSelectNotification,
   }) async {
-    await NotificationManager.initialize(
-      onSelectNotification: onSelectNotification,
-      appName: '目标跟踪提醒',
-      appId: 'com.example.memento.tracker',
-    );
-
     // 创建目标跟踪插件专用的通知通道
-    await NotificationManager.createNotificationChannel(
-      channelId: _channelId,
-      channelName: _channelName,
-      channelDescription: _channelDescription,
-      importance: Importance.high,
-      enableVibration: true,
-      enableSound: true,
-    );
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: -1, // 用于测试通道是否存在
+        channelKey: _channelKey,
+        title: '初始化',
+        body: '目标跟踪通知通道已创建',
+      ),
+    ).catchError((error) async {
+      // 如果通道不存在，先创建通道
+      await AwesomeNotifications().initialize(
+        null,
+        [
+          NotificationChannel(
+            channelKey: _channelKey,
+            channelName: _channelName,
+            channelDescription: _channelDescription,
+            defaultColor: const Color(0xFF9D50DD),
+            ledColor: Colors.white,
+            importance: NotificationImportance.High,
+            enableVibration: true,
+            playSound: true,
+          ),
+        ],
+      );
+    });
   }
 
   static Future<void> scheduleDailyNotification({
@@ -38,7 +50,7 @@ class TrackerNotificationUtils {
   }) async {
     try {
       final now = DateTime.now();
-      final scheduledDate = DateTime(
+      var scheduledDate = DateTime(
         now.year,
         now.month,
         now.day,
@@ -46,14 +58,26 @@ class TrackerNotificationUtils {
         minute,
       );
 
-      await NotificationManager.scheduleNotification(
-        id: id,
-        title: title,
-        body: body,
-        scheduledDate: scheduledDate,
-        channelId: _channelId,
-        isDaily: true,
-        payload: payload,
+      // 如果时间已过，安排到明天
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: id,
+          channelKey: _channelKey,
+          title: title,
+          body: body,
+          payload: {'payload': payload ?? ''},
+          notificationLayout: NotificationLayout.Default,
+        ),
+        schedule: NotificationCalendar(
+          hour: hour,
+          minute: minute,
+          second: 0,
+          repeats: true, // 每日重复
+        ),
       );
     } catch (e) {
       _logger.warning('Failed to schedule daily notification', e);
@@ -61,7 +85,7 @@ class TrackerNotificationUtils {
   }
 
   static Future<void> cancelNotification(int id) async {
-    await NotificationManager.cancelNotification(id);
+    await NotificationController.cancelNotification(id);
   }
 
   static Future<void> updateNotification({
@@ -73,21 +97,16 @@ class TrackerNotificationUtils {
     String? payload,
   }) async {
     try {
-      final now = DateTime.now();
-      final scheduledDate = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        hour,
-        minute,
-      );
+      // 先取消旧的通知
+      await cancelNotification(id);
 
-      await NotificationManager.updateNotification(
+      // 重新安排新的通知
+      await scheduleDailyNotification(
         id: id,
         title: title,
         body: body,
-        scheduledDate: scheduledDate,
-        isDaily: true,
+        hour: hour,
+        minute: minute,
         payload: payload,
       );
     } catch (e) {
@@ -100,11 +119,11 @@ class TrackerNotificationUtils {
     required String body,
     String? payload,
   }) async {
-    await NotificationManager.showInstantNotification(
+    await NotificationController.createCustomNotification(
+      id: DateTime.now().millisecondsSinceEpoch,
       title: title,
       body: body,
-      channelId: _channelId,
-      payload: payload,
+      layout: NotificationLayout.Default,
     );
   }
 }

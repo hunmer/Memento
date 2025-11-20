@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/core/services/shortcut_manager.dart';
+import 'package:Memento/core/notification_controller.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
@@ -124,6 +125,12 @@ late PermissionController _permissionController;
 void main() async {
   // 确保Flutter绑定初始化
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 初始化通知控制器
+  await NotificationController.initialize();
+
+  // 请求通知权限
+  await NotificationController.requestPermission();
 
   // 配置日志输出
   Logger.root.level = Level.ALL; // 设置日志级别为 ALL 以显示所有日志
