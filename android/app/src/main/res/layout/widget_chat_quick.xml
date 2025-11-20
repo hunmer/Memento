@@ -49,11 +49,19 @@
             android:background="?android:attr/selectableItemBackground"
             android:gravity="center_vertical">
 
-            <View
+            <TextView
                 android:id="@+id/channel_icon_1"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:background="@drawable/channel_icon_background" />
+                android:background="@drawable/channel_icon_background"
+                android:gravity="center"
+                android:fontFamily="@font/material_icons_regular"
+                android:text=""
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -95,11 +103,19 @@
             android:gravity="center_vertical"
             android:visibility="gone">
 
-            <View
+            <TextView
                 android:id="@+id/channel_icon_2"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:background="@drawable/channel_icon_background" />
+                android:background="@drawable/channel_icon_background"
+                android:gravity="center"
+                android:fontFamily="@font/material_icons_regular"
+                android:text=""
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -141,11 +157,19 @@
             android:gravity="center_vertical"
             android:visibility="gone">
 
-            <View
+            <TextView
                 android:id="@+id/channel_icon_3"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:background="@drawable/channel_icon_background" />
+                android:background="@drawable/channel_icon_background"
+                android:gravity="center"
+                android:fontFamily="@font/material_icons_regular"
+                android:text=""
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <LinearLayout
                 android:layout_width="0dp"

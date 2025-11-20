@@ -89,10 +89,10 @@ class ChatWidgetService {
 
       _logger.info('小组件被点击: $uri');
 
-      // 解析 URI: memento://widget/quick_send?channelId=xxx
+      // 解析 URI: memento://widget/chat?channelId=xxx
       if (uri.host == 'widget') {
         final pathSegments = uri.pathSegments;
-        if (pathSegments.isNotEmpty && pathSegments[0] == 'quick_send') {
+        if (pathSegments.isNotEmpty && pathSegments[0] == 'chat') {
           final channelId = uri.queryParameters['channelId'];
           callback(channelId);
         }

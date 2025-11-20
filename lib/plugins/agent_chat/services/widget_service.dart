@@ -82,10 +82,10 @@ class AgentChatWidgetService {
 
       _logger.info('小组件被点击: $uri');
 
-      // 解析 URI: memento://widget/voice_quick?conversationId=xxx
+      // 解析 URI: memento://widget/agent_chat?conversationId=xxx
       if (uri.host == 'widget') {
         final pathSegments = uri.pathSegments;
-        if (pathSegments.isNotEmpty && pathSegments[0] == 'voice_quick') {
+        if (pathSegments.isNotEmpty && pathSegments[0] == 'agent_chat') {
           final conversationId = uri.queryParameters['conversationId'];
           callback(conversationId);
         }

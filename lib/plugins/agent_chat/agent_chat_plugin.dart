@@ -4,6 +4,7 @@ import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import 'controllers/conversation_controller.dart';
 import 'screens/conversation_list_screen/conversation_list_screen.dart';
+import 'screens/chat_screen/chat_screen.dart';
 import 'screens/agent_chat_settings_screen.dart';
 import 'services/tool_service.dart';
 import 'services/tool_template_service.dart';
@@ -98,7 +99,10 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
 /// Agent Chat 主视图（路由入口）
 class AgentChatMainView extends StatefulWidget {
-  const AgentChatMainView({super.key});
+  /// 可选的对话ID - 如果提供，将直接打开该对话的聊天界面
+  final String? conversationId;
+
+  const AgentChatMainView({super.key, this.conversationId});
 
   @override
   State<AgentChatMainView> createState() => _AgentChatMainViewState();
@@ -115,6 +119,15 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
     // 如果已初始化，直接完成；否则等待初始化
     _initializeFuture =
         plugin.isInitialized ? Future.value() : _waitForInitialization();
+
+    // 如果传入了conversationId，在初始化完成后直接打开对话
+    if (widget.conversationId != null) {
+      _initializeFuture.then((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openConversation();
+        });
+      });
+    }
   }
 
   Future<void> _waitForInitialization() async {
@@ -129,6 +142,44 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
 
     if (!plugin.isInitialized) {
       throw Exception('插件初始化超时');
+    }
+  }
+
+  /// 打开指定的对话
+  Future<void> _openConversation() async {
+    if (!mounted || widget.conversationId == null) return;
+
+    try {
+      final plugin = AgentChatPlugin.instance;
+      final controller = plugin.conversationController;
+
+      // 查找指定的对话
+      final conversation = controller.conversations.firstWhere(
+        (c) => c.id == widget.conversationId,
+        orElse: () => throw Exception('对话不存在'),
+      );
+
+      // 导航到聊天界面
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(
+            conversation: conversation,
+            storage: controller.storage,
+            conversationService: controller.conversationService,
+            getSettings: () => plugin.settings,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('打开对话失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

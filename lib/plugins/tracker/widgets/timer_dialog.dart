@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
+import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
@@ -20,10 +21,25 @@ class _TimerDialogState extends State<TimerDialog> {
   Timer? _timer;
   int _seconds = 0;
   bool _isRunning = false;
+  bool _notificationInitialized = false;
   final TextEditingController _noteController = TextEditingController();
   final TextEditingController _valueController = TextEditingController(
     text: '1',
   );
+
+  @override
+  void initState() {
+    super.initState();
+    // 在计时器对话框打开时初始化通知系统
+    _initializeNotification();
+  }
+
+  Future<void> _initializeNotification() async {
+    if (!_notificationInitialized) {
+      await TrackerNotificationUtils.initialize();
+      _notificationInitialized = true;
+    }
+  }
 
   @override
   void dispose() {
