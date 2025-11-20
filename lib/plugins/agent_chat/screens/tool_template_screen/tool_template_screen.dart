@@ -22,7 +22,7 @@ class ToolTemplateScreen extends StatefulWidget {
 
 class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
   String _searchQuery = '';
-  String? _selectedTag;
+  Set<String> _selectedTags = {};
 
   @override
   void initState() {
@@ -51,8 +51,12 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
       templates = widget.templateService.searchTemplates(_searchQuery);
     }
 
-    if (_selectedTag != null) {
-      templates = templates.where((t) => t.tags.contains(_selectedTag)).toList();
+    // 多标签过滤:只要模板包含任一选中标签就显示
+    if (_selectedTags.isNotEmpty) {
+      templates =
+          templates
+              .where((t) => t.tags.any((tag) => _selectedTags.contains(tag)))
+              .toList();
     }
 
     final allTags = widget.templateService.getAllTags();
@@ -63,70 +67,21 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
         actions: [
           // 标签过滤按钮
           if (allTags.isNotEmpty)
-            PopupMenuButton<String?>(
-              icon: Icon(
-                Icons.filter_list,
-                color: _selectedTag != null ? Colors.blue : null,
+            IconButton(
+              icon: Badge(
+                isLabelVisible: _selectedTags.isNotEmpty,
+                label: Text(_selectedTags.length.toString()),
+                child: Icon(
+                  Icons.filter_list,
+                  color: _selectedTags.isNotEmpty ? Colors.blue : null,
+                ),
               ),
               tooltip: '按标签过滤',
-              onSelected: (tag) {
-                setState(() {
-                  _selectedTag = tag;
-                });
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: null,
-                  child: Row(
-                    children: [
-                      Icon(Icons.clear, size: 18),
-                      SizedBox(width: 8),
-                      Text('全部'),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                ...allTags.map((tag) {
-                  final count = widget.templateService.templates
-                      .where((t) => t.tags.contains(tag))
-                      .length;
-                  return PopupMenuItem(
-                    value: tag,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.label,
-                          size: 18,
-                          color: _selectedTag == tag
-                              ? Colors.blue
-                              : Colors.grey,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(tag),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            count.toString(),
-                            style: const TextStyle(fontSize: 11),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-              ],
+              onPressed: () => _showTagFilterDialog(allTags),
             ),
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(_selectedTag != null ? 100 : 60),
+          preferredSize: Size.fromHeight(_selectedTags.isNotEmpty ? 100 : 60),
           child: Column(
             children: [
               Padding(
@@ -150,7 +105,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                 ),
               ),
               // 当前选中的标签
-              if (_selectedTag != null)
+              if (_selectedTags.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
                   child: Row(
@@ -160,17 +115,39 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                         style: TextStyle(fontSize: 12),
                       ),
                       const SizedBox(width: 8),
-                      Chip(
-                        avatar: const Icon(Icons.label, size: 16),
-                        label: Text(_selectedTag!),
-                        onDeleted: () {
-                          setState(() {
-                            _selectedTag = null;
-                          });
-                        },
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        visualDensity: VisualDensity.compact,
+                      Expanded(
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children:
+                              _selectedTags.map((tag) {
+                                return Chip(
+                                  avatar: const Icon(Icons.label, size: 16),
+                                  label: Text(tag),
+                                  onDeleted: () {
+                                    setState(() {
+                                      _selectedTags.remove(tag);
+                                    });
+                                  },
+                                  deleteIcon: const Icon(Icons.close, size: 16),
+                                  visualDensity: VisualDensity.compact,
+                                );
+                              }).toList(),
+                        ),
                       ),
+                      if (_selectedTags.length > 1)
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _selectedTags.clear();
+                            });
+                          },
+                          icon: const Icon(Icons.clear_all, size: 16),
+                          label: const Text(
+                            '清空',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -509,6 +486,158 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
         templateName: template.name,
         steps: steps,
       ),
+    );
+  }
+
+  /// 显示标签过滤对话框
+  Future<void> _showTagFilterDialog(List<String> allTags) async {
+    final result = await showDialog<Set<String>>(
+      context: context,
+      builder:
+          (context) => _TagFilterDialog(
+            allTags: allTags,
+            selectedTags: Set.from(_selectedTags),
+            templateService: widget.templateService,
+          ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedTags = result;
+      });
+    }
+  }
+}
+
+/// 标签过滤对话框
+class _TagFilterDialog extends StatefulWidget {
+  final List<String> allTags;
+  final Set<String> selectedTags;
+  final ToolTemplateService templateService;
+
+  const _TagFilterDialog({
+    required this.allTags,
+    required this.selectedTags,
+    required this.templateService,
+  });
+
+  @override
+  State<_TagFilterDialog> createState() => _TagFilterDialogState();
+}
+
+class _TagFilterDialogState extends State<_TagFilterDialog> {
+  late Set<String> _selectedTags;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTags = Set.from(widget.selectedTags);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          const Icon(Icons.filter_list, size: 24),
+          const SizedBox(width: 8),
+          const Text('选择标签过滤'),
+          const Spacer(),
+          if (_selectedTags.isNotEmpty)
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedTags.clear();
+                });
+              },
+              child: const Text('清空'),
+            ),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: widget.allTags.length,
+          itemBuilder: (context, index) {
+            final tag = widget.allTags[index];
+            final count =
+                widget.templateService.templates
+                    .where((t) => t.tags.contains(tag))
+                    .length;
+            final isSelected = _selectedTags.contains(tag);
+
+            return CheckboxListTile(
+              value: isSelected,
+              onChanged: (checked) {
+                setState(() {
+                  if (checked == true) {
+                    _selectedTags.add(tag);
+                  } else {
+                    _selectedTags.remove(tag);
+                  }
+                });
+              },
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.label,
+                    size: 18,
+                    color: isSelected ? Colors.blue : Colors.grey,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(tag)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          isSelected ? Colors.blue.shade50 : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color:
+                            isSelected
+                                ? Colors.blue.shade200
+                                : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Text(
+                      count.toString(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color:
+                            isSelected
+                                ? Colors.blue.shade700
+                                : Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              controlAffinity: ListTileControlAffinity.leading,
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.pop(context, _selectedTags),
+          icon:
+              _selectedTags.isEmpty
+                  ? const Icon(Icons.check)
+                  : Badge(
+                    label: Text(_selectedTags.length.toString()),
+                    child: const Icon(Icons.check),
+                  ),
+          label: const Text('确定'),
+        ),
+      ],
     );
   }
 }
