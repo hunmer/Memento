@@ -1,0 +1,19 @@
+package github.hunmer.memento.widget.providers
+
+import github.hunmer.memento.widget.BasePluginWidgetProvider
+
+/**
+ * 目标追踪小组件 - 1x1 尺寸
+ */
+class TrackerWidgetProvider : BasePluginWidgetProvider() {
+    override val pluginId: String = "tracker"
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_1X1
+}
+
+/**
+ * 目标追踪小组件 - 2x1 尺寸
+ */
+class TrackerWidget2x1Provider : BasePluginWidgetProvider() {
+    override val pluginId: String = "tracker"
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+}
