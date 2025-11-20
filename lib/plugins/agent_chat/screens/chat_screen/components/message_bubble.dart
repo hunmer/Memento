@@ -27,6 +27,7 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(String messageId, String templateId)?
   onExecuteTemplate; // 执行匹配的模版
   final String? Function(String templateId)? getTemplateName; // 获取模版名称
+  final VoidCallback? onCancel; // 取消生成的回调
   final bool hasAgent;
   final StorageManager? storage;
 
@@ -41,6 +42,7 @@ class MessageBubble extends StatelessWidget {
     this.onRerunStep,
     this.onExecuteTemplate,
     this.getTemplateName,
+    this.onCancel,
     this.hasAgent = true,
     this.storage,
   });
@@ -103,6 +105,21 @@ class MessageBubble extends StatelessWidget {
                                 color: Colors.grey,
                               ),
                             ),
+                            // 取消按钮
+                            if (onCancel != null) ...[
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.cancel, size: 20),
+                                color: Colors.red[400],
+                                tooltip: '取消生成',
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
+                                onPressed: onCancel,
+                              ),
+                            ],
                           ],
                         )
                       else if (message.matchedTemplateIds != null &&

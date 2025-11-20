@@ -6,6 +6,63 @@ import '../models/ai_agent.dart';
 import 'prompt_preset_service.dart';
 import 'dart:developer' as developer;
 
+/// 统一的错误消息提取和修复方法
+///
+/// 从异常对象中提取错误消息，并修复可能的UTF-8编码问题
+/// 特别处理 OpenAIClientException，提取其中的错误码和消息
+String _extractErrorMessage(dynamic error) {
+  String errorDetails = error.toString();
+
+  // 如果是 OpenAIClientException，尝试提取并修复错误消息
+  if (error is OpenAIClientException) {
+    try {
+      final body = error.body;
+      if (body != null && body is Map) {
+        final errorObj = body['error'];
+        if (errorObj != null && errorObj is Map) {
+          final message = errorObj['message'];
+          if (message != null && message is String) {
+            // 修复可能的UTF-8编码问题
+            final fixedMessage = _fixUTF8Encoding(message);
+            final code = errorObj['code'];
+            errorDetails = code != null
+                ? '错误码 $code: $fixedMessage'
+                : fixedMessage;
+          }
+        }
+      }
+    } catch (parseError) {
+      // 如果解析失败，使用原始错误消息
+      developer.log(
+        '解析错误消息失败',
+        name: 'RequestService',
+        error: parseError,
+      );
+    }
+  }
+
+  return errorDetails;
+}
+
+/// 修复UTF-8编码的字符串
+///
+/// 尝试将错误编码的字符串（如Latin1误编码为UTF-8）转换为正确的UTF-8字符串
+String _fixUTF8Encoding(String message) {
+  try {
+    // 将字符串按 Latin1 编码转换为字节
+    final bytes = latin1.encode(message);
+    // 再按 UTF-8 解码
+    final decodedMessage = utf8.decode(bytes, allowMalformed: false);
+    // 如果成功解码且与原始消息不同，说明原消息有编码问题
+    if (decodedMessage != message && decodedMessage.isNotEmpty) {
+      return decodedMessage;
+    }
+  } catch (e) {
+    // 解码失败，返回原始消息
+  }
+  return message;
+}
+
 class RequestService {
   /// 获取有效的系统提示词
   /// 如果 agent 设置了 promptPresetId，则返回预设的内容
@@ -43,9 +100,9 @@ class RequestService {
     return agent.systemPrompt;
   }
 
-  /// 处理思考内容，将<think>标签转换为Markdown格式
+  /// 处理思考内容，将 `<think>` 标签转换为Markdown格式
   static String processThinkingContent(String content) {
-    // 使用正则表达式匹配<think>标签内的内容
+    // 使用正则表达式匹配 `<think>` 标签内的内容
     final thinkPattern = RegExp(r'<think>(.*?)</think>', dotAll: true);
 
     // 创建一个StringBuffer来构建最终的内容
@@ -203,12 +260,13 @@ class RequestService {
 
       return content;
     } catch (e) {
+      final errorDetails = _extractErrorMessage(e);
       developer.log(
-        '聊天请求错误: ${e.toString()}',
+        '聊天请求错误: $errorDetails',
         name: 'RequestService',
         error: e,
       );
-      return 'Error: ${e.toString()}';
+      return 'Error: $errorDetails';
     }
   }
 
@@ -440,7 +498,8 @@ class RequestService {
       );
       onComplete();
     } catch (e, stackTrace) {
-      final errorMessage = '处理AI响应时出错: $e';
+      final errorDetails = _extractErrorMessage(e);
+      final errorMessage = '处理AI响应时出错: $errorDetails';
       developer.log(
         errorMessage,
         name: 'RequestService',
@@ -526,12 +585,13 @@ class RequestService {
 
       return urls;
     } catch (e) {
+      final errorDetails = _extractErrorMessage(e);
       developer.log(
-        '图像生成错误: ${e.toString()}',
+        '图像生成错误: $errorDetails',
         name: 'RequestService',
         error: e,
       );
-      return ['Error: ${e.toString()}'];
+      return ['Error: $errorDetails'];
     }
   }
 
@@ -565,8 +625,9 @@ class RequestService {
 
       return vector;
     } catch (e) {
+      final errorDetails = _extractErrorMessage(e);
       developer.log(
-        '嵌入向量生成错误: ${e.toString()}',
+        '嵌入向量生成错误: $errorDetails',
         name: 'RequestService',
         error: e,
       );

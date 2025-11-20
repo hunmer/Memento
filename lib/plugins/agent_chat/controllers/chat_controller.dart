@@ -482,7 +482,20 @@ class ChatController extends ChangeNotifier {
             },
             onError: (String error) {
               debugPrint('❌ [第零阶段] AI响应错误: $error');
-              completer.complete(false);
+
+              // 如果是用户取消操作，直接更新消息并完成
+              if (error == '已取消发送') {
+                messageService.updateAIMessageContent(
+                  conversation.id,
+                  aiMessageId,
+                  '用户已取消操作',
+                  0,
+                );
+                messageService.completeAIMessage(conversation.id, aiMessageId);
+                completer.complete(true); // 标记为已完成，阻止继续执行
+              } else {
+                completer.complete(false);
+              }
             },
           );
 
@@ -573,10 +586,15 @@ class ChatController extends ChangeNotifier {
         onError: (error) {
           debugPrint('AI响应错误: $error');
 
+          // 检测是否为用户取消操作
+          final errorMessage = error == '已取消发送'
+              ? '用户已取消操作'
+              : '抱歉，生成回复时出现错误：$error';
+
           messageService.updateAIMessageContent(
             conversation.id,
             aiMessageId,
-            '抱歉，生成回复时出现错误：$error',
+            errorMessage,
             0,
           );
 
@@ -666,10 +684,16 @@ class ChatController extends ChangeNotifier {
                 },
                 onError: (error) {
                   debugPrint('第二阶段 AI 响应错误: $error');
+
+                  // 检测是否为用户取消操作
+                  final errorMessage = error == '已取消发送'
+                      ? '用户已取消操作'
+                      : '抱歉，生成工具调用时出现错误：$error';
+
                   messageService.updateAIMessageContent(
                     conversation.id,
                     aiMessageId,
-                    '抱歉，生成工具调用时出现错误：$error',
+                    errorMessage,
                     0,
                   );
                   messageService.completeAIMessage(

@@ -95,6 +95,13 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   /// 打开工具管理页面
   void _openToolManagement() {
+    // 记录路由访问历史
+    RouteHistoryManager.recordPageVisit(
+      pageId: 'tool_management',
+      title: '工具配置管理',
+      icon: Icons.settings_outlined,
+    );
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -105,6 +112,13 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   /// 打开工具模板页面
   void _openToolTemplate() {
+    // 记录路由访问历史
+    RouteHistoryManager.recordPageVisit(
+      pageId: 'tool_template',
+      title: '工具模板管理',
+      icon: Icons.inventory_2_outlined,
+    );
+
     Navigator.push(
       context,
       MaterialPageRoute(

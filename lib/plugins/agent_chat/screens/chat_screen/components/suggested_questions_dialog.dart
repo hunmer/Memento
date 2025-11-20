@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../../services/suggested_questions_service.dart';
+import '../../../../../core/storage/storage_manager.dart';
 
 /// 预设问题选择对话框
 class SuggestedQuestionsDialog extends StatefulWidget {
-  const SuggestedQuestionsDialog({super.key});
+  final StorageManager storage;
+
+  const SuggestedQuestionsDialog({
+    super.key,
+    required this.storage,
+  });
 
   @override
   State<SuggestedQuestionsDialog> createState() =>
@@ -11,6 +17,9 @@ class SuggestedQuestionsDialog extends StatefulWidget {
 }
 
 class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
+  // 存储上次选中分类的 key
+  static const String _lastCategoryKey = 'agent_chat/suggested_questions_last_category';
+
   final _service = SuggestedQuestionsService();
   Map<String, List<String>>? _questions;
   String? _selectedCategory;
@@ -26,11 +35,24 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
     try {
       final questions = await _service.getCategorizedQuestions();
       if (mounted) {
+        // 尝试读取上次选中的分类
+        String? lastCategory;
+        try {
+          lastCategory = await widget.storage.getString(_lastCategoryKey);
+        } catch (e) {
+          // 如果读取失败，忽略错误
+          lastCategory = null;
+        }
+
         setState(() {
           _questions = questions;
-          // 默认选中第一个分类
+          // 优先使用上次选中的分类（如果存在且有效），否则选中第一个
           if (questions.isNotEmpty) {
-            _selectedCategory = questions.keys.first;
+            if (lastCategory != null && questions.containsKey(lastCategory)) {
+              _selectedCategory = lastCategory;
+            } else {
+              _selectedCategory = questions.keys.first;
+            }
           }
           _isLoading = false;
         });
@@ -44,6 +66,15 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
           SnackBar(content: Text('加载问题失败: $e'), backgroundColor: Colors.red),
         );
       }
+    }
+  }
+
+  /// 保存当前选中的分类
+  Future<void> _saveSelectedCategory(String category) async {
+    try {
+      await widget.storage.setString(_lastCategoryKey, category);
+    } catch (e) {
+      // 保存失败不影响功能，忽略错误
     }
   }
 
@@ -145,6 +176,8 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
                 setState(() {
                   _selectedCategory = categoryKey;
                 });
+                // 保存选中的分类
+                _saveSelectedCategory(categoryKey);
               },
               backgroundColor: Colors.white,
               selectedColor: Theme.of(context).primaryColor.withValues(alpha: 0.2),
@@ -223,11 +256,14 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
 }
 
 /// 显示预设问题对话框
-Future<String?> showSuggestedQuestionsDialog(BuildContext context) {
+Future<String?> showSuggestedQuestionsDialog(
+  BuildContext context,
+  StorageManager storage,
+) {
   return showModalBottomSheet<String>(
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    builder: (context) => const SuggestedQuestionsDialog(),
+    builder: (context) => SuggestedQuestionsDialog(storage: storage),
   );
 }

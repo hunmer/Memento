@@ -578,7 +578,11 @@ class _MessageInputState extends State<MessageInput> {
 
   /// 显示预设问题对话框
   Future<void> _showSuggestedQuestions() async {
-    final selectedQuestion = await showSuggestedQuestionsDialog(context);
+    final plugin = AgentChatPlugin.instance;
+    final selectedQuestion = await showSuggestedQuestionsDialog(
+      context,
+      plugin.storage,
+    );
 
     if (selectedQuestion != null && mounted) {
       // 将选中的问题填充到输入框
