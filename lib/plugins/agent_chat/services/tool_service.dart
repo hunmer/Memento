@@ -279,14 +279,39 @@ class ToolService {
     buffer.writeln('- `await Memento.system.getAppInfo()` - 获取应用信息');
     buffer.writeln('\n### 步骤间结果传递 API（多步骤协作）\n');
     buffer.writeln('当工具调用包含多个步骤时，可以使用以下 API 在步骤之间传递数据：\n');
+    buffer.writeln('#### ⚠️ 强制要求：必须使用对象类型\n');
+    buffer.writeln('- **setResult 必须传入对象**：value 参数必须是对象类型 `{}`，不能是原始值或数组');
+    buffer.writeln('- **getResult 返回对象**：返回值永远是对象类型，通过属性访问数据\n');
+    buffer.writeln('#### API 说明\n');
     buffer.writeln('- `await Memento.toolCall.setResult({id?, value})` - 保存结果供后续步骤使用');
     buffer.writeln('  - `id` (可选): 自定义结果 ID，如 "userData"、"taskList"');
-    buffer.writeln('  - `value` (必需): 要保存的数据（任意 JSON 可序列化对象）');
+    buffer.writeln('  - `value` (必需): **必须是对象** `{key: value}`，不能是数组或原始值');
     buffer.writeln('- `await Memento.toolCall.getResult({id?, step?, default?})` - 获取之前步骤的结果');
     buffer.writeln('  - `id` (可选): 结果 ID');
     buffer.writeln('  - `step` (可选): 步骤索引（从 0 开始），如 `{step: 0}` 获取第一个步骤的结果');
     buffer.writeln('  - `default` (可选): 默认值，结果不存在时返回');
+    buffer.writeln('  - **返回值**: 永远是对象类型，通过 `result.propertyName` 访问数据');
     buffer.writeln('\n**自动保存**：每个步骤执行成功后，结果会自动保存到 `step_N`（N 为步骤索引）');
+    buffer.writeln('\n**🚫 错误示例（禁止）**:');
+    buffer.writeln('```javascript');
+    buffer.writeln('// ❌ 错误：setResult 传入数组');
+    buffer.writeln('const tasks = await Memento.plugins.todo.getTasks();');
+    buffer.writeln('await Memento.toolCall.setResult({value: tasks}); // 错误！tasks 是数组');
+    buffer.writeln('');
+    buffer.writeln('// ❌ 错误：getResult 当作数组使用');
+    buffer.writeln('const tasks = await Memento.toolCall.getResult({step: 0});');
+    buffer.writeln('if (tasks.length > 0) { ... } // 错误！tasks 是对象不是数组');
+    buffer.writeln('```\n');
+    buffer.writeln('**✅ 正确示例（必须遵循）**:');
+    buffer.writeln('```javascript');
+    buffer.writeln('// ✅ 正确：setResult 传入对象，用属性包装数据');
+    buffer.writeln('const tasks = await Memento.plugins.todo.getTasks();');
+    buffer.writeln('await Memento.toolCall.setResult({value: {tasks, count: tasks.length}}); // 正确！');
+    buffer.writeln('');
+    buffer.writeln('// ✅ 正确：getResult 返回对象，通过属性访问');
+    buffer.writeln('const result = await Memento.toolCall.getResult({step: 0});');
+    buffer.writeln('if (result.tasks && result.tasks.length > 0) { ... } // 正确！');
+    buffer.writeln('```');
     buffer.writeln('\n你可以调用以下插件功能来获取数据或执行操作。');
     buffer.writeln('\n### 🎯 run_js 工具用途说明\n');
     buffer.writeln('**JavaScript 代码可用于**:');
@@ -391,7 +416,7 @@ class ToolService {
     buffer.writeln('}');
     buffer.writeln('```\n');
     buffer.writeln('**示例 4：步骤间数据传递（查询→分析→生成报告）**\n');
-    buffer.writeln('使用 setResult/getResult 在步骤之间传递数据：\n');
+    buffer.writeln('使用 setResult/getResult 在步骤之间传递数据（⚠️ 必须使用对象类型）：\n');
     buffer.writeln('```json');
     buffer.writeln('{');
     buffer.writeln('  "steps": [');
@@ -399,14 +424,14 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "查询今日任务",');
     buffer.writeln('      "desc": "获取今天的任务列表",');
-    final step1Example = '''const tasks = await Memento.plugins.todo.getTodayTasks(); await Memento.toolCall.setResult({id: 'todayTasks', value: tasks}); return `已获取 \${tasks.length} 个任务`;''';
+    final step1Example = '''const tasks = await Memento.plugins.todo.getTodayTasks(); await Memento.toolCall.setResult({id: 'todayTasks', value: {tasks, count: tasks.length}}); return `已获取 \${tasks.length} 个任务`;''';
     buffer.writeln('      "data": "${step1Example.replaceAll('"', '\\"')}"');
     buffer.writeln('    },');
     buffer.writeln('    {');
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "统计任务情况",');
     buffer.writeln('      "desc": "分析任务完成情况",');
-    final step2Example = '''const tasks = await Memento.toolCall.getResult({id: 'todayTasks'}); const completed = tasks.filter(t => t.completed).length; const rate = (completed / tasks.length * 100).toFixed(1); return `完成率: \${rate}%`;''';
+    final step2Example = '''const result = await Memento.toolCall.getResult({id: 'todayTasks'}); const tasks = result.tasks; const completed = tasks.filter(t => t.completed).length; const rate = (completed / tasks.length * 100).toFixed(1); return `完成率: \${rate}%`;''';
     buffer.writeln('      "data": "${step2Example.replaceAll('"', '\\"')}"');
     buffer.writeln('    }');
     buffer.writeln('  ]');
@@ -482,15 +507,45 @@ class ToolService {
 
 当工具调用包含多个步骤时，可以使用以下 API 在步骤之间传递数据：
 
+#### ⚠️ 强制要求：必须使用对象类型
+
+- **setResult 必须传入对象**：value 参数必须是对象类型 `{}`，不能是原始值或数组
+- **getResult 返回对象**：返回值永远是对象类型，通过属性访问数据
+
+#### API 说明
+
 - `await Memento.toolCall.setResult({id?, value})` - 保存结果供后续步骤使用
   - `id` (可选): 自定义结果 ID
-  - `value` (必需): 要保存的数据
+  - `value` (必需): **必须是对象** `{key: value}`，不能是数组或原始值
 - `await Memento.toolCall.getResult({id?, step?, default?})` - 获取之前步骤的结果
   - `id` (可选): 结果 ID
   - `step` (可选): 步骤索引（从 0 开始）
   - `default` (可选): 默认值
+  - **返回值**: 永远是对象类型，通过 `result.propertyName` 访问数据
 
 **自动保存**：每个步骤执行成功后，结果会自动保存到 `step_N`
+
+**🚫 错误示例（禁止）**:
+```javascript
+// ❌ 错误：setResult 传入数组
+const tasks = await Memento.plugins.todo.getTasks();
+await Memento.toolCall.setResult({value: tasks}); // 错误！tasks 是数组
+
+// ❌ 错误：getResult 当作数组使用
+const tasks = await Memento.toolCall.getResult({step: 0});
+if (tasks.length > 0) { ... } // 错误！tasks 是对象不是数组
+```
+
+**✅ 正确示例（必须遵循）**:
+```javascript
+// ✅ 正确：setResult 传入对象，用属性包装数据
+const tasks = await Memento.plugins.todo.getTasks();
+await Memento.toolCall.setResult({value: {tasks, count: tasks.length}}); // 正确！
+
+// ✅ 正确：getResult 返回对象，通过属性访问
+const result = await Memento.toolCall.getResult({step: 0});
+if (result.tasks && result.tasks.length > 0) { ... } // 正确！
+```
 
 ### 🎯 run_js 工具用途说明
 
@@ -675,26 +730,51 @@ return result;
     buffer.writeln('⚠️ **重要**：不要将系统 API 作为单独的步骤，而是在需要时直接在代码中调用！\n');
     buffer.writeln('### 步骤间结果传递 API（多步骤数据共享）\n');
     buffer.writeln('当需要在多个步骤之间传递数据时，使用以下 API：\n');
+    buffer.writeln('#### ⚠️ 强制要求：必须使用对象类型\n');
+    buffer.writeln('- **setResult 必须传入对象**：value 参数必须是对象类型 `{}`，不能是原始值或数组');
+    buffer.writeln('- **getResult 返回对象**：返回值永远是对象类型，通过属性访问数据\n');
     buffer.writeln('**设置结果**：');
     buffer.writeln('```javascript');
     buffer.writeln('await Memento.toolCall.setResult({');
     buffer.writeln('  id: "myData",    // 可选：自定义 ID');
-    buffer.writeln('  value: dataObj   // 必需：要保存的数据');
+    buffer.writeln('  value: {data: dataObj}   // 必需：必须是对象，用属性包装数据');
     buffer.writeln('});');
     buffer.writeln('```\n');
     buffer.writeln('**获取结果**：');
     buffer.writeln('```javascript');
     buffer.writeln('// 方式1: 通过自定义 ID');
-    buffer.writeln('const data = await Memento.toolCall.getResult({id: "myData"});');
+    buffer.writeln('const result = await Memento.toolCall.getResult({id: "myData"});');
+    buffer.writeln('const data = result.data; // 通过属性访问');
     buffer.writeln('');
     buffer.writeln('// 方式2: 通过步骤索引（0 = 第一个步骤）');
     buffer.writeln('const prevResult = await Memento.toolCall.getResult({step: 0});');
+    buffer.writeln('const tasks = prevResult.tasks; // 通过属性访问数组');
     buffer.writeln('');
     buffer.writeln('// 方式3: 带默认值（防止获取失败）');
     buffer.writeln('const config = await Memento.toolCall.getResult({');
     buffer.writeln('  id: "config",');
     buffer.writeln('  default: {theme: "light"}');
     buffer.writeln('});');
+    buffer.writeln('```\n');
+    buffer.writeln('**🚫 错误示例（禁止）**:');
+    buffer.writeln('```javascript');
+    buffer.writeln('// ❌ 错误：setResult 传入数组');
+    buffer.writeln('const tasks = await Memento.plugins.todo.getTasks();');
+    buffer.writeln('await Memento.toolCall.setResult({id: "tasks", value: tasks}); // 错误！tasks 是数组');
+    buffer.writeln('');
+    buffer.writeln('// ❌ 错误：getResult 当作数组使用');
+    buffer.writeln('const tasks = await Memento.toolCall.getResult({id: "tasks"});');
+    buffer.writeln('if (tasks.length > 0) { ... } // 错误！tasks 是对象不是数组');
+    buffer.writeln('```\n');
+    buffer.writeln('**✅ 正确示例（必须遵循）**:');
+    buffer.writeln('```javascript');
+    buffer.writeln('// ✅ 正确：setResult 传入对象，用属性包装数据');
+    buffer.writeln('const tasks = await Memento.plugins.todo.getTasks();');
+    buffer.writeln('await Memento.toolCall.setResult({id: "taskData", value: {tasks, count: tasks.length}}); // 正确！');
+    buffer.writeln('');
+    buffer.writeln('// ✅ 正确：getResult 返回对象，通过属性访问');
+    buffer.writeln('const result = await Memento.toolCall.getResult({id: "taskData"});');
+    buffer.writeln('if (result.tasks && result.tasks.length > 0) { ... } // 正确！');
     buffer.writeln('```\n');
     buffer.writeln('**自动保存**：每个步骤的结果会自动保存到 `step_N`，可直接通过索引获取。\n');
 
