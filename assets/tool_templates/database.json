@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取数据库列表",
         "desc": "查询所有数据库",
-        "data": "const databases = await Memento.plugins.database.getDatabases();\n\nreturn {\n  count: databases.length,\n  databases: databases.map(db => ({\n    id: db.id,\n    name: db.name,\n    recordCount: db.recordCount\n  }))\n};"
+        "data": "const databases = await Memento.plugins.database.getDatabases();\n\nconst result = {\n  count: databases.length,\n  databases: databases.map(db => ({\n    id: db.id,\n    name: db.name,\n    recordCount: db.recordCount\n  }))\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "创建数据库",
         "desc": "创建\"书籍清单\"数据库",
-        "data": "const database = await Memento.plugins.database.createDatabase({\n  name: '书籍清单',\n  fields: [\n    { name: '书名', type: 'text', required: true },\n    { name: '作者', type: 'text' },\n    { name: '评分', type: 'number' },\n    { name: '已读', type: 'boolean' }\n  ]\n});\n\nreturn {\n  success: true,\n  database: {\n    id: database.id,\n    name: database.name\n  }\n};"
+        "data": "const database = await Memento.plugins.database.createDatabase({\n  name: '书籍清单',\n  fields: [\n    { name: '书名', type: 'text', required: true },\n    { name: '作者', type: 'text' },\n    { name: '评分', type: 'number' },\n    { name: '已读', type: 'boolean' }\n  ]\n});\n\nconst result = {\n  success: true,\n  database: {\n    id: database.id,\n    name: database.name\n  }\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -44,7 +44,7 @@
         "method": "run_js",
         "title": "查询记录",
         "desc": "查询符合条件的记录",
-        "data": "const databases = await Memento.plugins.database.getDatabases();\nconst db = databases[0];\n\nif (!db) {\n  return { success: false, message: '没有数据库' };\n}\n\nconst records = await Memento.plugins.database.getRecords({\n  databaseId: db.id\n});\n\nreturn {\n  databaseName: db.name,\n  count: records.length,\n  records: records.slice(0, 10)\n};"
+        "data": "const databases = await Memento.plugins.database.getDatabases();\nconst db = databases[0];\n\nif (!db) {\n  const errorResult = { success: false, message: '没有数据库' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst records = await Memento.plugins.database.getRecords({\n  databaseId: db.id\n});\n\nconst result = {\n  databaseName: db.name,\n  count: records.length,\n  records: records.slice(0, 10)\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

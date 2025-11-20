@@ -7,6 +7,7 @@ import 'controllers/conversation_controller.dart';
 import 'screens/conversation_list_screen/conversation_list_screen.dart';
 import 'screens/agent_chat_settings_screen.dart';
 import 'services/tool_service.dart';
+import 'services/tool_template_service.dart';
 import '../openai/openai_plugin.dart';
 // import 'l10n/agent_chat_localizations.dart';
 
@@ -29,6 +30,9 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
   ConversationController? _conversationController;
   ConversationController get conversationController => _conversationController!;
+
+  ToolTemplateService? _templateService;
+  ToolTemplateService get templateService => _templateService!;
 
   /// 检查是否已初始化
   bool get isInitialized => _conversationController != null &&
@@ -55,6 +59,10 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
     // 初始化控制器
     _conversationController = ConversationController(storage: storage);
     await _conversationController!.initialize();
+
+    // 初始化工具模板服务
+    _templateService = ToolTemplateService(storage);
+    await _templateService!.ensureInitialized();
 
     // 初始化工具服务
     await ToolService.initialize();

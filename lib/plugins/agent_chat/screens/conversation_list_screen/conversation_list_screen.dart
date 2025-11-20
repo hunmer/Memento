@@ -5,6 +5,9 @@ import '../../models/conversation.dart';
 import '../chat_screen/chat_screen.dart';
 import '../agent_chat_settings_screen.dart';
 import '../tool_management_screen/tool_management_screen.dart';
+import '../tool_template_screen/tool_template_screen.dart';
+import '../../services/tool_template_service.dart';
+import '../../../../core/route/route_history_manager.dart';
 
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
@@ -17,6 +20,7 @@ class ConversationListScreen extends StatefulWidget {
 
 class _ConversationListScreenState extends State<ConversationListScreen> {
   late ConversationController _controller;
+  late ToolTemplateService _templateService;
 
   // 搜索相关
   bool _isSearching = false;
@@ -28,6 +32,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     super.initState();
     // 通过插件实例获取controller
     _controller = AgentChatPlugin.instance.conversationController;
+
+    // 初始化工具模板服务
+    _templateService = ToolTemplateService(_controller.storage);
 
     // 延迟添加监听器，避免在build期间触发setState
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -96,6 +103,19 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     );
   }
 
+  /// 打开工具模板页面
+  void _openToolTemplate() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ToolTemplateScreen(
+          templateService: _templateService,
+          // 不传递 onUseTemplate，隐藏"使用"按钮
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,6 +156,12 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             icon: const Icon(Icons.build, size: 24),
             tooltip: '工具管理',
             onPressed: _openToolManagement,
+          ),
+          // 工具模板按钮
+          IconButton(
+            icon: const Icon(Icons.inventory_2, size: 24),
+            tooltip: '工具模板',
+            onPressed: _openToolTemplate,
           ),
           // 设置按钮
           IconButton(

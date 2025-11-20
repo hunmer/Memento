@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取积分余额",
         "desc": "查询当前积分余额",
-        "data": "const balance = await Memento.plugins.store.getBalance();\n\nreturn {\n  balance: balance,\n  message: '当前积分余额: ' + balance + ' 分'\n};"
+        "data": "const balance = await Memento.plugins.store.getBalance();\n\nconst result = {\n  balance: balance,\n  message: '当前积分余额: ' + balance + ' 分'\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "获取商品列表",
         "desc": "查询可兑换的商品",
-        "data": "const products = await Memento.plugins.store.getProducts();\n\nreturn {\n  count: products.length,\n  products: products.map(p => ({\n    id: p.id,\n    name: p.name,\n    price: p.price,\n    stock: p.stock\n  }))\n};"
+        "data": "const products = await Memento.plugins.store.getProducts();\n\nconst result = {\n  count: products.length,\n  products: products.map(p => ({\n    id: p.id,\n    name: p.name,\n    price: p.price,\n    stock: p.stock\n  }))\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -44,7 +44,7 @@
         "method": "run_js",
         "title": "添加积分",
         "desc": "添加100积分",
-        "data": "await Memento.plugins.store.addPoints({\n  amount: 100,\n  reason: '完成任务奖励'\n});\n\nconst newBalance = await Memento.plugins.store.getBalance();\n\nreturn {\n  success: true,\n  added: 100,\n  newBalance: newBalance\n};"
+        "data": "await Memento.plugins.store.addPoints({\n  amount: 100,\n  reason: '完成任务奖励'\n});\n\nconst newBalance = await Memento.plugins.store.getBalance();\n\nconst result = {\n  success: true,\n  added: 100,\n  newBalance: newBalance\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -63,7 +63,7 @@
         "method": "run_js",
         "title": "获取兑换历史",
         "desc": "查询兑换记录",
-        "data": "const history = await Memento.plugins.store.getExchangeHistory();\n\nreturn {\n  count: history.length,\n  history: history.map(h => ({\n    productName: h.productName,\n    price: h.price,\n    date: h.date\n  }))\n};"
+        "data": "const history = await Memento.plugins.store.getExchangeHistory();\n\nconst result = {\n  count: history.length,\n  history: history.map(h => ({\n    productName: h.productName,\n    price: h.price,\n    date: h.date\n  }))\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

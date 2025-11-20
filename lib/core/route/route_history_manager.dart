@@ -1,0 +1,249 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import '../storage/storage_manager.dart';
+import 'page_visit_record.dart';
+
+/// 路由历史管理器
+///
+/// 负责记录和管理页面访问历史，支持持久化存储
+class RouteHistoryManager {
+  static final RouteHistoryManager _instance = RouteHistoryManager._internal();
+  factory RouteHistoryManager() => _instance;
+  RouteHistoryManager._internal();
+
+  static RouteHistoryManager get instance => _instance;
+
+  /// 存储键
+  static const String _storageKey = 'configs/route_history';
+
+  /// 历史记录列表（按时间倒序）
+  final List<PageVisitRecord> _history = [];
+
+  /// 最大历史记录数
+  static const int _maxHistorySize = 100;
+
+  /// 并发锁
+  bool _isSaving = false;
+
+  /// 是否已初始化
+  bool _initialized = false;
+
+  /// 初始化管理器（从存储加载历史记录）
+  Future<void> initialize() async {
+    if (_initialized) return;
+
+    try {
+      final data = await StorageManager.instance.read(_storageKey);
+      if (data != null && data.isNotEmpty) {
+        final json = jsonDecode(data) as Map<String, dynamic>;
+        final historyList = json['history'] as List<dynamic>?;
+
+        if (historyList != null) {
+          _history.clear();
+          for (final item in historyList) {
+            try {
+              final record = PageVisitRecord.fromJson(item as Map<String, dynamic>);
+              _history.add(record);
+            } catch (e) {
+              debugPrint('解析历史记录失败: $e');
+            }
+          }
+
+          // 按时间倒序排序
+          _history.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+          debugPrint('路由历史管理器已加载 ${_history.length} 条记录');
+        }
+      }
+    } catch (e) {
+      debugPrint('加载路由历史失败: $e');
+    }
+
+    _initialized = true;
+  }
+
+  /// 记录页面访问
+  ///
+  /// [pageId] 页面唯一标识符
+  /// [title] 页面标题
+  /// [icon] 页面图标（可选）
+  /// [params] 附加参数（可选）
+  static Future<void> recordPageVisit({
+    required String pageId,
+    required String title,
+    IconData? icon,
+    Map<String, dynamic>? params,
+  }) async {
+    final manager = instance;
+
+    // 确保已初始化
+    if (!manager._initialized) {
+      await manager.initialize();
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final iconCodePoint = icon?.codePoint;
+
+    // 查找是否已存在该页面的记录
+    final existingIndex = manager._history.indexWhere((record) => record.pageId == pageId);
+
+    if (existingIndex != -1) {
+      // 更新现有记录
+      final existing = manager._history[existingIndex];
+      manager._history[existingIndex] = existing.copyWith(
+        timestamp: now,
+        visitCount: existing.visitCount + 1,
+        title: title, // 更新标题（可能有变化）
+        iconCodePoint: iconCodePoint,
+        params: params,
+      );
+    } else {
+      // 创建新记录
+      final record = PageVisitRecord(
+        pageId: pageId,
+        title: title,
+        iconCodePoint: iconCodePoint,
+        timestamp: now,
+        visitCount: 1,
+        params: params,
+      );
+      manager._history.insert(0, record);
+    }
+
+    // 按时间重新排序
+    manager._history.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    // 限制历史记录数量
+    if (manager._history.length > _maxHistorySize) {
+      manager._history.removeRange(_maxHistorySize, manager._history.length);
+    }
+
+    // 异步保存
+    manager._saveHistory();
+
+    debugPrint('记录页面访问: $pageId ($title), 总访问次数: ${manager._history[manager._history.indexWhere((r) => r.pageId == pageId)].visitCount}');
+  }
+
+  /// 获取上次访问的页面（排除指定页面）
+  ///
+  /// [excludePageId] 要排除的页面ID（通常是当前页面）
+  static PageVisitRecord? getLastVisitedPage({String? excludePageId}) {
+    final manager = instance;
+
+    if (manager._history.isEmpty) return null;
+
+    if (excludePageId == null) {
+      return manager._history.first;
+    }
+
+    // 查找第一个不是排除页面的记录
+    for (final record in manager._history) {
+      if (record.pageId != excludePageId) {
+        return record;
+      }
+    }
+
+    return null;
+  }
+
+  /// 获取历史记录列表
+  ///
+  /// [limit] 限制返回数量（默认不限制）
+  /// [excludePageId] 排除指定页面（可选）
+  static List<PageVisitRecord> getHistory({int? limit, String? excludePageId}) {
+    final manager = instance;
+
+    var history = manager._history;
+
+    // 排除指定页面
+    if (excludePageId != null) {
+      history = history.where((record) => record.pageId != excludePageId).toList();
+    }
+
+    // 限制数量
+    if (limit != null && limit < history.length) {
+      return history.sublist(0, limit);
+    }
+
+    return List.unmodifiable(history);
+  }
+
+  /// 清空历史记录
+  static Future<void> clearHistory() async {
+    final manager = instance;
+    manager._history.clear();
+    await manager._saveHistory();
+    debugPrint('路由历史已清空');
+  }
+
+  /// 删除指定页面的历史记录
+  ///
+  /// [pageId] 要删除的页面ID
+  static Future<void> removePageHistory(String pageId) async {
+    final manager = instance;
+    manager._history.removeWhere((record) => record.pageId == pageId);
+    await manager._saveHistory();
+    debugPrint('已删除页面历史: $pageId');
+  }
+
+  /// 获取指定页面的访问次数
+  ///
+  /// [pageId] 页面ID
+  static int getVisitCount(String pageId) {
+    final manager = instance;
+    final record = manager._history.firstWhere(
+      (r) => r.pageId == pageId,
+      orElse: () => PageVisitRecord(
+        pageId: '',
+        title: '',
+        timestamp: 0,
+        visitCount: 0,
+      ),
+    );
+    return record.visitCount;
+  }
+
+  /// 保存历史记录到存储
+  Future<void> _saveHistory() async {
+    if (_isSaving) return; // 防止并发保存
+
+    _isSaving = true;
+    try {
+      final json = {
+        'history': _history.map((record) => record.toJson()).toList(),
+      };
+      await StorageManager.instance.write(_storageKey, jsonEncode(json));
+    } catch (e) {
+      debugPrint('保存路由历史失败: $e');
+    } finally {
+      _isSaving = false;
+    }
+  }
+
+  /// 获取历史记录统计信息
+  static Map<String, dynamic> getStatistics() {
+    final manager = instance;
+
+    if (manager._history.isEmpty) {
+      return {
+        'totalPages': 0,
+        'totalVisits': 0,
+        'mostVisitedPage': null,
+      };
+    }
+
+    final totalVisits = manager._history.fold<int>(
+      0,
+      (sum, record) => sum + record.visitCount,
+    );
+
+    final mostVisited = manager._history.reduce(
+      (current, next) => current.visitCount > next.visitCount ? current : next,
+    );
+
+    return {
+      'totalPages': manager._history.length,
+      'totalVisits': totalVisits,
+      'mostVisitedPage': mostVisited,
+    };
+  }
+}
