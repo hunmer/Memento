@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../core/plugin_base.dart';
 import '../services/speech/speech_recognition_config.dart';
@@ -23,6 +25,10 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
   bool _isLoading = false;
   bool _hasChanges = false;
   bool _preferToolTemplates = false; // 优先使用工具模版开关
+
+  // 后台服务设置
+  bool _enableBackgroundService = true; // 启用后台服务（仅Android）
+  bool _showTokenInNotification = true; // 在通知中显示token消耗
 
   @override
   void initState() {
@@ -70,6 +76,12 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
 
       // 加载工具模版设置
       _preferToolTemplates = settings['preferToolTemplates'] as bool? ?? false;
+
+      // 加载后台服务设置
+      _enableBackgroundService =
+          settings['enableBackgroundService'] as bool? ?? true;
+      _showTokenInNotification =
+          settings['showTokenInNotification'] as bool? ?? true;
     } catch (e) {
       _showError('加载设置失败: $e');
     } finally {
@@ -106,6 +118,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
       await widget.plugin.updateSettings({
         'asrConfig': asrConfig,
         'preferToolTemplates': _preferToolTemplates,
+        'enableBackgroundService': _enableBackgroundService,
+        'showTokenInNotification': _showTokenInNotification,
       });
 
       // 验证保存后立即读取
@@ -215,6 +229,114 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
         const SizedBox(height: 24),
         const Divider(),
         const SizedBox(height: 8),
+
+        // 后台服务设置标题（仅Android）
+        if (!kIsWeb && Platform.isAndroid) ...[
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '后台服务设置',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+
+          // 启用后台服务开关
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Card(
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text('启用后台服务'),
+                    subtitle: const Text(
+                      '切换到其他应用后继续接收AI回复。会显示前台通知以保持服务运行。',
+                    ),
+                    value: _enableBackgroundService,
+                    onChanged: (value) {
+                      setState(() {
+                        _enableBackgroundService = value;
+                        _hasChanges = true;
+                      });
+                    },
+                  ),
+
+                  if (_enableBackgroundService) ...[
+                    const Divider(height: 1),
+
+                    // Token消耗显示开关
+                    SwitchListTile(
+                      title: const Text('显示Token消耗'),
+                      subtitle: const Text(
+                        '在通知中实时显示输入/输出token数量和总消耗。',
+                      ),
+                      value: _showTokenInNotification,
+                      onChanged: (value) {
+                        setState(() {
+                          _showTokenInNotification = value;
+                          _hasChanges = true;
+                        });
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          // 后台服务说明卡片
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Card(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '后台服务说明',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '• 切换到其他应用后，AI会继续生成回复\n'
+                      '• 通知栏会显示"AI助手运行中"\n'
+                      '• 生成完成后会收到系统通知\n'
+                      '• 可通过通知按钮取消生成\n'
+                      '• Android 15+ 每24小时限制6小时',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 8),
+        ],
 
         // 语音识别设置标题
         Padding(

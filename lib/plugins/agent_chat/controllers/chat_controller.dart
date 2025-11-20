@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:openai_dart/openai_dart.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import '../../../core/plugin_manager.dart';
+import '../../../core/services/foreground_task_manager.dart';
 import '../../openai/openai_plugin.dart';
 import '../../openai/models/ai_agent.dart';
 import '../../openai/services/request_service.dart';
@@ -19,6 +22,7 @@ import '../services/token_counter_service.dart';
 import '../services/tool_service.dart';
 import '../services/tool_template_service.dart';
 import '../services/message_detail_service.dart';
+import '../services/chat_task_handler.dart';
 import '../../../utils/file_picker_helper.dart';
 import '../../../core/js_bridge/js_bridge_manager.dart';
 
@@ -33,6 +37,9 @@ class ChatController extends ChangeNotifier {
   final ToolTemplateService? templateService;
   final Map<String, dynamic> Function()? getSettings; // 获取插件设置的回调
   bool _conversationServiceInitialized = false;
+
+  /// 前台服务管理器（仅 Android）
+  final ForegroundTaskManager _foregroundTaskManager = ForegroundTaskManager();
 
   /// 当前会话（可变，用于存储最新的会话数据）
   Conversation? _currentConversation;
@@ -132,6 +139,12 @@ class ChatController extends ChangeNotifier {
       // 再加载消息
       await messageService.setCurrentConversation(conversation.id);
       debugPrint('📝 消息加载完成，共 ${messageService.currentMessages.length} 条');
+
+      // 注册前台服务数据回调（仅 Android）
+      if (!kIsWeb && Platform.isAndroid) {
+        _foregroundTaskManager.addDataCallback(_onReceiveBackgroundData);
+        debugPrint('📝 已注册前台服务数据回调');
+      }
     } catch (e) {
       debugPrint('❌ 初始化聊天控制器失败: $e');
     } finally {
@@ -280,6 +293,15 @@ class ChatController extends ChangeNotifier {
       );
       await messageService.addMessage(aiMessage);
 
+      // 启动前台服务（仅 Android，且用户启用了后台服务）
+      final settings = getSettings?.call() ?? {};
+      final enableBackgroundService =
+          settings['enableBackgroundService'] as bool? ?? true;
+
+      if (!kIsWeb && Platform.isAndroid && enableBackgroundService) {
+        await _startAIChatService(conversation.id, aiMessage.id);
+      }
+
       // 流式请求AI回复
       await _requestAIResponse(
         aiMessage.id,
@@ -362,8 +384,9 @@ class ChatController extends ChangeNotifier {
           debugPrint('🔍 [第零阶段] 找到 ${templates.length} 个工具模版');
 
           // 优先尝试精确匹配：使用用户输入标题直接匹配模版名称
-          final exactMatchTemplate =
-              templateService!.getTemplateByName(userInput.trim());
+          final exactMatchTemplate = templateService!.getTemplateByName(
+            userInput.trim(),
+          );
 
           if (exactMatchTemplate != null) {
             debugPrint(
@@ -414,9 +437,7 @@ class ChatController extends ChangeNotifier {
                 schema: ToolService.toolTemplateMatchSchema,
               ),
             ),
-            additionalPrompts: {
-              'tool_templates': templatePrompt,
-            },
+            additionalPrompts: {'tool_templates': templatePrompt},
             shouldCancel: () => _isCancelling,
             onToken: (token) {
               buffer.write(token);
@@ -519,9 +540,10 @@ class ChatController extends ChangeNotifier {
           files.where((f) => FilePickerHelper.isImageFile(f)).toList();
 
       // 准备工具简要索引 Prompt（用于第一阶段）
-      final toolBriefPrompt = (enableToolCalling && _currentAgent!.enableFunctionCalling)
-          ? ToolService.getToolBriefPrompt()
-          : '';
+      final toolBriefPrompt =
+          (enableToolCalling && _currentAgent!.enableFunctionCalling)
+              ? ToolService.getToolBriefPrompt()
+              : '';
 
       // 第一阶段：流式接收 AI 回复（使用占位符方式）
       await RequestService.streamResponse(
@@ -542,11 +564,8 @@ class ChatController extends ChangeNotifier {
                   ),
                 )
                 : null,
-        additionalPrompts: toolBriefPrompt.isNotEmpty
-            ? {
-                'tool_brief': toolBriefPrompt,
-              }
-            : null,
+        additionalPrompts:
+            toolBriefPrompt.isNotEmpty ? {'tool_brief': toolBriefPrompt} : null,
         shouldCancel: () => _isCancelling, // 传递取消检查函数
         onToken: (token) {
           buffer.write(token);
@@ -587,9 +606,8 @@ class ChatController extends ChangeNotifier {
           debugPrint('AI响应错误: $error');
 
           // 检测是否为用户取消操作
-          final errorMessage = error == '已取消发送'
-              ? '用户已取消操作'
-              : '抱歉，生成回复时出现错误：$error';
+          final errorMessage =
+              error == '已取消发送' ? '用户已取消操作' : '抱歉，生成回复时出现错误：$error';
 
           messageService.updateAIMessageContent(
             conversation.id,
@@ -599,9 +617,23 @@ class ChatController extends ChangeNotifier {
           );
 
           messageService.completeAIMessage(conversation.id, aiMessageId);
+
+          // 通知后台服务生成错误
+          if (!kIsWeb && Platform.isAndroid) {
+            _notifyGenerationError(errorMessage, messageId: aiMessageId);
+            // 延迟停止服务
+            Future.delayed(const Duration(seconds: 3), () {
+              _stopAIChatServiceIfIdle();
+            });
+          }
         },
         onComplete: () async {
           final firstResponse = buffer.toString();
+
+          // 通知后台服务AI响应完成（第一阶段）
+          if (!kIsWeb && Platform.isAndroid) {
+            _notifyGenerationProgress('AI思考完成，准备执行...');
+          }
 
           // ========== 检测工具需求（第一阶段响应）==========
           final toolRequest = ToolService.parseToolRequest(firstResponse);
@@ -642,9 +674,7 @@ class ChatController extends ChangeNotifier {
                 prompt: null,
                 contextMessages: contextMessages,
                 vision: false,
-                additionalPrompts: {
-                  'tool_detail': detailPrompt,
-                },
+                additionalPrompts: {'tool_detail': detailPrompt},
                 // 使用 JSON Schema 强制返回工具调用格式
                 responseFormat: ResponseFormat.jsonSchema(
                   jsonSchema: JsonSchemaObject(
@@ -686,9 +716,8 @@ class ChatController extends ChangeNotifier {
                   debugPrint('第二阶段 AI 响应错误: $error');
 
                   // 检测是否为用户取消操作
-                  final errorMessage = error == '已取消发送'
-                      ? '用户已取消操作'
-                      : '抱歉，生成工具调用时出现错误：$error';
+                  final errorMessage =
+                      error == '已取消发送' ? '用户已取消操作' : '抱歉，生成工具调用时出现错误：$error';
 
                   messageService.updateAIMessageContent(
                     conversation.id,
@@ -767,6 +796,20 @@ class ChatController extends ChangeNotifier {
           ? '${processedContent.substring(0, 50)}...'
           : processedContent,
     );
+
+    // 通知后台服务生成完成
+    if (!kIsWeb && Platform.isAndroid) {
+      final tokenCount = TokenCounterService.estimateTokenCount(content);
+      _notifyGenerationComplete(
+        processedContent,
+        tokenCount: tokenCount,
+        messageId: messageId,
+      );
+      // 延迟停止服务（给用户时间看通知）
+      Future.delayed(const Duration(seconds: 3), () {
+        _stopAIChatServiceIfIdle();
+      });
+    }
   }
 
   /// 构建上下文消息列表
@@ -1425,6 +1468,20 @@ class ChatController extends ChangeNotifier {
           aiMessage: updatedParent,
           finalReply: newAiMessageFinal.content,
         );
+
+        // 通知后台服务生成完成（工具调用流程）
+        if (!kIsWeb && Platform.isAndroid) {
+          final tokenCount = newAiMessageFinal.tokenCount;
+          _notifyGenerationComplete(
+            newAiMessageFinal.content,
+            tokenCount: tokenCount,
+            messageId: originalMessageId,
+          );
+          // 延迟停止服务
+          Future.delayed(const Duration(seconds: 3), () {
+            _stopAIChatServiceIfIdle();
+          });
+        }
       } else {
         debugPrint('❌ 未找到父消息: $originalMessageId');
       }
@@ -1864,8 +1921,176 @@ class ChatController extends ChangeNotifier {
     }
   }
 
+  // ========== 前台服务管理 ==========
+
+  /// 接收后台服务发送的数据
+  void _onReceiveBackgroundData(Object data) {
+    debugPrint('📨 [ChatController] 收到后台服务数据: $data');
+
+    if (data is Map<String, dynamic>) {
+      final event = data['event'];
+
+      switch (event) {
+        case 'cancel_generation':
+          // 后台服务请求取消生成
+          debugPrint('🛑 [ChatController] 后台服务请求取消生成');
+          cancelSending();
+          break;
+
+        case 'ai_response_ready':
+          // AI 回复完成
+          final messageId = data['messageId'] as String?;
+          debugPrint('✅ [ChatController] AI 回复完成: $messageId');
+          // 刷新消息列表
+          notifyListeners();
+          break;
+
+        case 'ai_response_error':
+          // AI 回复错误
+          final error = data['error'] as String?;
+          debugPrint('❌ [ChatController] AI 回复错误: $error');
+          notifyListeners();
+          break;
+
+        default:
+          debugPrint('⚠️ [ChatController] 未知事件: $event');
+      }
+    }
+  }
+
+  /// 启动 AI 聊天前台服务（仅 Android）
+  Future<void> _startAIChatService(String conversationId, String messageId) async {
+    if (kIsWeb || !Platform.isAndroid) {
+      debugPrint('ℹ️ [ChatController] 非 Android 平台，跳过前台服务');
+      return;
+    }
+
+    try {
+      final isRunning = await _foregroundTaskManager.isServiceRunning();
+
+      if (!isRunning) {
+        debugPrint('🚀 [ChatController] 启动AI聊天前台服务');
+
+        await _foregroundTaskManager.startService(
+          serviceId: 257, // 唯一ID（与 TimerService 区分）
+          notificationTitle: 'AI助手运行中',
+          notificationText: '正在为您生成回复...',
+          notificationButtons: [
+            const NotificationButton(id: 'cancel', text: '取消'),
+          ],
+          notificationInitialRoute: '/chat',
+          callback: startAIChatTaskCallback,
+        );
+      }
+
+      // 发送开始生成的消息到后台服务
+      FlutterForegroundTask.sendDataToTask({
+        'action': 'start_generation',
+        'conversationId': conversationId,
+        'messageId': messageId,
+      });
+
+      debugPrint('✅ [ChatController] 前台服务启动成功');
+    } catch (e) {
+      debugPrint('❌ [ChatController] 启动前台服务失败: $e');
+    }
+  }
+
+  /// 通知后台服务生成完成
+  void _notifyGenerationComplete(String content, {int? tokenCount, String? messageId}) {
+    if (kIsWeb || !Platform.isAndroid) return;
+
+    try {
+      final preview = content.length > 50 ? '${content.substring(0, 50)}...' : content;
+      final isInForeground = _isInChatScreen();
+
+      // 获取设置：是否显示token
+      final settings = getSettings?.call() ?? {};
+      final showToken = settings['showTokenInNotification'] as bool? ?? true;
+
+      FlutterForegroundTask.sendDataToTask({
+        'action': 'generation_complete',
+        'conversationId': conversation.id,
+        'messageId': messageId,
+        'preview': preview,
+        'isInForeground': isInForeground,
+        'showToken': showToken,
+        'tokenCount': tokenCount ?? TokenCounterService.estimateTokenCount(content),
+      });
+
+      debugPrint('✅ [ChatController] 已通知后台服务生成完成 (token: $tokenCount)');
+    } catch (e) {
+      debugPrint('❌ [ChatController] 通知生成完成失败: $e');
+    }
+  }
+
+  /// 通知后台服务生成进度
+  void _notifyGenerationProgress(String progress) {
+    if (kIsWeb || !Platform.isAndroid) return;
+
+    try {
+      FlutterForegroundTask.sendDataToTask({
+        'action': 'generation_progress',
+        'progress': progress,
+      });
+    } catch (e) {
+      debugPrint('❌ [ChatController] 通知生成进度失败: $e');
+    }
+  }
+
+  /// 通知后台服务生成错误
+  void _notifyGenerationError(String error, {String? messageId}) {
+    if (kIsWeb || !Platform.isAndroid) return;
+
+    try {
+      FlutterForegroundTask.sendDataToTask({
+        'action': 'generation_error',
+        'conversationId': conversation.id,
+        'messageId': messageId,
+        'error': error,
+      });
+
+      debugPrint('✅ [ChatController] 已通知后台服务生成错误');
+    } catch (e) {
+      debugPrint('❌ [ChatController] 通知生成错误失败: $e');
+    }
+  }
+
+  /// 停止前台服务（如果空闲）
+  Future<void> _stopAIChatServiceIfIdle() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+
+    try {
+      if (!_isSending && await _foregroundTaskManager.isServiceRunning()) {
+        await _foregroundTaskManager.stopService();
+        debugPrint('✅ [ChatController] 前台服务已停止');
+      }
+    } catch (e) {
+      debugPrint('❌ [ChatController] 停止前台服务失败: $e');
+    }
+  }
+
+  /// 检查是否在聊天界面
+  bool _isInChatScreen() {
+    // 方式1: 通过 WidgetsBinding 检查应用状态
+    final lifecycleState = WidgetsBinding.instance.lifecycleState;
+    if (lifecycleState != AppLifecycleState.resumed) {
+      return false; // 应用在后台
+    }
+
+    // 方式2: 简化实现 - 假设在前台就是在聊天界面
+    // TODO: 可以通过路由监听或全局状态更精确判断
+    return true;
+  }
+
   @override
   void dispose() {
+    // 移除前台服务数据回调
+    if (!kIsWeb && Platform.isAndroid) {
+      _foregroundTaskManager.removeDataCallback(_onReceiveBackgroundData);
+      debugPrint('📝 已移除前台服务数据回调');
+    }
+
     // 清理资源
     super.dispose();
   }
