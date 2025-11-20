@@ -23,6 +23,7 @@ class ToolTemplateScreen extends StatefulWidget {
 class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
   String _searchQuery = '';
   Set<String> _selectedTags = {};
+  final ScrollController _tagsScrollController = ScrollController();
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
 
   @override
   void dispose() {
+    _tagsScrollController.dispose();
     widget.templateService.removeListener(_onTemplatesChanged);
     super.dispose();
   }
@@ -79,6 +81,12 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
               tooltip: '按标签过滤',
               onPressed: () => _showTagFilterDialog(allTags),
             ),
+          // 重置默认模板按钮
+          IconButton(
+            icon: const Icon(Icons.restore),
+            tooltip: '重置默认模板',
+            onPressed: _resetToDefaultTemplates,
+          ),
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(_selectedTags.isNotEmpty ? 100 : 60),
@@ -116,23 +124,32 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children:
-                              _selectedTags.map((tag) {
-                                return Chip(
-                                  avatar: const Icon(Icons.label, size: 16),
-                                  label: Text(tag),
-                                  onDeleted: () {
-                                    setState(() {
-                                      _selectedTags.remove(tag);
-                                    });
-                                  },
-                                  deleteIcon: const Icon(Icons.close, size: 16),
-                                  visualDensity: VisualDensity.compact,
-                                );
-                              }).toList(),
+                        child: Scrollbar(
+                          controller: _tagsScrollController,
+                          thumbVisibility: true,
+                          child: SingleChildScrollView(
+                            controller: _tagsScrollController,
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children:
+                                  _selectedTags.map((tag) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 6),
+                                      child: Chip(
+                                        avatar: const Icon(Icons.label, size: 16),
+                                        label: Text(tag),
+                                        onDeleted: () {
+                                          setState(() {
+                                            _selectedTags.remove(tag);
+                                          });
+                                        },
+                                        deleteIcon: const Icon(Icons.close, size: 16),
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                    );
+                                  }).toList(),
+                            ),
+                          ),
                         ),
                       ),
                       if (_selectedTags.length > 1)
@@ -507,6 +524,114 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
       });
     }
   }
+
+  /// 重置为默认模板
+  Future<void> _resetToDefaultTemplates() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('重置确认'),
+          ],
+        ),
+        content: const Text(
+          '此操作将强制恢复所有默认工具模板到初始状态。\n\n'
+          '⚠️ 注意：如果您修改过默认模板，这些修改将会被覆盖！\n\n'
+          '自定义模板不会受到影响。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.orange,
+            ),
+            icon: const Icon(Icons.restore),
+            label: const Text('重置'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      // 显示加载指示器
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('正在重置默认模板...'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // 执行重置操作
+      await widget.templateService.restoreDefaultTemplates();
+
+      // 关闭加载指示器
+      if (mounted) {
+        Navigator.pop(context);
+
+        // 显示成功提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Text('默认模板已成功重置'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        // 刷新界面
+        setState(() {});
+      }
+    } catch (e) {
+      // 关闭加载指示器
+      if (mounted) {
+        Navigator.pop(context);
+
+        // 显示错误提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(child: Text('重置失败: $e')),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
 }
 
 /// 标签过滤对话框
@@ -556,69 +681,71 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: widget.allTags.length,
-          itemBuilder: (context, index) {
-            final tag = widget.allTags[index];
-            final count =
-                widget.templateService.templates
-                    .where((t) => t.tags.contains(tag))
-                    .length;
-            final isSelected = _selectedTags.contains(tag);
+        child: SingleChildScrollView(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: widget.allTags.map((tag) {
+              final count =
+                  widget.templateService.templates
+                      .where((t) => t.tags.contains(tag))
+                      .length;
+              final isSelected = _selectedTags.contains(tag);
 
-            return CheckboxListTile(
-              value: isSelected,
-              onChanged: (checked) {
-                setState(() {
-                  if (checked == true) {
-                    _selectedTags.add(tag);
-                  } else {
-                    _selectedTags.remove(tag);
-                  }
-                });
-              },
-              title: Row(
-                children: [
-                  Icon(
-                    Icons.label,
-                    size: 18,
-                    color: isSelected ? Colors.blue : Colors.grey,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(tag)),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          isSelected ? Colors.blue.shade50 : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
+              return FilterChip(
+                avatar: Icon(
+                  Icons.label,
+                  size: 18,
+                  color: isSelected ? Colors.blue : Colors.grey,
+                ),
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(tag),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
                         color:
-                            isSelected
-                                ? Colors.blue.shade200
-                                : Colors.grey.shade300,
+                            isSelected ? Colors.blue.shade100 : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              isSelected
+                                  ? Colors.blue.shade800
+                                  : Colors.grey.shade700,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      count.toString(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color:
-                            isSelected
-                                ? Colors.blue.shade700
-                                : Colors.grey.shade600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              controlAffinity: ListTileControlAffinity.leading,
-            );
-          },
+                  ],
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      _selectedTags.add(tag);
+                    } else {
+                      _selectedTags.remove(tag);
+                    }
+                  });
+                },
+                showCheckmark: false,
+                selectedColor: Colors.blue.shade50,
+                side: BorderSide(
+                  color: isSelected ? Colors.blue.shade300 : Colors.grey.shade400,
+                  width: 1,
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
       actions: [

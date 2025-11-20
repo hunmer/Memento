@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "创建计时器",
         "desc": "创建25分钟番茄计时器",
-        "data": "const timer = await Memento.plugins.timer.createTimer({\n  name: '专注工作',\n  duration: 25 * 60,\n  type: 'countdown'\n});\n\nreturn {\n  success: true,\n  timer: {\n    id: timer.id,\n    name: timer.name,\n    duration: '25分钟'\n  }\n};"
+        "data": "const timer = await Memento.plugins.timer.createTimer({\n  name: '专注工作',\n  duration: 25 * 60,\n  type: 'countdown'\n});\n\nconst result = {\n  success: true,\n  timer: {\n    id: timer.id,\n    name: timer.name,\n    duration: '25分钟'\n  }\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "获取计时器列表",
         "desc": "查询所有计时器",
-        "data": "const timers = await Memento.plugins.timer.getTimers();\n\nreturn {\n  count: timers.length,\n  timers: timers.map(t => ({\n    id: t.id,\n    name: t.name,\n    duration: Math.floor(t.duration / 60) + '分钟',\n    status: t.status\n  }))\n};"
+        "data": "const timers = await Memento.plugins.timer.getTimers();\n\nconst result = {\n  count: timers.length,\n  timers: timers.map(t => ({\n    id: t.id,\n    name: t.name,\n    duration: Math.floor(t.duration / 60) + '分钟',\n    status: t.status\n  }))\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -44,7 +44,7 @@
         "method": "run_js",
         "title": "启动计时器",
         "desc": "启动\"工作\"计时器",
-        "data": "const timers = await Memento.plugins.timer.getTimers();\nconst workTimer = timers.find(t => t.name.includes('工作'));\n\nif (!workTimer) {\n  return { success: false, message: '未找到\"工作\"计时器' };\n}\n\nawait Memento.plugins.timer.startTimer({ id: workTimer.id });\n\nreturn {\n  success: true,\n  message: '计时器已启动',\n  timer: {\n    id: workTimer.id,\n    name: workTimer.name\n  }\n};"
+        "data": "const timers = await Memento.plugins.timer.getTimers();\nconst workTimer = timers.find(t => t.name.includes('工作'));\n\nif (!workTimer) {\n  const errorResult = { success: false, message: '未找到\"工作\"计时器' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nawait Memento.plugins.timer.startTimer({ id: workTimer.id });\n\nconst result = {\n  success: true,\n  message: '计时器已启动',\n  timer: {\n    id: workTimer.id,\n    name: workTimer.name\n  }\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -63,7 +63,7 @@
         "method": "run_js",
         "title": "获取计时历史",
         "desc": "查询计时历史记录",
-        "data": "const history = await Memento.plugins.timer.getHistory();\n\nreturn {\n  count: history.length,\n  history: history.slice(0, 10).map(h => ({\n    timerName: h.timerName,\n    duration: Math.floor(h.duration / 60) + '分钟',\n    date: h.date\n  }))\n};"
+        "data": "const history = await Memento.plugins.timer.getHistory();\n\nconst result = {\n  count: history.length,\n  history: history.slice(0, 10).map(h => ({\n    timerName: h.timerName,\n    duration: Math.floor(h.duration / 60) + '分钟',\n    date: h.date\n  }))\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

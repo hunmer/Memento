@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取今日活动",
         "desc": "查询今天的活动记录",
-        "data": "const today = new Date();\ntoday.setHours(0, 0, 0, 0);\n\nconst activities = await Memento.plugins.activity.getActivities({\n  startDate: today.toISOString()\n});\n\nreturn {\n  count: activities.length,\n  activities: activities.map(a => ({\n    id: a.id,\n    name: a.name,\n    tags: a.tags,\n    duration: a.duration,\n    createdAt: a.createdAt\n  }))\n};"
+        "data": "const todayDate = await Memento.system.getCustomDate({relativePosition: 'startOfDay', format: 'iso'});\n\nconst activities = await Memento.plugins.activity.getActivities({\n  startDate: todayDate\n});\n\nconst result = {\n  count: activities.length,\n  activities: activities.map(a => ({\n    id: a.id,\n    name: a.name,\n    tags: a.tags,\n    duration: a.duration,\n    createdAt: a.createdAt\n  }))\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "创建活动",
         "desc": "记录跑步30分钟",
-        "data": "const activity = await Memento.plugins.activity.createActivity({\n  name: '跑步',\n  duration: 30,\n  tags: ['运动', '健身']\n});\n\nreturn {\n  success: true,\n  activity: {\n    id: activity.id,\n    name: activity.name,\n    duration: activity.duration + '分钟',\n    tags: activity.tags\n  }\n};"
+        "data": "const activity = await Memento.plugins.activity.createActivity({\n  name: '跑步',\n  duration: 30,\n  tags: ['运动', '健身']\n});\n\nconst result = {\n  success: true,\n  activity: {\n    id: activity.id,\n    name: activity.name,\n    duration: activity.duration + '分钟',\n    tags: activity.tags\n  }\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -44,7 +44,7 @@
         "method": "run_js",
         "title": "获取统计数据",
         "desc": "统计今日活动",
-        "data": "const stats = await Memento.plugins.activity.getTodayStats();\n\nreturn {\n  totalActivities: stats.totalActivities,\n  totalDuration: stats.totalDuration + '分钟',\n  tagBreakdown: stats.tagBreakdown\n};"
+        "data": "const stats = await Memento.plugins.activity.getTodayStats();\n\nconst result = {\n  totalActivities: stats.totalActivities,\n  totalDuration: stats.totalDuration + '分钟',\n  tagBreakdown: stats.tagBreakdown\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -62,7 +62,7 @@
         "method": "run_js",
         "title": "获取标签分组",
         "desc": "查询所有标签分组",
-        "data": "const tagGroups = await Memento.plugins.activity.getTagGroups();\n\nreturn {\n  groups: tagGroups.map(g => ({\n    name: g.name,\n    tags: g.tags,\n    color: g.color\n  }))\n};"
+        "data": "const tagGroups = await Memento.plugins.activity.getTagGroups();\n\nconst result = {\n  groups: tagGroups.map(g => ({\n    name: g.name,\n    tags: g.tags,\n    color: g.color\n  }))\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

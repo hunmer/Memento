@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取今日照片",
         "desc": "查询今天的照片日记",
-        "data": "const today = new Date().toISOString().split('T')[0];\nconst photos = await Memento.plugins.calendarAlbum.getPhotos({\n  date: today\n});\n\nreturn {\n  count: photos.length,\n  photos: photos.map(p => ({\n    id: p.id,\n    caption: p.caption,\n    tags: p.tags\n  }))\n};"
+        "data": "const todayDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nconst photos = await Memento.plugins.calendarAlbum.getPhotos({\n  date: todayDate\n});\n\nconst result = {\n  count: photos.length,\n  photos: photos.map(p => ({\n    id: p.id,\n    caption: p.caption,\n    tags: p.tags\n  }))\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "获取标签列表",
         "desc": "查询所有标签",
-        "data": "const tags = await Memento.plugins.calendarAlbum.getTags();\n\nreturn {\n  count: tags.length,\n  tags: tags\n};"
+        "data": "const tags = await Memento.plugins.calendarAlbum.getTags();\n\nconst result = {\n  count: tags.length,\n  tags: tags\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -44,7 +44,7 @@
         "method": "run_js",
         "title": "获取统计数据",
         "desc": "查询相册统计",
-        "data": "const stats = await Memento.plugins.calendarAlbum.getStats();\n\nreturn {\n  totalPhotos: stats.totalPhotos,\n  totalDays: stats.totalDays,\n  tagCount: stats.tagCount\n};"
+        "data": "const stats = await Memento.plugins.calendarAlbum.getStats();\n\nconst result = {\n  totalPhotos: stats.totalPhotos,\n  totalDays: stats.totalDays,\n  tagCount: stats.tagCount\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
