@@ -12,6 +12,7 @@ import 'services/message_service.dart';
 import 'services/settings_service.dart';
 import 'services/ui_service.dart';
 import 'services/user_service.dart';
+import 'services/widget_service.dart';
 
 class ChatMainView extends StatefulWidget {
   const ChatMainView({super.key});
@@ -81,6 +82,9 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     await uiService.initialize();
 
     // Initialize prompt controller
+
+    // 初始化小组件服务
+    await ChatWidgetService.initialize();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
