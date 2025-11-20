@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'timer_item.dart';
 import '../timer_plugin.dart';
-import '../../../../core/notification_manager.dart';
+import '../../../../core/notification_controller.dart';
 import '../../../../core/event/event_manager.dart';
 
 class TimerTaskEventArgs extends EventArgs {
@@ -171,7 +171,8 @@ class TimerTask {
 
       // 发送完成通知
       if (enableNotification) {
-        NotificationManager.showInstantNotification(
+        NotificationController.createBasicNotification(
+          id: DateTime.now().millisecondsSinceEpoch,
           title: '计时任务完成',
           body: '计时任务"$name"已完成',
         );

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:Memento/core/notification_manager.dart';
+import 'package:Memento/core/notification_controller.dart';
 import '../../../../core/event/event_manager.dart';
 
 class TimerItemEventArgs extends EventArgs {
@@ -303,7 +303,8 @@ class TimerItem {
       } else {
         // 发送完成通知
         if (enableNotification) {
-          NotificationManager.showInstantNotification(
+          NotificationController.createBasicNotification(
+            id: DateTime.now().millisecondsSinceEpoch,
             title: '正时器完成',
             body: '正时器"$name"已完成',
           );
@@ -337,7 +338,8 @@ class TimerItem {
         start(); // 重新启动计时器
       } else {
         if (enableNotification) {
-          NotificationManager.showInstantNotification(
+          NotificationController.createBasicNotification(
+            id: DateTime.now().millisecondsSinceEpoch,
             title: '倒计时器完成',
             body: '倒计时器"$name"已完成',
           );
@@ -413,7 +415,8 @@ class TimerItem {
           start(); // 重新启动计时器
         } else {
           if (enableNotification) {
-            NotificationManager.showInstantNotification(
+            NotificationController.createBasicNotification(
+              id: DateTime.now().millisecondsSinceEpoch,
               title: '番茄钟计时器完成',
               body: '番茄钟计时器"$name"已完成',
             );
