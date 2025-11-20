@@ -360,14 +360,15 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     try {
-      final messages = await channelService.getChannelMessages(channelId);
-      if (messages == null) {
-        return jsonEncode({'success': false, 'error': '频道不存在'});
+      // 获取要删除的消息
+      final message = channelService.getMessageById(messageId);
+      if (message == null) {
+        return jsonEncode({'success': false, 'error': '消息不存在'});
       }
 
-      messages.removeWhere((m) => m.id == messageId);
-      await channelService.saveMessages(channelId, messages);
-      return jsonEncode({'success': true});
+      // 使用 ChannelService 的 deleteMessage 方法正确删除消息
+      final success = await channelService.deleteMessage(message);
+      return jsonEncode({'success': success});
     } catch (e) {
       return jsonEncode({'success': false, 'error': '删除失败: ${e.toString()}'});
     }

@@ -76,6 +76,9 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
   bool _isRecording = false;
   bool _isInitialized = false;
 
+  /// 录音开始前输入框中的文本
+  String _textBeforeRecording = '';
+
   StreamSubscription<String>? _recognitionSubscription;
   StreamSubscription<SpeechRecognitionState>? _stateSubscription;
   StreamSubscription<String>? _errorSubscription;
@@ -99,12 +102,17 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
     try {
       await widget.recognitionService.initialize();
 
-      // 监听识别结果
+      // 监听识别结果并实时更新到输入框
       _recognitionSubscription =
           widget.recognitionService.recognitionStream.listen((text) {
         setState(() {
           _recognizedText = text;
         });
+
+        // 实时更新到输入框
+        if (_isRecording && text.isNotEmpty) {
+          _updateTextController(text);
+        }
       });
 
       // 监听状态变化
@@ -137,6 +145,9 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
     if (!widget.enabled || !_isInitialized || _isRecording) return;
 
     try {
+      // 保存录音开始前的文本
+      _textBeforeRecording = widget.textController.text;
+
       setState(() {
         _isRecording = true;
         _recognizedText = '';
@@ -182,17 +193,27 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
     }
   }
 
+  /// 实时更新文本控制器
+  void _updateTextController(String recognizedText) {
+    if (recognizedText.isEmpty) return;
+
+    // 合并录音前的文本和当前识别的文本
+    final newText = _textBeforeRecording.isEmpty
+        ? recognizedText
+        : '$_textBeforeRecording\n$recognizedText';
+
+    widget.textController.text = newText;
+
+    // 移动光标到末尾
+    widget.textController.selection = TextSelection.fromPosition(
+      TextPosition(offset: newText.length),
+    );
+  }
+
   /// 录音完成时的处理
   void _onRecordingComplete() {
     if (_recognizedText.isNotEmpty) {
-      // 将识别结果添加到输入框
-      final currentText = widget.textController.text;
-      final newText = currentText.isEmpty
-          ? _recognizedText
-          : '$currentText\n$_recognizedText';
-      widget.textController.text = newText;
-
-      // 触发回调
+      // 文本已经通过实时更新添加到输入框了，这里只需要触发回调
       widget.onRecognitionComplete?.call(_recognizedText);
 
       // 清空识别文本

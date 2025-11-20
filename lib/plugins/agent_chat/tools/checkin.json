@@ -68,7 +68,7 @@
     "examples": [
       {
         "title": "获取本月签到历史（无分页）",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst result = await Memento.plugins.checkin.getCheckinHistory({\n  itemId: 'item-id-123',\n  startDate: startDate,\n  endDate: endDate\n});\nsetResult(`本月共签到 ${result.totalCount} 次`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst result = await Memento.plugins.checkin.getCheckinHistory({\n  itemId: 'item-id-123',\n  startDate: startDate,\n  endDate: endDate\n});\nsetResult(`本月共签到 ${result.totalCount} 次`);"
       },
       {
         "title": "分页获取签到历史（第1页，每页30条）",

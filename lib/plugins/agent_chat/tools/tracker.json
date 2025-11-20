@@ -280,7 +280,7 @@
         "comment": "添加当前记录(自动ID)"
       },
       {
-        "code": "// 添加昨日的记录\nconst timeInfo = await Memento.system.getCurrentTime();\nconst yesterday = new Date(timeInfo.timestamp);\nyesterday.setDate(yesterday.getDate() - 1);\nconst pastTime = yesterday.toISOString().replace(/T.*/, 'T20:00:00.000Z');\nconst pastRecord = await Memento.plugins.tracker.recordData({\n  goalId: 'goal123',\n  value: 45,\n  note: '昨日补记',\n  dateTime: pastTime\n});\nsetResult(pastRecord);",
+        "code": "// 添加昨日的记录\nconst yesterday = await Memento.system.getCustomDate({subtract: {days: 1}, relativePosition: 'startOfDay', format: 'iso'});\nconst pastTime = yesterday.replace(/T.*/, 'T20:00:00.000Z');\nconst pastRecord = await Memento.plugins.tracker.recordData({\n  goalId: 'goal123',\n  value: 45,\n  note: '昨日补记',\n  dateTime: pastTime\n});\nsetResult(pastRecord);",
         "comment": "补记历史数据(自动ID)"
       },
       {

@@ -12,7 +12,7 @@
     },
     {
       "title": "setResult 高级用法",
-      "code": "// 演示 setResult 的正确用法\nconsole.log('开始测试...');\n\n// 1. 调用 API\nvar result = await Memento.chat.testSync();\nconsole.log('API 返回:', result);\n\n// 2. 处理数据\nvar processed = {\n  original: result,\n  timestamp: new Date().toISOString(),\n  processed: true\n};\n\n// 3. 使用 setResult 显式设置返回值\nsetResult(processed);\nconsole.log('完成！');"
+      "code": "// 演示 setResult 的正确用法\nconsole.log('开始测试...');\n\n// 1. 调用 API\nvar result = await Memento.chat.testSync();\nconsole.log('API 返回:', result);\n\n// 2. 处理数据\nvar timestamp = await Memento.system.getCustomDate({format: 'iso'});\nvar processed = {\n  original: result,\n  timestamp: timestamp,\n  processed: true\n};\n\n// 3. 使用 setResult 显式设置返回值\nsetResult(processed);\nconsole.log('完成！');"
     },
     {
       "title": "创建新频道",

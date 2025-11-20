@@ -59,15 +59,15 @@
     "examples": [
       {
         "title": "创建简单活动",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T08:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T10:00:00.000Z');\nconst result = await Memento.plugins.activity.createActivity({\n  startTime,\n  endTime,\n  title: '晨间会议'\n});\nsetResult(result.success ? '创建成功' : '创建失败');"
+        "code": "const baseTime = await Memento.system.getCustomDate({relativePosition: 'startOfDay', format: 'iso'});\nconst startTime = baseTime.replace(/T.*/, 'T08:00:00.000Z');\nconst endTime = baseTime.replace(/T.*/, 'T10:00:00.000Z');\nconst result = await Memento.plugins.activity.createActivity({\n  startTime,\n  endTime,\n  title: '晨间会议'\n});\nsetResult(result.success ? '创建成功' : '创建失败');"
       },
       {
         "title": "创建完整活动",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T08:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T10:00:00.000Z');\nconst result = await Memento.plugins.activity.createActivity({\n  startTime,\n  endTime,\n  title: '项目会议',\n  tags: ['工作', '会议'],\n  description: '讨论项目进度',\n  mood: '😊'\n});\nsetResult(`活动ID: ${result.activity.id}`);"
+        "code": "const baseTime = await Memento.system.getCustomDate({relativePosition: 'startOfDay', format: 'iso'});\nconst startTime = baseTime.replace(/T.*/, 'T08:00:00.000Z');\nconst endTime = baseTime.replace(/T.*/, 'T10:00:00.000Z');\nconst result = await Memento.plugins.activity.createActivity({\n  startTime,\n  endTime,\n  title: '项目会议',\n  tags: ['工作', '会议'],\n  description: '讨论项目进度',\n  mood: '😊'\n});\nsetResult(`活动ID: ${result.activity.id}`);"
       },
       {
         "title": "使用自定义ID创建活动",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T14:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T16:00:00.000Z');\nconst result = await Memento.plugins.activity.createActivity({\n  id: 'activity123',\n  startTime,\n  endTime,\n  title: '客户会谈',\n  tags: ['工作', '客户'],\n  description: '与客户讨论新项目需求',\n  mood: '🤝'\n});\nsetResult(`活动已创建，自定义ID: ${result.activity.id}`);"
+        "code": "const baseTime = await Memento.system.getCustomDate({relativePosition: 'startOfDay', format: 'iso'});\nconst startTime = baseTime.replace(/T.*/, 'T14:00:00.000Z');\nconst endTime = baseTime.replace(/T.*/, 'T16:00:00.000Z');\nconst result = await Memento.plugins.activity.createActivity({\n  id: 'activity123',\n  startTime,\n  endTime,\n  title: '客户会谈',\n  tags: ['工作', '客户'],\n  description: '与客户讨论新项目需求',\n  mood: '🤝'\n});\nsetResult(`活动已创建，自定义ID: ${result.activity.id}`);"
       }
     ],
     "notes": "必需参数: startTime(开始时间)、endTime(结束时间)、title(活动标题);可选参数: id(自定义ID)、tags(标签)、description(描述)、mood(心情);如果不提供id会自动生成UUID;ID不能与现有活动重复;如果时间段与现有活动重叠，会自动替换原活动;结束时间必须晚于开始时间;tags 参数支持数组或 JSON 字符串格式",
@@ -94,7 +94,7 @@
     "examples": [
       {
         "title": "更新活动",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T11:00:00.000Z');\nconst result = await Memento.plugins.activity.updateActivity({\n  activityId: 'activity-id-123',\n  startTime,\n  endTime,\n  title: '修改后的会议',\n  tags: ['工作'],\n  description: '延长了会议时间',\n  mood: '😊'\n});\nsetResult(result.success ? '更新成功' : result.error);"
+        "code": "const baseTime = await Memento.system.getCustomDate({relativePosition: 'startOfDay', format: 'iso'});\nconst startTime = baseTime.replace(/T.*/, 'T09:00:00.000Z');\nconst endTime = baseTime.replace(/T.*/, 'T11:00:00.000Z');\nconst result = await Memento.plugins.activity.updateActivity({\n  activityId: 'activity-id-123',\n  startTime,\n  endTime,\n  title: '修改后的会议',\n  tags: ['工作'],\n  description: '延长了会议时间',\n  mood: '😊'\n});\nsetResult(result.success ? '更新成功' : result.error);"
       }
     ],
     "notes": "如果修改后的时间与其他活动重叠会返回错误；如果日期改变，会自动迁移到新日期文件；tags 参数支持数组或 JSON 字符串格式",
@@ -271,7 +271,7 @@
       },
       {
         "title": "查找本月带会议标签的活动",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst activities = await Memento.plugins.activity.findActivitiesByTag({tag: '会议', startDate, endDate});\nconst totalHours = activities.reduce((sum, a) => sum + (a.duration || 0), 0) / 60;\nsetResult(`本月会议 ${activities.length} 个，共 ${totalHours.toFixed(1)} 小时`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst activities = await Memento.plugins.activity.findActivitiesByTag({tag: '会议', startDate, endDate});\nconst totalHours = activities.reduce((sum, a) => sum + (a.duration || 0), 0) / 60;\nsetResult(`本月会议 ${activities.length} 个，共 ${totalHours.toFixed(1)} 小时`);"
       }
     ],
     "notes": "标签匹配区分大小写；支持日期范围过滤",

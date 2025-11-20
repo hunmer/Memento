@@ -4,7 +4,7 @@
   "examples": [
     {
       "title": "获取今天的活动",
-      "code": "// 获取今天的活动列表\nvar today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD\nvar activities = await Memento.activity.getActivities(today);\nconsole.log('今日活动:', activities);\nreturn activities;"
+      "code": "// 获取今天的活动列表\nvar today = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nvar activities = await Memento.activity.getActivities(today);\nconsole.log('今日活动:', activities);\nreturn activities;"
     },
     {
       "title": "创建新活动",
@@ -20,7 +20,7 @@
     },
     {
       "title": "删除活动",
-      "code": "// 先获取今天的活动\nvar today = new Date().toISOString().split('T')[0];\nvar activities = await Memento.activity.getActivities(today);\n\nif (activities.length > 0) {\n  var activityId = activities[0].id;\n  \n  // 删除活动 (需要活动ID和日期)\n  var result = await Memento.activity.deleteActivity(activityId, today);\n  console.log('删除结果:', result);\n  return result;\n} else {\n  return '今天没有活动记录';\n}"
+      "code": "// 先获取今天的活动\nvar today = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nvar activities = await Memento.activity.getActivities(today);\n\nif (activities.length > 0) {\n  var activityId = activities[0].id;\n  \n  // 删除活动 (需要活动ID和日期)\n  var result = await Memento.activity.deleteActivity(activityId, today);\n  console.log('删除结果:', result);\n  return result;\n} else {\n  return '今天没有活动记录';\n}"
     }
   ]
 }

@@ -95,18 +95,18 @@
     "examples": [
       {
         "title": "获取本周事件",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst startDate = weekStart.toISOString().split('T')[0] + 'T00:00:00.000Z';\nconst endDate = weekEnd.toISOString().split('T')[0] + 'T23:59:59.000Z';\nconst events = await Memento.plugins.calendar.getEventsByDateRange({startDate: startDate, endDate: endDate});\nsetResult(`本周有 ${events.length} 个事件`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfWeek', format: 'iso'});\nconst weekEnd = await Memento.system.getCustomDate({relativePosition: 'endOfWeek', format: 'iso'});\nconst endDate = weekEnd.replace(/T.*/, 'T23:59:59.000Z');\nconst events = await Memento.plugins.calendar.getEventsByDateRange({startDate: startDate, endDate: endDate});\nsetResult(`本周有 ${events.length} 个事件`);"
       },
       {
         "title": "分页获取本周事件",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst startDate = weekStart.toISOString().split('T')[0] + 'T00:00:00.000Z';\nconst endDate = weekEnd.toISOString().split('T')[0] + 'T23:59:59.000Z';\nconst result = await Memento.plugins.calendar.getEventsByDateRange({startDate, endDate, offset: 0, count: 20});\nsetResult(`本周共 ${result.total} 个事件，当前返回 ${result.data.length} 个`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfWeek', format: 'iso'});\nconst weekEnd = await Memento.system.getCustomDate({relativePosition: 'endOfWeek', format: 'iso'});\nconst endDate = weekEnd.replace(/T.*/, 'T23:59:59.000Z');\nconst result = await Memento.plugins.calendar.getEventsByDateRange({startDate, endDate, offset: 0, count: 20});\nsetResult(`本周共 ${result.total} 个事件，当前返回 ${result.data.length} 个`);"
       },
       {
         "title": "遍历本月所有事件（分页加载）",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01T00:00:00.000Z`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}T23:59:59.000Z`;\n\nlet allEvents = [];\nlet offset = 0;\nconst count = 30;\n\nwhile (true) {\n  const result = await Memento.plugins.calendar.getEventsByDateRange({startDate, endDate, offset, count});\n  allEvents = allEvents.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`本月共加载 ${allEvents.length} 个事件`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'iso'});\nconst monthEnd = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'iso'});\nconst endDate = monthEnd.replace(/T.*/, 'T23:59:59.000Z');\n\nlet allEvents = [];\nlet offset = 0;\nconst count = 30;\n\nwhile (true) {\n  const result = await Memento.plugins.calendar.getEventsByDateRange({startDate, endDate, offset, count});\n  allEvents = allEvents.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`本月共加载 ${allEvents.length} 个事件`);"
       }
     ],
-    "notes": "日期需要使用 ISO8601 格式，可使用 JavaScript 的 Date.toISOString() 生成。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
+    "notes": "使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
     "enabled": true
   },
   "createEvent": {
@@ -128,11 +128,11 @@
     "examples": [
       {
         "title": "创建今日事件",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent({title: '项目会议', description: '讨论Q1计划', startTime: startTime});\nsetResult(`事件已创建: ${event.id}`);"
+        "code": "const today = await Memento.system.getCustomDate({relativePosition: 'startOfDay', format: 'iso'});\nconst startTime = today.replace(/T.*/, 'T09:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent({title: '项目会议', description: '讨论Q1计划', startTime: startTime});\nsetResult(`事件已创建: ${event.id}`);"
       },
       {
         "title": "创建带提醒的事件",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T14:00:00.000Z');\nconst endTime = new Date(timeInfo.timestamp).toISOString().replace(/T.*/, 'T16:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent({title: '重要会议', description: '年度规划', startTime: startTime, endTime: endTime, reminderMinutes: 15});\nsetResult('已创建事件，将提前15分钟提醒');"
+        "code": "const today = await Memento.system.getCustomDate({relativePosition: 'startOfDay', format: 'iso'});\nconst startTime = today.replace(/T.*/, 'T14:00:00.000Z');\nconst endTime = today.replace(/T.*/, 'T16:00:00.000Z');\nconst event = await Memento.plugins.calendar.createEvent({title: '重要会议', description: '年度规划', startTime: startTime, endTime: endTime, reminderMinutes: 15});\nsetResult('已创建事件，将提前15分钟提醒');"
       }
     ],
     "notes": "reminderMinutes 可选值: 5, 15, 30, 60, 120, 1440（1天）, 2880（2天）",

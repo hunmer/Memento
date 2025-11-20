@@ -477,6 +477,51 @@ class ChannelService {
     }
   }
 
+  /// 删除指定消息
+  ///
+  /// 此方法会从频道的完整消息列表中删除消息，并持久化到存储
+  Future<bool> deleteMessage(Message message) async {
+    if (message.channelId == null) {
+      debugPrint('无法删除消息：消息缺少channelId属性');
+      return false;
+    }
+
+    final channelIndex = _channels.indexWhere((c) => c.id == message.channelId);
+    if (channelIndex == -1) {
+      debugPrint('无法删除消息：找不到ID为 ${message.channelId} 的频道');
+      return false;
+    }
+
+    // 从频道的消息列表中删除消息
+    final originalLength = _channels[channelIndex].messages.length;
+    _channels[channelIndex].messages.removeWhere((m) => m.id == message.id);
+
+    // 检查是否成功删除
+    if (_channels[channelIndex].messages.length == originalLength) {
+      debugPrint('无法删除消息：在频道 ${message.channelId} 中未找到ID为 ${message.id} 的消息');
+      return false;
+    }
+
+    // 如果删除的是最后一条消息，更新频道的lastMessage
+    if (_channels[channelIndex].lastMessage?.id == message.id) {
+      if (_channels[channelIndex].messages.isNotEmpty) {
+        // 找出最新的消息
+        _channels[channelIndex].lastMessage = _channels[channelIndex].messages.reduce(
+          (curr, next) => curr.date.isAfter(next.date) ? curr : next,
+        );
+      } else {
+        _channels[channelIndex].lastMessage = null;
+      }
+    }
+
+    // 持久化到存储
+    await saveMessages(message.channelId!, _channels[channelIndex].messages);
+
+    // 通知UI更新
+    _plugin.refresh();
+    return true;
+  }
+
   // 更新消息
   /// 更新指定消息的内容
   ///

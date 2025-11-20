@@ -223,16 +223,58 @@ class ToolService {
     buffer.writeln('\n### 🚫 严格禁止的行为');
     buffer.writeln('1. **禁止硬编码日期时间**：');
     buffer.writeln('   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`');
-    buffer.writeln('   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = `\${time.year}-\${String(time.month).padStart(2, "0")}-\${String(time.day).padStart(2, "0")}`');
+    buffer.writeln('   - ✅ 正确：`const date = await Memento.system.getCustomDate({format: "yyyy-MM-dd"})`');
     buffer.writeln('2. **禁止使用占位符变量**：');
     buffer.writeln('   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`');
     buffer.writeln('   - ✅ 正确：先查询获取真实数据，然后使用实际的ID');
     buffer.writeln('   - ✅ 示例：`const channels = await Memento.plugins.chat.getChannels(); const firstChannel = channels[0]; await Memento.plugins.chat.sendMessage({channelId: firstChannel.id, content: "消息内容"})`');
     buffer.writeln('\n### 系统 API（在 JavaScript 代码中直接调用）');
     buffer.writeln('\n当需要时间或设备信息时，**必须在 JavaScript 代码中调用系统API**，不要作为单独的步骤：');
-    buffer.writeln('- `await Memento.system.getCurrentTime()` - **必须使用此API获取当前时间**，返回 `{timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName}`');
+    buffer.writeln('\n#### 🌟 推荐：getCustomDate（解决时区问题）');
+    buffer.writeln('- `await Memento.system.getCustomDate(options)` - **推荐使用**，一次调用解决所有日期需求');
+    buffer.writeln('  - **options 参数**：');
+    buffer.writeln('    - `baseDate`: 基准日期（时间戳或ISO字符串），默认当前时间');
+    buffer.writeln('    - `timezone`: "local"（默认）或 "UTC"');
+    buffer.writeln('    - `add`: 增加时间 `{days, hours, minutes, seconds, milliseconds}`');
+    buffer.writeln('    - `subtract`: 减少时间 `{days, hours, minutes, seconds, milliseconds}`');
+    buffer.writeln('    - `relativePosition`: 相对位置，可选值：');
+    buffer.writeln('      - `startOfDay` / `endOfDay` - 当天凌晨/结束');
+    buffer.writeln('      - `startOfHour` / `endOfHour` - 小时开始/结束');
+    buffer.writeln('      - `startOfMonth` / `endOfMonth` - 月初/月末');
+    buffer.writeln('      - `startOfWeek` / `endOfWeek` - 周一/周日');
+    buffer.writeln('      - `startOfYear` / `endOfYear` - 年初/年末');
+    buffer.writeln('    - `format`: 返回格式');
+    buffer.writeln('      - `"object"`（默认）: 返回完整对象 `{timestamp, datetime, year, month, day, ...}`');
+    buffer.writeln('      - `"timestamp"`: 仅返回时间戳');
+    buffer.writeln('      - `"iso"`: 返回 ISO 8601 字符串');
+    buffer.writeln('      - `"text"`: 返回相对时间（如"3天前"）');
+    buffer.writeln('      - 自定义格式如 `"yyyy-MM-dd HH:mm:ss"`');
+    buffer.writeln('\n  **使用示例**：');
+    buffer.writeln('  ```javascript');
+    buffer.writeln('  // 获取今天凌晨（解决时区问题）');
+    buffer.writeln('  const todayStart = await Memento.system.getCustomDate({relativePosition: "startOfDay"});');
+    buffer.writeln('  ');
+    buffer.writeln('  // 获取明天凌晨的时间戳');
+    buffer.writeln('  const tomorrowStart = await Memento.system.getCustomDate({');
+    buffer.writeln('    add: {days: 1},');
+    buffer.writeln('    relativePosition: "startOfDay",');
+    buffer.writeln('    format: "timestamp"');
+    buffer.writeln('  });');
+    buffer.writeln('  ');
+    buffer.writeln('  // 获取本周一凌晨');
+    buffer.writeln('  const weekStart = await Memento.system.getCustomDate({relativePosition: "startOfWeek"});');
+    buffer.writeln('  ');
+    buffer.writeln('  // 获取3天前的日期，格式化输出');
+    buffer.writeln('  const threeDaysAgo = await Memento.system.getCustomDate({');
+    buffer.writeln('    subtract: {days: 3},');
+    buffer.writeln('    format: "yyyy-MM-dd"');
+    buffer.writeln('  });');
+    buffer.writeln('  ```');
+    buffer.writeln('\n#### 其他时间 API');
+    buffer.writeln('- `await Memento.system.getCurrentTime()` - 获取当前时间，返回 `{timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName}`');
     buffer.writeln('- `await Memento.system.getTimestamp()` - 获取当前时间戳（毫秒）');
     buffer.writeln('- `await Memento.system.formatDate(dateInput, format)` - 格式化日期');
+    buffer.writeln('\n#### 设备与应用信息');
     buffer.writeln('- `await Memento.system.getDeviceInfo()` - 获取设备信息');
     buffer.writeln('- `await Memento.system.getAppInfo()` - 获取应用信息');
     buffer.writeln('\n### 步骤间结果传递 API（多步骤协作）\n');
@@ -314,7 +356,7 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "获取今日任务",');
     buffer.writeln('      "desc": "查询今天的所有待办任务",');
-    buffer.writeln(r'      "data": "const time = await Memento.system.getCurrentTime(); const tasks = await Memento.plugins.todo.getTodayTasks(); const result = `今天是${time.month}月${time.day}日，有 ${tasks.length} 个任务`; setResult(result); return result;"');
+    buffer.writeln(r'      "data": "const today = await Memento.system.getCustomDate(); const tasks = await Memento.plugins.todo.getTodayTasks(); const result = `今天是${today.month}月${today.day}日，有 ${tasks.length} 个任务`; setResult(result); return result;"');
     buffer.writeln('    }');
     buffer.writeln('  ]');
     buffer.writeln('}');
@@ -379,7 +421,7 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "创建明天的任务",');
     buffer.writeln('      "desc": "获取明天日期并创建任务",');
-    final createTaskExample = '''const time = await Memento.system.getCurrentTime(); const tomorrow = time.timestamp + 24 * 60 * 60 * 1000; const result = await Memento.plugins.todo.createTask('New Task', { dueDate: tomorrow }); const msg = result.success ? 'Task created successfully' : 'Failed to create task'; setResult(msg); return msg;''';
+    final createTaskExample = '''const tomorrow = await Memento.system.getCustomDate({add: {days: 1}, relativePosition: 'startOfDay', format: 'timestamp'}); const result = await Memento.plugins.todo.createTask('New Task', { dueDate: tomorrow }); const msg = result.success ? 'Task created successfully' : 'Failed to create task'; setResult(msg); return msg;''';
     buffer.writeln('      "data": "${createTaskExample.replaceAll('"', '\\"')}"');
     buffer.writeln('    }');
     buffer.writeln('  ]');
@@ -387,7 +429,7 @@ class ToolService {
     buffer.writeln('```\n');
 
     buffer.writeln('### ⚠️ 注意事项\n');
-    buffer.writeln('1. **🚫 绝对禁止硬编码日期时间**：任何涉及日期时间的代码，必须使用 `await Memento.system.getCurrentTime()` 获取当前时间');
+    buffer.writeln('1. **🚫 绝对禁止硬编码日期时间**：任何涉及日期时间的代码，推荐使用 `await Memento.system.getCustomDate(options)` 获取和处理时间');
     buffer.writeln('   - 生成日记内容时，使用系统API获取的真实日期，不要使用你知识中的日期');
     buffer.writeln('   - 创建任务、账单等需要日期的操作，都必须先调用系统API');
     buffer.writeln('2. **🚫 绝对禁止使用占位符**：不允许使用 "your_xxx_id"、"请填入xxx" 等占位符');
@@ -416,7 +458,7 @@ class ToolService {
 ### 🚫 严格禁止的行为
 1. **禁止硬编码日期时间**：
    - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`
-   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = \`${time.year}-${String(time.month).padStart(2, '0')}-${String(time.day).padStart(2, '0')}\``
+   - ✅ 正确：`const date = await Memento.system.getCustomDate({format: "yyyy-MM-dd"})`
 2. **禁止使用占位符变量**：
    - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`
    - ✅ 正确：先查询获取真实数据，然后使用实际的ID
@@ -426,7 +468,11 @@ class ToolService {
 ### 系统 API（在 JavaScript 代码中直接调用）
 
 当需要时间或设备信息时，**必须在 JavaScript 代码中调用系统API**，不要作为单独的步骤：
-- `await Memento.system.getCurrentTime()` - **必须使用此API获取当前时间**，返回 `{timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName}`
+- `await Memento.system.getCustomDate(options)` - **推荐使用**，一次调用解决所有日期需求
+  - options: `{baseDate?, timezone?, add?, subtract?, relativePosition?, format?}`
+  - relativePosition: "startOfDay"、"endOfDay"、"startOfWeek"、"startOfMonth" 等
+  - format: "object"(默认)、"timestamp"、"iso"、"text" 或自定义格式
+- `await Memento.system.getCurrentTime()` - 获取当前时间，返回 `{timestamp, datetime, year, month, day, ...}`
 - `await Memento.system.getTimestamp()` - 获取当前时间戳（毫秒）
 - `await Memento.system.formatDate(dateInput, format)` - 格式化日期
 - `await Memento.system.getDeviceInfo()` - 获取设备信息
@@ -491,9 +537,9 @@ class ToolService {
 
 **示例**：查询今天的任务
 ```javascript
-const time = await Memento.system.getCurrentTime();
+const today = await Memento.system.getCustomDate();
 const tasks = await Memento.plugins.todo.getTodayTasks();
-const result = `今天是 ${time.month}月${time.day}日，有 ${tasks.length} 个任务`;
+const result = `今天是 ${today.month}月${today.day}日，有 ${tasks.length} 个任务`;
 setResult(result);
 return result;
 ```
@@ -603,7 +649,7 @@ return result;
     buffer.writeln('1. **绝对禁止硬编码日期时间**：');
     buffer.writeln('   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`');
     buffer.writeln('   - ❌ 错误：在生成日记内容、任务标题等地方使用你知识中的日期');
-    buffer.writeln('   - ✅ 正确：`const time = await Memento.system.getCurrentTime(); const date = `\${time.year}-\${String(time.month).padStart(2, "0")}-\${String(time.day).padStart(2, "0")}`');
+    buffer.writeln('   - ✅ 正确：`const date = await Memento.system.getCustomDate({format: "yyyy-MM-dd"})`');
     buffer.writeln('   - ✅ 正确：在生成的内容中使用系统API返回的真实日期');
     buffer.writeln('2. **绝对禁止使用占位符变量**：');
     buffer.writeln('   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`');
@@ -613,9 +659,13 @@ return result;
 
     buffer.writeln('### 系统 API（始终可用）\n');
     buffer.writeln('在生成的 JavaScript 代码中，你**必须使用**以下系统 API 获取时间信息：\n');
-    buffer.writeln('- `await Memento.system.getCurrentTime()` - **必须使用此API获取当前时间**');
+    buffer.writeln('- `await Memento.system.getCustomDate(options)` - **推荐使用，解决时区问题**');
+    buffer.writeln('  - options: `{baseDate?, timezone?, add?, subtract?, relativePosition?, format?}`');
+    buffer.writeln('  - relativePosition: "startOfDay"、"endOfDay"、"startOfWeek"、"startOfMonth" 等');
+    buffer.writeln('  - format: "object"、"timestamp"、"iso"、"text" 或自定义格式如 "yyyy-MM-dd"');
+    buffer.writeln('  - 示例：`await Memento.system.getCustomDate({relativePosition: "startOfDay", format: "timestamp"})`');
+    buffer.writeln('- `await Memento.system.getCurrentTime()` - 获取当前时间');
     buffer.writeln('  - 返回：`{ timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName }`');
-    buffer.writeln('  - 用途：生成日记、任务、账单等任何需要日期的内容');
     buffer.writeln('- `await Memento.system.getTimestamp()` - 获取当前时间戳（毫秒）');
     buffer.writeln('- `await Memento.system.formatDate(dateInput, format)` - 格式化日期');
     buffer.writeln('  - dateInput: 时间戳（毫秒）或 ISO 字符串');

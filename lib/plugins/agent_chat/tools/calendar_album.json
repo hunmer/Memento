@@ -243,7 +243,7 @@
     "examples": [
       {
         "title": "获取本月的照片（无分页）",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst photos = await Memento.plugins.calendar_album.getPhotosByDateRange({ startDate, endDate });\nsetResult(JSON.stringify(photos, null, 2));"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst photos = await Memento.plugins.calendar_album.getPhotosByDateRange({ startDate, endDate });\nsetResult(JSON.stringify(photos, null, 2));"
       },
       {
         "title": "分页获取日期范围照片",

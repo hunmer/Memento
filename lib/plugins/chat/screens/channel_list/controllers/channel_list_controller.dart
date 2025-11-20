@@ -49,19 +49,25 @@ class ChannelListController extends ChangeNotifier {
   }
 
   void _updateSortedChannels() {
+    List<Channel> tempChannels;
     if (selectedGroup == "all") {
-      sortedChannels = List<Channel>.from(channels)..sort(Channel.compare);
+      tempChannels = List<Channel>.from(channels);
     } else if (selectedGroup == "ungrouped") {
-      sortedChannels =
-          channels.where((channel) => channel.groups.isEmpty).toList()
-            ..sort(Channel.compare);
+      tempChannels = channels.where((channel) => channel.groups.isEmpty).toList();
     } else {
-      sortedChannels =
-          channels
-              .where((channel) => channel.groups.contains(selectedGroup))
-              .toList()
-            ..sort(Channel.compare);
+      tempChannels =
+          channels.where((channel) => channel.groups.contains(selectedGroup)).toList();
     }
+
+    // 去重：确保每个 ID 只出现一次（保留第一个出现的）
+    final seenIds = <String>{};
+    sortedChannels = tempChannels.where((channel) {
+      if (seenIds.contains(channel.id)) {
+        return false;
+      }
+      seenIds.add(channel.id);
+      return true;
+    }).toList()..sort(Channel.compare);
   }
 
   void _updateAvailableGroups() {

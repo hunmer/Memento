@@ -716,7 +716,8 @@ class MobileJSEngine implements JSEngine {
         // 处理结果（同步或异步）
         if (result is Future) {
           result.then((value) {
-            final jsonResult = value is String ? value : jsonEncode(value);
+            // 总是 JSON 编码,确保在 JavaScript 中能正确解析
+            final jsonResult = jsonEncode(value);
             print('[JS Bridge] Future 结果: $jsonResult');
             setJsResult(jsonResult);
           }).catchError((e) {
@@ -725,7 +726,8 @@ class MobileJSEngine implements JSEngine {
             setJsResult(errorJson);
           });
         } else {
-          final jsonResult = result is String ? result : jsonEncode(result);
+          // 总是 JSON 编码,确保在 JavaScript 中能正确解析
+          final jsonResult = jsonEncode(result);
           print('[JS Bridge] 同步结果: $jsonResult');
           setJsResult(jsonResult);
         }
