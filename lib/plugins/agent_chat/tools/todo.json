@@ -12,7 +12,7 @@
           "status": {
             "type": "string",
             "optional": true,
-            "description": "任务状态:'todo'(待办) | 'inProgress'(进行中) | 'in_progress'(进行中) | 'done'(已完成)"
+            "description": "任务状态: 标准值 'todo'/'inProgress'/'done' | 别名 'waiting'/'pending'/'open'(待办)、'working'/'active'/'started'(进行中)、'completed'/'complete'/'finished'(已完成) | 数字 '0'(待办)/'1'(进行中)/'2'(已完成)"
           },
           "priority": {
             "type": "string",
@@ -282,7 +282,7 @@
         "comment": "更新任务状态"
       }
     ],
-    "notes": "可更新字段:title(标题), description(描述), priority(优先级), status(状态), startDate(开始日期), dueDate(截止日期), tags(标签数组)。status 可选值:'todo', 'inProgress', 'done'。",
+    "notes": "可更新字段:title(标题), description(描述), priority(优先级), status(状态), startDate(开始日期), dueDate(截止日期), tags(标签数组)。status 支持标准值('todo', 'inProgress', 'done')及别名('waiting'/'pending'/'open'/'completed'/'complete'/'finished'/'working'/'active'/'started')和数字('0'/'1'/'2')。",
     "enabled": true
   },
   "todo_deleteTask": {
@@ -433,7 +433,7 @@
     "description": "查找包含指定标签的所有任务（支持分页）",
     "parameters": [
       {"name": "tag", "type": "string", "required": true, "description": "标签名称"},
-      {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤: 'todo' | 'inProgress' | 'done'"},
+      {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤: 标准值 'todo'/'inProgress'/'done' | 别名 'waiting'/'pending'/'completed'等 | 数字 '0'/'1'/'2'"},
       {"name": "priority", "type": "string", "required": false, "description": "可选的优先级过滤: 'low' | 'medium' | 'high'"},
       {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
       {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"}
@@ -463,7 +463,7 @@
     "title": "根据状态查找任务",
     "description": "查找指定状态的所有任务（支持分页，扩展 getTasks 功能）",
     "parameters": [
-      {"name": "status", "type": "string", "required": true, "description": "任务状态: 'todo' | 'inProgress' | 'done'"},
+      {"name": "status", "type": "string", "required": true, "description": "任务状态: 标准值 'todo'/'inProgress'/'done' | 别名 'waiting'/'pending'/'open'(待办)、'working'/'active'(进行中)、'completed'/'complete'/'finished'(已完成) | 数字 '0'/'1'/'2'"},
       {"name": "startDate", "type": "string", "required": false, "description": "开始日期过滤（ISO 8601 格式）"},
       {"name": "endDate", "type": "string", "required": false, "description": "结束日期过滤（ISO 8601 格式）"},
       {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
@@ -495,7 +495,7 @@
     "description": "查找指定优先级的所有任务（支持分页）",
     "parameters": [
       {"name": "priority", "type": "string", "required": true, "description": "优先级: 'low' | 'medium' | 'high'"},
-      {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤"},
+      {"name": "status", "type": "string", "required": false, "description": "可选的状态过滤: 标准值 'todo'/'inProgress'/'done' | 别名 'waiting'/'pending'/'completed'等 | 数字 '0'/'1'/'2'"},
       {"name": "offset", "type": "number", "required": false, "description": "分页起始位置（默认 0）"},
       {"name": "count", "type": "number", "required": false, "description": "返回数量（默认 100）"}
     ],

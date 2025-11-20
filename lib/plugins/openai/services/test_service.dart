@@ -436,28 +436,18 @@ class _TextInputDialogState extends State<_TextInputDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(widget.title),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 加载上次输入的按钮
-                  IconButton(
-                    icon: _isLoading 
+              // 加载上次输入的按钮
+              IconButton(
+                icon:
+                    _isLoading
                         ? const SizedBox(
-                            width: 20, 
-                            height: 20, 
-                            child: CircularProgressIndicator(strokeWidth: 2)
-                          )
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                         : const Icon(Icons.refresh, size: 20),
-                    tooltip: l10n.loadLastInput,
-                    onPressed: _isLoading ? null : _loadLastInput,
-                  ),
-                  // 清空输入的按钮
-                  IconButton(
-                    icon: const Icon(Icons.clear, size: 20),
-                    tooltip: l10n.clearInput,
-                    onPressed: _clearInput,
-                  ),
-                ],
+                tooltip: l10n.loadLastInput,
+                onPressed: _isLoading ? null : _loadLastInput,
               ),
             ],
           );
@@ -494,6 +484,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                       }
                     ),
                     const SizedBox(width: 8),
+                  
                     Expanded(
                       child: Builder(
                         builder: (context) {
@@ -506,6 +497,21 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                               : Text(l10n.noImageSelected);
                         }
                       ),
+                    ),
+
+                    const SizedBox(width: 8),
+                    Builder(
+                      builder: (context) {
+                        final l10n = OpenAILocalizations.of(context);
+                        return TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _testResult = null;
+                            });
+                          },
+                          child: Text(l10n.clearOutput),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -540,6 +546,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                 ),
                 const SizedBox(height: 8),
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],

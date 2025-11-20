@@ -165,6 +165,18 @@ class ProviderController {
         baseUrl: 'https://api.perplexity.ai',
         headers: {'Authorization': 'Bearer YOUR_API_KEY'},
       ),
+      ServiceProvider(
+        id: 'xai',
+        label: 'xAI (Grok)',
+        baseUrl: 'https://api.x.ai/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
+      ServiceProvider(
+        id: 'mistral',
+        label: 'Mistral AI',
+        baseUrl: 'https://api.mistral.ai/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+      ),
     ];
   }
 }

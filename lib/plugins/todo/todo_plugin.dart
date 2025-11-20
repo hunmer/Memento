@@ -199,6 +199,51 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     };
   }
 
+  // ==================== 状态标准化 ====================
+
+  /// 将各种状态字符串标准化为 TaskStatus
+  /// 支持的输入格式:
+  /// - 标准: 'todo', 'inProgress', 'in_progress', 'done'
+  /// - 别名: 'completed', 'complete', 'finished' → done
+  /// - 别名: 'waiting', 'pending', 'open' → todo
+  /// - 别名: 'working', 'active', 'started' → inProgress
+  /// - 数字: '0' → todo, '1' → inProgress, '2' → done
+  TaskStatus? _normalizeStatus(String? statusStr) {
+    if (statusStr == null || statusStr.isEmpty) {
+      return null;
+    }
+
+    final normalized = statusStr.toLowerCase().trim();
+
+    // 标准值
+    switch (normalized) {
+      case 'todo':
+      case 'waiting':
+      case 'pending':
+      case 'open':
+      case '0':
+        return TaskStatus.todo;
+
+      case 'inprogress':
+      case 'in_progress':
+      case 'working':
+      case 'active':
+      case 'started':
+      case '1':
+        return TaskStatus.inProgress;
+
+      case 'done':
+      case 'completed':
+      case 'complete':
+      case 'finished':
+      case '2':
+        return TaskStatus.done;
+
+      default:
+        return null;
+    }
+  }
+
   // ==================== JS API 实现 ====================
 
   /// 获取任务列表
@@ -215,23 +260,9 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     final String? priorityStr = params['priority'];
 
     // 状态过滤
-    if (statusStr != null && statusStr.isNotEmpty) {
-      TaskStatus? status;
-      switch (statusStr.toLowerCase()) {
-        case 'todo':
-          status = TaskStatus.todo;
-          break;
-        case 'inprogress':
-        case 'in_progress':
-          status = TaskStatus.inProgress;
-          break;
-        case 'done':
-          status = TaskStatus.done;
-          break;
-      }
-      if (status != null) {
-        tasks = tasks.where((t) => t.status == status).toList();
-      }
+    final status = _normalizeStatus(statusStr);
+    if (status != null) {
+      tasks = tasks.where((t) => t.status == status).toList();
     }
 
     // 优先级过滤
@@ -545,17 +576,9 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
       if (updateData.containsKey('status')) {
         final statusStr = updateData['status'] as String;
-        switch (statusStr.toLowerCase()) {
-          case 'todo':
-            task.status = TaskStatus.todo;
-            break;
-          case 'inprogress':
-          case 'in_progress':
-            task.status = TaskStatus.inProgress;
-            break;
-          case 'done':
-            task.status = TaskStatus.done;
-            break;
+        final newStatus = _normalizeStatus(statusStr);
+        if (newStatus != null) {
+          task.status = newStatus;
         }
       }
 
@@ -764,23 +787,9 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     List<Task> tasks = taskController.tasks.where((t) => t.tags.contains(tag)).toList();
 
     // 状态过滤
-    if (statusStr != null && statusStr.isNotEmpty) {
-      TaskStatus? status;
-      switch (statusStr.toLowerCase()) {
-        case 'todo':
-          status = TaskStatus.todo;
-          break;
-        case 'inprogress':
-        case 'in_progress':
-          status = TaskStatus.inProgress;
-          break;
-        case 'done':
-          status = TaskStatus.done;
-          break;
-      }
-      if (status != null) {
-        tasks = tasks.where((t) => t.status == status).toList();
-      }
+    final status = _normalizeStatus(statusStr);
+    if (status != null) {
+      tasks = tasks.where((t) => t.status == status).toList();
     }
 
     // 优先级过滤
@@ -833,20 +842,7 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: status'});
     }
 
-    TaskStatus? status;
-    switch (statusStr.toLowerCase()) {
-      case 'todo':
-        status = TaskStatus.todo;
-        break;
-      case 'inprogress':
-      case 'in_progress':
-        status = TaskStatus.inProgress;
-        break;
-      case 'done':
-        status = TaskStatus.done;
-        break;
-    }
-
+    final status = _normalizeStatus(statusStr);
     if (status == null) {
       return jsonEncode({'error': '无效的状态值: $statusStr'});
     }
@@ -930,23 +926,9 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     // 可选的状态过滤
     final String? statusStr = params['status'];
-    if (statusStr != null && statusStr.isNotEmpty) {
-      TaskStatus? status;
-      switch (statusStr.toLowerCase()) {
-        case 'todo':
-          status = TaskStatus.todo;
-          break;
-        case 'inprogress':
-        case 'in_progress':
-          status = TaskStatus.inProgress;
-          break;
-        case 'done':
-          status = TaskStatus.done;
-          break;
-      }
-      if (status != null) {
-        tasks = tasks.where((t) => t.status == status).toList();
-      }
+    final status = _normalizeStatus(statusStr);
+    if (status != null) {
+      tasks = tasks.where((t) => t.status == status).toList();
     }
 
     final tasksJson = tasks.map((t) => t.toJson()).toList();

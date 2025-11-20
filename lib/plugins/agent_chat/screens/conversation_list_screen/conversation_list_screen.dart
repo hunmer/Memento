@@ -28,8 +28,17 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     super.initState();
     // 通过插件实例获取controller
     _controller = AgentChatPlugin.instance.conversationController;
-    // 监听控制器变化
-    _controller.addListener(_onControllerChanged);
+
+    // 延迟添加监听器，避免在build期间触发setState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _controller.addListener(_onControllerChanged);
+        // 触发一次更新以确保显示最新状态
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
   }
 
   @override
