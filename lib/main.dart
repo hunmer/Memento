@@ -45,6 +45,7 @@ import 'core/plugin_manager.dart';
 import 'core/storage/storage_manager.dart';
 import 'core/config_manager.dart';
 import 'core/js_bridge/js_bridge_manager.dart';
+import 'core/route/route_history_manager.dart';
 import 'screens/route.dart';
 
 import 'plugins/chat/chat_plugin.dart'; // 聊天插件
@@ -157,6 +158,9 @@ void main() async {
 
     // 初始化 ImageUtils 的同步方法缓存
     await ImageUtils.initializeSync();
+
+    // 初始化路由历史管理器
+    await RouteHistoryManager.instance.initialize(storage: globalStorage);
 
     // 获取插件管理器单例实例并初始化
     globalPluginManager = PluginManager();

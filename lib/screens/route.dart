@@ -66,6 +66,10 @@ class AppRoutes extends NavigatorObserver {
   static const String todo = '/todo';
   static const String tracker = '/tracker';
 
+  // Agent Chat 子页面路由
+  static const String toolTemplate = '/tool_template';
+  static const String toolManagement = '/tool_management';
+
   // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page) {
     return PageRouteBuilder(

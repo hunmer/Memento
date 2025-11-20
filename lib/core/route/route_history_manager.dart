@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../storage/storage_manager.dart';
 import 'page_visit_record.dart';
@@ -12,6 +11,9 @@ class RouteHistoryManager {
   RouteHistoryManager._internal();
 
   static RouteHistoryManager get instance => _instance;
+
+  /// 存储管理器
+  StorageManager? _storage;
 
   /// 存储键
   static const String _storageKey = 'configs/route_history';
@@ -29,13 +31,24 @@ class RouteHistoryManager {
   bool _initialized = false;
 
   /// 初始化管理器（从存储加载历史记录）
-  Future<void> initialize() async {
+  Future<void> initialize({StorageManager? storage}) async {
     if (_initialized) return;
 
+    // 设置存储管理器
+    if (storage != null) {
+      _storage = storage;
+    }
+
+    if (_storage == null) {
+      debugPrint('RouteHistoryManager: 存储管理器未设置，跳过初始化');
+      return;
+    }
+
     try {
-      final data = await StorageManager.instance.read(_storageKey);
-      if (data != null && data.isNotEmpty) {
-        final json = jsonDecode(data) as Map<String, dynamic>;
+      final data = await _storage!.read(_storageKey);
+      if (data != null) {
+        // StorageManager.read() 返回的是已经解析过的数据（Map）
+        final json = data as Map<String, dynamic>;
         final historyList = json['history'] as List<dynamic>?;
 
         if (historyList != null) {
@@ -205,13 +218,15 @@ class RouteHistoryManager {
   /// 保存历史记录到存储
   Future<void> _saveHistory() async {
     if (_isSaving) return; // 防止并发保存
+    if (_storage == null) return; // 存储未初始化
 
     _isSaving = true;
     try {
-      final json = {
+      final data = {
         'history': _history.map((record) => record.toJson()).toList(),
       };
-      await StorageManager.instance.write(_storageKey, jsonEncode(json));
+      // StorageManager.write() 接受 Map 对象，会自动序列化为 JSON
+      await _storage!.write(_storageKey, data);
     } catch (e) {
       debugPrint('保存路由历史失败: $e');
     } finally {

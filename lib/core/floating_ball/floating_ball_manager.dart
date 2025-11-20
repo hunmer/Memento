@@ -8,6 +8,11 @@ import 'package:flutter/material.dart';
 import 'floating_ball_service.dart';
 import '../../dialogs/plugin_list_dialog.dart';
 import '../plugin_manager.dart';
+import '../route/route_history_manager.dart';
+import '../../widgets/route_history_dialog/route_history_dialog.dart';
+import '../../plugins/agent_chat/agent_chat_plugin.dart';
+import '../../plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
+import '../../plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 
 /// 悬浮球手势动作类型
 enum FloatingBallGesture {
@@ -104,7 +109,70 @@ class FloatingBallManager {
             );
           }
         },
+    '路由历史记录':
+        (context) => () {
+          if (context.mounted) {
+            showDialog(
+              context: context,
+              builder: (context) => const RouteHistoryDialog(),
+            );
+          }
+        },
+    '打开上个路由':
+        (context) => () async {
+          if (context.mounted) {
+            final lastPage = RouteHistoryManager.getLastVisitedPage();
+            if (lastPage != null) {
+              await _reopenPage(context, lastPage);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('没有历史记录'),
+                ),
+              );
+            }
+          }
+        },
   };
+
+  /// 根据页面记录重新打开页面
+  static Future<void> _reopenPage(BuildContext context, dynamic lastPage) async {
+    if (!context.mounted) return;
+
+    // 记录访问历史
+    RouteHistoryManager.recordPageVisit(
+      pageId: lastPage.pageId,
+      title: lastPage.title,
+      icon: lastPage.icon,
+    );
+
+    switch (lastPage.pageId) {
+      case 'tool_template':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ToolTemplateScreen(
+              templateService: AgentChatPlugin.instance.templateService,
+            ),
+          ),
+        );
+        break;
+      case 'tool_management':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ToolManagementScreen(),
+          ),
+        );
+        break;
+      default:
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('未知页面类型: ${lastPage.pageId}')),
+          );
+        }
+    }
+  }
 
   static get noRecentPlugin => null;
 

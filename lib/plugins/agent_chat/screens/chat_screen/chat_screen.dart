@@ -8,6 +8,7 @@ import '../../services/tool_template_service.dart';
 import '../../services/message_detail_service.dart';
 import '../../../../core/storage/storage_manager.dart';
 import '../../../../core/js_bridge/js_bridge_manager.dart';
+import '../../../../core/route/route_history_manager.dart';
 import '../../../tts/tts_plugin.dart';
 import '../../../../widgets/tts_settings_dialog.dart';
 import 'components/message_bubble.dart';
@@ -486,6 +487,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                     getTemplateName: (templateId) {
                                       return _controller.templateService?.getTemplateById(templateId)?.name;
                                     },
+                                    onCancel: message.isGenerating
+                                        ? () => _controller.cancelSending()
+                                        : null,
                                   ),
                                 );
                               },
@@ -692,6 +696,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// 打开工具模板管理界面
   void _openToolTemplateManagement() {
+    // 记录路由访问历史
+    RouteHistoryManager.recordPageVisit(
+      pageId: 'tool_template',
+      title: '工具模板管理',
+      icon: Icons.inventory_2_outlined,
+    );
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -708,6 +719,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// 打开工具管理界面
   void _openToolManagement() {
+    // 记录路由访问历史
+    RouteHistoryManager.recordPageVisit(
+      pageId: 'tool_management',
+      title: '工具配置管理',
+      icon: Icons.settings_outlined,
+    );
+
     Navigator.push(
       context,
       MaterialPageRoute(
