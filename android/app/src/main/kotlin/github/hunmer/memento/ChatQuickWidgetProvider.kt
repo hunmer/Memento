@@ -9,7 +9,6 @@ import android.net.Uri
 import android.widget.RemoteViews
 import org.json.JSONArray
 import org.json.JSONObject
-import org.json.JSONObject
 
 /**
  * 频道快速发送小组件 Provider

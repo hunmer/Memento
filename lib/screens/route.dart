@@ -88,8 +88,6 @@ class AppRoutes extends NavigatorObserver {
     switch (settings.name) {
       case '/':
         return _createRoute(const HomeScreen());
-      case 'chat':
-        return _createRoute(const ChatMainView());
       case 'tts':
         return _createRoute(const TTSServicesScreen());
       case 'diary':
