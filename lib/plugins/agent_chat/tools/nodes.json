@@ -4,7 +4,7 @@
     "description": "获取所有笔记本的列表，支持分页",
     "parameters": [
       {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（跳过的记录数，默认0）"},
-      {"name": "count", "type": "number", "required": "false", "description": "返回的记录数（默认全部）"}
+      {"name": "count", "type": "number", "required": false, "description": "返回的记录数（默认全部）"}
     ],
     "returns": {
       "type": "Array|Object",

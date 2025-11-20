@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
 import '../../../models/tool_call_step.dart';
 import '../../../services/tool_service.dart';
+import '../../../../../core/js_bridge/js_bridge_manager.dart';
+
+const _uuid = Uuid();
 
 /// 工具模板执行对话框
 ///
@@ -27,6 +31,7 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
   bool _isCompleted = false;
   int _currentStepIndex = -1;
   final List<Map<String, dynamic>> _results = [];
+  int? _expandedStepIndex; // 当前展开的步骤索引
 
   @override
   void initState() {
@@ -40,53 +45,74 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
       _results.clear();
     });
 
-    for (var i = 0; i < widget.steps.length; i++) {
-      if (!mounted) return;
+    // 生成唯一的工具调用ID
+    final toolCallId = _uuid.v4();
 
-      setState(() {
-        _currentStepIndex = i;
-        widget.steps[i].status = ToolCallStatus.running;
-      });
+    // 初始化工具调用上下文（用于步骤间结果传递）
+    final jsBridge = JSBridgeManager.instance;
+    jsBridge.initToolCallContext(toolCallId);
 
-      final step = widget.steps[i];
-
-      try {
-        final result = await ToolService.executeToolStep(step);
-
+    try {
+      for (var i = 0; i < widget.steps.length; i++) {
         if (!mounted) return;
 
         setState(() {
-          widget.steps[i].status = ToolCallStatus.success;
-          widget.steps[i].result = result;
-          _results.add({
-            'stepIndex': i,
-            'title': step.title,
-            'success': true,
-            'result': result,
-          });
+          _currentStepIndex = i;
+          widget.steps[i].status = ToolCallStatus.running;
         });
-      } catch (e) {
-        if (!mounted) return;
 
-        setState(() {
-          widget.steps[i].status = ToolCallStatus.failed;
-          widget.steps[i].error = e.toString();
-          _results.add({
-            'stepIndex': i,
-            'title': step.title,
-            'success': false,
-            'error': e.toString(),
+        final step = widget.steps[i];
+
+        try {
+          // 设置当前执行上下文（供 JavaScript 中的 setResult/getResult 使用）
+          jsBridge.setCurrentExecution(toolCallId, i);
+
+          final result = await ToolService.executeToolStep(step);
+
+          // 自动将步骤结果保存到上下文（供后续步骤通过索引获取）
+          jsBridge.setToolCallResult('step_$i', result);
+
+          if (!mounted) return;
+
+          setState(() {
+            widget.steps[i].status = ToolCallStatus.success;
+            widget.steps[i].result = result;
+            _results.add({
+              'stepIndex': i,
+              'title': step.title,
+              'success': true,
+              'result': result,
+            });
+            _expandedStepIndex = i; // 自动展开最后完成的步骤
           });
+        } catch (e) {
+          if (!mounted) return;
+
+          setState(() {
+            widget.steps[i].status = ToolCallStatus.failed;
+            widget.steps[i].error = e.toString();
+            _results.add({
+              'stepIndex': i,
+              'title': step.title,
+              'success': false,
+              'error': e.toString(),
+            });
+            _expandedStepIndex = i; // 自动展开最后完成的步骤（包括失败的）
+          });
+          // 步骤失败后继续执行后续步骤（测试模式下）
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _isExecuting = false;
+          _isCompleted = true;
+          _currentStepIndex = -1;
         });
       }
-    }
-
-    if (mounted) {
-      setState(() {
-        _isExecuting = false;
-        _isCompleted = true;
-        _currentStepIndex = -1;
-      });
+    } finally {
+      // 清除工具调用上下文
+      jsBridge.clearToolCallContext(toolCallId);
     }
   }
 
@@ -169,6 +195,21 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ExpansionTile(
+        key: ValueKey('step_$index\_${_expandedStepIndex == index}'), // 使用key强制重建
+        initiallyExpanded: _expandedStepIndex == index, // 仅展开最后完成的步骤
+        onExpansionChanged: (expanded) {
+          if (expanded) {
+            // 用户手动展开时更新状态
+            setState(() {
+              _expandedStepIndex = index;
+            });
+          } else if (_expandedStepIndex == index) {
+            // 用户手动折叠当前展开的步骤
+            setState(() {
+              _expandedStepIndex = null;
+            });
+          }
+        },
         leading: _buildStatusIcon(step.status),
         title: Text(
           step.title.isNotEmpty ? step.title : '步骤 ${index + 1}',
