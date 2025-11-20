@@ -1,0 +1,75 @@
+[
+  {
+    "id": "default-goods-warehouses",
+    "name": "查看物品仓库",
+    "description": "获取所有物品仓库列表",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取仓库列表",
+        "desc": "查询所有仓库",
+        "data": "const warehouses = await Memento.plugins.goods.getWarehouses();\n\nreturn {\n  count: warehouses.length,\n  warehouses: warehouses.map(w => ({\n    id: w.id,\n    name: w.name,\n    itemCount: w.itemCount\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["goods", "仓库", "列表"],
+    "declaredTools": [
+      {"id": "goods_getWarehouses", "name": "获取仓库列表"}
+    ]
+  },
+  {
+    "id": "default-goods-items",
+    "name": "查看物品列表",
+    "description": "获取所有物品",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取物品列表",
+        "desc": "查询所有物品",
+        "data": "const items = await Memento.plugins.goods.getItems();\n\nreturn {\n  count: items.length,\n  items: items.map(i => ({\n    id: i.id,\n    name: i.name,\n    warehouse: i.warehouseName,\n    quantity: i.quantity\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["goods", "物品", "列表"],
+    "declaredTools": [
+      {"id": "goods_getItems", "name": "获取物品列表"}
+    ]
+  },
+  {
+    "id": "default-goods-create",
+    "name": "创建物品",
+    "description": "创建一个新物品",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建物品",
+        "desc": "创建\"MacBook Pro\"物品",
+        "data": "const warehouses = await Memento.plugins.goods.getWarehouses();\nconst warehouse = warehouses[0];\n\nif (!warehouse) {\n  return { success: false, message: '没有仓库' };\n}\n\nconst item = await Memento.plugins.goods.createItem({\n  name: 'MacBook Pro',\n  warehouseId: warehouse.id,\n  quantity: 1,\n  description: '2023款 14寸'\n});\n\nreturn {\n  success: true,\n  item: {\n    id: item.id,\n    name: item.name,\n    warehouse: warehouse.name\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["goods", "创建", "物品"],
+    "declaredTools": [
+      {"id": "goods_getWarehouses", "name": "获取仓库列表"},
+      {"id": "goods_createItem", "name": "创建物品"}
+    ]
+  },
+  {
+    "id": "default-goods-stats",
+    "name": "物品统计",
+    "description": "获取物品统计信息",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取统计数据",
+        "desc": "查询物品统计",
+        "data": "const stats = await Memento.plugins.goods.getStats();\n\nreturn {\n  totalItems: stats.totalItems,\n  totalWarehouses: stats.totalWarehouses,\n  totalValue: stats.totalValue\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["goods", "统计", "数据"],
+    "declaredTools": [
+      {"id": "goods_getStats", "name": "获取统计"}
+    ]
+  }
+]

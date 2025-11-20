@@ -1,0 +1,111 @@
+[
+  {
+    "id": "default-todo-today",
+    "name": "查看今日待办",
+    "description": "获取今天需要完成的所有待办任务",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取今日待办任务",
+        "desc": "查询今天到期的所有待办任务",
+        "data": "const today = new Date();\ntoday.setHours(0, 0, 0, 0);\nconst tomorrow = new Date(today);\ntomorrow.setDate(tomorrow.getDate() + 1);\n\nconst tasks = await Memento.plugins.todo.getTasks({\n  status: 'todo'\n});\n\n// 过滤今天到期的任务\nconst todayTasks = tasks.filter(task => {\n  if (!task.dueDate) return false;\n  const dueDate = new Date(task.dueDate);\n  return dueDate >= today && dueDate < tomorrow;\n});\n\nreturn {\n  count: todayTasks.length,\n  tasks: todayTasks.map(t => ({\n    id: t.id,\n    title: t.title,\n    priority: t.priority,\n    dueDate: t.dueDate\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["todo", "待办", "今日"],
+    "declaredTools": [
+      {"id": "todo_getTasks", "name": "获取任务列表"}
+    ]
+  },
+  {
+    "id": "default-todo-create-high",
+    "name": "创建高优先级任务",
+    "description": "创建一个高优先级的待办任务",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建高优先级任务",
+        "desc": "创建一个紧急重要的任务",
+        "data": "const task = await Memento.plugins.todo.createTask({\n  title: '完成项目文档',\n  priority: 'high',\n  status: 'todo'\n});\n\nreturn {\n  success: true,\n  task: {\n    id: task.id,\n    title: task.title,\n    priority: task.priority\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["todo", "创建", "高优先级"],
+    "declaredTools": [
+      {"id": "todo_createTask", "name": "创建任务"}
+    ]
+  },
+  {
+    "id": "default-todo-overdue",
+    "name": "查看过期任务",
+    "description": "获取所有已过期但未完成的任务",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取过期任务",
+        "desc": "查询所有已过期的待办任务",
+        "data": "const now = new Date();\nconst tasks = await Memento.plugins.todo.getTasks({\n  status: 'todo'\n});\n\nconst overdueTasks = tasks.filter(task => {\n  if (!task.dueDate) return false;\n  return new Date(task.dueDate) < now;\n});\n\nreturn {\n  count: overdueTasks.length,\n  tasks: overdueTasks.map(t => ({\n    id: t.id,\n    title: t.title,\n    priority: t.priority,\n    dueDate: t.dueDate,\n    daysOverdue: Math.floor((now - new Date(t.dueDate)) / (1000 * 60 * 60 * 24))\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["todo", "过期", "查询"],
+    "declaredTools": [
+      {"id": "todo_getTasks", "name": "获取任务列表"}
+    ]
+  },
+  {
+    "id": "default-todo-complete",
+    "name": "完成指定任务",
+    "description": "将指定的任务标记为已完成",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "完成任务",
+        "desc": "标记任务为已完成状态",
+        "data": "// 先获取任务列表\nconst tasks = await Memento.plugins.todo.getTasks({\n  status: 'todo'\n});\n\n// 查找包含\"周报\"的任务\nconst task = tasks.find(t => t.title.includes('周报'));\n\nif (!task) {\n  return { success: false, message: '未找到包含\"周报\"的任务' };\n}\n\n// 更新任务状态\nawait Memento.plugins.todo.updateTask(task.id, {\n  status: 'done'\n});\n\nreturn {\n  success: true,\n  message: '任务已完成',\n  task: {\n    id: task.id,\n    title: task.title\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["todo", "完成", "更新"],
+    "declaredTools": [
+      {"id": "todo_getTasks", "name": "获取任务列表"},
+      {"id": "todo_updateTask", "name": "更新任务"}
+    ]
+  },
+  {
+    "id": "default-todo-in-progress",
+    "name": "查看进行中任务",
+    "description": "获取所有正在进行中的任务",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取进行中任务",
+        "desc": "查询所有状态为进行中的任务",
+        "data": "const tasks = await Memento.plugins.todo.getTasks({\n  status: 'doing'\n});\n\nreturn {\n  count: tasks.length,\n  tasks: tasks.map(t => ({\n    id: t.id,\n    title: t.title,\n    priority: t.priority,\n    dueDate: t.dueDate\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["todo", "进行中", "查询"],
+    "declaredTools": [
+      {"id": "todo_getTasks", "name": "获取任务列表"}
+    ]
+  },
+  {
+    "id": "default-todo-count",
+    "name": "统计待办任务数量",
+    "description": "统计各状态的任务数量",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "统计任务数量",
+        "desc": "分别统计待办、进行中、已完成的任务数",
+        "data": "const todoTasks = await Memento.plugins.todo.getTasks({ status: 'todo' });\nconst doingTasks = await Memento.plugins.todo.getTasks({ status: 'doing' });\nconst doneTasks = await Memento.plugins.todo.getTasks({ status: 'done' });\n\nreturn {\n  todo: todoTasks.length,\n  doing: doingTasks.length,\n  done: doneTasks.length,\n  total: todoTasks.length + doingTasks.length + doneTasks.length\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["todo", "统计", "数量"],
+    "declaredTools": [
+      {"id": "todo_getTasks", "name": "获取任务列表"}
+    ]
+  }
+]

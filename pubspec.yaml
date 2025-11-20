@@ -132,6 +132,7 @@ flutter:
     - assets/audio/msg_sended.mp3
     - assets/icon/icon.png
     - assets/images/image_not_found.jpg
+    - assets/tool_templates/
     - lib/screens/js_console/examples/
     - lib/plugins/agent_chat/tools/
 

@@ -353,10 +353,9 @@ class _MessageInputState extends State<MessageInput> {
                         widget.controller.isSending
                             ? Colors
                                 .red // 发送中显示红色
-                            : (widget.controller.inputText.trim().isEmpty ||
-                                    widget.controller.currentAgent == null
-                                ? Colors.grey[300]
-                                : Colors.blue),
+                            : (_canSendMessage()
+                                ? Colors.blue
+                                : Colors.grey[300]),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -372,10 +371,7 @@ class _MessageInputState extends State<MessageInput> {
                             ? () =>
                                 widget.controller
                                     .cancelSending() // 取消发送
-                            : (widget.controller.inputText.trim().isEmpty ||
-                                    widget.controller.currentAgent == null
-                                ? null
-                                : _sendMessage),
+                            : (_canSendMessage() ? _sendMessage : null),
                   ),
                 ),
               ],
@@ -1004,10 +1000,24 @@ class _MessageInputState extends State<MessageInput> {
     _focusNode.requestFocus();
   }
 
+  /// 检查是否可以发送消息
+  bool _canSendMessage() {
+    // Agent 必须已选择
+    if (widget.controller.currentAgent == null) return false;
+
+    // 如果有选中的工具模板，即使输入框为空也可以发送
+    if (widget.controller.selectedToolTemplate != null) return true;
+
+    // 否则，输入框不能为空
+    return widget.controller.inputText.trim().isNotEmpty;
+  }
+
   /// 发送消息
   Future<void> _sendMessage() async {
     final text = widget.controller.inputText.trim();
-    if (text.isEmpty) return;
+
+    // 如果有工具模板，即使文本为空也可以发送
+    if (text.isEmpty && widget.controller.selectedToolTemplate == null) return;
 
     // 检查是否是命令
     if (text.startsWith('/')) {

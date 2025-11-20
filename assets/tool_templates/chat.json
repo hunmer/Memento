@@ -1,0 +1,57 @@
+[
+  {
+    "id": "default-chat-channels",
+    "name": "查看聊天频道",
+    "description": "获取所有聊天频道列表",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取频道列表",
+        "desc": "查询所有聊天频道",
+        "data": "const channels = await Memento.plugins.chat.getChannels();\n\nreturn {\n  count: channels.length,\n  channels: channels.map(c => ({\n    id: c.id,\n    name: c.name,\n    messageCount: c.messageCount || 0\n  }))\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["chat", "频道", "列表"],
+    "declaredTools": [
+      {"id": "chat_getChannels", "name": "获取频道列表"}
+    ]
+  },
+  {
+    "id": "default-chat-send",
+    "name": "发送消息",
+    "description": "在指定频道发送消息",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "发送消息",
+        "desc": "在\"工作\"频道发送消息",
+        "data": "const channels = await Memento.plugins.chat.getChannels();\nconst workChannel = channels.find(c => c.name.includes('工作'));\n\nif (!workChannel) {\n  return { success: false, message: '未找到\"工作\"频道' };\n}\n\nconst message = await Memento.plugins.chat.sendMessage({\n  channelId: workChannel.id,\n  content: '这是一条测试消息'\n});\n\nreturn {\n  success: true,\n  message: {\n    id: message.id,\n    channelName: workChannel.name,\n    content: message.content\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["chat", "发送", "消息"],
+    "declaredTools": [
+      {"id": "chat_getChannels", "name": "获取频道列表"},
+      {"id": "chat_sendMessage", "name": "发送消息"}
+    ]
+  },
+  {
+    "id": "default-chat-create-channel",
+    "name": "创建频道",
+    "description": "创建一个新的聊天频道",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建频道",
+        "desc": "创建名为\"项目讨论\"的频道",
+        "data": "const channel = await Memento.plugins.chat.createChannel({\n  name: '项目讨论'\n});\n\nreturn {\n  success: true,\n  channel: {\n    id: channel.id,\n    name: channel.name\n  }\n};"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["chat", "创建", "频道"],
+    "declaredTools": [
+      {"id": "chat_createChannel", "name": "创建频道"}
+    ]
+  }
+]

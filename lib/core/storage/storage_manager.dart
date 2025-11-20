@@ -69,6 +69,11 @@ class StorageManager {
     _cache.removeWhere((key, _) => key.startsWith(prefix));
   }
 
+  /// 获取指定前缀的所有键
+  Future<List<String>> getKeysWithPrefix(String prefix) async {
+    return await _storage.getKeysWithPrefix(prefix);
+  }
+
   /// 获取插件存储路径
   String getPluginPath(String pluginId) => pluginId;
 

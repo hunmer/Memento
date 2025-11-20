@@ -1657,44 +1657,59 @@ class ChatController extends ChangeNotifier {
     String messageId,
     List<ToolCallStep> steps,
   ) async {
-    for (var i = 0; i < steps.length; i++) {
-      final step = steps[i];
+    // 初始化工具调用上下文（用于步骤间结果传递）
+    final jsBridge = JSBridgeManager.instance;
+    jsBridge.initToolCallContext(messageId);
 
-      // 更新步骤状态为运行中（创建新的列表以触发UI更新）
-      step.status = ToolCallStatus.running;
-      final runningSteps = List<ToolCallStep>.from(steps);
-      await _updateMessageToolSteps(messageId, runningSteps);
-      notifyListeners(); // 立即通知UI更新
+    try {
+      for (var i = 0; i < steps.length; i++) {
+        final step = steps[i];
 
-      try {
-        // 执行步骤
-        final result = await ToolService.executeToolStep(step);
-
-        // 更新步骤状态为成功（创建新的列表以触发UI更新）
-        step.status = ToolCallStatus.success;
-        step.result = result;
-        final successSteps = List<ToolCallStep>.from(steps);
-        await _updateMessageToolSteps(messageId, successSteps);
+        // 更新步骤状态为运行中（创建新的列表以触发UI更新）
+        step.status = ToolCallStatus.running;
+        final runningSteps = List<ToolCallStep>.from(steps);
+        await _updateMessageToolSteps(messageId, runningSteps);
         notifyListeners(); // 立即通知UI更新
-      } catch (e) {
-        // 更新步骤状态为失败（创建新的列表以触发UI更新）
-        step.status = ToolCallStatus.failed;
-        step.error = e.toString();
-        final failedSteps = List<ToolCallStep>.from(steps);
-        await _updateMessageToolSteps(messageId, failedSteps);
-        notifyListeners(); // 立即通知UI更新
-        break; // 停止执行后续步骤
+
+        try {
+          // 设置当前执行上下文（供 JavaScript 中的 setResult/getResult 使用）
+          jsBridge.setCurrentExecution(messageId, i);
+
+          // 执行步骤
+          final result = await ToolService.executeToolStep(step);
+
+          // 自动将步骤结果保存到上下文（供后续步骤通过索引获取）
+          jsBridge.setToolCallResult('step_$i', result);
+
+          // 更新步骤状态为成功（创建新的列表以触发UI更新）
+          step.status = ToolCallStatus.success;
+          step.result = result;
+          final successSteps = List<ToolCallStep>.from(steps);
+          await _updateMessageToolSteps(messageId, successSteps);
+          notifyListeners(); // 立即通知UI更新
+        } catch (e) {
+          // 更新步骤状态为失败（创建新的列表以触发UI更新）
+          step.status = ToolCallStatus.failed;
+          step.error = e.toString();
+          final failedSteps = List<ToolCallStep>.from(steps);
+          await _updateMessageToolSteps(messageId, failedSteps);
+          notifyListeners(); // 立即通知UI更新
+          break; // 停止执行后续步骤
+        }
       }
-    }
 
-    // 完成消息生成
-    final message = messageService.getMessage(conversation.id, messageId);
-    if (message != null) {
-      final completedMessage = message.copyWith(isGenerating: false);
-      await messageService.updateMessage(completedMessage);
-    }
+      // 完成消息生成
+      final message = messageService.getMessage(conversation.id, messageId);
+      if (message != null) {
+        final completedMessage = message.copyWith(isGenerating: false);
+        await messageService.updateMessage(completedMessage);
+      }
 
-    notifyListeners();
+      notifyListeners();
+    } finally {
+      // 清除工具调用上下文
+      jsBridge.clearToolCallContext(messageId);
+    }
   }
 
   /// 更新消息的工具调用步骤

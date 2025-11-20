@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import '../models/saved_tool_template.dart';
 import '../models/tool_call_step.dart';
 import '../../../core/storage/storage_manager.dart';
@@ -6,15 +8,53 @@ import '../../../core/storage/storage_manager.dart';
 /// 工具模板服务
 ///
 /// 管理保存的工具模板，包括保存、加载、删除等操作
+/// 每个模板存储为独立的 JSON 文件
 class ToolTemplateService extends ChangeNotifier {
-  static const String _storageKey = 'agent_chat_tool_templates';
+  /// 旧存储键（用于迁移）
+  static const String _oldStorageKey = 'agent_chat_tool_templates';
+
+  /// 模板存储目录
+  static const String _templatesDir = 'agent_chat/tool_templates';
+
+  /// 默认模板 assets 路径
+  static const String _defaultTemplatesAssetPath = 'assets/tool_templates';
+
+  /// 默认模板文件列表
+  static const List<String> _defaultTemplateFiles = [
+    'todo',
+    'notes',
+    'tracker',
+    'store',
+    'timer',
+    'chat',
+    'diary',
+    'activity',
+    'checkin',
+    'bill',
+    'calendar',
+    'calendar_album',
+    'contact',
+    'database',
+    'day',
+    'goods',
+    'habits',
+    'nodes',
+  ];
 
   final StorageManager _storage;
   List<SavedToolTemplate> _templates = [];
   late final Future<void> _initialLoadFuture;
 
   ToolTemplateService(this._storage) {
-    _initialLoadFuture = _loadTemplates();
+    _initialLoadFuture = _initialize();
+  }
+
+  /// 初始化服务
+  Future<void> _initialize() async {
+    await _storage.createDirectory(_templatesDir);
+    await _migrateOldFormat();
+    await _loadTemplates();
+    await _ensureDefaultTemplates();
   }
 
   /// 获取所有模板
@@ -47,53 +87,174 @@ class ToolTemplateService extends ChangeNotifier {
     return _normalizeSteps(template.steps);
   }
 
-  /// 加载模板
+  /// 迁移旧格式数据到新格式
+  Future<void> _migrateOldFormat() async {
+    try {
+      final oldData = await _storage.read(_oldStorageKey);
+      if (oldData != null && oldData is List && oldData.isNotEmpty) {
+        debugPrint('检测到旧格式工具模板，开始迁移...');
+
+        for (final item in oldData) {
+          try {
+            final template = SavedToolTemplate.fromJson(
+              item as Map<String, dynamic>,
+            );
+            final normalizedTemplate = template.copyWith(
+              steps: _normalizeSteps(template.steps),
+            );
+            await _saveTemplateFile(normalizedTemplate);
+          } catch (e) {
+            debugPrint('迁移模板失败: $e');
+          }
+        }
+
+        // 删除旧数据
+        await _storage.delete(_oldStorageKey);
+        debugPrint('工具模板迁移完成，已删除旧数据');
+      }
+    } catch (e) {
+      debugPrint('迁移旧格式失败: $e');
+    }
+  }
+
+  /// 确保默认模板存在
+  Future<void> _ensureDefaultTemplates() async {
+    for (final fileName in _defaultTemplateFiles) {
+      try {
+        final assetPath = '$_defaultTemplatesAssetPath/$fileName.json';
+        final jsonString = await rootBundle.loadString(assetPath);
+        final List<dynamic> jsonList = json.decode(jsonString);
+
+        for (final jsonData in jsonList) {
+          final template = SavedToolTemplate.fromJson(
+            jsonData as Map<String, dynamic>,
+          );
+
+          // 只有在模板不存在时才添加
+          if (!_templates.any((t) => t.id == template.id)) {
+            final normalizedTemplate = template.copyWith(
+              steps: _normalizeSteps(template.steps),
+            );
+            await _saveTemplateFile(normalizedTemplate);
+            _templates.add(normalizedTemplate);
+          }
+        }
+      } catch (e) {
+        debugPrint('加载默认模板失败 ($fileName): $e');
+      }
+    }
+    _sortTemplates();
+    notifyListeners();
+  }
+
+  /// 从 assets 加载所有默认模板
+  Future<List<SavedToolTemplate>> _loadDefaultTemplatesFromAssets() async {
+    final List<SavedToolTemplate> templates = [];
+
+    for (final fileName in _defaultTemplateFiles) {
+      try {
+        final assetPath = '$_defaultTemplatesAssetPath/$fileName.json';
+        final jsonString = await rootBundle.loadString(assetPath);
+        final List<dynamic> jsonList = json.decode(jsonString);
+
+        for (final jsonData in jsonList) {
+          final template = SavedToolTemplate.fromJson(
+            jsonData as Map<String, dynamic>,
+          );
+          templates.add(template.copyWith(
+            steps: _normalizeSteps(template.steps),
+          ));
+        }
+      } catch (e) {
+        debugPrint('加载默认模板失败 ($fileName): $e');
+      }
+    }
+
+    return templates;
+  }
+
+  /// 恢复默认模板
+  Future<void> restoreDefaultTemplates() async {
+    final defaults = await _loadDefaultTemplatesFromAssets();
+    for (final template in defaults) {
+      await _saveTemplateFile(template);
+      _templates.removeWhere((t) => t.id == template.id);
+      _templates.add(template);
+    }
+    _sortTemplates();
+    notifyListeners();
+  }
+
+  /// 加载所有模板
   Future<void> _loadTemplates() async {
     try {
-      final data = await _storage.read(_storageKey);
-      if (data != null && data is List) {
-        _templates = data
-            .map((e) => SavedToolTemplate.fromJson(e as Map<String, dynamic>))
-            .map((template) => template.copyWith(
-                  steps: _normalizeSteps(template.steps),
-                ))
-            .toList();
+      // 获取所有模板文件
+      final keys = await _storage.getKeysWithPrefix(_templatesDir);
 
-        // 按最后使用时间排序，未使用的按创建时间排序
-        _templates.sort((a, b) {
-          if (a.lastUsedAt != null && b.lastUsedAt != null) {
-            return b.lastUsedAt!.compareTo(a.lastUsedAt!);
-          } else if (a.lastUsedAt != null) {
-            return -1;
-          } else if (b.lastUsedAt != null) {
-            return 1;
-          } else {
-            return b.createdAt.compareTo(a.createdAt);
+      _templates = [];
+      for (final key in keys) {
+        if (!key.endsWith('.json')) continue;
+
+        try {
+          final data = await _storage.readJson(key);
+          if (data != null && data is Map<String, dynamic>) {
+            final template = SavedToolTemplate.fromJson(data);
+            _templates.add(
+              template.copyWith(steps: _normalizeSteps(template.steps)),
+            );
           }
-        });
-
-        notifyListeners();
+        } catch (e) {
+          debugPrint('加载模板失败 ($key): $e');
+        }
       }
+
+      _sortTemplates();
+      notifyListeners();
     } catch (e) {
       debugPrint('加载工具模板失败: $e');
     }
   }
 
-  /// 保存模板列表到存储
-  Future<void> _saveTemplates() async {
+  /// 排序模板列表
+  void _sortTemplates() {
+    _templates.sort((a, b) {
+      if (a.lastUsedAt != null && b.lastUsedAt != null) {
+        return b.lastUsedAt!.compareTo(a.lastUsedAt!);
+      } else if (a.lastUsedAt != null) {
+        return -1;
+      } else if (b.lastUsedAt != null) {
+        return 1;
+      } else {
+        return b.createdAt.compareTo(a.createdAt);
+      }
+    });
+  }
+
+  /// 获取模板文件路径
+  String _getTemplatePath(String id) => '$_templatesDir/$id.json';
+
+  /// 保存单个模板文件
+  Future<void> _saveTemplateFile(SavedToolTemplate template) async {
     try {
-      final data = _templates
-          .map(
-            (t) => t.copyWith(
-              steps: _normalizeSteps(t.steps),
-            ),
-          )
-          .map((t) => t.toJson())
-          .toList();
-      await _storage.write(_storageKey, data);
+      final normalizedTemplate = template.copyWith(
+        steps: _normalizeSteps(template.steps),
+      );
+      await _storage.writeJson(
+        _getTemplatePath(template.id),
+        normalizedTemplate.toJson(),
+      );
     } catch (e) {
       debugPrint('保存工具模板失败: $e');
       rethrow;
+    }
+  }
+
+  /// 删除模板文件
+  Future<void> _deleteTemplateFile(String id) async {
+    try {
+      await _storage.deleteFile(_getTemplatePath(id));
+    } catch (e) {
+      debugPrint('删除工具模板文件失败: $e');
     }
   }
 
@@ -119,7 +280,7 @@ class ToolTemplateService extends ChangeNotifier {
     );
 
     _templates.insert(0, template);
-    await _saveTemplates();
+    await _saveTemplateFile(template);
     notifyListeners();
 
     return template;
@@ -132,17 +293,18 @@ class ToolTemplateService extends ChangeNotifier {
       throw Exception('模板不存在');
     }
 
-    _templates[index] = template.copyWith(
+    final updatedTemplate = template.copyWith(
       steps: _normalizeSteps(template.steps),
     );
-    await _saveTemplates();
+    _templates[index] = updatedTemplate;
+    await _saveTemplateFile(updatedTemplate);
     notifyListeners();
   }
 
   /// 删除模板
   Future<void> deleteTemplate(String id) async {
     _templates.removeWhere((t) => t.id == id);
-    await _saveTemplates();
+    await _deleteTemplateFile(id);
     notifyListeners();
   }
 
@@ -172,22 +334,13 @@ class ToolTemplateService extends ChangeNotifier {
     if (index == -1) return;
 
     final template = _templates[index];
-    _templates[index] = template.markAsUsed();
+    final updatedTemplate = template.markAsUsed();
+    _templates[index] = updatedTemplate;
 
     // 重新排序
-    _templates.sort((a, b) {
-      if (a.lastUsedAt != null && b.lastUsedAt != null) {
-        return b.lastUsedAt!.compareTo(a.lastUsedAt!);
-      } else if (a.lastUsedAt != null) {
-        return -1;
-      } else if (b.lastUsedAt != null) {
-        return 1;
-      } else {
-        return b.createdAt.compareTo(a.createdAt);
-      }
-    });
+    _sortTemplates();
 
-    await _saveTemplates();
+    await _saveTemplateFile(updatedTemplate);
     notifyListeners();
   }
 
