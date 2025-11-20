@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:dart_date/dart_date.dart';
 import 'platform/js_engine_interface.dart';
 import 'platform/js_engine_factory.dart';
 import 'platform/mobile_js_engine.dart';
@@ -343,29 +344,180 @@ class JSBridgeManager {
       }
     });
 
+    // 6. 获取自定义日期（解决时区问题的核心 API）
+    await _engine!.registerFunction('Memento_system_getCustomDate', ([dynamic options]) async {
+      try {
+        // 解析参数
+        Map<String, dynamic> opts = {};
+        if (options is String) {
+          opts = jsonDecode(options);
+        } else if (options is Map) {
+          opts = Map<String, dynamic>.from(options);
+        }
+
+        // 默认从当前时间开始
+        DateTime date = DateTime.now();
+
+        // 处理基准日期
+        if (opts['baseDate'] != null) {
+          final baseDate = opts['baseDate'];
+          if (baseDate is num) {
+            date = DateTime.fromMillisecondsSinceEpoch(baseDate.toInt());
+          } else if (baseDate is String) {
+            date = DateTime.parse(baseDate);
+          }
+        }
+
+        // 处理时区
+        String timezone = opts['timezone']?.toString() ?? 'local';
+        if (timezone == 'UTC') {
+          date = date.toUtc();
+        } else {
+          date = date.toLocal();
+        }
+
+        // 处理增加时间
+        if (opts['add'] != null) {
+          final add = Map<String, dynamic>.from(opts['add'] as Map);
+          date = date.add(Duration(
+            days: (add['days'] as num?)?.toInt() ?? 0,
+            hours: (add['hours'] as num?)?.toInt() ?? 0,
+            minutes: (add['minutes'] as num?)?.toInt() ?? 0,
+            seconds: (add['seconds'] as num?)?.toInt() ?? 0,
+            milliseconds: (add['milliseconds'] as num?)?.toInt() ?? 0,
+          ));
+        }
+
+        // 处理减少时间
+        if (opts['subtract'] != null) {
+          final sub = Map<String, dynamic>.from(opts['subtract'] as Map);
+          date = date.subtract(Duration(
+            days: (sub['days'] as num?)?.toInt() ?? 0,
+            hours: (sub['hours'] as num?)?.toInt() ?? 0,
+            minutes: (sub['minutes'] as num?)?.toInt() ?? 0,
+            seconds: (sub['seconds'] as num?)?.toInt() ?? 0,
+            milliseconds: (sub['milliseconds'] as num?)?.toInt() ?? 0,
+          ));
+        }
+
+        // 处理相对位置（使用 dart_date 扩展方法）
+        String? position = opts['relativePosition']?.toString();
+        if (position != null) {
+          switch (position) {
+            case 'startOfDay':
+              date = date.startOfDay;
+              break;
+            case 'endOfDay':
+              date = date.endOfDay;
+              break;
+            case 'startOfHour':
+              date = date.startOfHour;
+              break;
+            case 'endOfHour':
+              date = date.endOfHour;
+              break;
+            case 'startOfMinute':
+              date = date.startOfMinute;
+              break;
+            case 'endOfMinute':
+              date = date.endOfMinute;
+              break;
+            case 'startOfMonth':
+              date = date.startOfMonth;
+              break;
+            case 'endOfMonth':
+              date = date.endOfMonth;
+              break;
+            case 'startOfWeek':
+              date = date.startOfWeek;
+              break;
+            case 'endOfWeek':
+              date = date.endOfWeek;
+              break;
+            case 'startOfYear':
+              date = date.startOfYear;
+              break;
+            case 'endOfYear':
+              date = date.endOfYear;
+              break;
+          }
+        }
+
+        // 处理返回格式
+        String format = opts['format']?.toString() ?? 'object';
+        final weekdayNames = ['一', '二', '三', '四', '五', '六', '日'];
+
+        if (format == 'timestamp') {
+          return date.millisecondsSinceEpoch;
+        } else if (format == 'iso') {
+          return date.toIso8601String();
+        } else if (format == 'text') {
+          // 使用 dart_date 的 timeago 功能
+          return date.timeago();
+        } else if (format == 'object') {
+          // 返回完整对象（默认）
+          return jsonEncode({
+            'timestamp': date.millisecondsSinceEpoch,
+            'datetime': date.toIso8601String(),
+            'year': date.year,
+            'month': date.month,
+            'day': date.day,
+            'hour': date.hour,
+            'minute': date.minute,
+            'second': date.second,
+            'millisecond': date.millisecond,
+            'weekday': date.weekday,
+            'weekdayName': weekdayNames[date.weekday - 1],
+          });
+        } else {
+          // 自定义格式字符串
+          return date.format(format);
+        }
+      } catch (e) {
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
     // 在 JS 中创建系统 API 代理
     await _engine!.evaluateDirect('''
       (function() {
         var namespace = globalThis.Memento;
 
+        // 辅助函数：自动解析 JSON 字符串结果
+        function parseResult(result) {
+          if (typeof result === 'string') {
+            try {
+              return JSON.parse(result);
+            } catch (e) {
+              return result;
+            }
+          }
+          return result;
+        }
+
         namespace.system.getCurrentTime = function() {
-          return Memento_system_getCurrentTime();
+          return Memento_system_getCurrentTime().then(parseResult);
         };
 
         namespace.system.getDeviceInfo = function() {
-          return Memento_system_getDeviceInfo();
+          return Memento_system_getDeviceInfo().then(parseResult);
         };
 
         namespace.system.getAppInfo = function() {
-          return Memento_system_getAppInfo();
+          return Memento_system_getAppInfo().then(parseResult);
         };
 
         namespace.system.formatDate = function(dateInput, format) {
-          return Memento_system_formatDate(dateInput, format);
+          return Memento_system_formatDate(dateInput, format).then(parseResult);
         };
 
         namespace.system.getTimestamp = function() {
           return Memento_system_getTimestamp();
+        };
+
+        // 获取自定义日期（推荐使用，解决时区问题）
+        namespace.system.getCustomDate = function(options) {
+          return Memento_system_getCustomDate(options ? JSON.stringify(options) : '{}').then(parseResult);
         };
 
         // 获取位置信息

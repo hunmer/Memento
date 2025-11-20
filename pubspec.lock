@@ -209,6 +209,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  dart_date:
+    dependency: "direct main"
+    description:
+      name: dart_date
+      sha256: "629ba0a6e10ac48f57104c17a49228ba185253e4ab9f752c32fafc5e06281678"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.3"
   dart_quill_delta:
     dependency: transitive
     description:

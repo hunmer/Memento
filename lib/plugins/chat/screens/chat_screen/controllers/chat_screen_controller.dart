@@ -266,9 +266,17 @@ class ChatScreenController extends ChangeNotifier {
 
   Future<void> deleteMessage(Message message) async {
     try {
-      messages.removeWhere((m) => m.id == message.id);
-      await chatPlugin.channelService.saveMessages(channel.id, messages);
-      notifyListeners();
+      // 使用 ChannelService 的 deleteMessage 方法正确删除消息
+      // 这会从频道的完整消息列表中删除消息并持久化
+      final success = await chatPlugin.channelService.deleteMessage(message);
+
+      if (success) {
+        // 同步更新控制器中的消息列表
+        messages.removeWhere((m) => m.id == message.id);
+        notifyListeners();
+      } else {
+        debugPrint('Failed to delete message: ${message.id}');
+      }
     } catch (e) {
       // Handle error
       debugPrint('Error deleting message: $e');

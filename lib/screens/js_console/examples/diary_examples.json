@@ -4,7 +4,7 @@
   "examples": [
     {
       "title": "获取指定日期的日记",
-      "code": "// 获取今天的日记\nvar today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD\nvar diary = await Memento.diary.getDiary(today);\nconsole.log('今日日记:', diary);\nreturn diary;"
+      "code": "// 获取今天的日记\nvar today = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nvar diary = await Memento.diary.getDiary(today);\nconsole.log('今日日记:', diary);\nreturn diary;"
     },
     {
       "title": "保存日记",

@@ -234,7 +234,7 @@
         "comment": "创建简单任务"
       },
       {
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst startTime = today.toISOString().replace(/T.*/, 'T09:00:00.000Z');\nconst endDate = new Date(today);\nendDate.setDate(today.getDate() + 5);\nconst endTime = endDate.toISOString().replace(/T.*/, 'T18:00:00.000Z');\nconst task2 = await Memento.plugins.todo.createTask({\n  title: '编写需求分析',\n  description: '详细描述项目需求和功能点',\n  startDate: startTime,\n  dueDate: endTime,\n  priority: 'high',\n  tags: '[\"工作\",\"文档\",\"紧急\"]'\n});\nsetResult(task2);",
+        "code": "const today = await Memento.system.getCustomDate({relativePosition: 'startOfDay', format: 'iso'});\nconst startTime = today.replace(/T.*/, 'T09:00:00.000Z');\nconst futureDay = await Memento.system.getCustomDate({add: {days: 5}, relativePosition: 'startOfDay', format: 'iso'});\nconst endTime = futureDay.replace(/T.*/, 'T18:00:00.000Z');\nconst task2 = await Memento.plugins.todo.createTask({\n  title: '编写需求分析',\n  description: '详细描述项目需求和功能点',\n  startDate: startTime,\n  dueDate: endTime,\n  priority: 'high',\n  tags: '[\"工作\",\"文档\",\"紧急\"]'\n});\nsetResult(task2);",
         "comment": "创建完整任务(从今天到5天后)"
       },
       {
@@ -480,7 +480,7 @@
       },
       {
         "title": "查找本周完成的任务",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = new Date(timeInfo.timestamp);\nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() - today.getDay() + 1);\nconst weekEnd = new Date(weekStart);\nweekEnd.setDate(weekStart.getDate() + 6);\nconst tasks = await Memento.plugins.todo.findTasksByStatus({status: 'done', startDate: weekStart.toISOString(), endDate: weekEnd.toISOString()});\nsetResult(`本周完成 ${tasks.length} 个任务`);"
+        "code": "const weekStart = await Memento.system.getCustomDate({relativePosition: 'startOfWeek', format: 'iso'});\nconst weekEnd = await Memento.system.getCustomDate({relativePosition: 'endOfWeek', format: 'iso'});\nconst tasks = await Memento.plugins.todo.findTasksByStatus({status: 'done', startDate: weekStart, endDate: weekEnd});\nsetResult(`本周完成 ${tasks.length} 个任务`);"
       },
       {
         "title": "分页查找待办任务",

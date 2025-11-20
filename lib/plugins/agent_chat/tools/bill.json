@@ -137,7 +137,7 @@
       },
       {
         "title": "获取本月账单",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst bills = await Memento.plugins.bill.getBills({startDate, endDate});\nsetResult(`本月共 ${bills.length} 条账单`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst bills = await Memento.plugins.bill.getBills({startDate, endDate});\nsetResult(`本月共 ${bills.length} 条账单`);"
       },
       {
         "title": "分页获取账单（前20条）",
@@ -145,7 +145,7 @@
       },
       {
         "title": "分页获取本月账单（第二页）",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst result = await Memento.plugins.bill.getBills({startDate, endDate, offset: 20, count: 20});\nsetResult(`还有更多: ${result.hasMore}`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst result = await Memento.plugins.bill.getBills({startDate, endDate, offset: 20, count: 20});\nsetResult(`还有更多: ${result.hasMore}`);"
       },
       {
         "title": "遍历所有账单（分页加载）",
@@ -254,7 +254,7 @@
     "examples": [
       {
         "title": "获取本月统计",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst stats = await Memento.plugins.bill.getStats({startDate, endDate});\nsetResult(`本月收入: ${stats.totalIncome}, 支出: ${stats.totalExpense}, 余额: ${stats.balance}`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst stats = await Memento.plugins.bill.getStats({startDate, endDate});\nsetResult(`本月收入: ${stats.totalIncome}, 支出: ${stats.totalExpense}, 余额: ${stats.balance}`);"
       },
       {
         "title": "获取全部统计",
@@ -279,7 +279,7 @@
     "examples": [
       {
         "title": "获取本月分类统计",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst catStats = await Memento.plugins.bill.getCategoryStats({startDate, endDate});\nsetResult(JSON.stringify(catStats, null, 2));"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst catStats = await Memento.plugins.bill.getCategoryStats({startDate, endDate});\nsetResult(JSON.stringify(catStats, null, 2));"
       }
     ],
     "notes": "返回示例: {\"工资\": 5000.00, \"餐饮\": -800.00, \"交通\": -200.00}",
@@ -480,7 +480,7 @@
       },
       {
         "title": "查找本月工资收入",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst bills = await Memento.plugins.bill.findBillsByCategory({category: '工资', startDate, endDate});\nconst total = bills.reduce((sum, b) => sum + b.amount, 0);\nsetResult(`本月工资: ${total}`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst bills = await Memento.plugins.bill.findBillsByCategory({category: '工资', startDate, endDate});\nconst total = bills.reduce((sum, b) => sum + b.amount, 0);\nsetResult(`本月工资: ${total}`);"
       },
       {
         "title": "分页查找餐饮账单",
@@ -488,7 +488,7 @@
       },
       {
         "title": "分页查找本月交通账单",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst year = timeInfo.year;\nconst month = String(timeInfo.month).padStart(2, '0');\nconst lastDay = new Date(year, timeInfo.month, 0).getDate();\nconst startDate = `${year}-${month}-01`;\nconst endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;\nconst result = await Memento.plugins.bill.findBillsByCategory({category: '交通', startDate, endDate, offset: 0, count: 20});\nsetResult(`本月交通账单共 ${result.total} 条，当前返回 ${result.data.length} 条`);"
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst result = await Memento.plugins.bill.findBillsByCategory({category: '交通', startDate, endDate, offset: 0, count: 20});\nsetResult(`本月交通账单共 ${result.total} 条，当前返回 ${result.data.length} 条`);"
       }
     ],
     "notes": "等价于 findBillBy({field: 'category', value: category, findAll: true}) 但支持日期过滤。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
