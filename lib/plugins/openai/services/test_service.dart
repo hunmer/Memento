@@ -10,7 +10,7 @@ import 'request_service.dart';
 class TestService {
   // 用于存储最后一次输入的文本的键
   static const String _lastInputKey = 'last_test_input';
-  
+
   /// 保存最后一次输入的文本
   static Future<void> saveLastInput(String input) async {
     try {
@@ -21,7 +21,7 @@ class TestService {
       debugPrint('保存最后一次输入的文本失败: $e');
     }
   }
-  
+
   /// 读取最后一次输入的文本
   static Future<String> getLastInput() async {
     try {
@@ -32,6 +32,7 @@ class TestService {
       return '';
     }
   }
+
   /// 显示长文本输入对话框，支持图片选择，自动加载上次输入的文本
   static Future<Map<String, dynamic>?> showLongTextInputDialog(
     BuildContext context, {
@@ -46,7 +47,7 @@ class TestService {
     final l10n = OpenAILocalizations.of(context);
     // 如果没有提供初始值，则尝试加载上次输入的文本
     String loadedInitialValue = initialValue ?? await getLastInput();
-    
+
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       barrierDismissible: false, // 防止点击外部关闭对话框导致控制器过早处置
@@ -61,12 +62,12 @@ class TestService {
         );
       },
     );
-    
+
     // 如果用户输入了文本并点击了确定，保存这次输入
     if (result != null && result['text'] != null && result['text'].isNotEmpty) {
       await saveLastInput(result['text']);
     }
-    
+
     return result;
   }
 
@@ -86,10 +87,14 @@ class TestService {
         temperature: formValues['temperature']?.toDouble() ?? agent.temperature,
         maxLength: formValues['maxLength'] ?? agent.maxLength,
         topP: formValues['topP']?.toDouble() ?? agent.topP,
-        frequencyPenalty: formValues['frequencyPenalty']?.toDouble() ?? agent.frequencyPenalty,
-        presencePenalty: formValues['presencePenalty']?.toDouble() ?? agent.presencePenalty,
+        frequencyPenalty:
+            formValues['frequencyPenalty']?.toDouble() ??
+            agent.frequencyPenalty,
+        presencePenalty:
+            formValues['presencePenalty']?.toDouble() ?? agent.presencePenalty,
         stop: formValues['stop'] ?? agent.stop,
-        serviceProviderId: formValues['serviceProviderId'] ?? agent.serviceProviderId,
+        serviceProviderId:
+            formValues['serviceProviderId'] ?? agent.serviceProviderId,
       );
     }
     // 保存这次输入
@@ -156,7 +161,7 @@ ${l10n.checkItems}:
     // 使用独立的context避免MediaQuery依赖问题
     // 获取本地化实例
     final l10n = OpenAILocalizations.of(context);
-    
+
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -203,7 +208,7 @@ ${l10n.checkItems}:
 
     // 获取本地化实例
     final l10n = OpenAILocalizations.of(context);
-    
+
     if (matches.isEmpty) {
       return Text(l10n.imageLoadFailed);
     }
@@ -305,8 +310,8 @@ class _TextInputDialogState extends State<_TextInputDialog> {
   bool _isDisposed = false;
   bool _isLoading = false;
   File? _selectedImage;
-  String? _testResult;  // 测试结果
-  bool _isTesting = false;  // 是否正在测试
+  String? _testResult; // 测试结果
+  bool _isTesting = false; // 是否正在测试
 
   @override
   void initState() {
@@ -320,15 +325,15 @@ class _TextInputDialogState extends State<_TextInputDialog> {
     _controller.dispose();
     super.dispose();
   }
-  
+
   /// 加载上次输入的文本
   Future<void> _loadLastInput() async {
     if (_isDisposed) return;
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       final lastInput = await TestService.getLastInput();
       if (!_isDisposed && lastInput.isNotEmpty) {
@@ -338,9 +343,9 @@ class _TextInputDialogState extends State<_TextInputDialog> {
       debugPrint('加载上次输入失败: $e');
       if (!_isDisposed) {
         final l10n = OpenAILocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.lastInputLoadFailed)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.lastInputLoadFailed)));
       }
     } finally {
       if (!_isDisposed) {
@@ -348,13 +353,6 @@ class _TextInputDialogState extends State<_TextInputDialog> {
           _isLoading = false;
         });
       }
-    }
-  }
-  
-  /// 清空输入框
-  void _clearInput() {
-    if (!_isDisposed) {
-      _controller.clear();
     }
   }
 
@@ -382,9 +380,9 @@ class _TextInputDialogState extends State<_TextInputDialog> {
     if (input.isEmpty) {
       if (!_isDisposed) {
         final l10n = OpenAILocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.enterTestText)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.enterTestText)));
       }
       return;
     }
@@ -451,7 +449,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
               ),
             ],
           );
-        }
+        },
       ),
       content: SizedBox(
         width: double.maxFinite,
@@ -467,7 +465,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                   hintText: widget.hintText,
                   border: const OutlineInputBorder(),
                 ),
-                enabled: !_isTesting,  // 测试时禁用输入
+                enabled: !_isTesting, // 测试时禁用输入
               ),
               if (widget.enableImagePicker) ...[
                 const SizedBox(height: 16),
@@ -481,21 +479,21 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                           icon: const Icon(Icons.image),
                           label: Text(l10n.selectImage),
                         );
-                      }
+                      },
                     ),
                     const SizedBox(width: 8),
-                  
+
                     Expanded(
                       child: Builder(
                         builder: (context) {
                           final l10n = OpenAILocalizations.of(context);
                           return _selectedImage != null
                               ? Text(
-                                  '${l10n.selectedImage}: ${_selectedImage!.path.split('/').last}',
-                                  overflow: TextOverflow.ellipsis,
-                                )
+                                '${l10n.selectedImage}: ${_selectedImage!.path.split('/').last}',
+                                overflow: TextOverflow.ellipsis,
+                              )
                               : Text(l10n.noImageSelected);
-                        }
+                        },
                       ),
                     ),
 
@@ -542,7 +540,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                         fontSize: 16,
                       ),
                     );
-                  }
+                  },
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -584,14 +582,17 @@ class _TextInputDialogState extends State<_TextInputDialog> {
           builder: (context) {
             final l10n = OpenAILocalizations.of(context);
             return TextButton(
-              onPressed: _isTesting ? null : () {
-                if (!_isDisposed) {
-                  Navigator.of(context).pop();
-                }
-              },
+              onPressed:
+                  _isTesting
+                      ? null
+                      : () {
+                        if (!_isDisposed) {
+                          Navigator.of(context).pop();
+                        }
+                      },
               child: Text(l10n.close),
             );
-          }
+          },
         ),
         // 如果提供了测试agent，显示测试按钮；否则显示保存按钮
         if (widget.testAgent != null)
@@ -602,7 +603,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                 onPressed: _isTesting ? null : _runTest,
                 child: Text(l10n.testAgent),
               );
-            }
+            },
           )
         else
           Builder(
@@ -613,14 +614,13 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                 onPressed: () {
                   if (!_isDisposed) {
                     final text = _controller.text;
-                    Navigator.of(context).pop({
-                      'text': text,
-                      'image': _selectedImage,
-                    });
+                    Navigator.of(
+                      context,
+                    ).pop({'text': text, 'image': _selectedImage});
                   }
                 },
               );
-            }
+            },
           ),
       ],
     );

@@ -8,5 +8,5 @@
     android:initialLayout="@layout/widget_chat_quick"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
-    android:description="快速发送消息到频道"
+    android:description="@string/widget_chat_quick_description"
     android:previewImage="@drawable/launcher_icon" />

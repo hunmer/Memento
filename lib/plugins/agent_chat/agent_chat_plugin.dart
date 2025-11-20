@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
-import '../../core/js_bridge/js_bridge_manager.dart';
 import 'controllers/conversation_controller.dart';
 import 'screens/conversation_list_screen/conversation_list_screen.dart';
 import 'screens/agent_chat_settings_screen.dart';
 import 'services/tool_service.dart';
 import 'services/tool_template_service.dart';
 import 'services/widget_service.dart';
-import '../openai/openai_plugin.dart';
 // import 'l10n/agent_chat_localizations.dart';
 
 /// Agent Chat 插件
@@ -36,8 +34,8 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
   ToolTemplateService get templateService => _templateService!;
 
   /// 检查是否已初始化
-  bool get isInitialized => _conversationController != null &&
-      _conversationController!.isInitialized;
+  bool get isInitialized =>
+      _conversationController != null && _conversationController!.isInitialized;
 
   AgentChatPlugin() {
     _instance = this;
@@ -115,9 +113,8 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
     final plugin = AgentChatPlugin.instance;
 
     // 如果已初始化，直接完成；否则等待初始化
-    _initializeFuture = plugin.isInitialized
-        ? Future.value()
-        : _waitForInitialization();
+    _initializeFuture =
+        plugin.isInitialized ? Future.value() : _waitForInitialization();
   }
 
   Future<void> _waitForInitialization() async {
@@ -142,9 +139,7 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 

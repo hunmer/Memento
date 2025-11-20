@@ -78,130 +78,131 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
           Text('语音播报设置'),
         ],
       ),
-      content: _isLoading
-          ? const SizedBox(
-              height: 100,
-              child: Center(child: CircularProgressIndicator()),
-            )
-          : SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 启用开关
-                  SwitchListTile(
-                    title: const Text('启用自动朗读'),
-                    subtitle: const Text('AI回复完成后自动朗读消息内容'),
-                    value: _enabled,
-                    onChanged: (value) {
-                      setState(() {
-                        _enabled = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 服务选择
-                  if (_enabled && _services.isNotEmpty) ...[
-                    const Text(
-                      '选择TTS服务',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+      content:
+          _isLoading
+              ? const SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator()),
+              )
+              : SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 启用开关
+                    SwitchListTile(
+                      title: const Text('启用自动朗读'),
+                      subtitle: const Text('AI回复完成后自动朗读消息内容'),
+                      value: _enabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _enabled = value;
+                        });
+                      },
                     ),
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _services.length,
-                        itemBuilder: (context, index) {
-                          final service = _services[index];
-                          final isSelected = service.id == _selectedServiceId;
+                    const SizedBox(height: 16),
 
-                          return RadioListTile<String>(
-                            title: Row(
-                              children: [
-                                Text(service.name),
-                                if (service.isDefault)
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: const Text(
-                                        '默认',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.blue,
+                    // 服务选择
+                    if (_enabled && _services.isNotEmpty) ...[
+                      const Text(
+                        '选择TTS服务',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _services.length,
+                          itemBuilder: (context, index) {
+                            final service = _services[index];
+
+                            return RadioListTile<String>(
+                              title: Row(
+                                children: [
+                                  Text(service.name),
+                                  if (service.isDefault)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          '默认',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.blue,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                              ],
-                            ),
-                            subtitle: Text(
-                              _getServiceTypeText(service),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade600,
+                                ],
                               ),
-                            ),
-                            value: service.id,
-                            groupValue: _selectedServiceId,
-                            onChanged: service.isEnabled
-                                ? (value) {
-                                    setState(() {
-                                      _selectedServiceId = value;
-                                    });
-                                  }
-                                : null,
-                            controlAffinity: ListTileControlAffinity.trailing,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-
-                  // 无可用服务提示
-                  if (_enabled && _services.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.orange.shade200,
+                              subtitle: Text(
+                                _getServiceTypeText(service),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                              value: service.id,
+                              groupValue: _selectedServiceId,
+                              onChanged:
+                                  service.isEnabled
+                                      ? (value) {
+                                        setState(() {
+                                          _selectedServiceId = value;
+                                        });
+                                      }
+                                      : null,
+                              controlAffinity: ListTileControlAffinity.trailing,
+                            );
+                          },
                         ),
                       ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.warning, color: Colors.orange, size: 20),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '暂无可用的TTS服务，请先在TTS插件中配置',
-                              style: TextStyle(fontSize: 12),
+                    ],
+
+                    // 无可用服务提示
+                    if (_enabled && _services.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange.shade200),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.warning, color: Colors.orange, size: 20),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '暂无可用的TTS服务，请先在TTS插件中配置',
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -242,10 +243,7 @@ class TTSSettingsResult {
   /// 选择的服务ID
   final String? serviceId;
 
-  const TTSSettingsResult({
-    required this.enabled,
-    this.serviceId,
-  });
+  const TTSSettingsResult({required this.enabled, this.serviceId});
 }
 
 /// 显示TTS设置对话框的便捷方法
@@ -258,9 +256,10 @@ Future<TTSSettingsResult?> showTTSSettingsDialog(
 }) {
   return showDialog<TTSSettingsResult>(
     context: context,
-    builder: (context) => TTSSettingsDialog(
-      initialEnabled: initialEnabled,
-      initialServiceId: initialServiceId,
-    ),
+    builder:
+        (context) => TTSSettingsDialog(
+          initialEnabled: initialEnabled,
+          initialServiceId: initialServiceId,
+        ),
   );
 }

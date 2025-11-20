@@ -13,31 +13,31 @@ class CalendarNotificationUtils {
     Function(String?)? onSelectNotification,
   }) async {
     // 创建日历插件专用的通知通道
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: -1, // 用于测试通道是否存在
-        channelKey: _channelKey,
-        title: '初始化',
-        body: '日历通知通道已创建',
-      ),
-    ).catchError((error) async {
-      // 如果通道不存在，先创建通道
-      await AwesomeNotifications().initialize(
-        null,
-        [
-          NotificationChannel(
+    await AwesomeNotifications()
+        .createNotification(
+          content: NotificationContent(
+            id: -1, // 用于测试通道是否存在
             channelKey: _channelKey,
-            channelName: _channelName,
-            channelDescription: _channelDescription,
-            defaultColor: const Color(0xFF2196F3),
-            ledColor: Colors.blue,
-            importance: NotificationImportance.Max,
-            enableVibration: true,
-            playSound: true,
+            title: '初始化',
+            body: '日历通知通道已创建',
           ),
-        ],
-      );
-    });
+          // ignore: body_might_complete_normally_catch_error
+        )
+        .catchError((error) async {
+          // 如果通道不存在，先创建通道
+          await AwesomeNotifications().initialize(null, [
+            NotificationChannel(
+              channelKey: _channelKey,
+              channelName: _channelName,
+              channelDescription: _channelDescription,
+              defaultColor: const Color(0xFF2196F3),
+              ledColor: Colors.blue,
+              importance: NotificationImportance.Max,
+              enableVibration: true,
+              playSound: true,
+            ),
+          ]);
+        });
   }
 
   static Future<void> scheduleEventNotification({
@@ -63,9 +63,7 @@ class CalendarNotificationUtils {
           payload: {'payload': payload ?? ''},
           notificationLayout: NotificationLayout.Default,
         ),
-        schedule: NotificationCalendar.fromDate(
-          date: scheduledDateTime,
-        ),
+        schedule: NotificationCalendar.fromDate(date: scheduledDateTime),
       );
     } catch (e) {
       _logger.warning('Failed to schedule event notification', e);

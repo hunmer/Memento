@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
@@ -41,7 +40,6 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   Future<void> initialize() async {
     timerController = TimerController(storage);
     await _loadTasks();
-
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
@@ -260,31 +258,43 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取计时器列表
   /// 支持分页参数: offset, count
   Future<dynamic> _jsGetTimers(Map<String, dynamic> params) async {
-    final timers = _tasks.map((task) => {
-      'id': task.id,
-      'name': task.name,
-      'color': task.color.toARGB32(),
-      'icon': task.icon.codePoint,
-      'group': task.group,
-      'isRunning': task.isRunning,
-      'repeatCount': task.repeatCount,
-      'remainingRepeatCount': task.remainingRepeatCount,
-      'enableNotification': task.enableNotification,
-      'createdAt': task.createdAt.toIso8601String(),
-      'timerItems': task.timerItems.map((item) => {
-        'id': item.id,
-        'name': item.name,
-        'description': item.description,
-        'type': item.type.name,
-        'duration': item.duration.inSeconds,
-        'completedDuration': item.completedDuration.inSeconds,
-        'isRunning': item.isRunning,
-        'isCompleted': item.isCompleted,
-        'remainingDuration': item.remainingDuration.inSeconds,
-        'repeatCount': item.repeatCount,
-        'enableNotification': item.enableNotification,
-      }).toList(),
-    }).toList();
+    final timers =
+        _tasks
+            .map(
+              (task) => {
+                'id': task.id,
+                'name': task.name,
+                'color': task.color.toARGB32(),
+                'icon': task.icon.codePoint,
+                'group': task.group,
+                'isRunning': task.isRunning,
+                'repeatCount': task.repeatCount,
+                'remainingRepeatCount': task.remainingRepeatCount,
+                'enableNotification': task.enableNotification,
+                'createdAt': task.createdAt.toIso8601String(),
+                'timerItems':
+                    task.timerItems
+                        .map(
+                          (item) => {
+                            'id': item.id,
+                            'name': item.name,
+                            'description': item.description,
+                            'type': item.type.name,
+                            'duration': item.duration.inSeconds,
+                            'completedDuration':
+                                item.completedDuration.inSeconds,
+                            'isRunning': item.isRunning,
+                            'isCompleted': item.isCompleted,
+                            'remainingDuration':
+                                item.remainingDuration.inSeconds,
+                            'repeatCount': item.repeatCount,
+                            'enableNotification': item.enableNotification,
+                          },
+                        )
+                        .toList(),
+              },
+            )
+            .toList();
 
     // 检查是否需要分页
     final int? offset = params['offset'];
@@ -331,13 +341,14 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       // 检查ID是否已存在
       final existingTask = _tasks.firstWhere(
         (t) => t.id == customId,
-        orElse: () => TimerTask.create(
-          id: '',
-          name: '',
-          color: Colors.transparent,
-          icon: Icons.error,
-          timerItems: [],
-        ),
+        orElse:
+            () => TimerTask.create(
+              id: '',
+              name: '',
+              color: Colors.transparent,
+              icon: Icons.error,
+              timerItems: [],
+            ),
       );
 
       if (existingTask.id.isNotEmpty) {
@@ -386,11 +397,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     await addTask(task);
 
-    return {
-      'success': true,
-      'taskId': task.id,
-      'message': '计时器创建成功',
-    };
+    return {'success': true, 'taskId': task.id, 'message': '计时器创建成功'};
   }
 
   /// 删除计时器
@@ -402,10 +409,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     await removeTask(timerId);
 
-    return {
-      'success': true,
-      'message': '计时器已删除',
-    };
+    return {'success': true, 'message': '计时器已删除'};
   }
 
   /// 启动计时器
@@ -493,11 +497,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     task.reset();
     await updateTask(task);
 
-    return {
-      'success': true,
-      'message': '计时器已重置',
-      'taskId': task.id,
-    };
+    return {'success': true, 'message': '计时器已重置', 'taskId': task.id};
   }
 
   /// 获取计时器状态
@@ -524,46 +524,66 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       'repeatCount': task.repeatCount,
       'remainingRepeatCount': task.remainingRepeatCount,
       'currentTimerIndex': currentIndex,
-      'activeTimer': activeTimer != null ? {
-        'id': activeTimer.id,
-        'name': activeTimer.name,
-        'type': activeTimer.type.name,
-        'duration': activeTimer.duration.inSeconds,
-        'completedDuration': activeTimer.completedDuration.inSeconds,
-        'remainingDuration': activeTimer.remainingDuration.inSeconds,
-        'isRunning': activeTimer.isRunning,
-        'isCompleted': activeTimer.isCompleted,
-        'formattedRemainingTime': activeTimer.formattedRemainingTime,
-      } : null,
-      'timerItems': task.timerItems.map((item) => {
-        'id': item.id,
-        'name': item.name,
-        'type': item.type.name,
-        'duration': item.duration.inSeconds,
-        'completedDuration': item.completedDuration.inSeconds,
-        'remainingDuration': item.remainingDuration.inSeconds,
-        'isCompleted': item.isCompleted,
-      }).toList(),
+      'activeTimer':
+          activeTimer != null
+              ? {
+                'id': activeTimer.id,
+                'name': activeTimer.name,
+                'type': activeTimer.type.name,
+                'duration': activeTimer.duration.inSeconds,
+                'completedDuration': activeTimer.completedDuration.inSeconds,
+                'remainingDuration': activeTimer.remainingDuration.inSeconds,
+                'isRunning': activeTimer.isRunning,
+                'isCompleted': activeTimer.isCompleted,
+                'formattedRemainingTime': activeTimer.formattedRemainingTime,
+              }
+              : null,
+      'timerItems':
+          task.timerItems
+              .map(
+                (item) => {
+                  'id': item.id,
+                  'name': item.name,
+                  'type': item.type.name,
+                  'duration': item.duration.inSeconds,
+                  'completedDuration': item.completedDuration.inSeconds,
+                  'remainingDuration': item.remainingDuration.inSeconds,
+                  'isCompleted': item.isCompleted,
+                },
+              )
+              .toList(),
     };
   }
 
   /// 获取计时历史
   /// 支持分页参数: offset, count
   Future<dynamic> _jsGetHistory(Map<String, dynamic> params) async {
-    final completedTasks = _tasks.where((task) => task.isCompleted).map((task) => {
-      'id': task.id,
-      'name': task.name,
-      'group': task.group,
-      'createdAt': task.createdAt.toIso8601String(),
-      'totalDuration': task.timerItems
-          .map((item) => item.completedDuration.inSeconds)
-          .fold<int>(0, (sum, duration) => sum + duration),
-      'timerItems': task.timerItems.map((item) => {
-        'name': item.name,
-        'type': item.type.name,
-        'completedDuration': item.completedDuration.inSeconds,
-      }).toList(),
-    }).toList();
+    final completedTasks =
+        _tasks
+            .where((task) => task.isCompleted)
+            .map(
+              (task) => {
+                'id': task.id,
+                'name': task.name,
+                'group': task.group,
+                'createdAt': task.createdAt.toIso8601String(),
+                'totalDuration': task.timerItems
+                    .map((item) => item.completedDuration.inSeconds)
+                    .fold<int>(0, (sum, duration) => sum + duration),
+                'timerItems':
+                    task.timerItems
+                        .map(
+                          (item) => {
+                            'name': item.name,
+                            'type': item.type.name,
+                            'completedDuration':
+                                item.completedDuration.inSeconds,
+                          },
+                        )
+                        .toList(),
+              },
+            )
+            .toList();
 
     // 检查是否需要分页
     final int? offset = params['offset'];
@@ -585,10 +605,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     // 兼容旧版本：无分页参数时返回原格式
-    return {
-      'total': completedTasks.length,
-      'tasks': completedTasks,
-    };
+    return {'total': completedTasks.length, 'tasks': completedTasks};
   }
 
   // ==================== 查找方法 ====================
@@ -717,9 +734,10 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     final matches = <Map<String, dynamic>>[];
 
     for (var task in _tasks) {
-      final isMatch = fuzzy
-          ? task.name.toLowerCase().contains(name.toLowerCase())
-          : task.name == name;
+      final isMatch =
+          fuzzy
+              ? task.name.toLowerCase().contains(name.toLowerCase())
+              : task.name == name;
 
       if (isMatch) {
         final taskData = {
@@ -768,14 +786,20 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     final int? offset = params['offset'];
     final int? count = params['count'];
 
-    final matches = _tasks.where((task) => task.group == group).map((task) => {
-      'id': task.id,
-      'name': task.name,
-      'color': task.color.toARGB32(),
-      'icon': task.icon.codePoint,
-      'group': task.group,
-      'isRunning': task.isRunning,
-    }).toList();
+    final matches =
+        _tasks
+            .where((task) => task.group == group)
+            .map(
+              (task) => {
+                'id': task.id,
+                'name': task.name,
+                'color': task.color.toARGB32(),
+                'icon': task.icon.codePoint,
+                'group': task.group,
+                'isRunning': task.isRunning,
+              },
+            )
+            .toList();
 
     // 检查是否需要分页
     if (offset != null || count != null) {

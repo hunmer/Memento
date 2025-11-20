@@ -140,17 +140,15 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
             // 进度指示
             if (_isExecuting) ...[
               LinearProgressIndicator(
-                value: _currentStepIndex >= 0
-                    ? (_currentStepIndex + 1) / widget.steps.length
-                    : null,
+                value:
+                    _currentStepIndex >= 0
+                        ? (_currentStepIndex + 1) / widget.steps.length
+                        : null,
               ),
               const SizedBox(height: 8),
               Text(
                 '正在执行步骤 ${_currentStepIndex + 1}/${widget.steps.length}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
               const SizedBox(height: 16),
             ],
@@ -195,7 +193,9 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ExpansionTile(
-        key: ValueKey('step_$index\_${_expandedStepIndex == index}'), // 使用key强制重建
+        key: ValueKey(
+          'step_${index}_${_expandedStepIndex == index}',
+        ), // 使用key强制重建
         initiallyExpanded: _expandedStepIndex == index, // 仅展开最后完成的步骤
         onExpansionChanged: (expanded) {
           if (expanded) {
@@ -219,10 +219,7 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
           step.desc,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
         ),
         children: [
           Padding(
@@ -287,14 +284,16 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: result['success']
-                          ? Colors.green.shade50
-                          : Colors.red.shade50,
+                      color:
+                          result['success']
+                              ? Colors.green.shade50
+                              : Colors.red.shade50,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: result['success']
-                            ? Colors.green.shade200
-                            : Colors.red.shade200,
+                        color:
+                            result['success']
+                                ? Colors.green.shade200
+                                : Colors.red.shade200,
                       ),
                     ),
                     child: SelectableText(
@@ -304,9 +303,10 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 11,
-                        color: result['success']
-                            ? Colors.green.shade900
-                            : Colors.red.shade900,
+                        color:
+                            result['success']
+                                ? Colors.green.shade900
+                                : Colors.red.shade900,
                       ),
                     ),
                   ),
@@ -356,17 +356,13 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
 
     if (result.isEmpty) return;
 
-    final text = result['success']
-        ? _formatResult(result['result'])
-        : result['error'];
+    final text =
+        result['success'] ? _formatResult(result['result']) : result['error'];
 
     Clipboard.setData(ClipboardData(text: text));
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('已复制到剪贴板'),
-        duration: Duration(seconds: 1),
-      ),
+      const SnackBar(content: Text('已复制到剪贴板'), duration: Duration(seconds: 1)),
     );
   }
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Memento</string>
+    <string name="widget_chat_quick_description">快速发送消息到频道</string>
+    <string name="widget_agent_voice_description">快速发送语音到 AI 助手</string>
+</resources>

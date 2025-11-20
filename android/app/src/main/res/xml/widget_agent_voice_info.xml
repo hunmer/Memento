@@ -8,5 +8,5 @@
     android:initialLayout="@layout/widget_agent_voice"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
-    android:description="快速发送语音到 AI 助手"
+    android:description="@string/widget_agent_voice_description"
     android:previewImage="@drawable/launcher_icon" />

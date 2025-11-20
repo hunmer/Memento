@@ -13,31 +13,31 @@ class TrackerNotificationUtils {
     Function(String?)? onSelectNotification,
   }) async {
     // 创建目标跟踪插件专用的通知通道
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: -1, // 用于测试通道是否存在
-        channelKey: _channelKey,
-        title: '初始化',
-        body: '目标跟踪通知通道已创建',
-      ),
-    ).catchError((error) async {
-      // 如果通道不存在，先创建通道
-      await AwesomeNotifications().initialize(
-        null,
-        [
-          NotificationChannel(
+    await AwesomeNotifications()
+        .createNotification(
+          content: NotificationContent(
+            id: -1, // 用于测试通道是否存在
             channelKey: _channelKey,
-            channelName: _channelName,
-            channelDescription: _channelDescription,
-            defaultColor: const Color(0xFF9D50DD),
-            ledColor: Colors.white,
-            importance: NotificationImportance.High,
-            enableVibration: true,
-            playSound: true,
+            title: '初始化',
+            body: '目标跟踪通知通道已创建',
           ),
-        ],
-      );
-    });
+          // ignore: body_might_complete_normally_catch_error
+        )
+        .catchError((error) async {
+          // 如果通道不存在，先创建通道
+          await AwesomeNotifications().initialize(null, [
+            NotificationChannel(
+              channelKey: _channelKey,
+              channelName: _channelName,
+              channelDescription: _channelDescription,
+              defaultColor: const Color(0xFF9D50DD),
+              ledColor: Colors.white,
+              importance: NotificationImportance.High,
+              enableVibration: true,
+              playSound: true,
+            ),
+          ]);
+        });
   }
 
   static Future<void> scheduleDailyNotification({
@@ -50,13 +50,7 @@ class TrackerNotificationUtils {
   }) async {
     try {
       final now = DateTime.now();
-      var scheduledDate = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        hour,
-        minute,
-      );
+      var scheduledDate = DateTime(now.year, now.month, now.day, hour, minute);
 
       // 如果时间已过，安排到明天
       if (scheduledDate.isBefore(now)) {
