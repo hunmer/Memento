@@ -192,143 +192,37 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 工具调用设置标题
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            '工具调用设置',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-
-        // 优先使用工具模版开关
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Card(
-            child: SwitchListTile(
-              title: const Text('优先使用工具模版'),
-              subtitle: const Text(
-                '开启后，AI 会优先尝试匹配已保存的工具模版，提升响应速度。如无匹配则继续正常的工具调用流程。',
-              ),
-              value: _preferToolTemplates,
-              onChanged: (value) {
-                setState(() {
-                  _preferToolTemplates = value;
-                  _hasChanges = true;
-                });
-              },
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 24),
-        const Divider(),
-        const SizedBox(height: 8),
-
-        // 后台服务设置标题（仅Android）
-        if (!kIsWeb && Platform.isAndroid) ...[
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 工具调用设置标题
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              '后台服务设置',
+              '工具调用设置',
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
 
-          // 启用后台服务开关
+          // 优先使用工具模版开关
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Card(
-              child: Column(
-                children: [
-                  SwitchListTile(
-                    title: const Text('启用后台服务'),
-                    subtitle: const Text(
-                      '切换到其他应用后继续接收AI回复。会显示前台通知以保持服务运行。',
-                    ),
-                    value: _enableBackgroundService,
-                    onChanged: (value) {
-                      setState(() {
-                        _enableBackgroundService = value;
-                        _hasChanges = true;
-                      });
-                    },
-                  ),
-
-                  if (_enableBackgroundService) ...[
-                    const Divider(height: 1),
-
-                    // Token消耗显示开关
-                    SwitchListTile(
-                      title: const Text('显示Token消耗'),
-                      subtitle: const Text(
-                        '在通知中实时显示输入/输出token数量和总消耗。',
-                      ),
-                      value: _showTokenInNotification,
-                      onChanged: (value) {
-                        setState(() {
-                          _showTokenInNotification = value;
-                          _hasChanges = true;
-                        });
-                      },
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-
-          // 后台服务说明卡片
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Card(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '后台服务说明',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '• 切换到其他应用后，AI会继续生成回复\n'
-                      '• 通知栏会显示"AI助手运行中"\n'
-                      '• 生成完成后会收到系统通知\n'
-                      '• 可通过通知按钮取消生成\n'
-                      '• Android 15+ 每24小时限制6小时',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                  ],
+              child: SwitchListTile(
+                title: const Text('优先使用工具模版'),
+                subtitle: const Text(
+                  '开启后，AI 会优先尝试匹配已保存的工具模版，提升响应速度。如无匹配则继续正常的工具调用流程。',
                 ),
+                value: _preferToolTemplates,
+                onChanged: (value) {
+                  setState(() {
+                    _preferToolTemplates = value;
+                    _hasChanges = true;
+                  });
+                },
               ),
             ),
           ),
@@ -336,209 +230,215 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 8),
-        ],
 
-        // 语音识别设置标题
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            '语音识别设置',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
+          // 后台服务设置标题（仅Android）
+          if (!kIsWeb && Platform.isAndroid) ...[
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                '后台服务设置',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
 
-        // 说明文本
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            '配置腾讯云实时语音识别服务，用于聊天界面的语音输入功能。',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            // 启用后台服务开关
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Card(
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      title: const Text('启用后台服务'),
+                      subtitle: const Text('切换到其他应用后继续接收AI回复。会显示前台通知以保持服务运行。'),
+                      value: _enableBackgroundService,
+                      onChanged: (value) {
+                        setState(() {
+                          _enableBackgroundService = value;
+                          _hasChanges = true;
+                        });
+                      },
+                    ),
+
+                    if (_enableBackgroundService) ...[
+                      const Divider(height: 1),
+
+                      // Token消耗显示开关
+                      SwitchListTile(
+                        title: const Text('显示Token消耗'),
+                        subtitle: const Text('在通知中实时显示输入/输出token数量和总消耗。'),
+                        value: _showTokenInNotification,
+                        onChanged: (value) {
+                          setState(() {
+                            _showTokenInNotification = value;
+                            _hasChanges = true;
+                          });
+                        },
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const Divider(),
+            const SizedBox(height: 8),
+          ],
+
+          // 语音识别设置标题
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '语音识别设置',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
-        ),
 
-        const SizedBox(height: 8),
-
-        // 获取凭证链接
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: InkWell(
-            onTap: () {
-              // TODO: 打开浏览器到腾讯云控制台
-            },
+          // 说明文本
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              '如何获取 API 凭证？',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                decoration: TextDecoration.underline,
+              '配置腾讯云实时语音识别服务，用于聊天界面的语音输入功能。',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
-        ),
 
-        const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
-        // 表单
-        Expanded(
-          child:
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : Form(
-                    key: _formKey,
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          // 获取凭证链接
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: InkWell(
+              onTap: () {
+                // TODO: 打开浏览器到腾讯云控制台
+              },
+              child: Text(
+                '如何获取 API 凭证？',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // 表单
+          if (_isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else
+            Form(
+              key: _formKey,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    // App ID 输入框
+                    TextFormField(
+                      controller: _appIdController,
+                      decoration: const InputDecoration(
+                        labelText: 'App ID',
+                        hintText: '请输入腾讯云应用 ID',
+                        border: OutlineInputBorder(),
+                        helperText: '在腾讯云控制台获取',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return '请输入 App ID';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Secret ID 输入框
+                    TextFormField(
+                      controller: _secretIdController,
+                      decoration: const InputDecoration(
+                        labelText: 'Secret ID',
+                        hintText: '请输入密钥 ID',
+                        border: OutlineInputBorder(),
+                        helperText: '访问密钥 ID',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return '请输入 Secret ID';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Secret Key 输入框
+                    TextFormField(
+                      controller: _secretKeyController,
+                      obscureText: _obscureSecretKey,
+                      decoration: InputDecoration(
+                        labelText: 'Secret Key',
+                        hintText: '请输入密钥 Key',
+                        border: const OutlineInputBorder(),
+                        helperText: '访问密钥 Key（请妥善保管）',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureSecretKey
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureSecretKey = !_obscureSecretKey;
+                            });
+                          },
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return '请输入 Secret Key';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 操作按钮
+                    Row(
                       children: [
-                        // App ID 输入框
-                        TextFormField(
-                          controller: _appIdController,
-                          decoration: const InputDecoration(
-                            labelText: 'App ID',
-                            hintText: '请输入腾讯云应用 ID',
-                            border: OutlineInputBorder(),
-                            helperText: '在腾讯云控制台获取',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return '请输入 App ID';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Secret ID 输入框
-                        TextFormField(
-                          controller: _secretIdController,
-                          decoration: const InputDecoration(
-                            labelText: 'Secret ID',
-                            hintText: '请输入密钥 ID',
-                            border: OutlineInputBorder(),
-                            helperText: '访问密钥 ID',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return '请输入 Secret ID';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Secret Key 输入框
-                        TextFormField(
-                          controller: _secretKeyController,
-                          obscureText: _obscureSecretKey,
-                          decoration: InputDecoration(
-                            labelText: 'Secret Key',
-                            hintText: '请输入密钥 Key',
-                            border: const OutlineInputBorder(),
-                            helperText: '访问密钥 Key（请妥善保管）',
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureSecretKey
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureSecretKey = !_obscureSecretKey;
-                                });
-                              },
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return '请输入 Secret Key';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // 引擎配置说明
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.info_outline,
-                                      size: 20,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      '识别引擎配置',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '当前使用默认配置：',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '• 采样率：16000 Hz\n'
-                                  '• 引擎模型：16k_zh（中文普通话）\n'
-                                  '• VAD 人声检测：关闭\n'
-                                  '• 脏词过滤：关闭',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.bodySmall?.copyWith(
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _testConnection,
+                            child: const Text('测试配置'),
                           ),
                         ),
-
-                        const SizedBox(height: 24),
-
-                        // 操作按钮
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: _testConnection,
-                                child: const Text('测试配置'),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: FilledButton(
-                                onPressed: _hasChanges ? _saveSettings : null,
-                                child: const Text('保存设置'),
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: _hasChanges ? _saveSettings : null,
+                            child: const Text('保存设置'),
+                          ),
                         ),
-
-                        const SizedBox(height: 16),
                       ],
                     ),
-                  ),
-        ),
-      ],
+
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

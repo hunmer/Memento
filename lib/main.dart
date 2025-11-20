@@ -294,44 +294,101 @@ Future<void> _setupWidgetClickListener() async {
   // 初始化 HomeWidget (必须在监听前调用)
   await HomeWidget.setAppGroupId('group.github.hunmer.memento');
 
-  // 监听小组件点击事件
+  // 监听 HomeWidget 的点击事件（备用方式）
   HomeWidget.widgetClicked.listen((Uri? uri) {
     if (uri != null) {
-      debugPrint('收到桌面小组件点击事件: $uri');
-      debugPrint('URI path: ${uri.path}');
-      debugPrint('URI query: ${uri.query}');
+      _handleWidgetClick(uri.toString());
+    }
+  });
 
-      // 解析 URI 路径和参数
-      // 例如: memento://widget/quick_send?channelId=xxx
-      // path 会包含 /quick_send，需要移除前面的路径
-      String routePath = uri.path;
-
-      // 移除 /widget 前缀（如果存在）
-      if (routePath.startsWith('/widget/')) {
-        routePath = routePath.substring(7); // 移除 "/widget"，保留 /quick_send
-      } else if (routePath.startsWith('widget/')) {
-        routePath = '/${routePath.substring(7)}'; // 添加前导斜杠
+  // 监听 Android 原生通过 MethodChannel 发送的小组件点击事件
+  const platform = MethodChannel('github.hunmer.memento/widget');
+  platform.setMethodCallHandler((call) async {
+    if (call.method == 'onWidgetClicked') {
+      final url = call.arguments as String?;
+      if (url != null) {
+        _handleWidgetClick(url);
       }
-
-      debugPrint('处理后的路由路径: $routePath');
-
-      // 提取参数
-      final queryParams = uri.queryParameters;
-      String? argument;
-      if (queryParams.containsKey('channelId')) {
-        argument = queryParams['channelId'];
-      } else if (queryParams.containsKey('conversationId')) {
-        argument = queryParams['conversationId'];
-      }
-
-      debugPrint('导航到路由: $routePath, 参数: $argument');
-
-      // 使用全局导航键进行路由跳转
-      navigatorKey.currentState?.pushNamed(routePath, arguments: argument);
     }
   });
 
   debugPrint('桌面小组件点击监听器已设置');
+}
+
+/// 处理小组件点击事件
+void _handleWidgetClick(String url) {
+  debugPrint('收到桌面小组件点击事件: $url');
+
+  try {
+    final uri = Uri.parse(url);
+    debugPrint('URI path: ${uri.path}');
+    debugPrint('URI query: ${uri.query}');
+
+    // 解析 URI 路径和参数
+    // 例如: memento://widget/quick_send?channelId=xxx
+    String routePath = uri.path;
+
+    // 移除 /widget 前缀（如果存在）
+    if (routePath.startsWith('/widget/')) {
+      routePath = routePath.substring(7); // 移除 "/widget"，保留 /quick_send
+    } else if (routePath.startsWith('widget/')) {
+      routePath = '/${routePath.substring(7)}'; // 添加前导斜杠
+    }
+
+    debugPrint('处理后的路由路径: $routePath');
+
+    // 提取参数
+    final queryParams = uri.queryParameters;
+    String? argument;
+    if (queryParams.containsKey('channelId')) {
+      argument = queryParams['channelId'];
+    } else if (queryParams.containsKey('conversationId')) {
+      argument = queryParams['conversationId'];
+    }
+
+    debugPrint('导航到路由: $routePath, 参数: $argument');
+
+    // 延迟导航，确保应用完全启动
+    Future.delayed(const Duration(milliseconds: 100), () {
+      final navigator = navigatorKey.currentState;
+      if (navigator != null) {
+        debugPrint('执行导航: push RouteSettings($routePath, arguments: $argument)');
+        try {
+          // 直接使用 generateRoute 以确保路由能被正确处理
+          final route = AppRoutes.generateRoute(RouteSettings(
+            name: routePath,
+            arguments: argument,
+          ));
+          navigator.push(route);
+          debugPrint('导航成功');
+        } catch (error, stack) {
+          debugPrint('路由导航失败: $error');
+          debugPrint('堆栈: $stack');
+        }
+      } else {
+        debugPrint('导航器尚未初始化，延迟500ms后重试');
+        Future.delayed(const Duration(milliseconds: 500), () {
+          final retryNavigator = navigatorKey.currentState;
+          if (retryNavigator != null) {
+            try {
+              final route = AppRoutes.generateRoute(RouteSettings(
+                name: routePath,
+                arguments: argument,
+              ));
+              retryNavigator.push(route);
+            } catch (e) {
+              debugPrint('重试导航失败: $e');
+            }
+          } else {
+            debugPrint('导航器初始化失败');
+          }
+        });
+      }
+    });
+  } catch (e, stack) {
+    debugPrint('处理小组件点击失败: $e');
+    debugPrint('堆栈: $stack');
+  }
 }
 
 class MyApp extends StatefulWidget {

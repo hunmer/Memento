@@ -163,7 +163,7 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
     }
 
     widget.onRecognitionComplete(text);
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(true); // 返回 true 表示确认
   }
 
   /// 取消并关闭
@@ -171,7 +171,7 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
     if (_isRecording) {
       _cancelRecording();
     }
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(false); // 返回 false 表示取消
   }
 
   @override

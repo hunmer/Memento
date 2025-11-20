@@ -1,6 +1,5 @@
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
-import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -67,7 +66,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   @override
   Future<void> initialize() async {
-    await TrackerNotificationUtils.initialize();
+    // 不再在插件初始化时初始化通知系统,改为在开始计时时才初始化
     await _controller.loadInitialData();
 
     // 注册 JS API（最后一步）

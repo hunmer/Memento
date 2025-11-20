@@ -12,7 +12,11 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "github.hunmer.memento/timer_service"
+    private val WIDGET_CHANNEL = "github.hunmer.memento/widget"
     private val ENGINE_ID = "timer_engine"
+
+    private var widgetMethodChannel: MethodChannel? = null
+    private var pendingWidgetUrl: String? = null
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,18 +32,32 @@ class MainActivity: FlutterActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        intent?.data?.let { uri ->
-            Log.d("MainActivity", "Received DeepLink: $uri")
+        val uri: Uri? = intent?.data
+        uri?.let {
+            Log.d("MainActivity", "Received DeepLink: $it")
 
-            // 将 URI 发送给 home_widget 插件，以便 Flutter 侧监听器能够接收
-            es.antonborri.home_widget.HomeWidgetPlugin.sendIntentToFlutter(uri.toString())
+            // 如果 MethodChannel 已经初始化，直接发送；否则保存待发送
+            if (widgetMethodChannel != null) {
+                widgetMethodChannel?.invokeMethod("onWidgetClicked", it.toString())
+            } else {
+                pendingWidgetUrl = it.toString()
+            }
         }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         TimerForegroundService.flutterEngine = flutterEngine
-        
+
+        // 初始化小组件 MethodChannel
+        widgetMethodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_CHANNEL)
+
+        // 如果有待发送的 URL，现在发送
+        pendingWidgetUrl?.let { url ->
+            widgetMethodChannel?.invokeMethod("onWidgetClicked", url)
+            pendingWidgetUrl = null
+        }
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             call, result ->
             when (call.method) {

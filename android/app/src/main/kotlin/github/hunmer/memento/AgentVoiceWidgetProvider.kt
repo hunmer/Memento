@@ -84,10 +84,10 @@ class AgentVoiceWidgetProvider : AppWidgetProvider() {
                             if (lastMessage.isNotEmpty()) lastMessage else "暂无消息"
                         )
 
-                        // 设置点击事件 - 使用 home_widget 方式跳转到 voice_quick 界面并自动打开语音输入
+                        // 设置点击事件 - 直接跳转到 agent_chat 并打开指定对话
                         val intent = Intent(context, MainActivity::class.java).apply {
                             action = Intent.ACTION_VIEW
-                            data = Uri.parse("memento://widget/voice_quick?conversationId=$conversationId")
+                            data = Uri.parse("memento://widget/agent_chat?conversationId=$conversationId")
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         }
 
@@ -105,10 +105,10 @@ class AgentVoiceWidgetProvider : AppWidgetProvider() {
                     }
                 }
 
-                // 设置"选择对话"按钮点击事件 - 打开应用但不指定对话
+                // 设置"选择对话"按钮点击事件 - 打开 agent_chat 主界面
                 val newConversationIntent = Intent(context, MainActivity::class.java).apply {
                     action = Intent.ACTION_VIEW
-                    data = Uri.parse("memento://widget/voice_quick")
+                    data = Uri.parse("memento://widget/agent_chat")
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 }
 

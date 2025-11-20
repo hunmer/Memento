@@ -8,6 +8,8 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.RemoteViews
 import org.json.JSONArray
+import org.json.JSONObject
+import org.json.JSONObject
 
 /**
  * 频道快速发送小组件 Provider
@@ -27,6 +29,7 @@ class ChatQuickWidgetProvider : AppWidgetProvider() {
     companion object {
         private const val PREFS_NAME = "HomeWidgetPreferences"
         private const val PREF_CHANNELS = "channels_json"
+        private const val DEFAULT_ICON_PLACEHOLDER = "·"
 
         fun updateAppWidget(
             context: Context,
@@ -78,12 +81,16 @@ class ChatQuickWidgetProvider : AppWidgetProvider() {
                         val channelId = channel.getString("id")
                         val channelName = channel.getString("name")
                         val lastMessage = channel.optString("lastMessage", "")
+                        val iconText = resolveIconGlyph(channel, channelName)
 
                         // 显示频道项
                         views.setViewVisibility(channelItemId, android.view.View.VISIBLE)
 
                         // 设置频道名称
                         views.setTextViewText(channelNameId, channelName)
+
+                        // 设置频道图标文本
+                        views.setTextViewText(channelIconId, iconText)
 
                         // 设置最后消息预览
                         views.setTextViewText(
@@ -95,10 +102,10 @@ class ChatQuickWidgetProvider : AppWidgetProvider() {
                         val colorValue = channel.optInt("colorValue", 0xFF5C6BC0.toInt())
                         // views.setInt(channelIconId, "setBackgroundColor", colorValue)
 
-                        // 设置点击事件 - 使用 home_widget 方式跳转到 quick_send 界面
+                        // 设置点击事件 - 直接跳转到聊天界面
                         val intent = Intent(context, MainActivity::class.java).apply {
                             action = Intent.ACTION_VIEW
-                            data = Uri.parse("memento://widget/quick_send?channelId=$channelId")
+                            data = Uri.parse("memento://widget/chat?channelId=$channelId")
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         }
 
@@ -116,10 +123,10 @@ class ChatQuickWidgetProvider : AppWidgetProvider() {
                     }
                 }
 
-                // 设置"选择频道"按钮点击事件 - 打开应用但不指定频道
+                // 设置"选择频道"按钮点击事件 - 打开聊天主界面
                 val newChannelIntent = Intent(context, MainActivity::class.java).apply {
                     action = Intent.ACTION_VIEW
-                    data = Uri.parse("memento://widget/quick_send")
+                    data = Uri.parse("memento://widget/chat")
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 }
 
@@ -144,6 +151,26 @@ class ChatQuickWidgetProvider : AppWidgetProvider() {
 
             // 更新小组件
             appWidgetManager.updateAppWidget(appWidgetId, views)
+        }
+
+        private fun resolveIconGlyph(channel: JSONObject, channelName: String): String {
+            val iconCodePoint = channel.optInt("iconCodePoint", 0)
+            if (iconCodePoint > 0) {
+                return try {
+                    String(Character.toChars(iconCodePoint))
+                } catch (ignored: IllegalArgumentException) {
+                    extractChannelInitial(channelName)
+                }
+            }
+            return extractChannelInitial(channelName)
+        }
+
+        private fun extractChannelInitial(channelName: String): String {
+            val trimmed = channelName.trim()
+            if (trimmed.isNotEmpty()) {
+                return trimmed.substring(0, 1).uppercase()
+            }
+            return DEFAULT_ICON_PLACEHOLDER
         }
     }
 }

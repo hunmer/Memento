@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -15,7 +16,8 @@ import 'services/user_service.dart';
 import 'services/widget_service.dart';
 
 class ChatMainView extends StatefulWidget {
-  const ChatMainView({super.key});
+  final String? channelId;
+  const ChatMainView({super.key, this.channelId});
   @override
   State<ChatMainView> createState() => _ChatMainViewState();
 }
@@ -27,6 +29,45 @@ class _ChatMainViewState extends State<ChatMainView> {
   void initState() {
     super.initState();
     _plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin;
+
+    // 如果有 channelId，在初始化完成后自动打开该频道
+    if (widget.channelId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openChannel();
+      });
+    }
+  }
+
+  Future<void> _openChannel() async {
+    if (!mounted || widget.channelId == null) return;
+
+    try {
+      // 从频道列表中查找指定频道
+      final channel = _plugin.channelService.channels.firstWhere(
+        (c) => c.id == widget.channelId,
+        orElse: () => throw Exception('频道不存在'),
+      );
+
+      // 设置当前频道
+      _plugin.channelService.setCurrentChannel(channel);
+
+      // 导航到聊天界面
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(channel: channel),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('打开频道失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
