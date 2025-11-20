@@ -30,6 +30,8 @@ import 'package:logging/logging.dart';
 import 'package:home_widget/home_widget.dart';
 
 import 'package:flutter/material.dart';
+import 'core/services/system_widget_service.dart';
+import 'core/services/plugin_widget_sync_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -232,6 +234,10 @@ void main() async {
 
     // 设置桌面小组件点击监听器
     await _setupWidgetClickListener();
+
+    // 初始化系统桌面小组件服务并同步数据
+    await SystemWidgetService.instance.initialize();
+    await PluginWidgetSyncHelper.instance.syncAllPlugins();
 
     // 延迟备份服务初始化到Widget构建完成后
     WidgetsBinding.instance.addPostFrameCallback((_) async {

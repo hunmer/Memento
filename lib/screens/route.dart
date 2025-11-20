@@ -85,7 +85,11 @@ class AppRoutes extends NavigatorObserver {
   }
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
+    // 处理系统小组件的 Deep Link 跳转
+    // 格式: memento://widget/{pluginId} 或 memento://widget/{pluginId}?id={id}
+    final routeName = settings.name ?? '/';
+
+    switch (routeName) {
       case '/':
         return _createRoute(const HomeScreen());
       case 'tts':
