@@ -286,11 +286,6 @@ class ChatController extends ChangeNotifier {
       _selectedToolTemplate = null;
       notifyListeners();
 
-      // 优先执行工具模板，获取结果上下文
-      if (selectedTemplate != null) {
-        await _executeToolTemplateBeforeAI(userMessage, selectedTemplate);
-      }
-
       // 创建AI消息占位符
       final aiMessage = ChatMessage.ai(
         conversationId: conversation.id,
@@ -308,13 +303,22 @@ class ChatController extends ChangeNotifier {
         await _startAIChatService(conversation.id, aiMessage.id);
       }
 
-      // 流式请求AI回复
-      await _requestAIResponse(
-        aiMessage.id,
-        userInput,
-        files,
-        enableToolCalling: selectedTemplate == null,
-      );
+      // 如果选择了工具模板，先执行工具，然后让 AI 基于结果回复
+      if (selectedTemplate != null) {
+        await _executeToolTemplateAndRespond(
+          aiMessageId: aiMessage.id,
+          userMessage: userMessage,
+          template: selectedTemplate,
+        );
+      } else {
+        // 流式请求AI回复
+        await _requestAIResponse(
+          aiMessage.id,
+          userInput,
+          files,
+          enableToolCalling: true,
+        );
+      }
     } catch (e) {
       debugPrint('发送消息失败: $e');
       rethrow;
@@ -1477,9 +1481,11 @@ class ChatController extends ChangeNotifier {
         originalMessageId,
       );
       if (parentMessage != null) {
-        // 将AI的最终回复追加到父消息的content
+        // 将AI的最终回复追加到父消息的content（保留toolCall数据）
         final updatedParent = parentMessage.copyWith(
           content: '$currentContent\n\n[AI最终回复]\n${newAiMessageFinal.content}',
+          // 保留toolCall，否则UI无法显示工具调用步骤
+          toolCall: parentMessage.toolCall,
         );
         await messageService.updateMessage(updatedParent);
         messageService.completeAIMessage(conversation.id, originalMessageId);
@@ -1512,6 +1518,84 @@ class ChatController extends ChangeNotifier {
       }
     } else {
       debugPrint('⚠️ AI回复还在生成中或未找到');
+    }
+  }
+
+  /// 保存工具模板执行的详细数据
+  Future<void> _saveToolTemplateDetail({
+    required String messageId,
+    required ChatMessage aiMessage,
+    required SavedToolTemplate template,
+    required List<ToolCallStep> steps,
+    required String resultSummary,
+    String? userInput,
+  }) async {
+    try {
+      // 查找对应的用户消息（往前查找最近的用户消息）
+      final allMessages = messageService.currentMessages;
+      final aiIndex = allMessages.indexWhere((m) => m.id == messageId);
+
+      String userPrompt = userInput ?? '';
+      if (userPrompt.isEmpty && aiIndex > 0) {
+        // 从AI消息往前查找最近的用户消息
+        for (int i = aiIndex - 1; i >= 0; i--) {
+          if (allMessages[i].isUser && allMessages[i].parentId == null) {
+            userPrompt = allMessages[i].content;
+            break;
+          }
+        }
+      }
+
+      // 构建思考过程（说明工具模板的选择和执行）
+      final thinkingProcess = '''
+# 工具模板执行
+
+**模板名称**: ${template.name}
+${template.description != null && template.description!.isNotEmpty ? '**模板描述**: ${template.description}\n' : ''}
+**执行步骤数**: ${steps.length}
+
+## 执行策略
+
+基于用户输入「$userPrompt」，选择执行工具模板「${template.name}」。
+
+## 步骤详情
+
+${steps.asMap().entries.map((entry) {
+        final idx = entry.key + 1;
+        final step = entry.value;
+        return '''
+### 步骤 $idx: ${step.title}
+- **方法**: ${step.method}
+- **描述**: ${step.desc}
+- **状态**: ${step.status.name}
+${step.result != null ? '- **结果**: ${step.result}\n' : ''}${step.error != null ? '- **错误**: ${step.error}\n' : ''}
+''';
+      }).join('\n')}
+''';
+
+      // 构建AI输入上下文（简化版）
+      final fullAIInput = '''
+# 工具模板执行上下文
+
+**用户请求**: $userPrompt
+**选择的模板**: ${template.name}
+**执行时间**: ${DateTime.now().toIso8601String()}
+''';
+
+      // 保存详细数据
+      await messageDetailService.saveDetail(
+        messageId: messageId,
+        conversationId: conversation.id,
+        userPrompt: userPrompt,
+        fullAIInput: fullAIInput,
+        thinkingProcess: thinkingProcess,
+        toolCallData: aiMessage.toolCall?.toJson(),
+        finalReply: resultSummary,
+      );
+
+      debugPrint('💾 工具模板详细数据已保存: ${messageId.substring(0, 8)}');
+    } catch (e) {
+      debugPrint('❌ 保存工具模板详细数据失败: $e');
     }
   }
 
@@ -1814,7 +1898,7 @@ class ChatController extends ChangeNotifier {
           content: '正在执行工具模版: ${template.name}',
           isGenerating: true,
           toolCall: ToolCallResponse(steps: steps),
-          matchedTemplateIds: null, // 清除匹配列表
+          matchedTemplateIds: [], // 清除匹配列表（必须用空列表，null不会清除）
         ),
       );
     }
@@ -1825,13 +1909,28 @@ class ChatController extends ChangeNotifier {
     // 6. 构建执行结果摘要
     final resultSummary = _buildToolResultMessage(steps);
 
-    // 7. 更新消息内容
+    // 7. 更新消息内容（保留toolCall数据，确保包含最新的步骤状态）
     final finalMessage = messageService.getMessage(conversation.id, messageId);
     if (finalMessage != null) {
-      await messageService.updateMessage(
-        finalMessage.copyWith(
-          content: '已执行工具模版: ${template.name}\n\n执行结果：\n$resultSummary',
-        ),
+      final updatedMessage = finalMessage.copyWith(
+        content: '已执行工具模版: ${template.name}\n\n执行结果：\n$resultSummary',
+        // 保留toolCall，确保包含最新的步骤执行状态
+        toolCall: ToolCallResponse(steps: steps),
+        // 清除matchedTemplateIds，否则UI会优先显示模板选择而不是工具调用步骤
+        matchedTemplateIds: [],
+        // 保持 isGenerating = true，等待 AI 回复完成后再设置为 false
+        // isGenerating 会在 _continueWithToolResult 完成后由 completeAIMessage 设置
+      );
+      await messageService.updateMessage(updatedMessage);
+
+      // 8. 保存消息详情（用于后续查看工具调用详情）
+      await _saveToolTemplateDetail(
+        messageId: messageId,
+        aiMessage: updatedMessage,
+        template: template,
+        steps: steps,
+        resultSummary: resultSummary,
+        userInput: userInput,
       );
     }
 
@@ -2223,27 +2322,25 @@ $toolDetailPrompt
     return fixed;
   }
 
-  /// 在请求 AI 之前先执行选中的工具模板（手动选择路径）
-  Future<void> _executeToolTemplateBeforeAI(
-    ChatMessage userMessage,
-    SavedToolTemplate template,
-  ) async {
-    // 创建工具执行消息，作为用户消息的子消息
-    final toolMessage = ChatMessage.ai(
-      conversationId: conversation.id,
-      content: '正在执行工具: ${template.name}',
-      isGenerating: true,
-    ).copyWith(parentId: userMessage.id);
-    await messageService.addMessage(toolMessage);
-
-    // ✅ 使用统一的执行入口
-    final summary = await _executeTemplateWithSmartReplacement(
-      messageId: toolMessage.id,
+  /// 执行工具模板并让 AI 回复（合并到同一条消息）
+  ///
+  /// 这个方法会：
+  /// 1. 在 aiMessage 上执行工具模板
+  /// 2. 设置 toolCall 数据到消息
+  /// 3. 让 AI 基于工具执行结果继续生成回复
+  Future<void> _executeToolTemplateAndRespond({
+    required String aiMessageId,
+    required ChatMessage userMessage,
+    required SavedToolTemplate template,
+  }) async {
+    // 1. 执行工具模板（在 aiMessage 上）
+    final resultSummary = await _executeTemplateWithSmartReplacement(
+      messageId: aiMessageId,
       template: template,
-      userInput: userMessage.content.trim(), // 传入用户输入用于参数分析
+      userInput: userMessage.content.trim(),
     );
 
-    // 更新用户消息的模板元数据，附加执行结果
+    // 2. 更新用户消息的模板元数据
     final metadata = Map<String, dynamic>.from(userMessage.metadata ?? {});
     final templateMeta = Map<String, dynamic>.from(
       (metadata['toolTemplate'] as Map<String, dynamic>?) ?? {},
@@ -2254,11 +2351,18 @@ $toolDetailPrompt
     if (template.description?.isNotEmpty ?? false) {
       templateMeta['description'] = template.description;
     }
-    templateMeta['resultSummary'] = summary;
+    templateMeta['resultSummary'] = resultSummary;
     metadata['toolTemplate'] = templateMeta;
 
     final updatedUserMessage = userMessage.copyWith(metadata: metadata);
     await messageService.updateMessage(updatedUserMessage);
+
+    // 3. 获取执行后的消息内容（包含工具执行结果）
+    final aiMessage = messageService.getMessage(conversation.id, aiMessageId);
+    final currentContent = aiMessage?.content ?? resultSummary;
+
+    // 4. 让 AI 基于工具执行结果继续生成回复（在同一条消息上）
+    await _continueWithToolResult(aiMessageId, resultSummary, currentContent);
   }
 
   /// 执行工具调用步骤
@@ -2307,12 +2411,9 @@ $toolDetailPrompt
         }
       }
 
-      // 完成消息生成
-      final message = messageService.getMessage(conversation.id, messageId);
-      if (message != null) {
-        final completedMessage = message.copyWith(isGenerating: false);
-        await messageService.updateMessage(completedMessage);
-      }
+      // 注意：不要在这里设置 isGenerating = false
+      // 因为可能还需要让 AI 继续生成回复
+      // isGenerating 会在 AI 回复完成或 _executeTemplateWithSmartReplacement 结束时设置
 
       notifyListeners();
     } finally {
