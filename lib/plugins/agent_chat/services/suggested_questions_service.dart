@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import '../../openai/models/ai_agent.dart';
+import '../../openai/services/request_service.dart';
 
 /// 预设问题管理服务
 /// 根据工具配置动态生成预设问题示例
@@ -325,5 +327,84 @@ class SuggestedQuestionsService {
 
     allQuestions.shuffle();
     return allQuestions.take(count).toList();
+  }
+
+  /// 使用 AI 智能生成问题建议
+  /// [agent] - AI 助手
+  /// [count] - 生成问题数量
+  /// 返回 AI 生成的问题列表
+  Future<List<String>> generateQuestionsWithAI({
+    required AIAgent agent,
+    int count = 5,
+  }) async {
+    try {
+      // 构建生成问题的提示词
+      final prompt = '''
+你是一个智能助手，需要根据以下系统提示词，生成 $count 个用户可能想要请求你帮忙完成的任务。
+
+系统提示词:
+${agent.systemPrompt}
+
+要求:
+1. 生成的内容必须是【请求式任务】，而不是【提问式问题】
+2. 使用"帮我..."、"请帮我..."、"能帮我..."等请求句式
+3. 要充分挖掘你的能力范围，展示你能为用户做什么
+4. 任务要具体、实用，让用户一看就想点击
+5. 每条内容控制在 30 字以内
+6. 直接返回任务列表，每行一条，不要添加序号或其他格式
+7. 不要返回任何解释说明，只返回任务本身
+
+好的示例:
+- 帮我分析今天的工作安排
+- 帮我写一封感谢邮件
+- 帮我整理会议纪要
+
+坏的示例（不要生成这类）:
+- 如何提高工作效率？
+- 什么是番茄工作法？
+- 你能做什么？
+
+请生成 $count 条请求式任务:''';
+
+      // 使用流式 API 收集完整响应
+      final StringBuffer responseBuffer = StringBuffer();
+      bool hasError = false;
+
+      await RequestService.streamResponse(
+        agent: agent,
+        prompt: prompt,
+        onToken: (token) {
+          responseBuffer.write(token);
+        },
+        onError: (error) {
+          hasError = true;
+        },
+        onComplete: () {},
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          hasError = true;
+        },
+      );
+
+      if (hasError) {
+        // 如果出错,降级到预设问题
+        return await getRandomQuestions(count: count);
+      }
+
+      // 解析 AI 返回的问题列表
+      final response = responseBuffer.toString();
+      final questions = response
+          .split('\n')
+          .map((q) => q.trim())
+          .where((q) => q.isNotEmpty && !q.startsWith('//') && !q.startsWith('#'))
+          .take(count)
+          .toList();
+
+      return questions.isNotEmpty ? questions : await getRandomQuestions(count: count);
+    } catch (e) {
+      // 如果 AI 生成失败,降级到预设问题
+      return await getRandomQuestions(count: count);
+    }
   }
 }

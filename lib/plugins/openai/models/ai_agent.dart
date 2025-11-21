@@ -35,6 +35,8 @@ class AIAgent {
   final String? avatarUrl;
   final bool enableFunctionCalling;
   final String? promptPresetId;
+  final bool enableOpeningQuestions; // 是否开启猜你想问功能
+  final List<String> openingQuestions; // 预设的开场白问题列表
 
   const AIAgent({
     required this.id,
@@ -59,6 +61,8 @@ class AIAgent {
     this.avatarUrl,
     this.enableFunctionCalling = false,
     this.promptPresetId,
+    this.enableOpeningQuestions = false,
+    this.openingQuestions = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -84,6 +88,8 @@ class AIAgent {
     'avatarUrl': avatarUrl,
     'enableFunctionCalling': enableFunctionCalling,
     'promptPresetId': promptPresetId,
+    'enableOpeningQuestions': enableOpeningQuestions,
+    'openingQuestions': openingQuestions,
   };
 
   factory AIAgent.fromJson(Map<String, dynamic> json) => AIAgent(
@@ -109,6 +115,8 @@ class AIAgent {
     avatarUrl: json['avatarUrl'] as String?,
     enableFunctionCalling: json['enableFunctionCalling'] as bool? ?? false,
     promptPresetId: json['promptPresetId'] as String?,
+    enableOpeningQuestions: json['enableOpeningQuestions'] as bool? ?? false,
+    openingQuestions: (json['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? const [],
   );
 
   /// 创建一个新的 AIAgent 实例，可以选择性地更新某些字段
@@ -135,6 +143,8 @@ class AIAgent {
     List<String>? stop,
     bool? enableFunctionCalling,
     String? promptPresetId,
+    bool? enableOpeningQuestions,
+    List<String>? openingQuestions,
   }) {
     return AIAgent(
       id: id ?? this.id,
@@ -159,6 +169,8 @@ class AIAgent {
       stop: stop ?? this.stop,
       enableFunctionCalling: enableFunctionCalling ?? this.enableFunctionCalling,
       promptPresetId: promptPresetId ?? this.promptPresetId,
+      enableOpeningQuestions: enableOpeningQuestions ?? this.enableOpeningQuestions,
+      openingQuestions: openingQuestions ?? this.openingQuestions,
     );
   }
 }
