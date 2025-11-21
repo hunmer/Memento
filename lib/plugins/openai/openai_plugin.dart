@@ -11,6 +11,7 @@ import 'screens/prompt_preset_screen.dart';
 import 'handlers/chat_event_handler.dart';
 import 'controllers/agent_controller.dart';
 import 'controllers/service_provider_controller.dart';
+import 'controllers/model_controller.dart';
 import 'services/request_service.dart';
 
 class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
@@ -141,18 +142,18 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取可用模型数
-  /// 统计所有服务商提供的模型总数
+  /// 统计所有模型的总数
   Future<int> getAvailableModelsCount() async {
     try {
-      final providerController = ServiceProviderController();
-      await providerController.loadProviders();
+      final modelController = ModelController();
+      final modelGroups = await modelController.getModels();
 
-      final Set<String> uniqueModels = {};
-      for (final provider in providerController.providers) {
-        uniqueModels.addAll(provider.availableModels);
+      int totalModels = 0;
+      for (final group in modelGroups) {
+        totalModels += group.models.length;
       }
 
-      return uniqueModels.length;
+      return totalModels;
     } catch (e) {
       debugPrint('获取可用模型数失败: $e');
       return 0;
