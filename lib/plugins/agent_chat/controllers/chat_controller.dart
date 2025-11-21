@@ -233,7 +233,12 @@ class ChatController extends ChangeNotifier {
 
   /// 发送消息
   Future<void> sendMessage() async {
-    if (_inputText.trim().isEmpty || _isSending) return;
+    // 如果正在发送，直接返回
+    if (_isSending) return;
+
+    // 如果没有工具模板且输入为空，则返回
+    if (_inputText.trim().isEmpty && _selectedToolTemplate == null) return;
+
     if (_currentAgent == null) {
       throw Exception('未选择Agent');
     }

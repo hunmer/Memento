@@ -129,16 +129,8 @@ class MessageBubble extends StatelessWidget {
                       else if (isToolCallMessage)
                         // 如果是工具调用消息,显示工具调用步骤
                         _buildToolCallContent()
-                      else if (message.content.isEmpty)
-                        const Text(
-                          '(空消息)',
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            color: Colors.grey,
-                          ),
-                        )
                       else
-                        MarkdownContent(content: message.content),
+                        _buildMessageContent(),
 
                       // 附件显示
                       if (message.attachments.isNotEmpty) ...[
@@ -1098,6 +1090,108 @@ class MessageBubble extends StatelessWidget {
               ),
             ],
           ),
+    );
+  }
+
+  /// 构建消息内容（处理工具模板和普通文本）
+  Widget _buildMessageContent() {
+    // 检查是否有工具模板信息（用户消息）
+    final toolTemplate = message.metadata?['toolTemplate'] as Map<String, dynamic>?;
+    final hasToolTemplate = toolTemplate != null;
+    final hasContent = message.content.isNotEmpty;
+
+    // 如果既没有内容也没有工具模板，显示空消息提示
+    if (!hasContent && !hasToolTemplate) {
+      return const Text(
+        '(空消息)',
+        style: TextStyle(
+          fontStyle: FontStyle.italic,
+          color: Colors.grey,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 显示工具模板（如果有）
+        if (hasToolTemplate) ...[
+          _buildUserToolTemplate(toolTemplate),
+          // 如果同时有文本内容，添加分隔
+          if (hasContent) ...[
+            const SizedBox(height: 8),
+            Divider(color: Colors.grey[300], thickness: 1),
+            const SizedBox(height: 8),
+          ],
+        ],
+        // 显示文本内容（如果有）
+        if (hasContent) MarkdownContent(content: message.content),
+      ],
+    );
+  }
+
+  /// 构建用户选择的工具模板显示
+  Widget _buildUserToolTemplate(Map<String, dynamic> toolTemplate) {
+    final name = toolTemplate['name'] as String? ?? '未知模板';
+    final description = toolTemplate['description'] as String?;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.orange[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.orange[200]!),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.build_circle, size: 18, color: Colors.orange[700]),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '工具模板:',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.orange[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange[900],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                if (description != null && description.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange[700],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
