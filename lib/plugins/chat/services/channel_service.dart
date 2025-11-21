@@ -5,6 +5,7 @@ import '../models/channel.dart';
 import '../models/message.dart';
 import '../chat_plugin.dart';
 import '../../../core/event/event.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 import 'widget_service.dart';
 
 /// 负责管理频道相关的功能
@@ -132,6 +133,9 @@ class ChannelService {
 
     // 通知监听器数据已更新，确保UI刷新
     _plugin.refresh();
+
+    // 同步到小组件
+    await _syncWidget();
   }
 
   // 更新频道颜色
@@ -354,6 +358,9 @@ class ChannelService {
 
       // 通知监听器数据已更新
       _plugin.refresh();
+
+      // 同步到小组件
+      await _syncWidget();
     } catch (e) {
       debugPrint('Error deleting channel: $e');
       rethrow; // 重新抛出异常，让调用者知道删除失败
@@ -682,5 +689,14 @@ class ChannelService {
   Future<Message?> loadReplyMessage(String? replyToId) async {
     if (replyToId == null) return null;
     return getMessageById(replyToId);
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncChat();
+    } catch (e) {
+      debugPrint('Failed to sync chat widget: $e');
+    }
   }
 }

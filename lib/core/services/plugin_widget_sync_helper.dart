@@ -161,13 +161,36 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('calendar') as CalendarPlugin?;
       if (plugin == null) return;
 
+      // 获取统计数据
+      final todayCount = plugin.getTodayEventCount();
+      final weekCount = plugin.getWeekEventCount();
+      final pendingCount = plugin.getPendingEventCount();
+
       await _updateWidget(
         pluginId: 'calendar',
         pluginName: '日历',
         iconCodePoint: Icons.calendar_today.codePoint,
         colorValue: Colors.teal.value,
         stats: [
-          WidgetStatItem(id: 'today', label: '今日', value: '-'),
+          WidgetStatItem(
+            id: 'today',
+            label: '今日事件',
+            value: '$todayCount',
+            highlight: todayCount > 0,
+            colorValue: todayCount > 0 ? Colors.blue.value : null,
+          ),
+          WidgetStatItem(
+            id: 'week',
+            label: '本周事件',
+            value: '$weekCount',
+          ),
+          WidgetStatItem(
+            id: 'pending',
+            label: '待办事件',
+            value: '$pendingCount',
+            highlight: pendingCount > 0,
+            colorValue: pendingCount > 0 ? Colors.orange.value : null,
+          ),
         ],
       );
     } catch (e) {
@@ -223,13 +246,32 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('tracker') as TrackerPlugin?;
       if (plugin == null) return;
 
+      // 获取统计数据
+      final totalGoals = plugin.getGoalCount();
+      final activeGoals = plugin.getActiveGoalCount();
+      final todayRecords = plugin.getTodayRecordCount();
+
       await _updateWidget(
         pluginId: 'tracker',
         pluginName: '目标',
         iconCodePoint: Icons.track_changes.codePoint,
         colorValue: Colors.orange.value,
         stats: [
-          WidgetStatItem(id: 'goals', label: '目标', value: '-'),
+          WidgetStatItem(id: 'total', label: '总目标数', value: '$totalGoals'),
+          WidgetStatItem(
+            id: 'active',
+            label: '进行中',
+            value: '$activeGoals',
+            highlight: activeGoals > 0,
+            colorValue: activeGoals > 0 ? Colors.blue.value : null,
+          ),
+          WidgetStatItem(
+            id: 'records',
+            label: '今日记录',
+            value: '$todayRecords',
+            highlight: todayRecords > 0,
+            colorValue: todayRecords > 0 ? Colors.green.value : null,
+          ),
         ],
       );
     } catch (e) {
@@ -364,13 +406,26 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('nodes') as NodesPlugin?;
       if (plugin == null) return;
 
+      // 获取统计数据
+      final notebookCount = plugin.getNotebookCount();
+      final totalNodes = plugin.getTotalNodeCount();
+      final todayAdded = plugin.getTodayAddedNodeCount();
+
       await _updateWidget(
         pluginId: 'nodes',
         pluginName: '节点',
         iconCodePoint: Icons.account_tree.codePoint,
         colorValue: Colors.cyan.value,
         stats: [
-          WidgetStatItem(id: 'nodes', label: '节点', value: '-'),
+          WidgetStatItem(id: 'notebooks', label: '笔记本数', value: '$notebookCount'),
+          WidgetStatItem(id: 'nodes', label: '总节点数', value: '$totalNodes'),
+          WidgetStatItem(
+            id: 'today',
+            label: '今日新增',
+            value: '$todayAdded',
+            highlight: todayAdded > 0,
+            colorValue: todayAdded > 0 ? Colors.green.value : null,
+          ),
         ],
       );
     } catch (e) {
@@ -384,13 +439,33 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('database') as DatabasePlugin?;
       if (plugin == null) return;
 
+      final databaseCount = await plugin.service.getDatabaseCount();
+      final todayRecordCount = await plugin.service.getTodayRecordCount(plugin.controller);
+      final totalRecordCount = await plugin.service.getTotalRecordCount(plugin.controller);
+
       await _updateWidget(
         pluginId: 'database',
         pluginName: '数据库',
         iconCodePoint: Icons.storage.codePoint,
         colorValue: Colors.grey.value,
         stats: [
-          WidgetStatItem(id: 'records', label: '记录', value: '-'),
+          WidgetStatItem(
+            id: 'total_records',
+            label: '总记录数',
+            value: '$totalRecordCount',
+          ),
+          WidgetStatItem(
+            id: 'today_records',
+            label: '今日新增',
+            value: '$todayRecordCount',
+            highlight: todayRecordCount > 0,
+            colorValue: todayRecordCount > 0 ? Colors.green.value : null,
+          ),
+          WidgetStatItem(
+            id: 'databases',
+            label: '数据库表数',
+            value: '$databaseCount',
+          ),
         ],
       );
     } catch (e) {
@@ -404,13 +479,34 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('contact') as ContactPlugin?;
       if (plugin == null) return;
 
+      final allContacts = await plugin.controller.getAllContacts();
+      final totalContacts = allContacts.length;
+      final todayInteractionCount = await plugin.controller.getTodayInteractionCount();
+      final recentContactsCount = await plugin.controller.getRecentlyContactedCount();
+
       await _updateWidget(
         pluginId: 'contact',
         pluginName: '联系人',
         iconCodePoint: Icons.contacts.codePoint,
         colorValue: Colors.lightBlue.value,
         stats: [
-          WidgetStatItem(id: 'contacts', label: '联系人', value: '-'),
+          WidgetStatItem(
+            id: 'total',
+            label: '总联系人数',
+            value: '$totalContacts',
+          ),
+          WidgetStatItem(
+            id: 'today_interaction',
+            label: '今日互动次数',
+            value: '$todayInteractionCount',
+            highlight: todayInteractionCount > 0,
+            colorValue: todayInteractionCount > 0 ? Colors.orange.value : null,
+          ),
+          WidgetStatItem(
+            id: 'recent',
+            label: '最近联系人数',
+            value: '$recentContactsCount',
+          ),
         ],
       );
     } catch (e) {
@@ -424,13 +520,35 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
       if (plugin == null) return;
 
+      final totalCount = plugin.getMemorialDayCount();
+      final upcomingCount = plugin.getUpcomingMemorialDayCount();
+      final todayCount = plugin.getTodayMemorialDayCount();
+
       await _updateWidget(
         pluginId: 'day',
         pluginName: '纪念日',
         iconCodePoint: Icons.celebration.codePoint,
         colorValue: Colors.pink.value,
         stats: [
-          WidgetStatItem(id: 'days', label: '纪念日', value: '-'),
+          WidgetStatItem(
+            id: 'total',
+            label: '总纪念日数',
+            value: '$totalCount',
+          ),
+          WidgetStatItem(
+            id: 'upcoming',
+            label: '即将到来',
+            value: '$upcomingCount',
+            highlight: upcomingCount > 0,
+            colorValue: upcomingCount > 0 ? Colors.amber.value : null,
+          ),
+          WidgetStatItem(
+            id: 'today',
+            label: '今日纪念日',
+            value: '$todayCount',
+            highlight: todayCount > 0,
+            colorValue: todayCount > 0 ? Colors.red.value : null,
+          ),
         ],
       );
     } catch (e) {
@@ -444,13 +562,25 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('goods') as GoodsPlugin?;
       if (plugin == null) return;
 
+      final totalItems = plugin.getTotalItemsCount();
+      final todayUsage = plugin.getTodayUsageCount();
+      final warehouseCount = plugin.warehouses.length;
+
       await _updateWidget(
         pluginId: 'goods',
         pluginName: '物品',
         iconCodePoint: Icons.inventory.codePoint,
         colorValue: Colors.deepOrange.value,
         stats: [
-          WidgetStatItem(id: 'items', label: '物品', value: '-'),
+          WidgetStatItem(id: 'total', label: '总物品数', value: '$totalItems'),
+          WidgetStatItem(
+            id: 'today_usage',
+            label: '今日使用',
+            value: '$todayUsage',
+            highlight: todayUsage > 0,
+            colorValue: todayUsage > 0 ? Colors.green.value : null,
+          ),
+          WidgetStatItem(id: 'warehouses', label: '仓库数', value: '$warehouseCount'),
         ],
       );
     } catch (e) {
@@ -464,13 +594,25 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('notes') as NotesPlugin?;
       if (plugin == null) return;
 
+      final totalNotes = plugin.getTotalNotesCount();
+      final todayNotes = plugin.getTodayNotesCount();
+      final totalWords = plugin.getTotalWordCount();
+
       await _updateWidget(
         pluginId: 'notes',
         pluginName: '笔记',
         iconCodePoint: Icons.note.codePoint,
         colorValue: Colors.yellow.shade700.value,
         stats: [
-          WidgetStatItem(id: 'notes', label: '笔记', value: '-'),
+          WidgetStatItem(id: 'total', label: '总笔记数', value: '$totalNotes'),
+          WidgetStatItem(
+            id: 'today',
+            label: '今日新增',
+            value: '$todayNotes',
+            highlight: todayNotes > 0,
+            colorValue: todayNotes > 0 ? Colors.deepOrange.value : null,
+          ),
+          WidgetStatItem(id: 'words', label: '总字数', value: '$totalWords'),
         ],
       );
     } catch (e) {
@@ -478,11 +620,79 @@ class PluginWidgetSyncHelper {
     }
   }
 
+  /// 同步AI对话插件
+  Future<void> syncAgentChat() async {
+    try {
+      final plugin = PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
+      if (plugin == null) return;
+
+      // 获取统计数据
+      final totalConversations = plugin.getTotalConversationsCount();
+      final todayMessages = await plugin.getTodayMessagesCount();
+      final activeConversations = await plugin.getActiveConversationsCount();
+
+      await _updateWidget(
+        pluginId: 'agent_chat',
+        pluginName: 'AI对话',
+        iconCodePoint: Icons.smart_toy.codePoint,
+        colorValue: Colors.tealAccent.shade700.value,
+        stats: [
+          WidgetStatItem(
+            id: 'conversations',
+            label: '总对话',
+            value: '$totalConversations',
+            highlight: totalConversations > 0,
+            colorValue: totalConversations > 0 ? Colors.teal.value : null,
+          ),
+          WidgetStatItem(
+            id: 'today_messages',
+            label: '今日消息',
+            value: '$todayMessages',
+            highlight: todayMessages > 0,
+            colorValue: todayMessages > 0 ? Colors.blue.value : null,
+          ),
+          WidgetStatItem(
+            id: 'active',
+            label: '活跃会话',
+            value: '$activeConversations',
+            highlight: activeConversations > 0,
+            colorValue: activeConversations > 0 ? Colors.green.value : null,
+          ),
+        ],
+      );
+    } catch (e) {
+      debugPrint('Failed to sync agent_chat widget: $e');
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   /// 同步商店插件
   Future<void> syncStore() async {
     try {
       final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
       if (plugin == null) return;
+
+      final totalProducts = plugin.controller.getGoodsCount();
+      final todayRedeemCount = plugin.controller.getTodayRedeemCount();
+      final currentPoints = plugin.controller.currentPoints;
 
       await _updateWidget(
         pluginId: 'store',
@@ -490,7 +700,21 @@ class PluginWidgetSyncHelper {
         iconCodePoint: Icons.store.codePoint,
         colorValue: Colors.red.value,
         stats: [
-          WidgetStatItem(id: 'products', label: '商品', value: '-'),
+          WidgetStatItem(id: 'products', label: '总商品数', value: '$totalProducts'),
+          WidgetStatItem(
+            id: 'today_redeem',
+            label: '今日兑换',
+            value: '$todayRedeemCount',
+            highlight: todayRedeemCount > 0,
+            colorValue: todayRedeemCount > 0 ? Colors.purple.value : null,
+          ),
+          WidgetStatItem(
+            id: 'points',
+            label: '可用积分',
+            value: '$currentPoints',
+            highlight: currentPoints > 0,
+            colorValue: currentPoints > 0 ? Colors.orange.value : null,
+          ),
         ],
       );
     } catch (e) {
@@ -504,13 +728,36 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
       if (plugin == null) return;
 
+      // 获取统计数据
+      final totalAgents = await plugin.getTotalAgentsCount();
+      final todayRequests = await plugin.getTodayRequestCount();
+      final availableModels = await plugin.getAvailableModelsCount();
+
       await _updateWidget(
         pluginId: 'openai',
         pluginName: 'AI助手',
         iconCodePoint: Icons.psychology.codePoint,
         colorValue: Colors.deepPurple.value,
         stats: [
-          WidgetStatItem(id: 'assistants', label: '助手', value: '-'),
+          WidgetStatItem(
+            id: 'assistants',
+            label: '总助手',
+            value: '$totalAgents',
+            highlight: totalAgents > 0,
+            colorValue: totalAgents > 0 ? Colors.deepPurple.value : null,
+          ),
+          WidgetStatItem(
+            id: 'requests',
+            label: '今日请求',
+            value: '$todayRequests',
+            highlight: todayRequests > 0,
+            colorValue: todayRequests > 0 ? Colors.green.value : null,
+          ),
+          WidgetStatItem(
+            id: 'models',
+            label: '可用模型',
+            value: '$availableModels',
+          ),
         ],
       );
     } catch (e) {
@@ -539,10 +786,16 @@ class PluginWidgetSyncHelper {
   }
 
   /// 同步日记相册插件
+  /// 同步日记相册插件
   Future<void> syncCalendarAlbum() async {
     try {
       final plugin = PluginManager.instance.getPlugin('calendar_album') as CalendarAlbumPlugin?;
       if (plugin == null) return;
+
+      // 获取统计数据
+      final totalPhotos = plugin.getTotalPhotosCount();
+      final todayPhotos = plugin.getTodayPhotosCount();
+      final tagsCount = plugin.getTagsCount();
 
       await _updateWidget(
         pluginId: 'calendar_album',
@@ -550,15 +803,31 @@ class PluginWidgetSyncHelper {
         iconCodePoint: Icons.photo_album.codePoint,
         colorValue: Colors.lime.shade700.value,
         stats: [
-          WidgetStatItem(id: 'photos', label: '照片', value: '-'),
+          WidgetStatItem(
+            id: 'total_photos',
+            label: '总照片',
+            value: '$totalPhotos',
+            highlight: totalPhotos > 0,
+            colorValue: totalPhotos > 0 ? Colors.lime.value : null,
+          ),
+          WidgetStatItem(
+            id: 'today_photos',
+            label: '今日新增',
+            value: '$todayPhotos',
+            highlight: todayPhotos > 0,
+            colorValue: todayPhotos > 0 ? Colors.green.value : null,
+          ),
+          WidgetStatItem(
+            id: 'tags',
+            label: '标签数',
+            value: '$tagsCount',
+          ),
         ],
       );
     } catch (e) {
       debugPrint('Failed to sync calendar_album widget: $e');
     }
   }
-
-  /// 同步聊天插件
   Future<void> syncChat() async {
     try {
       final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;

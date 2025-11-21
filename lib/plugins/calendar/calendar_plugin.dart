@@ -276,6 +276,40 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     return CalendarMainView();
   }
 
+  // ========== 小组件统计方法 ==========
+
+  /// 获取今日事件数量
+  int getTodayEventCount() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+
+    return controller.getAllEvents().where((event) {
+      return event.startTime.isAfter(today.subtract(const Duration(seconds: 1))) &&
+          event.startTime.isBefore(tomorrow);
+    }).length;
+  }
+
+  /// 获取本周事件数量
+  int getWeekEventCount() {
+    final now = DateTime.now();
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 7));
+
+    return controller.getAllEvents().where((event) {
+      return event.startTime.isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
+          event.startTime.isBefore(weekEnd);
+    }).length;
+  }
+
+  /// 获取未完成事件数量（开始时间在未来的事件）
+  int getPendingEventCount() {
+    final now = DateTime.now();
+    return controller.getAllEvents().where((event) {
+      return event.startTime.isAfter(now);
+    }).length;
+  }
+
   // 获取所有活动数量
   int _getEventCount() {
     return controller.getAllEvents().length;

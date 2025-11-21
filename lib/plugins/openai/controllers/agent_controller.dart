@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/ai_agent.dart';
 import '../../../core/plugin_manager.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 
 class AgentController extends ChangeNotifier {
   static final AgentController _instance = AgentController._internal();
@@ -59,6 +60,9 @@ class AgentController extends ChangeNotifier {
 
     // 通知监听器数据已更新
     notifyListeners();
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncOpenai();
   }
 
   Future<void> deleteAgent(String agentId) async {
@@ -74,6 +78,9 @@ class AgentController extends ChangeNotifier {
 
     // 通知监听器数据已更新
     notifyListeners();
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncOpenai();
   }
 
   Future<AIAgent?> getAgent(String agentId) async {

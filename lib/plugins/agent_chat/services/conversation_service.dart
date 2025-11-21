@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 import '../models/conversation.dart';
 import '../models/conversation_group.dart';
 
@@ -113,6 +114,9 @@ class ConversationService extends ChangeNotifier {
     await _saveConversations();
     notifyListeners();
 
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncAgentChat();
+
     return conversation;
   }
 
@@ -146,8 +150,11 @@ class ConversationService extends ChangeNotifier {
     try {
       await storage.delete('agent_chat/messages/$id');
     } catch (e) {
-      debugPrint('删除会话消息失败: $e');
+      debugPrint('删除会话失败: $e');
     }
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncAgentChat();
   }
 
   /// 更新会话的最后消息信息

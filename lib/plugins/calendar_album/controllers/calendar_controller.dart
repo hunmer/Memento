@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/calendar_entry.dart';
 import 'dart:convert';
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 
 class CalendarController extends ChangeNotifier {
   final Map<DateTime, List<CalendarEntry>> _entries = {};
@@ -151,6 +152,9 @@ class CalendarController extends ChangeNotifier {
     _entries[date]!.add(entry);
     await _saveEntries();
     notifyListeners();
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncCalendarAlbum();
   }
 
   Future<void> updateEntry(CalendarEntry entry) async {
@@ -165,6 +169,9 @@ class CalendarController extends ChangeNotifier {
         _entries[date]![index] = entry;
         await _saveEntries();
         notifyListeners();
+
+        // 同步小组件数据
+        await PluginWidgetSyncHelper.instance.syncCalendarAlbum();
       }
     }
   }
@@ -182,6 +189,9 @@ class CalendarController extends ChangeNotifier {
       }
       await _saveEntries();
       notifyListeners();
+
+      // 同步小组件数据
+      await PluginWidgetSyncHelper.instance.syncCalendarAlbum();
     }
   }
 

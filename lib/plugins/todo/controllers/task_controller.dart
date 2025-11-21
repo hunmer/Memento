@@ -4,6 +4,7 @@ import '../../../core/storage/storage_manager.dart';
 import '../../../core/event/event_manager.dart';
 import '../../../core/event/item_event_args.dart';
 import 'package:uuid/uuid.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 
 // 排序方式枚举，移到类外部
 enum SortBy { dueDate, priority, custom }
@@ -213,6 +214,7 @@ class TaskController extends ChangeNotifier {
     _sortTasks();
     notifyListeners();
     await _saveTasks();
+    await _syncWidget();
   }
 
   // 创建新任务
@@ -252,6 +254,7 @@ class TaskController extends ChangeNotifier {
       _sortTasks();
       notifyListeners();
       await _saveTasks();
+      await _syncWidget();
     }
   }
 
@@ -273,6 +276,7 @@ class TaskController extends ChangeNotifier {
     _notifyEvent('deleted', task);
     notifyListeners();
     await _saveTasks();
+    await _syncWidget();
   }
 
   // 从历史记录中删除任务
@@ -280,6 +284,7 @@ class TaskController extends ChangeNotifier {
     _completedTasks.removeWhere((task) => task.id == taskId);
     notifyListeners();
     await _saveTasks();
+    await _syncWidget();
   }
 
   // 更新任务状态
@@ -311,6 +316,7 @@ class TaskController extends ChangeNotifier {
 
       notifyListeners();
       await _saveTasks();
+      await _syncWidget();
     }
   }
 
@@ -321,6 +327,7 @@ class TaskController extends ChangeNotifier {
       _tasks[index].subtasks.add(Subtask(id: const Uuid().v4(), title: title));
       notifyListeners();
       await _saveTasks();
+      await _syncWidget();
     }
   }
 
@@ -350,6 +357,7 @@ class TaskController extends ChangeNotifier {
 
         notifyListeners();
         await _saveTasks();
+        await _syncWidget();
       }
     }
   }
@@ -417,5 +425,14 @@ class TaskController extends ChangeNotifier {
       return (task.createdAt.isAfter(sevenDaysAgo) ||
           (task.dueDate != null && task.dueDate!.isAfter(sevenDaysAgo)));
     }).length;
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncTodo();
+    } catch (e) {
+      debugPrint('Failed to sync todo widget: $e');
+    }
   }
 }

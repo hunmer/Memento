@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 import '../models/activity_record.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 
@@ -56,6 +57,9 @@ class ActivityService {
       // 保存到文件
       final jsonList = activities.map((e) => e.toJson()).toList();
       await _storage.writeJson(filePath, jsonList);
+
+      // 同步到小组件
+      await _syncWidget();
     } catch (e) {
       debugPrint('Error saving activity: $e');
       rethrow;
@@ -146,6 +150,9 @@ class ActivityService {
       // 保存更新后的列表
       final jsonList = activities.map((e) => e.toJson()).toList();
       await _storage.writeJson(filePath, jsonList);
+
+      // 同步到小组件
+      await _syncWidget();
     } catch (e) {
       debugPrint('Error deleting activity: $e');
       rethrow;
@@ -259,6 +266,15 @@ class ActivityService {
     } catch (e) {
       debugPrint('Error loading recent moods: $e');
       return [];
+    }
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncActivity();
+    } catch (e) {
+      debugPrint('Failed to sync activity widget: $e');
     }
   }
 }

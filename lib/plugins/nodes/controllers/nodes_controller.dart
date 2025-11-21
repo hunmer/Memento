@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../models/node.dart';
 import '../models/notebook.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 
 class NodesController extends ChangeNotifier {
   final StorageManager _storageManager;
@@ -92,6 +93,9 @@ class NodesController extends ChangeNotifier {
 
     notifyListeners();
     await _saveData();
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncNodes();
   }
 
   Future<void> updateNotebook(Notebook notebook) async {
@@ -103,6 +107,9 @@ class NodesController extends ChangeNotifier {
       }
       notifyListeners();
       await _saveData();
+
+      // 同步小组件数据
+      await PluginWidgetSyncHelper.instance.syncNodes();
     }
   }
 
@@ -115,6 +122,9 @@ class NodesController extends ChangeNotifier {
 
     notifyListeners();
     await _saveData();
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncNodes();
   }
 
   Future<void> reorderNotebooks(int oldIndex, int newIndex) async {
@@ -173,6 +183,9 @@ class NodesController extends ChangeNotifier {
     notifyListeners();
     await _saveData();
     debugPrint('【NodesController】节点添加完成，已通知UI更新');
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncNodes();
   }
 
   bool _addChildNode(List<Node> nodes, String parentId, Node newNode) {
@@ -235,6 +248,9 @@ class NodesController extends ChangeNotifier {
 
     notifyListeners();
     await _saveData();
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncNodes();
   }
 
   bool _updateNodeInList(List<Node> nodes, Node updatedNode) {
@@ -270,6 +286,9 @@ class NodesController extends ChangeNotifier {
 
     notifyListeners();
     await _saveData();
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncNodes();
   }
 
   bool _deleteNodeFromList(List<Node> nodes, String nodeId) {

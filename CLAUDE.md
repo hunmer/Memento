@@ -312,6 +312,42 @@ A: 使用全局事件系统 `eventManager.broadcast(eventName, data)` 和 `event
 **Q: 如何添加平台特定代码？**
 A: 使用 Flutter 的 Platform Channels，参考现有的平台目录（android/, ios/, windows/ 等）。
 
+**Q: 如何为插件添加 Android 小组件？**
+A: 参考 [小组件实现指南](docs/WIDGET_IMPLEMENTATION_GUIDE.md) 或 [快速参考](docs/WIDGET_QUICK_REFERENCE.md)。
+
+---
+
+## 开发文档
+
+### Android 小组件开发
+
+Memento 支持为各插件添加 Android 桌面小组件（1x1 和 2x2 尺寸），可实时展示插件统计数据。
+
+**核心文档**:
+- 📘 **[小组件实现指南](docs/WIDGET_IMPLEMENTATION_GUIDE.md)** - 完整的实现教程
+  - 架构说明与工作流程
+  - 分步实现指南（4 步完成）
+  - 完整示例（Notes 插件）
+  - 数据同步最佳实践
+  - 常见问题排查
+
+- 📝 **[小组件快速参考](docs/WIDGET_QUICK_REFERENCE.md)** - 5 分钟快速上手
+  - 关键代码片段
+  - 常用配置速查
+  - 快速排查清单
+
+**已实现的插件示例**:
+- `activity` - 活动记录（4 个统计项）
+- `diary` - 日记（3 个统计项）
+- `checkin` - 签到（3 个统计项）
+- `chat` - 聊天（3 个统计项）
+- `habits` - 习惯（2 个统计项）
+
+**关键组件**:
+- `lib/core/services/system_widget_service.dart` - 小组件数据同步服务
+- `lib/core/services/plugin_widget_sync_helper.dart` - 各插件的同步逻辑
+- `android/.../widget/BasePluginWidgetProvider.kt` - 小组件基类
+
 ---
 
 ## 项目注意事项

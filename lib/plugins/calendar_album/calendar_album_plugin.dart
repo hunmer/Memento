@@ -97,6 +97,48 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     return CalendarAlbumMainView();
   }
 
+  // ==================== 小组件统计方法 ====================
+
+  /// 获取总照片数
+  int getTotalPhotosCount() {
+    try {
+      return calendarController.getAllImages().length;
+    } catch (e) {
+      debugPrint('获取总照片数失败: $e');
+      return 0;
+    }
+  }
+
+  /// 获取今日新增照片数
+  int getTodayPhotosCount() {
+    try {
+      final todayEntries = calendarController.getEntriesForDate(DateTime.now());
+      int photoCount = 0;
+
+      for (final entry in todayEntries) {
+        // 统计imageUrls中的照片
+        photoCount += entry.imageUrls.length;
+        // 统计Markdown内容中的照片
+        photoCount += entry.extractImagesFromMarkdown().length;
+      }
+
+      return photoCount;
+    } catch (e) {
+      debugPrint('获取今日新增照片数失败: $e');
+      return 0;
+    }
+  }
+
+  /// 获取标签总数
+  int getTagsCount() {
+    try {
+      return tagController.tags.length;
+    } catch (e) {
+      debugPrint('获取标签总数失败: $e');
+      return 0;
+    }
+  }
+
   @override
   Widget? buildCardView(BuildContext context) {
     final theme = Theme.of(context);

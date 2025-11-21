@@ -56,6 +56,46 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
   NodesController get controller => _controller;
 
+  // ========== 小组件统计方法 ==========
+
+  /// 获取笔记本总数
+  int getNotebookCount() {
+    return _controller.notebooks.length;
+  }
+
+  /// 获取所有节点总数（递归统计）
+  int getTotalNodeCount() {
+    int count = 0;
+    for (var notebook in _controller.notebooks) {
+      count += _countAllNodes(notebook.nodes);
+    }
+    return count;
+  }
+
+  /// 获取今日新增节点数
+  int getTodayAddedNodeCount() {
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+
+    int count = 0;
+    for (var notebook in _controller.notebooks) {
+      count += _countNodesCreatedAfter(notebook.nodes, todayStart);
+    }
+    return count;
+  }
+
+  /// 递归统计某个时间之后创建的节点数量
+  int _countNodesCreatedAfter(List<Node> nodes, DateTime after) {
+    int count = 0;
+    for (var node in nodes) {
+      if (node.createdAt.isAfter(after)) {
+        count++;
+      }
+      count += _countNodesCreatedAfter(node.children, after);
+    }
+    return count;
+  }
+
   @override
   String get id => 'nodes';
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 import '../models/event.dart';
 import '../services/todo_event_service.dart';
 
@@ -55,6 +56,9 @@ class CalendarController extends ChangeNotifier {
     _events.add(event);
     _saveEvents();
     notifyListeners();
+
+    // 同步小组件数据
+    PluginWidgetSyncHelper.instance.syncCalendar();
   }
 
   // 更新事件
@@ -64,6 +68,9 @@ class CalendarController extends ChangeNotifier {
       _events[index] = updatedEvent;
       _saveEvents();
       notifyListeners();
+
+      // 同步小组件数据
+      PluginWidgetSyncHelper.instance.syncCalendar();
     }
   }
 
@@ -72,6 +79,9 @@ class CalendarController extends ChangeNotifier {
     _events.removeWhere((e) => e.id == event.id);
     _saveEvents();
     notifyListeners();
+
+    // 同步小组件数据
+    PluginWidgetSyncHelper.instance.syncCalendar();
   }
 
   // 完成事件
@@ -81,6 +91,9 @@ class CalendarController extends ChangeNotifier {
     _completedEvents.add(completedEvent);
     _saveEvents();
     notifyListeners();
+
+    // 同步小组件数据
+    PluginWidgetSyncHelper.instance.syncCalendar();
   }
 
   // 加载事件

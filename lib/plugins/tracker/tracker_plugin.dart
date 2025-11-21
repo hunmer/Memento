@@ -102,6 +102,23 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     );
   }
 
+  // ========== 小组件统计方法 ==========
+
+  /// 获取总目标数量
+  int getGoalCount() {
+    return _controller.getGoalCount();
+  }
+
+  /// 获取进行中的目标数量
+  int getActiveGoalCount() {
+    return _controller.goals.where((g) => !g.isCompleted).length;
+  }
+
+  /// 获取今日新增记录数
+  int getTodayRecordCount() {
+    return _controller.getTodayRecordCount();
+  }
+
   @override
   String? getPluginName(context) {
     return TrackerLocalizations.of(context).name;

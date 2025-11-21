@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import '../../../core/event/event.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 import '../utils/date_utils.dart' as tracker_date_utils;
 import '../tracker_plugin.dart';
 
@@ -75,6 +76,9 @@ class TrackerController with ChangeNotifier {
     _goals.add(goal);
     await _saveGoals();
     notifyListeners();
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncTracker();
   }
 
   Future<void> updateGoal(String id, Goal newGoal) async {
@@ -84,6 +88,9 @@ class TrackerController with ChangeNotifier {
       _goals[index] = newGoal;
       await _saveGoals();
       notifyListeners();
+
+      // 同步小组件数据
+      await PluginWidgetSyncHelper.instance.syncTracker();
     }
   }
 
@@ -96,6 +103,9 @@ class TrackerController with ChangeNotifier {
       );
       await _saveGoals();
       notifyListeners();
+
+      // 同步小组件数据
+      await PluginWidgetSyncHelper.instance.syncTracker();
     }
   }
 
@@ -111,6 +121,9 @@ class TrackerController with ChangeNotifier {
     await _saveGoals();
     await _saveRecords();
     notifyListeners();
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncTracker();
   }
 
   // 进度计算
@@ -225,6 +238,8 @@ class TrackerController with ChangeNotifier {
     // 重置目标当前值
     await updateGoal(goalId, goal.copyWith(currentValue: 0));
     notifyListeners();
+
+    // 同步小组件数据（updateGoal 已经调用了同步，这里不需要重复调用）
   }
 
   // 删除单条记录
@@ -245,6 +260,8 @@ class TrackerController with ChangeNotifier {
       goal.copyWith(currentValue: goal.currentValue - record.value),
     );
     notifyListeners();
+
+    // 同步小组件数据（updateGoal 已经调用了同步，这里不需要重复调用）
   }
 
   // 添加记录并更新目标值
@@ -262,5 +279,7 @@ class TrackerController with ChangeNotifier {
     eventManager.broadcast('onRecordAdded', Value<Record>(record));
 
     notifyListeners();
+
+    // 同步小组件数据（updateGoal 已经调用了同步，这里不需要重复调用）
   }
 }

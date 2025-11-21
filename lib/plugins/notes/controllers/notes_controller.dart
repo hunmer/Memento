@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../../../core/event/event_manager.dart';
 import '../../../core/event/item_event_args.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 import '../models/folder.dart';
 import '../models/note.dart';
 
@@ -178,6 +179,10 @@ class NotesController {
     _notes.putIfAbsent(folderId, () => []).add(note);
     await _saveNotes();
     _notifyEvent('added', note);
+
+    // 同步小组件数据
+    await _syncWidget();
+
     return note;
   }
 
@@ -189,6 +194,9 @@ class NotesController {
       if (index != -1) {
         notes[index] = note;
         await _saveNotes();
+
+        // 同步小组件数据
+        await _syncWidget();
       }
     }
   }
@@ -205,6 +213,9 @@ class NotesController {
         // 发送删除事件
         _notifyEvent('deleted', note);
         await _saveNotes();
+
+        // 同步小组件数据
+        await _syncWidget();
         break;
       }
     }
@@ -321,5 +332,17 @@ class NotesController {
 
     await _saveFolders();
     await _saveNotes();
+
+    // 同步小组件数据
+    await _syncWidget();
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncNotes();
+    } catch (e) {
+      debugPrint('Failed to sync notes widget: $e');
+    }
   }
 }

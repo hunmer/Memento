@@ -119,6 +119,46 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取 AgentController 实例
   AgentController get controller => AgentController();
 
+  // ==================== 小组件统计方法 ====================
+
+  /// 获取总助手数
+  Future<int> getTotalAgentsCount() async {
+    try {
+      final agents = await controller.loadAgents();
+      return agents.length;
+    } catch (e) {
+      debugPrint('获取总助手数失败: $e');
+      return 0;
+    }
+  }
+
+  /// 获取今日请求次数
+  /// 注意: 当前实现返回0,因为项目中未实现请求历史记录功能
+  Future<int> getTodayRequestCount() async {
+    // TODO: 实现请求历史记录功能后,从存储中读取今日请求数
+    // 可能的实现路径: openai/request_history.json
+    return 0;
+  }
+
+  /// 获取可用模型数
+  /// 统计所有服务商提供的模型总数
+  Future<int> getAvailableModelsCount() async {
+    try {
+      final providerController = ServiceProviderController();
+      await providerController.loadProviders();
+
+      final Set<String> uniqueModels = {};
+      for (final provider in providerController.providers) {
+        uniqueModels.addAll(provider.availableModels);
+      }
+
+      return uniqueModels.length;
+    } catch (e) {
+      debugPrint('获取可用模型数失败: $e');
+      return 0;
+    }
+  }
+
   @override
   IconData get icon => Icons.smart_toy;
 

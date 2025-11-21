@@ -1,6 +1,8 @@
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
+import 'package:flutter/foundation.dart';
 
 typedef TimerModeListener = void Function(String habitId, bool isCountdown);
 
@@ -64,6 +66,9 @@ class HabitController {
       _habitsKey,
       habits.map((h) => h.toMap()).toList(),
     );
+
+    // 同步到小组件
+    await _syncWidget();
   }
 
   Future<void> deleteHabit(String id) async {
@@ -73,6 +78,9 @@ class HabitController {
       _habitsKey,
       habits.map((h) => h.toMap()).toList(),
     );
+
+    // 同步到小组件
+    await _syncWidget();
   }
 
   void addTimerModeListener(TimerModeListener listener) {
@@ -86,6 +94,15 @@ class HabitController {
   void notifyTimerModeChanged(String habitId, bool isCountdown) {
     for (final listener in _timerModeListeners) {
       listener(habitId, isCountdown);
+    }
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncHabits();
+    } catch (e) {
+      debugPrint('Failed to sync habits widget: $e');
     }
   }
 }

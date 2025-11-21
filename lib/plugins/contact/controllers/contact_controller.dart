@@ -351,6 +351,26 @@ class ContactController {
     return contacts.where((c) => c.lastContactTime.isAfter(oneMonthAgo)).length;
   }
 
+  // 获取今日互动次数
+  Future<int> getTodayInteractionCount() async {
+    try {
+      final interactions = await getAllInteractions();
+      final today = DateTime.now();
+      final todayDate = DateTime(today.year, today.month, today.day);
+
+      return interactions.where((interaction) {
+        final interactionDate = DateTime(
+          interaction.date.year,
+          interaction.date.month,
+          interaction.date.day,
+        );
+        return interactionDate.isAtSameMomentAs(todayDate);
+      }).length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
   // 获取联系人的联系记录数量
   Future<int> getContactInteractionsCount(String contactId) async {
     final interactions = await getInteractionsByContactId(contactId);

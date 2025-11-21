@@ -65,6 +65,29 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         .length;
   }
 
+  // 获取今日新增笔记数
+  int getTodayNotesCount() {
+    if (!_isInitialized) return 0;
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    return controller
+        .searchNotes(query: '', startDate: startOfDay, endDate: endOfDay)
+        .length;
+  }
+
+  // 获取总字数
+  int getTotalWordCount() {
+    if (!_isInitialized) return 0;
+    final allNotes = controller.searchNotes(query: '');
+    int totalWords = 0;
+    for (final note in allNotes) {
+      totalWords += note.content.length;
+    }
+    return totalWords;
+  }
+
   @override
   Widget? buildCardView(BuildContext context) {
     if (!_isInitialized) return null;

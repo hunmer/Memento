@@ -3,6 +3,7 @@ import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/timer_task.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 
 class TimerController {
   final StorageManager storage;
@@ -35,6 +36,16 @@ class TimerController {
   Future<void> saveTasks(List<TimerTask> tasks) async {
     final tasksData = tasks.map((task) => task.toJson()).toList();
     await storage.write('timer/tasks', {'tasks': tasksData});
+    await _syncWidget();
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncTimer();
+    } catch (e) {
+      debugPrint('Failed to sync timer widget: $e');
+    }
   }
 
   // 获取所有任务的分组名称（去重）

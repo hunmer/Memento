@@ -92,6 +92,25 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
         .toList();
   }
 
+  // 获取即将到来的纪念日数量（7天内）
+  int getUpcomingMemorialDayCount() {
+    if (!_isInitialized) return 0;
+    return _controller.memorialDays
+        .where((day) {
+          final daysRemaining = day.daysRemaining;
+          return daysRemaining >= 0 && daysRemaining <= 7;
+        })
+        .length;
+  }
+
+  // 获取今日纪念日数量
+  int getTodayMemorialDayCount() {
+    if (!_isInitialized) return 0;
+    return _controller.memorialDays
+        .where((day) => day.isToday)
+        .length;
+  }
+
   @override
   Widget? buildCardView(BuildContext context) {
     if (!_isInitialized) return null;

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
+import '../../core/services/plugin_widget_sync_helper.dart';
 import '../base_plugin.dart';
 import 'l10n/checkin_localizations.dart';
 import 'models/checkin_item.dart';
@@ -179,6 +180,17 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     await storage.writeJson(pluginPath, {'items': itemsJson});
     // 通知监听者数据已更新
     (ValueNotifier(_checkinItems)..value = _checkinItems).notifyListeners();
+    // 同步到小组件
+    await _syncWidget();
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncCheckin();
+    } catch (e) {
+      debugPrint('Failed to sync checkin widget: $e');
+    }
   }
 
   @override
