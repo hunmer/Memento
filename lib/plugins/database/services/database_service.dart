@@ -86,4 +86,47 @@ class DatabaseService {
       return 0;
     }
   }
+
+  /// 获取今日新增记录数（所有数据库）
+  Future<int> getTodayRecordCount(dynamic controller) async {
+    try {
+      final databases = await getAllDatabases();
+      int todayCount = 0;
+      final today = DateTime.now();
+      final todayDate = DateTime(today.year, today.month, today.day);
+
+      for (final db in databases) {
+        final records = await controller.getRecords(db.id);
+        todayCount += records.where((record) {
+          final recordDate = DateTime(
+            record.createdAt.year,
+            record.createdAt.month,
+            record.createdAt.day,
+          );
+          return recordDate.isAtSameMomentAs(todayDate);
+        }).length;
+      }
+
+      return todayCount;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// 获取总记录数（所有数据库）
+  Future<int> getTotalRecordCount(dynamic controller) async {
+    try {
+      final databases = await getAllDatabases();
+      int totalCount = 0;
+
+      for (final db in databases) {
+        final records = await controller.getRecords(db.id);
+        totalCount += records.length;
+      }
+
+      return totalCount;
+    } catch (e) {
+      return 0;
+    }
+  }
 }

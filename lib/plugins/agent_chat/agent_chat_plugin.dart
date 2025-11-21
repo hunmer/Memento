@@ -9,6 +9,7 @@ import 'screens/agent_chat_settings_screen.dart';
 import 'services/tool_service.dart';
 import 'services/tool_template_service.dart';
 import 'services/widget_service.dart';
+import 'models/chat_message.dart';
 // import 'l10n/agent_chat_localizations.dart';
 
 /// Agent Chat 插件
@@ -94,6 +95,81 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
   @override
   Widget buildSettingsView(BuildContext context) {
     return AgentChatSettingsScreen(plugin: this);
+  }
+
+  // ==================== 小组件统计方法 ====================
+
+  /// 获取总对话数
+  int getTotalConversationsCount() {
+    try {
+      return conversationController.conversations.length;
+    } catch (e) {
+      debugPrint('获取总对话数失败: $e');
+      return 0;
+    }
+  }
+
+  /// 获取今日消息数
+  /// 统计所有会话中今天发送的消息总数
+  Future<int> getTodayMessagesCount() async {
+    try {
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      final todayEnd = todayStart.add(const Duration(days: 1));
+
+      int count = 0;
+
+      // 遍历所有会话
+      for (final conversation in conversationController.conversations) {
+        try {
+          // 加载该会话的消息
+          final data = await storage.read('agent_chat/messages/${conversation.id}');
+          if (data is List) {
+            final messages = data
+                .map((json) => ChatMessage.fromJson(json as Map<String, dynamic>))
+                .toList();
+
+            // 统计今日消息
+            count += messages.where((msg) {
+              return msg.timestamp.isAfter(todayStart) &&
+                  msg.timestamp.isBefore(todayEnd);
+            }).length;
+          }
+        } catch (e) {
+          debugPrint('加载会话 ${conversation.id} 的消息失败: $e');
+          continue;
+        }
+      }
+
+      return count;
+    } catch (e) {
+      debugPrint('获取今日消息数失败: $e');
+      return 0;
+    }
+  }
+
+  /// 获取活跃会话数
+  /// 定义: 最近7天内有消息的会话
+  Future<int> getActiveConversationsCount() async {
+    try {
+      final now = DateTime.now();
+      final sevenDaysAgo = now.subtract(const Duration(days: 7));
+
+      int count = 0;
+
+      for (final conversation in conversationController.conversations) {
+        // 检查lastMessageAt是否在7天内
+        if (conversation.lastMessageAt != null &&
+            conversation.lastMessageAt!.isAfter(sevenDaysAgo)) {
+          count++;
+        }
+      }
+
+      return count;
+    } catch (e) {
+      debugPrint('获取活跃会话数失败: $e');
+      return 0;
+    }
   }
 }
 

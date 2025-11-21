@@ -6,6 +6,7 @@ import '../models/bill.dart';
 import '../models/bill_statistics.dart';
 import '../models/statistic_range.dart';
 import '../../../core/event/event_manager.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 
 /// 账单添加事件参数
 class BillAddedEventArgs extends EventArgs {
@@ -208,6 +209,7 @@ class BillController with ChangeNotifier {
 
     // 确保在数据保存成功后再通知监听器
     notifyListeners();
+    await _syncWidget();
   }
 
   // 更新账户信息
@@ -230,6 +232,7 @@ class BillController with ChangeNotifier {
 
     // 再通知监听器，确保数据已经持久化
     notifyListeners();
+    await _syncWidget();
   }
 
   // 删除账户
@@ -244,6 +247,7 @@ class BillController with ChangeNotifier {
     );
 
     notifyListeners();
+    await _syncWidget();
   }
 
   // 根据日期范围获取账单
@@ -420,6 +424,8 @@ class BillController with ChangeNotifier {
       billAddedEvent,
       BillAddedEventArgs(bill, bill.accountId),
     );
+
+    await _syncWidget();
   }
 
   // 删除账单
@@ -443,6 +449,7 @@ class BillController with ChangeNotifier {
     );
 
     notifyListeners();
+    await _syncWidget();
   }
 
   // 获取今日财务统计（收入和支出总和）
@@ -503,5 +510,14 @@ class BillController with ChangeNotifier {
               .length;
     }
     return count;
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncBill();
+    } catch (e) {
+      debugPrint('Failed to sync bill widget: $e');
+    }
   }
 }

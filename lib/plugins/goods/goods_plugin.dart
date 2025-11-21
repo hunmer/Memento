@@ -5,6 +5,7 @@ import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/event/event_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
+import '../../core/services/plugin_widget_sync_helper.dart';
 import 'screens/goods_main_screen.dart';
 import 'models/warehouse.dart';
 import 'models/goods_item.dart';
@@ -266,6 +267,9 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       await storage.write('goods/warehouses', {'warehouses': warehouseIds});
 
       notifyListeners();
+
+      // 同步小组件数据
+      await _syncWidget();
     } catch (e) {
       debugPrint('Error saving warehouse: $e');
       rethrow;
@@ -281,6 +285,9 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       await storage.write('goods/warehouses', {'warehouses': warehouseIds});
 
       notifyListeners();
+
+      // 同步小组件数据
+      await _syncWidget();
     } catch (e) {
       debugPrint('Error deleting warehouse: $e');
       rethrow;
@@ -304,6 +311,9 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
         );
       }
       await saveWarehouse(warehouse);
+
+      // 同步小组件数据
+      await _syncWidget();
     } catch (e) {
       debugPrint('Error saving goods item: $e');
       rethrow;
@@ -349,6 +359,9 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       );
 
       await saveWarehouse(warehouse);
+
+      // 同步小组件数据
+      await _syncWidget();
     } catch (e) {
       debugPrint('Error deleting goods item: $e');
       rethrow;
@@ -420,6 +433,37 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
         if (lastUsed == null || lastUsed.isBefore(oneMonthAgo)) {
           count++;
         }
+      }
+    }
+    return count;
+  }
+
+  // 获取今日使用记录数量
+  int getTodayUsageCount() {
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    int count = 0;
+    for (var warehouse in _warehouses) {
+      count += _countTodayUsageRecursively(warehouse.items, startOfDay, endOfDay);
+    }
+    return count;
+  }
+
+  // 递归统计今日使用记录（包含子物品）
+  int _countTodayUsageRecursively(List<GoodsItem> items, DateTime startOfDay, DateTime endOfDay) {
+    int count = 0;
+    for (var item in items) {
+      // 统计当前物品的今日使用记录
+      for (var record in item.usageRecords) {
+        if (record.date.isAfter(startOfDay) && record.date.isBefore(endOfDay)) {
+          count++;
+        }
+      }
+      // 递归统计子物品
+      if (item.subItems.isNotEmpty) {
+        count += _countTodayUsageRecursively(item.subItems, startOfDay, endOfDay);
       }
     }
     return count;
@@ -955,5 +999,14 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       'warehouseCount': _warehouses.length,
       'timestamp': DateTime.now().toIso8601String(),
     });
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncGoods();
+    } catch (e) {
+      debugPrint('Failed to sync goods widget: $e');
+    }
   }
 }

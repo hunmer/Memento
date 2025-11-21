@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import '../../../core/storage/storage_manager.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 import '../../../core/event/event_manager.dart';
 import '../models/diary_entry.dart';
 import '../diary_plugin.dart';
@@ -133,6 +134,9 @@ class DiaryUtils {
       // 更新索引文件
       await _updateDiaryIndex(dateStr);
 
+      // 同步到小组件
+      await _syncWidget();
+
       debugPrint('Saved diary entry for $dateStr');
     } catch (e) {
       debugPrint('Error saving diary entry: $e');
@@ -211,6 +215,9 @@ class DiaryUtils {
         'diary_entry_deleted',
         DiaryEntryDeletedEventArgs(normalizedDate),
       );
+
+      // 同步到小组件
+      await _syncWidget();
 
       debugPrint('Deleted diary entry for $dateStr');
       return true;
@@ -324,6 +331,15 @@ class DiaryUtils {
     } catch (e) {
       debugPrint('Error getting diary stats: $e');
       return {'totalCharCount': 0, 'entryCount': 0, 'averageCharCount': 0};
+    }
+  }
+
+  /// 同步小组件数据
+  static Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncDiary();
+    } catch (e) {
+      debugPrint('Failed to sync diary widget: $e');
     }
   }
 }

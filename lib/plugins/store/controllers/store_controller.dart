@@ -4,6 +4,7 @@ import 'package:Memento/plugins/store/models/used_item.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import '../models/product.dart';
 import '../models/user_item.dart';
 import '../models/points_log.dart';
@@ -110,10 +111,28 @@ class StoreController with ChangeNotifier {
         .length;
   }
 
+  // 获取今日兑换次数
+  int getTodayRedeemCount() {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    return _userItems
+        .where(
+          (item) =>
+              item.purchaseDate.isAfter(startOfDay) &&
+              item.purchaseDate.isBefore(endOfDay),
+        )
+        .length;
+  }
+
   // 添加商品
   Future<void> addProduct(Product product) async {
     _products.add(product);
     _updateStreams();
+
+    // 同步小组件数据
+    await _syncWidget();
   }
 
   // 从JSON添加商品
@@ -174,6 +193,10 @@ class StoreController with ChangeNotifier {
     await saveUserItems();
     _updateStreams(); // 更新badge显示
     notifyListeners(); // 通知UI更新
+
+    // 同步小组件数据
+    await _syncWidget();
+
     return true;
   }
 
@@ -242,6 +265,9 @@ class StoreController with ChangeNotifier {
     await savePoints();
     _updateStreams();
     notifyListeners();
+
+    // 同步小组件数据
+    await _syncWidget();
   }
 
   // 排序商品
@@ -484,5 +510,14 @@ class StoreController with ChangeNotifier {
               .toList();
     }
     notifyListeners();
+  }
+
+  // 同步小组件数据
+  Future<void> _syncWidget() async {
+    try {
+      await PluginWidgetSyncHelper.instance.syncStore();
+    } catch (e) {
+      debugPrint('Failed to sync store widget: $e');
+    }
   }
 }
