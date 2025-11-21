@@ -765,27 +765,6 @@ class PluginWidgetSyncHelper {
     }
   }
 
-  /// 同步AI对话插件
-  Future<void> syncAgentChat() async {
-    try {
-      final plugin = PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
-      if (plugin == null) return;
-
-      await _updateWidget(
-        pluginId: 'agent_chat',
-        pluginName: 'AI对话',
-        iconCodePoint: Icons.smart_toy.codePoint,
-        colorValue: Colors.tealAccent.shade700.value,
-        stats: [
-          WidgetStatItem(id: 'chats', label: '对话', value: '-'),
-        ],
-      );
-    } catch (e) {
-      debugPrint('Failed to sync agent_chat widget: $e');
-    }
-  }
-
-  /// 同步日记相册插件
   /// 同步日记相册插件
   Future<void> syncCalendarAlbum() async {
     try {
@@ -854,14 +833,6 @@ class PluginWidgetSyncHelper {
         }
       }
 
-      // 计算未读消息数（如果实现了）
-      int unreadCount = 0;
-      for (final channel in channels) {
-        if (channel.unreadCount != null) {
-          unreadCount += channel.unreadCount!;
-        }
-      }
-
       await _updateWidget(
         pluginId: 'chat',
         pluginName: '聊天',
@@ -877,13 +848,6 @@ class PluginWidgetSyncHelper {
             id: 'messages',
             label: '消息数',
             value: '$totalMessageCount',
-          ),
-          WidgetStatItem(
-            id: 'unread',
-            label: '未读',
-            value: '$unreadCount',
-            highlight: unreadCount > 0,
-            colorValue: unreadCount > 0 ? Colors.red.value : null,
           ),
         ],
       );

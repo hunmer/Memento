@@ -97,14 +97,15 @@ class DatabaseService {
 
       for (final db in databases) {
         final records = await controller.getRecords(db.id);
-        todayCount += records.where((record) {
+        final filteredRecords = records.where((record) {
           final recordDate = DateTime(
             record.createdAt.year,
             record.createdAt.month,
             record.createdAt.day,
           );
           return recordDate.isAtSameMomentAs(todayDate);
-        }).length;
+        }).toList();
+        todayCount += filteredRecords.length as int;
       }
 
       return todayCount;
@@ -121,7 +122,7 @@ class DatabaseService {
 
       for (final db in databases) {
         final records = await controller.getRecords(db.id);
-        totalCount += records.length;
+        totalCount += records.length as int;
       }
 
       return totalCount;
