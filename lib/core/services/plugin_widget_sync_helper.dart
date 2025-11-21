@@ -181,13 +181,35 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
       if (plugin == null) return;
 
+      // 获取今日统计数据
+      final activityCount = await plugin.getTodayActivityCount();
+      final durationMinutes = await plugin.getTodayActivityDuration();
+      final remainingMinutes = plugin.getTodayRemainingTime();
+
+      // 转换为小时（保留一位小数）
+      final durationHours = (durationMinutes / 60.0).toStringAsFixed(1);
+      final remainingHours = (remainingMinutes / 60.0).toStringAsFixed(1);
+
+      // 计算记录覆盖率
+      final totalDayMinutes = 24 * 60;
+      final coveragePercent = (durationMinutes / totalDayMinutes * 100).toStringAsFixed(0);
+
       await _updateWidget(
         pluginId: 'activity',
         pluginName: '活动',
         iconCodePoint: Icons.timeline.codePoint,
         colorValue: Colors.purple.value,
         stats: [
-          WidgetStatItem(id: 'today', label: '今日', value: '-'),
+          WidgetStatItem(id: 'count', label: '今日活动', value: '$activityCount'),
+          WidgetStatItem(id: 'duration', label: '已记录', value: '${durationHours}h'),
+          WidgetStatItem(
+            id: 'remaining',
+            label: '剩余时间',
+            value: '${remainingHours}h',
+            highlight: remainingMinutes < 120,
+            colorValue: remainingMinutes < 120 ? Colors.red.value : null,
+          ),
+          WidgetStatItem(id: 'coverage', label: '覆盖率', value: '$coveragePercent%'),
         ],
       );
     } catch (e) {
@@ -221,13 +243,17 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
       if (plugin == null) return;
 
+      final habitCount = plugin.getHabitController().getHabits().length;
+      final skillCount = plugin.getSkillController().getSkills().length;
+
       await _updateWidget(
         pluginId: 'habits',
         pluginName: '习惯',
         iconCodePoint: Icons.auto_awesome.codePoint,
-        colorValue: Colors.indigo.value,
+        colorValue: Colors.amber.value,
         stats: [
-          WidgetStatItem(id: 'habits', label: '习惯', value: '-'),
+          WidgetStatItem(id: 'habits', label: '习惯', value: '$habitCount'),
+          WidgetStatItem(id: 'skills', label: '技能', value: '$skillCount'),
         ],
       );
     } catch (e) {
@@ -241,13 +267,37 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
       if (plugin == null) return;
 
+      final todayCount = await plugin.getTodayWordCount();
+      final monthCount = await plugin.getMonthWordCount();
+      final progress = await plugin.getMonthProgress();
+      final completedDays = progress.$1;
+      final totalDays = progress.$2;
+
       await _updateWidget(
         pluginId: 'diary',
         pluginName: '日记',
         iconCodePoint: Icons.book.codePoint,
         colorValue: Colors.brown.value,
         stats: [
-          WidgetStatItem(id: 'entries', label: '日记', value: '-'),
+          WidgetStatItem(
+            id: 'today',
+            label: '今日字数',
+            value: '$todayCount',
+            highlight: todayCount > 0,
+            colorValue: todayCount > 0 ? Colors.deepOrange.value : null,
+          ),
+          WidgetStatItem(
+            id: 'month',
+            label: '本月字数',
+            value: '$monthCount',
+          ),
+          WidgetStatItem(
+            id: 'progress',
+            label: '本月进度',
+            value: '$completedDays/$totalDays',
+            highlight: completedDays == totalDays,
+            colorValue: completedDays == totalDays ? Colors.green.value : null,
+          ),
         ],
       );
     } catch (e) {
@@ -261,13 +311,46 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
       if (plugin == null) return;
 
+      final todayCount = plugin.getTodayCheckins();
+      final totalItems = plugin.checkinItems.length;
+      final totalCheckins = plugin.getTotalCheckins();
+
+      // 计算最大连续天数
+      int maxConsecutiveDays = 0;
+      for (final item in plugin.checkinItems) {
+        final consecutive = item.getConsecutiveDays();
+        if (consecutive > maxConsecutiveDays) {
+          maxConsecutiveDays = consecutive;
+        }
+      }
+
       await _updateWidget(
         pluginId: 'checkin',
         pluginName: '签到',
         iconCodePoint: Icons.check_circle.codePoint,
-        colorValue: Colors.amber.value,
+        colorValue: Colors.teal.value,
         stats: [
-          WidgetStatItem(id: 'streak', label: '连续', value: '-'),
+          WidgetStatItem(
+            id: 'today',
+            label: '今日完成',
+            value: '$todayCount/$totalItems',
+            highlight: todayCount == totalItems && totalItems > 0,
+            colorValue: todayCount == totalItems && totalItems > 0
+                ? Colors.green.value
+                : null,
+          ),
+          WidgetStatItem(
+            id: 'total',
+            label: '总签到数',
+            value: '$totalCheckins',
+          ),
+          WidgetStatItem(
+            id: 'streak',
+            label: '最长连续',
+            value: '$maxConsecutiveDays天',
+            highlight: maxConsecutiveDays >= 7,
+            colorValue: maxConsecutiveDays >= 7 ? Colors.amber.value : null,
+          ),
         ],
       );
     } catch (e) {
@@ -481,13 +564,58 @@ class PluginWidgetSyncHelper {
       final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
       if (plugin == null) return;
 
+      final channels = plugin.channelService.channels;
+      final channelCount = channels.length;
+
+      // 计算所有消息总数
+      int totalMessageCount = 0;
+      for (final channel in channels) {
+        totalMessageCount += channel.messages.length;
+      }
+
+      // 获取最近一条消息的时间（用于显示最后更新时间）
+      DateTime? lastMessageTime;
+      for (final channel in channels) {
+        if (channel.messages.isNotEmpty) {
+          final channelLastTime = channel.messages.last.date;
+          if (lastMessageTime == null ||
+              channelLastTime.isAfter(lastMessageTime)) {
+            lastMessageTime = channelLastTime;
+          }
+        }
+      }
+
+      // 计算未读消息数（如果实现了）
+      int unreadCount = 0;
+      for (final channel in channels) {
+        if (channel.unreadCount != null) {
+          unreadCount += channel.unreadCount!;
+        }
+      }
+
       await _updateWidget(
         pluginId: 'chat',
         pluginName: '聊天',
         iconCodePoint: Icons.chat.codePoint,
         colorValue: Colors.lightGreen.value,
         stats: [
-          WidgetStatItem(id: 'channels', label: '频道', value: '-'),
+          WidgetStatItem(
+            id: 'channels',
+            label: '频道数',
+            value: '$channelCount',
+          ),
+          WidgetStatItem(
+            id: 'messages',
+            label: '消息数',
+            value: '$totalMessageCount',
+          ),
+          WidgetStatItem(
+            id: 'unread',
+            label: '未读',
+            value: '$unreadCount',
+            highlight: unreadCount > 0,
+            colorValue: unreadCount > 0 ? Colors.red.value : null,
+          ),
         ],
       );
     } catch (e) {

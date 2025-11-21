@@ -11,9 +11,9 @@ class HabitsWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 习惯小组件 - 2x1 尺寸
+ * 习惯小组件 - 2x2 尺寸
  */
 class HabitsWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "habits"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

@@ -11,9 +11,9 @@ class ActivityWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 活动记录小组件 - 2x1 尺寸
+ * 活动记录小组件 - 2x2 尺寸
  */
 class ActivityWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "activity"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

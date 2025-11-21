@@ -11,9 +11,9 @@ class TrackerWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 目标追踪小组件 - 2x1 尺寸
+ * 目标追踪小组件 - 2x2 尺寸
  */
 class TrackerWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "tracker"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

@@ -145,8 +145,9 @@ graph TD
 | `lib/screens/settings_screen/` | 设置屏幕：WebDAV同步、数据管理、自动更新 | settings_screen.dart, webdav_controller.dart | [查看](lib/screens/settings_screen/CLAUDE.md) |
 | `lib/widgets/` | 通用 UI 组件：Markdown编辑器、文件预览、标签管理 | markdown_editor/, file_preview/, tag_manager_dialog/ | [查看](lib/widgets/CLAUDE.md) |
 | `scripts/` | 构建与发布脚本 | build.sh, release.sh | [查看](scripts/CLAUDE.md) |
-| `android/` | Android 平台配置 | AndroidManifest.xml, build.gradle | - |
+| `android/` | Android 平台配置与小组件 | AndroidManifest.xml, BasePluginWidgetProvider.kt | [小组件指南](docs/WIDGET_IMPLEMENTATION_GUIDE.md) |
 | `ios/` | iOS 平台配置 | Info.plist, Podfile | - |
+| `docs/` | 开发文档 | 小组件实现指南、快速参考 | [查看目录](#开发文档) |
 
 ---
 

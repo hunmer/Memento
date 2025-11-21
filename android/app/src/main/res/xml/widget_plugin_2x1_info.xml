@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="110dp"
-    android:minHeight="40dp"
+    android:minHeight="110dp"
     android:targetCellWidth="2"
-    android:targetCellHeight="1"
+    android:targetCellHeight="2"
     android:updatePeriodMillis="1800000"
-    android:initialLayout="@layout/widget_plugin_2x1"
+    android:initialLayout="@layout/widget_plugin_2x2"
     android:resizeMode="horizontal"
     android:widgetCategory="home_screen"
-    android:previewImage="@drawable/launcher_icon" />
+    android:previewImage="@drawable/launcher_icon"
+    android:label="@string/widget_plugin_2x2_label"
+    android:description="@string/widget_plugin_description" />

@@ -33,7 +33,8 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
      */
     enum class WidgetSize {
         SIZE_1X1,
-        SIZE_2X1
+        SIZE_2X1,
+        SIZE_2X2
     }
 
     /**
@@ -62,6 +63,7 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
         val views = when (widgetSize) {
             WidgetSize.SIZE_1X1 -> RemoteViews(context.packageName, R.layout.widget_plugin_1x1)
             WidgetSize.SIZE_2X1 -> RemoteViews(context.packageName, R.layout.widget_plugin_2x1)
+            WidgetSize.SIZE_2X2 -> RemoteViews(context.packageName, R.layout.widget_plugin_2x2)
         }
 
         // 读取插件数据
@@ -75,6 +77,7 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
             when (widgetSize) {
                 WidgetSize.SIZE_1X1 -> setup1x1Widget(views, data)
                 WidgetSize.SIZE_2X1 -> setup2x1Widget(views, data)
+                WidgetSize.SIZE_2X2 -> setup2x2Widget(views, data)
             }
         } else {
             // 没有数据时显示默认内容
@@ -152,6 +155,49 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
     }
 
     /**
+     * 设置 2x2 小组件内容
+     */
+    private fun setup2x2Widget(views: RemoteViews, data: JSONObject) {
+        // 设置图标
+        val iconCodePoint = data.optInt("iconCodePoint", 0xE87C)
+        val iconChar = try {
+            String(Character.toChars(iconCodePoint))
+        } catch (e: Exception) {
+            "·"
+        }
+        views.setTextViewText(R.id.widget_icon, iconChar)
+
+        // 设置标题
+        views.setTextViewText(R.id.widget_title, data.optString("pluginName", pluginId))
+
+        // 设置统计项（最多4个）
+        val stats = data.optJSONArray("stats")
+        if (stats != null) {
+            val statIds = listOf(
+                Triple(R.id.stat_item_1, R.id.stat_value_1, R.id.stat_label_1),
+                Triple(R.id.stat_item_2, R.id.stat_value_2, R.id.stat_label_2),
+                Triple(R.id.stat_item_3, R.id.stat_value_3, R.id.stat_label_3),
+                Triple(R.id.stat_item_4, R.id.stat_value_4, R.id.stat_label_4)
+            )
+
+            for (i in 0 until minOf(stats.length(), 4)) {
+                val stat = stats.getJSONObject(i)
+                val (itemId, valueId, labelId) = statIds[i]
+
+                views.setViewVisibility(itemId, View.VISIBLE)
+                views.setTextViewText(valueId, stat.optString("value", "-"))
+                views.setTextViewText(labelId, stat.optString("label", ""))
+
+                // 如果有自定义颜色
+                val statColor = stat.optInt("colorValue", 0)
+                if (statColor != 0) {
+                    views.setTextColor(valueId, statColor)
+                }
+            }
+        }
+    }
+
+    /**
      * 设置默认显示内容
      */
     private fun setupDefaultWidget(views: RemoteViews) {
@@ -166,6 +212,14 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
                 views.setTextViewText(R.id.widget_title, pluginId)
                 views.setViewVisibility(R.id.stat_item_1, View.GONE)
                 views.setViewVisibility(R.id.stat_item_2, View.GONE)
+            }
+            WidgetSize.SIZE_2X2 -> {
+                views.setTextViewText(R.id.widget_icon, "·")
+                views.setTextViewText(R.id.widget_title, pluginId)
+                views.setViewVisibility(R.id.stat_item_1, View.GONE)
+                views.setViewVisibility(R.id.stat_item_2, View.GONE)
+                views.setViewVisibility(R.id.stat_item_3, View.GONE)
+                views.setViewVisibility(R.id.stat_item_4, View.GONE)
             }
         }
     }

@@ -92,14 +92,19 @@ class AppRoutes extends NavigatorObserver {
     switch (routeName) {
       case '/':
         return _createRoute(const HomeScreen());
+      case '/tts':
       case 'tts':
         return _createRoute(const TTSServicesScreen());
+      case '/diary':
       case 'diary':
         return _createRoute(const DiaryMainView());
+      case '/activity':
       case 'activity':
         return _createRoute(const ActivityMainView());
+      case '/checkin':
       case 'checkin':
         return _createRoute(const CheckinMainView());
+      case '/settings':
       case 'settings':
         return _createRoute(const SettingsScreen());
       case '/agent_chat':
@@ -107,42 +112,61 @@ class AppRoutes extends NavigatorObserver {
         // 支持通过 conversationId 参数直接打开指定对话
         final conversationId = settings.arguments as String?;
         return _createRoute(AgentChatMainView(conversationId: conversationId));
+      case '/bill':
       case 'bill':
         return _createRoute(const BillMainView());
+      case '/calendar':
       case 'calendar':
         return _createRoute(const CalendarMainView());
+      case '/calendar_album':
       case 'calendar_album':
         return _createRoute(const CalendarAlbumMainView());
+      case '/contact':
       case 'contact':
         return _createRoute(const ContactMainView());
+      case '/database':
       case 'database':
         return _createRoute(const DatabaseMainView());
+      case '/day':
       case 'day':
         return _createRoute(const DayMainView());
+      case '/goods':
       case 'goods':
         return _createRoute(const GoodsMainView());
+      case '/habits':
       case 'habits':
         return _createRoute(const HabitsMainView());
+      case '/nodes':
       case 'nodes':
         return _createRoute(const NodesMainView());
+      case '/notes':
       case 'notes':
         return _createRoute(const NotesMainView());
+      case '/openai':
       case 'openai':
         return _createRoute(const OpenAIMainView());
+      case '/scripts_center':
       case 'scripts_center':
         return _createRoute(const ScriptsCenterMainView());
+      case '/store':
       case 'store':
         return _createRoute(const StoreMainView());
+      case '/timer':
       case 'timer':
         return _createRoute(const TimerMainView());
+      case '/todo':
       case 'todo':
         return _createRoute(const TodoMainView());
+      case '/tracker':
       case 'tracker':
         return _createRoute(const TrackerMainView());
+      case '/js_console':
       case 'js_console':
         return _createRoute(const JSConsoleScreen());
+      case '/json_dynamic_test':
       case 'json_dynamic_test':
         return _createRoute(const JsonDynamicTestScreen());
+      case '/notification_test':
       case 'notification_test':
         return _createRoute(const NotificationTestPage());
       case '/chat':

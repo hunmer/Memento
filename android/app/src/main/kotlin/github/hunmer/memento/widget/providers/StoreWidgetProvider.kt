@@ -11,9 +11,9 @@ class StoreWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 商店小组件 - 2x1 尺寸
+ * 商店小组件 - 2x2 尺寸
  */
 class StoreWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "store"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

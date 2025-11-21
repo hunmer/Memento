@@ -8,4 +8,6 @@
     android:initialLayout="@layout/widget_plugin_1x1"
     android:resizeMode="none"
     android:widgetCategory="home_screen"
-    android:previewImage="@drawable/launcher_icon" />
+    android:previewImage="@drawable/launcher_icon"
+    android:label="@string/widget_plugin_1x1_label"
+    android:description="@string/widget_plugin_description" />

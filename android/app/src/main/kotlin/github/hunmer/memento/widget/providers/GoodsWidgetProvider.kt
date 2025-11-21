@@ -11,9 +11,9 @@ class GoodsWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 物品管理小组件 - 2x1 尺寸
+ * 物品管理小组件 - 2x2 尺寸
  */
 class GoodsWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "goods"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }
