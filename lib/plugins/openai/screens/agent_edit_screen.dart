@@ -50,6 +50,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   final List<String> _tags = [];
   final _tagController = TextEditingController();
   bool _enableFunctionCalling = false;
+  bool _enableOpeningQuestions = false;
+  final List<String> _openingQuestions = [];
+  final _openingQuestionController = TextEditingController();
 
   List<ServiceProvider> _providers = [];
   bool _isLoadingProviders = true;
@@ -78,6 +81,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       _tags.addAll(widget.agent!.tags);
       _enableFunctionCalling = widget.agent!.enableFunctionCalling;
       _selectedPresetId = widget.agent!.promptPresetId;
+      _enableOpeningQuestions = widget.agent!.enableOpeningQuestions;
+      _openingQuestions.addAll(widget.agent!.openingQuestions);
     }
   }
 
@@ -262,6 +267,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       avatarUrl: _avatarUrl,
       enableFunctionCalling: _enableFunctionCalling,
       promptPresetId: _selectedPresetId,
+      enableOpeningQuestions: _enableOpeningQuestions,
+      openingQuestions: _openingQuestions,
     );
 
     try {
@@ -801,6 +808,103 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                 });
               },
             ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: const Text('启用猜你想问功能'),
+              subtitle: const Text('在聊天界面显示预设的开场白问题'),
+              value: _enableOpeningQuestions,
+              onChanged: (value) {
+                setState(() {
+                  _enableOpeningQuestions = value;
+                });
+              },
+            ),
+            if (_enableOpeningQuestions) ...[
+              const SizedBox(height: 16),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  '开场白问题列表',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _openingQuestionController,
+                        decoration: const InputDecoration(
+                          labelText: '添加开场白问题',
+                          hintText: '输入一个问题',
+                        ),
+                        maxLines: 2,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () {
+                        final question = _openingQuestionController.text.trim();
+                        if (question.isNotEmpty) {
+                          setState(() {
+                            _openingQuestions.add(question);
+                            _openingQuestionController.clear();
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (_openingQuestions.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: _openingQuestions.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final question = entry.value;
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            child: Text(
+                              '${index + 1}',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          title: Text(question),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, size: 20),
+                                onPressed: () {
+                                  _openingQuestionController.text = question;
+                                  setState(() {
+                                    _openingQuestions.removeAt(index);
+                                  });
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, size: 20),
+                                onPressed: () {
+                                  setState(() {
+                                    _openingQuestions.removeAt(index);
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+            ],
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _testAgent,
@@ -892,6 +996,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     _headersController.dispose();
     _modelController.dispose();
     _tagController.dispose();
+    _openingQuestionController.dispose();
     super.dispose();
   }
 }

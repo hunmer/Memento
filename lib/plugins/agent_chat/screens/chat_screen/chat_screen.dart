@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../controllers/chat_controller.dart';
 import '../../models/conversation.dart';
@@ -6,6 +7,7 @@ import '../../services/message_service.dart';
 import '../../services/conversation_service.dart';
 import '../../services/tool_template_service.dart';
 import '../../services/message_detail_service.dart';
+import '../../services/suggested_questions_service.dart';
 import '../../../../core/storage/storage_manager.dart';
 import '../../../../core/js_bridge/js_bridge_manager.dart';
 import '../../../../core/route/route_history_manager.dart';
@@ -46,6 +48,11 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _selectedTTSServiceId; // 选择的TTS服务ID
   String? _lastReadMessageId; // 上次朗读的消息ID
 
+  // 猜你想问相关
+  List<String> _suggestedQuestions = [];
+  bool _isLoadingSuggestions = false;
+  final SuggestedQuestionsService _suggestionsService = SuggestedQuestionsService();
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     _initializeController();
+    _loadSuggestedQuestions();
   }
 
   Future<void> _initializeController() async {
@@ -171,6 +179,66 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     } catch (e) {
       debugPrint('调用TTS朗读失败: $e');
+    }
+  }
+
+  /// 加载建议问题
+  Future<void> _loadSuggestedQuestions() async {
+    // 检查 agent 是否开启了猜你想问功能
+    if (_controller.currentAgent == null ||
+        !_controller.currentAgent!.enableOpeningQuestions) {
+      setState(() {
+        _suggestedQuestions = [];
+      });
+      return;
+    }
+
+    // 如果有预设问题,使用预设问题
+    if (_controller.currentAgent!.openingQuestions.isNotEmpty) {
+      setState(() {
+        _suggestedQuestions = List.from(_controller.currentAgent!.openingQuestions);
+      });
+    } else {
+      // 否则使用随机问题
+      final questions = await _suggestionsService.getRandomQuestions(count: 5);
+      setState(() {
+        _suggestedQuestions = questions;
+      });
+    }
+  }
+
+  /// 刷新建议问题（使用 AI 生成）
+  Future<void> _refreshSuggestedQuestions() async {
+    if (_controller.currentAgent == null) return;
+
+    setState(() {
+      _isLoadingSuggestions = true;
+    });
+
+    try {
+      // 使用 AI 生成新问题
+      final questions = await _suggestionsService.generateQuestionsWithAI(
+        agent: _controller.currentAgent!,
+        count: 5,
+      );
+
+      setState(() {
+        _suggestedQuestions = questions;
+        _isLoadingSuggestions = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingSuggestions = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('生成问题失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -436,6 +504,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
 
+                  // 猜你想问区域
+                  if (_suggestedQuestions.isNotEmpty && _controller.messages.isEmpty)
+                    _buildSuggestedQuestionsBar(),
+
                   // 消息列表
                   Expanded(
                     child:
@@ -500,6 +572,105 @@ class _ChatScreenState extends State<ChatScreen> {
                   MessageInput(controller: _controller),
                 ],
               ),
+    );
+  }
+
+  /// 构建猜你想问横条
+  Widget _buildSuggestedQuestionsBar() {
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 12),
+          Icon(
+            Icons.tips_and_updates_outlined,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '猜你想问',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                dragDevices: {
+                  PointerDeviceKind.touch,
+                  PointerDeviceKind.mouse,
+                  PointerDeviceKind.trackpad,
+                },
+              ),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _suggestedQuestions.length,
+                itemBuilder: (context, index) {
+                  final question = _suggestedQuestions[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ActionChip(
+                      label: Text(
+                        question,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onPressed: () {
+                        // 点击问题填入输入框
+                        _controller.setInputText(question);
+                      },
+                      avatar: Icon(
+                        Icons.chat_bubble_outline,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // 刷新按钮
+          IconButton(
+            icon: _isLoadingSuggestions
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.refresh,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+            onPressed: _isLoadingSuggestions ? null : _refreshSuggestedQuestions,
+            tooltip: '刷新问题',
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
     );
   }
 
@@ -979,6 +1150,8 @@ class _ChatScreenState extends State<ChatScreen> {
       if (selectedAgent != null && mounted) {
         try {
           await _controller.selectAgent(selectedAgent);
+          // 切换 agent 后重新加载建议问题
+          await _loadSuggestedQuestions();
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
