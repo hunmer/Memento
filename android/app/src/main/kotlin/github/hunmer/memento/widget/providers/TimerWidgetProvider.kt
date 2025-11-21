@@ -11,9 +11,9 @@ class TimerWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 计时器小组件 - 2x1 尺寸
+ * 计时器小组件 - 2x2 尺寸
  */
 class TimerWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "timer"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

@@ -11,9 +11,9 @@ class NodesWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 节点小组件 - 2x1 尺寸
+ * 节点小组件 - 2x2 尺寸
  */
 class NodesWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "nodes"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

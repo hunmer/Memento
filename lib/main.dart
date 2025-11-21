@@ -358,15 +358,24 @@ void _handleWidgetClick(String url) {
     Future.delayed(const Duration(milliseconds: 100), () {
       final navigator = navigatorKey.currentState;
       if (navigator != null) {
-        debugPrint('执行导航: push RouteSettings($routePath, arguments: $argument)');
+        debugPrint('执行导航: 重置路由栈并push RouteSettings($routePath, arguments: $argument)');
         try {
-          // 直接使用 generateRoute 以确保路由能被正确处理
-          final route = AppRoutes.generateRoute(RouteSettings(
-            name: routePath,
-            arguments: argument,
-          ));
-          navigator.push(route);
-          debugPrint('导航成功');
+          // 从小组件进入时，重置路由栈为两层：首页 + 目标页面
+          // 1. 先清除所有路由并回到首页
+          navigator.pushNamedAndRemoveUntil(
+            '/',
+            (route) => false,
+          );
+
+          // 2. 延迟一帧后再推入目标路由，确保首页已经完全加载
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final route = AppRoutes.generateRoute(RouteSettings(
+              name: routePath,
+              arguments: argument,
+            ));
+            navigator.push(route);
+            debugPrint('导航成功：路由栈现在有两层 (/ -> $routePath)');
+          });
         } catch (error, stack) {
           debugPrint('路由导航失败: $error');
           debugPrint('堆栈: $stack');
@@ -377,11 +386,20 @@ void _handleWidgetClick(String url) {
           final retryNavigator = navigatorKey.currentState;
           if (retryNavigator != null) {
             try {
-              final route = AppRoutes.generateRoute(RouteSettings(
-                name: routePath,
-                arguments: argument,
-              ));
-              retryNavigator.push(route);
+              // 重试时也使用相同的两层路由栈逻辑
+              retryNavigator.pushNamedAndRemoveUntil(
+                '/',
+                (route) => false,
+              );
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                final route = AppRoutes.generateRoute(RouteSettings(
+                  name: routePath,
+                  arguments: argument,
+                ));
+                retryNavigator.push(route);
+                debugPrint('重试导航成功');
+              });
             } catch (e) {
               debugPrint('重试导航失败: $e');
             }

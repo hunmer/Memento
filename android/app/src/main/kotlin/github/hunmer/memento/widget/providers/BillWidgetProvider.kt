@@ -11,9 +11,9 @@ class BillWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 账单小组件 - 2x1 尺寸
+ * 账单小组件 - 2x2 尺寸
  */
 class BillWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "bill"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

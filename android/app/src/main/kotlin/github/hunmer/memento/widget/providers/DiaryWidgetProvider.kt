@@ -11,9 +11,9 @@ class DiaryWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 日记小组件 - 2x1 尺寸
+ * 日记小组件 - 2x2 尺寸
  */
 class DiaryWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "diary"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

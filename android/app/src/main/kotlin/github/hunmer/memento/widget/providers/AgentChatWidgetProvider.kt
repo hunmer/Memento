@@ -11,9 +11,9 @@ class AgentChatWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * AI对话小组件 - 2x1 尺寸
+ * AI对话小组件 - 2x2 尺寸
  */
 class AgentChatWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "agent_chat"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

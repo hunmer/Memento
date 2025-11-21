@@ -11,9 +11,9 @@ class ContactWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 联系人小组件 - 2x1 尺寸
+ * 联系人小组件 - 2x2 尺寸
  */
 class ContactWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "contact"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }

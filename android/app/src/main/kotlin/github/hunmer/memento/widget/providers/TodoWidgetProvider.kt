@@ -11,9 +11,9 @@ class TodoWidgetProvider : BasePluginWidgetProvider() {
 }
 
 /**
- * 待办事项小组件 - 2x1 尺寸
+ * 待办事项小组件 - 2x2 尺寸
  */
 class TodoWidget2x1Provider : BasePluginWidgetProvider() {
     override val pluginId: String = "todo"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X1
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 }
