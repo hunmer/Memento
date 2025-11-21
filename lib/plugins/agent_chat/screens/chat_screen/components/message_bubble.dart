@@ -84,8 +84,12 @@ class MessageBubble extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 消息内容
-                      if (message.isGenerating)
+                      // 消息内容 - 优先检查是否有工具调用
+                      if (isToolCallMessage)
+                        // 如果是工具调用消息，显示工具调用步骤（内部处理加载状态）
+                        _buildToolCallContent()
+                      else if (message.isGenerating)
+                        // 普通消息正在生成中
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -126,9 +130,6 @@ class MessageBubble extends StatelessWidget {
                           message.matchedTemplateIds!.isNotEmpty)
                         // 显示模版选择按钮
                         _buildTemplateSelectionUI()
-                      else if (isToolCallMessage)
-                        // 如果是工具调用消息,显示工具调用步骤
-                        _buildToolCallContent()
                       else
                         _buildMessageContent(),
 
