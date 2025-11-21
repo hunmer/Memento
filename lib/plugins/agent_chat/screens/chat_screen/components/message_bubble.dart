@@ -239,10 +239,35 @@ class MessageBubble extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 显示思考内容
-          if (parsedContent['thinking']?.isNotEmpty ?? false) ...[
-            MarkdownContent(content: parsedContent['thinking']!),
-            const SizedBox(height: 8),
+          // 显示AI最终回复（优先显示）
+          if (parsedContent['finalReply']?.isNotEmpty ?? false) ...[
+            MarkdownContent(content: parsedContent['finalReply']!),
+            const SizedBox(height: 12),
+          ]
+          // 如果正在生成且没有最终回复，显示加载占位符
+          else if (message.isGenerating) ...[
+            Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.blue[700],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'AI 正在生成回复...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
           ],
 
           // 显示工具调用步骤
@@ -255,12 +280,12 @@ class MessageBubble extends StatelessWidget {
                     : null,
           ),
 
-          // 显示AI最终回复
-          if (parsedContent['finalReply']?.isNotEmpty ?? false) ...[
+          // 显示思考内容（如果有，通常不会显示）
+          if (parsedContent['thinking']?.isNotEmpty ?? false) ...[
             const SizedBox(height: 8),
             const Divider(),
             const SizedBox(height: 8),
-            MarkdownContent(content: parsedContent['finalReply']!),
+            MarkdownContent(content: parsedContent['thinking']!),
           ],
         ],
       );
@@ -275,23 +300,27 @@ class MessageBubble extends StatelessWidget {
   Map<String, String> _parseToolCallContent(String content) {
     final result = <String, String>{};
 
-    // 查找工具执行结果的位置
-    final toolResultIndex = content.indexOf('[工具执行结果]');
+    // 查找 [AI最终回复] 标记
     final finalReplyIndex = content.indexOf('[AI最终回复]');
 
-    if (toolResultIndex != -1) {
-      // 提取思考内容（工具执行结果之前的内容）
-      final thinkingRaw = content.substring(0, toolResultIndex);
-      result['thinking'] = _stripToolJsonBlocks(thinkingRaw).trim();
-
-      if (finalReplyIndex != -1) {
-        // 提取AI最终回复
-        final replyStart = finalReplyIndex + '[AI最终回复]'.length;
-        result['finalReply'] = content.substring(replyStart).trim();
-      }
+    if (finalReplyIndex != -1) {
+      // 只提取AI最终回复部分
+      final replyStart = finalReplyIndex + '[AI最终回复]'.length;
+      result['finalReply'] = content.substring(replyStart).trim();
     } else {
-      // 没有工具结果标记，全部作为思考内容
-      result['thinking'] = _stripToolJsonBlocks(content).trim();
+      // 如果没有 [AI最终回复] 标记，可能是旧数据，尝试提取工具执行结果之前的内容
+      final toolResultIndex = content.indexOf('[工具执行结果]');
+      if (toolResultIndex != -1) {
+        // 有工具执行结果标记，但没有AI回复，提取思考内容
+        final thinkingRaw = content.substring(0, toolResultIndex);
+        result['thinking'] = _stripToolJsonBlocks(thinkingRaw).trim();
+      } else if (content.contains('已执行工具模版:') || content.contains('执行结果：')) {
+        // 是工具模板执行消息但没有AI回复，不显示任何文本（只显示工具调用步骤）
+        result['thinking'] = '';
+      } else {
+        // 其他情况，全部作为思考内容
+        result['thinking'] = _stripToolJsonBlocks(content).trim();
+      }
     }
 
     return result;
