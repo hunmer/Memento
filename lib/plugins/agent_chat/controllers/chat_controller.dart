@@ -23,6 +23,7 @@ import '../services/tool_service.dart';
 import '../services/tool_template_service.dart';
 import '../services/message_detail_service.dart';
 import '../services/chat_task_handler.dart';
+export '../services/tool_service.dart' show TemplateMatch, ReplacementRule, TemplateStrategy;
 import '../../../utils/file_picker_helper.dart';
 import '../../../core/js_bridge/js_bridge_manager.dart';
 
@@ -454,41 +455,60 @@ class ChatController extends ChangeNotifier {
                 debugPrint('🔍 [第零阶段] AI 响应: $matchResponse');
 
                 // 解析匹配结果
-                final matchedIds = ToolService.parseToolTemplateMatch(
+                final matches = ToolService.parseToolTemplateMatch(
                   matchResponse,
                 );
 
-                if (matchedIds != null && matchedIds.isNotEmpty) {
+                if (matches != null && matches.isNotEmpty) {
                   debugPrint(
-                    '✅ [第零阶段] 匹配到 ${matchedIds.length} 个模版: ${matchedIds.join(", ")}',
+                    '✅ [第零阶段] 匹配到 ${matches.length} 个模版',
                   );
 
-                  // 过滤出存在的模版
-                  final validTemplates = <SavedToolTemplate>[];
-                  for (final id in matchedIds) {
+                  // 过滤出存在的模版，并保存替换规则
+                  final validMatches = <TemplateMatch>[];
+                  for (final match in matches) {
                     try {
-                      final template = templateService!.getTemplateById(id);
+                      final template = templateService!.getTemplateById(match.id);
                       if (template != null) {
-                        validTemplates.add(template);
+                        validMatches.add(match);
+                        if (match.replacements != null && match.replacements!.isNotEmpty) {
+                          debugPrint(
+                            '  - ${template.name}: ${match.replacements!.length} 个参数替换',
+                          );
+                        }
                       }
                     } catch (e) {
-                      debugPrint('⚠️ [第零阶段] 模版 $id 不存在或加载失败: $e');
+                      debugPrint('⚠️ [第零阶段] 模版 ${match.id} 不存在或加载失败: $e');
                     }
                   }
 
-                  if (validTemplates.isNotEmpty) {
-                    // 保存匹配的模版ID到消息
+                  if (validMatches.isNotEmpty) {
+                    // 保存匹配的模版ID和替换规则到消息元数据
                     final message = messageService.getMessage(
                       conversation.id,
                       aiMessageId,
                     );
                     if (message != null) {
+                      // 构建元数据，包含替换规则
+                      final metadata = <String, dynamic>{
+                        'templateMatches': validMatches.map((m) {
+                          final matchData = <String, dynamic>{'id': m.id};
+                          if (m.replacements != null && m.replacements!.isNotEmpty) {
+                            matchData['replacements'] = m.replacements!.map((r) => {
+                              'from': r.from,
+                              'to': r.to,
+                            }).toList();
+                          }
+                          return matchData;
+                        }).toList(),
+                      };
+
                       final updatedMessage = message.copyWith(
-                        matchedTemplateIds:
-                            validTemplates.map((t) => t.id).toList(),
+                        matchedTemplateIds: validMatches.map((m) => m.id).toList(),
                         content:
-                            '我找到了 ${validTemplates.length} 个相关的工具模版，请选择要执行的模版：',
+                            '我找到了 ${validMatches.length} 个相关的工具模版，请选择要执行的模版：',
                         isGenerating: false,
+                        metadata: metadata,
                       );
                       await messageService.updateMessage(updatedMessage);
                     }
@@ -1604,7 +1624,7 @@ class ChatController extends ChangeNotifier {
 
   // ========== 工具模板执行 ==========
 
-  /// 执行用户选择的匹配模版（第零阶段匹配后调用）
+  /// 执行 AI 匹配的模板（自动匹配路径）
   Future<void> executeMatchedTemplate(
     String aiMessageId,
     String templateId,
@@ -1630,43 +1650,62 @@ class ChatController extends ChangeNotifier {
 
       debugPrint('✅ 执行匹配的模版: ${template.name}');
 
-      // 克隆步骤
-      final steps = _cloneTemplateSteps(template);
+      // 从消息元数据中读取 AI 预先分析的策略和数据
+      TemplateStrategy strategy = TemplateStrategy.replace;
+      List<ReplacementRule>? replacements;
+      List<ToolCallStep>? rewrittenSteps;
 
-      // 标记模板使用
-      await templateService!.markTemplateAsUsed(template.id);
-
-      // 更新AI消息，显示正在执行
       final message = messageService.getMessage(conversation.id, aiMessageId);
-      if (message != null) {
-        await messageService.updateMessage(
-          message.copyWith(
-            content: '正在执行工具模版: ${template.name}',
-            isGenerating: true,
-            toolCall: ToolCallResponse(steps: steps),
-            matchedTemplateIds: null, // 清除匹配列表
-          ),
-        );
+      if (message?.metadata != null) {
+        final templateMatches = message!.metadata!['templateMatches'] as List<dynamic>?;
+        if (templateMatches != null) {
+          final matchData = templateMatches.firstWhere(
+            (m) => m['id'] == templateId,
+            orElse: () => null,
+          );
+
+          if (matchData != null) {
+            // 解析策略
+            final strategyStr = matchData['strategy'] as String? ?? 'replace';
+            strategy = strategyStr == 'rewrite'
+                ? TemplateStrategy.rewrite
+                : TemplateStrategy.replace;
+
+            // 解析 replace 策略的替换规则
+            if (strategy == TemplateStrategy.replace && matchData['replacements'] != null) {
+              final replacementsList = matchData['replacements'] as List<dynamic>;
+              replacements = replacementsList.map((r) =>
+                ReplacementRule(
+                  from: r['from'] as String,
+                  to: r['to'] as String,
+                )
+              ).toList();
+            }
+
+            // 解析 rewrite 策略的重写代码
+            if (strategy == TemplateStrategy.rewrite && matchData['rewritten_steps'] != null) {
+              final stepsList = matchData['rewritten_steps'] as List<dynamic>;
+              rewrittenSteps = stepsList.map((s) =>
+                ToolCallStep(
+                  method: s['method'] as String,
+                  title: s['title'] as String,
+                  desc: s['desc'] as String,
+                  data: s['data'] as String,
+                )
+              ).toList();
+            }
+          }
+        }
       }
 
-      // 执行工具步骤
-      await _executeToolSteps(aiMessageId, steps);
-
-      // 构建执行结果摘要
-      final resultSummary = _buildToolResultMessage(steps);
-
-      // 更新消息内容
-      final updatedMessage = messageService.getMessage(
-        conversation.id,
-        aiMessageId,
+      // ✅ 使用统一的执行入口
+      final resultSummary = await _executeTemplateWithSmartReplacement(
+        messageId: aiMessageId,
+        template: template,
+        strategy: strategy,
+        replacements: replacements,
+        rewrittenSteps: rewrittenSteps,
       );
-      if (updatedMessage != null) {
-        await messageService.updateMessage(
-          updatedMessage.copyWith(
-            content: '已执行工具模版: ${template.name}\n\n执行结果：\n$resultSummary',
-          ),
-        );
-      }
 
       // 让AI基于工具执行结果继续生成回复
       debugPrint('🤖 工具模版执行完成，让AI基于结果继续生成回复...');
@@ -1682,43 +1721,391 @@ class ChatController extends ChangeNotifier {
     }
   }
 
-  /// 在请求 AI 之前先执行选中的工具模板
-  Future<void> _executeToolTemplateBeforeAI(
-    ChatMessage userMessage,
-    SavedToolTemplate template,
-  ) async {
-    final steps = _cloneTemplateSteps(template);
+  /// 🔄 统一的模板执行入口（带智能参数替换/重写）
+  ///
+  /// 参数：
+  /// - messageId: 消息ID（用于更新执行状态）
+  /// - template: 要执行的模板
+  /// - strategy: 修改策略（replace 或 rewrite）
+  /// - userInput: 用户输入（可选，用于参数分析）
+  /// - replacements: 预先分析的替换规则（strategy=replace时使用）
+  /// - rewrittenSteps: 重写后的代码步骤（strategy=rewrite时使用）
+  Future<String> _executeTemplateWithSmartReplacement({
+    required String messageId,
+    required SavedToolTemplate template,
+    TemplateStrategy strategy = TemplateStrategy.replace,
+    String? userInput,
+    List<ReplacementRule>? replacements,
+    List<ToolCallStep>? rewrittenSteps,
+  }) async {
+    List<ToolCallStep> steps;
 
-    // 标记模板使用
+    // 根据策略选择执行路径
+    if (strategy == TemplateStrategy.rewrite && rewrittenSteps != null && rewrittenSteps.isNotEmpty) {
+      // 🔄 重写策略：直接使用 AI 生成的新代码
+      debugPrint('📝 使用 rewrite 策略，执行 AI 重写的代码');
+      debugPrint('  重写步骤数: ${rewrittenSteps.length}');
+      steps = rewrittenSteps;
+    } else {
+      // 🔄 替换策略：克隆模板步骤并应用替换规则
+      debugPrint('🔄 使用 replace 策略');
+      steps = _cloneTemplateSteps(template);
+
+      // 获取参数替换规则（按优先级）
+      List<ReplacementRule>? finalReplacements = replacements;
+
+      // 如果没有预先提供替换规则，且有用户输入，则实时分析
+      if (finalReplacements == null &&
+          userInput != null &&
+          userInput.isNotEmpty &&
+          userInput.toLowerCase() != template.name.toLowerCase() &&
+          _currentAgent != null &&
+          _currentAgent!.enableFunctionCalling) {
+
+        debugPrint('🔄 实时分析模板修改策略');
+        debugPrint('  用户输入: "$userInput"');
+        debugPrint('  模板名称: "${template.name}"');
+
+        final analysisResult = await _analyzeTemplateModification(
+          userInput,
+          template,
+        );
+
+        if (analysisResult != null) {
+          if (analysisResult.strategy == TemplateStrategy.rewrite &&
+              analysisResult.rewrittenSteps != null &&
+              analysisResult.rewrittenSteps!.isNotEmpty) {
+            // 切换到 rewrite 策略
+            debugPrint('📝 切换到 rewrite 策略');
+            steps = analysisResult.rewrittenSteps!
+                .map((s) => ToolCallStep(
+                      method: s['method'] as String,
+                      title: s['title'] as String,
+                      desc: s['desc'] as String,
+                      data: s['data'] as String,
+                    ))
+                .toList();
+          } else {
+            finalReplacements = analysisResult.replacements;
+          }
+        }
+      }
+
+      // 应用参数替换（仅 replace 策略）
+      if (finalReplacements != null && finalReplacements.isNotEmpty) {
+        debugPrint('✅ 应用 ${finalReplacements.length} 个参数替换规则');
+        for (var rule in finalReplacements) {
+          debugPrint('  - "${rule.from}" → "${rule.to}"');
+        }
+        steps = ToolService.applyReplacements(steps, finalReplacements);
+      }
+    }
+
+    // 3. 标记模板使用
     if (templateService != null) {
       await templateService!.markTemplateAsUsed(template.id);
     }
 
+    // 4. 更新消息，显示正在执行
+    final message = messageService.getMessage(conversation.id, messageId);
+    if (message != null) {
+      await messageService.updateMessage(
+        message.copyWith(
+          content: '正在执行工具模版: ${template.name}',
+          isGenerating: true,
+          toolCall: ToolCallResponse(steps: steps),
+          matchedTemplateIds: null, // 清除匹配列表
+        ),
+      );
+    }
+
+    // 5. 执行工具步骤
+    await _executeToolSteps(messageId, steps);
+
+    // 6. 构建执行结果摘要
+    final resultSummary = _buildToolResultMessage(steps);
+
+    // 7. 更新消息内容
+    final finalMessage = messageService.getMessage(conversation.id, messageId);
+    if (finalMessage != null) {
+      await messageService.updateMessage(
+        finalMessage.copyWith(
+          content: '已执行工具模版: ${template.name}\n\n执行结果：\n$resultSummary',
+        ),
+      );
+    }
+
+    return resultSummary;
+  }
+
+  /// 让 AI 分析用户输入和模板之间的差异，返回修改策略
+  Future<TemplateMatch?> _analyzeTemplateModification(
+    String userInput,
+    SavedToolTemplate template,
+  ) async {
+    if (_currentAgent == null) return null;
+
+    try {
+      // 获取模板的完整代码用于分析（支持 rewrite 场景）
+      final steps = _cloneTemplateSteps(template);
+      final fullCodePreview = steps.map((step) {
+        return '### ${step.title}\n```javascript\n${step.data}\n```';
+      }).join('\n\n');
+
+      final prompt = '''
+分析用户输入和工具模板的差异，选择合适的修改策略。
+
+**模板名称**: ${template.name}
+${template.description != null ? '**模板描述**: ${template.description}\n' : ''}
+**用户输入**: $userInput
+
+**模板完整代码**:
+$fullCodePreview
+
+## 🎯 双策略选择
+
+**策略1: `replace` - 关键词替换**（优先选择）
+- 适用：功能相同，只是参数/名称不同
+- 示例：模版"签到早起"→用户"签到早睡"，只需替换字符串
+
+**策略2: `rewrite` - 重写代码**
+- 适用：逻辑需要修改，简单替换无法满足
+- 示例：原记录"个数"，改成记录"时长"（单位和逻辑都变了）
+
+## 📝 返回格式
+
+使用 replace 策略：
+```json
+{
+  "strategy": "replace",
+  "replacements": [{"from": "代码中实际字符串", "to": "新字符串"}]
+}
+```
+
+使用 rewrite 策略：
+```json
+{
+  "strategy": "rewrite",
+  "rewritten_steps": [
+    {"method": "run_js", "title": "步骤标题", "desc": "描述", "data": "新的JS代码"}
+  ]
+}
+```
+
+无需修改：
+```json
+{"strategy": "replace", "replacements": []}
+```
+
+⚠️ 注意：
+- `strategy` 必填，必须是 "replace" 或 "rewrite"
+- 优先使用 replace（能替换解决就不重写）
+- replacements 的 `from` 必须是代码中**实际存在**的精确字符串
+- rewrite 时参考原代码结构，保持相同的工具调用方式
+''';
+
+      final buffer = StringBuffer();
+      await RequestService.streamResponse(
+        agent: _currentAgent!,
+        prompt: prompt,
+        contextMessages: [],
+        responseFormat: ResponseFormat.jsonSchema(
+          jsonSchema: JsonSchemaObject(
+            name: 'TemplateModification',
+            description: '模板修改策略分析结果',
+            strict: true,
+            schema: {
+              'type': 'object',
+              'properties': {
+                'strategy': {
+                  'type': 'string',
+                  'enum': ['replace', 'rewrite'],
+                  'description': '修改策略',
+                },
+                'replacements': {
+                  'type': 'array',
+                  'description': 'replace策略时的替换规则',
+                  'items': {
+                    'type': 'object',
+                    'properties': {
+                      'from': {'type': 'string'},
+                      'to': {'type': 'string'},
+                    },
+                    'required': ['from', 'to'],
+                    'additionalProperties': false,
+                  },
+                },
+                'rewritten_steps': {
+                  'type': 'array',
+                  'description': 'rewrite策略时的新代码步骤',
+                  'items': {
+                    'type': 'object',
+                    'properties': {
+                      'method': {'type': 'string', 'enum': ['run_js']},
+                      'title': {'type': 'string'},
+                      'desc': {'type': 'string'},
+                      'data': {'type': 'string'},
+                    },
+                    'required': ['method', 'title', 'desc', 'data'],
+                    'additionalProperties': false,
+                  },
+                },
+              },
+              'required': ['strategy'],
+              'additionalProperties': false,
+            },
+          ),
+        ),
+        onToken: (token) => buffer.write(token),
+        onComplete: () {},
+        onError: (error) => debugPrint('AI 参数分析错误: $error'),
+      );
+
+      final response = buffer.toString();
+      debugPrint('AI 参数分析响应: $response');
+
+      // 提取 JSON 内容（可能包含在 ```json ... ``` 中）
+      String? jsonStr;
+
+      // 尝试从 ```json ... ``` 中提取
+      final jsonBlockMatch = RegExp(
+        r'```json\s*(\{[\s\S]*?\})\s*```',
+        multiLine: true,
+      ).firstMatch(response);
+
+      if (jsonBlockMatch != null) {
+        jsonStr = jsonBlockMatch.group(1);
+      } else {
+        // 尝试提取直接的 JSON（strategy 是必填字段）
+        final directJsonMatch = RegExp(
+          r'\{\s*"strategy"\s*:[\s\S]*?\}',
+          multiLine: true,
+        ).firstMatch(response);
+        if (directJsonMatch != null) {
+          jsonStr = directJsonMatch.group(0);
+        } else {
+          // 如果都没有匹配，尝试直接解析
+          jsonStr = response.trim();
+        }
+      }
+
+      // 尝试修复常见的 JSON 格式错误（AI 可能用单引号包裹字符串）
+      jsonStr = _fixInvalidJson(jsonStr!);
+
+      final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+      final strategyStr = json['strategy'] as String? ?? 'replace';
+      final strategy = strategyStr == 'rewrite'
+          ? TemplateStrategy.rewrite
+          : TemplateStrategy.replace;
+
+      debugPrint('AI 分析结果：策略=$strategyStr');
+
+      if (strategy == TemplateStrategy.rewrite) {
+        // 解析重写的代码步骤
+        final stepsList = json['rewritten_steps'] as List<dynamic>?;
+        if (stepsList == null || stepsList.isEmpty) {
+          debugPrint('⚠️ rewrite 策略但没有提供重写代码');
+          return null;
+        }
+        debugPrint('AI 分析结果：重写 ${stepsList.length} 个步骤');
+        return TemplateMatch(
+          id: template.id,
+          strategy: TemplateStrategy.rewrite,
+          rewrittenSteps: stepsList.map((s) => s as Map<String, dynamic>).toList(),
+        );
+      } else {
+        // 解析替换规则
+        final replacementsList = json['replacements'] as List<dynamic>? ?? [];
+        if (replacementsList.isEmpty) {
+          debugPrint('AI 分析结果：无需修改');
+          return TemplateMatch(id: template.id, strategy: TemplateStrategy.replace);
+        }
+        final rules = replacementsList.map((r) => ReplacementRule(
+          from: r['from'] as String,
+          to: r['to'] as String,
+        )).toList();
+        debugPrint('AI 分析结果：找到 ${rules.length} 个替换规则');
+        return TemplateMatch(
+          id: template.id,
+          strategy: TemplateStrategy.replace,
+          replacements: rules,
+        );
+      }
+
+    } catch (e) {
+      debugPrint('AI 模板修改分析失败: $e');
+      return null;
+    }
+  }
+
+  /// 修复 AI 返回的无效 JSON（主要处理单引号字符串值）
+  String _fixInvalidJson(String jsonStr) {
+    // 尝试先解析，如果成功则不需要修复
+    try {
+      jsonDecode(jsonStr);
+      return jsonStr;
+    } catch (_) {
+      // 继续修复
+    }
+
+    // 修复模式：将 JSON 对象中单引号包裹的字符串值转为双引号
+    // 例如：{"from": '早起', "to": '晨跑'} -> {"from": "早起", "to": "晨跑"}
+    final buffer = StringBuffer();
+    bool inDoubleQuote = false;
+    bool inSingleQuote = false;
+    bool escaped = false;
+
+    for (int i = 0; i < jsonStr.length; i++) {
+      final char = jsonStr[i];
+
+      if (escaped) {
+        buffer.write(char);
+        escaped = false;
+        continue;
+      }
+
+      if (char == '\\') {
+        escaped = true;
+        buffer.write(char);
+        continue;
+      }
+
+      if (char == '"' && !inSingleQuote) {
+        inDoubleQuote = !inDoubleQuote;
+        buffer.write(char);
+      } else if (char == "'" && !inDoubleQuote) {
+        // 单引号转双引号
+        inSingleQuote = !inSingleQuote;
+        buffer.write('"');
+      } else {
+        buffer.write(char);
+      }
+    }
+
+    final fixed = buffer.toString();
+    debugPrint('🔧 修复 JSON: $fixed');
+    return fixed;
+  }
+
+  /// 在请求 AI 之前先执行选中的工具模板（手动选择路径）
+  Future<void> _executeToolTemplateBeforeAI(
+    ChatMessage userMessage,
+    SavedToolTemplate template,
+  ) async {
     // 创建工具执行消息，作为用户消息的子消息
     final toolMessage = ChatMessage.ai(
       conversationId: conversation.id,
       content: '正在执行工具: ${template.name}',
       isGenerating: true,
-    ).copyWith(
-      parentId: userMessage.id,
-      toolCall: ToolCallResponse(steps: steps),
-    );
+    ).copyWith(parentId: userMessage.id);
     await messageService.addMessage(toolMessage);
 
-    // 执行步骤
-    await _executeToolSteps(toolMessage.id, steps);
-
-    // 汇总执行结果
-    final summary = _buildToolResultMessage(steps);
-    final latestToolMessage = messageService.getMessage(
-      conversation.id,
-      toolMessage.id,
+    // ✅ 使用统一的执行入口
+    final summary = await _executeTemplateWithSmartReplacement(
+      messageId: toolMessage.id,
+      template: template,
+      userInput: userMessage.content.trim(), // 传入用户输入用于参数分析
     );
-    if (latestToolMessage != null) {
-      await messageService.updateMessage(
-        latestToolMessage.copyWith(content: summary),
-      );
-    }
 
     // 更新用户消息的模板元数据，附加执行结果
     final metadata = Map<String, dynamic>.from(userMessage.metadata ?? {});
