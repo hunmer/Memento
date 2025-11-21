@@ -1852,6 +1852,9 @@ class ChatController extends ChangeNotifier {
         return '### ${step.title}\n```javascript\n${step.data}\n```';
       }).join('\n\n');
 
+      // 获取工具简要列表（用于 rewrite 策略选择工具）
+      final toolBriefPrompt = ToolService.getToolBriefPrompt();
+
       final prompt = '''
 分析用户输入和工具模板的差异，选择合适的修改策略。
 
@@ -1871,6 +1874,7 @@ $fullCodePreview
 **策略2: `rewrite` - 重写代码**
 - 适用：逻辑需要修改，简单替换无法满足
 - 示例：原记录"个数"，改成记录"时长"（单位和逻辑都变了）
+- **选择 rewrite 时，必须指定 needed_tools（需要的工具ID列表）**
 
 ## 📝 返回格式
 
@@ -1882,13 +1886,11 @@ $fullCodePreview
 }
 ```
 
-使用 rewrite 策略：
+使用 rewrite 策略（第一阶段，仅选择工具）：
 ```json
 {
   "strategy": "rewrite",
-  "rewritten_steps": [
-    {"method": "run_js", "title": "步骤标题", "desc": "描述", "data": "新的JS代码"}
-  ]
+  "needed_tools": ["checkin", "tracker"]  // 需要的工具ID列表
 }
 ```
 
@@ -1901,7 +1903,12 @@ $fullCodePreview
 - `strategy` 必填，必须是 "replace" 或 "rewrite"
 - 优先使用 replace（能替换解决就不重写）
 - replacements 的 `from` 必须是代码中**实际存在**的精确字符串
-- rewrite 时参考原代码结构，保持相同的工具调用方式
+- rewrite 时必须指定 needed_tools，系统会根据工具ID获取详细API后让你生成代码
+
+---
+## 📋 可用工具列表（rewrite 时选择需要的工具）
+
+$toolBriefPrompt
 ''';
 
       final buffer = StringBuffer();
@@ -1935,20 +1942,10 @@ $fullCodePreview
                     'additionalProperties': false,
                   },
                 },
-                'rewritten_steps': {
+                'needed_tools': {
                   'type': 'array',
-                  'description': 'rewrite策略时的新代码步骤',
-                  'items': {
-                    'type': 'object',
-                    'properties': {
-                      'method': {'type': 'string', 'enum': ['run_js']},
-                      'title': {'type': 'string'},
-                      'desc': {'type': 'string'},
-                      'data': {'type': 'string'},
-                    },
-                    'required': ['method', 'title', 'desc', 'data'],
-                    'additionalProperties': false,
-                  },
+                  'description': 'rewrite策略时需要的工具ID列表',
+                  'items': {'type': 'string'},
                 },
               },
               'required': ['strategy'],
@@ -2001,17 +1998,36 @@ $fullCodePreview
       debugPrint('AI 分析结果：策略=$strategyStr');
 
       if (strategy == TemplateStrategy.rewrite) {
-        // 解析重写的代码步骤
-        final stepsList = json['rewritten_steps'] as List<dynamic>?;
-        if (stepsList == null || stepsList.isEmpty) {
-          debugPrint('⚠️ rewrite 策略但没有提供重写代码');
+        // 第一阶段：获取需要的工具列表
+        final neededTools = (json['needed_tools'] as List<dynamic>?)
+            ?.map((t) => t as String)
+            .toList() ?? [];
+
+        if (neededTools.isEmpty) {
+          debugPrint('⚠️ rewrite 策略但没有指定需要的工具');
           return null;
         }
-        debugPrint('AI 分析结果：重写 ${stepsList.length} 个步骤');
+
+        debugPrint('📋 第一阶段：需要工具 ${neededTools.join(", ")}');
+
+        // 第二阶段：获取工具详细文档，让 AI 生成代码
+        final rewrittenSteps = await _generateRewriteCode(
+          userInput,
+          template,
+          fullCodePreview,
+          neededTools,
+        );
+
+        if (rewrittenSteps == null || rewrittenSteps.isEmpty) {
+          debugPrint('⚠️ 第二阶段：生成代码失败');
+          return null;
+        }
+
+        debugPrint('✅ 第二阶段：生成 ${rewrittenSteps.length} 个步骤');
         return TemplateMatch(
           id: template.id,
           strategy: TemplateStrategy.rewrite,
-          rewrittenSteps: stepsList.map((s) => s as Map<String, dynamic>).toList(),
+          rewrittenSteps: rewrittenSteps,
         );
       } else {
         // 解析替换规则
@@ -2034,6 +2050,126 @@ $fullCodePreview
 
     } catch (e) {
       debugPrint('AI 模板修改分析失败: $e');
+      return null;
+    }
+  }
+
+  /// 第二阶段：根据工具详情生成重写代码
+  Future<List<Map<String, dynamic>>?> _generateRewriteCode(
+    String userInput,
+    SavedToolTemplate template,
+    String originalCode,
+    List<String> neededTools,
+  ) async {
+    if (_currentAgent == null) return null;
+
+    try {
+      // 获取工具详细文档
+      final toolDetailPrompt = await ToolService.getToolDetailPrompt(neededTools);
+
+      final prompt = '''
+根据用户需求和工具API，重写模板代码。
+
+**用户需求**: $userInput
+**原模板名称**: ${template.name}
+
+**原模板代码**（参考结构）:
+$originalCode
+
+## 📚 工具详细 API 文档
+
+$toolDetailPrompt
+
+## 📝 返回格式
+
+生成完整的代码步骤：
+```json
+{
+  "steps": [
+    {
+      "method": "run_js",
+      "title": "步骤标题",
+      "desc": "步骤描述",
+      "data": "JavaScript 代码"
+    }
+  ]
+}
+```
+
+⚠️ 要求：
+- 代码必须实现用户的需求，不是原模板的功能
+- 参考原模板的代码结构和风格
+- 使用上方工具 API 文档中的方法
+- 禁止硬编码日期时间，使用 Memento.system.getCustomDate()
+- 禁止使用占位符，先查询获取真实数据
+''';
+
+      final buffer = StringBuffer();
+      await RequestService.streamResponse(
+        agent: _currentAgent!,
+        prompt: prompt,
+        contextMessages: [],
+        responseFormat: ResponseFormat.jsonSchema(
+          jsonSchema: JsonSchemaObject(
+            name: 'RewriteCode',
+            description: '重写的代码步骤',
+            strict: true,
+            schema: {
+              'type': 'object',
+              'properties': {
+                'steps': {
+                  'type': 'array',
+                  'items': {
+                    'type': 'object',
+                    'properties': {
+                      'method': {'type': 'string', 'enum': ['run_js']},
+                      'title': {'type': 'string'},
+                      'desc': {'type': 'string'},
+                      'data': {'type': 'string'},
+                    },
+                    'required': ['method', 'title', 'desc', 'data'],
+                    'additionalProperties': false,
+                  },
+                },
+              },
+              'required': ['steps'],
+              'additionalProperties': false,
+            },
+          ),
+        ),
+        onToken: (token) => buffer.write(token),
+        onComplete: () {},
+        onError: (error) => debugPrint('AI 代码生成错误: $error'),
+      );
+
+      final response = buffer.toString();
+      debugPrint('AI 代码生成响应: ${response.substring(0, response.length > 200 ? 200 : response.length)}...');
+
+      // 解析 JSON
+      String? jsonStr;
+      final jsonBlockMatch = RegExp(
+        r'```json\s*(\{[\s\S]*?\})\s*```',
+        multiLine: true,
+      ).firstMatch(response);
+
+      if (jsonBlockMatch != null) {
+        jsonStr = jsonBlockMatch.group(1);
+      } else {
+        jsonStr = response.trim();
+      }
+
+      jsonStr = _fixInvalidJson(jsonStr!);
+      final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+      final stepsList = json['steps'] as List<dynamic>?;
+
+      if (stepsList == null || stepsList.isEmpty) {
+        return null;
+      }
+
+      return stepsList.map((s) => s as Map<String, dynamic>).toList();
+
+    } catch (e) {
+      debugPrint('AI 代码生成失败: $e');
       return null;
     }
   }
