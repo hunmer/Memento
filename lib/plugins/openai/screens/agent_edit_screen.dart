@@ -153,11 +153,16 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     }
   }
 
-  void _updateProviderFields(ServiceProvider provider) {
+  void _updateProviderFields(ServiceProvider provider, {bool updateModel = true}) {
     // 如果是新建智能体，或者用户明确要更新配置，则使用服务商的默认配置
     setState(() {
       _baseUrlController.text = provider.baseUrl;
       _headersController.text = _formatHeaders(provider.headers);
+
+      // 使用服务商的默认模型
+      if (updateModel && provider.defaultModel != null && provider.defaultModel!.isNotEmpty) {
+        _modelController.text = provider.defaultModel!;
+      }
     });
 
     // 显示确认更新的 Snackbar
@@ -175,6 +180,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   _headersController.text = _formatHeaders(
                     widget.agent!.headers,
                   );
+                  _modelController.text = widget.agent!.model;
                 }
               });
             },

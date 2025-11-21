@@ -15,6 +15,7 @@ class _ModelListScreenState extends State<ModelListScreen>
   TabController? _tabController;
   late List<LLMModelGroup> _modelGroups;
   late ModelController _modelController;
+  Map<String, String> _defaultModels = {};
   String _searchQuery = '';
   bool _isLoading = true;
 
@@ -32,6 +33,13 @@ class _ModelListScreenState extends State<ModelListScreen>
 
     try {
       final models = await _modelController.getModels();
+      // 加载每个分组的默认模型
+      for (final group in models) {
+        final defaultModel = await _modelController.getDefaultModel(group.id);
+        if (defaultModel != null) {
+          _defaultModels[group.id] = defaultModel;
+        }
+      }
       if (mounted) {
         setState(() {
           _modelGroups = models;
@@ -58,6 +66,30 @@ class _ModelListScreenState extends State<ModelListScreen>
           _tabController = TabController(length: 1, vsync: this);
           _isLoading = false;
         });
+      }
+    }
+  }
+
+  String? _getDefaultModelForGroup(String groupId) {
+    return _defaultModels[groupId];
+  }
+
+  Future<void> _setDefaultModel(String groupId, String modelId) async {
+    try {
+      await _modelController.setDefaultModel(groupId, modelId);
+      setState(() {
+        _defaultModels[groupId] = modelId;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('已设置默认模型: $modelId')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('设置默认模型失败: $e')),
+        );
       }
     }
   }
@@ -146,7 +178,16 @@ class _ModelListScreenState extends State<ModelListScreen>
                             itemCount: filteredModels.length,
                             itemBuilder: (context, index) {
                               final model = filteredModels[index];
+                              final isDefault = _getDefaultModelForGroup(group.id) == model.id;
                               return ListTile(
+                                leading: IconButton(
+                                  icon: Icon(
+                                    isDefault ? Icons.star : Icons.star_border,
+                                    color: isDefault ? Colors.amber : null,
+                                  ),
+                                  onPressed: () => _setDefaultModel(group.id, model.id),
+                                  tooltip: '设为默认模型',
+                                ),
                                 title: Text(model.name),
                                 trailing: IconButton(
                                   icon: const Icon(Icons.delete),

@@ -10,10 +10,14 @@ class ModelController {
 
   // 内存中的模型列表
   List<LLMModelGroup> _modelGroups = [];
-  
+
+  // 每个分组的默认模型
+  Map<String, String> _defaultModels = {};
+
   // 本地存储的键
   static const String _storageKey = 'openai_llm_models';
-  
+  static const String _defaultModelsKey = 'openai_default_models';
+
   // 是否已初始化
   bool _initialized = false;
 
@@ -71,6 +75,7 @@ class ModelController {
         await _saveToStorage();
       }
 
+      await _loadDefaultModels();
       _initialized = true;
     } catch (e) {
       // 加载失败，使用默认模型
@@ -172,5 +177,45 @@ class ModelController {
   Future<void> resetToDefault() async {
     _modelGroups = List.from(llmModelGroups);
     await _saveToStorage();
+  }
+
+  // 获取分组的默认模型
+  Future<String?> getDefaultModel(String groupId) async {
+    if (!_initialized) {
+      await _loadFromStorage();
+    }
+    return _defaultModels[groupId];
+  }
+
+  // 设置分组的默认模型
+  Future<void> setDefaultModel(String groupId, String modelId) async {
+    if (!_initialized) {
+      await _loadFromStorage();
+    }
+    _defaultModels[groupId] = modelId;
+    await _saveDefaultModels();
+  }
+
+  // 保存默认模型到本地存储
+  Future<void> _saveDefaultModels() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_defaultModelsKey, jsonEncode(_defaultModels));
+    } catch (e) {
+      print('保存默认模型失败: $e');
+    }
+  }
+
+  // 加载默认模型
+  Future<void> _loadDefaultModels() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? json = prefs.getString(_defaultModelsKey);
+      if (json != null) {
+        _defaultModels = Map<String, String>.from(jsonDecode(json));
+      }
+    } catch (e) {
+      print('加载默认模型失败: $e');
+    }
   }
 }
