@@ -1,7 +1,9 @@
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/service_provider.dart';
+import '../models/llm_models.dart';
 import '../controllers/provider_controller.dart';
+import 'model_search_screen.dart';
 
 class ProviderEditScreen extends StatefulWidget {
   final ServiceProvider? provider;
@@ -16,6 +18,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
   final _formKey = GlobalKey<FormState>();
   final _labelController = TextEditingController();
   final _baseUrlController = TextEditingController();
+  final _defaultModelController = TextEditingController();
 
   // 用于添加/编辑 header
   final _headerKeyController = TextEditingController();
@@ -31,6 +34,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
       _labelController.text = widget.provider!.label;
       _baseUrlController.text = widget.provider!.baseUrl;
       _headers = Map<String, String>.from(widget.provider!.headers);
+      _defaultModelController.text = widget.provider!.defaultModel ?? '';
     }
   }
 
@@ -38,6 +42,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
   void dispose() {
     _labelController.dispose();
     _baseUrlController.dispose();
+    _defaultModelController.dispose();
     _headerKeyController.dispose();
     _headerValueController.dispose();
     super.dispose();
@@ -70,6 +75,23 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
     _removeHeader(key);
   }
 
+  Future<void> _selectDefaultModel() async {
+    final selectedModel = await Navigator.push<LLMModel>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ModelSearchScreen(
+          initialModelId: _defaultModelController.text,
+        ),
+      ),
+    );
+
+    if (selectedModel != null) {
+      setState(() {
+        _defaultModelController.text = selectedModel.id;
+      });
+    }
+  }
+
   Future<void> _saveProvider() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -84,6 +106,9 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
       label: _labelController.text.trim(),
       baseUrl: _baseUrlController.text.trim(),
       headers: _headers,
+      defaultModel: _defaultModelController.text.trim().isEmpty
+          ? null
+          : _defaultModelController.text.trim(),
     );
 
     if (widget.provider == null) {
@@ -195,6 +220,26 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                 }
                 return null;
               },
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _defaultModelController,
+                    decoration: InputDecoration(
+                      labelText: '默认模型',
+                      hintText: '选择此服务商的默认模型',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _selectDefaultModel,
+                  tooltip: OpenAILocalizations.of(context).searchModel,
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             const Text(

@@ -463,40 +463,101 @@ class RequestService {
       int totalChars = 0;
       int chunkCount = 0;
       String finalResponse = '';
+      bool wasCancelled = false;
 
-      await for (final res in stream) {
-        // 检查是否应该取消
-        if (shouldCancel != null && shouldCancel()) {
-          developer.log('流式响应被用户取消', name: 'RequestService');
-          onError('已取消发送');
-          return;
-        }
+      // 使用 StreamSubscription 以便能够主动取消
+      StreamSubscription? subscription;
+      Timer? cancelCheckTimer;
 
-        final content = res.choices.first.delta.content;
-        if (content != null) {
-          totalChars += content.length;
-          chunkCount++;
-          finalResponse += content;
+      final completer = Completer<void>();
 
-          // 每10个块记录一次进度
-          if (chunkCount % 10 == 0) {
-            developer.log(
-              '流式响应进度: $totalChars字符, $chunkCount个块, 已耗时: ${stopwatch.elapsedMilliseconds}ms',
-              name: 'RequestService',
-            );
+      // 定期检查是否需要取消（每100ms检查一次）
+      if (shouldCancel != null) {
+        cancelCheckTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+          if (shouldCancel() && !wasCancelled) {
+            developer.log('🛑 定时检查发现取消请求', name: 'RequestService');
+            wasCancelled = true;
+            timer.cancel();
+            subscription?.cancel();
+            onError('已取消发送');
+            if (!completer.isCompleted) {
+              completer.complete();
+            }
           }
-
-          onToken(content);
-        }
+        });
       }
 
-      stopwatch.stop();
-      developer.log('返回文本完成: $finalResponse', name: 'RequestService');
-      developer.log(
-        '流式响应完成: 总计$totalChars字符, $chunkCount个块, 总耗时: ${stopwatch.elapsedMilliseconds}ms',
-        name: 'RequestService',
+      subscription = stream.listen(
+        (res) {
+          // 检查是否应该取消（双重保险）
+          if (shouldCancel != null && shouldCancel() && !wasCancelled) {
+            developer.log('🛑 流数据处理中检测到取消请求', name: 'RequestService');
+            wasCancelled = true;
+            cancelCheckTimer?.cancel();
+            subscription?.cancel();
+            onError('已取消发送');
+            if (!completer.isCompleted) {
+              completer.complete();
+            }
+            return;
+          }
+
+          final content = res.choices.first.delta.content;
+          if (content != null) {
+            totalChars += content.length;
+            chunkCount++;
+            finalResponse += content;
+
+            // 每10个块记录一次进度
+            if (chunkCount % 10 == 0) {
+              developer.log(
+                '流式响应进度: $totalChars字符, $chunkCount个块, 已耗时: ${stopwatch.elapsedMilliseconds}ms',
+                name: 'RequestService',
+              );
+            }
+
+            onToken(content);
+          }
+        },
+        onError: (error) {
+          cancelCheckTimer?.cancel();
+          if (!wasCancelled) {
+            final errorDetails = _extractErrorMessage(error);
+            developer.log(
+              '流式响应错误: $errorDetails',
+              name: 'RequestService',
+              error: error,
+            );
+            onError('处理AI响应时出错: $errorDetails');
+          }
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        },
+        onDone: () {
+          cancelCheckTimer?.cancel();
+          if (!wasCancelled) {
+            stopwatch.stop();
+            developer.log('返回文本完成: $finalResponse', name: 'RequestService');
+            developer.log(
+              '流式响应完成: 总计$totalChars字符, $chunkCount个块, 总耗时: ${stopwatch.elapsedMilliseconds}ms',
+              name: 'RequestService',
+            );
+            onComplete();
+          }
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        },
+        cancelOnError: true,
       );
-      onComplete();
+
+      // 等待流处理完成
+      await completer.future;
+
+      // 确保资源被清理
+      cancelCheckTimer?.cancel();
+      await subscription.cancel();
     } catch (e, stackTrace) {
       final errorDetails = _extractErrorMessage(e);
       final errorMessage = '处理AI响应时出错: $errorDetails';
