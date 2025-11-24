@@ -36,26 +36,43 @@ class _AccountListScreenState extends State<AccountListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F6F8),
       appBar: AppBar(
-        title: Text(BillLocalizations.of(context).accountManagement),
-        // 添加返回按钮
+        backgroundColor: const Color(0xCCF6F6F8), // Semi-transparent background
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          BillLocalizations.of(context).accountManagement,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () => PluginManager.toHomeScreen(context),
         ),
       ),
       body: _buildAccountList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed:
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) =>
-                        AccountEditScreen(billPlugin: widget.billPlugin),
+      floatingActionButton: SizedBox(
+        width: 64,
+        height: 64,
+        child: FloatingActionButton(
+          onPressed:
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          AccountEditScreen(billPlugin: widget.billPlugin),
+                ),
               ),
-            ),
-        child: const Icon(Icons.add),
+          backgroundColor: Theme.of(context).primaryColor,
+          elevation: 4,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, size: 32, color: Colors.white),
+        ),
       ),
     );
   }
@@ -65,14 +82,19 @@ class _AccountListScreenState extends State<AccountListScreen> {
       return Center(child: Text(BillLocalizations.of(context).noAccounts));
     }
 
-    return ListView.builder(
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
       itemCount: widget.billPlugin.accounts.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final account = widget.billPlugin.accounts[index];
         return Dismissible(
           key: Key(account.id),
           background: Container(
-            color: Colors.red,
+            decoration: BoxDecoration(
+              color: Colors.red,
+              borderRadius: BorderRadius.circular(12),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             alignment: Alignment.centerRight,
             child: const Icon(Icons.delete, color: Colors.white),
@@ -95,7 +117,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
                       child: const Text(
-                        '',
+                        '删除',
                         style: TextStyle(color: Colors.red),
                       ),
                     ),
@@ -121,40 +143,79 @@ class _AccountListScreenState extends State<AccountListScreen> {
   }
 
   Widget _buildAccountCard(BuildContext context, Account account) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: InkWell(
-        onTap: () => _openAccountBills(context, account),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: account.backgroundColor,
-                child: Icon(account.icon, color: Colors.white),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      account.title,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '总金额: ¥${account.totalAmount.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => _openAccountBills(context, account),
+          onLongPress: () => _editAccount(context, account),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: account.backgroundColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    account.icon,
+                    color: account.backgroundColor,
+                    size: 28,
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () => _editAccount(context, account),
-              ),
-            ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${account.bills.length} 笔账单',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '¥${account.totalAmount.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        account.totalAmount < 0
+                            ? const Color(0xFFE74C3C)
+                            : Colors.black87,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
