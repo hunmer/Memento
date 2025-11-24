@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../bill_plugin.dart';
 import '../models/bill_model.dart';
+import '../widgets/month_selector.dart';
 
 class BillStatsScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -238,19 +239,6 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
   }
 
   Widget _buildHeader(bool isDark) {
-    // Generate last 6 months including selected
-    // Actually, we want to center selected or show a range. 
-    // Let's show [Selected-2, Selected-1, Selected, Selected+1, Selected+2] 
-    // Or just previous months relative to "Now"? 
-    // The design shows a timeline. Let's show 6 months ending at _selectedMonth (or centered).
-    // Let's try: 3 months before and 2 months after, if they exist (up to current real month).
-    // But simplest is: Show 6 months ending at SelectedMonth? No, user might want to go forward.
-    // Let's show: The selected month and previous 5 months.
-    
-    final months = List.generate(6, (index) {
-      return DateTime(_selectedMonth.year, _selectedMonth.month - (5 - index));
-    });
-
     return Container(
       color: isDark ? Colors.white.withAlpha(10) : Colors.white.withAlpha(200), // Glassmorphism-ish
       child: Column(
@@ -291,80 +279,18 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
               ],
             ),
           ),
-          
+
           // Month Strip
-          SizedBox(
-            height: 90,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              scrollDirection: Axis.horizontal,
-              itemCount: months.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                // We want the last item to be on the right initially? 
-                // Flutter ListView starts from left.
-                final month = months[index];
-                final isSelected = month.year == _selectedMonth.year && month.month == _selectedMonth.month;
-                final stats = _getMonthStats(month);
-                
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedMonth = month;
-                      _expandedCategories.clear();
-                    });
-                  },
-                  child: Container(
-                    width: 80,
-                    decoration: BoxDecoration(
-                      color: isSelected 
-                          ? (isDark ? Colors.grey[800] : Colors.white) 
-                          : (isDark ? Colors.transparent : Colors.white),
-                      borderRadius: BorderRadius.circular(16),
-                      border: isSelected 
-                          ? Border.all(color: _primaryColor, width: 2)
-                          : null,
-                      boxShadow: isSelected || !isDark
-                          ? [BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 4)]
-                          : null,
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${month.month}月',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected 
-                                ? (isDark ? Colors.white : Colors.black)
-                                : (isDark ? Colors.grey[500] : Colors.grey[400]),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '+${_formatCompact(stats['income']!)}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: _incomeColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          '-${_formatCompact(stats['expense']!)}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: _expenseColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+          MonthSelector(
+            selectedMonth: _selectedMonth,
+            onMonthSelected: (month) {
+              setState(() {
+                _selectedMonth = month;
+                _expandedCategories.clear();
+              });
+            },
+            getMonthStats: _getMonthStats,
+            primaryColor: _primaryColor,
           ),
         ],
       ),
@@ -624,12 +550,6 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
     return NumberFormat('#,##0.00', 'en_US').format(amount.abs());
   }
 
-  String _formatCompact(double amount) {
-    if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}k';
-    }
-    return amount.toStringAsFixed(0);
-  }
 }
 
 class _CategoryData {

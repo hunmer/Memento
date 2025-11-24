@@ -1155,7 +1155,6 @@ class _BillMainViewState extends State<BillMainView> {
             billPlugin.selectedAccount?.title ??
                 BillLocalizations.of(context).accountTitle,
           ),
-          bottom: const TabBar(tabs: [Tab(text: '账单列表'), Tab(text: '统计分析')]),
           actions: [
             IconButton(
               icon: const Icon(Icons.list),
@@ -1183,6 +1182,18 @@ class _BillMainViewState extends State<BillMainView> {
                 const Duration(days: 30),
               ), // 默认显示最近30天
               endDate: DateTime.now(),
+            ),
+          ],
+        ),
+        bottomNavigationBar: const TabBar(
+          tabs: [
+            Tab(
+              icon: Icon(Icons.receipt_long),
+              text: '账单列表',
+            ),
+            Tab(
+              icon: Icon(Icons.bar_chart),
+              text: '统计分析',
             ),
           ],
         ),
