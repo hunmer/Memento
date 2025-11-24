@@ -1,11 +1,12 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/models.dart';
 import '../controllers/controllers.dart';
 
 class TaskForm extends StatefulWidget {
-  final Task? task; // 如果为null，则是创建新任务
+  final Task? task; // If null, create new task
   final TaskController taskController;
   final ReminderController reminderController;
 
@@ -22,7 +23,7 @@ class TaskForm extends StatefulWidget {
 
 class _TaskFormState extends State<TaskForm> {
   late TextEditingController _titleController;
-  late TextEditingController _descriptionController;
+  late TextEditingController _notesController; // Mapped to description
   late DateTime? _startDate;
   late DateTime? _dueDate;
   late TaskPriority _priority;
@@ -31,20 +32,22 @@ class _TaskFormState extends State<TaskForm> {
   late List<DateTime> _reminders;
   late TextEditingController _subtaskController;
 
+  // Custom color from HTML
+  static const Color _primaryColor = Color(0xFF607AFB);
+  static const Color _backgroundLight = Color(0xFFF5F6F8);
+  static const Color _backgroundDark = Color(0xFF0F1323);
+
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.task?.title ?? '');
-    _descriptionController = TextEditingController(
+    _notesController = TextEditingController(
       text: widget.task?.description ?? '',
     );
     _startDate = widget.task?.startDate;
     _dueDate = widget.task?.dueDate;
     _priority = widget.task?.priority ?? TaskPriority.medium;
-
-    // 初始化标签
     _tags = widget.task?.tags.toList() ?? [];
-
     _subtasks = widget.task?.subtasks.toList() ?? [];
     _reminders = widget.task?.reminders.toList() ?? [];
     _subtaskController = TextEditingController();
@@ -53,37 +56,57 @@ class _TaskFormState extends State<TaskForm> {
   @override
   void dispose() {
     _titleController.dispose();
-    _descriptionController.dispose();
+    _notesController.dispose();
     _subtaskController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
+  Future<void> _selectStartDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
       context: context,
-      initialDateRange:
-          _startDate != null && _dueDate != null
-              ? DateTimeRange(start: _startDate!, end: _dueDate!)
-              : DateTimeRange(
-                start: DateTime.now(),
-                end: DateTime.now().add(const Duration(days: 7)),
-              ),
+      initialDate: _startDate ?? DateTime.now(),
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.fromSeed(seedColor: _primaryColor, brightness: Theme.of(context).brightness),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
-        _startDate = picked.start;
-        _dueDate = picked.end;
+        _startDate = picked;
+        // Ensure due date is not before start date
+        if (_dueDate != null && _dueDate!.isBefore(picked)) {
+          _dueDate = null;
+        }
       });
     }
   }
 
-  void _clearDateRange() {
-    setState(() {
-      _startDate = null;
-      _dueDate = null;
-    });
+  Future<void> _selectDueDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? (_startDate ?? DateTime.now()),
+      firstDate: _startDate ?? DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.fromSeed(seedColor: _primaryColor, brightness: Theme.of(context).brightness),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        _dueDate = picked;
+      });
+    }
   }
 
   void _addSubtask() {
@@ -113,37 +136,50 @@ class _TaskFormState extends State<TaskForm> {
   }
 
   Future<void> _addReminder() async {
-    final TimeOfDay? pickedTime = await showTimePicker(
+    final DateTime baseDate = _dueDate ?? DateTime.now();
+    
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialDate: baseDate,
+      firstDate: DateTime.now(),
+      lastDate: baseDate.add(const Duration(days: 365)),
+       builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.fromSeed(seedColor: _primaryColor, brightness: Theme.of(context).brightness),
+          ),
+          child: child!,
+        );
+      },
     );
 
-    if (pickedTime != null) {
-      final now = DateTime.now();
-      DateTime reminderDate = _dueDate ?? now;
-      reminderDate = DateTime(
-        reminderDate.year,
-        reminderDate.month,
-        reminderDate.day,
-        pickedTime.hour,
-        pickedTime.minute,
+    if (pickedDate != null && mounted) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+         builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.fromSeed(seedColor: _primaryColor, brightness: Theme.of(context).brightness),
+          ),
+          child: child!,
+        );
+      },
       );
 
-      // 如果设置的时间已经过去，则设置为明天同一时间
-      if (reminderDate.isBefore(now)) {
-        reminderDate = reminderDate.add(const Duration(days: 1));
+      if (pickedTime != null) {
+         final reminderDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+        setState(() {
+          _reminders.add(reminderDateTime);
+        });
       }
-
-      setState(() {
-        _reminders.add(reminderDate);
-      });
     }
-  }
-
-  void _removeReminder(int index) {
-    setState(() {
-      _reminders.removeAt(index);
-    });
   }
 
   Future<void> _saveTask() async {
@@ -156,14 +192,18 @@ class _TaskFormState extends State<TaskForm> {
       return;
     }
 
+    // Ensure pending subtask text is added
+    if (_subtaskController.text.isNotEmpty) {
+       _addSubtask();
+    }
+
     if (widget.task == null) {
-      // 创建新任务
       await widget.taskController.createTask(
         title: _titleController.text,
         description:
-            _descriptionController.text.isEmpty
+            _notesController.text.isEmpty
                 ? null
-                : _descriptionController.text,
+                : _notesController.text,
         startDate: _startDate,
         dueDate: _dueDate,
         priority: _priority,
@@ -172,19 +212,15 @@ class _TaskFormState extends State<TaskForm> {
         reminders: _reminders,
       );
     } else {
-      // 更新现有任务
-      final updatedTask = Task(
-        id: widget.task!.id,
+      final updatedTask = widget.task!.copyWith(
         title: _titleController.text,
         description:
-            _descriptionController.text.isEmpty
+            _notesController.text.isEmpty
                 ? null
-                : _descriptionController.text,
-        createdAt: widget.task!.createdAt,
+                : _notesController.text,
         startDate: _startDate,
         dueDate: _dueDate,
         priority: _priority,
-        status: widget.task!.status,
         tags: _tags,
         subtasks: _subtasks,
         reminders: _reminders,
@@ -197,214 +233,182 @@ class _TaskFormState extends State<TaskForm> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.task == null
-              ? TodoLocalizations.of(context).newTask
-              : TodoLocalizations.of(context).editTask,
-        ),
-        actions: [
-          IconButton(icon: const Icon(Icons.check), onPressed: _saveTask),
+  // --- Widget Builders ---
+
+  Widget _buildHeader() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              icon: const Icon(Icons.close, size: 28),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () => Navigator.pop(context),
+              color: isDark ? Colors.white : Colors.grey[800],
+            ),
+          ),
+          Expanded(
+            child: Text(
+              widget.task == null
+                  ? TodoLocalizations.of(context).newTask
+                  : TodoLocalizations.of(context).editTask,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.grey[900],
+              ),
+            ),
+          ),
+           Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              icon: const Icon(Icons.more_horiz, size: 28),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () {
+                // Placeholder for more options
+              },
+              color: isDark ? Colors.white : Colors.grey[800],
+            ),
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 标题
-            TextField(
+    );
+  }
+
+  Widget _buildTitleSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.add_reaction_outlined,
+              color: isDark ? Colors.grey[400] : Colors.grey[500],
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: TextField(
               controller: _titleController,
+              style: TextStyle(
+                fontSize: 20, 
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.grey[900],
+              ),
               decoration: InputDecoration(
-                labelText: TodoLocalizations.of(context).title,
-                border: const OutlineInputBorder(),
+                hintText: TodoLocalizations.of(context).title,
+                border: InputBorder.none,
+                hintStyle: TextStyle(
+                  color: isDark ? Colors.grey[500] : Colors.grey[400],
+                ),
+                contentPadding: EdgeInsets.zero,
               ),
             ),
-            const SizedBox(height: 16),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // 描述
-            TextField(
-              controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: TodoLocalizations.of(context).description,
-                border: const OutlineInputBorder(),
+  Widget _buildNotesSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return _buildSectionContainer(
+      label: TodoLocalizations.of(context).notes,
+      child: TextField(
+        controller: _notesController,
+        maxLines: null,
+        minLines: 4,
+        style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
+        decoration: InputDecoration(
+          hintText: 'Add some notes...',
+          hintStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[400]),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+               color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+             borderRadius: BorderRadius.circular(12),
+             borderSide: BorderSide(
+               color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+            ),
+          ),
+           focusedBorder: OutlineInputBorder(
+             borderRadius: BorderRadius.circular(12),
+             borderSide: const BorderSide(
+               color: _primaryColor,
+               width: 1.5,
+            ),
+          ),
+          filled: true,
+          fillColor: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+          contentPadding: const EdgeInsets.all(12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTagsSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return _buildSectionContainer(
+      label: TodoLocalizations.of(context).tags,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+           color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+           border: Border.all(
+             color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+           ),
+        ),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            ..._tags.map((tag) => _buildTagChip(tag)),
+            InkWell(
+              onTap: _showAddTagDialog,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.add_circle_outline, color: _primaryColor, size: 20),
+                    const SizedBox(width: 4),
+                    Text(
+                      TodoLocalizations.of(context).addTag,
+                      style: const TextStyle(
+                        color: _primaryColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-
-            // 日期范围
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${TodoLocalizations.of(context).startDate}: ${_startDate == null ? TodoLocalizations.of(context).notSet : '${_startDate!.year}/${_startDate!.month}/${_startDate!.day}'}',
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${TodoLocalizations.of(context).dueDate}: ${_dueDate == null ? TodoLocalizations.of(context).notSet : '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}'}',
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => _selectDateRange(context),
-                  child: Text(TodoLocalizations.of(context).selectDates),
-                ),
-                if (_startDate != null || _dueDate != null)
-                  IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: _clearDateRange,
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 优先级
-            Text(TodoLocalizations.of(context).priority),
-            const SizedBox(height: 8),
-            SegmentedButton<TaskPriority>(
-              segments: [
-                ButtonSegment<TaskPriority>(
-                  value: TaskPriority.low,
-                  label: Text(TodoLocalizations.of(context).low),
-                  icon: const Icon(Icons.arrow_downward),
-                ),
-                ButtonSegment<TaskPriority>(
-                  value: TaskPriority.medium,
-                  label: Text(TodoLocalizations.of(context).medium),
-                  icon: const Icon(Icons.remove),
-                ),
-                ButtonSegment<TaskPriority>(
-                  value: TaskPriority.high,
-                  label: Text(TodoLocalizations.of(context).high),
-                  icon: const Icon(Icons.arrow_upward),
-                ),
-              ],
-              selected: {_priority},
-              onSelectionChanged: (Set<TaskPriority> newSelection) {
-                setState(() {
-                  _priority = newSelection.first;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // 标签
-            Text(TodoLocalizations.of(context).tags),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8.0,
-              runSpacing: 4.0,
-              children: [
-                ..._tags.map(
-                  (tag) => Chip(
-                    label: Text(tag),
-                    deleteIcon: const Icon(Icons.close, size: 18),
-                    onDeleted: () {
-                      setState(() {
-                        _tags.remove(tag);
-                      });
-                    },
-                  ),
-                ),
-                ActionChip(
-                  avatar: const Icon(Icons.add, size: 18),
-                  label: Text(TodoLocalizations.of(context).addTag),
-                  onPressed: () {
-                    _showAddTagDialog();
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // 子任务
-            Text(
-              TodoLocalizations.of(context).subtasks,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _subtaskController,
-                    decoration: InputDecoration(
-                      labelText:
-                          '${TodoLocalizations.of(context).add} ${TodoLocalizations.of(context).subtasks.toLowerCase()}',
-                      border: const OutlineInputBorder(),
-                    ),
-                    onSubmitted: (_) => _addSubtask(),
-                  ),
-                ),
-                IconButton(icon: const Icon(Icons.add), onPressed: _addSubtask),
-              ],
-            ),
-            const SizedBox(height: 8),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _subtasks.length,
-              itemBuilder: (context, index) {
-                final subtask = _subtasks[index];
-                return ListTile(
-                  leading: Checkbox(
-                    value: subtask.isCompleted,
-                    onChanged: (_) => _toggleSubtask(index),
-                  ),
-                  title: Text(
-                    subtask.title,
-                    style: TextStyle(
-                      decoration:
-                          subtask.isCompleted
-                              ? TextDecoration.lineThrough
-                              : null,
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => _removeSubtask(index),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 24),
-
-            // 提醒
-            Text(
-              TodoLocalizations.of(context).reminders,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              icon: const Icon(Icons.add_alarm),
-              label: Text(TodoLocalizations.of(context).addReminder),
-              onPressed: _addReminder,
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _reminders.length,
-              itemBuilder: (context, index) {
-                final reminder = _reminders[index];
-                return ListTile(
-                  leading: const Icon(Icons.alarm),
-                  title: Text(
-                    '${reminder.year}/${reminder.month}/${reminder.day} ${reminder.hour}:${reminder.minute.toString().padLeft(2, '0')}',
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => _removeReminder(index),
-                  ),
-                );
-              },
             ),
           ],
         ),
@@ -412,46 +416,534 @@ class _TaskFormState extends State<TaskForm> {
     );
   }
 
-  // 显示添加标签对话框
-  void _showAddTagDialog() {
-    final TextEditingController tagController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(TodoLocalizations.of(context).addTag),
-            content: TextField(
-              controller: tagController,
-              decoration: InputDecoration(
-                labelText:
-                    '${TodoLocalizations.of(context).tags} ${TodoLocalizations.of(context).title.toLowerCase()}',
-                hintText:
-                    '${TodoLocalizations.of(context).pleaseEnterTitle.toLowerCase()} ${TodoLocalizations.of(context).tags.toLowerCase()}',
-              ),
-              autofocus: true,
+  Widget _buildTagChip(String tag) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF607AFB).withOpacity(0.2) : const Color(0xFFEFF6FF), // Blue-50 equivalent
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            tag,
+            style: TextStyle(
+              color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E40AF), // Blue-300 : Blue-800
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _tags.remove(tag);
+              });
+            },
+            child: Icon(
+              Icons.close,
+              size: 14,
+              color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E40AF),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubtasksSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+     return _buildSectionContainer(
+      label: TodoLocalizations.of(context).subtasks,
+      child: Container(
+        decoration: BoxDecoration(
+           color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+          ),
+        ),
+        child: Column(
+          children: [
+            if (_subtasks.isNotEmpty)
+              ..._subtasks.asMap().entries.map((entry) {
+                 final index = entry.key;
+                 final subtask = entry.value;
+                 return Container(
+                   decoration: BoxDecoration(
+                     border: Border(bottom: BorderSide(
+                       color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+                     )),
+                   ),
+                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                   child: Row(
+                     children: [
+                       SizedBox(
+                         width: 20,
+                         height: 20,
+                         child: Checkbox(
+                           value: subtask.isCompleted,
+                           onChanged: (_) => _toggleSubtask(index),
+                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                           activeColor: _primaryColor,
+                           side: BorderSide(
+                             color: isDark ? Colors.white.withOpacity(0.2) : Colors.grey[400]!,
+                             width: 2,
+                           ),
+                         ),
+                       ),
+                       const SizedBox(width: 12),
+                       Expanded(
+                         child: Text(
+                           subtask.title,
+                           style: TextStyle(
+                             decoration: subtask.isCompleted ? TextDecoration.lineThrough : null,
+                             fontSize: 16,
+                             color: isDark ? Colors.white : Colors.grey[900],
+                           ),
+                         ),
+                       ),
+                       IconButton(
+                         icon: const Icon(Icons.close, size: 18),
+                         onPressed: () => _removeSubtask(index),
+                         color: isDark ? Colors.grey[400] : Colors.grey[500],
+                       )
+                     ],
+                   ),
+                 );
+              }),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  InkWell(
+                    onTap: _addSubtask,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Row(
+                      children: [
+                         const Icon(Icons.add_circle_outline, color: _primaryColor, size: 20),
+                         const SizedBox(width: 8),
+                         Text(
+                            '${TodoLocalizations.of(context).add} ${TodoLocalizations.of(context).subtasks}',
+                            style: const TextStyle(
+                              color: _primaryColor,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _subtaskController,
+                      style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
+                      decoration: InputDecoration(
+                        hintText: '', // Placeholder is covered by the button text effectively or we can add one
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      onSubmitted: (_) => _addSubtask(),
+                    ),
+                  ),
+                ],
               ),
-              TextButton(
-                onPressed: () {
-                  final tagName = tagController.text.trim();
-                  if (tagName.isNotEmpty && !_tags.contains(tagName)) {
-                    setState(() {
-                      _tags.add(tagName);
-                    });
-                  }
-                  Navigator.of(context).pop();
-                },
-                child: Text(TodoLocalizations.of(context).add),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildInputBox(
+              label: TodoLocalizations.of(context).startDate,
+              icon: Icons.calendar_today_outlined,
+              value: _startDate != null ? DateFormat.yMMMEd().format(_startDate!) : '',
+              placeholder: DateFormat.yMMMEd().format(DateTime.now()),
+              onTap: () => _selectStartDate(context),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: _buildInputBox(
+              label: TodoLocalizations.of(context).dueDate,
+              icon: Icons.calendar_today_outlined,
+              value: _dueDate != null ? DateFormat.yMMMEd().format(_dueDate!) : '',
+              placeholder: DateFormat.yMMMEd().format(DateTime.now().add(const Duration(days: 1))),
+              onTap: () => _selectDueDate(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPriorityAndReminderSection() {
+     return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildPriorityDropdown(),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: _buildReminderDropdown(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPriorityDropdown() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labels = {
+      TaskPriority.high: TodoLocalizations.of(context).high,
+      TaskPriority.medium: TodoLocalizations.of(context).medium,
+      TaskPriority.low: TodoLocalizations.of(context).low,
+    };
+
+    return _buildSectionContainer(
+      label: TodoLocalizations.of(context).priority.replaceAll(':', ''), // Remove colon if present in loc
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+         decoration: BoxDecoration(
+           color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+             color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.flag_outlined, color: isDark ? Colors.grey[500] : Colors.grey[400]),
+            const SizedBox(width: 8),
+            Expanded(
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<TaskPriority>(
+                  value: _priority,
+                  isExpanded: true,
+                  dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  icon: Icon(Icons.expand_more, color: isDark ? Colors.grey[500] : Colors.grey[400]),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.grey[900],
+                    fontSize: 16,
+                  ),
+                  items: TaskPriority.values.map((p) {
+                    return DropdownMenuItem(
+                      value: p,
+                      child: Text(labels[p] ?? ''),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => _priority = val);
+                    }
+                  },
+                ),
               ),
+            ),
+          ],
+        ),
+      ),
+      padding: EdgeInsets.zero
+    );
+  }
+
+  Widget _buildReminderDropdown() {
+     final isDark = Theme.of(context).brightness == Brightness.dark;
+     String text = 'None';
+     if (_reminders.isNotEmpty) {
+       final r = _reminders.first;
+       text = '${r.month}/${r.day} ${r.hour}:${r.minute.toString().padLeft(2,'0')}';
+       if (_reminders.length > 1) text += ' (+${_reminders.length - 1})';
+     }
+
+     return _buildSectionContainer(
+      label: TodoLocalizations.of(context).reminders,
+      child: GestureDetector(
+        onTap: _showRemindersModal,
+        child: Container(
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+               color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.notifications_outlined, color: isDark ? Colors.grey[500] : Colors.grey[400]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                   style: TextStyle(
+                     fontSize: 16,
+                     color: isDark ? Colors.white : Colors.grey[900],
+                   ),
+                ),
+              ),
+              Icon(Icons.expand_more, color: isDark ? Colors.grey[500] : Colors.grey[400]),
             ],
           ),
+        ),
+      ),
+      padding: EdgeInsets.zero
+    );
+  }
+
+  Widget _buildInputBox({
+    required String label,
+    required IconData icon,
+    required String value,
+    required String placeholder,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 16, bottom: 4),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isDark ? Colors.grey[400] : Colors.grey[500],
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 50,
+            padding: const EdgeInsets.only(left: 10, right: 12), // Adjust padding for icon alignment
+             decoration: BoxDecoration(
+               color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                 color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: isDark ? Colors.grey[500] : Colors.grey[400], size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    value.isEmpty ? placeholder : value,
+                    style: TextStyle(
+                       color: value.isEmpty 
+                          ? (isDark ? Colors.grey[500] : Colors.grey[400]) 
+                          : (isDark ? Colors.white : Colors.grey[900]),
+                       fontSize: 16,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionContainer({required String label, required Widget child, EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 16)}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16, bottom: 4), // Align label with input padding if needed, or keep consistent 16
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isDark ? Colors.grey[400] : Colors.grey[500],
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          child,
+        ],
+      ),
+    );
+  }
+
+  void _showAddTagDialog() {
+    final TextEditingController tagController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(TodoLocalizations.of(context).addTag),
+        content: TextField(
+          controller: tagController,
+          autofocus: true,
+          decoration: InputDecoration(
+             hintText: TodoLocalizations.of(context).tags,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              final tagName = tagController.text.trim();
+              if (tagName.isNotEmpty && !_tags.contains(tagName)) {
+                setState(() {
+                  _tags.add(tagName);
+                });
+              }
+              Navigator.pop(context);
+            },
+            child: Text(TodoLocalizations.of(context).add),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRemindersModal() {
+     showModalBottomSheet(
+       context: context, 
+       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+       shape: const RoundedRectangleBorder(
+         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+       ),
+       builder: (context) => StatefulBuilder(
+         builder: (context, setModalState) {
+           return Container(
+             padding: const EdgeInsets.all(16),
+             height: 400,
+             child: Column(
+               children: [
+                 Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                   children: [
+                     Text(TodoLocalizations.of(context).reminders, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                     IconButton(
+                       icon: const Icon(Icons.add),
+                       onPressed: () async {
+                          Navigator.pop(context); // Close modal to show picker
+                          await _addReminder();
+                          if (mounted) _showRemindersModal(); // Reopen
+                       },
+                     )
+                   ],
+                 ),
+                 const Divider(),
+                 Expanded(
+                   child: ListView.builder(
+                     itemCount: _reminders.length,
+                     itemBuilder: (context, index) {
+                       final r = _reminders[index];
+                       return ListTile(
+                         leading: const Icon(Icons.alarm),
+                         title: Text(DateFormat.yMMMEd().add_jm().format(r)),
+                         trailing: IconButton(
+                           icon: const Icon(Icons.delete),
+                           onPressed: () {
+                             setState(() => _reminders.removeAt(index));
+                             setModalState(() {});
+                           },
+                         ),
+                       );
+                     },
+                   ),
+                 )
+               ],
+             ),
+           );
+         }
+       )
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: isDark ? _backgroundDark : _backgroundLight,
+      body: SafeArea(
+        child: Column(
+          children: [
+             _buildHeader(),
+             Expanded(
+               child: SingleChildScrollView(
+                 padding: const EdgeInsets.only(bottom: 80), // Space for button
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     const SizedBox(height: 8),
+                     _buildTitleSection(),
+                     const SizedBox(height: 24),
+                     _buildNotesSection(),
+                     const SizedBox(height: 16),
+                     _buildTagsSection(),
+                     const SizedBox(height: 16),
+                     _buildSubtasksSection(),
+                     const SizedBox(height: 16),
+                     _buildDateSection(),
+                     const SizedBox(height: 16),
+                     _buildPriorityAndReminderSection(),
+                     const SizedBox(height: 32),
+                   ],
+                 ),
+               ),
+             ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+           color: isDark ? _backgroundDark : _backgroundLight,
+           border: Border(top: BorderSide(
+             color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+           )),
+        ),
+        child: ElevatedButton(
+          onPressed: _saveTask,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _primaryColor,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 52), // 52px height commonly used
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(26), // Full rounded
+            ),
+            elevation: 0,
+            shadowColor: Colors.transparent,
+          ),
+          child: Text(
+            widget.task == null 
+                ? TodoLocalizations.of(context).createTask
+                : TodoLocalizations.of(context).saveTask, 
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
     );
   }
 }

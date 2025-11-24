@@ -177,7 +177,11 @@ class _TodoMainViewState extends State<TodoMainView> {
                 onTaskDismissed: (task) {
                   _plugin.taskController.deleteTask(task.id);
                 },
+                onSubtaskStatusChanged: (taskId, subtaskId, isCompleted) {
+                  _plugin.taskController.updateSubtaskStatus(taskId, subtaskId, isCompleted);
+                },
               );
+
         },
       ),
       // 添加任务按钮

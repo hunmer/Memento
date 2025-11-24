@@ -17,6 +17,7 @@ abstract class TodoLocalizations {
   String get deleteTaskTitle;
   String get deleteTaskMessage;
   String get description;
+  String get notes;
   String get tags;
   String get timer;
   String get duration;
@@ -48,6 +49,8 @@ abstract class TodoLocalizations {
   String get completedTaskDetailsTitle;
   String get newTask;
   String get editTask;
+  String get createTask;
+  String get saveTask;
   String get title;
   String get startDate;
   String get notSet;
