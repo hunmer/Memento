@@ -460,7 +460,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 创建账单
-  /// @param params.accountId 账户ID (必需)
+  /// @param params.accountId 账户ID (可选，不传则使用第一个账户)
   /// @param params.amount 金额 (必需，正数=收入，负数=支出)
   /// @param params.category 分类 (必需)
   /// @param params.title 标题 (必需)
@@ -468,9 +468,15 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   /// @param params.note 备注 (可选，默认空字符串)
   /// @param params.tag 标签 (可选)
   Future<String> _jsCreateBill(Map<String, dynamic> params) async {
-    final String? accountId = params['accountId'];
+    String? accountId = params['accountId'];
+
+    // 如果没有提供 accountId，使用第一个账户
     if (accountId == null || accountId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: accountId'});
+      final accounts = _billController.accounts;
+      if (accounts.isEmpty) {
+        return jsonEncode({'error': '没有可用账户，请先创建账户'});
+      }
+      accountId = accounts.first.id;
     }
 
     final double? amount = (params['amount'] as num?)?.toDouble();

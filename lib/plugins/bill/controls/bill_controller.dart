@@ -267,14 +267,10 @@ class BillController with ChangeNotifier {
     return allBills.where((bill) {
       bool match = true;
       if (startDate != null) {
-        match =
-            match &&
-            bill.createdAt.isAfter(startDate.subtract(const Duration(days: 1)));
+        match = match && bill.createdAt.isAfter(startDate.subtract(const Duration(seconds: 1)));
       }
       if (endDate != null) {
-        match =
-            match &&
-            bill.createdAt.isBefore(endDate.add(const Duration(days: 1)));
+        match = match && bill.createdAt.isBefore(endDate.add(const Duration(days: 1)));
       }
       return match;
     }).toList();

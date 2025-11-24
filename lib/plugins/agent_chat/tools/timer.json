@@ -70,7 +70,7 @@
     ],
     "returns": {
       "type": "Object",
-      "description": "创建结果对象,包含 success, taskId, message"
+      "description": "创建结果对象,包含 success, id, message"
     },
     "examples": [
       {
@@ -126,7 +126,7 @@
     ],
     "returns": {
       "type": "Object",
-      "description": "启动结果对象,包含 success, message, taskId, isRunning"
+      "description": "启动结果对象,包含 success, message, id, isRunning"
     },
     "examples": [
       {
@@ -150,7 +150,7 @@
     ],
     "returns": {
       "type": "Object",
-      "description": "暂停结果对象,包含 success, message, taskId, isRunning"
+      "description": "暂停结果对象,包含 success, message, id, isRunning"
     },
     "examples": [
       {
@@ -174,7 +174,7 @@
     ],
     "returns": {
       "type": "Object",
-      "description": "停止结果对象,包含 success, message, taskId, isRunning"
+      "description": "停止结果对象,包含 success, message, id, isRunning"
     },
     "examples": [
       {
@@ -198,7 +198,7 @@
     ],
     "returns": {
       "type": "Object",
-      "description": "重置结果对象,包含 success, message, taskId"
+      "description": "重置结果对象,包含 success, message, id"
     },
     "examples": [
       {
@@ -230,7 +230,7 @@
         "comment": "查询计时器状态"
       }
     ],
-    "notes": "返回字段: taskId, name, isRunning, isCompleted, elapsedDuration, repeatCount, remainingRepeatCount, currentTimerIndex, activeTimer(当前活动的子计时器), timerItems(所有子计时器列表)",
+    "notes": "返回字段: id, name, isRunning, isCompleted, elapsedDuration, repeatCount, remainingRepeatCount, currentTimerIndex, activeTimer(当前活动的子计时器), timerItems(所有子计时器列表)",
     "enabled": true
   },
   "timer_getHistory": {

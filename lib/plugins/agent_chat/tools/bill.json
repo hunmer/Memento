@@ -157,9 +157,9 @@
   },
   "createBill": {
     "title": "创建账单",
-    "description": "在指定账户中创建新账单",
+    "description": "在指定账户中创建新账单，不指定账户时使用第一个账户",
     "parameters": [
-      {"name": "accountId", "type": "string", "required": true, "description": "账户ID"},
+      {"name": "accountId", "type": "string", "required": false, "description": "账户ID（可选，不传则使用第一个账户）"},
       {"name": "amount", "type": "number", "required": true, "description": "金额（正数=收入，负数=支出）"},
       {"name": "category", "type": "string", "required": true, "description": "分类（如：工资、餐饮、交通）"},
       {"name": "title", "type": "string", "required": true, "description": "账单标题"},
@@ -186,11 +186,11 @@
         "code": "const bill = await Memento.plugins.bill.createBill({\n  accountId: 'acc123',\n  amount: -299,\n  category: '购物',\n  title: '购买书籍',\n  id: 'bill123',\n  date: '2025-01-15',\n  note: '技术书籍《代码大全》'\n});\nsetResult(`账单已创建，自定义ID: ${bill.id}`);"
       },
       {
-        "title": "自动使用首个账户创建账单",
-        "code": "const accounts = await Memento.plugins.bill.getAccounts({});\nif (accounts.length === 0) {\n  setResult('错误：没有可用账户，请先创建账户');\n} else {\n  const firstAccountId = accounts[0].id;\n  const bill = await Memento.plugins.bill.createBill({accountId: firstAccountId, amount: -88, category: '交通', title: '地铁费'});\n  setResult(`已在账户 ${accounts[0].title} 中创建账单`);\n}"
+        "title": "自动使用首个账户创建账单（推荐）",
+        "code": "const bill = await Memento.plugins.bill.createBill({amount: -88, category: '交通', title: '地铁费'});\nsetResult(`已在默认账户中创建账单: ${bill.id}`);"
       }
     ],
-    "notes": "必需参数: accountId(账户ID)、amount(金额)、category(分类)、title(账单标题);可选参数: id(自定义ID)、date(日期)、note(备注)、tag(标签);如果不提供id会自动生成UUID;ID不能与现有账单重复;金额为正数记录收入，负数记录支出;不提供日期时使用当天日期",
+    "notes": "必需参数: amount(金额)、category(分类)、title(账单标题);可选参数: accountId(账户ID，不传则使用第一个账户)、id(自定义ID)、date(日期)、note(备注)、tag(标签);如果不提供id会自动生成UUID;ID不能与现有账单重复;金额为正数记录收入，负数记录支出;不提供日期时使用当天日期;如果没有账户会报错",
     "enabled": true
   },
   "updateBill": {

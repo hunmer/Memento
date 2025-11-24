@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'dart:convert';
 
 /// 系统桌面小组件数据同步服务
@@ -17,7 +18,10 @@ class SystemWidgetService {
 
   /// 初始化 home_widget
   Future<void> initialize() async {
-    await HomeWidget.setAppGroupId(_appGroupId);
+    // 只在 iOS 平台上设置 App Group ID，因为 setAppGroupId 只在 iOS 上有效
+    if (UniversalPlatform.isIOS) {
+      await HomeWidget.setAppGroupId(_appGroupId);
+    }
   }
 
   /// 更新插件小组件数据
@@ -25,26 +29,51 @@ class SystemWidgetService {
   /// [pluginId] 插件ID
   /// [data] 小组件数据
   Future<void> updateWidgetData(String pluginId, PluginWidgetData data) async {
-    final jsonData = jsonEncode(data.toJson());
-    await HomeWidget.saveWidgetData<String>('${pluginId}_widget_data', jsonData);
+    // 只在支持的平台上运行（Android 和 iOS）
+    if (!_isWidgetSupported()) {
+      debugPrint('Widget not supported on this platform, skipping update for $pluginId');
+      return;
+    }
 
-    // 触发小组件更新
-    await updateWidget(pluginId);
+    try {
+      final jsonData = jsonEncode(data.toJson());
+      await HomeWidget.saveWidgetData<String>('${pluginId}_widget_data', jsonData);
+
+      // 触发小组件更新
+      await updateWidget(pluginId);
+    } catch (e) {
+      debugPrint('Failed to update widget data for $pluginId: $e');
+    }
   }
 
   /// 更新指定插件的所有小组件
   Future<void> updateWidget(String pluginId) async {
+    // 只在支持的平台上运行（Android 和 iOS）
+    if (!_isWidgetSupported()) {
+      return;
+    }
+
     final providerName = _getProviderName(pluginId);
     if (providerName != null) {
-      await HomeWidget.updateWidget(
-        androidName: providerName,
-        iOSName: providerName,
-      );
+      try {
+        await HomeWidget.updateWidget(
+          androidName: providerName,
+          iOSName: providerName,
+        );
+      } catch (e) {
+        debugPrint('Failed to update widget $pluginId: $e');
+      }
     }
   }
 
   /// 更新所有插件的小组件
   Future<void> updateAllWidgets() async {
+    // 只在支持的平台上运行（Android 和 iOS）
+    if (!_isWidgetSupported()) {
+      debugPrint('Widget not supported on this platform, skipping updateAllWidgets');
+      return;
+    }
+
     final providers = [
       'TodoWidgetProvider',
       'TimerWidgetProvider',
@@ -109,11 +138,43 @@ class SystemWidgetService {
 
   /// 处理小组件点击事件
   Future<Uri?> getInitialUri() async {
-    return await HomeWidget.initiallyLaunchedFromHomeWidget();
+    // 只在支持的平台上运行（Android 和 iOS）
+    if (!_isWidgetSupported()) {
+      return null;
+    }
+
+    try {
+      return await HomeWidget.initiallyLaunchedFromHomeWidget();
+    } catch (e) {
+      debugPrint('Failed to get initial URI from widget: $e');
+      return null;
+    }
   }
 
   /// 监听小组件点击事件
-  Stream<Uri?> get widgetClicked => HomeWidget.widgetClicked;
+  Stream<Uri?> get widgetClicked {
+    // 只在支持的平台上运行（Android 和 iOS）
+    if (!_isWidgetSupported()) {
+      return Stream.empty();
+    }
+
+    try {
+      return HomeWidget.widgetClicked;
+    } catch (e) {
+      debugPrint('Failed to get widget clicked stream: $e');
+      return Stream.empty();
+    }
+  }
+
+  /// 检查当前平台是否支持小组件
+  bool isWidgetSupported() {
+    return UniversalPlatform.isAndroid || UniversalPlatform.isIOS;
+  }
+
+  /// 检查当前平台是否支持小组件（私有方法）
+  bool _isWidgetSupported() {
+    return isWidgetSupported();
+  }
 }
 
 /// 插件小组件数据模型

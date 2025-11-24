@@ -79,7 +79,7 @@ console.log(JSON.parse(result2));
 ```json
 {
   "success": true,
-  "taskId": "1705300800000",
+  "id": "1705300800000",
   "message": "计时器创建成功"
 }
 ```
@@ -127,7 +127,7 @@ console.log(JSON.parse(result));
 {
   "success": true,
   "message": "计时器已启动",
-  "taskId": "1705300800000",
+  "id": "1705300800000",
   "isRunning": true
 }
 ```
@@ -152,7 +152,7 @@ console.log(JSON.parse(result));
 {
   "success": true,
   "message": "计时器已暂停",
-  "taskId": "1705300800000",
+  "id": "1705300800000",
   "isRunning": false
 }
 ```
@@ -177,7 +177,7 @@ console.log(JSON.parse(result));
 {
   "success": true,
   "message": "计时器已停止",
-  "taskId": "1705300800000",
+  "id": "1705300800000",
   "isRunning": false
 }
 ```
@@ -202,7 +202,7 @@ console.log(JSON.parse(result));
 {
   "success": true,
   "message": "计时器已重置",
-  "taskId": "1705300800000"
+  "id": "1705300800000"
 }
 ```
 
@@ -224,7 +224,7 @@ console.log(JSON.parse(status));
 **返回格式:**
 ```json
 {
-  "taskId": "1705300800000",
+  "id": "1705300800000",
   "name": "测试多计时器",
   "isRunning": true,
   "isCompleted": false,
@@ -315,13 +315,13 @@ const createResult = await window.memento.timer.createTimer(
   'countUp',
   '学习'
 );
-const { taskId } = JSON.parse(createResult);
+const { id } = JSON.parse(createResult);
 
 // 启动计时器
-await window.memento.timer.startTimer(taskId);
+await window.memento.timer.startTimer(id);
 
 // 获取状态
-const status = await window.memento.timer.getTimerStatus(taskId);
+const status = await window.memento.timer.getTimerStatus(id);
 console.log('当前状态:', JSON.parse(status));
 ```
 
