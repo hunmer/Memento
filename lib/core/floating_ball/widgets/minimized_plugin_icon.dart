@@ -59,32 +59,51 @@ class _MinimizedPluginIconState extends State<MinimizedPluginIcon>
 
   /// 获取默认位置
   Offset _getDefaultPosition(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
+    try {
+      final screenSize = MediaQuery.of(context).size;
 
-    // 如果有初始位置，使用初始位置
-    if (widget.initialX != null && widget.initialY != null) {
-      return Offset(widget.initialX!, widget.initialY!);
-    } else {
-      // 否则默认放在右下角
-      return Offset(
-        screenSize.width - _iconSize - 20,
-        screenSize.height - _iconSize - 20,
-      );
+      // 如果有初始位置，使用初始位置（但避免使用 Offset.zero）
+      if (widget.initialX != null && widget.initialY != null) {
+        final initialPosition = Offset(widget.initialX!, widget.initialY!);
+
+        // 如果初始位置是 (0,0)，则使用默认的右下角位置
+        if (initialPosition == Offset.zero) {
+          return Offset(
+            screenSize.width - _iconSize - 20,
+            screenSize.height - _iconSize - 20,
+          );
+        }
+        return initialPosition;
+      } else {
+        // 否则默认放在右下角
+        return Offset(
+          screenSize.width - _iconSize - 20,
+          screenSize.height - _iconSize - 20,
+        );
+      }
+    } catch (e) {
+      // 如果获取屏幕尺寸失败，返回一个保守的默认位置
+      return const Offset(100, 100);
     }
   }
 
   void _initializePosition() {
     if (_isInitialized) return; // 避免重复初始化
 
-    final screenSize = MediaQuery.of(context).size;
+    try {
+      _position = _getDefaultPosition(context);
 
-    _position = _getDefaultPosition(context);
-
-    // 确保位置在屏幕范围内
-    _position = Offset(
-      _position.dx.clamp(0, screenSize.width - _iconSize),
-      _position.dy.clamp(0, screenSize.height - _iconSize),
-    );
+      // 确保位置在屏幕范围内
+      final screenSize = MediaQuery.of(context).size;
+      _position = Offset(
+        _position.dx.clamp(0, screenSize.width - _iconSize),
+        _position.dy.clamp(0, screenSize.height - _iconSize),
+      );
+    } catch (e) {
+      // 如果出现任何错误，使用安全的默认位置
+      _position = const Offset(100, 100);
+      debugPrint('Error initializing position: $e');
+    }
 
     _isInitialized = true;
   }
@@ -117,17 +136,21 @@ class _MinimizedPluginIconState extends State<MinimizedPluginIcon>
   void _handlePanUpdate(DragUpdateDetails details) {
     if (!_isDragging) return;
 
-    final delta = details.globalPosition - _dragStartOffset;
-    _position = _initialIconPosition + delta;
+    try {
+      final delta = details.globalPosition - _dragStartOffset;
+      _position = _initialIconPosition + delta;
 
-    // 限制图标在屏幕内
-    final screenSize = MediaQuery.of(context).size;
-    _position = Offset(
-      _position.dx.clamp(0, screenSize.width - _iconSize),
-      _position.dy.clamp(0, screenSize.height - _iconSize),
-    );
+      // 限制图标在屏幕内
+      final screenSize = MediaQuery.of(context).size;
+      _position = Offset(
+        _position.dx.clamp(0, screenSize.width - _iconSize),
+        _position.dy.clamp(0, screenSize.height - _iconSize),
+      );
 
-    setState(() {});
+      setState(() {});
+    } catch (e) {
+      debugPrint('Error in pan update: $e');
+    }
   }
 
   void _handlePanEnd(DragEndDetails details) {
@@ -141,66 +164,61 @@ class _MinimizedPluginIconState extends State<MinimizedPluginIcon>
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Stack(
-        children: [
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              // 确保_position已初始化，如果未初始化则使用默认位置
-              final currentPosition =
-                  _isInitialized ? _position : _getDefaultPosition(context);
-              return Positioned(
-                left: currentPosition.dx,
-                top: currentPosition.dy,
-                child: Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: GestureDetector(
-                    onPanStart: _handlePanStart,
-                    onPanUpdate: _handlePanUpdate,
-                    onPanEnd: _handlePanEnd,
-                    onTap: _handleRestore,
-                    child: Container(
-                      width: _iconSize,
-                      height: _iconSize,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color:
-                            widget.plugin.color ??
-                            Theme.of(context).primaryColor,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          // 插件图标
-                          Center(
-                            child: Icon(
-                              widget.plugin.icon ?? Icons.extension,
-                              size: 28,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
+    // 确保_position已初始化，如果未初始化则使用默认位置
+    final currentPosition =
+        _isInitialized ? _position : _getDefaultPosition(context);
+
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Positioned(
+          left: currentPosition.dx,
+          top: currentPosition.dy,
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: GestureDetector(
+              onPanStart: _handlePanStart,
+              onPanUpdate: _handlePanUpdate,
+              onPanEnd: _handlePanEnd,
+              onTap: _handleRestore,
+              behavior: HitTestBehavior.opaque, // 确保能接收点击事件
+              child: Container(
+                width: _iconSize,
+                height: _iconSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color:
+                      widget.plugin.color ??
+                      Theme.of(context).primaryColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
+                  ],
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 2,
                   ),
                 ),
-              );
-            },
+                child: Stack(
+                  children: [
+                    // 插件图标
+                    Center(
+                      child: Icon(
+                        widget.plugin.icon ?? Icons.extension,
+                        size: 28,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
