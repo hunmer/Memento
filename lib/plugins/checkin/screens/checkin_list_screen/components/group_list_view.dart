@@ -20,15 +20,13 @@ class GroupListView extends StatelessWidget {
     return ReorderableListView.builder(
       buildDefaultDragHandles: false, // 禁用默认拖拽手柄
       itemCount: groupListItems.length,
-      onReorder: (oldIndex, newIndex) {
-      },
+      onReorder: (oldIndex, newIndex) {},
       itemBuilder: (context, groupIndex) {
         final groupData = groupListItems[groupIndex];
         final group = groupData['group'] as String;
         final items = (groupData['items'] as List<dynamic>).cast<CheckinItem>();
         final completedCount = groupData['completedCount'] as int;
         final total = groupData['total'] as int;
-        final isExpanded = controller.expandedGroups[group] ?? true;
 
         return GroupCard(
           key: ValueKey('group_${group}_$groupIndex'),
@@ -36,7 +34,7 @@ class GroupListView extends StatelessWidget {
           items: items,
           completedCount: completedCount,
           total: total,
-          isExpanded: isExpanded,
+          isExpanded: true, // 始终展开,不使用折叠功能
           groupIndex: groupIndex,
           controller: controller,
           onStateChanged: onStateChanged,

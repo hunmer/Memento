@@ -1,5 +1,3 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../controllers/checkin_list_controller.dart';
 import '../../../models/checkin_item.dart';
@@ -26,210 +24,494 @@ class CheckinItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => CheckinRecordScreen(
-                    checkinItem: item,
-                    controller: controller,
-                  ),
-            ),
-          ).then((_) => onStateChanged());
-        },
-        onLongPress: () {
-          controller.showItemOptionsDialog(item);
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // 项目名称、图标和描述
-                  Expanded(
-                    child: Row(
-                      children: [
-                        // 项目图标
-                        Icon(item.icon, color: item.color, size: 24),
-                        const SizedBox(width: 8),
+    final theme = Theme.of(context);
+    
+    Widget content;
+    switch (item.cardStyle) {
+      case CheckinCardStyle.small:
+        content = _buildSmallStyle(context, theme);
+        break;
+      case CheckinCardStyle.calendar:
+        content = _buildCalendarStyle(context, theme);
+        break;
+      case CheckinCardStyle.weekly:
+      default:
+        content = _buildWeeklyStyle(context, theme);
+        break;
+    }
 
-                        // 项目名称和描述
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (item.description.isNotEmpty)
-                                Text(
-                                  item.description,
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
+    return Container(
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) => CheckinRecordScreen(
+                      checkinItem: item,
+                      controller: controller,
                     ),
-                  ),
-                ],
               ),
-
-              // 打卡记录信息
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0, top: 4.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        // 上次打卡时间
-                        if (item.lastCheckinDate != null)
-                          Expanded(
-                            child: Text(
-                              '上次打卡: ${DateFormat('yyyy-MM-dd').format(item.lastCheckinDate!)}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-
-                        // 打卡频率
-                        Text(
-                          '频率: ${_getFrequencyText(item)}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                    // 今日打卡记录
-                    ..._buildTodayRecords(context),
-                  ],
-                ),
-              ),
-
-              // 周打卡圆圈
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: WeeklyCheckinCircles(
-                  item: item,
-                  onDateSelected: (selectedDate) {
-                    showDialog(
-                      context: context,
-                      builder:
-                          (context) => CheckinRecordDialog(
-                            item: item,
-                            controller: controller,
-                            onCheckinCompleted: onStateChanged,
-                            selectedDate: selectedDate,
-                          ),
-                    );
-                  },
-                ),
-              ),
-            ],
+            ).then((_) => onStateChanged());
+          },
+          onLongPress: () {
+            controller.showItemOptionsDialog(item);
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: content,
           ),
         ),
       ),
     );
   }
 
-  List<Widget> _buildTodayRecords(BuildContext context) {
-    final todayRecords = item.getTodayRecords();
-    if (todayRecords.isEmpty) {
-      return [];
-    }
-
-    return [
-      const SizedBox(height: 8),
-      Text(
-        '今日打卡记录:',
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
-      ),
-      ...todayRecords.map((record) {
-        final timeStr =
-            '${record.startTime.hour.toString().padLeft(2, '0')}:${record.startTime.minute.toString().padLeft(2, '0')} - '
-            '${record.endTime.hour.toString().padLeft(2, '0')}:${record.endTime.minute.toString().padLeft(2, '0')}';
-        return Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  timeStr + (record.note != null ? ' (${record.note})' : ''),
-                  style: Theme.of(context).textTheme.bodySmall,
+  // --- Weekly Style ---
+  Widget _buildWeeklyStyle(BuildContext context, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header Row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Icon and Name
+            Expanded(
+              child: Row(
+                children: [
+                  _buildIcon(theme),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      item.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Stats (Frequency & Last Check-in)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: theme.dividerColor),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _getWeeklyProgressText(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: item.color,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close, size: 16),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder:
-                        (context) => AlertDialog(
-                          title: Text(
-                            CheckinLocalizations.of(
-                              context,
-                            ).deleteCheckinRecordTitle,
-                          ),
-                          content: Text(
-                            CheckinLocalizations.of(
-                              context,
-                            ).deleteCheckinRecordSimpleMessage,
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text(AppLocalizations.of(context)!.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                await item.cancelCheckinRecord(
-                                  record.checkinTime,
-                                );
-                                onStateChanged();
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              child: Text(AppLocalizations.of(context)!.delete),
-                            ),
-                          ],
-                        ),
-                  );
+                const SizedBox(height: 4),
+                if (item.lastCheckinDate != null)
+                  Row(
+                    children: [
+                      Text(
+                        _formatLastCheckinTime(),
+                        style: TextStyle(fontSize: 10, color: theme.hintColor),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.access_time,
+                        size: 12,
+                        color: theme.hintColor,
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        // Body Row (Weekly Circles + Button)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: WeeklyCheckinCircles(
+                item: item,
+                onDateSelected: (selectedDate) {
+                  _showCheckinDialog(context, selectedDate);
                 },
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
               ),
-            ],
-          ),
-        );
-      }),
-    ];
+            ),
+            const SizedBox(width: 16),
+            // +1 Button
+            _buildPlusOneButton(context, size: 56),
+          ],
+        ),
+      ],
+    );
   }
 
-  String _getFrequencyText(CheckinItem item) {
-    if (item.frequency.every((day) => day)) {
-      return '每天';
-    } else {
-      final days = <String>[];
-      final weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-      for (var i = 0; i < item.frequency.length; i++) {
-        if (item.frequency[i]) {
-          days.add(weekdays[i]);
-        }
+  // --- Small Style ---
+  Widget _buildSmallStyle(BuildContext context, ThemeData theme) {
+    final stats = _calculateMonthlyStats();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(item.icon, color: item.color, size: 20),
+                const SizedBox(width: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 80),
+                  child: Text(
+                    item.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            if (item.lastCheckinDate != null)
+              Row(
+                children: [
+                  Text(
+                    DateFormat('HH:mm').format(item.lastCheckinDate!),
+                    style: TextStyle(fontSize: 10, color: theme.hintColor),
+                  ),
+                  Icon(Icons.edit_note, size: 14, color: theme.hintColor),
+                ],
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        
+        // Stats Box
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildSmallStatItem(context, Icons.checklist_rtl, stats['count']!.toString(), '本次次数', Colors.blue),
+              _buildSmallStatItem(context, Icons.calendar_today, stats['days']!.toString(), '本次天数', Colors.purple),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Progress Button (Acting as +1)
+        InkWell(
+          onTap: () => _showCheckinDialog(context, DateTime.now()),
+          child: Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: item.color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Stack(
+              children: [
+                // Progress Bar
+                FractionallySizedBox(
+                  widthFactor: (stats['count']! / 30).clamp(0.0, 1.0), // Example target 30
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: item.color.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                // Text
+                Center(
+                  child: Text(
+                    '${stats['count']}/30', // Example target
+                    style: TextStyle(
+                      color: item.color,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- Calendar Style ---
+  Widget _buildCalendarStyle(BuildContext context, ThemeData theme) {
+     final stats = _calculateMonthlyStats();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                _buildIcon(theme),
+                const SizedBox(width: 12),
+                Text(
+                  item.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+            if (item.lastCheckinDate != null)
+              Row(
+                children: [
+                  Text(
+                    _formatLastCheckinTime(),
+                    style: TextStyle(fontSize: 12, color: theme.hintColor),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.edit_note, size: 16, color: theme.hintColor),
+                ],
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        
+        // Body
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // Calendar Grid
+            Expanded(
+              child: _buildMonthCalendar(context, theme),
+            ),
+            const SizedBox(width: 16),
+            
+            // Right Side Stats & Button
+            SizedBox(
+              width: 80, // Fixed width for right column
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceAround,
+                       children: [
+                         Expanded(child: _buildSmallStatItem(context, Icons.checklist_rtl, stats['count']!.toString(), '次数', Colors.blue)),
+                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildPlusOneButton(context, size: 60),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // --- Helper Widgets ---
+
+  Widget _buildIcon(ThemeData theme) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: item.color.withValues(alpha: 0.1),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(item.icon, color: item.color, size: 24),
+    );
+  }
+
+  Widget _buildPlusOneButton(BuildContext context, {required double size}) {
+    return InkWell(
+      onTap: () => _showCheckinDialog(context, DateTime.now()),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: item.color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(
+          child: Text(
+            '+1',
+            style: TextStyle(
+              color: item.color,
+              fontSize: size * 0.35,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSmallStatItem(BuildContext context, IconData icon, String value, String label, Color color) {
+    return Column(
+      children: [
+        Icon(icon, size: 16, color: color.withValues(alpha: 0.7)),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        ),
+        Text(
+          label,
+          style: TextStyle(fontSize: 8, color: Theme.of(context).hintColor),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMonthCalendar(BuildContext context, ThemeData theme) {
+    final now = DateTime.now();
+    final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
+    final firstDayOfMonth = DateTime(now.year, now.month, 1);
+    // Adjust weekday to start from 0 (Monday) to 6 (Sunday) if needed, 
+    // or just use grid indices. Text '1' should correspond to day 1.
+    
+    // Reference HTML just lists numbers 1 to 31. Let's do that for simplicity 
+    // to match the visual. It's a simple grid of numbers.
+    
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7,
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+        childAspectRatio: 1,
+      ),
+      itemCount: daysInMonth,
+      itemBuilder: (context, index) {
+        final day = index + 1;
+        final date = DateTime(now.year, now.month, day);
+        final dateStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+        final hasCheckin = item.checkInRecords.containsKey(dateStr) && item.checkInRecords[dateStr]!.isNotEmpty;
+        final isToday = day == now.day;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: hasCheckin ? item.color.withValues(alpha: 0.2) : Colors.transparent,
+            borderRadius: BorderRadius.circular(4),
+            border: isToday && !hasCheckin ? Border.all(color: item.color, width: 1) : null,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            '$day',
+            style: TextStyle(
+              fontSize: 10,
+              color: hasCheckin ? item.color : theme.hintColor,
+              fontWeight: hasCheckin || isToday ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // --- Logic Helpers ---
+
+  void _showCheckinDialog(BuildContext context, DateTime date) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => CheckinRecordDialog(
+            item: item,
+            controller: controller,
+            onCheckinCompleted: onStateChanged,
+            selectedDate: date,
+          ),
+    );
+  }
+
+  Map<String, int> _calculateMonthlyStats() {
+    final now = DateTime.now();
+    final records = item.getMonthlyRecords(now.year, now.month);
+    int count = 0;
+    records.forEach((_, list) => count += list.length);
+    return {'count': count, 'days': records.length};
+  }
+
+  String _getWeeklyProgressText() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    int completedCount = 0;
+    for (int i = 0; i < 7; i++) {
+      final date = startOfWeek.add(Duration(days: i));
+      final dateStr =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      if (item.checkInRecords.containsKey(dateStr) &&
+          item.checkInRecords[dateStr]!.isNotEmpty) {
+        completedCount++;
       }
-      return days.join(', ');
+    }
+    return '$completedCount 次/周';
+  }
+
+  String _formatLastCheckinTime() {
+    final lastDate = item.lastCheckinDate;
+    if (lastDate == null) return '';
+
+    final now = DateTime.now();
+    final diff = now.difference(lastDate);
+
+    if (diff.inDays == 0) {
+      final records = item.getDateRecords(lastDate);
+      if (records.isNotEmpty) {
+        return DateFormat('HH:mm').format(records.first.checkinTime);
+      }
+      return '今天';
+    } else if (diff.inDays == 1) {
+      final records = item.getDateRecords(lastDate);
+      if (records.isNotEmpty) {
+        return '昨天 ${DateFormat('HH:mm').format(records.first.checkinTime)}';
+      }
+      return '昨天';
+    } else {
+      return DateFormat('MM-dd').format(lastDate);
     }
   }
 }

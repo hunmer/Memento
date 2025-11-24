@@ -17,41 +17,58 @@ class CheckinListController {
   final BuildContext context;
   final List<CheckinItem> checkinItems;
   final Function() onStateChanged;
-  final Map<String, bool> expandedGroups;
+  
+  // 移除 expandedGroups，不再使用分组展开/折叠逻辑
+  // final Map<String, bool> expandedGroups; 
+
   GroupSortType currentSortType = GroupSortType.upcoming;
   bool isReversed = false;
+  
+  String selectedGroup = '全部'; // 当前选中的分组
 
   CheckinListController({
     required this.context,
     required this.checkinItems,
     required this.onStateChanged,
-    required this.expandedGroups,
+    // required this.expandedGroups, // Remove this parameter
   });
 
-  // 获取所有分组
-  List<String> get groups =>
-      checkinItems.map((item) => item.group).toSet().toList()..sort();
-
-  // 构建分组列表项
-  List<Map<String, dynamic>> buildGroupListItems() {
-    final items = <Map<String, dynamic>>[];
-    for (var group in groups) {
-      final groupItems = groupedItems[group] ?? [];
-      final completedCount =
-          groupItems.where((item) => item.isCheckedToday()).length;
-      items.add({
-        'group': group,
-        'items': groupItems,
-        'completedCount': completedCount,
-        'total': groupItems.length,
-      });
-    }
-
-    // 应用排序
-    return GroupSortService.sortGroups(items, currentSortType, isReversed);
+  // 获取所有分组 (用于过滤栏)
+  List<String> get groups {
+    final g = checkinItems.map((item) => item.group).toSet().toList()..sort();
+    return ['全部', ...g];
   }
 
-  // 按分组获取打卡项目
+  // 选择分组
+  void selectGroup(String group) {
+    selectedGroup = group;
+    onStateChanged();
+  }
+
+  // 获取过滤后的打卡项目
+  List<CheckinItem> get filteredItems {
+    List<CheckinItem> items;
+    if (selectedGroup == '全部') {
+      items = List.from(checkinItems);
+    } else {
+      items = checkinItems.where((item) => item.group == selectedGroup).toList();
+    }
+    
+    // 这里可以应用排序，如果需要的话。目前保持默认顺序或添加简单的排序。
+    // 暂时保持添加顺序，或者可以复用 GroupSortService 对 flat list 进行排序 (需要修改 Service 支持 List<CheckinItem>)
+    // 简单起见，这里先不进行复杂排序，或者复用之前的排序逻辑但应用在 List<CheckinItem> 上
+    
+    return items;
+  }
+
+  // 更新卡片风格
+  Future<void> updateCardStyle(CheckinItem item, CheckinCardStyle style) async {
+    item.cardStyle = style;
+    await CheckinPlugin.shared.triggerSave();
+    onStateChanged();
+  }
+
+  // 按分组获取打卡项目 (用于统计或旧逻辑兼容)
   Map<String, List<CheckinItem>> get groupedItems {
     final grouped = <String, List<CheckinItem>>{};
     for (var item in checkinItems) {
@@ -67,7 +84,10 @@ class CheckinListController {
   // 获取统计信息
   Map<String, dynamic> getStatistics() {
     final groupStats = <String, Map<String, int>>{};
-    for (var group in groups) {
+    // Use actual groups from items, not including 'All'
+    final actualGroups = checkinItems.map((item) => item.group).toSet().toList()..sort();
+    
+    for (var group in actualGroups) {
       final items = groupedItems[group] ?? [];
       final completed = items.where((item) => item.isCheckedToday()).length;
       groupStats[group] = {'total': items.length, 'completed': completed};
@@ -90,7 +110,7 @@ class CheckinListController {
       'totalItems': totalItems,
       'completedItems': completedItems,
       'completionRate': completionRate,
-      'todayCheckins': todayCheckins, // 添加今日打卡总次数
+      'todayCheckins': todayCheckins,
     };
   }
 
@@ -101,13 +121,6 @@ class CheckinListController {
       totalRecords += item.getTodayRecords().length;
     }
     return totalRecords;
-  }
-
-  // 获取特定分组的统计信息
-  Map<String, int> getGroupStats(String group) {
-    final items = groupedItems[group] ?? [];
-    final completed = items.where((item) => item.isCheckedToday()).length;
-    return {'total': items.length, 'completed': completed};
   }
 
   // 恢复最后一次排序设置
@@ -131,8 +144,9 @@ class CheckinListController {
     }
   }
 
-  // 显示分组排序对话框
+  // 显示分组排序对话框 (可能需要调整为列表排序)
   Future<void> showGroupSortDialog() async {
+    // Temporary: keep as is, or disable if sorting isn't prioritized in this refactor
     await showDialog(
       context: context,
       builder:
@@ -247,6 +261,14 @@ class CheckinListController {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
+                  leading: const Icon(Icons.style),
+                  title: Text('修改卡片显示风格'), // TODO: Localize
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showCardStyleDialog(item);
+                  },
+                ),
+                ListTile(
                   leading: const Icon(Icons.edit),
                   title: Text(
                     CheckinLocalizations.of(context).editCheckinItem,
@@ -284,6 +306,38 @@ class CheckinListController {
     );
   }
 
+  void _showCardStyleDialog(CheckinItem item) {
+    showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('选择卡片风格'), // TODO: Localize
+        children: [
+          SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context);
+              updateCardStyle(item, CheckinCardStyle.weekly);
+            },
+            child: const Text('七天显示 (默认)'),
+          ),
+          SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context);
+              updateCardStyle(item, CheckinCardStyle.small);
+            },
+            child: const Text('小卡片风格 (1/2宽度)'),
+          ),
+          SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context);
+              updateCardStyle(item, CheckinCardStyle.calendar);
+            },
+            child: const Text('日历风格'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // 编辑打卡项目
   void _editCheckinItem(CheckinItem item) {
     Navigator.push<CheckinItem>(
@@ -296,8 +350,7 @@ class CheckinListController {
         final index = checkinItems.indexOf(item);
         if (index != -1) {
           checkinItems[index] = editedItem;
-          // 如果分组改变了，确保新分组是展开的
-          expandedGroups[editedItem.group] = true;
+          // 如果分组改变了，无需再处理 expandedGroups
           await CheckinPlugin.shared.triggerSave();
           onStateChanged();
         }
@@ -452,6 +505,8 @@ class CheckinListController {
   void showGroupManagementDialog() {
     // 获取当前的标签组
     List<TagGroup> getCurrentTagGroups() {
+      // Re-calculate groups as selectedGroup shouldn't affect management
+      final groups = checkinItems.map((item) => item.group).toSet().toList()..sort();
       return groups.map((group) {
         final items = groupedItems[group] ?? [];
         return TagGroup(
@@ -514,15 +569,11 @@ class CheckinListController {
                 final existingItemNames =
                     existingItems.map((e) => e.name).toSet();
 
-                // 确保新分组是展开的
-                expandedGroups[tagGroup.name] = true;
-
                 // 更新现有项目的分组
                 for (var tag in tagGroup.tags) {
                   // 如果标签不在现有项目中，创建新项目
                   if (!existingItemNames.contains(tag)) {
                     // 这里不需要显示对话框，因为已经通过onAddTag回调处理了
-                    // 只需确保标签已经被正确添加到项目中
                   }
                 }
 
@@ -639,8 +690,6 @@ class CheckinListController {
           // 添加新项目
           checkinItems.add(checkinItem);
         }
-        // 确保新添加的项目所在的分组是展开的
-        expandedGroups[checkinItem.group] = true;
         await CheckinPlugin.shared.triggerSave();
         onStateChanged();
         completer.complete(checkinItem.name);
@@ -683,6 +732,5 @@ class CheckinListController {
   // 释放资源
   void dispose() {
     // 清理资源
-    expandedGroups.clear();
   }
 }

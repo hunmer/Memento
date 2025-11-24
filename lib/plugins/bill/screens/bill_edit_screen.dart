@@ -11,6 +11,7 @@ class BillEditScreen extends StatefulWidget {
   final Bill? bill;
   final VoidCallback? onSaved;
   final VoidCallback? onCancel;
+  final DateTime? initialDate;
 
   const BillEditScreen({
     super.key,
@@ -19,6 +20,7 @@ class BillEditScreen extends StatefulWidget {
     this.bill,
     this.onSaved,
     this.onCancel,
+    this.initialDate,
   });
 
   @override
@@ -58,6 +60,11 @@ class _BillEditScreenState extends State<BillEditScreen> {
     _titleController = TextEditingController();
     _amountController = TextEditingController();
     _noteController = TextEditingController();
+    
+    if (widget.initialDate != null) {
+      _selectedDate = widget.initialDate!;
+    }
+    
     if (widget.bill != null) {
       _titleController.text = widget.bill!.title;
       _amountController.text = widget.bill!.absoluteAmount.toString();
