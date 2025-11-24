@@ -242,11 +242,18 @@ class PluginManager {
     _lastOpenedPluginId = plugin.id; // 记录最后打开的插件ID
     _saveLastOpenedPlugin(); // 保存最后打开的插件ID
     _updatePluginAccessTime(plugin.id);
-    Navigator.pushNamed(context, '/${plugin.id}');
+
+    // 清除历史路由记录，只保留根路由
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/${plugin.id}',
+      (route) => route.isFirst,
+    );
   }
 
   static toHomeScreen(BuildContext context) {
     PluginManager.instance._currentPlugin = null; // 清除当前插件记录
-    Navigator.pushNamed(context, '/');
+    // 清除所有历史路由，回到根路由
+    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 }

@@ -8,7 +8,9 @@ import 'l10n/activity_localizations.dart';
 import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_statistics_screen.dart';
 import 'services/activity_service.dart';
+import 'services/activity_notification_service.dart';
 import 'models/activity_record.dart';
+import 'dart:io';
 
 class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   static ActivityPlugin? _instance;
@@ -29,6 +31,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   late ActivityService _activityService;
+  late ActivityNotificationService _notificationService;
   bool _isInitialized = false;
 
   // 缓存今日统计数据（用于同步访问）
@@ -42,6 +45,14 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       throw StateError('ActivityPlugin has not been initialized');
     }
     return _activityService;
+  }
+
+  // 获取通知服务实例
+  ActivityNotificationService get notificationService {
+    if (!_isInitialized) {
+      throw StateError('ActivityPlugin has not been initialized');
+    }
+    return _notificationService;
   }
 
   @override
@@ -68,6 +79,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     await storage.createDirectory('activity');
     _activityService = ActivityService(storage, 'activity');
 
+    // 初始化通知服务
+    _notificationService = ActivityNotificationService(_activityService);
+    await _notificationService.initialize();
+
     _isInitialized = true;
 
     // 注册 JS API
@@ -92,6 +107,11 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       // 标签管理
       'getTagGroups': _jsGetTagGroups,
       'getRecentTags': _jsGetRecentTags,
+
+      // 通知管理
+      'enableNotification': _jsEnableNotification,
+      'disableNotification': _jsDisableNotification,
+      'getNotificationStatus': _jsGetNotificationStatus,
     };
   }
 
@@ -359,6 +379,66 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     }
   }
 
+  // ==================== 通知相关 API ====================
+
+  /// 启用活动通知
+  /// 参数: params - {} (无需参数)
+  Future<String> _jsEnableNotification(Map<String, dynamic> params) async {
+    try {
+      if (!Platform.isAndroid) {
+        return jsonEncode({
+          'success': false,
+          'error': '仅支持Android平台'
+        });
+      }
+
+      await _notificationService.enable();
+      return jsonEncode({
+        'success': true,
+        'message': '活动通知已启用'
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': '启用通知失败: $e'
+      });
+    }
+  }
+
+  /// 禁用活动通知
+  /// 参数: params - {} (无需参数)
+  Future<String> _jsDisableNotification(Map<String, dynamic> params) async {
+    try {
+      await _notificationService.disable();
+      return jsonEncode({
+        'success': true,
+        'message': '活动通知已禁用'
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': '禁用通知失败: $e'
+      });
+    }
+  }
+
+  /// 获取通知状态
+  /// 参数: params - {} (无需参数)
+  Future<String> _jsGetNotificationStatus(Map<String, dynamic> params) async {
+    try {
+      final stats = _notificationService.getStats();
+      return jsonEncode({
+        'success': true,
+        'status': stats
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': '获取通知状态失败: $e'
+      });
+    }
+  }
+
   // 获取今日活动数
   Future<int> getTodayActivityCount() async {
     if (!_isInitialized) return 0;
@@ -412,6 +492,59 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     // 更新缓存值
     if (count != null) _cachedTodayActivityCount = count;
     if (duration != null) _cachedTodayActivityDuration = duration;
+  }
+
+  // ==================== 通知便捷方法 ====================
+
+  /// 获取最近活动时间（同步方法，用于通知服务）
+  DateTime? getLastActivityTimeSync() {
+    if (!_isInitialized) return null;
+
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      // 同步获取今天的数据（如果有缓存的话）
+      // 由于我们需要同步访问，这里使用简化逻辑
+      // 在实际应用中，通知服务会调用异步方法
+      print('同步获取活动时间：${today.toIso8601String()}'); // 使用today变量
+      return null; // 占位符，实际由ActivityNotificationService处理
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 获取最近活动内容（同步方法，用于通知服务）
+  String? getLastActivityContentSync() {
+    if (!_isInitialized) return null;
+
+    // 同步访问的占位符，实际由ActivityNotificationService处理
+    return null;
+  }
+
+  // ==================== 通知服务便捷方法 ====================
+
+  /// 启用活动通知服务
+  Future<void> enableActivityNotification() async {
+    try {
+      await _notificationService.enable();
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 启用活动通知失败: $e');
+    }
+  }
+
+  /// 禁用活动通知服务
+  Future<void> disableActivityNotification() async {
+    try {
+      await _notificationService.disable();
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 禁用活动通知失败: $e');
+    }
+  }
+
+  /// 获取通知服务状态
+  bool isNotificationEnabled() {
+    return _notificationService.isEnabled;
   }
 
   // 同步获取今日活动数（从缓存）

@@ -1,5 +1,6 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'event/event.dart';
 
 /// 通知控制器 - 处理 awesome_notifications 的初始化和事件
 class NotificationController {
@@ -103,6 +104,12 @@ class NotificationController {
     debugPrint(
       '通知动作接收: ID=${receivedAction.id}, ButtonKey=${receivedAction.buttonKeyPressed}',
     );
+
+    // 检查是否是活动通知
+    if (receivedAction.payload?['type'] == 'activity_reminder') {
+      await _handleActivityNotificationAction(receivedAction);
+      return;
+    }
 
     // 根据按钮 key 处理不同的逻辑
     if (receivedAction.buttonKeyPressed == 'YES') {
@@ -209,5 +216,41 @@ class NotificationController {
   /// 获取活动通知列表
   static Future<List<NotificationModel>> getActiveNotifications() async {
     return await AwesomeNotifications().listScheduledNotifications();
+  }
+
+  /// 处理活动通知的动作
+  static Future<void> _handleActivityNotificationAction(
+    ReceivedAction receivedAction,
+  ) async {
+    debugPrint(
+      '活动通知动作接收: ID=${receivedAction.id}, ButtonKey=${receivedAction.buttonKeyPressed}',
+    );
+
+    if (receivedAction.buttonKeyPressed == 'open_form') {
+      // 打开活动表单
+      debugPrint('用户点击了"记录活动"按钮');
+      _broadcastOpenActivityForm();
+    } else if (receivedAction.buttonKeyPressed == 'dismiss') {
+      // 忽略通知
+      debugPrint('用户点击了"忽略"按钮');
+    } else {
+      // 点击通知本体
+      debugPrint('用户点击了活动通知本体');
+      _broadcastOpenActivityForm();
+    }
+  }
+
+  /// 广播打开活动表单事件
+  static void _broadcastOpenActivityForm() {
+    try {
+      debugPrint('[NotificationController] 广播打开活动表单事件');
+
+      // 使用全局事件管理器广播事件
+      eventManager.broadcast('activity_notification_tapped', EventArgs('activity_notification_tapped'));
+
+      debugPrint('[NotificationController] 事件广播成功: activity_notification_tapped');
+    } catch (e) {
+      debugPrint('[NotificationController] 广播事件失败: $e');
+    }
   }
 }
