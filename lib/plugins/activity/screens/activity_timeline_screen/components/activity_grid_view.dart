@@ -211,15 +211,18 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       final rawStart = _selectionStart!.isBefore(_lastEnteredTime!)
           ? _selectionStart!
           : _lastEnteredTime!;
-      final end = _selectionStart!.isBefore(_lastEnteredTime!)
+      final rawEnd =
+          _selectionStart!.isBefore(_lastEnteredTime!)
           ? _lastEnteredTime!
           : _selectionStart!;
-          
+
       // 由于网格时间从每小时的05分钟开始，我们需要将开始时间向前调整5分钟
-      // 例如：如果选择了8:05，实际应该从8:00开始
+      // 同时也要将结束时间向前调整5分钟，保持时间段的完整性
+      // 例如：如果选择了8:05-10:05，实际应该是8:00-10:00
       final start = rawStart.subtract(const Duration(minutes: 5));
-      
-      // 调用回调函数，传入调整后的开始时间和原始结束时间
+      final end = rawEnd.subtract(const Duration(minutes: 5));
+
+      // 调用回调函数，传入调整后的开始时间和结束时间
       widget.onUnrecordedTimeTap(start, end);
     }
     setState(() {
