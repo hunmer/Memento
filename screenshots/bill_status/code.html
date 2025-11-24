@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="" lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Personal Finance App - Statistics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#3498DB",
+              "background-light": "#f6f6f8",
+              "background-dark": "#101622",
+              "expense": "#E74C3C",
+              "income": "#2ECC71"
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "0.75rem",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full flex-col">
+<header class="sticky top-0 z-10 flex flex-col bg-background-light/80 pt-4 backdrop-blur-sm dark:bg-background-dark/80">
+<div class="flex items-center justify-between px-4">
+<h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">统计报表</h1>
+<div class="flex items-center gap-2">
+<button class="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-600 dark:text-gray-300">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios</span>
+</button>
+<span class="text-lg font-semibold text-gray-800 dark:text-gray-100">2023</span>
+<button class="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-600 dark:text-gray-300">
+<span class="material-symbols-outlined text-2xl">arrow_forward_ios</span>
+</button>
+</div>
+</div>
+<div class="scrollbar-hide mt-4 flex snap-x snap-mandatory space-x-3 overflow-x-auto px-4 pb-2">
+<div class="flex snap-center shrink-0 flex-col items-center justify-center rounded-xl bg-white p-3 text-center ring-2 ring-primary dark:bg-gray-800 dark:ring-primary">
+<div class="text-sm font-bold text-gray-800 dark:text-white">10月</div>
+<div class="mt-1 text-xs font-medium text-income">+¥8.5k</div>
+<div class="mt-0.5 text-xs font-medium text-expense">-¥3.2k</div>
+</div>
+<div class="flex snap-center shrink-0 flex-col items-center justify-center rounded-xl bg-white p-3 text-center dark:bg-gray-800">
+<div class="text-sm font-bold text-gray-400 dark:text-gray-500">9月</div>
+<div class="mt-1 text-xs font-medium text-income">+¥9.1k</div>
+<div class="mt-0.5 text-xs font-medium text-expense">-¥4.5k</div>
+</div>
+<div class="flex snap-center shrink-0 flex-col items-center justify-center rounded-xl bg-white p-3 text-center dark:bg-gray-800">
+<div class="text-sm font-bold text-gray-400 dark:text-gray-500">8月</div>
+<div class="mt-1 text-xs font-medium text-income">+¥7.8k</div>
+<div class="mt-0.5 text-xs font-medium text-expense">-¥2.9k</div>
+</div>
+<div class="flex snap-center shrink-0 flex-col items-center justify-center rounded-xl bg-white p-3 text-center dark:bg-gray-800">
+<div class="text-sm font-bold text-gray-400 dark:text-gray-500">7月</div>
+<div class="mt-1 text-xs font-medium text-income">+¥10.2k</div>
+<div class="mt-0.5 text-xs font-medium text-expense">-¥5.1k</div>
+</div>
+<div class="flex snap-center shrink-0 flex-col items-center justify-center rounded-xl bg-white p-3 text-center dark:bg-gray-800">
+<div class="text-sm font-bold text-gray-400 dark:text-gray-500">6月</div>
+<div class="mt-1 text-xs font-medium text-income">+¥8.9k</div>
+<div class="mt-0.5 text-xs font-medium text-expense">-¥3.8k</div>
+</div>
+<div class="flex snap-center shrink-0 flex-col items-center justify-center rounded-xl bg-white p-3 text-center dark:bg-gray-800">
+<div class="text-sm font-bold text-gray-400 dark:text-gray-500">5月</div>
+<div class="mt-1 text-xs font-medium text-income">+¥8.2k</div>
+<div class="mt-0.5 text-xs font-medium text-expense">-¥4.0k</div>
+</div>
+</div>
+</header>
+<main class="flex flex-1 flex-col gap-4 px-4 py-4">
+<div class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
+<div class="flex justify-between">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+<span class="material-symbols-outlined text-lg">arrow_downward</span>
+<span class="text-sm font-medium">总收入</span>
+</div>
+<p class="text-xl font-bold text-income">+¥8,500.00</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+<span class="material-symbols-outlined text-lg">arrow_upward</span>
+<span class="text-sm font-medium">总支出</span>
+</div>
+<p class="text-xl font-bold text-expense">-¥3,250.50</p>
+</div>
+</div>
+<div class="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium text-gray-500 dark:text-gray-400">结余</span>
+<p class="font-bold text-gray-800 dark:text-gray-100">+¥5,249.50</p>
+</div>
+</div>
+<div class="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium text-gray-500 dark:text-gray-400">总资产</span>
+<p class="font-bold text-gray-800 dark:text-gray-100">+¥5,249.50</p>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-white shadow-sm dark:bg-gray-800">
+<div class="p-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+<button class="rounded-md bg-white px-3 py-1 text-sm font-semibold text-gray-800 shadow-sm dark:bg-gray-600 dark:text-white">支出</button>
+<button class="px-3 py-1 text-sm font-medium text-gray-500 dark:text-gray-400">收入</button>
+</div>
+<span class="text-sm font-medium text-gray-500 dark:text-gray-400">¥3,250.50</span>
+</div>
+</div>
+<div class="space-y-2 px-4 pb-4">
+<details open="">
+<summary class="flex cursor-pointer list-none items-center gap-4 py-2">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-400">
+<span class="material-symbols-outlined">restaurant</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm">
+<p class="font-medium text-gray-800 dark:text-white">餐饮</p>
+<p class="font-medium text-gray-600 dark:text-gray-300">¥1,150.00</p>
+</div>
+<div class="mt-1.5 h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+<div class="h-2 rounded-full bg-rose-500" style="width: 35.38%"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400 transition-transform duration-300 open:rotate-180">expand_more</span>
+</summary>
+<div class="mt-2 space-y-3 pl-12">
+<div class="relative flex items-center justify-between border-l-2 border-gray-200 py-1 pl-4 text-sm dark:border-gray-700">
+<p class="text-gray-600 dark:text-gray-300">午餐</p>
+<p class="font-medium text-gray-800 dark:text-gray-100">¥580.00</p>
+</div>
+<div class="relative flex items-center justify-between border-l-2 border-gray-200 py-1 pl-4 text-sm dark:border-gray-700">
+<p class="text-gray-600 dark:text-gray-300">晚餐</p>
+<p class="font-medium text-gray-800 dark:text-gray-100">¥420.00</p>
+</div>
+<div class="relative flex items-center justify-between border-l-2 border-gray-200 py-1 pl-4 text-sm dark:border-gray-700">
+<p class="text-gray-600 dark:text-gray-300">饮料</p>
+<p class="font-medium text-gray-800 dark:text-gray-100">¥150.00</p>
+</div>
+</div>
+</details>
+<details>
+<summary class="flex cursor-pointer list-none items-center gap-4 py-2">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+<span class="material-symbols-outlined">shopping_bag</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm">
+<p class="font-medium text-gray-800 dark:text-white">购物</p>
+<p class="font-medium text-gray-600 dark:text-gray-300">¥850.50</p>
+</div>
+<div class="mt-1.5 h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+<div class="h-2 rounded-full bg-blue-500" style="width: 26.16%"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400 transition-transform duration-300 open:rotate-180">expand_more</span>
+</summary>
+</details>
+<details>
+<summary class="flex cursor-pointer list-none items-center gap-4 py-2">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-900/50 dark:text-orange-400">
+<span class="material-symbols-outlined">commute</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm">
+<p class="font-medium text-gray-800 dark:text-white">交通</p>
+<p class="font-medium text-gray-600 dark:text-gray-300">¥550.00</p>
+</div>
+<div class="mt-1.5 h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+<div class="h-2 rounded-full bg-orange-500" style="width: 16.92%"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400 transition-transform duration-300 open:rotate-180">expand_more</span>
+</summary>
+</details>
+<details>
+<summary class="flex cursor-pointer list-none items-center gap-4 py-2">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-400">
+<span class="material-symbols-outlined">local_mall</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm">
+<p class="font-medium text-gray-800 dark:text-white">娱乐</p>
+<p class="font-medium text-gray-600 dark:text-gray-300">¥400.00</p>
+</div>
+<div class="mt-1.5 h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+<div class="h-2 rounded-full bg-purple-500" style="width: 12.3%"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400 transition-transform duration-300 open:rotate-180">expand_more</span>
+</summary>
+</details>
+<details>
+<summary class="flex cursor-pointer list-none items-center gap-4 py-2">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/50 dark:text-teal-400">
+<span class="material-symbols-outlined">home</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm">
+<p class="font-medium text-gray-800 dark:text-white">住房</p>
+<p class="font-medium text-gray-600 dark:text-gray-300">¥300.00</p>
+</div>
+<div class="mt-1.5 h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+<div class="h-2 rounded-full bg-teal-500" style="width: 9.23%"></div>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400 transition-transform duration-300 open:rotate-180">expand_more</span>
+</summary>
+</details>
+</div>
+</div>
+</main>
+</div>
+</body></html>

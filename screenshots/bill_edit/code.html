@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html class="" lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Transaction</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#3498DB",
+              "background-light": "#f6f6f8",
+              "background-dark": "#101622",
+              "expense": "#E74C3C",
+              "income": "#2ECC71"
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;scrollbar-width: none;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<header class="sticky top-0 z-10 flex items-center bg-background-light/80 px-4 pb-2 pt-4 backdrop-blur-sm dark:bg-background-dark/80">
+<button class="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-800 dark:text-white">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+</button>
+<h1 class="flex-1 text-center text-lg font-bold tracking-tight">添加记账</h1>
+<div class="h-12 w-12 shrink-0"></div>
+</header>
+<main class="flex flex-1 flex-col px-4 pt-4">
+<div class="rounded-xl bg-white p-4 dark:bg-gray-800">
+<div class="flex rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+<button class="flex-1 rounded-md bg-white py-2.5 text-center font-semibold text-expense shadow-sm dark:bg-gray-900">支出</button>
+<button class="flex-1 rounded-md py-2.5 text-center font-medium text-gray-500 dark:text-gray-400">收入</button>
+</div>
+<div class="mt-6 flex items-center border-b border-gray-200 pb-4 dark:border-gray-700">
+<span class="text-4xl font-bold text-expense">¥</span>
+<input class="w-full flex-1 border-0 bg-transparent p-0 text-right text-4xl font-bold text-expense placeholder-gray-300 focus:ring-0 dark:placeholder-gray-600" placeholder="0.00" type="number"/>
+</div>
+</div>
+<div class="mt-4 rounded-xl bg-white p-4 dark:bg-gray-800">
+<h2 class="mb-4 text-base font-semibold text-gray-600 dark:text-gray-300">选择分类</h2>
+<div class="no-scrollbar -mx-4 flex items-start gap-3 overflow-x-auto px-4 pb-2">
+<div class="flex shrink-0 flex-col items-center gap-1.5 text-center">
+<button class="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white">
+<span class="material-symbols-outlined text-3xl">restaurant</span>
+</button>
+<p class="text-sm font-medium">餐饮</p>
+</div>
+<div class="flex shrink-0 flex-col items-center gap-1.5 text-center">
+<button class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+<span class="material-symbols-outlined text-3xl">shopping_bag</span>
+</button>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">购物</p>
+</div>
+<div class="flex shrink-0 flex-col items-center gap-1.5 text-center">
+<button class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+<span class="material-symbols-outlined text-3xl">commute</span>
+</button>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">交通</p>
+</div>
+<div class="flex shrink-0 flex-col items-center gap-1.5 text-center">
+<button class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+<span class="material-symbols-outlined text-3xl">local_mall</span>
+</button>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">日用</p>
+</div>
+<div class="flex shrink-0 flex-col items-center gap-1.5 text-center">
+<button class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+<span class="material-symbols-outlined text-3xl">sports_esports</span>
+</button>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">娱乐</p>
+</div>
+<div class="flex shrink-0 flex-col items-center gap-1.5 text-center">
+<button class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+<span class="material-symbols-outlined text-3xl">home</span>
+</button>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">住房</p>
+</div>
+<div class="flex shrink-0 flex-col items-center gap-1.5 text-center">
+<button class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">自定义</p>
+</div>
+</div>
+</div>
+<div class="mt-4 flex flex-col gap-4">
+<div class="flex items-center rounded-xl bg-white p-4 dark:bg-gray-800">
+<span class="material-symbols-outlined mr-4 text-gray-500">edit_note</span>
+<input class="w-full flex-1 border-0 bg-transparent p-0 text-base placeholder-gray-400 focus:ring-0 dark:placeholder-gray-500" placeholder="添加笔记..." type="text"/>
+</div>
+<div class="flex items-center rounded-xl bg-white p-4 dark:bg-gray-800">
+<span class="material-symbols-outlined mr-4 text-gray-500">calendar_today</span>
+<p class="flex-1 text-base">2023年10月26日</p>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</div>
+</div>
+</main>
+<footer class="sticky bottom-0 bg-background-light/80 px-4 py-4 backdrop-blur-sm dark:bg-background-dark/80">
+<button class="w-full rounded-xl bg-primary py-4 text-center text-lg font-bold text-white shadow-lg transition-transform active:scale-95">保存</button>
+</footer>
+</div>
+
+</body></html>
