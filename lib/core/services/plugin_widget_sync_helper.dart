@@ -36,6 +36,12 @@ class PluginWidgetSyncHelper {
 
   /// 同步所有插件的小组件数据
   Future<void> syncAllPlugins() async {
+    // 检查平台是否支持小组件
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      debugPrint('Widget not supported on this platform, skipping all widget sync');
+      return;
+    }
+
     await Future.wait([
       syncTodo(),
       syncTimer(),

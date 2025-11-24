@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'package:home_widget/home_widget.dart';
+import 'package:Memento/core/services/system_widget_service.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
 import 'package:logging/logging.dart';
@@ -20,25 +19,31 @@ class AgentChatWidgetService {
       // 获取最近使用的对话
       final recentConversations = _getRecentConversations(conversations);
 
-      // 序列化对话数据
-      final conversationsData = recentConversations.map((c) => {
-        'id': c.id,
-        'title': c.title,
-        'lastMessage': c.lastMessagePreview ?? '',
-        'lastMessageTime': c.lastMessageAt.toIso8601String(),
-        'groupName': c.groups.isNotEmpty ? c.groups.first : '',
-      }).toList();
-
-      // 保存到 SharedPreferences（Android）/ UserDefaults（iOS）
-      await HomeWidget.saveWidgetData('conversations_json', jsonEncode(conversationsData));
-      await HomeWidget.saveWidgetData('conversation_count', conversations.length);
-      await HomeWidget.saveWidgetData('last_update', DateTime.now().toIso8601String());
-
-      // 更新小组件
-      await HomeWidget.updateWidget(
-        androidName: 'AgentVoiceWidgetProvider', // 对应 Android AppWidgetProvider 类名
-        iOSName: 'AgentVoiceWidget', // 对应 iOS Widget 名称
+      // 构建插件小组件数据
+      final widgetData = PluginWidgetData(
+        pluginId: 'agent_chat',
+        pluginName: 'AI对话',
+        iconCodePoint: 0xe0b7, // 聊天图标 codePoint (可以根据需要调整)
+        colorValue: 0xFF2196F3, // 蓝色主题
+        stats: [
+          WidgetStatItem(
+            id: 'conversation_count',
+            label: '对话数',
+            value: conversations.length.toString(),
+            highlight: true,
+          ),
+          WidgetStatItem(
+            id: 'recent_message',
+            label: '最近消息',
+            value: recentConversations.isNotEmpty
+                ? _truncateMessage(recentConversations.first.lastMessagePreview ?? '暂无消息', 15)
+                : '暂无对话',
+          ),
+        ],
       );
+
+      // 使用系统小组件服务更新
+      await SystemWidgetService.instance.updateWidgetData('agent_chat', widgetData);
 
       _logger.info('AI对话小组件已更新: ${recentConversations.length} 个对话');
     } catch (e, stack) {
@@ -57,47 +62,17 @@ class AgentChatWidgetService {
     return sorted.take(_maxRecentConversations).toList();
   }
 
-  /// 处理小组件点击事件
-  ///
-  /// 从 home_widget 回调中获取点击的数据
-  static Future<Map<String, String?>?> getWidgetData() async {
-    try {
-      // 获取小组件传递的数据
-      final data = await HomeWidget.getWidgetData<String>('widget_action');
-      if (data == null) return null;
-
-      // 解析 JSON 数据
-      final Map<String, dynamic> action = jsonDecode(data);
-      return action.cast<String, String?>();
-    } catch (e) {
-      _logger.warning('获取小组件数据失败: $e');
-      return null;
-    }
-  }
-
-  /// 注册小组件点击事件监听
-  static void registerWidgetClickListener(Function(String? conversationId) callback) {
-    HomeWidget.widgetClicked.listen((uri) {
-      if (uri == null) return;
-
-      _logger.info('小组件被点击: $uri');
-
-      // 解析 URI: memento://widget/agent_chat?conversationId=xxx
-      if (uri.host == 'widget') {
-        final pathSegments = uri.pathSegments;
-        if (pathSegments.isNotEmpty && pathSegments[0] == 'agent_chat') {
-          final conversationId = uri.queryParameters['conversationId'];
-          callback(conversationId);
-        }
-      }
-    });
+  /// 截断消息文本
+  static String _truncateMessage(String message, int maxLength) {
+    if (message.length <= maxLength) return message;
+    return '${message.substring(0, maxLength)}...';
   }
 
   /// 初始化小组件
   static Future<void> initialize() async {
     try {
-      // 设置小组件配置
-      await HomeWidget.setAppGroupId('group.github.hunmer.memento'); // iOS App Group
+      // 确保系统小组件服务已初始化
+      await SystemWidgetService.instance.initialize();
 
       // 初次更新小组件
       await updateWidget();

@@ -69,6 +69,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   // 全局小组件透明度
   double _globalWidgetOpacity = 1.0;
 
+  // 是否通过参数启动（如小组件、URL scheme等）
+  bool _launchedWithParameters = false;
+
   @override
   void initState() {
     super.initState();
@@ -82,8 +85,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       if (mounted) {
         // 显示悬浮球（如果启用的话）
         FloatingBallService().show(context);
-        // 首次加载时打开最后使用的插件
-        if (!_hasInitialized) {
+        // 首次加载时打开最后使用的插件（仅在无参数启动时）
+        if (!_hasInitialized && !_launchedWithParameters) {
           _openLastUsedPlugin();
           _hasInitialized = true;
         }
@@ -92,10 +95,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   }
 
   @override
-  void dispose() {
-    _layoutManager.removeListener(_onLayoutChanged);
-    _pageController?.dispose();
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 将检查启动参数的逻辑移到这里，确保 context 已完全初始化
+    if (!_launchedWithParameters) {
+      _checkLaunchParameters();
+    }
   }
 
   /// 布局管理器变化时的回调（包括透明度设置）
@@ -290,6 +295,25 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     debugPrint('创建了 ${defaultWidgets.length} 个默认小组件');
   }
 
+  /// 检查启动参数，判断是否通过特定方式启动应用
+  void _checkLaunchParameters() {
+    // 检查路由设置，看是否有参数
+    final routeSettings = ModalRoute.of(context)?.settings;
+
+    if (routeSettings != null && routeSettings.arguments != null) {
+      // 如果有路由参数，说明是通过特定方式启动的
+      _launchedWithParameters = true;
+      debugPrint('应用通过路由参数启动: ${routeSettings.arguments}');
+      return;
+    }
+
+    // 可以在这里添加更多的参数检测逻辑
+    // 例如：检查是否通过 Intent、URI Scheme 等方式启动
+    // 目前主要检查路由参数，后续可根据需要扩展
+
+    debugPrint('应用正常启动，无启动参数');
+  }
+
   /// 打开最后使用的插件
   void _openLastUsedPlugin() async {
     // 防止重复打开
@@ -300,6 +324,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
     // 检查是否启用了自动打开功能
     if (!globalPluginManager.autoOpenLastPlugin) {
+      return;
+    }
+
+    // 检查是否通过参数启动
+    if (_launchedWithParameters) {
+      debugPrint('应用通过参数启动，跳过自动打开最后插件');
+      _isOpeningPlugin = false;
       return;
     }
 

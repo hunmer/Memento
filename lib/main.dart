@@ -28,6 +28,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 import 'package:logging/logging.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 import 'package:flutter/material.dart';
 import 'core/services/system_widget_service.dart';
@@ -297,8 +298,17 @@ Future<void> _initializeHomeWidgets() async {
 
 /// 设置桌面小组件点击监听器
 Future<void> _setupWidgetClickListener() async {
+  // home_widget 插件只支持 Android 和 iOS 平台
+  if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+    debugPrint('跳过小组件点击监听器设置（当前平台不支持 home_widget 插件）');
+    return;
+  }
+
   // 初始化 HomeWidget (必须在监听前调用)
-  await HomeWidget.setAppGroupId('group.github.hunmer.memento');
+  // 只在 iOS 平台上设置 App Group ID，因为 setAppGroupId 只在 iOS 上有效
+  if (UniversalPlatform.isIOS) {
+    await HomeWidget.setAppGroupId('group.github.hunmer.memento');
+  }
 
   // 监听 HomeWidget 的点击事件（备用方式）
   HomeWidget.widgetClicked.listen((Uri? uri) {

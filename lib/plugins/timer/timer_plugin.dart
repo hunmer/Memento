@@ -136,8 +136,8 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   // 删除任务
-  Future<void> removeTask(String taskId) async {
-    _tasks.removeWhere((task) => task.id == taskId);
+  Future<void> removeTask(String id) async {
+    _tasks.removeWhere((task) => task.id == id);
     await saveTasks();
   }
 
@@ -173,9 +173,9 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   // 停止前台通知服务
-  Future<void> stopNotificationService([String? taskId]) async {
+  Future<void> stopNotificationService([String? id]) async {
     if (Platform.isAndroid || Platform.isIOS) {
-      await TimerService.stopNotificationService(taskId);
+      await TimerService.stopNotificationService(id);
     }
   }
 
@@ -336,7 +336,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     final String? customId = params['id'];
 
     // 如果提供了自定义ID，检查是否已存在
-    String taskId;
+    String id;
     if (customId != null && customId.isNotEmpty) {
       // 检查ID是否已存在
       final existingTask = _tasks.firstWhere(
@@ -355,10 +355,10 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
         return {'error': '计时器ID已存在: $customId'};
       }
 
-      taskId = customId;
+      id = customId;
     } else {
       // 自动生成ID
-      taskId = DateTime.now().millisecondsSinceEpoch.toString();
+      id = DateTime.now().millisecondsSinceEpoch.toString();
     }
 
     // 解析计时器类型
@@ -385,7 +385,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     // 创建任务
     final task = TimerTask.create(
-      id: taskId,
+      id: id,
       name: name,
       color: Colors.blueGrey,
       icon: Icons.timer,
@@ -397,7 +397,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     await addTask(task);
 
-    return {'success': true, 'taskId': task.id, 'message': '计时器创建成功'};
+    return {'success': true, 'id': task.id, 'message': '计时器创建成功'};
   }
 
   /// 删除计时器
@@ -430,7 +430,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     return {
       'success': true,
       'message': '计时器已启动',
-      'taskId': task.id,
+      'id': task.id,
       'isRunning': task.isRunning,
     };
   }
@@ -453,7 +453,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     return {
       'success': true,
       'message': '计时器已暂停',
-      'taskId': task.id,
+      'id': task.id,
       'isRunning': task.isRunning,
     };
   }
@@ -477,7 +477,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     return {
       'success': true,
       'message': '计时器已停止',
-      'taskId': task.id,
+      'id': task.id,
       'isRunning': task.isRunning,
     };
   }
@@ -497,7 +497,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     task.reset();
     await updateTask(task);
 
-    return {'success': true, 'message': '计时器已重置', 'taskId': task.id};
+    return {'success': true, 'message': '计时器已重置', 'id': task.id};
   }
 
   /// 获取计时器状态
@@ -516,7 +516,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     final currentIndex = task.getCurrentIndex();
 
     return {
-      'taskId': task.id,
+      'id': task.id,
       'name': task.name,
       'isRunning': task.isRunning,
       'isCompleted': task.isCompleted,

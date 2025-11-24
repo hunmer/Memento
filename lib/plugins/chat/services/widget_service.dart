@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:home_widget/home_widget.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:logging/logging.dart';
@@ -14,6 +15,12 @@ class ChatWidgetService {
   /// 更新小组件数据
   static Future<void> updateWidget() async {
     try {
+      // home_widget 插件只支持 Android 和 iOS 平台
+      if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+        _logger.info('跳过小组件更新（当前平台不支持 home_widget 插件）');
+        return;
+      }
+
       final plugin = ChatPlugin.instance;
       final channels = plugin.channelService.channels;
 
@@ -69,6 +76,12 @@ class ChatWidgetService {
   /// 从 home_widget 回调中获取点击的数据
   static Future<Map<String, String?>?> getWidgetData() async {
     try {
+      // home_widget 插件只支持 Android 和 iOS 平台
+      if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+        _logger.info('跳过获取小组件数据（当前平台不支持 home_widget 插件）');
+        return null;
+      }
+
       // 获取小组件传递的数据
       final data = await HomeWidget.getWidgetData<String>('widget_action');
       if (data == null) return null;
@@ -84,6 +97,12 @@ class ChatWidgetService {
 
   /// 注册小组件点击事件监听
   static void registerWidgetClickListener(Function(String? channelId) callback) {
+    // home_widget 插件只支持 Android 和 iOS 平台
+    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+      _logger.info('跳过注册小组件点击监听（当前平台不支持 home_widget 插件）');
+      return;
+    }
+
     HomeWidget.widgetClicked.listen((uri) {
       if (uri == null) return;
 
@@ -103,8 +122,18 @@ class ChatWidgetService {
   /// 初始化小组件
   static Future<void> initialize() async {
     try {
-      // 设置小组件配置
-      await HomeWidget.setAppGroupId('group.github.hunmer.memento'); // iOS App Group
+      // home_widget 插件只支持 Android 和 iOS 平台
+      if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+        _logger.info('跳过小组件初始化（当前平台不支持 home_widget 插件）');
+        return;
+      }
+
+      // 只在 iOS 平台上设置 App Group ID
+      // setAppGroupId 只在 iOS 上有效，在 Android/Web/Windows 上会抛出 MissingPluginException
+      // 使用 UniversalPlatform 检查平台类型
+      if (UniversalPlatform.isIOS) {
+        await HomeWidget.setAppGroupId('group.github.hunmer.memento'); // iOS App Group
+      }
 
       // 初次更新小组件
       await updateWidget();

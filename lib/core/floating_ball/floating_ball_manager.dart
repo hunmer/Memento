@@ -13,6 +13,7 @@ import '../../widgets/route_history_dialog/route_history_dialog.dart';
 import '../../plugins/agent_chat/agent_chat_plugin.dart';
 import '../../plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
 import '../../plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
+import 'plugin_overlay_manager.dart';
 
 /// 悬浮球手势动作类型
 enum FloatingBallGesture {
@@ -131,6 +132,12 @@ class FloatingBallManager {
                 ),
               );
             }
+          }
+        },
+    '选择打开插件小窗口':
+        (context) => () {
+          if (context.mounted) {
+            PluginOverlayManager().showPluginOverlayFromSelection(context);
           }
         },
   };
