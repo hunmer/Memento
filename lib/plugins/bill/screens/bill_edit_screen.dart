@@ -1,9 +1,8 @@
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../bill_plugin.dart';
 import '../models/bill.dart';
-import 'package:flutter/services.dart';
-import '../../../widgets/circle_icon_picker.dart';
 
 class BillEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -34,24 +33,40 @@ class _BillEditScreenState extends State<BillEditScreen> {
   late final TextEditingController _noteController;
   String? _tag;
   bool _isExpense = true;
-  IconData _selectedIcon = Icons.shopping_cart;
+  IconData _selectedIcon = Icons.category;
   Color _selectedColor = Colors.blue;
   DateTime _selectedDate = DateTime.now();
 
   final List<String> _availableTags = <String>[
-    '未分类',
-    '食品',
-    '交通',
-    '住宿',
+    '餐饮',
     '购物',
+    '交通',
+    '日用',
     '娱乐',
     '医疗',
     '教育',
+    '住房',
     '工资',
     '奖金',
     '投资',
     '其他',
   ];
+
+  final Map<String, IconData> _categoryIcons = {
+    '餐饮': Icons.restaurant,
+    '购物': Icons.shopping_bag,
+    '交通': Icons.commute,
+    '日用': Icons.local_mall,
+    '娱乐': Icons.sports_esports,
+    '医疗': Icons.local_hospital,
+    '教育': Icons.school,
+    '住房': Icons.home,
+    '工资': Icons.attach_money,
+    '奖金': Icons.card_giftcard,
+    '投资': Icons.trending_up,
+    '其他': Icons.more_horiz,
+    '未分类': Icons.category,
+  };
 
   @override
   void initState() {
@@ -60,11 +75,11 @@ class _BillEditScreenState extends State<BillEditScreen> {
     _titleController = TextEditingController();
     _amountController = TextEditingController();
     _noteController = TextEditingController();
-    
+
     if (widget.initialDate != null) {
       _selectedDate = widget.initialDate!;
     }
-    
+
     if (widget.bill != null) {
       _titleController.text = widget.bill!.title;
       _amountController.text = widget.bill!.absoluteAmount.toString();
@@ -75,10 +90,13 @@ class _BillEditScreenState extends State<BillEditScreen> {
       _selectedColor = widget.bill!.iconColor;
       _selectedDate = widget.bill!.date;
 
-      // 如果账单的分类不在预定义列表中，添加进去，避免 DropdownButton 报错
       if (_tag != null && !_availableTags.contains(_tag)) {
         _availableTags.add(_tag!);
       }
+    } else {
+      // Default tag
+      _tag = _availableTags.first;
+      _selectedIcon = _categoryIcons[_tag] ?? Icons.category;
     }
   }
 
@@ -90,102 +108,189 @@ class _BillEditScreenState extends State<BillEditScreen> {
     super.dispose();
   }
 
+  Future<void> _saveBill() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        final amount = double.parse(_amountController.text);
+
+        // Use category as title if title is empty
+        final title =
+            _titleController.text.isEmpty
+                ? (_tag ?? '未分类')
+                : _titleController.text;
+
+        final bill = Bill(
+          id:
+              widget.bill?.id ??
+              DateTime.now().millisecondsSinceEpoch.toString(),
+          title: title,
+          amount: _isExpense ? -amount : amount,
+          accountId: widget.accountId,
+          category: _tag ?? '未分类',
+          date: _selectedDate,
+          tag: _tag,
+          note: _noteController.text,
+          icon: _selectedIcon,
+          iconColor: _selectedColor,
+          createdAt: widget.bill?.createdAt ?? _selectedDate,
+        );
+
+        await widget.billPlugin.controller.saveBill(bill);
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(BillLocalizations.of(context).billSaved),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.of(context).pop();
+        widget.onSaved?.call();
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${BillLocalizations.of(context).billSaveFailed}: $e',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Column(
-        children: [
-          AppBar(
-            title: Text(widget.bill == null ? '添加账单' : '编辑账单'),
-            leading:
-                widget.onCancel != null
-                    ? IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: widget.onCancel,
-                    )
-                    : null,
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    try {
-                      // 解析金额
-                      final amount = double.parse(_amountController.text);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark ? const Color(0xFF101622) : const Color(0xFFF6F6F8);
+    final cardColor = isDark ? const Color(0xFF1F2937) : Colors.white;
+    final primaryColor = Theme.of(context).primaryColor;
+    
+    // Colors from the design
+    final expenseColor = const Color(0xFFE74C3C);
+    final incomeColor = const Color(0xFF2ECC71);
+    final activeAmountColor = _isExpense ? expenseColor : incomeColor;
 
-                      // 创建账单对象
-                      final bill = Bill(
-                        id:
-                            widget.bill?.id ??
-                            DateTime.now().millisecondsSinceEpoch.toString(),
-                        title: _titleController.text,
-                        amount: _isExpense ? -amount : amount,
-                        accountId: widget.accountId,
-                        category: _tag ?? '未分类',
-                        date: _selectedDate,
-                        tag: _tag,
-                        note: _noteController.text,
-                        icon: _selectedIcon,
-                        iconColor: _selectedColor,
-                        createdAt: widget.bill?.createdAt ?? _selectedDate,
-                      );
-
-                      // 使用 controller 保存账单
-                      await widget.billPlugin.controller.saveBill(bill);
-
-                      // 显示成功提示
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            BillLocalizations.of(context).billSaved,
-                          ),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-
-                      // 返回上一页
-                      if (!mounted) return;
-                      Navigator.of(context).pop();
-                      widget.onSaved?.call();
-                    } catch (e) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '${BillLocalizations.of(context).billSaveFailed}: $e',
-                          ),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  }
-                },
-                child: Text(widget.bill == null ? '添加' : '保存'),
-              ),
-            ],
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        backgroundColor: backgroundColor.withValues(alpha: 0.8),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        title: Text(
+          widget.bill == null ? '添加账单' : '编辑账单', // Could use l10n here if available
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
           ),
+        ),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+          onPressed: widget.onCancel ?? () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Column(
+        children: [
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildIconSelector(),
+                    // Type and Amount Card
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildTypeSelector(isDark),
+                          const SizedBox(height: 24),
+                          _buildAmountInput(activeAmountColor, isDark),
+                        ],
+                      ),
+                    ),
+                    
                     const SizedBox(height: 16),
-                    _buildTypeSelector(),
+
+                    // Category Selector Card
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '选择分类',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.grey[300] : Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildCategoryList(primaryColor, isDark),
+                        ],
+                      ),
+                    ),
+
                     const SizedBox(height: 16),
-                    _buildTitleField(),
-                    const SizedBox(height: 16),
-                    _buildAmountField(),
-                    const SizedBox(height: 16),
-                    _buildTagSelector(),
-                    const SizedBox(height: 16),
-                    _buildDateSelector(),
-                    const SizedBox(height: 16),
-                    _buildNoteField(),
+
+                    // Details Section (Note & Date)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildNoteInput(isDark),
+                          Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[100]),
+                          _buildDateInput(isDark),
+                        ],
+                      ),
+                    ),
                   ],
+                ),
+              ),
+            ),
+          ),
+          
+          // Save Button Area
+          Container(
+            padding: const EdgeInsets.all(16) + MediaQuery.of(context).padding.copyWith(top: 0),
+            color: backgroundColor.withValues(alpha: 0.8),
+            child: SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _saveBill,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 2,
+                ),
+                child: const Text(
+                  '保存',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -195,29 +300,120 @@ class _BillEditScreenState extends State<BillEditScreen> {
     );
   }
 
-  Widget _buildTypeSelector() {
+  Widget _buildTypeSelector(bool isDark) {
+    final unselectedColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+    final selectedBgColor = isDark ? const Color(0xFF1F2937) : Colors.white;
+    
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: unselectedColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildTypeButton(
+              label: BillLocalizations.of(context).expense,
+              isSelected: _isExpense,
+              activeColor: const Color(0xFFE74C3C),
+              bgOnSelected: selectedBgColor,
+              onTap: () => setState(() => _isExpense = true),
+            ),
+          ),
+          Expanded(
+            child: _buildTypeButton(
+              label: BillLocalizations.of(context).income,
+              isSelected: !_isExpense,
+              activeColor: const Color(0xFF2ECC71),
+              bgOnSelected: selectedBgColor,
+              onTap: () => setState(() => _isExpense = false),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeButton({
+    required String label,
+    required bool isSelected,
+    required Color activeColor,
+    required Color bgOnSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? bgOnSelected : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            )
+          ] : null,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? activeColor : Colors.grey,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAmountInput(Color activeColor, bool isDark) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        Text(
+          '¥',
+          style: TextStyle(
+            fontSize: 36,
+            fontWeight: FontWeight.bold,
+            color: activeColor,
+          ),
+        ),
+        const SizedBox(width: 16),
         Expanded(
-          child: SegmentedButton<bool>(
-            segments: [
-              ButtonSegment<bool>(
-                value: true,
-                label: Text(BillLocalizations.of(context).expense),
-                icon: const Icon(Icons.arrow_upward),
+          child: TextFormField(
+            controller: _amountController,
+            style: TextStyle(
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              color: activeColor,
+              height: 1.2,
+            ),
+            textAlign: TextAlign.right,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: '0.00',
+              hintStyle: TextStyle(
+                color: isDark ? Colors.grey[700] : Colors.grey[300],
               ),
-              ButtonSegment<bool>(
-                value: false,
-                label: Text(BillLocalizations.of(context).income),
-                icon: const Icon(Icons.arrow_downward),
-              ),
+              contentPadding: EdgeInsets.zero,
+              isDense: true,
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
             ],
-            selected: {_isExpense},
-            onSelectionChanged: (Set<bool> newSelection) {
-              if (!mounted) return;
-              setState(() {
-                _isExpense = newSelection.first;
-              });
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return BillLocalizations.of(context).enterAmount;
+              }
+              if (double.tryParse(value) == null) {
+                return BillLocalizations.of(context).enterValidAmount;
+              }
+              return null;
             },
           ),
         ),
@@ -225,67 +421,87 @@ class _BillEditScreenState extends State<BillEditScreen> {
     );
   }
 
-  Widget _buildTitleField() {
-    return TextFormField(
-      controller: _titleController,
-      decoration: InputDecoration(
-        labelText: BillLocalizations.of(context).title,
-        border: const OutlineInputBorder(),
+  Widget _buildCategoryList(Color primaryColor, bool isDark) {
+    return SizedBox(
+      height: 100,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: _availableTags.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 16),
+        itemBuilder: (context, index) {
+          final tag = _availableTags[index];
+          final isSelected = tag == _tag;
+          final icon = _categoryIcons[tag] ?? Icons.category;
+          
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _tag = tag;
+                _selectedIcon = icon;
+                _titleController.text = ''; // Clear title so tag is used, or could set it to tag
+              });
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isSelected ? primaryColor : (isDark ? Colors.grey[800] : Colors.grey[100]),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isSelected ? Colors.white : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  tag,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: isSelected ? (isDark ? Colors.white : Colors.black87) : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return BillLocalizations.of(context).enterTitle;
-        }
-        return null;
-      },
     );
   }
 
-  Widget _buildAmountField() {
-    return TextFormField(
-      controller: _amountController,
-      decoration: InputDecoration(
-        labelText: BillLocalizations.of(context).amount,
-        border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.currency_yuan),
+  Widget _buildNoteInput(bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(Icons.edit_note, color: Colors.grey[500], size: 28),
+          const SizedBox(width: 16),
+          Expanded(
+            child: TextFormField(
+              controller: _noteController,
+              decoration: InputDecoration(
+                hintText: '添加笔记...',
+                hintStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[400]),
+                border: InputBorder.none,
+                isDense: true,
+              ),
+              style: TextStyle(
+                fontSize: 16,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+          ),
+        ],
       ),
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-      ],
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return BillLocalizations.of(context).enterAmount;
-        }
-        if (double.tryParse(value) == null) {
-          return BillLocalizations.of(context).enterValidAmount;
-        }
-        return null;
-      },
     );
   }
 
-  Widget _buildTagSelector() {
-    return DropdownButtonFormField<String>(
-      initialValue: _tag,
-      decoration: InputDecoration(
-        labelText: BillLocalizations.of(context).category,
-        border: const OutlineInputBorder(),
-      ),
-      items:
-          _availableTags.map((String tag) {
-            return DropdownMenuItem<String>(value: tag, child: Text(tag));
-          }).toList(),
-      onChanged: (String? newValue) {
-        if (!mounted) return;
-        setState(() {
-          _tag = newValue;
-        });
-      },
-    );
-  }
-
-  Widget _buildDateSelector() {
+  Widget _buildDateInput(bool isDark) {
     return InkWell(
       onTap: () async {
         final DateTime? picked = await showDateTimePicker(
@@ -298,20 +514,22 @@ class _BillEditScreenState extends State<BillEditScreen> {
           });
         }
       },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: BillLocalizations.of(context).time,
-          border: const OutlineInputBorder(),
-          prefixIcon: const Icon(Icons.calendar_today),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')} '
-              '${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}',
+            Icon(Icons.calendar_today, color: Colors.grey[500], size: 24),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                '${_selectedDate.year}年${_selectedDate.month}月${_selectedDate.day}日',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
             ),
-            const Icon(Icons.arrow_drop_down),
+            Icon(Icons.chevron_right, color: Colors.grey[400]),
           ],
         ),
       ),
@@ -346,35 +564,5 @@ class _BillEditScreenState extends State<BillEditScreen> {
       }
     }
     return null;
-  }
-
-  Widget _buildNoteField() {
-    return TextFormField(
-      controller: _noteController,
-      decoration: InputDecoration(
-        labelText: BillLocalizations.of(context).note,
-        border: const OutlineInputBorder(),
-      ),
-      maxLines: 3,
-    );
-  }
-
-  Widget _buildIconSelector() {
-    return CircleIconPicker(
-      currentIcon: _selectedIcon,
-      backgroundColor: _selectedColor,
-      onIconSelected: (IconData icon) {
-        if (!mounted) return;
-        setState(() {
-          _selectedIcon = icon;
-        });
-      },
-      onColorSelected: (Color color) {
-        if (!mounted) return;
-        setState(() {
-          _selectedColor = color;
-        });
-      },
-    );
   }
 }

@@ -329,6 +329,7 @@ class _BillListScreenState extends State<BillListScreen> {
     
     return Container(
       margin: const EdgeInsets.all(2),
+      width: double.infinity,
       decoration: BoxDecoration(
         color: isSelected ? _primaryColor : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
@@ -528,6 +529,13 @@ class _BillListScreenState extends State<BillListScreen> {
           decoration: BoxDecoration(
             color: iconBgColor,
             borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(12),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Row(
             children: [
