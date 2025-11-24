@@ -107,6 +107,12 @@ abstract class ActivityLocalizations {
   String get tapToRecordText;
   String get noActivitiesText;
   String get minute;
+
+  // Duration field
+  String get duration;
+
+  // Form hints
+  String get contentHint;
 }
 
 class _ActivityLocalizationsDelegate

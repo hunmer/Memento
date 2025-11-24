@@ -162,4 +162,7 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
 
   @override
   String get minute => '分';
+
+  @override
+  String get duration => '持续时间';
 }

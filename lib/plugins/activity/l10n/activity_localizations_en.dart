@@ -150,4 +150,10 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
 
   @override
   String get minute => 'm';
+
+  @override
+  String get duration => 'Duration';
+
+  @override
+  String get contentHint => 'Enter activity description';
 }
