@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import '../checkin_plugin.dart';
 
+enum CheckinCardStyle {
+  weekly,
+  small,
+  calendar,
+}
+
 class CheckinItem {
   final String id;
   final String name;
@@ -11,6 +17,8 @@ class CheckinItem {
   List<bool> frequency;
   // 提醒设置
   ReminderSettings? reminderSettings;
+  // 卡片显示风格
+  CheckinCardStyle cardStyle;
   // 打卡记录，包含时间范围和备注，key为yyyy-MM-dd格式的日期字符串
   final Map<String, List<CheckinRecord>> checkInRecords;
 
@@ -23,6 +31,7 @@ class CheckinItem {
     String? description,
     List<bool>? frequency,
     this.reminderSettings,
+    this.cardStyle = CheckinCardStyle.weekly,
     Map<String, List<CheckinRecord>>? checkInRecords,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        color = color ?? Colors.blue,
@@ -158,6 +167,7 @@ class CheckinItem {
       // ignore: deprecated_member_use
       'color': color.value,
       'group': group,
+      'cardStyle': cardStyle.index,
       'reminderSettings': reminderSettings?.toJson(),
       'checkInRecords': checkInRecords.map(
         (key, value) => MapEntry(key, value.map((record) => record.toJson()).toList()),
@@ -195,6 +205,9 @@ class CheckinItem {
       icon: icon,
       color: Color(json['color']),
       group: json['group'] ?? '默认分组',
+      cardStyle: json['cardStyle'] != null
+          ? CheckinCardStyle.values[json['cardStyle'] as int]
+          : CheckinCardStyle.weekly,
       reminderSettings: json['reminderSettings'] != null
           ? ReminderSettings.fromJson(json['reminderSettings'])
           : null,

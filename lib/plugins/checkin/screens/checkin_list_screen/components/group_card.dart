@@ -27,66 +27,56 @@ class GroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 16, // 增加底部间距
-      ),
-      elevation: 2,
-      child: Column(
-        children: [
-          // 分组标题
-          ListTile(
-            title: Text(
-              group,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            subtitle: Text(
-              '$completedCount/$total 已完成',
-              style: TextStyle(
-                color: completedCount == total
-                    ? Colors.green
-                    : Theme.of(context).hintColor,
-              ),
-            ),
-            leading: const Icon(Icons.folder),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    isExpanded ? Icons.expand_less : Icons.expand_more,
-                  ),
-                  onPressed: () {
-                    controller.expandedGroups[group] = !isExpanded;
-                    onStateChanged();
-                  },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 分组标题
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            children: [
+              const Icon(Icons.folder_outlined, size: 20, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(
+                group,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Theme.of(context).textTheme.titleMedium?.color,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: completedCount == total
+                      ? Colors.green.withValues(alpha: 0.1)
+                      : Colors.grey.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$completedCount/$total',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: completedCount == total
+                        ? Colors.green
+                        : Theme.of(context).hintColor,
+                  ),
+                ),
+              ),
+            ],
           ),
+        ),
 
-          // 分组内的打卡项目
-          if (isExpanded)
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: CheckinItemList(
-                items: items,
-                group: group,
-                groupIndex: groupIndex,
-                controller: controller,
-                onStateChanged: onStateChanged,
-              ),
-            ),
-        ],
-      ),
+        // 分组内的打卡项目(始终显示)
+        CheckinItemList(
+          items: items,
+          group: group,
+          groupIndex: groupIndex,
+          controller: controller,
+          onStateChanged: onStateChanged,
+        ),
+      ],
     );
   }
 }

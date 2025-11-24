@@ -37,7 +37,6 @@ class _CheckinMainViewState extends State<CheckinMainView> {
                   setState(() {});
                   CheckinPlugin.instance.triggerSave();
                 },
-                expandedGroups: {},
               );
               return CheckinListScreen(controller: controller);
             },
