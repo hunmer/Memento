@@ -89,6 +89,7 @@ dependencies:
   flutter_markdown: ^0.7.4  # For agent_chat plugin Markdown rendering
   flutter_tts: ^3.8.0  # Text-to-Speech for TTS plugin
   home_widget: ^0.6.0  # Desktop widgets for Android/iOS
+  wheel_picker: ^0.2.2  # Wheel picker for time selection
 
 dev_dependencies:
   flutter_test:

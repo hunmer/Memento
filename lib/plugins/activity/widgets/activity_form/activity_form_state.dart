@@ -212,6 +212,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
       selectedDate: widget.selectedDate,
       isStartTime: false,
     );
+    _syncDurationWithTimes();
   }
 
   void _onTagsChanged() {
@@ -249,8 +250,18 @@ class ActivityFormState extends State<ActivityFormWidget> {
         } else {
           _endTime = picked;
         }
+        _syncDurationWithTimes();
       });
     }
+  }
+
+  void _syncDurationWithTimes() {
+    final minutes = calculateDuration(
+      widget.selectedDate,
+      _startTime,
+      _endTime,
+    );
+    _durationController.text = minutes.toString();
   }
 
   void _handleDurationChanged(String durationText) {
@@ -394,10 +405,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
     final activity = ActivityRecord(
       startTime: startDateTime,
       endTime: endDateTime,
-      title:
-          _titleController.text.trim().isEmpty
-              ? l10n.unnamedActivity
-              : _titleController.text.trim(),
+      title: _titleController.text.trim(),
       description:
           _descriptionController.text.isEmpty
               ? null
