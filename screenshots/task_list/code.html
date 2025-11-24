@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>To-Do List App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#607AFB",
+            "background-light": "#f5f6f8",
+            "background-dark": "#0f1323"
+          },
+          fontFamily: {
+            display: "Inter"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(17,24,19)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e');">
+<div class="flex items-center p-4 pb-2 justify-between bg-background-light dark:bg-background-dark sticky top-0 z-10">
+<div class="flex size-12 shrink-0 items-center">
+<span class="material-symbols-outlined text-gray-800 dark:text-white" style="font-size: 28px;">menu</span>
+</div>
+<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Inbox</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-gray-800 dark:text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+<span class="material-symbols-outlined" style="font-size: 24px;">tune</span>
+</button>
+</div>
+</div>
+<main class="flex-grow p-4 space-y-4">
+<div class="bg-white dark:bg-gray-800/20 border-l-4 border-red-500 rounded-xl overflow-hidden shadow-sm">
+<details class="flex flex-col group" open="">
+<summary class="flex flex-col cursor-pointer list-none">
+<div class="flex gap-4 px-4 py-3 justify-between items-center">
+<div class="flex items-start gap-4 flex-1">
+<div class="text-gray-900 dark:text-white flex items-center justify-center rounded-lg bg-gray-100 dark:bg-white/10 shrink-0 size-12">
+<span class="material-symbols-outlined">palette</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-gray-900 dark:text-white text-base font-medium leading-normal">Design final mockups</p>
+<div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+<span class="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300 rounded-full">UI/UX</span>
+<span class="text-xs font-semibold px-2 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300 rounded-full">High Priority</span>
+</div>
+<div class="flex items-center gap-4 mt-2">
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Mar 15 - Mar 20</p>
+<div class="flex items-center gap-1 text-primary dark:text-primary-300">
+<span class="material-symbols-outlined" style="font-size: 16px;">notifications_active</span>
+<span class="text-sm font-medium">9:00 AM</span>
+</div>
+</div>
+<div class="mt-1">
+<span class="text-xs font-semibold px-2 py-1 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-full">3 days remaining</span>
+</div>
+</div>
+</div>
+<div class="shrink-0 flex items-center gap-2 self-start">
+<input class="h-5 w-5 rounded border-gray-400 dark:border-white/20 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:border-primary/50 dark:focus:border-primary focus:outline-none" type="checkbox"/>
+<div class="text-gray-500 dark:text-white group-open:rotate-180 transition-transform">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+</summary>
+<div class="border-t border-gray-200 dark:border-white/10 mt-2 pt-2">
+<div class="pl-4 pr-4 pb-2">
+<div class="flex items-center gap-4 min-h-14 justify-between">
+<div class="flex items-center gap-4">
+<div class="flex size-7 items-center justify-center">
+<input class="h-5 w-5 rounded border-gray-400 dark:border-white/20 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:border-primary/50 dark:focus:border-primary focus:outline-none" type="checkbox"/>
+</div>
+<p class="text-gray-900 dark:text-white text-base font-normal leading-normal flex-1 truncate">Create color palette</p>
+</div>
+</div>
+<div class="flex items-center gap-4 min-h-14 justify-between">
+<div class="flex items-center gap-4">
+<div class="flex size-7 items-center justify-center">
+<input class="h-5 w-5 rounded border-gray-400 dark:border-white/20 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:border-primary/50 dark:focus:border-primary focus:outline-none" type="checkbox"/>
+</div>
+<p class="text-gray-900 dark:text-white text-base font-normal leading-normal flex-1 truncate">Design login screen</p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between gap-4 border-t border-gray-200 dark:border-white/10 px-4 py-2 mt-2 bg-primary/5 dark:bg-primary/10">
+<div class="flex items-center gap-2 text-primary dark:text-primary-300">
+<span class="material-symbols-outlined !text-xl">timer</span>
+<span class="font-mono text-sm font-medium">01:32:45</span>
+</div>
+<button class="flex items-center justify-center size-8 rounded-full bg-primary text-white">
+<span class="material-symbols-outlined !text-2xl" style="font-variation-settings: 'FILL' 1, 'wght' 500;">pause</span>
+</button>
+</div>
+</div>
+</details>
+</div>
+<div class="bg-white dark:bg-gray-800/20 border-l-4 border-amber-500 rounded-xl overflow-hidden shadow-sm p-0">
+<div class="flex gap-4 px-4 py-3 justify-between items-center">
+<div class="flex items-start gap-4 flex-1">
+<div class="text-gray-900 dark:text-white flex items-center justify-center rounded-lg bg-gray-100 dark:bg-white/10 shrink-0 size-12">
+<span class="material-symbols-outlined">code</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-gray-900 dark:text-white text-base font-medium leading-normal">Develop onboarding flow</p>
+<div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+<span class="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300 rounded-full">Frontend</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal mt-2">Mar 21 - Mar 25</p>
+<div class="mt-1">
+<span class="text-xs font-semibold px-2 py-1 bg-primary/20 text-primary dark:text-primary-300 rounded-full">Starts in 6 days</span>
+</div>
+</div>
+</div>
+<div class="shrink-0 self-start">
+<div class="flex size-7 items-center justify-center">
+<input class="h-5 w-5 rounded border-gray-400 dark:border-white/20 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:border-primary/50 dark:focus:border-primary focus:outline-none" type="checkbox"/>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800/20 border-l-4 border-transparent rounded-xl overflow-hidden shadow-sm opacity-60">
+<details class="flex flex-col group">
+<summary class="flex flex-col cursor-pointer list-none">
+<div class="flex gap-4 px-4 py-3 justify-between items-center">
+<div class="flex items-start gap-4 flex-1">
+<div class="text-gray-900 dark:text-white flex items-center justify-center rounded-lg bg-gray-100 dark:bg-white/10 shrink-0 size-12">
+<span class="material-symbols-outlined">school</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-gray-500 dark:text-gray-400 text-base font-medium leading-normal line-through">Finalize Q1 report</p>
+<div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+<span class="text-xs font-semibold px-2 py-0.5 bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full">Admin</span>
+<span class="text-xs font-semibold px-2 py-0.5 bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full">Reporting</span>
+</div>
+<div class="flex items-center gap-4 mt-2">
+<p class="text-gray-400 dark:text-gray-500 text-sm font-normal leading-normal line-through">Mar 10 - Mar 14</p>
+<div class="flex items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined" style="font-size: 16px;">notifications_off</span>
+</div>
+</div>
+<div class="mt-1">
+<span class="text-xs font-semibold px-2 py-1 bg-red-500/20 text-red-700 dark:text-red-400 rounded-full">Overdue</span>
+</div>
+</div>
+</div>
+<div class="shrink-0 flex items-center gap-2 self-start">
+<input checked="" class="h-5 w-5 rounded border-gray-400 dark:border-white/20 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:border-primary/50 dark:focus:border-primary focus:outline-none" type="checkbox"/>
+<div class="text-gray-400 dark:text-gray-500 group-open:rotate-180 transition-transform">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+</summary>
+<div class="pl-4 pr-4 pb-2 border-t border-gray-200 dark:border-white/10 mt-2 pt-2">
+<div class="flex items-center gap-4 min-h-14 justify-between">
+<div class="flex items-center gap-4">
+<div class="flex size-7 items-center justify-center">
+<input checked="" class="h-5 w-5 rounded border-gray-400 dark:border-white/20 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:border-primary/50 dark:focus:border-primary focus:outline-none" type="checkbox"/>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal flex-1 truncate line-through">Gather sales data</p>
+</div>
+</div>
+<div class="flex items-center gap-4 min-h-14 justify-between">
+<div class="flex items-center gap-4">
+<div class="flex size-7 items-center justify-center">
+<input checked="" class="h-5 w-5 rounded border-gray-400 dark:border-white/20 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:border-primary/50 dark:focus:border-primary focus:outline-none" type="checkbox"/>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal flex-1 truncate line-through">Write executive summary</p>
+</div>
+</div>
+</div>
+</details>
+</div>
+</main>
+<div class="fixed bottom-6 right-6">
+<button class="flex items-center justify-center w-14 h-14 bg-primary text-white dark:text-background-dark rounded-full shadow-lg">
+<span class="material-symbols-outlined" style="font-size: 28px; font-variation-settings: 'wght' 500;">add</span>
+</button>
+</div>
+</div>
+
+</body></html>

@@ -28,6 +28,9 @@ class TodoLocalizationsZh extends TodoLocalizations {
   String get description => '描述';
 
   @override
+  String get notes => '备注';
+
+  @override
   String get tags => '标签';
 
   @override
@@ -131,6 +134,12 @@ class TodoLocalizationsZh extends TodoLocalizations {
 
   @override
   String get editTask => '编辑任务';
+
+  @override
+  String get createTask => '创建任务';
+
+  @override
+  String get saveTask => '保存任务';
 
   @override
   String get title => '标题';

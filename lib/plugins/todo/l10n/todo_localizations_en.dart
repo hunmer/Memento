@@ -28,6 +28,9 @@ class TodoLocalizationsEn extends TodoLocalizations {
   String get description => 'Description';
 
   @override
+  String get notes => 'Notes';
+
+  @override
   String get tags => 'Tags';
 
   @override
@@ -119,6 +122,12 @@ class TodoLocalizationsEn extends TodoLocalizations {
 
   @override
   String get editTask => 'Edit Task';
+
+  @override
+  String get createTask => 'Create Task';
+
+  @override
+  String get saveTask => 'Save Task';
 
   @override
   String get title => 'Title';

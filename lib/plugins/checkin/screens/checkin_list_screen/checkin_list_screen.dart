@@ -41,10 +41,6 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
     final filteredItems = controller.filteredItems;
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? null
-              : Colors.grey[50],
       appBar: AppBar(
         backgroundColor:
             Theme.of(context).brightness == Brightness.dark
@@ -78,40 +74,49 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
 
           // 打卡项目列表
           Expanded(
-            child: filteredItems.isEmpty
-                ? const EmptyState()
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: StaggeredGrid.count(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 0,
-                        crossAxisSpacing: 0,
-                        children: filteredItems.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final item = entry.value;
-                          return StaggeredGridTile.fit(
-                            crossAxisCellCount:
-                                item.cardStyle == CheckinCardStyle.small ? 1 : 2,
-                            child: CheckinItemCard(
-                              item: item,
-                              index: index,
-                              itemIndex: index,
-                              controller: controller,
-                              onStateChanged: _handleStateChanged,
-                            ),
-                          );
-                        }).toList(),
+            child:
+                filteredItems.isEmpty
+                    ? const EmptyState()
+                    : SingleChildScrollView(
+                      padding: const EdgeInsets.only(bottom: 80),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: StaggeredGrid.count(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 0,
+                          crossAxisSpacing: 0,
+                          children:
+                              filteredItems.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final item = entry.value;
+                                return StaggeredGridTile.fit(
+                                  crossAxisCellCount:
+                                      item.cardStyle == CheckinCardStyle.small
+                                          ? 1
+                                          : 2,
+                                  child: CheckinItemCard(
+                                    item: item,
+                                    index: index,
+                                    itemIndex: index,
+                                    controller: controller,
+                                    onStateChanged: _handleStateChanged,
+                                  ),
+                                );
+                              }).toList(),
+                        ),
                       ),
                     ),
-                  ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-           await controller.showAddCheckinItemDialog(group: controller.selectedGroup == '全部' ? null : controller.selectedGroup);
+          await controller.showAddCheckinItemDialog(
+            group:
+                controller.selectedGroup == '全部'
+                    ? null
+                    : controller.selectedGroup,
+          );
         },
         child: const Icon(Icons.add),
       ),
@@ -141,9 +146,10 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
             },
             showCheckmark: false,
             labelStyle: TextStyle(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.onPrimary
-                  : Theme.of(context).textTheme.bodyMedium?.color,
+              color:
+                  isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).textTheme.bodyMedium?.color,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
             selectedColor: Theme.of(context).primaryColor,

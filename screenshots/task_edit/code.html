@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>To-Do List App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#607AFB",
+            "background-light": "#f5f6f8",
+            "background-dark": "#0f1323"
+          },
+          fontFamily: {
+            display: "Inter"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+<div class="flex items-center p-4 pb-2 justify-between bg-background-light dark:bg-background-dark sticky top-0 z-10 border-b border-gray-200 dark:border-white/10">
+<div class="flex size-12 shrink-0 items-center">
+<button class="flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-800 dark:text-white" style="font-size: 28px;">close</span>
+</button>
+</div>
+<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">New Task</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-gray-800 dark:text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+<span class="material-symbols-outlined" style="font-size: 24px;">more_horiz</span>
+</button>
+</div>
+</div>
+<main class="flex-grow p-4 space-y-4">
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 shrink-0 size-14 text-gray-500 dark:text-gray-400">
+<span class="material-symbols-outlined text-3xl">add_reaction</span>
+</button>
+<input class="flex-1 bg-transparent border-0 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-xl font-medium focus:ring-0 p-0" placeholder="Task Title" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="text-gray-500 dark:text-gray-400 text-sm font-medium px-4" for="notes">Notes</label>
+<textarea class="w-full bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-primary focus:border-primary placeholder:text-gray-400 dark:placeholder:text-gray-500 min-h-[100px]" id="notes" placeholder="Add some notes..."></textarea>
+</div>
+<div class="space-y-2">
+<label class="text-gray-500 dark:text-gray-400 text-sm font-medium px-4">Tags</label>
+<div class="flex items-center gap-2 flex-wrap bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-white/10 rounded-xl p-3">
+<span class="text-xs font-semibold px-2.5 py-1 bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300 rounded-full flex items-center gap-1.5">UI/UX <button><span class="material-symbols-outlined !text-sm">close</span></button></span>
+<span class="text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300 rounded-full flex items-center gap-1.5">High Priority <button><span class="material-symbols-outlined !text-sm">close</span></button></span>
+<button class="flex items-center gap-1 text-primary text-sm font-medium p-1">
+<span class="material-symbols-outlined !text-base">add_circle</span>
+<span>New Tag</span>
+</button>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-gray-500 dark:text-gray-400 text-sm font-medium px-4">Subtasks</label>
+<div class="bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-white/10 rounded-xl divide-y divide-gray-200 dark:divide-white/10">
+<div class="flex items-center gap-4 px-4 py-2">
+<input class="h-5 w-5 rounded border-gray-400 dark:border-white/20 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 focus:border-primary/50 dark:focus:border-primary focus:outline-none" type="checkbox"/>
+<input class="flex-1 bg-transparent border-0 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-base p-0 focus:ring-0" type="text" value="Create color palette"/>
+</div>
+<div class="flex items-center gap-4 px-4 py-2">
+<input class="h-5 w-5 rounded border-gray-400 dark:border-white/20 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 focus:border-primary/50 dark:focus:border-primary focus:outline-none" type="checkbox"/>
+<input class="flex-1 bg-transparent border-0 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-base p-0 focus:ring-0" type="text" value="Design login screen"/>
+</div>
+<div class="flex items-center gap-2 px-4 py-3">
+<button class="flex items-center gap-2 text-primary text-sm font-medium">
+<span class="material-symbols-outlined !text-xl">add_circle</span>
+<span>Add Subtask</span>
+</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-gray-500 dark:text-gray-400 text-sm font-medium px-4" for="start-date">Start Date</label>
+<div class="relative">
+<input class="w-full bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-primary focus:border-primary placeholder:text-gray-400 dark:placeholder:text-gray-500 pl-10" id="start-date" type="text" value="Mar 15, 2024"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">calendar_today</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-gray-500 dark:text-gray-400 text-sm font-medium px-4" for="end-date">End Date</label>
+<div class="relative">
+<input class="w-full bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-primary focus:border-primary placeholder:text-gray-400 dark:placeholder:text-gray-500 pl-10" id="end-date" type="text" value="Mar 20, 2024"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">calendar_today</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-gray-500 dark:text-gray-400 text-sm font-medium px-4" for="priority">Priority</label>
+<div class="relative">
+<select class="w-full bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-primary focus:border-primary pl-10 appearance-none" id="priority">
+<option>High</option>
+<option>Medium</option>
+<option>Low</option>
+<option>None</option>
+</select>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">flag</span>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-gray-500 dark:text-gray-400 text-sm font-medium px-4" for="reminder">Reminder</label>
+<div class="relative">
+<select class="w-full bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-primary focus:border-primary pl-10 appearance-none" id="reminder">
+<option>1 day before</option>
+<option>2 days before</option>
+<option>1 hour before</option>
+<option>None</option>
+</select>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">notifications</span>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+</main>
+<div class="sticky bottom-0 p-4 bg-background-light dark:bg-background-dark border-t border-gray-200 dark:border-white/10 mt-auto">
+<button class="w-full flex items-center justify-center h-12 bg-primary text-white dark:text-background-dark rounded-full shadow-lg text-base font-bold">
+<span>Create Task</span>
+</button>
+</div>
+</div>
+
+</body></html>
