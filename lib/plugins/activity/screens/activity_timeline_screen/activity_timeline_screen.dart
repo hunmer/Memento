@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/storage/storage_manager.dart';
+import '../../../../core/event/event.dart';
 import '../../services/activity_service.dart';
 import '../../widgets/activity_timeline.dart';
 import '../../l10n/activity_localizations.dart';
@@ -29,6 +30,10 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
+
+    // 监听通知点击事件
+    eventManager.subscribe('activity_notification_tapped', _onNotificationTapped);
+
     _initializeService().then((_) {
       if (mounted) {
         setState(() {
@@ -67,6 +72,78 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       _selectedDate = date;
     });
     _activityController.loadActivities(_selectedDate);
+  }
+
+  @override
+  void dispose() {
+    // 清理事件监听
+    eventManager.unsubscribe('activity_notification_tapped', _onNotificationTapped);
+
+    // 清理控制器
+    _viewModeController.dispose();
+    super.dispose();
+  }
+
+  /// 处理通知点击事件
+  void _onNotificationTapped(EventArgs args) {
+    debugPrint('[ActivityTimelineScreen] 收到通知点击事件: ${args.eventName}');
+
+    if (!_isInitialized) {
+      // 如果还没初始化完成，延迟处理
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _showActivityFormFromNotification();
+      });
+    } else {
+      _showActivityFormFromNotification();
+    }
+  }
+
+  /// 从通知点击显示活动表单
+  void _showActivityFormFromNotification() {
+    // 显示一个提示信息
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('正在打开活动记录表单...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    // 延迟一点时间确保SnackBar显示后再打开表单
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _showQuickActivityForm();
+    });
+  }
+
+  /// 显示快速活动表单
+  void _showQuickActivityForm() async {
+    if (!mounted) return;
+
+    final now = DateTime.now();
+
+    // 尝试检测最优的活动时间
+    try {
+      // 这里可以添加智能时间检测逻辑，但现在直接使用当前时间
+      final optimalTime = now;
+
+      await _activityController.addActivity(
+        context,
+        optimalTime,
+        null, // 不预设开始时间，让用户在表单中选择
+        null, // 不预设结束时间
+        _tagController.updateRecentTags,
+      );
+    } catch (e) {
+      debugPrint('[ActivityTimelineScreen] 打开活动表单失败: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('打开表单失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override

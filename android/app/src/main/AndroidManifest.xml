@@ -46,6 +46,10 @@
             android:name="github.hunmer.memento.TimerForegroundService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+        <service
+            android:name="github.hunmer.memento.ActivityForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
         
         <!-- Warning: Do not change service name. -->
         <service 

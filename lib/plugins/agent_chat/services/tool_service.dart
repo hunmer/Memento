@@ -216,58 +216,30 @@ class ToolService {
 
   /// 检查内容是否包含工具调用 JSON
   static bool containsToolCall(String content) {
-    // 检测 ```json ... ``` 格式
-    if (content.contains('```json') && content.contains('```')) {
-      final jsonMatch = RegExp(r'```json\s*(\{[\s\S]*?\})\s*```', multiLine: true).firstMatch(content);
-      if (jsonMatch != null) {
-        try {
-          final jsonStr = jsonMatch.group(1)!;
-          final parsed = jsonDecode(jsonStr);
-          return parsed is Map && parsed.containsKey('steps');
-        } catch (e) {
-          return false;
-        }
-      }
-    }
-
-    // 检测直接的 JSON 格式（查找 {"steps": ...}）
-    final directJsonMatch = RegExp(r'\{\s*"steps"\s*:\s*\[[\s\S]*?\]\s*\}', multiLine: true).firstMatch(content);
-    if (directJsonMatch != null) {
+    // 使用通用JSON解析方法检查是否包含有效的工具调用
+    final json = parseJsonFromResponse(content, requiredField: 'steps');
+    if (json != null && json.containsKey('steps')) {
       try {
-        jsonDecode(directJsonMatch.group(0)!);
-        return true;
+        final steps = json['steps'];
+        return steps is List;
       } catch (e) {
         return false;
       }
     }
-
     return false;
   }
 
   /// 从 AI 回复中解析工具调用
   static ToolCallResponse? parseToolCallFromResponse(String response) {
     try {
-      String? jsonStr;
+      // 使用通用JSON解析方法
+      final json = parseJsonFromResponse(response, requiredField: 'steps');
 
-      // 1. 尝试从 ```json ... ``` 中提取
-      final jsonBlockMatch = RegExp(r'```json\s*(\{[\s\S]*?\})\s*```', multiLine: true).firstMatch(response);
-      if (jsonBlockMatch != null) {
-        jsonStr = jsonBlockMatch.group(1);
-      } else {
-        // 2. 尝试提取直接的 JSON
-        final directJsonMatch = RegExp(r'\{\s*"steps"\s*:\s*\[[\s\S]*?\]\s*\}', multiLine: true).firstMatch(response);
-        if (directJsonMatch != null) {
-          jsonStr = directJsonMatch.group(0);
-        }
-      }
-
-      if (jsonStr == null) {
+      if (json == null) {
         print('[ToolService] 未找到工具调用 JSON');
         return null;
       }
 
-      // 解析 JSON
-      final json = jsonDecode(jsonStr) as Map<String, dynamic>;
       final toolCall = ToolCallResponse.fromJson(json);
 
       print('[ToolService] 成功解析工具调用，包含 ${toolCall.steps.length} 个步骤');
@@ -985,33 +957,10 @@ return result;
   /// 解析 AI 返回的工具需求
   static List<String>? parseToolRequest(String response) {
     try {
-      // 尝试从 ```json ... ``` 中提取
-      final jsonBlockMatch = RegExp(
-        r'```json\s*(\{[\s\S]*?\})\s*```',
-        multiLine: true,
-      ).firstMatch(response);
+      // 使用通用JSON解析方法
+      final json = parseJsonFromResponse(response, requiredField: 'needed_tools');
 
-      String? jsonStr;
-      if (jsonBlockMatch != null) {
-        jsonStr = jsonBlockMatch.group(1);
-      } else {
-        // 尝试提取直接的 JSON
-        final directJsonMatch = RegExp(
-          r'\{\s*"needed_tools"\s*:\s*\[[\s\S]*?\]\s*\}',
-          multiLine: true,
-        ).firstMatch(response);
-        if (directJsonMatch != null) {
-          jsonStr = directJsonMatch.group(0);
-        }
-      }
-
-      if (jsonStr == null) {
-        return null;
-      }
-
-      // 解析 JSON
-      final json = jsonDecode(jsonStr) as Map<String, dynamic>;
-      if (!json.containsKey('needed_tools')) {
+      if (json == null || !json.containsKey('needed_tools')) {
         return null;
       }
 
@@ -1125,36 +1074,109 @@ return result;
     return buffer.toString();
   }
 
+  /// 从AI响应中提取JSON字符串（通用方法）
+  ///
+  /// 支持以下格式：
+  /// 1. ```json {...}``` 代码块
+  /// 2. 直接的JSON对象（需要提供必填字段名用于匹配）
+  /// 3. 整个响应就是JSON（作为最后尝试）
+  ///
+  /// 参数：
+  /// - [response]: AI的完整响应
+  /// - [requiredField]: 用于匹配直接JSON的必填字段名（如 "use_tool_temps", "strategy", "steps"）
+  ///
+  /// 返回提取的JSON字符串，如果提取失败返回null
+  static String? extractJsonFromResponse(String response, {String? requiredField}) {
+    // 1. 尝试从 ```json ... ``` 代码块中提取
+    final jsonBlockMatch = RegExp(
+      r'```json\s*(\{[\s\S]*?\})\s*```',
+      multiLine: true,
+    ).firstMatch(response);
+
+    if (jsonBlockMatch != null) {
+      return jsonBlockMatch.group(1);
+    }
+
+    // 2. 如果提供了必填字段名，尝试提取直接的JSON对象
+    if (requiredField != null) {
+      // 构建正则表达式匹配包含必填字段的JSON对象
+      final pattern = r'\{\s*"' + RegExp.escape(requiredField) + r'\s*:[\s\S]*?\}';
+      final directJsonMatch = RegExp(pattern, multiLine: true).firstMatch(response);
+      if (directJsonMatch != null) {
+        return directJsonMatch.group(0);
+      }
+    }
+
+    // 3. 尝试提取第一个JSON对象（通用匹配）
+    final genericJsonMatch = RegExp(r'\{[\s\S]*?\}', multiLine: true).firstMatch(response);
+    if (genericJsonMatch != null) {
+      return genericJsonMatch.group(0);
+    }
+
+    return null;
+  }
+
+  /// 修复常见的AI返回JSON格式错误
+  static String _fixInvalidJson(String jsonStr) {
+    // 尝试先解析，如果成功则不需要修复
+    try {
+      jsonDecode(jsonStr);
+      return jsonStr;
+    } catch (_) {
+      // 继续修复
+    }
+
+    // 修复模式：将 JSON 对象中单引号包裹的字符串值转为双引号
+    // 例如：{"from": '早起', "to": '晨跑'} -> {"from": "早起", "to": "晨跑"}
+    final buffer = StringBuffer();
+    bool inDoubleQuote = false;
+    bool inSingleQuote = false;
+    bool escaped = false;
+
+    for (int i = 0; i < jsonStr.length; i++) {
+      final char = jsonStr[i];
+
+      if (escaped) {
+        buffer.write(char);
+        escaped = false;
+        continue;
+      }
+
+      if (char == '\\') {
+        escaped = true;
+        buffer.write(char);
+        continue;
+      }
+
+      if (char == '"' && !inSingleQuote) {
+        inDoubleQuote = !inDoubleQuote;
+        buffer.write(char);
+      } else if (char == "'" && !inDoubleQuote) {
+        // 单引号转双引号
+        inSingleQuote = !inSingleQuote;
+        buffer.write('"');
+      } else {
+        buffer.write(char);
+      }
+    }
+
+    return buffer.toString();
+  }
+
   /// 解析 AI 返回的工具模版匹配结果
   static List<TemplateMatch>? parseToolTemplateMatch(String response) {
     try {
-      // 尝试从 ```json ... ``` 中提取
-      final jsonBlockMatch = RegExp(
-        r'```json\s*(\{[\s\S]*?\})\s*```',
-        multiLine: true,
-      ).firstMatch(response);
-
-      String? jsonStr;
-      if (jsonBlockMatch != null) {
-        jsonStr = jsonBlockMatch.group(1);
-      } else {
-        // 尝试提取直接的 JSON
-        final directJsonMatch = RegExp(
-          r'\{\s*"use_tool_temps"\s*:\s*\[[\s\S]*?\]\s*\}',
-          multiLine: true,
-        ).firstMatch(response);
-        if (directJsonMatch != null) {
-          jsonStr = directJsonMatch.group(0);
-        }
-      }
+      // 使用通用JSON提取方法
+      final jsonStr = extractJsonFromResponse(response, requiredField: 'use_tool_temps');
 
       if (jsonStr == null) {
         print('[ToolService] 未找到工具模版匹配 JSON');
         return null;
       }
 
-      // 解析 JSON
-      final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+      // 修复JSON格式错误并解析
+      final fixedJsonStr = _fixInvalidJson(jsonStr);
+      final json = jsonDecode(fixedJsonStr) as Map<String, dynamic>;
       if (!json.containsKey('use_tool_temps')) {
         print('[ToolService] JSON 中缺少 use_tool_temps 字段');
         return null;
@@ -1214,5 +1236,31 @@ return result;
         data: newData,
       );
     }).toList();
+  }
+
+  /// 通用JSON解析方法（带格式修复）
+  ///
+  /// 参数：
+  /// - [response]: AI的完整响应
+  /// - [requiredField]: 用于匹配的必填字段名
+  ///
+  /// 返回解析后的JSON对象，解析失败返回null
+  static Map<String, dynamic>? parseJsonFromResponse(String response, {String? requiredField}) {
+    try {
+      // 使用通用JSON提取方法
+      final jsonStr = extractJsonFromResponse(response, requiredField: requiredField);
+
+      if (jsonStr == null) {
+        print('[ToolService] 未找到JSON');
+        return null;
+      }
+
+      // 修复JSON格式错误并解析
+      final fixedJsonStr = _fixInvalidJson(jsonStr);
+      return jsonDecode(fixedJsonStr) as Map<String, dynamic>;
+    } catch (e) {
+      print('[ToolService] JSON解析失败: $e');
+      return null;
+    }
   }
 }

@@ -2060,35 +2060,13 @@ $toolBriefPrompt
       final response = buffer.toString();
       debugPrint('AI 参数分析响应: $response');
 
-      // 提取 JSON 内容（可能包含在 ```json ... ``` 中）
-      String? jsonStr;
+      // 使用统一的JSON解析方法
+      final json = ToolService.parseJsonFromResponse(response, requiredField: 'strategy');
 
-      // 尝试从 ```json ... ``` 中提取
-      final jsonBlockMatch = RegExp(
-        r'```json\s*(\{[\s\S]*?\})\s*```',
-        multiLine: true,
-      ).firstMatch(response);
-
-      if (jsonBlockMatch != null) {
-        jsonStr = jsonBlockMatch.group(1);
-      } else {
-        // 尝试提取直接的 JSON（strategy 是必填字段）
-        final directJsonMatch = RegExp(
-          r'\{\s*"strategy"\s*:[\s\S]*?\}',
-          multiLine: true,
-        ).firstMatch(response);
-        if (directJsonMatch != null) {
-          jsonStr = directJsonMatch.group(0);
-        } else {
-          // 如果都没有匹配，尝试直接解析
-          jsonStr = response.trim();
-        }
+      if (json == null) {
+        debugPrint('⚠️ 解析模板修改策略失败：JSON解析失败');
+        return null;
       }
-
-      // 尝试修复常见的 JSON 格式错误（AI 可能用单引号包裹字符串）
-      jsonStr = _fixInvalidJson(jsonStr!);
-
-      final json = jsonDecode(jsonStr) as Map<String, dynamic>;
       final strategyStr = json['strategy'] as String? ?? 'replace';
       final strategy = strategyStr == 'rewrite'
           ? TemplateStrategy.rewrite
@@ -2244,21 +2222,13 @@ $toolDetailPrompt
       final response = buffer.toString();
       debugPrint('AI 代码生成响应: ${response.substring(0, response.length > 200 ? 200 : response.length)}...');
 
-      // 解析 JSON
-      String? jsonStr;
-      final jsonBlockMatch = RegExp(
-        r'```json\s*(\{[\s\S]*?\})\s*```',
-        multiLine: true,
-      ).firstMatch(response);
+      // 使用统一的JSON解析方法
+      final json = ToolService.parseJsonFromResponse(response, requiredField: 'steps');
 
-      if (jsonBlockMatch != null) {
-        jsonStr = jsonBlockMatch.group(1);
-      } else {
-        jsonStr = response.trim();
+      if (json == null) {
+        debugPrint('⚠️ 生成重写代码失败：JSON解析失败');
+        return null;
       }
-
-      jsonStr = _fixInvalidJson(jsonStr!);
-      final json = jsonDecode(jsonStr) as Map<String, dynamic>;
       final stepsList = json['steps'] as List<dynamic>?;
 
       if (stepsList == null || stepsList.isEmpty) {
@@ -2273,55 +2243,7 @@ $toolDetailPrompt
     }
   }
 
-  /// 修复 AI 返回的无效 JSON（主要处理单引号字符串值）
-  String _fixInvalidJson(String jsonStr) {
-    // 尝试先解析，如果成功则不需要修复
-    try {
-      jsonDecode(jsonStr);
-      return jsonStr;
-    } catch (_) {
-      // 继续修复
-    }
-
-    // 修复模式：将 JSON 对象中单引号包裹的字符串值转为双引号
-    // 例如：{"from": '早起', "to": '晨跑'} -> {"from": "早起", "to": "晨跑"}
-    final buffer = StringBuffer();
-    bool inDoubleQuote = false;
-    bool inSingleQuote = false;
-    bool escaped = false;
-
-    for (int i = 0; i < jsonStr.length; i++) {
-      final char = jsonStr[i];
-
-      if (escaped) {
-        buffer.write(char);
-        escaped = false;
-        continue;
-      }
-
-      if (char == '\\') {
-        escaped = true;
-        buffer.write(char);
-        continue;
-      }
-
-      if (char == '"' && !inSingleQuote) {
-        inDoubleQuote = !inDoubleQuote;
-        buffer.write(char);
-      } else if (char == "'" && !inDoubleQuote) {
-        // 单引号转双引号
-        inSingleQuote = !inSingleQuote;
-        buffer.write('"');
-      } else {
-        buffer.write(char);
-      }
-    }
-
-    final fixed = buffer.toString();
-    debugPrint('🔧 修复 JSON: $fixed');
-    return fixed;
-  }
-
+  
   /// 执行工具模板并让 AI 回复（合并到同一条消息）
   ///
   /// 这个方法会：
