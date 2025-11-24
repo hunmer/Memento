@@ -118,6 +118,7 @@ class ActivityController {
   ) async {
     DateTime? initialStartTime;
     DateTime? initialEndTime;
+    DateTime? lastActivityEndTime;
 
     if (startTime != null && endTime != null) {
       initialStartTime = DateTime(
@@ -134,6 +135,28 @@ class ActivityController {
         endTime.hour,
         endTime.minute,
       );
+    } else {
+      // 设置默认时间：开始时间为最后一个活动的结束时间，结束时间为当前时间
+      final now = DateTime.now();
+
+      // 确保已加载当天活动数据
+      if (activities.isEmpty) {
+        await loadActivities(selectedDate);
+      }
+
+      // 找到当天最后一个活动的结束时间
+      if (activities.isNotEmpty) {
+        // 按开始时间排序，找到最后一个活动
+        final sortedActivities = List.from(activities)
+          ..sort((a, b) => a.startTime.compareTo(b.startTime));
+        lastActivityEndTime = sortedActivities.last.endTime;
+      }
+
+      // 设置开始时间为最后一个活动的结束时间，如果没有活动则为当前时间前1小时
+      initialStartTime = lastActivityEndTime ?? now.subtract(const Duration(hours: 1));
+
+      // 设置结束时间为当前时间
+      initialEndTime = now;
     }
 
     // 加载最近使用的心情和标签
@@ -146,6 +169,7 @@ class ActivityController {
             selectedDate: selectedDate,
             initialStartTime: initialStartTime,
             initialEndTime: initialEndTime,
+            lastActivityEndTime: lastActivityEndTime,
             recentMoods: recentMoods,
             recentTags: recentTags,
             onSave: (ActivityRecord activity) async {
