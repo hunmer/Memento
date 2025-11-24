@@ -17,16 +17,82 @@ class ActivityTimeline extends StatelessWidget {
     this.onDeleteActivity,
   });
 
+  Color _getActivityColor(ActivityRecord activity) {
+    // Generate a consistent color based on the activity title
+    final colors = [
+      Colors.blue,
+      Colors.indigo,
+      Colors.orange,
+      Colors.green,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+      Colors.redAccent,
+    ];
+    final hashCode = activity.title.hashCode;
+    return colors[hashCode.abs() % colors.length];
+  }
+
+  IconData _getActivityIcon(ActivityRecord activity) {
+    // Simple mapping based on title keywords, fallback to default
+    final title = activity.title.toLowerCase();
+    if (title.contains('phone') || title.contains('手机')) return Icons.phone_iphone;
+    if (title.contains('sleep') || title.contains('睡觉')) return Icons.bed;
+    if (title.contains('eat') || title.contains('food') || title.contains('吃饭')) return Icons.restaurant;
+    if (title.contains('sport') || title.contains('run') || title.contains('运动')) return Icons.fitness_center;
+    if (title.contains('work') || title.contains('工作')) return Icons.work;
+    if (title.contains('study') || title.contains('学习')) return Icons.book;
+    if (title.contains('game') || title.contains('游戏')) return Icons.games;
+    return Icons.local_activity;
+  }
+
   String _formatDuration(DateTime start, DateTime end) {
     final duration = end.difference(start);
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
 
-    if (hours > 0) {
-      return '${hours}h\n${minutes}m';
+    if (hours > 0 && minutes > 0) {
+      return '$hours小时$minutes分钟';
+    } else if (hours > 0) {
+      return '$hours小时';
     } else {
-      return '${minutes}m';
+      return '$minutes分钟';
     }
+  }
+
+  Widget _buildTimeColumn(BuildContext context, DateTime start, DateTime end) {
+    return SizedBox(
+      width: 64,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')}',
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).hintColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Expanded(
+            child: Container(
+              width: 1,
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              color: Theme.of(context).dividerColor,
+            ),
+          ),
+          Text(
+            '${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}',
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).hintColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildUnrecordedTimeGap(
@@ -38,142 +104,73 @@ class ActivityTimeline extends StatelessWidget {
     return InkWell(
       onTap: () => onUnrecordedTimeTap?.call(start, end),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const EdgeInsets.only(bottom: 16.0),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 时间线
-              SizedBox(
-                width: 60,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Expanded(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Center(
-                            child: Container(
-                              width: 4,
-                              height: double.infinity,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).scaffoldBackgroundColor,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.grey[400]!,
-                                width: 2,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                _formatDuration(start, end),
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      '${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              // 未记录的活动卡片
+              _buildTimeColumn(context, start, end),
+              const SizedBox(width: 12),
               Expanded(
-                child: Card(
-                  elevation: 2,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor.withAlpha(150),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor,
+                      style: BorderStyle.solid,
+                      width: 1,
+                    ),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.history_toggle_off_rounded,
-                                        color: Colors.grey,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          ActivityLocalizations.of(
-                                            context,
-                                          ).unrecordedTimeText,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    ActivityLocalizations.of(
-                                      context,
-                                    ).tapToRecordText,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                _formatTimeDisplay(gapMinutes, context),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
+                        Icon(
+                          Icons.history_toggle_off_rounded,
+                          color: Theme.of(context).hintColor,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                ActivityLocalizations.of(context).unrecordedTimeText,
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                                  fontSize: 14,
                                 ),
                               ),
+                              Text(
+                                ActivityLocalizations.of(context).tapToRecordText,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).dividerColor.withAlpha(50),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _formatDuration(start, end),
+                            style: TextStyle(
+                              color: Theme.of(context).hintColor,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
@@ -187,92 +184,268 @@ class ActivityTimeline extends StatelessWidget {
     );
   }
 
-  String _formatTimeDisplay(int totalMinutes, context) {
-    final hours = totalMinutes ~/ 60;
-    final minutes = totalMinutes % 60;
+  Widget _buildTimelineItem(
+    BuildContext context,
+    ActivityRecord activity,
+    int index,
+  ) {
+    final color = _getActivityColor(activity);
+    final icon = _getActivityIcon(activity);
 
-    if (hours > 0 && minutes > 0) {
-      return '$hours${ActivityLocalizations.of(context).hour}$minutes${ActivityLocalizations.of(context).minute}';
-    } else if (hours > 0) {
-      return '$hours${ActivityLocalizations.of(context).hour}';
-    } else {
-      return '$minutes${ActivityLocalizations.of(context).minute}';
-    }
+    return Dismissible(
+      key: Key('activity_${activity.id}'),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(ActivityLocalizations.of(context).confirmDelete),
+              content: Text(
+                '${ActivityLocalizations.of(context).confirmDelete.replaceFirst('确定要删除', '确定要删除活动')}"${activity.title}"吗？',
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(AppLocalizations.of(context)!.cancel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(ActivityLocalizations.of(context).deleteActivity),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onDismissed: (direction) {
+        if (onDeleteActivity != null) {
+          onDeleteActivity!(activity);
+        }
+      },
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 16.0),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20.0),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: InkWell(
+        onTap: () => onActivityTap?.call(activity),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildTimeColumn(context, activity.startTime, activity.endTime),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(10),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Colored Bar
+                        Container(
+                          width: 6,
+                          color: color.withAlpha(200),
+                        ),
+                        // Content
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Header Row
+                                Row(
+                                  children: [
+                                    // Icon
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: color.withAlpha(30),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        icon,
+                                        color: color,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    // Title
+                                    Expanded(
+                                      child: Text(
+                                        activity.title,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    // Mood (if any)
+                                    if (activity.mood != null) ...[
+                                      Padding(
+                                        padding: const EdgeInsets.only(right: 8.0),
+                                        child: Text(
+                                          activity.mood!,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    // Duration
+                                    Text(
+                                      _formatDuration(
+                                        activity.startTime,
+                                        activity.endTime,
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(context).hintColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // Description
+                                if (activity.description != null && activity.description!.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text(
+                                      activity.description!,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Theme.of(context).hintColor,
+                                      ),
+                                    ),
+                                  ),
+                                // Tags
+                                if (activity.tags.isNotEmpty) ...[
+                                  const SizedBox(height: 12),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 4,
+                                    children: activity.tags.map((tag) {
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: color.withAlpha(20),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          tag,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: color.withAlpha(200),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   List<Widget> _buildTimelineItems(BuildContext context) {
     final List<Widget> items = [];
     final now = DateTime.now();
-
-    // 获取今天的开始时间 (00:00)
     final today = DateTime(now.year, now.month, now.day);
 
-    // 1. 检查一天开始到第一个活动之间的间隙
+    // Padding top
+    items.add(const SizedBox(height: 24)); // pt-6
+
     if (activities.isNotEmpty) {
       final firstActivity = activities.first;
-      final morningGap = firstActivity.startTime.difference(today).inMinutes;
-
+      // Check if we are viewing a past date or future date to handle "start of day"
+      // For simplicity, we use the activity's date as the "day" base
+      final activityDate = DateTime(firstActivity.startTime.year, firstActivity.startTime.month, firstActivity.startTime.day);
+      
+      // 1. Morning Gap (from 00:00 to first activity)
+      final morningGap = firstActivity.startTime.difference(activityDate).inMinutes;
       if (morningGap > 1) {
-        items.add(
-          _buildUnrecordedTimeGap(
-            context,
-            today,
-            firstActivity.startTime,
-            morningGap,
-          ),
-        );
+        items.add(_buildUnrecordedTimeGap(context, activityDate, firstActivity.startTime, morningGap));
       }
     }
 
-    // 2. 添加所有活动和活动之间的间隙
     for (int i = 0; i < activities.length; i++) {
-      // 添加活动
       items.add(_buildTimelineItem(context, activities[i], i));
 
-      // 如果不是最后一个活动，检查与下一个活动之间的间隙
       if (i < activities.length - 1) {
-        final currentActivity = activities[i];
-        final nextActivity = activities[i + 1];
-        final gap =
-            nextActivity.startTime
-                .difference(currentActivity.endTime)
-                .inMinutes;
-
+        final current = activities[i];
+        final next = activities[i + 1];
+        final gap = next.startTime.difference(current.endTime).inMinutes;
         if (gap > 1) {
-          items.add(
-            _buildUnrecordedTimeGap(
-              context,
-              currentActivity.endTime,
-              nextActivity.startTime,
-              gap,
-            ),
-          );
+          items.add(_buildUnrecordedTimeGap(context, current.endTime, next.startTime, gap));
         }
       }
     }
 
-    // 3. 检查最后一个活动到现在的间隙
+    // End Gap (only if today and showing "now", or if we want to show 'til end of day?)
+    // The original code showed gap to 'now' if it's today.
     if (activities.isNotEmpty) {
       final lastActivity = activities.last;
-      final eveningGap = now.difference(lastActivity.endTime).inMinutes;
-
-      if (eveningGap > 1) {
-        items.add(
-          _buildUnrecordedTimeGap(
-            context,
-            lastActivity.endTime,
-            now,
-            eveningGap,
-          ),
-        );
+      // If it's today, show gap to now
+      if (lastActivity.endTime.year == now.year && 
+          lastActivity.endTime.month == now.month && 
+          lastActivity.endTime.day == now.day && 
+          now.isAfter(lastActivity.endTime)) {
+          
+          final endGap = now.difference(lastActivity.endTime).inMinutes;
+          if (endGap > 1) {
+             items.add(_buildUnrecordedTimeGap(context, lastActivity.endTime, now, endGap));
+          }
       }
     } else {
-      // 如果没有活动，显示整天的未记录时间
-      final wholeDayGap = now.difference(today).inMinutes;
-      if (wholeDayGap > 0) {
-        items.add(_buildUnrecordedTimeGap(context, today, now, wholeDayGap));
-      }
+       // No activities. Show whole day gap if it's today?
+       // Original code had this.
+       if (now.year == today.year && now.month == today.month && now.day == today.day) {
+         final gap = now.difference(today).inMinutes;
+         if (gap > 0) {
+           items.add(_buildUnrecordedTimeGap(context, today, now, gap));
+         }
+       }
     }
+
+    // Padding bottom
+    items.add(const SizedBox(height: 96)); // pb-24
 
     return items;
   }
@@ -280,16 +453,7 @@ class ActivityTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (activities.isEmpty &&
-        DateTime.now()
-                .difference(
-                  DateTime(
-                    DateTime.now().year,
-                    DateTime.now().month,
-                    DateTime.now().day,
-                  ),
-                )
-                .inMinutes ==
-            0) {
+        DateTime.now().difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).inMinutes == 0) {
       return Center(
         child: Text(
           ActivityLocalizations.of(context).noActivitiesText,
@@ -298,267 +462,10 @@ class ActivityTimeline extends StatelessWidget {
       );
     }
 
-    return ListView(children: _buildTimelineItems(context));
-  }
-
-  Widget _buildTimelineItem(
-    BuildContext context,
-    ActivityRecord activity,
-    int index,
-  ) {
-    // 使用GlobalKey来获取卡片的高度
-    final cardKey = GlobalKey();
-
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: IntrinsicHeight(
-        // 使用IntrinsicHeight使Row的子元素高度一致
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch, // 拉伸子元素以填充高度
-          children: [
-            // 时间线
-            SizedBox(
-              width: 60,
-              child: Column(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween, // 分散对齐，使开始和结束时间分别在顶部和底部
-                children: [
-                  Text(
-                    '${activity.startTime.hour.toString().padLeft(2, '0')}:${activity.startTime.minute.toString().padLeft(2, '0')}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Expanded(
-                    // 使Stack填充中间空间
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // 主垂直连接线 - 现在会自动填充整个高度
-                        Center(
-                          child: Container(
-                            width: 4,
-                            height: double.infinity, // 使用无限高度，让父级约束决定实际高度
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                        // 圆形时间指示器（带背景色覆盖线条）
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Theme.of(context).primaryColor,
-                              width: 2,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              _formatDuration(
-                                activity.startTime,
-                                activity.endTime,
-                              ),
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '${activity.endTime.hour.toString().padLeft(2, '0')}:${activity.endTime.minute.toString().padLeft(2, '0')}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            // 活动内容
-            Expanded(
-              child: Dismissible(
-                key: Key('activity_${activity.id}'),
-                direction: DismissDirection.endToStart,
-                dismissThresholds: const {DismissDirection.endToStart: 0.4},
-                movementDuration: const Duration(milliseconds: 200),
-                confirmDismiss: (direction) async {
-                  return await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text(
-                          ActivityLocalizations.of(context).confirmDelete,
-                        ),
-                        content: Text(
-                          '${ActivityLocalizations.of(context).confirmDelete.replaceFirst('确定要删除', '确定要删除活动')}"${activity.title}"吗？',
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: Text(AppLocalizations.of(context)!.cancel),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: Text(
-                              ActivityLocalizations.of(context).deleteActivity,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                onDismissed: (direction) {
-                  if (onDeleteActivity != null) {
-                    onDeleteActivity!(activity);
-                  }
-                },
-                background: Container(
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20.0),
-                  color: Colors.red,
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                child: InkWell(
-                  onTap: () => onActivityTap?.call(activity),
-                  child: Card(
-                    key: cardKey,
-                    elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            activity.title,
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        if (activity.mood != null)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 8,
-                                            ),
-                                            child: Text(
-                                              activity.mood!,
-                                              style: const TextStyle(
-                                                fontSize: 20,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    if (activity.description != null &&
-                                        activity.description!.isNotEmpty)
-                                      Text(
-                                        activity.description!,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).primaryColor.withAlpha(25),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  activity.formattedDuration,
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (activity.tags.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 4,
-                              runSpacing: 4,
-                              children:
-                                  activity.tags
-                                      .map(
-                                        (tag) => Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(
-                                              context,
-                                            ).primaryColor.withAlpha(25),
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            tag,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color:
-                                                  Theme.of(
-                                                    context,
-                                                  ).primaryColor,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0), // px-4
+      child: ListView(
+        children: _buildTimelineItems(context),
       ),
     );
   }

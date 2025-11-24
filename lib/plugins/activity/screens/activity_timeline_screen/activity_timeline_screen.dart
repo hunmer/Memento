@@ -5,7 +5,6 @@ import '../../services/activity_service.dart';
 import '../../widgets/activity_timeline.dart';
 import '../../l10n/activity_localizations.dart';
 import 'components/activity_grid_view.dart';
-import 'components/date_selector.dart';
 import 'components/timeline_app_bar.dart';
 import 'controllers/activity_controller.dart';
 import 'controllers/tag_controller.dart';
@@ -146,6 +145,11 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     }
   }
 
+  String _getWeekDayName(int weekday) {
+    const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    return weekDays[weekday - 1];
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
@@ -164,10 +168,138 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       ),
       body: Column(
         children: [
-          // 日期选择器
-          DateSelector(
-            selectedDate: _selectedDate,
-            onDateChanged: _onDateChanged,
+          // Calendar Strip Date Picker
+          Container(
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 70,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 7,
+                      padding: const EdgeInsets.only(left: 16, right: 8),
+                      itemBuilder: (context, index) {
+                        // Calculate date for this item (Selected Date - 3 days + index)
+                        // This keeps the selected date in the middle (index 3)
+                        final date = _selectedDate
+                            .subtract(const Duration(days: 3))
+                            .add(Duration(days: index));
+                        final isSelected = date.year == _selectedDate.year &&
+                            date.month == _selectedDate.month &&
+                            date.day == _selectedDate.day;
+                        final isToday = date.year == DateTime.now().year &&
+                            date.month == DateTime.now().month &&
+                            date.day == DateTime.now().day;
+
+                        return GestureDetector(
+                          onTap: () => _onDateChanged(date),
+                          child: Container(
+                            width: 54,
+                            margin: const EdgeInsets.only(right: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(16),
+                              border: isToday && !isSelected
+                                  ? Border.all(
+                                      color: Theme.of(context).primaryColor,
+                                      width: 1,
+                                    )
+                                  : null,
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withOpacity(0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      )
+                                    ]
+                                  : null,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _getWeekDayName(date.weekday),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Theme.of(context).hintColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  date.day.toString(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.color,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                // Fixed Date Picker Button
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: GestureDetector(
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: ColorScheme.fromSeed(
+                                seedColor: Theme.of(context).primaryColor,
+                                brightness: Theme.of(context).brightness,
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) {
+                        _onDateChanged(picked);
+                      }
+                    },
+                    child: Container(
+                      width: 54,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(
+                        Icons.calendar_month_rounded,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           // 根据视图模式显示不同的视图
           Expanded(
