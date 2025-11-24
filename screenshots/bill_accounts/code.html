@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html class="" lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account List</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#3498DB",
+            "background-light": "#f6f6f8",
+            "background-dark": "#101622",
+            "expense": "#E74C3C",
+            "income": "#2ECC71"
+          },
+          fontFamily: {
+            "display": ["Manrope", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<header class="sticky top-0 z-10 flex items-center bg-background-light/80 px-4 pb-2 pt-4 backdrop-blur-sm dark:bg-background-dark/80">
+<button class="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-800 dark:text-white">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+</button>
+<h1 class="flex-1 text-center text-lg font-bold tracking-tight">账户列表</h1>
+<div class="h-12 w-12 shrink-0"></div>
+</header>
+<main class="flex-1 space-y-4 px-4 pt-4">
+<div class="rounded-xl bg-white p-4 dark:bg-gray-800">
+<div class="flex items-center">
+<div class="mr-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
+<span class="material-symbols-outlined text-3xl">wallet</span>
+</div>
+<div class="flex-1">
+<p class="text-base font-semibold">现金</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">15 笔账单</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold">¥1,250.75</p>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-white p-4 dark:bg-gray-800">
+<div class="flex items-center">
+<div class="mr-4 flex h-14 w-14 items-center justify-center rounded-full bg-orange-500/10 text-orange-500 dark:bg-orange-500/20">
+<span class="material-symbols-outlined text-3xl">account_balance</span>
+</div>
+<div class="flex-1">
+<p class="text-base font-semibold">银行卡 (6077)</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">82 笔账单</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold">¥23,890.12</p>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-white p-4 dark:bg-gray-800">
+<div class="flex items-center">
+<div class="mr-4 flex h-14 w-14 items-center justify-center rounded-full bg-sky-500/10 text-sky-500 dark:bg-sky-500/20">
+<span class="material-symbols-outlined text-3xl">payment</span>
+</div>
+<div class="flex-1">
+<p class="text-base font-semibold">支付宝</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">128 笔账单</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold">¥5,432.88</p>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-white p-4 dark:bg-gray-800">
+<div class="flex items-center">
+<div class="mr-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-500/10 text-green-500 dark:bg-green-500/20">
+<span class="material-symbols-outlined text-3xl">google_chat</span>
+</div>
+<div class="flex-1">
+<p class="text-base font-semibold">微信钱包</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">97 笔账单</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold">¥888.66</p>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-white p-4 dark:bg-gray-800">
+<div class="flex items-center">
+<div class="mr-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10 text-red-500 dark:bg-red-500/20">
+<span class="material-symbols-outlined text-3xl">credit_card</span>
+</div>
+<div class="flex-1">
+<p class="text-base font-semibold">信用卡 (2345)</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">45 笔账单</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold text-expense">-¥4,500.00</p>
+</div>
+</div>
+</div>
+</main>
+<div class="pointer-events-none fixed bottom-0 right-0 h-full w-full">
+<button class="pointer-events-auto absolute bottom-8 right-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform active:scale-95">
+<span class="material-symbols-outlined text-4xl">add</span>
+</button>
+</div>
+</div>
+
+</body></html>
