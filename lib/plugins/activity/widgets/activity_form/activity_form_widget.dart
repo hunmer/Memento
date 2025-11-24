@@ -46,117 +46,109 @@ class MoodSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
-          child: Text(
-            DiaryLocalizations.of(context).mood,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          alignment: WrapAlignment.start,
+    final moods = _getMoodsList();
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemWidth = (constraints.maxWidth - (4 * 12)) / 5; // 5 items per row, 12px gap
+        
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
           children: [
-            ..._getMoodsList().map((mood) {
+            ...moods.map((mood) {
               final isSelected = mood == selectedMood;
               return InkWell(
                 onTap: () => onMoodSelected(mood),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(50),
                 child: Container(
-                  width: 55,
-                  height: 55,
-                  padding: const EdgeInsets.all(8),
+                  width: itemWidth,
+                  height: itemWidth,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color:
-                        isSelected
-                            ? Theme.of(context).primaryColor.withAlpha(50)
-                            : Colors.transparent,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color:
-                          isSelected
-                              ? Theme.of(context).primaryColor
-                              : Colors.transparent,
-                      width: 2,
-                    ),
+                    color: isSelected
+                        ? Theme.of(context).primaryColor.withOpacity(0.2)
+                        : Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: isSelected
+                        ? Border.all(
+                            color: Theme.of(context).primaryColor,
+                            width: 2,
+                          )
+                        : null,
                   ),
-                  child: Text(mood, style: const TextStyle(fontSize: 24)),
+                  child: Text(mood, style: const TextStyle(fontSize: 28)),
                 ),
               );
             }),
             InkWell(
               onTap: () async {
-                final TextEditingController controller =
-                    TextEditingController();
+                final TextEditingController controller = TextEditingController();
                 final result = await showDialog<String>(
                   context: context,
-                  builder:
-                      (context) => AlertDialog(
-                        title: Text(
-                          ActivityLocalizations.of(context).inputMood,
-                        ),
-                        content: TextField(
-                          controller: controller,
-                          decoration: const InputDecoration(
-                            hintText: '请输入心情表情或文字',
-                          ),
-                          maxLength: 4, // 限制输入长度
-                          autofocus: true, // 自动获取焦点
-                          onSubmitted: (value) {
-                            if (value.isNotEmpty) {
-                              Navigator.of(context).pop(value);
-                            }
-                          },
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(AppLocalizations.of(context)!.cancel),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              if (controller.text.isNotEmpty) {
-                                Navigator.of(context).pop(controller.text);
-                              }
-                            },
-                            child: Text(AppLocalizations.of(context)!.confirm),
-                          ),
-                        ],
+                  builder: (context) => AlertDialog(
+                    title: Text(ActivityLocalizations.of(context).inputMood),
+                    content: TextField(
+                      controller: controller,
+                      decoration: const InputDecoration(
+                        hintText: '请输入心情表情或文字',
                       ),
+                      maxLength: 4,
+                      autofocus: true,
+                      onSubmitted: (value) {
+                        if (value.isNotEmpty) {
+                          Navigator.of(context).pop(value);
+                        }
+                      },
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(AppLocalizations.of(context)!.cancel),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          if (controller.text.isNotEmpty) {
+                            Navigator.of(context).pop(controller.text);
+                          }
+                        },
+                        child: Text(AppLocalizations.of(context)!.confirm),
+                      ),
+                    ],
+                  ),
                 );
                 if (result != null && result.isNotEmpty) {
                   onMoodSelected(result);
                 }
               },
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(50),
               child: Container(
-                width: 48,
-                height: 48,
-                padding: const EdgeInsets.all(8),
+                width: itemWidth,
+                height: itemWidth,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
+                  shape: BoxShape.circle,
                   border: Border.all(
-                    color: Theme.of(context).primaryColor.withAlpha(125),
-                    width: 2,
+                    color: Colors.grey.shade400,
+                    width: 1,
+                    style: BorderStyle.solid,
                   ),
                 ),
-                child: const Icon(Icons.add, size: 24),
+                child: Icon(
+                  Icons.add, 
+                  size: 24, 
+                  color: Colors.grey.shade400
+                ),
               ),
             ),
           ],
-        ),
-      ],
+        );
+      }
     );
   }
 
-  /// 获取合并后的心情列表，将最近使用的心情插入到候选列表前面，并截取前十个
+  /// 获取合并后的心情列表，将最近使用的心情插入到候选列表前面，并截取前9个（留一个位置给添加按钮）
   List<String> _getMoodsList() {
     // 创建一个新的列表来存储最终结果
     List<String> combinedMoods = [];
@@ -173,9 +165,9 @@ class MoodSelector extends StatelessWidget {
       }
     }
 
-    // 截取前10个
-    if (combinedMoods.length > 10) {
-      combinedMoods = combinedMoods.sublist(0, 10);
+    // 截取前9个
+    if (combinedMoods.length > 9) {
+      combinedMoods = combinedMoods.sublist(0, 9);
     }
 
     return combinedMoods;
