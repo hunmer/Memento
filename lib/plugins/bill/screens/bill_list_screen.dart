@@ -145,14 +145,27 @@ class _BillListScreenState extends State<BillListScreen> {
       );
     }
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BillEditScreen(
-          billPlugin: widget.billPlugin,
-          accountId: widget.accountId,
-          bill: bill,
-          initialDate: _selectedDay ?? DateTime.now(),
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF101622)
+                : const Color(0xFFF6F6F8),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: BillEditScreen(
+            billPlugin: widget.billPlugin,
+            accountId: widget.accountId,
+            bill: bill,
+            initialDate: _selectedDay ?? DateTime.now(),
+          ),
         ),
       ),
     );
