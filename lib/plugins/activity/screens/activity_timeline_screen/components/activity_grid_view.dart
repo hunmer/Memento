@@ -178,31 +178,91 @@ class _ActivityGridViewState extends State<ActivityGridView> {
 
   // 获取时间对应的网格颜色
   Color _getGridColor(DateTime time) {
-    // 检查是否超过当前时间
     if (time.isAfter(DateTime.now())) {
-      return Colors.grey.withValues(alpha: 0.3); // 增加灰色不透明度，使禁用状态更明显
+      return Colors.grey.withValues(alpha: 0.3);
     }
 
-    // 检查是否在选择范围内
     if (_isDragging && _selectionStart != null && _lastEnteredTime != null) {
-      final start = _selectionStart!;
-      final end = _lastEnteredTime!;
-      if ((time.isAfter(start) && time.isBefore(end)) ||
-          (time.isAfter(end) && time.isBefore(start)) ||
-          time.isAtSameMomentAs(start) ||
-          time.isAtSameMomentAs(end)) {
+      final startTime = _selectionStart!;
+      final endTime = _lastEnteredTime!;
+      if ((time.isAfter(startTime) && time.isBefore(endTime)) ||
+          (time.isAfter(endTime) && time.isBefore(startTime)) ||
+          time.isAtSameMomentAs(startTime) ||
+          time.isAtSameMomentAs(endTime)) {
         return Colors.lightBlue.withValues(alpha: 0.3);
       }
     }
 
-    // 检查是否有活动在这个时间点
     final activity = _getActivityAtTime(time);
     if (activity != null) {
-      // 优先使用活动的颜色，如果没有则根据标签生成颜色
-      return activity.color ?? _getColorFromTags(activity.tags);
+      return Colors.transparent;
     }
 
     return Colors.grey.withValues(alpha: 0.1);
+  }
+
+  Color _resolveActivityColor(ActivityRecord activity) {
+    return activity.color ?? _getColorFromTags(activity.tags);
+  }
+
+  Color _getContrastingTextColor(Color background) {
+    return background.computeLuminance() > 0.5 ? Colors.black : Colors.white;
+  }
+
+  String _buildActivityLabel(ActivityRecord activity) {
+    final buffer = StringBuffer(
+      '${activity.title} ${activity.tags.join(', ')} (${activity.formattedDuration})',
+    );
+    return buffer.toString();
+  }
+
+  List<_ActivityBarSegment> _buildActivitySegmentsForHour(int hourIndex) {
+    final segments = <_ActivityBarSegment>[];
+    ActivityRecord? currentActivity;
+    int? segmentStartIndex;
+
+    for (int minuteIndex = 0; minuteIndex <= 12; minuteIndex++) {
+      final bool reachedRowEnd = minuteIndex == 12;
+      final activity =
+          reachedRowEnd
+              ? null
+              : _getActivityAtTime(_getTimeFromIndex(hourIndex, minuteIndex));
+
+      if (activity == null) {
+        if (currentActivity != null && segmentStartIndex != null) {
+          segments.add(
+            _ActivityBarSegment(
+              activity: currentActivity!,
+              startMinuteIndex: segmentStartIndex,
+              endMinuteIndex: minuteIndex,
+            ),
+          );
+        }
+        currentActivity = null;
+        segmentStartIndex = null;
+        continue;
+      }
+
+      if (currentActivity == null) {
+        currentActivity = activity;
+        segmentStartIndex = minuteIndex;
+        continue;
+      }
+
+      if (activity.id != currentActivity!.id) {
+        segments.add(
+          _ActivityBarSegment(
+            activity: currentActivity!,
+            startMinuteIndex: segmentStartIndex!,
+            endMinuteIndex: minuteIndex,
+          ),
+        );
+        currentActivity = activity;
+        segmentStartIndex = minuteIndex;
+      }
+    }
+
+    return segments;
   }
 
   void _onGridDragEnd() {
@@ -366,69 +426,164 @@ class _ActivityGridViewState extends State<ActivityGridView> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final hourHeight =
-                    (constraints.maxHeight - 30) / 24; // 减去分钟标尺的高度
-                return Column(
-                  children: List.generate(24, (hourIndex) {
-                    return Row(
-                      children: [
-                        // 小时标签
-                        SizedBox(
-                          width: 30,
-                          child: Center(
-                            child: Text(
-                              '$hourIndex',
-                              style: const TextStyle(fontSize: 12),
+                    (constraints.maxHeight - 30) / 24; // ?????????
+                final double gridWidth = constraints.maxWidth - 30;
+                final double cellWidth = gridWidth <= 0 ? 0.0 : gridWidth / 12;
+
+                return Stack(
+                  children: [
+                    Column(
+                      children: List.generate(24, (hourIndex) {
+                        return Row(
+                          children: [
+                            SizedBox(
+                              width: 30,
+                              child: Center(
+                                child: Text(
+                                  '$hourIndex',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        // 每小时的12个5分钟格子
-                        Expanded(
-                          child: Row(
-                            children: List.generate(12, (minuteIndex) {
-                              final time = _getTimeFromIndex(
-                                hourIndex,
-                                minuteIndex,
-                              );
-                              return Expanded(
-                                child: MouseRegion(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      final activity = _getActivityAtTime(time);
-                                      if (activity != null) {
-                                        widget.onActivityTap(activity);
-                                      }
-                                    },
-                                    child: MetaData(
-                                      metaData: time,
-                                      child: Container(
-                                      height: hourHeight - 2, // 减去margin的高度
-                                      margin: const EdgeInsets.all(
-                                        1.0,
-                                      ), // 保持网格间隙
-                                      decoration: BoxDecoration(
-                                        color: _getGridColor(time),
-                                        borderRadius: BorderRadius.circular(
-                                          4.0,
-                                        ), // 添加圆角
-                                        border: Border.all(
-                                            color: Colors.grey.withValues(
-                                              alpha: 0.2,
+                            Expanded(
+                              child: Row(
+                                children: List.generate(12, (minuteIndex) {
+                                  final time = _getTimeFromIndex(
+                                    hourIndex,
+                                    minuteIndex,
+                                  );
+                                  return Expanded(
+                                    child: MouseRegion(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          final activity = _getActivityAtTime(
+                                            time,
+                                          );
+                                          if (activity != null) {
+                                            widget.onActivityTap(activity);
+                                          }
+                                        },
+                                        child: MetaData(
+                                          metaData: time,
+                                          child: Container(
+                                            height: hourHeight - 2,
+                                            margin: const EdgeInsets.all(1.0),
+                                            decoration: BoxDecoration(
+                                              color: _getGridColor(time),
+                                              borderRadius:
+                                                  BorderRadius.circular(4.0),
+                                              border: Border.all(
+                                                color: Colors.grey.withValues(
+                                                  alpha: 0.2,
+                                                ),
+                                                width: 0.5,
+                                              ),
                                             ),
-                                          width: 0.5,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                                ),
-                              );
-                            }),
+                                  );
+                                }),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
+                    Positioned.fill(
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 30),
+                          Expanded(
+                            child: IgnorePointer(
+                              child: Column(
+                                children: List.generate(24, (hourIndex) {
+                                  final segments =
+                                      _buildActivitySegmentsForHour(hourIndex);
+                                  final bars = <Widget>[];
+                                  for (final segment in segments) {
+                                    final span =
+                                        segment.endMinuteIndex -
+                                        segment.startMinuteIndex;
+                                    final double barWidth = span * cellWidth;
+                                    if (barWidth <= 0) {
+                                      continue;
+                                    }
+                                    final color = _resolveActivityColor(
+                                      segment.activity,
+                                    );
+                                    final textColor = _getContrastingTextColor(
+                                      color,
+                                    );
+                                    bars.add(
+                                      Positioned(
+                                        left:
+                                            segment.startMinuteIndex
+                                                .toDouble() *
+                                            cellWidth,
+                                        top: 1,
+                                        bottom: 1,
+                                        width: barWidth,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: color,
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: color.withValues(
+                                                  alpha: 0.25,
+                                                ),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 1),
+                                              ),
+                                            ],
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                          ),
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: ClipRect(
+                                              child: FittedBox(
+                                                alignment: Alignment.centerLeft,
+                                                fit: BoxFit.scaleDown,
+                                                child: Text(
+                                                  _buildActivityLabel(
+                                                    segment.activity,
+                                                  ),
+                                                  maxLines: 1,
+                                                  softWrap: false,
+                                                  style: TextStyle(
+                                                    color: textColor,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  return SizedBox(
+                                    height: hourHeight,
+                                    child: Stack(children: bars),
+                                  );
+                                }),
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
+                        ],
+                      ),
+                    ),
+                  ],
                 );
+
               },
             ),
           ),
@@ -436,4 +591,16 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       ),
     );
   }
+}
+
+class _ActivityBarSegment {
+  _ActivityBarSegment({
+    required this.activity,
+    required this.startMinuteIndex,
+    required this.endMinuteIndex,
+  });
+
+  final ActivityRecord activity;
+  final int startMinuteIndex;
+  final int endMinuteIndex;
 }

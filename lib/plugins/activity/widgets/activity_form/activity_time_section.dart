@@ -1,9 +1,12 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:wheel_picker/wheel_picker.dart';
 import '../../../../plugins/diary/l10n/diary_localizations.dart';
 import 'activity_form_utils.dart';
 
 class ActivityTimeSection extends StatelessWidget {
+  static const int _maxIntervalMinutes = 24 * 60; // cover full day range
   final TimeOfDay startTime;
   final TimeOfDay endTime;
   final DateTime selectedDate;
@@ -58,72 +61,67 @@ class ActivityTimeSection extends StatelessWidget {
             ),
           ),
         ),
-        // 间隔时间按钮
+        // 间隔时间选择器
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: TextButton(
-              onPressed: () async {
-                final result = await showDialog<String>(
-                  context: context,
-                  builder:
-                      (BuildContext context) => AlertDialog(
-                        title: Text(l10n.editInterval),
-                        content: TextField(
-                          controller: durationController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: appL10n.interval,
-                            suffixText: appL10n.minutes,
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(l10n.cancelButton),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(
-                                context,
-                              ).pop(durationController.text);
-                            },
-                            child: Text(l10n.confirmButton),
-                          ),
-                        ],
-                      ),
-                );
-
-                if (result != null) {
-                  onDurationChanged(result);
-                }
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  appL10n.interval,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  textAlign: TextAlign.center,
                 ),
-                backgroundColor: Theme.of(context).primaryColor.withAlpha(25),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    appL10n.interval,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${calculateDuration(selectedDate, startTime, endTime)}${appL10n.minutes}',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
+                const SizedBox(height: 4),
+                SizedBox(
+                  height: 140,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor.withAlpha(50),
+                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    textAlign: TextAlign.center,
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context).copyWith(
+                        dragDevices: {
+                          PointerDeviceKind.touch,
+                          PointerDeviceKind.mouse,
+                          PointerDeviceKind.stylus,
+                          PointerDeviceKind.trackpad,
+                          PointerDeviceKind.unknown,
+                        },
+                      ),
+                      child: WheelPicker(
+                        controller: WheelPickerController(
+                          itemCount: _maxIntervalMinutes,
+                          initialIndex: int.tryParse(durationController.text) ?? 0,
+                        ),
+                        style: const WheelPickerStyle(
+                          itemExtent: 40,
+                          squeeze: 1.25,
+                          diameterRatio: 0.8,
+                          surroundingOpacity: 0.25,
+                          magnification: 1.2,
+                        ),
+                        builder: (context, index) {
+                          return Center(
+                            child: Text(
+                              '$index${appL10n.minutes}',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          );
+                        },
+                        onIndexChanged: (index, _) {
+                          durationController.text = index.toString();
+                          onDurationChanged(index.toString());
+                        },
+                      ),
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
