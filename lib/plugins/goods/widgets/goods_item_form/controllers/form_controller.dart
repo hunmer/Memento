@@ -32,6 +32,10 @@ class GoodsItemFormController {
   List<UsageRecord> usageRecords = [];
   List<CustomField> customFields = [];
   List<GoodsItem> _subItems = [];
+  
+  DateTime purchaseDate = DateTime.now();
+  DateTime? expirationDate;
+  String status = 'normal'; // Default status
 
   // 获取子物品列表
   List<GoodsItem> get subItems => _subItems;
@@ -47,7 +51,7 @@ class GoodsItemFormController {
       nameController.text = item.title;
       descriptionController.text = item.notes ?? '';
       priceController.text = (item.purchasePrice ?? 0).toString();
-      stockController.text = '0'; // 由于原模型没有stock字段，默认为0
+      stockController.text = (item.quantity ?? 1).toString();
       icon = item.icon;
       iconColor = item.iconColor;
       imagePath = item.imageUrl;
@@ -56,6 +60,9 @@ class GoodsItemFormController {
       usageRecords = List<UsageRecord>.from(item.usageRecords);
       customFields = List<CustomField>.from(item.customFields);
       _subItems = List<GoodsItem>.from(item.subItems);
+      purchaseDate = item.purchaseDate ?? DateTime.now();
+      expirationDate = item.expirationDate;
+      status = item.status ?? 'normal';
     }
   }
 
@@ -86,6 +93,9 @@ class GoodsItemFormController {
       thumbUrl: item.thumbUrl,
       tags: item.tags,
       purchaseDate: item.purchaseDate,
+      expirationDate: item.expirationDate,
+      quantity: item.quantity,
+      status: item.status,
       usageRecords: [], // 清空使用记录
       customFields: [], // 清空自定义字段
       subItems: [], // 清空子物品的子物品
@@ -134,13 +144,16 @@ class GoodsItemFormController {
       id: existingId ?? DateTime.now().millisecondsSinceEpoch.toString(),
       title: nameController.text,
       notes: descriptionController.text,
-      purchasePrice: double.parse(priceController.text),
+      purchasePrice: double.tryParse(priceController.text),
+      quantity: int.tryParse(stockController.text) ?? 1,
       icon: icon ?? Icons.image,
       iconColor: iconColor ?? Colors.blue,
       imageUrl: imagePath,
       thumbUrl: thumbPath,
       tags: tags,
-      purchaseDate: DateTime.now(),
+      purchaseDate: purchaseDate,
+      expirationDate: expirationDate,
+      status: status,
       usageRecords: usageRecords,
       customFields: customFields,
       subItems: _subItems,
