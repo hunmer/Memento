@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Usage History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#007AFF",
+            "background-light": "#F0F4F8",
+            "background-dark": "#1C1C1E",
+            "card-light": "#FFFFFF",
+            "card-dark": "#2C2C2E",
+            "text-light-primary": "#111827",
+            "text-dark-primary": "#FFFFFF",
+            "text-light-secondary": "#6B7280",
+            "text-dark-secondary": "#A0AEC0",
+            "input-light": "#F9FAFB",
+            "input-dark": "#3A3A3C",
+            "border-light": "#E5E7EB",
+            "border-dark": "#48484A"
+          },
+          fontFamily: {
+            display: ["Noto Sans SC", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light-primary dark:text-text-dark-primary">
+<div class="min-h-screen max-w-md mx-auto relative">
+<header class="sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10 px-4 py-4">
+<div class="flex items-center space-x-2 relative">
+<button class="absolute left-0 p-1">
+<span class="material-icons text-2xl text-text-light-primary dark:text-text-dark-primary">arrow_back_ios_new</span>
+</button>
+<h1 class="text-xl font-bold text-text-light-primary dark:text-text-dark-primary text-center w-full">使用历史</h1>
+</div>
+</header>
+<main class="p-4 space-y-6 pb-28">
+<div class="relative pl-8">
+<div class="absolute left-4 top-2 bottom-0 w-0.5 bg-border-light dark:bg-border-dark"></div>
+<div class="relative mb-8">
+<div class="absolute left-[-2rem] top-2.5">
+<div class="h-4 w-4 rounded-full bg-primary border-4 box-content border-background-light dark:border-background-dark"></div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4 space-y-3">
+<div class="flex items-center text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+<span class="material-icons text-base mr-1.5 text-text-light-secondary dark:text-text-dark-secondary">schedule</span>
+<span>2023年10月26日 14:30</span>
+</div>
+<div class="border-t border-border-light dark:border-border-dark my-2"></div>
+<div class="space-y-2 text-sm">
+<div class="flex items-center text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-base mr-1.5 w-5 text-center">hourglass_empty</span>
+<span>使用时长: <strong>2小时 15分钟</strong></span>
+</div>
+<div class="flex items-center text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-base mr-1.5 w-5 text-center">location_on</span>
+<span>使用地点: <strong>办公室</strong></span>
+</div>
+<div class="flex items-start text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-base mr-1.5 w-5 text-center mt-0.5">sticky_note_2</span>
+<span class="flex-1">备注: <strong class="text-text-light-primary dark:text-text-dark-primary">项目演示，一切顺利。</strong></span>
+</div>
+</div>
+</div>
+</div>
+<div class="relative mb-8">
+<div class="absolute left-[-2rem] top-2.5">
+<div class="h-4 w-4 rounded-full bg-primary border-4 box-content border-background-light dark:border-background-dark"></div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4 space-y-3">
+<div class="flex items-center text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+<span class="material-icons text-base mr-1.5 text-text-light-secondary dark:text-text-dark-secondary">schedule</span>
+<span>2023年09月15日 09:00</span>
+</div>
+<div class="border-t border-border-light dark:border-border-dark my-2"></div>
+<div class="space-y-2 text-sm">
+<div class="flex items-center text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-base mr-1.5 w-5 text-center">hourglass_empty</span>
+<span>使用时长: <strong>8小时</strong></span>
+</div>
+<div class="flex items-center text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-base mr-1.5 w-5 text-center">location_on</span>
+<span>使用地点: <strong>客户公司 A</strong></span>
+</div>
+<div class="flex items-start text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-base mr-1.5 w-5 text-center mt-0.5">sticky_note_2</span>
+<span class="flex-1">备注: <strong class="text-text-light-primary dark:text-text-dark-primary">全天外部会议，设备电池续航表现良好。</strong></span>
+</div>
+</div>
+</div>
+</div>
+<div class="relative">
+<div class="absolute left-[-2rem] top-2.5">
+<div class="h-4 w-4 rounded-full bg-primary border-4 box-content border-background-light dark:border-background-dark"></div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4 space-y-3">
+<div class="flex items-center text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+<span class="material-icons text-base mr-1.5 text-text-light-secondary dark:text-text-dark-secondary">schedule</span>
+<span>2023年08月01日 18:00</span>
+</div>
+<div class="border-t border-border-light dark:border-border-dark my-2"></div>
+<div class="space-y-2 text-sm">
+<div class="flex items-center text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-base mr-1.5 w-5 text-center">hourglass_empty</span>
+<span>使用时长: <strong>30分钟</strong></span>
+</div>
+<div class="flex items-center text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-base mr-1.5 w-5 text-center">location_on</span>
+<span>使用地点: <strong>家中</strong></span>
+</div>
+<div class="flex items-start text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-base mr-1.5 w-5 text-center mt-0.5">sticky_note_2</span>
+<span class="flex-1">备注: <strong class="text-text-light-primary dark:text-text-dark-primary">固件更新。</strong></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

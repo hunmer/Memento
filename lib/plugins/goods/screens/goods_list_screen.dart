@@ -319,6 +319,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
                   return GoodsItemCard(
                     item: item,
                     warehouseTitle: warehouse.title,
+                    warehouseId: warehouse.id,
                     onTap: () => _showEditItemDialog(item, warehouse),
                   );
                 },

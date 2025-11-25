@@ -88,23 +88,31 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                 onTap: () {
                   Navigator.pop(context);
                   // 实现仓库编辑功能
-                  showDialog(
-                    context: context,
-                    builder:
-                        (context) => Dialog(
-                          child: WarehouseForm(
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder:
+                          (context) => WarehouseForm(
                             warehouse: _warehouse,
                             onSave: (warehouse) async {
                               await GoodsPlugin.instance.saveWarehouse(
                                 warehouse,
                               );
                               if (context.mounted) {
-                                Navigator.pop(context);
                                 await _refreshWarehouse();
                               }
                             },
+                            onDelete: () async {
+                              await GoodsPlugin.instance.deleteWarehouse(
+                                _warehouse.id,
+                              );
+                              if (context.mounted) {
+                                // 连退两页：关闭表单页和详情页
+                                Navigator.pop(context); // 关闭表单
+                                Navigator.pop(context); // 关闭详情
+                              }
+                            },
                           ),
-                        ),
+                    ),
                   );
                 },
               ),
@@ -321,7 +329,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                 padding: const EdgeInsets.all(16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.75,
+                  childAspectRatio: 0.68,
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
                 ),
@@ -330,6 +338,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                   final item = items[index];
                   return GoodsItemCard(
                     item: item,
+                    warehouseId: _warehouse.id,
                     onTap: () => _showEditItemDialog(item),
                   );
                 },

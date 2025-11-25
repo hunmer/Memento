@@ -59,36 +59,34 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
   Future<void> _createWarehouse() async {
     final l10n = GoodsLocalizations.of(context);
 
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => WarehouseForm(
-        onSave: (warehouse) async {
-          try {
-            await widget.plugin.saveWarehouse(warehouse);
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.warehouseCreated ?? '仓库已创建')),
-              );
-            }
-            return true;
-          } catch (e) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${l10n.createWarehouseFailed ?? '创建仓库失败'}: $e'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-            return false;
-          }
-        },
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (context) => WarehouseForm(
+              onSave: (warehouse) async {
+                try {
+                  await widget.plugin.saveWarehouse(warehouse);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.warehouseCreated ?? '仓库已创建')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          '${l10n.createWarehouseFailed ?? '创建仓库失败'}: $e',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
       ),
     );
-
-    if (result == true && mounted) {
-      Navigator.of(context).pop();
-    }
   }
 
   /// 添加物品

@@ -318,4 +318,19 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
 
   @override
   String? get createItemFailed => 'Failed to create item';
+
+  @override
+  String get dailyCost => "Daily Cost";
+
+  @override
+  String get day => "Day";
+
+  @override
+  String get days => "Days";
+
+  @override
+  String get inPlace => "In Place";
+
+  @override
+  String get times => "Times";
 }

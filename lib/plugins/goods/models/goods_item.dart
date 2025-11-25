@@ -188,9 +188,9 @@ class GoodsItem {
   }
 
   // 添加使用记录
-  GoodsItem addUsageRecord(DateTime date, {String? note}) {
+  GoodsItem addUsageRecord(DateTime date, {String? note, int? duration, String? location}) {
     final newRecords = List<UsageRecord>.from(usageRecords);
-    newRecords.add(UsageRecord(date: date, note: note));
+    newRecords.add(UsageRecord(date: date, note: note, duration: duration, location: location));
     return copyWith(usageRecords: newRecords);
   }
 }

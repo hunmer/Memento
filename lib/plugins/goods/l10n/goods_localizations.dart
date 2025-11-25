@@ -151,7 +151,15 @@ abstract class GoodsLocalizations {
   String? get itemCreated;
   String? get createWarehouseFirst;
   String? get createWarehouseFailed;
+
+  @override
   String? get createItemFailed;
+
+  String get dailyCost;
+  String get day;
+  String get days;
+  String get inPlace;
+  String get times;
 }
 
 class _GoodsLocalizationsDelegate
