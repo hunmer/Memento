@@ -7,7 +7,6 @@ import '../../../../core/storage/storage_manager.dart';
 import '../../services/activity_service.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'activity_form_utils.dart';
-import 'activity_time_section.dart';
 
 class ActivityFormState extends State<ActivityFormWidget> {
   late TextEditingController _titleController;
@@ -105,14 +104,18 @@ class ActivityFormState extends State<ActivityFormWidget> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.black26 : const Color(0xFFF5F7F8),
+                          color:
+                              isDark ? Colors.black26 : const Color(0xFFF5F7F8),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
                           children: [
                             Text(
                               l10n.duration,
-                              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[500],
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -160,64 +163,94 @@ class ActivityFormState extends State<ActivityFormWidget> {
                               hintText: appL10n.tags,
                               hintStyle: TextStyle(color: Colors.grey[400]),
                               border: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey[300]!),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[300]!,
+                                ),
                               ),
                               enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey[300]!),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[300]!,
+                                ),
                               ),
                               focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: primaryColor),
                               ),
-                              contentPadding: const EdgeInsets.only(right: 24, bottom: 8),
+                              contentPadding: const EdgeInsets.only(
+                                right: 24,
+                                bottom: 8,
+                              ),
                               isDense: true,
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8),
-                            child: Icon(Icons.tag, color: Colors.grey[400], size: 20),
+                            child: Icon(
+                              Icons.tag,
+                              color: Colors.grey[400],
+                              size: 20,
+                            ),
                           ),
                         ],
                       ),
-                      if (widget.recentTags != null && widget.recentTags!.isNotEmpty) ...[
+                      if (widget.recentTags != null &&
+                          widget.recentTags!.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: widget.recentTags!.map((tag) {
-                            // Check if tag is selected
-                            // Note: _selectedTags comes from controller parsing in current logic
-                            // We need to keep that logic synced.
-                            final isSelected = _selectedTags.contains(tag);
-                            return InkWell(
-                              onTap: () {
-                                setState(() {
-                                  if (_selectedTags.contains(tag)) {
-                                    _selectedTags.remove(tag);
-                                  } else {
-                                    _selectedTags.add(tag);
-                                  }
-                                  _tagsController.text = _selectedTags.join(', ');
-                                });
-                              },
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: isSelected 
-                                      ? primaryColor.withOpacity(0.2) 
-                                      : (isDark ? primaryColor.withOpacity(0.1) : primaryColor.withOpacity(0.1)),
+                          children:
+                              widget.recentTags!.map((tag) {
+                                // Check if tag is selected
+                                // Note: _selectedTags comes from controller parsing in current logic
+                                // We need to keep that logic synced.
+                                final isSelected = _selectedTags.contains(tag);
+                                return InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      if (_selectedTags.contains(tag)) {
+                                        _selectedTags.remove(tag);
+                                      } else {
+                                        _selectedTags.add(tag);
+                                      }
+                                      _tagsController.text = _selectedTags.join(
+                                        ', ',
+                                      );
+                                    });
+                                  },
                                   borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  tag,
-                                  style: TextStyle(
-                                    color: isSelected ? primaryColor : (isDark ? Colors.purple[200] : primaryColor),
-                                    fontSize: 13,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          isSelected
+                                              ? primaryColor.withOpacity(0.2)
+                                              : (isDark
+                                                  ? primaryColor.withOpacity(
+                                                    0.1,
+                                                  )
+                                                  : primaryColor.withOpacity(
+                                                    0.1,
+                                                  )),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      tag,
+                                      style: TextStyle(
+                                        color:
+                                            isSelected
+                                                ? primaryColor
+                                                : (isDark
+                                                    ? Colors.purple[200]
+                                                    : primaryColor),
+                                        fontSize: 13,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                                );
+                              }).toList(),
                         ),
                       ],
                     ],
@@ -249,7 +282,11 @@ class ActivityFormState extends State<ActivityFormWidget> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[200]!)),
+              border: Border(
+                top: BorderSide(
+                  color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                ),
+              ),
             ),
             child: SizedBox(
               width: double.infinity,
@@ -266,7 +303,10 @@ class ActivityFormState extends State<ActivityFormWidget> {
                 ),
                 child: Text(
                   appL10n.save,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -276,7 +316,12 @@ class ActivityFormState extends State<ActivityFormWidget> {
     );
   }
 
-  Widget _buildCard(BuildContext context, Color bgColor, {required IconData icon, required Widget child}) {
+  Widget _buildCard(
+    BuildContext context,
+    Color bgColor, {
+    required IconData icon,
+    required Widget child,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -328,10 +373,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
             const SizedBox(height: 4),
             Text(
               _formatTime(time),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -360,36 +402,31 @@ class ActivityFormState extends State<ActivityFormWidget> {
       _endTime.hour,
       _endTime.minute,
     );
-    
+
     if (endDateTime.isBefore(startDateTime)) {
-       endDateTime = endDateTime.add(const Duration(days: 1));
+      endDateTime = endDateTime.add(const Duration(days: 1));
     }
 
     final duration = endDateTime.difference(startDateTime);
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
-    
-    final appL10n = AppLocalizations.of(context)!;
+
     // Simple localized string construction
     // Ideally use l10n methods if available for "hours" and "minutes"
     // Assuming standard format for now matching the UI: "7小时 41分钟"
     // We can use 'h ' and 'm' if l10n not precise, but let's try to be generic or use hardcoded for Chinese context as requested by image style if l10n fails?
     // Actually, the project has l10n. Let's use it if possible.
-    
-    String hourStr = '';
-    if (hours > 0) {
-      hourStr = '$hours${ActivityLocalizations.of(context).hoursFormat(hours.toDouble()).replaceAll(RegExp(r'[0-9\s]'), '')} ';
-    }
-    String minuteStr = '$minutes${ActivityLocalizations.of(context).minutesFormat(minutes).replaceAll(RegExp(r'[0-9\s]'), '')}';
-    
+
+    if (hours > 0) {}
+
     // Fallback if l10n regex fails (it might be risky).
     // The prompt image shows "7小时 41分钟".
     // Let's just use "h" and "m" or try to get "小时" "分钟" if we know the locale is Chinese.
     // Or just use l10n.hours and l10n.minutes if they exist as standalone words.
     // DiaryLocalizations seems to have `hoursFormat` which returns "x hours".
-    
+
     // Safe approach:
-    return '${hours}h ${minutes}m'; 
+    return '${hours}h ${minutes}m';
   }
 
   @override
@@ -482,25 +519,10 @@ class ActivityFormState extends State<ActivityFormWidget> {
     _durationController.text = minutes.toString();
   }
 
-  void _handleDurationChanged(String durationText) {
-    final minutes = int.tryParse(durationText);
-    if (minutes != null && minutes > 0) {
-      setState(() {
-        final startDateTime = DateTime(
-          widget.selectedDate.year,
-          widget.selectedDate.month,
-          widget.selectedDate.day,
-          _startTime.hour,
-          _startTime.minute,
-        );
-        final newEndDateTime = startDateTime.add(Duration(minutes: minutes));
-        _endTime = TimeOfDay(
-          hour: newEndDateTime.hour,
-          minute: newEndDateTime.minute,
-        );
-        _durationController.text = minutes.toString();
-      });
-    }
+  void _selectMood(String mood) {
+    setState(() {
+      _selectedMood = mood;
+    });
   }
 
   Future<void> _handleSave() async {
@@ -541,9 +563,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '活动时间必须至少为1${ActivityLocalizations.of(
-                  context,
-                ).minutesFormat(1).replaceAll('1 ', '')}',
+            '活动时间必须至少为${ActivityLocalizations.of(context).minutesFormat(1).replaceAll('1 ', '')}',
           ),
         ),
       );
@@ -634,64 +654,5 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     widget.onSave(activity);
     Navigator.of(context).pop();
-  }
-
-  void _openTagManager() async {
-    // 获取标签组服务
-    final storage = StorageManager();
-    await storage.initialize();
-    final activityService = ActivityService(storage, 'activity');
-
-    // 加载保存的标签组
-    List<TagGroup> tagGroups = await activityService.getTagGroups();
-
-    // 确保存在所有和未分组标签组
-    if (!tagGroups.any((group) => group.name == '所有')) {
-      tagGroups.insert(0, TagGroup(name: '所有', tags: []));
-    }
-    if (!tagGroups.any((group) => group.name == '未分组')) {
-      // 检查是否存在"最近使用"标签组
-      final recentIndex = tagGroups.indexWhere((group) => group.name == '最近使用');
-      if (recentIndex != -1) {
-        // 在"最近使用"之后插入"未分组"
-        tagGroups.insert(recentIndex + 1, TagGroup(name: '未分组', tags: []));
-      } else {
-        // 在"所有"之后插入"未分组"
-        final allIndex = tagGroups.indexWhere((group) => group.name == '所有');
-        if (allIndex != -1) {
-          tagGroups.insert(allIndex + 1, TagGroup(name: '未分组', tags: []));
-        } else {
-          // 如果没有"所有"，直接添加到列表末尾
-          tagGroups.add(TagGroup(name: '未分组', tags: []));
-        }
-      }
-    }
-
-    if (!mounted) return;
-
-    final result = await showDialog<List<String>>(
-      context: context,
-      builder:
-          (BuildContext dialogContext) => TagManagerDialog(
-            groups: tagGroups,
-            selectedTags: _selectedTags,
-            onGroupsChanged: (groups) async {
-              await activityService.saveTagGroups(groups);
-            },
-          ),
-    );
-
-    if (result != null && mounted) {
-      setState(() {
-        _selectedTags = result;
-        _tagsController.text = _selectedTags.join(', ');
-      });
-    }
-  }
-
-  void _selectMood(String mood) {
-    setState(() {
-      _selectedMood = mood;
-    });
   }
 }

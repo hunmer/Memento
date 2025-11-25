@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:wheel_picker/wheel_picker.dart';
 import '../../../../plugins/diary/l10n/diary_localizations.dart';
-import 'activity_form_utils.dart';
 
 class ActivityTimeSection extends StatelessWidget {
   static const int _maxIntervalMinutes = 24 * 60; // cover full day range
@@ -26,7 +25,7 @@ class ActivityTimeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = DiaryLocalizations.of(context);
+    DiaryLocalizations.of(context);
     final appL10n = AppLocalizations.of(context)!;
 
     return Row(

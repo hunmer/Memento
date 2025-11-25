@@ -2,7 +2,6 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../models/activity_record.dart';
-import '../../../../plugins/diary/l10n/diary_localizations.dart';
 import 'constants.dart';
 import 'activity_form_state.dart';
 

@@ -160,7 +160,7 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
       for (final conversation in conversationController.conversations) {
         // 检查lastMessageAt是否在7天内
         if (conversation.lastMessageAt != null &&
-            conversation.lastMessageAt!.isAfter(sevenDaysAgo)) {
+            conversation.lastMessageAt.isAfter(sevenDaysAgo)) {
           count++;
         }
       }

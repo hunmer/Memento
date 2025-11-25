@@ -232,7 +232,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
         if (currentActivity != null && segmentStartIndex != null) {
           segments.add(
             _ActivityBarSegment(
-              activity: currentActivity!,
+              activity: currentActivity,
               startMinuteIndex: segmentStartIndex,
               endMinuteIndex: minuteIndex,
             ),
@@ -249,10 +249,10 @@ class _ActivityGridViewState extends State<ActivityGridView> {
         continue;
       }
 
-      if (activity.id != currentActivity!.id) {
+      if (activity.id != currentActivity.id) {
         segments.add(
           _ActivityBarSegment(
-            activity: currentActivity!,
+            activity: currentActivity,
             startMinuteIndex: segmentStartIndex!,
             endMinuteIndex: minuteIndex,
           ),
