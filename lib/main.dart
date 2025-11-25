@@ -467,6 +467,7 @@ class _MyAppState extends State<MyApp> {
       light: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
+        scaffoldBackgroundColor: Colors.white,
         // 使用无动画构建器以提升性能,特别是键盘弹出时
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: {
