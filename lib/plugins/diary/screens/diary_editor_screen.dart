@@ -1,7 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../core/storage/storage_manager.dart';
-import '../../../widgets/markdown_editor/quill_editor.dart';
+import '../../../widgets/memento_editor/memento_editor.dart';
 import '../utils/diary_utils.dart';
 import '../l10n/diary_localizations.dart';
 
@@ -140,44 +140,37 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: MarkdownEditor(
-        initialTitle: widget.initialTitle,
-        initialContent: widget.initialContent,
-        titleHint: DiaryLocalizations.of(context).titleHint,
-        contentHint: DiaryLocalizations.of(context).contentHint,
-        showTitle: true,
-        onSave: (title, content) async {
-          // 保存前捕获当前上下文
-          final currentContext = context;
+    return MementoEditor(
+      initialTitle: widget.initialTitle,
+      initialContent: widget.initialContent,
+      pageTitle: DiaryLocalizations.of(context).name,
+      date: widget.date,
+      mood: _selectedMood,
+      onMoodTap: _showMoodSelector,
+      titleHint: DiaryLocalizations.of(context).titleHint,
+      contentHint: DiaryLocalizations.of(context).contentHint,
+      onSave: (title, content) async {
+        // 保存前捕获当前上下文
+        final currentContext = context;
 
-          await DiaryUtils.saveDiaryEntry(
-            widget.date,
-            content,
-            title: title,
-            mood: _selectedMood,
-          );
+        await DiaryUtils.saveDiaryEntry(
+          widget.date,
+          content,
+          title: title,
+          mood: _selectedMood,
+        );
 
-          if (mounted) {
-            Navigator.of(currentContext).pop();
-          }
-        },
-        extraActions: [
-          IconButton(
-            icon:
-                _selectedMood != null
-                    ? Text(_selectedMood!, style: const TextStyle(fontSize: 24))
-                    : const Icon(Icons.mood),
-            onPressed: _showMoodSelector,
-            tooltip: DiaryLocalizations.of(context).moodSelectorTooltip,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: _showDeleteConfirmation,
-            tooltip: DiaryLocalizations.of(context).deleteDiary,
-          ),
-        ],
-      ),
+        if (mounted) {
+          Navigator.of(currentContext).pop();
+        }
+      },
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.delete_outline),
+          onPressed: _showDeleteConfirmation,
+          tooltip: DiaryLocalizations.of(context).deleteDiary,
+        ),
+      ],
     );
   }
 }

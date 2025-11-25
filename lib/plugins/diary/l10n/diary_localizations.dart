@@ -89,6 +89,7 @@ abstract class DiaryLocalizations {
   String get deleteDiary;
   String get confirmDeleteDiary;
   String get deleteDiaryMessage;
+  String get noDiaryForDate;
 }
 
 class _DiaryLocalizationsDelegate

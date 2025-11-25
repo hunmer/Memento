@@ -138,4 +138,7 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
 
   @override
   String get deleteDiaryMessage => '确定要删除这篇日记吗？此操作无法撤销。';
+
+  @override
+  String get noDiaryForDate => '这一天还没有日记';
 }
