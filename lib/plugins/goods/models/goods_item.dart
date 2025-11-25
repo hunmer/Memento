@@ -47,7 +47,10 @@ class GoodsItem {
   final Color? iconColor;
   final List<String> tags;
   final DateTime? purchaseDate;
+  final DateTime? expirationDate;
   final double? purchasePrice;
+  final int? quantity;
+  final String? status; // normal, damaged, lent, sold
   final List<UsageRecord> usageRecords;
   final List<CustomField> customFields;
   final String? notes;
@@ -74,7 +77,10 @@ class GoodsItem {
     this.iconColor,
     List<String>? tags,
     this.purchaseDate,
+    this.expirationDate,
     this.purchasePrice,
+    this.quantity,
+    this.status,
     List<UsageRecord>? usageRecords,
     List<CustomField>? customFields,
     this.notes,
@@ -114,10 +120,16 @@ class GoodsItem {
           json['purchaseDate'] != null
               ? DateTime.parse(json['purchaseDate'] as String)
               : null,
+      expirationDate:
+          json['expirationDate'] != null
+              ? DateTime.parse(json['expirationDate'] as String)
+              : null,
       purchasePrice:
           json['purchasePrice'] != null
               ? (json['purchasePrice'] as num).toDouble()
               : null,
+      quantity: json['quantity'] as int?,
+      status: json['status'] as String?,
       usageRecords:
           (json['usageRecords'] as List?)
               ?.map((e) => UsageRecord.fromJson(e))
@@ -148,7 +160,10 @@ class GoodsItem {
       'iconColor': iconColor?.value,
       'tags': tags,
       'purchaseDate': purchaseDate?.toIso8601String(),
+      'expirationDate': expirationDate?.toIso8601String(),
       'purchasePrice': purchasePrice,
+      'quantity': quantity,
+      'status': status,
       'usageRecords': usageRecords.map((record) => record.toJson()).toList(),
       'customFields': customFields.map((field) => field.toJson()).toList(),
       'notes': notes,
@@ -164,7 +179,10 @@ class GoodsItem {
     Color? iconColor,
     List<String>? tags,
     DateTime? purchaseDate,
+    DateTime? expirationDate,
     double? purchasePrice,
+    int? quantity,
+    String? status,
     List<UsageRecord>? usageRecords,
     List<CustomField>? customFields,
     String? notes,
@@ -179,7 +197,10 @@ class GoodsItem {
       iconColor: iconColor ?? this.iconColor,
       tags: tags ?? List.from(this.tags),
       purchaseDate: purchaseDate ?? this.purchaseDate,
+      expirationDate: expirationDate ?? this.expirationDate,
       purchasePrice: purchasePrice ?? this.purchasePrice,
+      quantity: quantity ?? this.quantity,
+      status: status ?? this.status,
       usageRecords: usageRecords ?? List.from(this.usageRecords),
       customFields: customFields ?? List.from(this.customFields),
       notes: notes ?? this.notes,

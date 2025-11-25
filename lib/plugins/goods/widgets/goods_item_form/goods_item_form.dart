@@ -59,16 +59,10 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
               : GoodsLocalizations.of(context).editItem,
         ),
         centerTitle: true,
-        leading: TextButton(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(GoodsLocalizations.of(context).cancel),
         ),
-        actions: [
-          TextButton(
-            onPressed: _submitForm,
-            child: Text(GoodsLocalizations.of(context).save),
-          ),
-        ],
       ),
       body: Form(
         key: _formController.formKey,
@@ -77,6 +71,27 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
           onStateChanged: () => setState(() {}),
           onDelete: widget.onDelete != null ? _handleDelete : null,
           showDeleteButton: widget.initialData != null,
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
+            onPressed: _submitForm,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            child: Text(
+              GoodsLocalizations.of(context).save,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
       ),
     );
