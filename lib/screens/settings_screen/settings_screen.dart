@@ -303,6 +303,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.navigation),
+            title: const Text('Super Cupertino Navigation 测试'),
+            subtitle: const Text('测试 iOS 风格导航栏组件'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/super_cupertino_test');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.notifications),
             title: const Text('通知测试'),
             trailing: const Icon(Icons.arrow_forward_ios),

@@ -347,6 +347,16 @@ class ChatLocalizationsEn extends ChatLocalizations {
   @override
   String get channelGroupHint => 'Optional, leave empty for default group';
 
+  // Bottom bar strings
+  @override
+  String get createChannel => 'Create Channel';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get channelCreated => 'Channel Created';
+
   @override
   String get all => 'All';
 

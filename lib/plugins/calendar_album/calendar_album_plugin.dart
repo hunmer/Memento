@@ -7,39 +7,12 @@ import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
 import '../base_plugin.dart';
-import 'screens/main_screen.dart';
+import 'widgets/calendar_album_bottom_bar.dart';
 import 'controllers/calendar_controller.dart';
 import 'controllers/tag_controller.dart';
 import 'models/calendar_entry.dart';
 import 'l10n/calendar_album_localizations.dart';
 
-/// 日历相册插件主视图
-class CalendarAlbumMainView extends StatefulWidget {
-  const CalendarAlbumMainView({super.key});
-
-  @override
-  State<CalendarAlbumMainView> createState() => _CalendarAlbumMainViewState();
-}
-
-class _CalendarAlbumMainViewState extends State<CalendarAlbumMainView> {
-  late CalendarAlbumPlugin _plugin;
-  @override
-  void initState() {
-    super.initState();
-    _plugin = CalendarAlbumPlugin.instance;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: _plugin.calendarController),
-        ChangeNotifierProvider.value(value: _plugin.tagController),
-      ],
-      child: const MainScreen(),
-    );
-  }
-}
 
 class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   static CalendarAlbumPlugin? _instance;
@@ -94,7 +67,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return CalendarAlbumMainView();
+    return CalendarAlbumBottomBar(plugin: this);
   }
 
   // ==================== 小组件统计方法 ====================

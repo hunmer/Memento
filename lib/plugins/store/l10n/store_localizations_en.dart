@@ -290,4 +290,25 @@ class StoreLocalizationsEn extends StoreLocalizations {
 
   @override
   String get name => 'Store';
+
+  @override
+  String get productAdded => 'Product added';
+
+  @override
+  String get pointsAmount => 'Points Amount';
+
+  @override
+  String get pointsReason => 'Reason';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get pointsAdded => 'Points added';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get viewRedeemHistory => 'View Redeem History';
 }

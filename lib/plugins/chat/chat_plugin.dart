@@ -3,6 +3,7 @@ import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
+import 'package:Memento/plugins/chat/widgets/chat_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -14,6 +15,7 @@ import 'services/settings_service.dart';
 import 'services/ui_service.dart';
 import 'services/user_service.dart';
 import 'services/widget_service.dart';
+import 'widgets/chat_bottom_bar.dart';
 
 class ChatMainView extends StatefulWidget {
   final String? channelId;
@@ -72,7 +74,7 @@ class _ChatMainViewState extends State<ChatMainView> {
 
   @override
   Widget build(BuildContext context) {
-    return _plugin.uiService.buildMainView(context);
+    return ChatBottomBar(plugin: _plugin);
   }
 }
 
@@ -166,7 +168,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return ChatMainView();
+    return ChatBottomBar(plugin: this);
   }
 
   @override

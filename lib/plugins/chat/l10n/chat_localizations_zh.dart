@@ -334,4 +334,14 @@ class ChatLocalizationsZh extends ChatLocalizations {
 
   @override
   String get channelGroupHint => '可选，留空则归类为默认分组';
+
+  // Bottom bar strings
+  @override
+  String get createChannel => '创建频道';
+
+  @override
+  String get create => '创建';
+
+  @override
+  String get channelCreated => '频道已创建';
 }

@@ -140,6 +140,13 @@ abstract class StoreLocalizations {
   String get remainingQuantityLabel;
 
   String get name;
+  String get productAdded;
+  String get pointsAmount;
+  String get pointsReason;
+  String get cancel;
+  String get pointsAdded;
+  String get add;
+  String get viewRedeemHistory;
 }
 
 class _StoreLocalizationsDelegate

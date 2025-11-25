@@ -6,7 +6,7 @@ import '../../core/config_manager.dart';
 import '../../core/event/event_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
 import '../../core/services/plugin_widget_sync_helper.dart';
-import 'screens/goods_main_screen.dart';
+import 'widgets/goods_bottom_bar.dart';
 import 'models/warehouse.dart';
 import 'models/goods_item.dart';
 import 'models/find_item_result.dart';
@@ -44,16 +44,12 @@ class _ItemSearchResult {
 }
 
 /// 物品管理插件主视图
-class GoodsMainView extends StatefulWidget {
+class GoodsMainView extends StatelessWidget {
   const GoodsMainView({super.key});
-  @override
-  State<GoodsMainView> createState() => _GoodsMainViewState();
-}
 
-class _GoodsMainViewState extends State<GoodsMainView> {
   @override
   Widget build(BuildContext context) {
-    return const GoodsMainScreen();
+    return GoodsBottomBar(plugin: GoodsPlugin.instance);
   }
 }
 
@@ -484,7 +480,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return GoodsMainView();
+    return GoodsBottomBar(plugin: this);
   }
 
   @override

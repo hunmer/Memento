@@ -192,10 +192,10 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
                     );
                   },
                 ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showEditDialog(),
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => _showEditDialog(),
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }

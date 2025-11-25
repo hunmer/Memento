@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
+import 'package:universal_platform/universal_platform.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
@@ -61,15 +62,7 @@ class _CheckinMainViewState extends State<CheckinMainView>
             ? Colors.black.withOpacity(0.6)
             : Colors.white.withOpacity(0.6);
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
-        title: Text(CheckinLocalizations.of(context).name),
-      ),
-      body: BottomBar(
+    return BottomBar(
         fit: StackFit.expand,
         icon:
             (width, height) => Center(
@@ -211,7 +204,6 @@ class _CheckinMainViewState extends State<CheckinMainView>
               ),
             ),
           ],
-        ),
       ),
     );
   }
@@ -220,8 +212,7 @@ class _CheckinMainViewState extends State<CheckinMainView>
 class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   static final CheckinPlugin _instance = CheckinPlugin._internal();
   factory CheckinPlugin() => _instance;
-  CheckinPlugin._internal() {
-  }
+  CheckinPlugin._internal();
   static CheckinPlugin get instance => _instance;
 
 
@@ -318,8 +309,6 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     final itemsJson = _checkinItems.map((item) => item.toJson()).toList();
     final pluginPath = 'checkin/$_storageKey';
     await storage.writeJson(pluginPath, {'items': itemsJson});
-    // 通知监听者数据已更新
-    (ValueNotifier(_checkinItems)..value = _checkinItems).notifyListeners();
     // 同步到小组件
     await _syncWidget();
   }

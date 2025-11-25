@@ -290,4 +290,32 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
 
   @override
   String get name => 'Warehouse';
+
+  // Bottom bar strings
+  @override
+  String? get warehouseTab => 'Warehouses';
+
+  @override
+  String? get itemsTab => 'Items';
+
+  @override
+  String? get createWarehouse => 'Create Warehouse';
+
+  @override
+  String? get createItem => 'Add Item';
+
+  @override
+  String? get warehouseCreated => 'Warehouse Created';
+
+  @override
+  String? get itemCreated => 'Item Created';
+
+  @override
+  String? get createWarehouseFirst => 'Please create a warehouse first';
+
+  @override
+  String? get createWarehouseFailed => 'Failed to create warehouse';
+
+  @override
+  String? get createItemFailed => 'Failed to create item';
 }
