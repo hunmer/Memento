@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Create Diary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#D8BFD8", // Dusty Rose
+              "primary-text": "#4A4A4A", // Soft charcoal
+              "background-light": "#FAF8F5", // Light cream
+              "background-dark": "#1f1d1c",
+              "text-light": "#4A4A4A",
+              "text-dark": "#e0e0e0",
+            },
+            fontFamily: {
+              "display": ["Plus Jakarta Sans", "Noto Sans", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+<div class="flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark pb-20">
+<header class="flex h-16 shrink-0 items-center justify-between p-4">
+<button class="flex size-10 items-center justify-center rounded-full">
+<span class="material-symbols-outlined text-2xl text-primary-text dark:text-gray-300">close</span>
+</button>
+<h1 class="text-lg font-bold">创建日记</h1>
+<div class="w-10"></div>
+</header>
+<main class="flex-grow p-4">
+<div class="mb-6 flex flex-col gap-3">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-primary-text/70 dark:text-text-dark/70">2024年7月20日</span>
+<span class="text-lg font-bold text-primary-text dark:text-text-dark">星期六</span>
+</div>
+<div class="relative w-full">
+<span class="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-2xl">😊</span>
+<input class="w-full border-none bg-transparent p-0 pl-10 text-2xl font-bold placeholder-gray-400 focus:ring-0 dark:placeholder-gray-500" placeholder="输入标题" type="text"/>
+</div>
+</div>
+<div class="flex flex-col rounded-lg bg-white/50 dark:bg-black/20">
+<div class="flex flex-wrap items-center gap-1 border-b border-gray-200 p-2 dark:border-gray-700">
+<button class="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"><span class="font-black">H1</span></button>
+<button class="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"><span class="font-bold">H2</span></button>
+<button class="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"><span class="material-symbols-outlined !text-2xl">format_bold</span></button>
+<button class="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"><span class="material-symbols-outlined !text-2xl">format_italic</span></button>
+<button class="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"><span class="material-symbols-outlined !text-2xl">format_underlined</span></button>
+<button class="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"><span class="material-symbols-outlined !text-2xl">strikethrough_s</span></button>
+<button class="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"><span class="material-symbols-outlined !text-2xl">format_list_bulleted</span></button>
+<button class="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"><span class="material-symbols-outlined !text-2xl">format_list_numbered</span></button>
+<button class="rounded p-2 hover:bg-gray-200 dark:hover:bg-gray-700"><span class="material-symbols-outlined !text-2xl">image</span></button>
+</div>
+<div class="min-h-[300px] w-full p-4">
+<p class="text-base leading-relaxed text-primary-text dark:text-text-dark">今天天气很好，阳光明媚。我和朋友们一起去了公园野餐。我们带了三明治、水果和饮料。在草地上，我们玩了飞盘，聊了很多有趣的话题。下午的时候，我们还看到了一只可爱的小松鼠在树上跳来跳去。这真是愉快的一天！</p>
+<div class="mt-4 grid grid-cols-3 gap-2">
+<img alt="picnic scene 1" class="aspect-square w-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvdMxXmJTESsbzNXyjcX8RDWcS8yVGyc8Q3bz5udb3PDHq-cVh1E6QJQoWpSnjPwUVqn0J1MMeiS_GOjaJh2Ql7o-JFH6fuCzfUx0_TZiSMzuDMq2u-owDUSOB32jlxD9GrxDEh19HdGF2B9Swj4VCFtmMlHoyXpl5BiALMvNMO9A-BjFMXh1lFUTEZ_WaVD8eOtjT9LcbqzErML8Iu2iVjM450fXNge-Ybt65thZrWA0hJms9e4mMzcnxFXGSABcgfGcO48fVvfo"/>
+<img alt="squirrel on a tree" class="aspect-square w-full rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBm0H96iATB7UX0iYLaljz0jckeaxfL6dHqBKgJQkPfdJq-8ZCyRw8djiYeI-Draz88ZrzJHtwd5G1S5zkcpkDTmdafo7H5Ai8gOCLl4CknL5f41y2J4f5ZhR-9BgifbMRoC6pYfgiSdHP43khfqBM3bvD5Tgq8M5RCJCKaf9jme8DpdxadSvrq8mqu-4rw6Zdmnd8pHMXalA_9d14blM7LYTgA1AwiWSXEBoGBmnJz_R-7zZadBb8M9idRhosDoi-vTD1AzcfRpr0"/>
+<div class="flex aspect-square w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800">
+<span class="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-500">add_photo_alternate</span>
+</div>
+</div>
+</div>
+<div class="border-t border-gray-200 p-2 text-right dark:border-gray-700">
+<span class="text-xs text-primary-text/60 dark:text-text-dark/60">108 字</span>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 w-full bg-background-light p-4 dark:bg-background-dark">
+<button class="w-full rounded-full bg-primary px-5 py-3 text-base font-bold text-primary-text">保存</button>
+</footer>
+</div>
+</body></html>

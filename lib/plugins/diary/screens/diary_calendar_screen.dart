@@ -19,13 +19,24 @@ class DiaryCalendarScreen extends StatefulWidget {
 
 class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   late DateTime _focusedDay;
+  DateTime? _selectedDay;
   Map<DateTime, DiaryEntry> _diaryEntries = {};
   CalendarFormat _calendarFormat = CalendarFormat.month;
+
+  // Colors from design
+  static const Color _primaryColor = Color(0xFFD8BFD8); // Dusty Rose
+  static const Color _primaryTextColor = Color(0xFF4A4A4A); // Soft charcoal
+  static const Color _backgroundColor = Color(0xFFFAF8F5); // Light cream
 
   @override
   void initState() {
     super.initState();
     _focusedDay = DateTime.now();
+    _selectedDay = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
     _loadDiaryEntries();
   }
 
@@ -39,18 +50,27 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   }
 
   void _onDayClicked(DateTime selectedDay, DateTime focusedDay) {
-    // 标准化今天的日期（仅保留年月日，去除时分秒）
+    setState(() {
+      _selectedDay = selectedDay;
+      _focusedDay = focusedDay;
+    });
+  }
+
+  void _navigateToEditor() {
+    if (_selectedDay == null) return;
+
+    // Standardize today's date
     final today = DateTime.now();
     final normalizedToday = DateTime(today.year, today.month, today.day);
 
-    // 标准化选中的日期
+    // Standardize selected date
     final normalizedSelectedDay = DateTime(
-      selectedDay.year,
-      selectedDay.month,
-      selectedDay.day,
+      _selectedDay!.year,
+      _selectedDay!.month,
+      _selectedDay!.day,
     );
 
-    // 检查选择的日期是否大于今天（使用标准化后的日期比较）
+    // Check if selected date is in the future
     if (normalizedSelectedDay.isAfter(normalizedToday)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -61,7 +81,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       return;
     }
 
-    // 导航到日记编辑界面
     Navigator.of(context)
         .push(
           MaterialPageRoute(
@@ -79,31 +98,106 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
         .then((_) => _loadDiaryEntries());
   }
 
+  List<String> _extractImagesFromContent(String content) {
+    // Simple regex to find markdown images ![alt](url)
+    final regex = RegExp(r'!\[.*?\]\((.*?)\)');
+    final matches = regex.allMatches(content);
+    return matches.map((m) => m.group(1)!).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedEntry =
+        _selectedDay != null ? _diaryEntries[_selectedDay] : null;
+    
+    // Check if current theme is dark
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? Theme.of(context).scaffoldBackgroundColor : _backgroundColor;
+    final textColor = isDark ? Colors.white : _primaryTextColor;
+    final primaryColor = isDark ? Theme.of(context).colorScheme.primary : _primaryColor;
+
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
-        title: Text(DiaryLocalizations.of(context).myDiary),
-        actions: [],
-      ),
-      body: TableCalendar<DiaryEntry>(
+      backgroundColor: bgColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Back Button
+            Padding(
+              padding: const EdgeInsets.only(left: 8, top: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back, color: textColor),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                  tooltip: DiaryLocalizations.of(context).myDiary,
+                ),
+              ),
+            ),
+            // Custom Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _focusedDay = DateTime(
+                          _focusedDay.year,
+                          _focusedDay.month - 1,
+                        );
+                      });
+                    },
+                    icon: Icon(
+                      Icons.chevron_left,
+                      size: 28,
+                      color: textColor,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      DateFormat('MMMM yyyy').format(_focusedDay),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _focusedDay = DateTime(
+                          _focusedDay.year,
+                          _focusedDay.month + 1,
+                        );
+                      });
+                    },
+                    icon: Icon(
+                      Icons.chevron_right,
+                      size: 28,
+                      color: textColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Calendar
+            TableCalendar<DiaryEntry>(
               firstDay: DateTime.utc(2020, 1, 1),
-        daysOfWeekHeight: 45,
-        rowHeight: 95,
               lastDay: DateTime.now(),
-        focusedDay: _focusedDay,
-              onDaySelected: (selectedDay, focusedDay) {
-          _onDayClicked(selectedDay, focusedDay);
-              },
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              onDaySelected: _onDayClicked,
               calendarFormat: _calendarFormat,
               onFormatChanged: (format) {
                 setState(() {
                   _calendarFormat = format;
                 });
+              },
+              onPageChanged: (focusedDay) {
+                _focusedDay = focusedDay;
               },
               eventLoader: (day) {
                 final normalizedDay = DateTime(day.year, day.month, day.day);
@@ -112,105 +206,201 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                 }
                 return [];
               },
+              rowHeight: 70, // Matches h-16 (approx 64px) + gap
+              daysOfWeekHeight: 40,
+              headerVisible: false, // We use custom header
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: TextStyle(
+                  color: textColor.withValues(alpha: 0.6),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                weekendStyle: TextStyle(
+                  color: textColor.withValues(alpha: 0.6),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                dowTextFormatter: (date, locale) => DateFormat.E(locale).format(date)[0], // S M T ...
+              ),
               calendarStyle: CalendarStyle(
                 outsideDaysVisible: false,
-          weekendTextStyle: TextStyle(color: Colors.red.shade400, fontSize: 16),
-          holidayTextStyle: TextStyle(color: Colors.red.shade400, fontSize: 16,
+                cellMargin: const EdgeInsets.all(4),
+                todayDecoration: BoxDecoration(
+                  color: Colors.transparent,
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: primaryColor, width: 2),
                 ),
-          cellMargin: const EdgeInsets.all(2),
-          cellPadding: const EdgeInsets.all(4),
-          todayDecoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 2,
-                  ),
+                selectedDecoration: BoxDecoration(
+                  color: Colors.transparent,
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: primaryColor, width: 2),
                 ),
-                todayTextStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-            fontSize: 16,
+                defaultDecoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-          defaultTextStyle: const TextStyle(fontSize: 16),
-              ),
-              headerStyle: const HeaderStyle(
-                formatButtonVisible: true,
-                titleCentered: true,
+                weekendDecoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               calendarBuilders: CalendarBuilders<DiaryEntry>(
+                defaultBuilder: (context, day, focusedDay) {
+                   return _buildCalendarCell(day, textColor, null, isDark);
+                },
+                todayBuilder: (context, day, focusedDay) {
+                  return _buildCalendarCell(day, textColor, primaryColor, isDark, isToday: true);
+                },
+                selectedBuilder: (context, day, focusedDay) {
+                  return _buildCalendarCell(day, textColor, primaryColor, isDark, isSelected: true);
+                },
                 markerBuilder: (context, date, events) {
                   if (events.isEmpty) return null;
                   final entry = events.first;
-                  return Container(
-              margin: const EdgeInsets.only(top: 4),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (entry.mood != null)
-                          Text(
-                            entry.mood!,
-                            style: const TextStyle(fontSize: 24),
+                  return Positioned(
+                    top: 4,
+                    right: 4,
+                    child: entry.mood != null
+                        ? Text(entry.mood!, style: const TextStyle(fontSize: 14))
+                        : Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              shape: BoxShape.circle,
+                            ),
                           ),
-                        const SizedBox(height: 2),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${entry.content.length}字',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.primary,
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Selected Day Details
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_selectedDay != null) ...[
+                      Text(
+                        DateFormat('MMMM d, yyyy').format(_selectedDay!),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
                       ),
+                      const SizedBox(height: 12),
+                      if (selectedEntry != null) ...[
+                        // Images list (if any)
+                         Builder(
+                           builder: (context) {
+                             final images = _extractImagesFromContent(selectedEntry.content);
+                             if (images.isEmpty) return const SizedBox.shrink();
+                             return Container(
+                               height: 100,
+                               margin: const EdgeInsets.only(bottom: 12),
+                               child: ListView.builder(
+                                 scrollDirection: Axis.horizontal,
+                                 itemCount: images.length,
+                                 itemBuilder: (context, index) {
+                                   return Container(
+                                     width: 100,
+                                     margin: const EdgeInsets.only(right: 8),
+                                     decoration: BoxDecoration(
+                                       borderRadius: BorderRadius.circular(8),
+                                       image: DecorationImage(
+                                         image: NetworkImage(images[index]), // Or FileImage if local
+                                         fit: BoxFit.cover,
+                                       ),
+                                     ),
+                                   );
+                                 },
+                               ),
+                             );
+                           }
+                         ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Text(
+                              selectedEntry.content.replaceAll(RegExp(r'!\[.*?\]\(.*?\)'), ''), // Remove images from text preview
+                              style: TextStyle(
+                                fontSize: 14,
+                                height: 1.5,
+                                color: textColor.withValues(alpha: 0.8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              DiaryLocalizations.of(context).noDiaryForDate,
+                              style: TextStyle(
+                                color: textColor.withValues(alpha: 0.4),
+                              ),
+                            ),
                           ),
                         ),
                       ],
-                    ),
-                  );
-                },
-                dowBuilder: (context, day) {
-            bool isWeekend =
-                day.weekday == DateTime.saturday ||
-                day.weekday == DateTime.sunday;
-                  return Center(
-                    child: Text(
-                      DateFormat.E().format(day),
-                      style: TextStyle(
-                  color: isWeekend ? Colors.red.shade400 : null,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                      ),
-                    ),
-                  );
-                },
-                defaultBuilder: (context, day, focusedDay) {
-            bool isWeekend =
-                day.weekday == DateTime.saturday ||
-                day.weekday == DateTime.sunday;
-
-            return Container(
-              margin: const EdgeInsets.all(2),
-              child: Center(
-                child: Text(
-                  '${day.day}',
-                  style: TextStyle(
-                    color: isWeekend ? Colors.red.shade400 : null,
-                    fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToEditor,
+        backgroundColor: primaryColor,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white, size: 32),
+      ),
+    );
+  }
+
+  Widget _buildCalendarCell(DateTime day, Color textColor, Color? borderColor, bool isDark, {bool isToday = false, bool isSelected = false}) {
+    final normalizedDay = DateTime(day.year, day.month, day.day);
+    final entry = _diaryEntries[normalizedDay];
+    
+    // Simulate random-ish background for demo matching the design's visual interest
+    // In a real app, maybe we use a specific color or pattern based on mood/content
+    final hasEntry = entry != null;
+    
+    return Container(
+      margin: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: (isSelected || isToday) ? Border.all(color: borderColor ?? Colors.transparent, width: 2) : null,
+        color: hasEntry ? (isDark ? Colors.white10 : Colors.grey.shade100) : Colors.transparent,
+      ),
+      child: Stack(
+        children: [
+          Center(
+            child: Text(
+              '${day.day}',
+              style: TextStyle(
+                color: textColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          if (entry?.mood != null)
+            Positioned(
+              top: 2,
+              right: 2,
+              child: Text(entry!.mood!, style: const TextStyle(fontSize: 12)),
+            ),
+        ],
       ),
     );
   }

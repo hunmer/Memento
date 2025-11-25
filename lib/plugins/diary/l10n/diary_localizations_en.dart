@@ -137,4 +137,7 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
 
   @override
   String get deleteDiaryMessage => 'Are you sure you want to delete this diary? This action cannot be undone.';
+
+  @override
+  String get noDiaryForDate => 'No diary for this date';
 }
