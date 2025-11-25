@@ -78,7 +78,7 @@ class MainActivity: FlutterActivity() {
         widgetMethodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_CHANNEL)
 
         // 处理活动通知点击事件
-        widgetMethodChannel.setMethodCallHandler { call, result ->
+        widgetMethodChannel?.setMethodCallHandler { call, result ->
             when (call.method) {
                 "onActivityNotificationClicked" -> {
                     // 这个方法由MainActivity内部调用，不需要处理返回值
