@@ -141,6 +141,17 @@ abstract class GoodsLocalizations {
   String get warehouseName;
   String get warehouseNameHint;
   String get name;
+
+  // Bottom bar strings
+  String? get warehouseTab;
+  String? get itemsTab;
+  String? get createWarehouse;
+  String? get createItem;
+  String? get warehouseCreated;
+  String? get itemCreated;
+  String? get createWarehouseFirst;
+  String? get createWarehouseFailed;
+  String? get createItemFailed;
 }
 
 class _GoodsLocalizationsDelegate

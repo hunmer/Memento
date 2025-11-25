@@ -12,33 +12,8 @@ import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
-import 'package:Memento/plugins/habits/widgets/habits_home.dart';
+import 'package:Memento/plugins/habits/widgets/habits_bottom_bar.dart';
 
-class HabitsMainView extends StatefulWidget {
-  const HabitsMainView({super.key});
-
-  @override
-  State<HabitsMainView> createState() => _HabitsMainViewState();
-}
-
-class _HabitsMainViewState extends State<HabitsMainView> {
-  late HabitsPlugin _plugin;
-
-  @override
-  void initState() {
-    super.initState();
-    _plugin = HabitsPlugin.instance;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return HabitsHome(
-      habitController: _plugin._habitController,
-      skillController: _plugin._skillController,
-      recordController: _plugin._recordController,
-    );
-  }
-}
 
 class HabitsPlugin extends PluginBase with JSBridgePlugin {
   late final HabitController _habitController;
@@ -67,7 +42,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return HabitsMainView();
+    return HabitsBottomBar(plugin: this);
   }
 
   @override

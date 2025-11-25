@@ -1,6 +1,8 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/chat/widgets/chat_bottom_bar.dart';
 import 'package:Memento/plugins/notes/screens/notes_screen.dart';
-import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
+import 'package:Memento/plugins/store/widgets/store_bottom_bar.dart';
+import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/tts/screens/tts_services_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';
@@ -8,6 +10,7 @@ import 'package:Memento/screens/settings_screen/settings_screen.dart';
 import 'package:Memento/screens/js_console/js_console_screen.dart';
 import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart';
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
+import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test_screen.dart';
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -15,13 +18,16 @@ import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
+import 'package:Memento/plugins/calendar_album/widgets/calendar_album_bottom_bar.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/database/database_plugin.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
+import 'package:Memento/plugins/goods/widgets/goods_bottom_bar.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/widgets/habits_bottom_bar.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';
@@ -47,6 +53,7 @@ class AppRoutes extends NavigatorObserver {
   static const String jsConsole = '/js_console';
   static const String jsonDynamicTest = '/json_dynamic_test';
   static const String notificationTest = '/notification_test';
+  static const String superCupertinoTest = '/super_cupertino_test';
 
   // 插件路由路径
   static const String agentChat = '/agent_chat';
@@ -120,7 +127,7 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const CalendarMainView());
       case '/calendar_album':
       case 'calendar_album':
-        return _createRoute(const CalendarAlbumMainView());
+        return _createRoute(CalendarAlbumBottomBar(plugin: CalendarAlbumPlugin.instance));
       case '/contact':
       case 'contact':
         return _createRoute(const ContactMainView());
@@ -132,10 +139,10 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const DayMainView());
       case '/goods':
       case 'goods':
-        return _createRoute(const GoodsMainView());
+        return _createRoute(GoodsBottomBar(plugin: GoodsPlugin.instance));
       case '/habits':
       case 'habits':
-        return _createRoute(const HabitsMainView());
+        return _createRoute(HabitsBottomBar(plugin: HabitsPlugin.instance));
       case '/nodes':
       case 'nodes':
         return _createRoute(const NodesMainView());
@@ -150,7 +157,7 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const ScriptsCenterMainView());
       case '/store':
       case 'store':
-        return _createRoute(const StoreMainView());
+        return _createRoute(StoreBottomBar(plugin: StorePlugin.instance));
       case '/timer':
       case 'timer':
         return _createRoute(const TimerMainView());
@@ -169,11 +176,14 @@ class AppRoutes extends NavigatorObserver {
       case '/notification_test':
       case 'notification_test':
         return _createRoute(const NotificationTestPage());
+      case '/super_cupertino_test':
+      case 'super_cupertino_test':
+        return _createRoute(const SuperCupertinoTestScreen());
       case '/chat':
       case 'chat':
         // 支持通过 channelId 参数直接打开指定频道
         final channelId = settings.arguments as String?;
-        return _createRoute(ChatMainView(channelId: channelId));
+            return _createRoute(ChatBottomBar(plugin: ChatPlugin.instance));
       default:
         return _createRoute(
           Scaffold(
@@ -185,7 +195,7 @@ class AppRoutes extends NavigatorObserver {
 
   static Map<String, WidgetBuilder> get routes => {
     home: (context) => const HomeScreen(),
-    chat: (context) => const ChatMainView(),
+    chat: (context) => ChatBottomBar(plugin: ChatPlugin.instance),
     diary: (context) => const DiaryMainView(),
     activity: (context) => const ActivityMainView(),
     checkin: (context) => const CheckinMainView(),
@@ -193,24 +203,25 @@ class AppRoutes extends NavigatorObserver {
     agentChat: (context) => const AgentChatMainView(),
     bill: (context) => const BillMainView(),
     calendar: (context) => const CalendarMainView(),
-    calendarAlbum: (context) => const CalendarAlbumMainView(),
+    calendarAlbum: (context) => CalendarAlbumBottomBar(plugin: CalendarAlbumPlugin.instance),
     contact: (context) => const ContactMainView(),
     database: (context) => const DatabaseMainView(),
     tts: (context) => const TTSServicesScreen(),
     day: (context) => const DayMainView(),
-    goods: (context) => const GoodsMainView(),
-    habits: (context) => const HabitsMainView(),
+    goods: (context) => GoodsBottomBar(plugin: GoodsPlugin.instance),
+    habits: (context) => HabitsBottomBar(plugin: HabitsPlugin.instance),
     nodes: (context) => const NodesMainView(),
     notes: (context) => const NotesMainView(),
     openai: (context) => const OpenAIMainView(),
     scriptsCenter: (context) => const ScriptsCenterMainView(),
-    store: (context) => const StoreMainView(),
+    store: (context) => StoreBottomBar(plugin: StorePlugin.instance),
     timer: (context) => const TimerMainView(),
     todo: (context) => const TodoMainView(),
     tracker: (context) => const TrackerMainView(),
     jsConsole: (context) => const JSConsoleScreen(),
     jsonDynamicTest: (context) => const JsonDynamicTestScreen(),
     notificationTest: (context) => const NotificationTestPage(),
+    superCupertinoTest: (context) => const SuperCupertinoTestScreen(),
   };
 
   static String get initialRoute => home;

@@ -345,18 +345,18 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _activityController.addActivity(
-          context,
-          _selectedDate,
-          null,
-          null,
-          _tagController.updateRecentTags,
-        ),
-        tooltip:
-            ActivityLocalizations.of(context).addActivity,
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => _activityController.addActivity(
+      //     context,
+      //     _selectedDate,
+      //     null,
+      //     null,
+      //     _tagController.updateRecentTags,
+      //   ),
+      //   tooltip:
+      //       ActivityLocalizations.of(context).addActivity,
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }

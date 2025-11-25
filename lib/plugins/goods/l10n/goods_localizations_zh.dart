@@ -282,4 +282,32 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
 
   @override
   String get name => '物品管理';
+
+  // Bottom bar strings
+  @override
+  String? get warehouseTab => '仓库';
+
+  @override
+  String? get itemsTab => '物品';
+
+  @override
+  String? get createWarehouse => '创建仓库';
+
+  @override
+  String? get createItem => '添加物品';
+
+  @override
+  String? get warehouseCreated => '仓库已创建';
+
+  @override
+  String? get itemCreated => '物品已创建';
+
+  @override
+  String? get createWarehouseFirst => '请先创建仓库';
+
+  @override
+  String? get createWarehouseFailed => '创建仓库失败';
+
+  @override
+  String? get createItemFailed => '创建物品失败';
 }

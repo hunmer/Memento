@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
+import 'package:universal_platform/universal_platform.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -9,6 +10,7 @@ import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'l10n/activity_localizations.dart';
 import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_statistics_screen.dart';
+import 'screens/activity_edit_screen.dart';
 import 'services/activity_service.dart';
 import 'services/activity_notification_service.dart';
 import 'models/activity_record.dart';
@@ -731,7 +733,6 @@ class ActivityMainView extends StatefulWidget {
 
 class _ActivityMainViewState extends State<ActivityMainView>
     with SingleTickerProviderStateMixin {
-  int _selectedIndex = 0;
   late TabController _tabController;
   late int _currentPage;
   final List<Color> _colors = [
@@ -740,9 +741,6 @@ class _ActivityMainViewState extends State<ActivityMainView>
     Colors.blue,
     Colors.orange,
   ];
-
-  // 页面列表
-  late final List<Widget> _pages;
 
   @override
   void initState() {
@@ -757,33 +755,146 @@ class _ActivityMainViewState extends State<ActivityMainView>
         });
       }
     });
-    _pages = [
-      const ActivityTimelineScreen(),
-      ActivityStatisticsScreen(
-        activityService: ActivityPlugin.instance.activityService,
-      ),
-    ];
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.timeline),
-            label: ActivityLocalizations.of(context).timeline,
+    final Color unselectedColor =
+        _colors[_currentPage].computeLuminance() < 0.5
+            ? Colors.black.withOpacity(0.6)
+            : Colors.white.withOpacity(0.6);
+
+    return BottomBar(
+      fit: StackFit.expand,
+      icon:
+          (width, height) => Center(
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                // 滚动到顶部功能
+                if (_tabController.indexIsChanging) return;
+
+                // 这里可以添加滚动到顶部的逻辑
+                // 由于我们使用的是TabBarView，可以考虑切换到第一个tab
+                if (_currentPage != 0) {
+                  _tabController.animateTo(0);
+                }
+              },
+              icon: Icon(
+                Icons.keyboard_arrow_up,
+                color: _colors[_currentPage],
+                size: width,
+              ),
+            ),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.bar_chart),
-            label: ActivityLocalizations.of(context).statistics,
+      borderRadius: BorderRadius.circular(25),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.decelerate,
+      showIcon: true,
+      width: MediaQuery.of(context).size.width * 0.85,
+      barColor:
+          _colors[_currentPage].computeLuminance() > 0.5
+              ? Colors.black
+              : Colors.white,
+      start: 2,
+      end: 0,
+      offset: 12,
+      barAlignment: Alignment.bottomCenter,
+      iconHeight: 35,
+      iconWidth: 35,
+      reverse: false,
+      barDecoration: BoxDecoration(
+        color: _colors[_currentPage].withOpacity(0.1),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: _colors[_currentPage].withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      iconDecoration: BoxDecoration(
+        color: _colors[_currentPage].withOpacity(0.8),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: _colors[_currentPage].withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      hideOnScroll: true,
+      scrollOpposite: false,
+      onBottomBarHidden: () {},
+      onBottomBarShown: () {},
+      body:
+          (context, controller) => TabBarView(
+            controller: _tabController,
+            dragStartBehavior: DragStartBehavior.down,
+            physics: const BouncingScrollPhysics(),
+            children: [
+              const ActivityTimelineScreen(),
+              ActivityStatisticsScreen(
+                activityService: ActivityPlugin.instance.activityService,
+              ),
+            ],
+          ),
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          TabBar(
+            controller: _tabController,
+            dividerColor: Colors.transparent,
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
+            indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+            indicator: UnderlineTabIndicator(
+              borderSide: BorderSide(
+                color:
+                    _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+                width: 4,
+              ),
+              insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            ),
+            labelColor:
+                _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+            unselectedLabelColor: unselectedColor,
+            tabs: [
+              Tab(
+                icon: const Icon(Icons.timeline),
+                text: ActivityLocalizations.of(context).timeline,
+              ),
+              Tab(
+                icon: const Icon(Icons.bar_chart),
+                text: ActivityLocalizations.of(context).statistics,
+              ),
+            ],
+          ),
+          Positioned(
+            top: -25,
+            child: FloatingActionButton(
+              backgroundColor: ActivityPlugin.instance.color,
+              elevation: 4,
+              shape: const CircleBorder(),
+              child: const Icon(Icons.add, color: Colors.white, size: 32),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder:
+                        (context) => ActivityEditScreen(
+                          activityService:
+                              ActivityPlugin.instance.activityService,
+                          selectedDate: DateTime.now(),
+                        ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),

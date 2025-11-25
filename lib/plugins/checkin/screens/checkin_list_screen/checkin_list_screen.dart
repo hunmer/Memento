@@ -109,17 +109,17 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await controller.showAddCheckinItemDialog(
-            group:
-                controller.selectedGroup == '全部'
-                    ? null
-                    : controller.selectedGroup,
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     await controller.showAddCheckinItemDialog(
+      //       group:
+      //           controller.selectedGroup == '全部'
+      //               ? null
+      //               : controller.selectedGroup,
+      //     );
+      //   },
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 

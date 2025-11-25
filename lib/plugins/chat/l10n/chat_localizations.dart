@@ -186,6 +186,12 @@ abstract class ChatLocalizations {
   String get username => 'Username';
   String get channelGroupLabel => 'Channel Group';
   String get channelGroupHint => 'Optional, leave empty for default group';
+
+  // Bottom bar strings
+  String get createChannel;
+  String get create;
+  String get cancel;
+  String get channelCreated;
 }
 
 class _ChatLocalizationsDelegate

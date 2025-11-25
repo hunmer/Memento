@@ -284,4 +284,25 @@ class StoreLocalizationsZh extends StoreLocalizations {
   String get remainingQuantityLabel => '剩余数量';
   @override
   String get name => '商店';
+
+  @override
+  String get productAdded => '商品已添加';
+
+  @override
+  String get pointsAmount => '积分数量';
+
+  @override
+  String get pointsReason => '原因';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get pointsAdded => '积分已添加';
+
+  @override
+  String get add => '添加';
+
+  @override
+  String get viewRedeemHistory => '查看兑换记录';
 }

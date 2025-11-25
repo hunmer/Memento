@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
-import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
+import 'package:Memento/plugins/store/widgets/store_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -12,6 +12,17 @@ import 'package:Memento/plugins/store/models/product.dart';
 
 /// 物品兑换插件
 class StorePlugin extends BasePlugin with JSBridgePlugin {
+  static StorePlugin? _instance;
+  static StorePlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('store') as StorePlugin?;
+      if (_instance == null) {
+        throw StateError('StorePlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
+
   @override
   String get id => 'store';
 
@@ -83,7 +94,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return StoreMainView();
+    return StoreBottomBar(plugin: this);
   }
 
   @override
