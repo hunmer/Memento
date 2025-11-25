@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import '../models/goods_item.dart';
+import '../l10n/goods_localizations.dart';
+import '../dialogs/add_usage_record_dialog.dart';
+import '../screens/goods_item_history_page.dart';
+import '../goods_plugin.dart';
 
 class GoodsItemCard extends StatefulWidget {
   final GoodsItem item;
   final String? warehouseTitle;
+  final String? warehouseId;
   final VoidCallback? onTap;
 
   const GoodsItemCard({
     super.key,
     required this.item,
     this.warehouseTitle,
+    this.warehouseId,
     this.onTap,
   });
 
@@ -57,159 +63,307 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
     }
   }
 
+  void _showMenu() {
+    if (widget.warehouseId == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.add_circle_outline),
+            title: Text(GoodsLocalizations.of(context).addUsageRecord),
+            onTap: () async {
+              Navigator.pop(context); // Close menu
+              final result = await showDialog<Map<String, dynamic>>(
+                context: context,
+                builder: (context) => const AddUsageRecordDialog(),
+              );
+              if (result != null) {
+                final updatedItem = widget.item.addUsageRecord(
+                  result['date'],
+                  note: result['note'],
+                  duration: result['duration'],
+                  location: result['location'],
+                );
+                await GoodsPlugin.instance.saveGoodsItem(widget.warehouseId!, updatedItem);
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.history),
+            title: const Text('使用历史'), // TODO: Localize
+            onTap: () {
+              Navigator.pop(context); // Close menu
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GoodsItemHistoryPage(
+                    item: widget.item,
+                    warehouseId: widget.warehouseId!,
+                  ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete_outline, color: Colors.red),
+            title: Text(
+              GoodsLocalizations.of(context).delete,
+              style: const TextStyle(color: Colors.red),
+            ),
+            onTap: () async {
+              Navigator.pop(context); // Close menu
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(GoodsLocalizations.of(context).confirmDelete),
+                  content: Text(GoodsLocalizations.of(context).confirmDeleteItem),
+                  actions: [
+                    TextButton(
+                      child: Text(GoodsLocalizations.of(context).cancel),
+                      onPressed: () => Navigator.pop(context, false),
+                    ),
+                    TextButton(
+                      child: Text(
+                        GoodsLocalizations.of(context).delete,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      onPressed: () => Navigator.pop(context, true),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                await GoodsPlugin.instance.deleteGoodsItem(widget.warehouseId!, widget.item.id);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: widget.onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child:
-                  widget.item.imageUrl != null ? _buildImage() : _buildIcon(),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 标题和价格行
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.item.title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+    final theme = Theme.of(context);
+    final l10n = GoodsLocalizations.of(context);
+    
+    // Calculate daily cost
+    double? dailyCost;
+    if (widget.item.totalPrice != null && widget.item.purchaseDate != null) {
+      final days = DateTime.now().difference(widget.item.purchaseDate!).inDays;
+      final effectiveDays = days < 1 ? 1 : days;
+      dailyCost = widget.item.totalPrice! / effectiveDays;
+    }
+
+    // Usage stats
+    final daysOwned = widget.item.purchaseDate != null 
+        ? DateTime.now().difference(widget.item.purchaseDate!).inDays 
+        : 0;
+    final usageCount = widget.item.usageRecords.length;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onTap,
+          onLongPress: _showMenu,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image Section
+                Stack(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 1.5, 
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: widget.item.imageUrl != null 
+                            ? _buildImage() 
+                            : _buildIcon(),
+                      ),
+                    ),
+                    // Badge (using subItems count as a placeholder for quantity if any)
+                    if (widget.item.subItems.isNotEmpty)
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.6),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${widget.item.subItems.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                      if (widget.item.totalPrice != null)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '¥${widget.item.totalPrice!.toStringAsFixed(2)}',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.titleMedium?.copyWith(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            if (widget.item.subItems.isNotEmpty && widget.item.purchasePrice != null)
-                              Text(
-                                '基础价: ¥${widget.item.purchasePrice!.toStringAsFixed(2)}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                  fontSize: 10,
-                                ),
-                              ),
-                          ],
-                        ),
-                    ],
+                  ],
+                ),
+                const SizedBox(height: 10), 
+                
+                // Title
+                Text(
+                  widget.item.title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 4),
-
-                  // 使用记录信息行
-                  // 子物品信息行
-                  if (widget.item.subItems.isNotEmpty) ...[
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                
+                const SizedBox(height: 4), 
+                
+                // Daily Cost
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     Row(
                       children: [
-                        Icon(Icons.layers, size: 12, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
+                        const Text(
+                          '¥',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
                         Text(
-                          '${widget.item.subItems.length}个子物品',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[600], fontSize: 11),
+                          l10n.dailyCost,
+                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    Text(
+                      dailyCost != null 
+                          ? '¥${dailyCost.toStringAsFixed(3)}/${l10n.day}'
+                          : '-',
+                      style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                    ),
                   ],
-                  
-                  if (widget.item.usageRecords.isNotEmpty) ...[
+                ), 
+                
+                const SizedBox(height: 4), 
+                
+                // Category & Price
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            widget.item.icon ?? Icons.category_outlined,
+                            size: 14,
+                            color: Colors.purple, 
+                          ),
+                          const SizedBox(width: 2),
+                          Expanded(
+                            child: Text(
+                              widget.item.tags.isNotEmpty ? widget.item.tags.first : l10n.noItems.replaceAll('没有物品', '未分类').replaceAll('No Items', 'Uncategorized'), // Fallback
+                              style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: theme.primaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '¥${(widget.item.totalPrice ?? 0).toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ), 
+                
+                const SizedBox(height: 8), 
+                
+                // Divider
+                Divider(height: 1, color: theme.dividerColor.withOpacity(0.2)),
+                
+                const SizedBox(height: 8), 
+                
+                // Usage Stats & Status
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '$daysOwned${l10n.days} / $usageCount${l10n.times}',
+                       style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                    ),
                     Row(
                       children: [
-                        Icon(Icons.history, size: 12, color: Colors.grey[600]),
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                          '${_formatLastUsed(widget.item.lastUsedDate)} · ${widget.item.usageRecords.length}次使用',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[600], fontSize: 11),
+                          l10n.inPlace,
+                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
                   ],
-                  if (widget.item.tags.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 4,
-                      children:
-                          widget.item.tags.map((tag) {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                tag,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            );
-                          }).toList(),
-                    ),
-                  ],
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  // 移除未使用的方法
-
-  String _formatLastUsed(DateTime? dateTime) {
-    if (dateTime == null) return '从未使用';
-
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inMinutes < 1) {
-      return '刚刚';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}分钟前';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}小时前';
-    } else if (difference.inDays == 1) {
-      return '昨天';
-    } else if (difference.inDays < 30) {
-      return '${difference.inDays}天前';
-    } else if (difference.inDays < 365) {
-      final months = (difference.inDays / 30).floor();
-      return '$months个月前';
-    } else {
-      final years = (difference.inDays / 365).floor();
-      return '$years年前';
-    }
-  }
-
   Widget _buildIcon() {
     return Container(
       color: widget.item.iconColor ?? Colors.grey[200],
+      width: double.infinity,
+      height: double.infinity,
       child: Icon(
         widget.item.icon ?? Icons.inventory_2,
-        size: 48,
+        size: 32,
         color: Colors.white,
       ),
     );
@@ -226,21 +380,11 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
       return Image.network(
         imageUrl,
         fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
         errorBuilder: (context, error, stackTrace) {
           debugPrint('网络图片加载失败: $error');
           return _buildIcon();
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value:
-                  loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                      : null,
-            ),
-          );
         },
       );
     } else {
@@ -250,6 +394,8 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
         return Image.file(
           file,
           fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
           errorBuilder: (context, error, stackTrace) {
             debugPrint('本地图片加载失败: $error\n路径: $imageUrl');
             return _buildIcon();

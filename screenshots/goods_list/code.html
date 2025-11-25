@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Warehouse List</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#007AFF",
+                        "background-light": "#F0F4F8",
+                        "background-dark": "#1C1C1E",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#2C2C2E",
+                        "text-light-primary": "#111827",
+                        "text-dark-primary": "#FFFFFF",
+                        "text-light-secondary": "#6B7280",
+                        "text-dark-secondary": "#A0AEC0",
+                    },
+                    fontFamily: {
+                        display: ["Noto Sans SC", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="min-h-screen max-w-md mx-auto relative">
+<main class="p-4 flex flex-col space-y-4 pb-24 pt-8">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-3 flex items-center space-x-4">
+<img alt="Living room with sofa and plants" class="w-24 h-24 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvjG82782xTNAJnUtfUpFLMWriK2MTM-IC2luciAgD7U77l3esxipP0BEupoa4HL3gF6OIW3oYUlhQkZMiTtEOWduT24gdJLg733d7eDgarWgZznB-8TNdfA42eZrqK_pi-MQqYDqnxMvUZYgQEmzE5AzeKC7Ww1F0NbIs0kIHcJ4FW83oWGBjPGMnfeCk9NvAM-NsIljv9kUuSCdgCU0r3EvAGc9cwz4-Hp1LEWzBwuugAsGqPxGbmhEQgXKsNyJ3SFxdkcGCdyg"/>
+<div class="flex-1 flex flex-col justify-center space-y-2">
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary">客厅</h2>
+<div class="flex items-center space-x-1.5 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-lg text-blue-500">home</span>
+<span>15 件物品</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">总价值</span>
+<div class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">¥15,250</div>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-3 flex items-center space-x-4">
+<img alt="Bedroom with a bed and a desk" class="w-24 h-24 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtmuI5sqRaQ4wu1-56pA67sbZpRo6b0fCYsC3j9bxWgPk59-pBKHo6immsmz6GmR71HLUluC8ShBUOzogaTj9SWZ6Tbk8xVt0dTC_2NLsEJtyrAZs0FzEvWHTnb2ehi_8pz55KfBgU5laY3sk-Hs1Ot_1SVGjJH8EjFZ-4LVoOEvEiUCcgSHjaGvRFmboclmb-Zb1FRoDfNk-e1km9N6cOOHUn4WIN3UhAA-Sb-5Y-6J95x7aCX5fkM43M6TPPBFhQ5mA959cs5Ug"/>
+<div class="flex-1 flex flex-col justify-center space-y-2">
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary">卧室</h2>
+<div class="flex items-center space-x-1.5 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-lg text-purple-500">bed</span>
+<span>8 件物品</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">总价值</span>
+<div class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">¥28,999</div>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-3 flex items-center space-x-4">
+<img alt="Modern office space with computers" class="w-24 h-24 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI-9M4ua0xQS-ioOZ7QpzOU5a5fZ6bXIVCg8w-5zmXNznS75JGlVRy3lUUFYTL2Kahq_NIab-oK1QTjdN2Nx17v0HL13x50v-zNfvGxPpf24IpJxSWuaV9w5BKS32W9QeSIS4vjCzLRUFKBsXhBcdjpR0ky8YFuSdJ8qJB1mjTkfy9kcwTAtEfIlhqbDq82Cw0HDL6brzhY-i0e333wD2ZsCThme1TGbNiX7eZDLjV6LKPbaKkOsj4VcKCgVpXjW6eQJtpbrdfEe4"/>
+<div class="flex-1 flex flex-col justify-center space-y-2">
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary">书房</h2>
+<div class="flex items-center space-x-1.5 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-lg text-green-500">local_library</span>
+<span>22 件物品</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">总价值</span>
+<div class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">¥45,730</div>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-3 flex items-center space-x-4">
+<img alt="Storage room with shelves and boxes" class="w-24 h-24 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfRempYF5i1gy37zfVCw-e_jHjffHWGcKi8XSVbApPb65JlL5cprhO_RT27G9_uJsisJbNxX_2-xkHiQ9U4hDY9zCxWcY4kiOaEe298lTE8FSXDaz6RAZGIamzPxOOp--NPNsTau9dS4acEIdx0I5a6zL5RdcxCArlBlffhKxMw71hWpKEWydFnljwjxMd9NUEKEuNUEabBI1dCDM1I-plKXV9wxBMLogNkSHWFbdXBXgr1tjxTbZV-Jz8jKQ-NUkEqyZD_1PFFl0"/>
+<div class="flex-1 flex flex-col justify-center space-y-2">
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary">储藏室</h2>
+<div class="flex items-center space-x-1.5 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+<span class="material-icons text-lg text-orange-500">inventory_2</span>
+<span>35 件物品</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">总价值</span>
+<div class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">¥8,500</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-8 right-8">
+<button class="bg-primary text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
+<span class="material-icons text-3xl">add</span>
+</button>
+</div>
+</div>
+</body></html>

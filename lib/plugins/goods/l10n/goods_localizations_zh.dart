@@ -310,4 +310,19 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
 
   @override
   String? get createItemFailed => '创建物品失败';
+
+  @override
+  String get dailyCost => "日均成本";
+
+  @override
+  String get day => "天";
+
+  @override
+  String get days => "天";
+
+  @override
+  String get inPlace => "在位";
+
+  @override
+  String get times => "次";
 }

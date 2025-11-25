@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Item Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#007AFF",
+              "background-light": "#F0F4F8",
+              "background-dark": "#1C1C1E",
+              "card-light": "#FFFFFF",
+              "card-dark": "#2C2C2E",
+              "text-light-primary": "#111827",
+              "text-dark-primary": "#FFFFFF",
+              "text-light-secondary": "#6B7280",
+              "text-dark-secondary": "#A0AEC0",
+            },
+            fontFamily: {
+              display: ["Noto Sans SC", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1rem",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="min-h-screen max-w-md mx-auto relative pt-16">
+<header class="fixed top-0 left-0 right-0 max-w-md mx-auto bg-background-light dark:bg-background-dark z-10 px-4 py-4">
+<div class="flex items-center space-x-2">
+<span class="material-icons text-3xl font-bold text-text-light-primary dark:text-text-dark-primary">widgets</span>
+<h1 class="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary">物品管理</h1>
+<span class="material-icons text-text-light-primary dark:text-text-dark-primary">expand_more</span>
+</div>
+</header>
+<main class="p-4 grid grid-cols-2 gap-4 pb-24">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-3 flex flex-col space-y-2.5">
+<div class="relative">
+<img alt="Black portable speaker" class="w-full h-24 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvjG82782xTNAJnUtfUpFLMWriK2MTM-IC2luciAgD7U77l3esxipP0BEupoa4HL3gF6OIW3oYUlhQkZMiTtEOWduT24gdJLg733d7eDgarWgZznB-8TNdfA42eZrqK_pi-MQqYDqnxMvUZYgQEmzE5AzeKC7Ww1F0NbIs0kIHcJ4FW83oWGBjPGMnfeCk9NvAM-NsIljv9kUuSCdgCU0r3EvAGc9cwz4-Hp1LEWzBwuugAsGqPxGbmhEQgXKsNyJ3SFxdkcGCdyg"/>
+<div class="absolute top-2 right-2 flex items-center justify-center bg-black bg-opacity-50 text-white text-xs font-bold rounded-full w-5 h-5">
+<span>1</span>
+</div>
+</div>
+<h2 class="font-bold text-text-light-primary dark:text-text-dark-primary text-sm">小米音箱</h2>
+<div class="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="text-green-500 font-bold">¥</span>
+<span>日均成本</span>
+</div>
+<span>¥0.236/天</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="material-icons text-sm text-blue-500">home</span>
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">生活用品</span>
+</div>
+<div class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">¥229</div>
+</div>
+<div class="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between items-center text-xs text-text-light-secondary dark:text-text-dark-secondary">
+<span>971天 / 12次</span>
+<div class="flex items-center space-x-1">
+<span class="w-2 h-2 bg-green-500 rounded-full"></span>
+<span>在位</span>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-3 flex flex-col space-y-2.5">
+<div class="relative">
+<img alt="White wireless earbuds in case" class="w-full h-24 object-cover rounded-lg bg-pink-50 dark:bg-gray-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtmuI5sqRaQ4wu1-56pA67sbZpRo6b0fCYsC3j9bxWgPk59-pBKHo6immsmz6GmR71HLUluC8ShBUOzogaTj9SWZ6Tbk8xVt0dTC_2NLsEJtyrAZs0FzEvWHTnb2ehi_8pz55KfBgU5laY3sk-Hs1Ot_1SVGjJH8EjFZ-4LVoOEvEiUCcgSHjaGvRFmboclmb-Zb1FRoDfNk-e1km9N6cOOHUn4WIN3UhAA-Sb-5Y-6J95x7aCX5fkM43M6TPPBFhQ5mA959cs5Ug"/>
+<div class="absolute top-2 right-2 flex items-center justify-center bg-black bg-opacity-50 text-white text-xs font-bold rounded-full w-5 h-5">
+<span>2</span>
+</div>
+</div>
+<h2 class="font-bold text-text-light-primary dark:text-text-dark-primary text-sm">Airpods 第二代</h2>
+<div class="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="text-green-500 font-bold">¥</span>
+<span>日均成本</span>
+</div>
+<span>¥0.455/天</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="material-icons text-sm text-purple-500">phone_iphone</span>
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">电子产品</span>
+</div>
+<div class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">¥899</div>
+</div>
+<div class="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between items-center text-xs text-text-light-secondary dark:text-text-dark-secondary">
+<span>1975天 / 198次</span>
+<div class="flex items-center space-x-1">
+<span class="w-2 h-2 bg-green-500 rounded-full"></span>
+<span>在位</span>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-3 flex flex-col space-y-2.5">
+<div class="relative">
+<img alt="Laptop on a desk" class="w-full h-24 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI-9M4ua0xQS-ioOZ7QpzOU5a5fZ6bXIVCg8w-5zmXNznS75JGlVRy3lUUFYTL2Kahq_NIab-oK1QTjdN2Nx17v0HL13x50v-zNfvGxPpf24IpJxSWuaV9w5BKS32W9QeSIS4vjCzLRUFKBsXhBcdjpR0ky8YFuSdJ8qJB1mjTkfy9kcwTAtEfIlhqbDq82Cw0HDL6brzhY-i0e333wD2ZsCThme1TGbNiX7eZDLjV6LKPbaKkOsj4VcKCgVpXjW6eQJtpbrdfEe4"/>
+<div class="absolute top-2 right-2 flex items-center justify-center bg-black bg-opacity-50 text-white text-xs font-bold rounded-full w-5 h-5">
+<span>3</span>
+</div>
+</div>
+<h2 class="font-bold text-text-light-primary dark:text-text-dark-primary text-sm">ipad2018</h2>
+<div class="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="text-green-500 font-bold">¥</span>
+<span>日均成本</span>
+</div>
+<span>¥1.53/天</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="material-icons text-sm text-purple-500">phone_iphone</span>
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">电子产品</span>
+</div>
+<div class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">¥3739</div>
+</div>
+<div class="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between items-center text-xs text-text-light-secondary dark:text-text-dark-secondary">
+<span>2445天 / 45次</span>
+<div class="flex items-center space-x-1">
+<span class="w-2 h-2 bg-green-500 rounded-full"></span>
+<span>在位</span>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-3 flex flex-col space-y-2.5">
+<div class="relative">
+<img alt="Smartphone standing upright" class="w-full h-24 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfRempYF5i1gy37zfVCw-e_jHjffHWGcKi8XSVbApPb65JlL5cprhO_RT27G9_uJsisJbNxX_2-xkHiQ9U4hDY9zCxWcY4kiOaEe298lTE8FSXDaz6RAZGIamzPxOOp--NPNsTau9dS4acEIdx0I5a6zL5RdcxCArlBlffhKxMw71hWpKEWydFnljwjxMd9NUEKEuNUEabBI1dCDM1I-plKXV9wxBMLogNkSHWFbdXBXgr1tjxTbZV-Jz8jKQ-NUkEqyZD_1PFFl0"/>
+<div class="absolute top-2 right-2 flex items-center justify-center bg-black bg-opacity-50 text-white text-xs font-bold rounded-full w-5 h-5">
+<span>0</span>
+</div>
+</div>
+<h2 class="font-bold text-text-light-primary dark:text-text-dark-primary text-sm">iphone 16 pro max</h2>
+<div class="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="text-green-500 font-bold">¥</span>
+<span>日均成本</span>
+</div>
+<span>¥45.97/天</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="material-icons text-sm text-purple-500">phone_iphone</span>
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">电子产品</span>
+</div>
+<div class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">¥7999</div>
+</div>
+<div class="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between items-center text-xs text-text-light-secondary dark:text-text-dark-secondary">
+<span>174天 / 10次</span>
+<div class="flex items-center space-x-1">
+<span class="w-2 h-2 bg-green-500 rounded-full"></span>
+<span>在位</span>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-3 flex flex-col space-y-2.5">
+<div class="relative">
+<img alt="Black smartwatch" class="w-full h-24 object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUK_407tISsDLY9KHDGzOPqh89bk49LM18L8yv18X0XnfiG7_56dI4wnQClvxilPTF0LjiBc-e88jSAa6BcihK42tBDAttTVBfS3vNQ3H0CuW3CGs8lDzmMoKQi8cG20VXE65BTB3tjGfpbPPC3GW4MXFOwFh8Ox3zY6Rqag6aJkIDeOvVYN_UyvGWkDLCG7eA2qgonNnCLevokARabUyJ_yHiwKCZ31lh3DFwv2TTYY2LgHv6OCL_g-qbWLxk9Jb3t0eIvf6tHyc"/>
+<div class="absolute top-2 right-2 flex items-center justify-center bg-black bg-opacity-50 text-white text-xs font-bold rounded-full w-5 h-5">
+<span>1</span>
+</div>
+</div>
+<h2 class="font-bold text-text-light-primary dark:text-text-dark-primary text-sm">iwatch se</h2>
+<div class="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="text-green-500 font-bold">¥</span>
+<span>日均成本</span>
+</div>
+<span>¥1.70/天</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1">
+<span class="material-icons text-sm text-purple-500">phone_iphone</span>
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">电子产品</span>
+</div>
+<div class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">¥1799</div>
+</div>
+<div class="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between items-center text-xs text-text-light-secondary dark:text-text-dark-secondary">
+<span>1060天 / 550次</span>
+<div class="flex items-center space-x-1">
+<span class="w-2 h-2 bg-green-500 rounded-full"></span>
+<span>在位</span>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-8 right-8">
+<button class="bg-primary text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
+<span class="material-icons text-3xl">add</span>
+</button>
+</div>
+</div>
+
+</body></html>

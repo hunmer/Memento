@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Item</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#007AFF",
+            "background-light": "#F0F4F8",
+            "background-dark": "#1C1C1E",
+            "card-light": "#FFFFFF",
+            "card-dark": "#2C2C2E",
+            "text-light-primary": "#111827",
+            "text-dark-primary": "#FFFFFF",
+            "text-light-secondary": "#6B7280",
+            "text-dark-secondary": "#A0AEC0",
+            "input-light": "#F9FAFB",
+            "input-dark": "#3A3A3C",
+            "border-light": "#E5E7EB",
+            "border-dark": "#48484A"
+          },
+          fontFamily: {
+            display: ["Noto Sans SC", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    input[type="date"]:before {
+      content: attr(placeholder);
+      color: #9ca3af;
+    }
+    input[type="date"]:focus:before,
+    input[type="date"]:valid:before {
+      display: none;
+    }
+    .dark input[type="date"]:before {
+      color: #98989f;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light-primary dark:text-text-dark-primary">
+<div class="min-h-screen max-w-md mx-auto relative">
+<header class="sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10 px-4 py-4">
+<div class="flex items-center space-x-2 relative">
+<button class="absolute left-0 p-1">
+<span class="material-icons text-2xl text-text-light-primary dark:text-text-dark-primary">arrow_back_ios_new</span>
+</button>
+<h1 class="text-xl font-bold text-text-light-primary dark:text-text-dark-primary text-center w-full">添加物品</h1>
+</div>
+</header>
+<main class="p-4 space-y-6 pb-28">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl flex flex-col items-center justify-center p-6 border-2 border-dashed border-border-light dark:border-border-dark cursor-pointer h-40">
+<span class="material-icons text-5xl text-text-light-secondary dark:text-text-dark-secondary">add_a_photo</span>
+<p class="text-text-light-secondary dark:text-text-dark-secondary mt-2">上传物品图片</p>
+<input accept="image/*" class="hidden" type="file"/>
+</div>
+<div class="space-y-4">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4">
+<label class="flex items-center text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1" for="item-name"><span class="material-icons text-base mr-1.5">label_outline</span>物品名称</label>
+<input class="w-full bg-input-light dark:bg-input-dark border-border-light dark:border-border-dark rounded-lg focus:ring-primary focus:border-primary" id="item-name" placeholder="请输入物品名称" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4">
+<label class="flex items-center text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1" for="purchase-date"><span class="material-icons text-base mr-1.5">calendar_today</span>购入日期</label>
+<input class="w-full bg-input-light dark:bg-input-dark border-border-light dark:border-border-dark rounded-lg focus:ring-primary focus:border-primary" id="purchase-date" placeholder="选择日期" type="date"/>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4">
+<label class="flex items-center text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1" for="expiration-date"><span class="material-icons text-base mr-1.5">event_busy</span>过期日期 (可选)</label>
+<input class="w-full bg-input-light dark:bg-input-dark border-border-light dark:border-border-dark rounded-lg focus:ring-primary focus:border-primary" id="expiration-date" placeholder="选择日期" type="date"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4">
+<label class="flex items-center text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1" for="price"><span class="material-icons text-base mr-1.5">paid</span>价格</label>
+<input class="w-full bg-input-light dark:bg-input-dark border-border-light dark:border-border-dark rounded-lg focus:ring-primary focus:border-primary" id="price" placeholder="¥ 0.00" type="number"/>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4">
+<label class="flex items-center text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1" for="quantity"><span class="material-icons text-base mr-1.5">pin_invoke</span>数量</label>
+<input class="w-full bg-input-light dark:bg-input-dark border-border-light dark:border-border-dark rounded-lg focus:ring-primary focus:border-primary" id="quantity" type="number" value="1"/>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4">
+<label class="flex items-center text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-3"><span class="material-icons text-base mr-1.5">category</span>分类</label>
+<div class="flex space-x-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+<label class="flex-shrink-0">
+<input checked="" class="sr-only peer" name="category" type="radio" value="electronics"/>
+<div class="w-24 h-24 flex flex-col items-center justify-center rounded-2xl bg-input-light dark:bg-input-dark peer-checked:bg-primary peer-checked:text-white transition-colors duration-200">
+<span class="material-icons text-3xl">devices</span>
+<span class="mt-2 text-sm">电子产品</span>
+</div>
+</label>
+<label class="flex-shrink-0">
+<input class="sr-only peer" name="category" type="radio" value="household"/>
+<div class="w-24 h-24 flex flex-col items-center justify-center rounded-2xl bg-input-light dark:bg-input-dark peer-checked:bg-primary peer-checked:text-white transition-colors duration-200">
+<span class="material-icons text-3xl">lightbulb</span>
+<span class="mt-2 text-sm">生活用品</span>
+</div>
+</label>
+<label class="flex-shrink-0">
+<input class="sr-only peer" name="category" type="radio" value="clothing"/>
+<div class="w-24 h-24 flex flex-col items-center justify-center rounded-2xl bg-input-light dark:bg-input-dark peer-checked:bg-primary peer-checked:text-white transition-colors duration-200">
+<span class="material-icons text-3xl">checkroom</span>
+<span class="mt-2 text-sm">服饰</span>
+</div>
+</label>
+<label class="flex-shrink-0">
+<input class="sr-only peer" name="category" type="radio" value="books"/>
+<div class="w-24 h-24 flex flex-col items-center justify-center rounded-2xl bg-input-light dark:bg-input-dark peer-checked:bg-primary peer-checked:text-white transition-colors duration-200">
+<span class="material-icons text-3xl">menu_book</span>
+<span class="mt-2 text-sm">书籍</span>
+</div>
+</label>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4">
+<label class="flex items-center text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-3"><span class="material-icons text-base mr-1.5">inventory</span>使用状态</label>
+<div class="grid grid-cols-4 gap-2">
+<label class="cursor-pointer">
+<input checked="" class="sr-only peer" name="status" type="radio" value="normal"/>
+<div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-input-light dark:bg-input-dark peer-checked:bg-primary peer-checked:text-white transition-colors duration-200">
+<span class="material-icons text-2xl">check_circle_outline</span>
+<span class="mt-1.5 text-xs">正常</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only peer" name="status" type="radio" value="damaged"/>
+<div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-input-light dark:bg-input-dark peer-checked:bg-primary peer-checked:text-white transition-colors duration-200">
+<span class="material-icons text-2xl">broken_image</span>
+<span class="mt-1.5 text-xs">损坏</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only peer" name="status" type="radio" value="lent"/>
+<div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-input-light dark:bg-input-dark peer-checked:bg-primary peer-checked:text-white transition-colors duration-200">
+<span class="material-icons text-2xl">ios_share</span>
+<span class="mt-1.5 text-xs">借出</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only peer" name="status" type="radio" value="sold"/>
+<div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-input-light dark:bg-input-dark peer-checked:bg-primary peer-checked:text-white transition-colors duration-200">
+<span class="material-icons text-2xl">sell</span>
+<span class="mt-1.5 text-xs">已出</span>
+</div>
+</label>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4">
+<h2 class="flex items-center text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-3">
+<span class="material-icons text-base mr-1.5">tune</span>自定义字段
+                    </h2>
+<div class="space-y-3" id="custom-fields-container">
+<div class="flex items-center gap-3">
+<input class="flex-1 w-1/3 bg-input-light dark:bg-input-dark border-border-light dark:border-border-dark rounded-lg focus:ring-primary focus:border-primary text-sm" placeholder="标签" type="text"/>
+<input class="flex-1 w-2/3 bg-input-light dark:bg-input-dark border-border-light dark:border-border-dark rounded-lg focus:ring-primary focus:border-primary text-sm" placeholder="内容" type="text"/>
+<button class="text-text-light-secondary dark:text-text-dark-secondary p-1.5 rounded-full hover:bg-input-light dark:hover:bg-input-dark">
+<span class="material-icons text-xl">remove_circle_outline</span>
+</button>
+</div>
+</div>
+<button class="mt-4 w-full flex items-center justify-center text-primary font-medium py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+<span class="material-icons text-xl mr-1">add</span>
+<span>添加字段</span>
+</button>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4">
+<h2 class="flex items-center text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-3">
+<span class="material-icons text-base mr-1.5">widgets</span>子物品清单
+                    </h2>
+<div class="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+<div class="flex-shrink-0 w-32 bg-input-light dark:bg-input-dark rounded-xl overflow-hidden">
+<div class="relative">
+<img alt="Sub-item 1" class="w-full h-24 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9zgIjRN77yyj7NDQPQpfQrnCRXGsP47zOA86MqBkxVQQ5OqJJKm-aHBN_gDqUPUd2HjdEMisrp0jSxTUsf02tNrslWC3i34BNNIuEdqy5t5fNrzzmFAtFfsepLz5blzRwnQpaGmoEb7b30Ci3OR1xO3Gyp0YMI-jXUZn7yTxzogz5Py_HwqKFg4-oB2hKipd6BS9oFRI8sSNlNEY0sfuBISjsM1eCl6flA5NXwsuUG80OG99l46j0C4lX_nx8omYPnB9B6e-zf7U"/>
+<div class="absolute top-1 right-1 bg-black/50 text-white text-xs font-bold py-0.5 px-2 rounded-full backdrop-blur-sm">
+                                    ¥199
+                                </div>
+</div>
+<div class="p-2">
+<p class="text-sm font-semibold truncate text-text-light-primary dark:text-text-dark-primary">游戏手柄</p>
+</div>
+</div>
+<div class="flex-shrink-0 w-32 bg-input-light dark:bg-input-dark rounded-xl overflow-hidden">
+<div class="relative">
+<img alt="Sub-item 2" class="w-full h-24 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDw5Mzy5d13e_TYuM935YCeJbVooGJfcgF64Cg5yUXGWnJaKOfzTjjV3ArSkqN0AjF6DPCRPBV9zu3BXCJ0fRAxKqxtC23BtRC0kaIMbq40htfl_FL-YPFBf49iGAisJaKydNt2mI7QCIBBJLktwKEKpW4fJlvV4LA4mwA9e1K45JtI-rSHx2diTxGe-ZnEjo56TfKmdjl01LCjs25o69W3HaH2zNIVw3M6wUacZBjr2S1KDomyGqfhVezpZyfleqjV2LCbXM1IAIg"/>
+<div class="absolute top-1 right-1 bg-black/50 text-white text-xs font-bold py-0.5 px-2 rounded-full backdrop-blur-sm">
+                                    ¥89
+                                </div>
+</div>
+<div class="p-2">
+<p class="text-sm font-semibold truncate text-text-light-primary dark:text-text-dark-primary">充电线</p>
+</div>
+</div>
+<div class="flex-shrink-0 w-32 bg-input-light dark:bg-input-dark rounded-xl overflow-hidden">
+<div class="relative">
+<img alt="Sub-item 3" class="w-full h-24 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAck0BL69j5_MceFm5yvsOrebee8Mdlqtykam5eh9V1729ZuElpslGz3qj4sW0NoBhBTzqm1x_S9v75yr8M3io0UELfooKwRXPhe3p40EopXLnk-KgCgLmneSPPc0q22-iivLthjAhvztp12CJBmqO9MsIFolka38nBxredfRVhFT1a6tp1Kx0EU8a9CfhDqC5gAT9reYD26Pv5ycUZRhnyQzZFzLuD1LzxJqR2mf2Pi3H_j0McqIUf_PBMnV7duIlG7aICRmKgGd4"/>
+<div class="absolute top-1 right-1 bg-black/50 text-white text-xs font-bold py-0.5 px-2 rounded-full backdrop-blur-sm">
+                                    ¥129
+                                </div>
+</div>
+<div class="p-2">
+<p class="text-sm font-semibold truncate text-text-light-primary dark:text-text-dark-primary">保护壳</p>
+</div>
+</div>
+<div class="flex-shrink-0 w-32 flex flex-col items-center justify-center bg-input-light dark:bg-input-dark rounded-xl border-2 border-dashed border-border-light dark:border-border-dark cursor-pointer text-text-light-secondary dark:text-text-dark-secondary hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-icons text-3xl">add</span>
+<span class="text-sm mt-1">添加</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10">
+<button class="w-full bg-primary text-white font-bold py-3.5 rounded-2xl text-lg">保存</button>
+</footer>
+</div>
+
+</body></html>
