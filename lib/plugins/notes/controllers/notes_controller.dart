@@ -116,6 +116,11 @@ class NotesController {
     return _folders.values.toList();
   }
 
+  // 获取所有笔记
+  Map<String, List<Note>> getAllNotes() {
+    return _notes;
+  }
+
   // 获取指定文件夹的子文件夹
   List<Folder> getFolderChildren(String parentId) {
     return _folders.values

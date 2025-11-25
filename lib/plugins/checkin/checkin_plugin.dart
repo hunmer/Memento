@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:flutter/gestures.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
@@ -9,6 +11,7 @@ import 'l10n/checkin_localizations.dart';
 import 'models/checkin_item.dart';
 import 'screens/checkin_list_screen/checkin_list_screen.dart';
 import 'screens/checkin_stats_screen/checkin_stats_screen.dart';
+import 'screens/checkin_form_screen.dart';
 import 'controllers/checkin_list_controller.dart';
 
 class CheckinMainView extends StatefulWidget {
@@ -18,59 +21,197 @@ class CheckinMainView extends StatefulWidget {
   State<CheckinMainView> createState() => _CheckinMainViewState();
 }
 
-class _CheckinMainViewState extends State<CheckinMainView> {
-  int _currentIndex = 0;
+class _CheckinMainViewState extends State<CheckinMainView>
+    with SingleTickerProviderStateMixin {
+  final CheckinPlugin checkinPlugin = CheckinPlugin.instance;
+  late TabController _tabController;
+  late int _currentPage;
+  final List<Color> _colors = [
+    Colors.teal,
+    Colors.blue,
+    Colors.cyan,
+    Colors.green,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = 0;
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.animation?.addListener(() {
+      final value = _tabController.animation!.value.round();
+      if (value != _currentPage && mounted) {
+        setState(() {
+          _currentPage = value;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final Color unselectedColor =
+        _colors[_currentPage].computeLuminance() < 0.5
+            ? Colors.black.withOpacity(0.6)
+            : Colors.white.withOpacity(0.6);
+
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          // 打卡列表页面
-          StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              final controller = CheckinListController(
-                context: context,
-                checkinItems: CheckinPlugin.instance.checkinItems,
-                onStateChanged: () {
-                  setState(() {});
-                  CheckinPlugin.instance.triggerSave();
-                },
-              );
-              return CheckinListScreen(controller: controller);
-            },
-          ),
-          // 统计页面
-          ValueListenableBuilder(
-            valueListenable: ValueNotifier(CheckinPlugin.instance.checkinItems),
-            builder: (context, _, __) {
-              return CheckinStatsScreen(
-                checkinItems: CheckinPlugin.instance.checkinItems,
-              );
-            },
-          ),
-        ],
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => PluginManager.toHomeScreen(context),
+        ),
+        title: Text(CheckinLocalizations.of(context).name),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.check_circle_outline),
-            selectedIcon: Icon(Icons.check_circle),
-            label: CheckinLocalizations.of(context).checkinList,
+      body: BottomBar(
+        fit: StackFit.expand,
+        icon:
+            (width, height) => Center(
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  // 滚动到顶部功能
+                  if (_tabController.indexIsChanging) return;
+
+                  // 切换到第一个tab
+                  if (_currentPage != 0) {
+                    _tabController.animateTo(0);
+                  }
+                },
+                icon: Icon(
+                  Icons.keyboard_arrow_up,
+                  color: _colors[_currentPage],
+                  size: width,
+                ),
+              ),
+            ),
+        borderRadius: BorderRadius.circular(25),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.decelerate,
+        showIcon: true,
+        width: MediaQuery.of(context).size.width * 0.85,
+        barColor:
+            _colors[_currentPage].computeLuminance() > 0.5
+                ? Colors.black
+                : Colors.white,
+        start: 2,
+        end: 0,
+        offset: 12,
+        barAlignment: Alignment.bottomCenter,
+        iconHeight: 35,
+        iconWidth: 35,
+        reverse: false,
+        barDecoration: BoxDecoration(
+          color: _colors[_currentPage].withOpacity(0.1),
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: _colors[_currentPage].withOpacity(0.3),
+            width: 1,
           ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: CheckinLocalizations.of(context).checkinStats,
-          ),
-        ],
+        ),
+        iconDecoration: BoxDecoration(
+          color: _colors[_currentPage].withOpacity(0.8),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: _colors[_currentPage].withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        hideOnScroll: true,
+        scrollOpposite: false,
+        onBottomBarHidden: () {},
+        onBottomBarShown: () {},
+        body:
+            (context, controller) => TabBarView(
+              controller: _tabController,
+              dragStartBehavior: DragStartBehavior.down,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                // 打卡列表页面
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    final listController = CheckinListController(
+                      context: context,
+                      checkinItems: CheckinPlugin.instance.checkinItems,
+                      onStateChanged: () {
+                        setState(() {});
+                        CheckinPlugin.instance.triggerSave();
+                      },
+                    );
+                    return CheckinListScreen(controller: listController);
+                  },
+                ),
+                // 统计页面
+                ValueListenableBuilder(
+                  valueListenable: ValueNotifier(CheckinPlugin.instance.checkinItems),
+                  builder: (context, _, __) {
+                    return CheckinStatsScreen(
+                      checkinItems: CheckinPlugin.instance.checkinItems,
+                    );
+                  },
+                ),
+              ],
+            ),
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            TabBar(
+              controller: _tabController,
+              dividerColor: Colors.transparent,
+              overlayColor: WidgetStateProperty.all(Colors.transparent),
+              indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide(
+                  color:
+                      _currentPage < 2
+                          ? _colors[_currentPage]
+                          : unselectedColor,
+                  width: 4,
+                ),
+                insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              ),
+              labelColor:
+                  _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+              unselectedLabelColor: unselectedColor,
+              tabs: [
+                Tab(
+                  icon: Icon(Icons.check_circle_outline),
+                  text: CheckinLocalizations.of(context).checkinList,
+                ),
+                Tab(
+                  icon: Icon(Icons.bar_chart_outlined),
+                  text: CheckinLocalizations.of(context).checkinStats,
+                ),
+              ],
+            ),
+            Positioned(
+              top: -25,
+              child: FloatingActionButton(
+                backgroundColor: checkinPlugin.color,
+                elevation: 4,
+                shape: const CircleBorder(),
+                child: const Icon(Icons.add, color: Colors.white, size: 32),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => CheckinFormScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
