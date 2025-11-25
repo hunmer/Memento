@@ -143,6 +143,7 @@ class ChatLocalizationsZh extends ChatLocalizations {
   @override
   String get noUsersAvailable => '没有可用的用户';
 
+  @override
   String get cancel => '取消';
 
   String get reset => '重置';

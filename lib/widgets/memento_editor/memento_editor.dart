@@ -62,7 +62,6 @@ class _MementoEditorState extends State<MementoEditor> {
   void _updateWordCount() {
     final text = _contentController.document.toPlainText();
     // Simple word count approximation
-    final count = text.trim().split(RegExp(r'\s+')).where((s) => s.isNotEmpty).length;
     // Or character count for CJK? The HTML example says "108 字" which usually means characters in Chinese context.
     // Let's just use length for now or a smarter count.
     // For simplicity/common usage in Chinese apps:
@@ -110,8 +109,8 @@ class _MementoEditorState extends State<MementoEditor> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final date = widget.date ?? DateTime.now();
-    final dateStr = DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(date);
-    final weekDayStr = DateFormat.EEEE(Localizations.localeOf(context).toString()).format(date);
+    DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(date);
+    DateFormat.EEEE(Localizations.localeOf(context).toString()).format(date);
 
     // Custom Colors based on the design
     // primary: #D8BFD8 -> Color(0xFFD8BFD8)

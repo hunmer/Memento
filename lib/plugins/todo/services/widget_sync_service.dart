@@ -18,7 +18,7 @@ class TodoWidgetSyncService {
       if (plugin == null) return;
 
       final totalTasks = plugin.taskController.getTotalTaskCount();
-      final weeklyTasks = plugin.taskController.getWeeklyTaskCount();
+      plugin.taskController.getWeeklyTaskCount();
       final incompleteTasks = plugin.taskController.getIncompleteTaskCount();
 
       final widgetData = PluginWidgetData(

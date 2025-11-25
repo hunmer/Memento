@@ -79,7 +79,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.addPointsTitle ?? '添加积分'),
+            title: Text(l10n.addPointsTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -87,7 +87,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
               controller: controller,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: l10n.pointsAmount ?? '积分数量',
+                    labelText: l10n.pointsAmount,
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -95,7 +95,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             TextField(
               controller: reasonController,
               decoration: InputDecoration(
-                labelText: l10n.pointsReason ?? '原因',
+                    labelText: l10n.pointsReason,
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -104,7 +104,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel ?? '取消'),
+                child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -117,7 +117,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(l10n.pointsAdded ?? '积分已添加'),
+                      content: Text(l10n.pointsAdded),
                     ),
                   );
                 }
@@ -132,7 +132,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                 }
               }
             },
-            child: Text(l10n.add ?? '添加'),
+                child: Text(l10n.add),
           ),
         ],
       ),
@@ -257,7 +257,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                     );
                   },
                 ),
-                text: StoreLocalizations.of(context).productList ?? '商品列表',
+                text: StoreLocalizations.of(context).productList,
               ),
               Tab(
                 icon: StreamBuilder<int>(
@@ -270,7 +270,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                     );
                   },
                 ),
-                text: StoreLocalizations.of(context).myItems ?? '我的物品',
+                text: StoreLocalizations.of(context).myItems,
               ),
               Tab(
                 icon: StreamBuilder<int>(
@@ -284,7 +284,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                     );
                   },
                 ),
-                text: StoreLocalizations.of(context).pointsHistory ?? '积分历史',
+                text: StoreLocalizations.of(context).pointsHistory,
               ),
             ],
           ),
@@ -309,7 +309,9 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                   // Tab1: 兑换记录 (目前跳转显示为空，实际可以打开兑换记录页面)
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(StoreLocalizations.of(context).viewRedeemHistory ?? '查看兑换记录'),
+                      content: Text(
+                        StoreLocalizations.of(context).viewRedeemHistory,
+                      ),
                     ),
                   );
                 } else {

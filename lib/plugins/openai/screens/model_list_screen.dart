@@ -15,7 +15,7 @@ class _ModelListScreenState extends State<ModelListScreen>
   TabController? _tabController;
   late List<LLMModelGroup> _modelGroups;
   late ModelController _modelController;
-  Map<String, String> _defaultModels = {};
+  final Map<String, String> _defaultModels = {};
   String _searchQuery = '';
   bool _isLoading = true;
 

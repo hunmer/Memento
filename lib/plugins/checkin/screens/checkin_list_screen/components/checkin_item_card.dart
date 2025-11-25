@@ -35,7 +35,6 @@ class CheckinItemCard extends StatelessWidget {
         content = _buildCalendarStyle(context, theme);
         break;
       case CheckinCardStyle.weekly:
-      default:
         content = _buildWeeklyStyle(context, theme);
         break;
     }
@@ -408,7 +407,6 @@ class CheckinItemCard extends StatelessWidget {
   Widget _buildMonthCalendar(BuildContext context, ThemeData theme) {
     final now = DateTime.now();
     final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
-    final firstDayOfMonth = DateTime(now.year, now.month, 1);
     // Adjust weekday to start from 0 (Monday) to 6 (Sunday) if needed, 
     // or just use grid indices. Text '1' should correspond to day 1.
     
@@ -427,7 +425,6 @@ class CheckinItemCard extends StatelessWidget {
       itemCount: daysInMonth,
       itemBuilder: (context, index) {
         final day = index + 1;
-        final date = DateTime(now.year, now.month, day);
         final dateStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
         final hasCheckin = item.checkInRecords.containsKey(dateStr) && item.checkInRecords[dateStr]!.isNotEmpty;
         final isToday = day == now.day;

@@ -116,6 +116,7 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
   @override
   String get unnamedActivity => '未命名活动';
 
+  @override
   String get contentHint => '输入活动描述';
 
   @override
