@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:flutter/gestures.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -8,6 +10,7 @@ import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'screens/agent_list_screen.dart';
 import 'screens/plugin_settings_screen.dart';
 import 'screens/prompt_preset_screen.dart';
+import 'screens/agent_edit_screen.dart';
 import 'handlers/chat_event_handler.dart';
 import 'controllers/agent_controller.dart';
 import 'controllers/service_provider_controller.dart';

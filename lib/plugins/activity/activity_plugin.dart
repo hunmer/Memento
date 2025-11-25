@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:flutter/gestures.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -727,8 +729,17 @@ class ActivityMainView extends StatefulWidget {
   State<ActivityMainView> createState() => _ActivityMainViewState();
 }
 
-class _ActivityMainViewState extends State<ActivityMainView> {
+class _ActivityMainViewState extends State<ActivityMainView>
+    with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
+  late TabController _tabController;
+  late int _currentPage;
+  final List<Color> _colors = [
+    Colors.pink,
+    Colors.purple,
+    Colors.blue,
+    Colors.orange,
+  ];
 
   // 页面列表
   late final List<Widget> _pages;
@@ -736,6 +747,16 @@ class _ActivityMainViewState extends State<ActivityMainView> {
   @override
   void initState() {
     super.initState();
+    _currentPage = 0;
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.animation?.addListener(() {
+      final value = _tabController.animation!.value.round();
+      if (value != _currentPage && mounted) {
+        setState(() {
+          _currentPage = value;
+        });
+      }
+    });
     _pages = [
       const ActivityTimelineScreen(),
       ActivityStatisticsScreen(

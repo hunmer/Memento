@@ -1,5 +1,6 @@
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
+import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -54,6 +55,8 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       _selectedDay = selectedDay;
       _focusedDay = focusedDay;
     });
+    // 直接打开编辑器
+    _navigateToEditor();
   }
 
   void _navigateToEditor() {
@@ -133,54 +136,29 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                 ),
               ),
             ),
-            // Custom Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _focusedDay = DateTime(
-                          _focusedDay.year,
-                          _focusedDay.month - 1,
-                        );
-                      });
-                    },
-                    icon: Icon(
-                      Icons.chevron_left,
-                      size: 28,
-                      color: textColor,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      DateFormat('MMMM yyyy').format(_focusedDay),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _focusedDay = DateTime(
-                          _focusedDay.year,
-                          _focusedDay.month + 1,
-                        );
-                      });
-                    },
-                    icon: Icon(
-                      Icons.chevron_right,
-                      size: 28,
-                      color: textColor,
-                    ),
-                  ),
-                ],
-              ),
+            // Month Selector
+            MonthSelector(
+              selectedMonth: _focusedDay,
+              onMonthSelected: (month) {
+                setState(() {
+                  _focusedDay = DateTime(month.year, month.month, _focusedDay.day);
+                });
+              },
+              getMonthStats: (month) {
+                // For diary plugin, we'll show entry count instead of financial stats
+                final monthEntries = _diaryEntries.entries.where((entry) {
+                  return entry.key.year == month.year && entry.key.month == month.month;
+                }).toList();
+
+                final entryCount = monthEntries.length;
+                final totalWords = monthEntries.fold(0, (sum, entry) => sum + entry.value.content.length);
+
+                return {
+                  'income': entryCount.toDouble(), // Use income for entry count
+                  'expense': totalWords.toDouble(), // Use expense for word count
+                };
+              },
+              primaryColor: primaryColor,
             ),
 
             // Calendar

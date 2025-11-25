@@ -161,40 +161,20 @@ class _MementoEditorState extends State<MementoEditor> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Date Section
-                    const SizedBox(height: 12),
-                    Text(
-                      dateStr,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
-                      ),
-                    ),
-                    Text(
-                      weekDayStr,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
                     // Title Input with Mood
                     Stack(
                       alignment: Alignment.centerLeft,
                       children: [
-                        if (widget.mood != null)
-                          GestureDetector(
-                            onTap: widget.onMoodTap,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Text(
-                                widget.mood!,
-                                style: const TextStyle(fontSize: 28),
-                              ),
+                        GestureDetector(
+                          onTap: widget.onMoodTap,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(
+                              widget.mood ?? '😊',
+                              style: const TextStyle(fontSize: 28),
                             ),
                           ),
+                        ),
                         TextField(
                           controller: _titleController,
                           style: const TextStyle(
@@ -204,23 +184,20 @@ class _MementoEditorState extends State<MementoEditor> {
                           decoration: InputDecoration(
                             hintText: widget.titleHint,
                             border: InputBorder.none,
-                            contentPadding: widget.mood != null 
-                                ? const EdgeInsets.only(left: 40) 
-                                : EdgeInsets.zero,
+                            contentPadding: const EdgeInsets.only(left: 40),
                           ),
                         ),
-                        if (widget.mood != null)
-                          Positioned(
-                            left: 0,
-                            child: GestureDetector(
-                              onTap: widget.onMoodTap,
-                              child: Container( // Invisible hit target improvement
-                                color: Colors.transparent,
-                                width: 40, 
-                                height: 40,
-                              ),
+                        Positioned(
+                          left: 0,
+                          child: GestureDetector(
+                            onTap: widget.onMoodTap,
+                            child: Container( // Invisible hit target improvement
+                              color: Colors.transparent,
+                              width: 40,
+                              height: 40,
                             ),
-                          )
+                          ),
+                        )
                       ],
                     ),
                     const SizedBox(height: 24),
