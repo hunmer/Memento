@@ -182,7 +182,6 @@ class AppRoutes extends NavigatorObserver {
       case '/chat':
       case 'chat':
         // 支持通过 channelId 参数直接打开指定频道
-        final channelId = settings.arguments as String?;
             return _createRoute(ChatBottomBar(plugin: ChatPlugin.instance));
       default:
         return _createRoute(

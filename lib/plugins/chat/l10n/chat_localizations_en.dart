@@ -137,6 +137,7 @@ class ChatLocalizationsEn extends ChatLocalizations {
   @override
   String get noUsersAvailable => 'No users available';
 
+  @override
   String get cancel => 'Cancel';
 
   String get reset => 'Reset';

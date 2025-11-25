@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
 import '../../widgets/super_cupertino_navigation_wrapper.dart';
 
 class SuperCupertinoTestScreen extends StatefulWidget {
@@ -12,7 +11,6 @@ class SuperCupertinoTestScreen extends StatefulWidget {
 }
 
 class _SuperCupertinoTestScreenState extends State<SuperCupertinoTestScreen> {
-  String _searchQuery = '';
   List<String> _filteredItems = [];
   final List<String> _allItems = [
     '香蕉 (Banana)',
@@ -36,7 +34,6 @@ class _SuperCupertinoTestScreenState extends State<SuperCupertinoTestScreen> {
 
   void _onSearchChanged(String query) {
     setState(() {
-      _searchQuery = query;
       if (query.isEmpty) {
         _filteredItems = _allItems;
       } else {

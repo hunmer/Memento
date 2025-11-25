@@ -27,14 +27,13 @@ class _BillListScreenState extends State<BillListScreen> {
   late final void Function() _billPluginListener;
 
   // Calendar State
-  CalendarFormat _calendarFormat = CalendarFormat.month;
+  final CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
   // Data State
   List<BillModel> _allMonthBills = []; // All bills for the focused month
   Map<DateTime, _DailyStats> _dailyStats = {};
-  bool _isLoading = true;
 
   // View State
   int _viewMode = 0; // 0: List, 1: Stats
@@ -70,7 +69,6 @@ class _BillListScreenState extends State<BillListScreen> {
 
   void _loadMonthBills() {
     if (!mounted) return;
-    setState(() => _isLoading = true);
 
     try {
       final currentAccount = widget.billPlugin.accounts.firstWhere(
@@ -134,12 +132,10 @@ class _BillListScreenState extends State<BillListScreen> {
         setState(() {
           _allMonthBills = bills;
           _dailyStats = stats;
-          _isLoading = false;
         });
       }
     } catch (e) {
       debugPrint('加载账单失败: $e');
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -253,10 +249,12 @@ class _BillListScreenState extends State<BillListScreen> {
             .toList();
 
     if (_filterCategory == 'all') return bills;
-    if (_filterCategory == 'income')
+    if (_filterCategory == 'income') {
       return bills.where((b) => !b.isExpense).toList();
-    if (_filterCategory == 'expense')
+    }
+    if (_filterCategory == 'expense') {
       return bills.where((b) => b.isExpense).toList();
+    }
 
     return bills.where((b) => b.category == _filterCategory).toList();
   }

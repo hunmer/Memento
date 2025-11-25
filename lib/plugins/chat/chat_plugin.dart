@@ -15,7 +15,6 @@ import 'services/settings_service.dart';
 import 'services/ui_service.dart';
 import 'services/user_service.dart';
 import 'services/widget_service.dart';
-import 'widgets/chat_bottom_bar.dart';
 
 class ChatMainView extends StatefulWidget {
   final String? channelId;

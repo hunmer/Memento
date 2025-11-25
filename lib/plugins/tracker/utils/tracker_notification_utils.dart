@@ -23,6 +23,7 @@ class TrackerNotificationUtils {
           ),
           // ignore: body_might_complete_normally_catch_error
         )
+        // ignore: body_might_complete_normally_catch_error
         .catchError((error) async {
           // 如果通道不存在，先创建通道
           await AwesomeNotifications().initialize(null, [

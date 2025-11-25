@@ -25,7 +25,7 @@ class BillStatsScreen extends StatefulWidget {
 class _BillStatsScreenState extends State<BillStatsScreen> {
   late DateTime _selectedMonth;
   bool _isExpenseSelected = true;
-  Set<String> _expandedCategories = {};
+  final Set<String> _expandedCategories = {};
   
   // Colors from design
   static const Color _incomeColor = Color(0xFF2ECC71);
@@ -412,9 +412,7 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
 
   Widget _buildCategoryItem(_CategoryData category, double percentage, bool isDark) {
     final isExpanded = _expandedCategories.contains(category.name);
-    final barColor = _isExpenseSelected 
-        ? const Color(0xFFE74C3C) 
-        : const Color(0xFF3498DB); // Blue for income bars? Or Green? Design uses colored bars.
+// Blue for income bars? Or Green? Design uses colored bars.
         // HTML uses specific colors for categories (Rose, Blue, Orange, Purple, Teal).
         // Since we don't have per-category colors in BillModel (we have iconColor), use that!
     final itemColor = category.color; // Use bill's color

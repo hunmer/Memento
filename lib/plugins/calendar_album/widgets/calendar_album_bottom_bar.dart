@@ -77,7 +77,7 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
             ChangeNotifierProvider.value(value: _tagController),
           ],
           child: EntryEditorScreen(
-            initialDate: _calendarController.selectedDate ?? DateTime.now(),
+                initialDate: _calendarController.selectedDate,
             isEditing: false,
           ),
         ),
@@ -94,6 +94,7 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
         selectedTags: _tagController.selectedTags,
         onGroupsChanged: (newGroups) {
           _tagController.tagGroups = newGroups;
+              // ignore: invalid_use_of_visible_for_testing_member
           _tagController.notifyListeners();
         },
       ),
