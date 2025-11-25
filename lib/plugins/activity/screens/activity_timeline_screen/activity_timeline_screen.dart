@@ -3,7 +3,6 @@ import '../../../../core/storage/storage_manager.dart';
 import '../../../../core/event/event.dart';
 import '../../services/activity_service.dart';
 import '../../widgets/activity_timeline.dart';
-import '../../l10n/activity_localizations.dart';
 import 'components/activity_grid_view.dart';
 import 'components/timeline_app_bar.dart';
 import 'controllers/activity_controller.dart';

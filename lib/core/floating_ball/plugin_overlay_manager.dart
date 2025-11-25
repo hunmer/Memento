@@ -207,7 +207,7 @@ class PluginOverlayManager {
       Overlay.of(context).insert(overlayEntry);
     } catch (e) {
       debugPrint('Error inserting overlay: $e');
-      overlayEntry?.remove();
+      overlayEntry.remove();
       _minimizedOverlayEntries.remove(plugin.id);
     }
   }
