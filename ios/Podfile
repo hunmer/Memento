@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '12.0'
+platform :ios, '13.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -39,5 +39,21 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    # 修复桥接头文件与模块接口冲突
+    target.build_configurations.each do |config|
+      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
+
+      # 额外的兼容性设置
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+
+      # 禁用 bitcode（iOS 14+ 已不再需要）
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+
+      # Swift 编译优化
+      if config.build_settings['SWIFT_VERSION'].to_f < 5.0
+        config.build_settings['SWIFT_VERSION'] = '5.0'
+      end
+    end
   end
 end

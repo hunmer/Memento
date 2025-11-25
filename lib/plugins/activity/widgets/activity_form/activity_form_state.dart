@@ -24,14 +24,11 @@ class ActivityFormState extends State<ActivityFormWidget> {
     final l10n = ActivityLocalizations.of(context);
     final appL10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark ? const Color(0xFF0F1923) : const Color(0xFFF5F7F8);
     final cardColor = isDark ? const Color(0xFF27272A) : Colors.white;
     final primaryColor = Theme.of(context).primaryColor;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black),
@@ -252,7 +249,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: backgroundColor,
               border: Border(top: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[200]!)),
             ),
             child: SizedBox(
