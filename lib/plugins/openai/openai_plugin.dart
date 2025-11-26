@@ -399,15 +399,15 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
 
       final testAgent = agentController.agents.firstWhere(
         (a) => a.serviceProviderId == provider.id,
-        orElse: () => throw Exception(
-            'No agent configured for provider: ${provider.label}'),
+        orElse:
+            () =>
+                throw Exception(
+                  'No agent configured for provider: ${provider.label}',
+                ),
       );
 
       // 发送简单的测试消息
-      final response = await RequestService.chat(
-        'Hello',
-        testAgent,
-      ).timeout(
+      final response = await RequestService.chat('Hello', testAgent).timeout(
         const Duration(seconds: 10),
         onTimeout: () => throw Exception('Connection timeout'),
       );
@@ -416,13 +416,13 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({
         'success': success,
         'provider': provider.label,
-        'response': response.substring(0, response.length > 100 ? 100 : response.length),
+        'response': response.substring(
+          0,
+          response.length > 100 ? 100 : response.length,
+        ),
       });
     } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': e.toString(),
-      });
+      return jsonEncode({'success': false, 'error': e.toString()});
     }
   }
 
@@ -545,54 +545,58 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(OpenAILocalizations.of(context).addPreset),
-        content: SizedBox(
-          width: 400,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: OpenAILocalizations.of(context).presetTitle,
-                  border: OutlineInputBorder(),
-                ),
+      builder:
+          (context) => AlertDialog(
+            title: Text(OpenAILocalizations.of(context).addPreset),
+            content: SizedBox(
+              width: 400,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: OpenAILocalizations.of(context).presetTitle,
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      labelText:
+                          OpenAILocalizations.of(context).presetDescription,
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: contentController,
+                    decoration: InputDecoration(
+                      labelText: OpenAILocalizations.of(context).contentLabel,
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 5,
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                decoration: InputDecoration(
-                  labelText: OpenAILocalizations.of(context).presetDescription,
-                  border: OutlineInputBorder(),
-                ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(OpenAILocalizations.of(context).cancel),
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: contentController,
-                decoration: InputDecoration(
-                  labelText: OpenAILocalizations.of(context).contentLabel,
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 5,
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(OpenAILocalizations.of(context).addPreset),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(OpenAILocalizations.of(context).cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(OpenAILocalizations.of(context).addPreset),
-          ),
-        ],
-      ),
     );
 
-    if (result == true && nameController.text.isNotEmpty && contentController.text.isNotEmpty) {
+    if (result == true &&
+        nameController.text.isNotEmpty &&
+        contentController.text.isNotEmpty) {
       final service = PromptPresetService();
       final preset = PromptPreset(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -690,7 +694,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
           (context, controller) => TabBarView(
             controller: _tabController,
             dragStartBehavior: DragStartBehavior.down,
-            physics: const BouncingScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             children: const [AgentListScreen(), PromptPresetScreen()],
           ),
       child: Stack(

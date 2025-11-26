@@ -18,10 +18,7 @@ import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 class HabitsBottomBar extends StatefulWidget {
   final HabitsPlugin plugin;
 
-  const HabitsBottomBar({
-    super.key,
-    required this.plugin,
-  });
+  const HabitsBottomBar({super.key, required this.plugin});
 
   @override
   State<HabitsBottomBar> createState() => _HabitsBottomBarState();
@@ -34,8 +31,8 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
 
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
-    Colors.amber,               // Tab0 - 习惯列表 (插件主色)
-    Colors.orange.shade600,      // Tab1 - 技能列表
+    Colors.amber, // Tab0 - 习惯列表 (插件主色)
+    Colors.orange.shade600, // Tab1 - 技能列表
   ];
 
   late final HabitController _habitController;
@@ -73,18 +70,19 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
     final l10n = HabitsLocalizations.of(context);
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.newHabit),
-            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          ),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          body: HabitForm(
-            onSave: (habit) async {
-              await _habitController.saveHabit(habit);
-            },
-          ),
-        ),
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(
+                title: Text(l10n.newHabit),
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+              ),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              body: HabitForm(
+                onSave: (habit) async {
+                  await _habitController.saveHabit(habit);
+                },
+              ),
+            ),
       ),
     );
   }
@@ -94,18 +92,19 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
     final l10n = HabitsLocalizations.of(context);
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.createSkill),
-            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          ),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          body: SkillForm(
-            onSave: (skill) async {
-              await _skillController.saveSkill(skill);
-            },
-          ),
-        ),
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(
+                title: Text(l10n.createSkill),
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+              ),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              body: SkillForm(
+                onSave: (skill) async {
+                  await _skillController.saveSkill(skill);
+                },
+              ),
+            ),
       ),
     );
   }
@@ -113,38 +112,41 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final Color unselectedColor = theme.brightness == Brightness.dark
-        ? Colors.white.withOpacity(0.6)
-        : Colors.black.withOpacity(0.6);
+    final Color unselectedColor =
+        theme.brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.6)
+            : Colors.black.withOpacity(0.6);
 
     return BottomBar(
       fit: StackFit.expand,
-      icon: (width, height) => Center(
-        child: IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: () {
-            // 滚动到顶部功能
-            if (_tabController.indexIsChanging) return;
+      icon:
+          (width, height) => Center(
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                // 滚动到顶部功能
+                if (_tabController.indexIsChanging) return;
 
-            // 切换到第一个tab
-            if (_currentPage != 0) {
-              _tabController.animateTo(0);
-            }
-          },
-          icon: Icon(
-            Icons.keyboard_arrow_up,
-            color: _colors[_currentPage],
-            size: width,
+                // 切换到第一个tab
+                if (_currentPage != 0) {
+                  _tabController.animateTo(0);
+                }
+              },
+              icon: Icon(
+                Icons.keyboard_arrow_up,
+                color: _colors[_currentPage],
+                size: width,
+              ),
+            ),
           ),
-        ),
-      ),
       borderRadius: BorderRadius.circular(25),
       duration: const Duration(milliseconds: 300),
       curve: Curves.decelerate,
       showIcon: true,
       width: MediaQuery.of(context).size.width * 0.85,
-      barColor: Theme.of(context).bottomAppBarTheme.color ??
-                Theme.of(context).scaffoldBackgroundColor,
+      barColor:
+          Theme.of(context).bottomAppBarTheme.color ??
+          Theme.of(context).scaffoldBackgroundColor,
       start: 2,
       end: 0,
       offset: 12,
@@ -171,28 +173,33 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
           ),
         ],
       ),
-      hideOnScroll: !kIsWeb && defaultTargetPlatform != TargetPlatform.macOS && defaultTargetPlatform != TargetPlatform.windows && defaultTargetPlatform != TargetPlatform.linux,
+      hideOnScroll:
+          !kIsWeb &&
+          defaultTargetPlatform != TargetPlatform.macOS &&
+          defaultTargetPlatform != TargetPlatform.windows &&
+          defaultTargetPlatform != TargetPlatform.linux,
       scrollOpposite: false,
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
-      body: (context, controller) => TabBarView(
-        controller: _tabController,
-        dragStartBehavior: DragStartBehavior.start,
-        physics: const BouncingScrollPhysics(),
-        children: [
-          // Tab0: 习惯列表
-          KeepAliveWrapper(
-            child: CombinedHabitsView(controller: _habitController),
+      body:
+          (context, controller) => TabBarView(
+            controller: _tabController,
+            dragStartBehavior: DragStartBehavior.start,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              // Tab0: 习惯列表
+              KeepAliveWrapper(
+                child: CombinedHabitsView(controller: _habitController),
+              ),
+              // Tab1: 技能列表
+              KeepAliveWrapper(
+                child: SkillsList(
+                  skillController: _skillController,
+                  recordController: _recordController,
+                ),
+              ),
+            ],
           ),
-          // Tab1: 技能列表
-          KeepAliveWrapper(
-            child: SkillsList(
-              skillController: _skillController,
-              recordController: _recordController,
-            ),
-          ),
-        ],
-      ),
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
@@ -204,12 +211,14 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
             indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
             indicator: UnderlineTabIndicator(
               borderSide: BorderSide(
-                color: _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+                color:
+                    _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
                 width: 4,
               ),
               insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             ),
-            labelColor: _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+            labelColor:
+                _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
             unselectedLabelColor: unselectedColor,
             tabs: [
               Tab(

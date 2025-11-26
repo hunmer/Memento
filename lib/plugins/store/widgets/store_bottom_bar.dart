@@ -127,7 +127,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             (context, controller) => TabBarView(
               controller: _tabController,
               dragStartBehavior: DragStartBehavior.start,
-              physics: const BouncingScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               children: [
                 // Tab0: 商品列表内容
                 _buildProductListContent(),

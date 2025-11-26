@@ -14,10 +14,7 @@ import '../goods_plugin.dart';
 class GoodsBottomBar extends StatefulWidget {
   final GoodsPlugin plugin;
 
-  const GoodsBottomBar({
-    super.key,
-    required this.plugin,
-  });
+  const GoodsBottomBar({super.key, required this.plugin});
 
   @override
   State<GoodsBottomBar> createState() => _GoodsBottomBarState();
@@ -32,7 +29,7 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
     const Color.fromARGB(255, 207, 77, 116), // Tab0 - 仓库视图 (插件主色)
-    Colors.pink.shade400,                      // Tab1 - 物品视图
+    Colors.pink.shade400, // Tab1 - 物品视图
   ];
 
   @override
@@ -126,29 +123,32 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
     // 跳转到物品创建表单
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => GoodsItemForm(
-          onSubmit: (item) async {
-            try {
-              // 选择第一个仓库（实际应用中应该让用户选择）
-              final warehouseId = widget.plugin.warehouses.first.id;
-              await widget.plugin.saveGoodsItem(warehouseId, item);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.itemCreated ?? '物品已创建')),
-                );
-              }
-            } catch (e) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${l10n.createItemFailed ?? '创建物品失败'}: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            }
-          },
-        ),
+        builder:
+            (context) => GoodsItemForm(
+              onSubmit: (item) async {
+                try {
+                  // 选择第一个仓库（实际应用中应该让用户选择）
+                  final warehouseId = widget.plugin.warehouses.first.id;
+                  await widget.plugin.saveGoodsItem(warehouseId, item);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.itemCreated ?? '物品已创建')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          '${l10n.createItemFailed ?? '创建物品失败'}: $e',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
       ),
     );
   }
@@ -162,33 +162,35 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
 
     return BottomBar(
       fit: StackFit.expand,
-      icon: (width, height) => Center(
-        child: IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: () {
-            // 滚动到顶部功能
-            if (_tabController.indexIsChanging) return;
+      icon:
+          (width, height) => Center(
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                // 滚动到顶部功能
+                if (_tabController.indexIsChanging) return;
 
-            // 切换到第一个tab
-            if (_currentPage != 0) {
-              _tabController.animateTo(0);
-            }
-          },
-          icon: Icon(
-            Icons.keyboard_arrow_up,
-            color: _colors[_currentPage],
-            size: width,
+                // 切换到第一个tab
+                if (_currentPage != 0) {
+                  _tabController.animateTo(0);
+                }
+              },
+              icon: Icon(
+                Icons.keyboard_arrow_up,
+                color: _colors[_currentPage],
+                size: width,
+              ),
+            ),
           ),
-        ),
-      ),
       borderRadius: BorderRadius.circular(25),
       duration: const Duration(milliseconds: 300),
       curve: Curves.decelerate,
       showIcon: true,
       width: MediaQuery.of(context).size.width * 0.85,
-      barColor: _colors[_currentPage].computeLuminance() > 0.5
-          ? Colors.black
-          : Colors.white,
+      barColor:
+          _colors[_currentPage].computeLuminance() > 0.5
+              ? Colors.black
+              : Colors.white,
       start: 2,
       end: 0,
       offset: 12,
@@ -215,26 +217,29 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
           ),
         ],
       ),
-      hideOnScroll: !kIsWeb && defaultTargetPlatform != TargetPlatform.macOS && defaultTargetPlatform != TargetPlatform.windows && defaultTargetPlatform != TargetPlatform.linux,
+      hideOnScroll:
+          !kIsWeb &&
+          defaultTargetPlatform != TargetPlatform.macOS &&
+          defaultTargetPlatform != TargetPlatform.windows &&
+          defaultTargetPlatform != TargetPlatform.linux,
       scrollOpposite: false,
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
-      body: (context, controller) => TabBarView(
-        controller: _tabController,
-        dragStartBehavior: DragStartBehavior.start,
-        physics: const BouncingScrollPhysics(),
-        children: [
-          // Tab0: 仓库视图
-          WarehouseListScreen(
-            onWarehouseTap: _handleWarehouseTap,
+      body:
+          (context, controller) => TabBarView(
+            controller: _tabController,
+            dragStartBehavior: DragStartBehavior.start,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              // Tab0: 仓库视图
+              WarehouseListScreen(onWarehouseTap: _handleWarehouseTap),
+              // Tab1: 物品视图
+              GoodsListScreen(
+                key: ValueKey('goods_list_${_filterWarehouseId ?? "all"}'),
+                initialFilterWarehouseId: _filterWarehouseId,
+              ),
+            ],
           ),
-          // Tab1: 物品视图
-          GoodsListScreen(
-            key: ValueKey('goods_list_${_filterWarehouseId ?? "all"}'),
-            initialFilterWarehouseId: _filterWarehouseId,
-          ),
-        ],
-      ),
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
@@ -246,12 +251,14 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
             indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
             indicator: UnderlineTabIndicator(
               borderSide: BorderSide(
-                color: _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+                color:
+                    _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
                 width: 4,
               ),
               insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             ),
-            labelColor: _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+            labelColor:
+                _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
             unselectedLabelColor: unselectedColor,
             tabs: [
               Tab(

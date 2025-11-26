@@ -197,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
         body: (context, controller) => TabBarView(
           controller: tabController,
           dragStartBehavior: DragStartBehavior.down,
-          physics: const BouncingScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           children: colors
               .map(
                 (e) => InfiniteListPage(
