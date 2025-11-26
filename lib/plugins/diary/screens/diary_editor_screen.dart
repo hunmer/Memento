@@ -47,6 +47,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
   }
 
   Future<void> _loadCurrentEntry() async {
+    // 从存储加载最新的日记条目
     final entry = await DiaryUtils.loadDiaryEntry(widget.date);
     if (entry != null && mounted) {
       setState(() {

@@ -90,6 +90,10 @@ abstract class DiaryLocalizations {
   String get confirmDeleteDiary;
   String get deleteDiaryMessage;
   String get noDiaryForDate;
+
+  // 按钮文本
+  String get edit;
+  String get create;
 }
 
 class _DiaryLocalizationsDelegate

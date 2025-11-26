@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../../../core/storage/storage_manager.dart';
+import '../../../widgets/quill_viewer/index.dart';
 import 'diary_editor_screen.dart';
 import '../models/diary_entry.dart';
 import '../utils/diary_utils.dart';
@@ -43,6 +44,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
 
   Future<void> _loadDiaryEntries() async {
     final entries = await DiaryUtils.loadDiaryEntries();
+    debugPrint('Loaded ${entries.length} diary entries');
     if (mounted) {
       setState(() {
         _diaryEntries = entries;
@@ -51,30 +53,32 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   }
 
   void _onDayClicked(DateTime selectedDay, DateTime focusedDay) {
+    // 标准化选中的日期，只保留年月日
+    final normalizedSelectedDay = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
     setState(() {
-      _selectedDay = selectedDay;
+      _selectedDay = normalizedSelectedDay;
       _focusedDay = focusedDay;
     });
-    // 直接打开编辑器
-    _navigateToEditor();
+    // 只选中日期，不直接打开编辑器
   }
 
-  void _navigateToEditor() {
-    if (_selectedDay == null) return;
+  void _navigateToEditor() async {
+    // If no day is selected, default to today
+    final targetDay = _selectedDay ?? DateTime.now();
 
     // Standardize today's date
     final today = DateTime.now();
     final normalizedToday = DateTime(today.year, today.month, today.day);
 
-    // Standardize selected date
-    final normalizedSelectedDay = DateTime(
-      _selectedDay!.year,
-      _selectedDay!.month,
-      _selectedDay!.day,
+    // Standardize target date
+    final normalizedTargetDay = DateTime(
+      targetDay.year,
+      targetDay.month,
+      targetDay.day,
     );
 
-    // Check if selected date is in the future
-    if (normalizedSelectedDay.isAfter(normalizedToday)) {
+    // Check if target date is in the future
+    if (normalizedTargetDay.isAfter(normalizedToday)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(DiaryLocalizations.of(context).cannotSelectFutureDate),
@@ -84,17 +88,19 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       return;
     }
 
+    // 从存储中获取最新的日记条目，而不是依赖内存缓存
+    final entry = await DiaryUtils.loadDiaryEntry(normalizedTargetDay);
+    debugPrint('Loading editor for $normalizedTargetDay: ${entry != null ? "found" : "not found"}');
+
     Navigator.of(context)
         .push(
           MaterialPageRoute(
             builder:
                 (context) => DiaryEditorScreen(
-                  date: normalizedSelectedDay,
+                  date: normalizedTargetDay,
                   storage: widget.storage,
-                  initialTitle:
-                      _diaryEntries[normalizedSelectedDay]?.title ?? '',
-                  initialContent:
-                      _diaryEntries[normalizedSelectedDay]?.content ?? '',
+                  initialTitle: entry?.title ?? '',
+                  initialContent: entry?.content ?? '',
                 ),
           ),
         )
@@ -110,8 +116,22 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 确保_selectedDay也是标准化的
+    final normalizedSelectedDay = _selectedDay != null
+        ? DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day)
+        : null;
     final selectedEntry =
-        _selectedDay != null ? _diaryEntries[_selectedDay] : null;
+        normalizedSelectedDay != null ? _diaryEntries[normalizedSelectedDay] : null;
+
+    // Debug output (可以移除这些调试代码)
+    debugPrint('=== Calendar Screen Debug ===');
+    debugPrint('Looking for entry: $normalizedSelectedDay');
+    debugPrint('Has entry: ${normalizedSelectedDay != null ? _diaryEntries.containsKey(normalizedSelectedDay) : false}');
+    if (selectedEntry != null) {
+      debugPrint('Found entry: title="${selectedEntry.title}"');
+    } else {
+      debugPrint('No entry found for selected date');
+    }
     
     // Check if current theme is dark
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -266,13 +286,41 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_selectedDay != null) ...[
-                      Text(
-                        DateFormat('MMMM d, yyyy').format(_selectedDay!),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                        ),
+                      // 日期和编辑按钮行
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            DateFormat('MMMM d, yyyy').format(_selectedDay!),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                          ),
+                          if (selectedEntry != null)
+                            ElevatedButton.icon(
+                              onPressed: _navigateToEditor,
+                              icon: Icon(Icons.edit, size: 16, color: Colors.white),
+                              label: Text(DiaryLocalizations.of(context).edit, style: TextStyle(color: Colors.white, fontSize: 12)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                minimumSize: Size(60, 32),
+                              ),
+                            )
+                          else
+                            ElevatedButton.icon(
+                              onPressed: _navigateToEditor,
+                              icon: Icon(Icons.add, size: 16, color: Colors.white),
+                              label: Text(DiaryLocalizations.of(context).create, style: TextStyle(color: Colors.white, fontSize: 12)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                minimumSize: Size(60, 32),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       if (selectedEntry != null) ...[
@@ -305,25 +353,36 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                            }
                          ),
                         Expanded(
-                          child: SingleChildScrollView(
-                            child: Text(
-                              selectedEntry.content.replaceAll(RegExp(r'!\[.*?\]\(.*?\)'), ''), // Remove images from text preview
-                              style: TextStyle(
-                                fontSize: 14,
-                                height: 1.5,
-                                color: textColor.withValues(alpha: 0.8),
-                              ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+                            ),
+                            child: QuillViewer(
+                              data: selectedEntry.content,
+                              selectable: true,
                             ),
                           ),
                         ),
                       ] else ...[
                         Expanded(
                           child: Center(
-                            child: Text(
-                              DiaryLocalizations.of(context).noDiaryForDate,
-                              style: TextStyle(
-                                color: textColor.withValues(alpha: 0.4),
-                              ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.edit_note,
+                                  size: 48,
+                                  color: textColor.withValues(alpha: 0.3),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  DiaryLocalizations.of(context).noDiaryForDate,
+                                  style: TextStyle(
+                                    color: textColor.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),

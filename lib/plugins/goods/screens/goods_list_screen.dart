@@ -311,24 +311,24 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
                 padding: const EdgeInsets.all(16),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    return Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: List.generate(allItems.length, (index) {
+                    return GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: constraints.maxWidth > 600 ? 3 : 2, // 响应式列数
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.8, // 调整卡片比例
+                      ),
+                      itemCount: allItems.length,
+                      itemBuilder: (context, index) {
                         final item = allItems[index]['item'] as GoodsItem;
                         final warehouse = allItems[index]['warehouse'] as Warehouse;
-                        final cardWidth = (constraints.maxWidth - 16) / 2; // 2列布局，减去一个spacing
-
-                        return SizedBox(
-                          width: cardWidth,
-                          child: GoodsItemCard(
-                            item: item,
-                            warehouseTitle: warehouse.title,
-                            warehouseId: warehouse.id,
-                            onTap: () => _showEditItemDialog(item, warehouse),
-                          ),
+                        return GoodsItemCard(
+                          item: item,
+                          warehouseTitle: warehouse.title,
+                          warehouseId: warehouse.id,
+                          onTap: () => _showEditItemDialog(item, warehouse),
                         );
-                      }),
+                      },
                     );
                   },
                 ),

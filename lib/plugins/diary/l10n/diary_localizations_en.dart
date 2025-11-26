@@ -140,4 +140,10 @@ class DiaryLocalizationsEn extends DiaryLocalizations {
 
   @override
   String get noDiaryForDate => 'No diary for this date';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get create => 'Create';
 }

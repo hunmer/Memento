@@ -58,6 +58,10 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     _billController.setPlugin(this);
     _billController.initialize();
 
+    // 监听 BillController 的变化并传播给 BillPlugin 的监听器
+    _billController.addListener(() {
+      notifyListeners();
+    });
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
