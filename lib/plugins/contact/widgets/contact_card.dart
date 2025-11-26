@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import '../controllers/contact_controller.dart';
 import '../models/contact_model.dart';
 import '../../../utils/image_utils.dart';
+import '../screens/contact_records_screen.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
+  final ContactController controller;
   final VoidCallback onTap;
 
   const ContactCard({
     super.key,
     required this.contact,
+    required this.controller,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cardColor = theme.brightness == Brightness.dark ? const Color(0xFF1C1C1E) : Colors.white;
-    final primaryTextColor = theme.brightness == Brightness.dark ? const Color(0xFFF2F2F7) : const Color(0xFF1C1C1E);
-    final secondaryTextColor = theme.brightness == Brightness.dark ? const Color(0xFF8E8E93) : const Color(0xFF8A8A8E);
-    final chipColor = theme.brightness == Brightness.dark ? const Color(0xFF2C2C2E) : const Color(0xFFEFEFF4);
+    final primaryTextColor = theme.brightness == Brightness.dark
+        ? const Color(0xFFF2F2F7)
+        : const Color(0xFF1C1C1E);
+    final secondaryTextColor = theme.brightness == Brightness.dark
+        ? const Color(0xFF8E8E93)
+        : const Color(0xFF8A8A8E);
+    final chipColor = theme.brightness == Brightness.dark
+        ? const Color(0xFF2C2C2E)
+        : const Color(0xFFEFEFF4);
 
     return Card(
       elevation: 0,
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: cardColor,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -49,7 +57,7 @@ class ContactCard extends StatelessWidget {
               const SizedBox(height: 12),
               const Divider(height: 1),
               const SizedBox(height: 8),
-              _buildBottomSection(primaryTextColor),
+              _buildBottomSection(context, primaryTextColor),
             ],
           ),
         ),
@@ -57,7 +65,20 @@ class ContactCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTopSection(BuildContext context, Color primaryTextColor, Color secondaryTextColor) {
+  void _navigateToRecords(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ContactRecordsScreen(
+          contact: contact,
+          controller: controller,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopSection(
+      BuildContext context, Color primaryTextColor, Color secondaryTextColor) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -69,7 +90,10 @@ class ContactCard extends StatelessWidget {
             children: [
               Text(
                 contact.name,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18, color: primaryTextColor),
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    color: primaryTextColor),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -87,11 +111,9 @@ class ContactCard extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         IconButton(
-          icon: const Icon(Icons.add_circle_outline, size: 30),
+          icon: const Icon(Icons.history, size: 30),
           color: Theme.of(context).primaryColor,
-          onPressed: () {
-            // TODO: Implement action
-          },
+          onPressed: () => _navigateToRecords(context),
         ),
       ],
     );
@@ -144,14 +166,16 @@ class ContactCard extends StatelessWidget {
                         width: size,
                         height: size,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => _buildIconAvatar(size),
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildIconAvatar(size),
                       )
                     : Image.file(
                         File(snapshot.data!),
                         width: size,
                         height: size,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => _buildIconAvatar(size),
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildIconAvatar(size),
                       ),
               );
             } else if (snapshot.hasError) {
@@ -160,7 +184,8 @@ class ContactCard extends StatelessWidget {
               return SizedBox(
                 width: size,
                 height: size,
-                child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2)),
               );
             }
           },
@@ -193,33 +218,51 @@ class ContactCard extends StatelessWidget {
       children: contact.tags.map((tag) {
         return Chip(
           backgroundColor: chipColor,
-          label: Text(tag, style: TextStyle(fontSize: 12, color: textColor, fontWeight: FontWeight.w500)),
+          label: Text(tag,
+              style: TextStyle(
+                  fontSize: 12,
+                  color: textColor,
+                  fontWeight: FontWeight.w500)),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           side: BorderSide.none,
         );
       }).toList(),
     );
   }
 
-  Widget _buildBottomSection(Color textColor) {
-    // Placeholder for event/meeting info
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: const BoxDecoration(
-            color: Colors.green, // Example color
-            shape: BoxShape.circle,
+  Widget _buildBottomSection(BuildContext context, Color textColor) {
+    return InkWell(
+      onTap: () => _navigateToRecords(context),
+      child: Row(
+        children: [
+          FutureBuilder<int>(
+            future: controller.getContactInteractionsCount(contact.id),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data! > 0) {
+                return Row(
+                  children: [
+                    Icon(Icons.event_note,
+                        color: Colors.green, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      "View ${snapshot.data} record(s)",
+                      style: TextStyle(fontSize: 14, color: textColor),
+                    ),
+                  ],
+                );
+              }
+              return Text(
+                "No records",
+                style: TextStyle(fontSize: 14, color: textColor),
+              );
+            },
           ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          "Meeting on Monday", // Example text
-          style: TextStyle(fontSize: 14, color: textColor),
-        ),
-      ],
+          const Spacer(),
+          Icon(Icons.arrow_forward_ios, size: 14, color: textColor),
+        ],
+      ),
     );
   }
 }
