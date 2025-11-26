@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Habit Tracker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#607AFB",
+            "background-light": "#f5f6f8",
+            "background-dark": "#0f1323"
+          },
+          fontFamily: {
+            display: "Inter"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          }
+        }
+      }
+    };
+  </script>
+<style type="text/tailwindcss">
+    @layer utilities {
+      :root {
+        --c-read: #607AFB;
+        --c-workout: #FF6B6B;
+        --c-water: #4ECDC4;
+        --c-sleep: #9D81E8;
+      }
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-screen w-full flex-col overflow-y-auto">
+<main class="flex-1 px-4 py-6">
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-3 rounded-xl bg-white p-3 dark:bg-black/20">
+<div class="flex items-center gap-2">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[var(--c-read)]/20 text-[var(--c-read)]">
+<span class="material-symbols-outlined text-2xl">auto_stories</span>
+</div>
+<p class="truncate text-base font-medium text-slate-800 dark:text-white">Read</p>
+</div>
+<div class="relative w-fit">
+<div class="flex gap-1">
+<div class="size-3.5 rounded-sm bg-[var(--c-read)]/20"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-read)]/20"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-read)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-read)]/20"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-read)]/60"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-read)]"></div>
+<div class="size-3.5 rounded-sm bg-slate-200 dark:bg-slate-700"></div>
+</div>
+<div class="absolute -right-1 -top-1 flex size-3.5 items-center justify-center rounded-full bg-[var(--c-read)] text-[9px] font-bold text-white">4</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<span class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">25h 10m / 58</span>
+</div>
+<button class="flex h-9 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[var(--c-read)] text-white text-sm font-bold leading-normal">
+<span class="truncate">01:32</span>
+</button>
+</div>
+<div class="flex flex-col gap-3 rounded-xl bg-white p-3 dark:bg-black/20">
+<div class="flex items-center gap-2">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[var(--c-workout)]/20 text-[var(--c-workout)]">
+<span class="material-symbols-outlined text-2xl">fitness_center</span>
+</div>
+<p class="truncate text-base font-medium text-slate-800 dark:text-white">Workout</p>
+</div>
+<div class="relative w-fit">
+<div class="flex gap-1">
+<div class="size-3.5 rounded-sm bg-[var(--c-workout)]"></div>
+<div class="size-3.5 rounded-sm bg-slate-200 dark:bg-slate-700"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-workout)]/60"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-workout)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-workout)]/60"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-workout)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-workout)]/20"></div>
+</div>
+<div class="absolute -right-1 -top-1 flex size-3.5 items-center justify-center rounded-full bg-[var(--c-workout)] text-[9px] font-bold text-white">5</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<span class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">18h 20m / 45</span>
+</div>
+<button class="flex size-9 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[var(--c-workout)]/20 text-[var(--c-workout)]">
+<span class="material-symbols-outlined text-2xl">play_arrow</span>
+</button>
+</div>
+<div class="flex flex-col gap-3 rounded-xl bg-white p-3 dark:bg-black/20">
+<div class="flex items-center gap-2">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[var(--c-water)]/20 text-[var(--c-water)]">
+<span class="material-symbols-outlined text-2xl">water_drop</span>
+</div>
+<p class="truncate text-base font-medium text-slate-800 dark:text-white">Drink Water</p>
+</div>
+<div class="relative w-fit">
+<div class="flex gap-1">
+<div class="size-3.5 rounded-sm bg-[var(--c-water)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-water)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-water)]/60"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-water)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-water)]/20"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-water)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-water)]"></div>
+</div>
+<div class="absolute -right-1 -top-1 flex size-3.5 items-center justify-center rounded-full bg-[var(--c-water)] text-[9px] font-bold text-white">6</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<span class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">Count: 150</span>
+</div>
+<button class="flex size-9 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[var(--c-water)]/20 text-[var(--c-water)]">
+<span class="material-symbols-outlined text-2xl">add</span>
+</button>
+</div>
+<div class="flex flex-col gap-3 rounded-xl bg-white p-3 dark:bg-black/20">
+<div class="flex items-center gap-2">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[var(--c-sleep)]/20 text-[var(--c-sleep)]">
+<span class="material-symbols-outlined text-2xl">bedtime</span>
+</div>
+<p class="truncate text-base font-medium text-slate-800 dark:text-white">Sleep</p>
+</div>
+<div class="relative w-fit">
+<div class="flex gap-1">
+<div class="size-3.5 rounded-sm bg-[var(--c-sleep)]/60"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-sleep)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-sleep)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-sleep)]/20"></div>
+<div class="size-3.5 rounded-sm bg-slate-200 dark:bg-slate-700"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-sleep)]"></div>
+<div class="size-3.5 rounded-sm bg-[var(--c-sleep)]/60"></div>
+</div>
+<div class="absolute -right-1 -top-1 flex size-3.5 items-center justify-center rounded-full bg-[var(--c-sleep)] text-[9px] font-bold text-white">5</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<span class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">42h 15m / 6</span>
+</div>
+<button class="flex size-9 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[var(--c-sleep)]/20 text-[var(--c-sleep)]">
+<span class="material-symbols-outlined text-2xl">add</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
