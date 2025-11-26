@@ -141,4 +141,10 @@ class DiaryLocalizationsZh extends DiaryLocalizations {
 
   @override
   String get noDiaryForDate => '这一天还没有日记';
+
+  @override
+  String get edit => '编辑';
+
+  @override
+  String get create => '新建';
 }

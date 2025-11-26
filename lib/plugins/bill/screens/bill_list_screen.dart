@@ -35,9 +35,7 @@ class _BillListScreenState extends State<BillListScreen> {
   List<BillModel> _allMonthBills = []; // All bills for the focused month
   Map<DateTime, _DailyStats> _dailyStats = {};
 
-  // View State
-  int _viewMode = 0; // 0: List, 1: Stats
-  String _filterCategory =
+    String _filterCategory =
       'all'; // 'all', 'income', 'expense', or specific category name
 
   // Colors
@@ -287,74 +285,75 @@ class _BillListScreenState extends State<BillListScreen> {
     final l10n = BillLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      body: Column(
-        children: [
-          // Month Selector
-          MonthSelector(
-            selectedMonth: _focusedDay,
-            onMonthSelected: (month) {
-              setState(() {
-                _focusedDay = month;
-                _loadMonthBills();
-              });
-            },
-            getMonthStats: _getMonthStats,
-            primaryColor: _primaryColor,
-          ),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Month Selector
+            MonthSelector(
+              selectedMonth: _focusedDay,
+              onMonthSelected: (month) {
+                setState(() {
+                  _focusedDay = month;
+                  _loadMonthBills();
+                });
+              },
+              getMonthStats: _getMonthStats,
+              primaryColor: _primaryColor,
+            ),
 
-          // Calendar
-          TableCalendar(
-            firstDay: DateTime(2020),
-            lastDay: DateTime(2030),
-            focusedDay: _focusedDay,
-            calendarFormat: _calendarFormat,
-            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            headerVisible: false,
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
+            // Calendar
+            TableCalendar(
+              firstDay: DateTime(2020),
+              lastDay: DateTime(2030),
+              focusedDay: _focusedDay,
+              calendarFormat: _calendarFormat,
+              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              headerVisible: false,
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+              },
+              onPageChanged: (focusedDay) {
                 _focusedDay = focusedDay;
-              });
-            },
-            onPageChanged: (focusedDay) {
-              _focusedDay = focusedDay;
-              _loadMonthBills();
-            },
-            calendarBuilders: CalendarBuilders(
-              defaultBuilder:
-                  (context, day, focusedDay) => _buildCalendarCell(day, false),
-              selectedBuilder:
-                  (context, day, focusedDay) => _buildCalendarCell(day, true),
-              todayBuilder:
-                  (context, day, focusedDay) =>
-                      _buildCalendarCell(day, isSameDay(_selectedDay, day)),
-            ),
-            daysOfWeekHeight: 40,
-            rowHeight: 64,
-            daysOfWeekStyle: DaysOfWeekStyle(
-              weekdayStyle: TextStyle(
-                color: Colors.grey[500],
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
+                _loadMonthBills();
+              },
+              calendarBuilders: CalendarBuilders(
+                defaultBuilder:
+                    (context, day, focusedDay) => _buildCalendarCell(day, false),
+                selectedBuilder:
+                    (context, day, focusedDay) => _buildCalendarCell(day, true),
+                todayBuilder:
+                    (context, day, focusedDay) =>
+                        _buildCalendarCell(day, isSameDay(_selectedDay, day)),
               ),
-              weekendStyle: TextStyle(
-                color: Colors.grey[500],
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
+              daysOfWeekHeight: 40,
+              rowHeight: 64,
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: TextStyle(
+                  color: Colors.grey[500],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+                weekendStyle: TextStyle(
+                  color: Colors.grey[500],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+                dowTextFormatter:
+                    (date, locale) =>
+                        DateFormat.E(locale).format(date)[0], // S M T W T F S
               ),
-              dowTextFormatter:
-                  (date, locale) =>
-                      DateFormat.E(locale).format(date)[0], // S M T W T F S
             ),
-          ),
 
-          // Stats/List Toggle & Date Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
+            // Date Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
                   _selectedDay != null
                       ? DateFormat(
                         'MMMM d, EEEE',
@@ -366,28 +365,13 @@ class _BillListScreenState extends State<BillListScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      _buildToggleButton(Icons.list, 0),
-                      _buildToggleButton(Icons.bar_chart, 1),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
 
-          // Content
-          Expanded(
-            child: _viewMode == 0 ? _buildListView(l10n) : _buildStatsView(),
-          ),
-        ],
+            // Content - Only List View
+            _buildListView(l10n),
+          ],
+        ),
       ),
     );
   }
@@ -450,44 +434,13 @@ class _BillListScreenState extends State<BillListScreen> {
     );
   }
 
-  Widget _buildToggleButton(IconData icon, int index) {
-    final isSelected = _viewMode == index;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: () => setState(() => _viewMode = index),
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color:
-              isSelected
-                  ? (isDark ? Colors.grey[700] : Colors.white)
-                  : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-          boxShadow:
-              isSelected && !isDark
-                  ? [
-                    BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 2),
-                  ]
-                  : null,
-        ),
-        child: Icon(
-          icon,
-          size: 20,
-          color:
-              isSelected
-                  ? (isDark ? Colors.white : Colors.black)
-                  : (isDark ? Colors.grey[400] : Colors.grey[600]),
-        ),
-      ),
-    );
-  }
-
+  
   Widget _buildListView(BillLocalizations l10n) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final filteredBills = _filteredBills;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Filter Chips
         SizedBox(
@@ -523,24 +476,28 @@ class _BillListScreenState extends State<BillListScreen> {
         const SizedBox(height: 16),
 
         // Bill List
-        Expanded(
-          child:
-              filteredBills.isEmpty
-                  ? Center(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100), // 增加底部padding为悬浮按钮留空间
+          child: filteredBills.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 50),
                     child: Text(
                       l10n.noBills,
                       style: TextStyle(color: Colors.grey[500]),
                     ),
-                  )
-                  : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-                    itemCount: filteredBills.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final bill = filteredBills[index];
-                      return _buildBillCard(bill, isDark);
-                    },
                   ),
+                )
+              : Column(
+                  children: filteredBills.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final bill = entry.value;
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: index < filteredBills.length - 1 ? 12 : 0),
+                      child: _buildBillCard(bill, isDark),
+                    );
+                  }).toList(),
+                ),
         ),
       ],
     );
@@ -698,20 +655,6 @@ class _BillListScreenState extends State<BillListScreen> {
       ),
     );
   }
-
-  Widget _buildStatsView() {
-    if (_focusedDay == null) return const SizedBox();
-    final monthStart = DateTime(_focusedDay.year, _focusedDay.month, 1);
-    final monthEnd = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
-
-    return BillStatsScreen(
-      billPlugin: widget.billPlugin,
-      accountId: widget.accountId,
-      startDate: monthStart,
-      endDate: monthEnd,
-    );
-  }
-}
 
 class _DailyStats {
   double income = 0;

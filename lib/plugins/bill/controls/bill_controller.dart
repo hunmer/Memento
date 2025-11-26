@@ -413,13 +413,16 @@ class BillController with ChangeNotifier {
 
     // 保存更新后的账户
     _accounts[accountIndex] = updatedAccount;
-    _plugin.controller.saveAccount(updatedAccount);
+    await _plugin.controller.saveAccount(updatedAccount);
 
     // 发布账单添加/更新事件
     EventManager.instance.broadcast(
       billAddedEvent,
       BillAddedEventArgs(bill, bill.accountId),
     );
+
+    // 通知 BillPlugin 监听器（这会触发 BillListScreen 的刷新）
+    notifyListeners();
 
     await _syncWidget();
   }
