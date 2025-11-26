@@ -91,7 +91,6 @@ class NodeBreadcrumbs extends StatelessWidget {
                           await controller.updateNode(notebookId, updatedNode);
                           debugPrint('【Breadcrumbs】节点更新完成，准备通知UI更新');
                           // 通知监听器更新UI
-                          controller.notifyListeners();
                           debugPrint('【Breadcrumbs】已发送UI更新通知');
 
                           // 检查widget是否仍然挂载
@@ -198,7 +197,6 @@ class NodeBreadcrumbs extends StatelessWidget {
               await controller.updateNode(notebookId, updatedNode);
               debugPrint('【Breadcrumbs】节点更新完成，准备通知UI更新');
               // 通知监听器更新UI
-              controller.notifyListeners();
               debugPrint('【Breadcrumbs】已发送UI更新通知');
 
               // 返回上一级，然后用更新后的节点重新打开编辑页面

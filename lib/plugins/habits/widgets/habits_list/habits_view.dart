@@ -386,28 +386,30 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                     _timerController.isHabitTiming(habit.id);
                 _timingStatus[habit.id] = isTiming;
 
-                return ListTile(
-                  leading: CircleAvatar(
-                    child:
-                        habit.icon == null
-                            ? Icon(Icons.auto_awesome)
-                            : Icon(
-                              IconData(
-                                int.parse(habit.icon!),
-                                fontFamily: 'MaterialIcons',
+                return Material(
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      child:
+                          habit.icon == null
+                              ? Icon(Icons.auto_awesome)
+                              : Icon(
+                                IconData(
+                                  int.parse(habit.icon!),
+                                  fontFamily: 'MaterialIcons',
+                                ),
                               ),
-                            ),
+                    ),
+                    title: Text(habit.title),
+                    subtitle: Text(
+                      '${habit.durationMinutes} ${HabitsLocalizations.of(context).minutes}',
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
+                      onPressed: () => _startTimer(context, habit),
+                    ),
+                    onTap: () => _showHabitForm(context, habit),
+                    onLongPress: () => _showHistory(context, habit),
                   ),
-                  title: Text(habit.title),
-                  subtitle: Text(
-                    '${habit.durationMinutes} ${HabitsLocalizations.of(context).minutes}',
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(isTiming ? Icons.pause : Icons.play_arrow),
-                    onPressed: () => _startTimer(context, habit),
-                  ),
-                  onTap: () => _showHabitForm(context, habit),
-                  onLongPress: () => _showHistory(context, habit),
                 );
               }),
             ];
