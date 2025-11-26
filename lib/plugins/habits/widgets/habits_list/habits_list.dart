@@ -57,6 +57,7 @@ class _HabitsListState extends State<HabitsList> {
                     ),
                 ],
               ),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: HabitForm(
                 initialHabit: habit,
                 onSave: (habit) async {

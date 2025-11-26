@@ -111,39 +111,41 @@ class _SkillsListState extends State<SkillsList> {
                     final count = snapshot.data?[0] ?? 0;
                     final duration = snapshot.data?[1] ?? 0;
 
-                    return ListTile(
-                      leading:
-                          skill.icon != null
-                              ? CircleAvatar(
-                                backgroundColor: Theme.of(context).primaryColor,
-                                child: Icon(
-                                  IconData(
-                                    int.parse(skill.icon!),
-                                    fontFamily: 'MaterialIcons',
+                    return Material(
+                      child: ListTile(
+                        leading:
+                            skill.icon != null
+                                ? CircleAvatar(
+                                  backgroundColor: Theme.of(context).primaryColor,
+                                  child: Icon(
+                                    IconData(
+                                      int.parse(skill.icon!),
+                                      fontFamily: 'MaterialIcons',
+                                    ),
+                                    size: 16,
+                                    color: Colors.white,
                                   ),
-                                  size: 16,
-                                  color: Colors.white,
-                                ),
-                              )
-                              : null,
-                      title: Text(skill.title),
-                      subtitle: Text(
-                        '$count completions • ${HabitsUtils.formatDuration(duration)}',
+                                )
+                                : null,
+                        title: Text(skill.title),
+                        subtitle: Text(
+                          '$count completions • ${HabitsUtils.formatDuration(duration)}',
+                        ),
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => SkillDetailPage(
+                                    skill: skill,
+                                    skillController: widget.skillController,
+                                    recordController: widget.recordController,
+                                  ),
+                            ),
+                          );
+                          if (mounted) _loadSkills();
+                        },
                       ),
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => SkillDetailPage(
-                                  skill: skill,
-                                  skillController: widget.skillController,
-                                  recordController: widget.recordController,
-                                ),
-                          ),
-                        );
-                        if (mounted) _loadSkills();
-                      },
                     );
                   },
                 );
@@ -447,6 +449,7 @@ class _SkillsListState extends State<SkillsList> {
                     ),
                 ],
               ),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: SkillForm(
                 initialSkill: skill,
                 onSave: (skill) async {

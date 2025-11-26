@@ -11,11 +11,24 @@ class GoodsMainScreen extends StatefulWidget {
 
 class _GoodsMainScreenState extends State<GoodsMainScreen> {
   int _currentIndex = 0;
+  String? _filterWarehouseId;
 
-  final List<Widget> _screens = [
-    const WarehouseListScreen(),
-    const GoodsListScreen(),
+  List<Widget> get _screens => [
+    WarehouseListScreen(
+      onWarehouseTap: _handleWarehouseTap,
+    ),
+    GoodsListScreen(
+      key: ValueKey('goods_list_${_filterWarehouseId ?? "all"}'),
+      initialFilterWarehouseId: _filterWarehouseId,
+    ),
   ];
+
+  void _handleWarehouseTap(String warehouseId) {
+    setState(() {
+      _filterWarehouseId = warehouseId;
+      _currentIndex = 1;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

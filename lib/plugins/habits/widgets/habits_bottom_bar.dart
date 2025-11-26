@@ -70,12 +70,20 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
 
   /// 添加习惯
   Future<void> _addHabit() async {
+    final l10n = HabitsLocalizations.of(context);
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => HabitForm(
-          onSave: (habit) async {
-            await _habitController.saveHabit(habit);
-          },
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(l10n.newHabit),
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+          ),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: HabitForm(
+            onSave: (habit) async {
+              await _habitController.saveHabit(habit);
+            },
+          ),
         ),
       ),
     );
@@ -83,12 +91,20 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
 
   /// 添加技能
   Future<void> _addSkill() async {
+    final l10n = HabitsLocalizations.of(context);
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => SkillForm(
-          onSave: (skill) async {
-            await _skillController.saveSkill(skill);
-          },
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(l10n.newSkill),
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+          ),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: SkillForm(
+            onSave: (skill) async {
+              await _skillController.saveSkill(skill);
+            },
+          ),
         ),
       ),
     );

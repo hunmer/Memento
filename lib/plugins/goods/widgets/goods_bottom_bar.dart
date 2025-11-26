@@ -27,6 +27,7 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int _currentPage;
+  String? _filterWarehouseId;
 
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
@@ -87,6 +88,15 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
             ),
       ),
     );
+  }
+
+  /// 处理仓库点击事件
+  void _handleWarehouseTap(String warehouseId) {
+    setState(() {
+      _filterWarehouseId = warehouseId;
+    });
+    // 切换到物品视图 (tab index 1)
+    _tabController.animateTo(1);
   }
 
   /// 添加物品
@@ -215,9 +225,14 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
         physics: const BouncingScrollPhysics(),
         children: [
           // Tab0: 仓库视图
-          const WarehouseListScreen(),
+          WarehouseListScreen(
+            onWarehouseTap: _handleWarehouseTap,
+          ),
           // Tab1: 物品视图
-          const GoodsListScreen(),
+          GoodsListScreen(
+            key: ValueKey('goods_list_${_filterWarehouseId ?? "all"}'),
+            initialFilterWarehouseId: _filterWarehouseId,
+          ),
         ],
       ),
       child: Stack(

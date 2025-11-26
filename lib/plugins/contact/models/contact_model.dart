@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+enum ContactGender {
+  male,
+  female,
+  other,
+}
+
 class Contact {
   final String id;
   final String name;
@@ -13,6 +19,7 @@ class Contact {
   final Map<String, String> customFields;
   final DateTime createdTime;
   final DateTime lastContactTime;
+  final ContactGender? gender;
 
   Contact({
     required this.id,
@@ -23,14 +30,15 @@ class Contact {
     required this.phone,
     this.address,
     this.notes,
+    this.gender,
     List<String>? tags,
     Map<String, String>? customFields,
     DateTime? createdTime,
     DateTime? lastContactTime,
-  }) : tags = tags ?? [],
-       customFields = customFields ?? {},
-       createdTime = createdTime ?? DateTime.now(),
-       lastContactTime = lastContactTime ?? DateTime.now();
+  })  : tags = tags ?? [],
+        customFields = customFields ?? {},
+        createdTime = createdTime ?? DateTime.now(),
+        lastContactTime = lastContactTime ?? DateTime.now();
 
   Map<String, dynamic> toJson() {
     return {
@@ -43,6 +51,7 @@ class Contact {
       'phone': phone,
       'address': address,
       'notes': notes,
+      'gender': gender?.name,
       'tags': tags,
       'customFields': customFields,
       'createdTime': createdTime.toIso8601String(),
@@ -60,6 +69,12 @@ class Contact {
       phone: json['phone'] as String,
       address: json['address'] as String?,
       notes: json['notes'] as String?,
+      gender: json['gender'] != null
+          ? ContactGender.values.firstWhere(
+              (e) => e.name == json['gender'],
+              orElse: () => ContactGender.other,
+            )
+          : null,
       tags: List<String>.from(json['tags'] as List),
       customFields: Map<String, String>.from(json['customFields'] as Map),
       createdTime: DateTime.parse(json['createdTime'] as String),
@@ -85,6 +100,7 @@ class Contact {
     String? phone,
     String? address,
     String? notes,
+    ContactGender? gender,
     List<String>? tags,
     Map<String, String>? customFields,
     DateTime? lastContactTime,
@@ -98,6 +114,7 @@ class Contact {
       phone: phone ?? this.phone,
       address: address ?? this.address,
       notes: notes ?? this.notes,
+      gender: gender ?? this.gender,
       tags: tags ?? List.from(this.tags),
       customFields: customFields ?? Map.from(this.customFields),
       createdTime: createdTime,

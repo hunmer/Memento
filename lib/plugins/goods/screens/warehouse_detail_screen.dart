@@ -325,23 +325,29 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
       ),
       body:
           _isGridView
-              ? GridView.builder(
+              ? Padding(
                 padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.68,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: List.generate(items.length, (index) {
+                        final item = items[index];
+                        final cardWidth = (constraints.maxWidth - 16) / 2; // 2列布局，减去一个spacing
+
+                        return SizedBox(
+                          width: cardWidth,
+                          child: GoodsItemCard(
+                            item: item,
+                            warehouseId: _warehouse.id,
+                            onTap: () => _showEditItemDialog(item),
+                          ),
+                        );
+                      }),
+                    );
+                  },
                 ),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return GoodsItemCard(
-                    item: item,
-                    warehouseId: _warehouse.id,
-                    onTap: () => _showEditItemDialog(item),
-                  );
-                },
               )
               : ListView.builder(
                 itemCount: items.length,
