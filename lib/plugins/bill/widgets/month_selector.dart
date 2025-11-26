@@ -1,8 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// 月份选择器组件
 /// 显示一个水平滚动的月份列表，每个月份卡片显示收入和支出统计
-/// 默认选择当前月份，以当前月份为中心显示12个月份，支持虚拟滚动
+/// 支持无限滚动和桌面端鼠标滚轮操作
 class MonthSelector extends StatefulWidget {
   /// 当前选中的月份
   final DateTime? selectedMonth;
@@ -15,9 +16,6 @@ class MonthSelector extends StatefulWidget {
 
   /// 主题色
   final Color primaryColor;
-
-  /// 显示的月份数量（固定为12）
-  static const int visibleMonthCount = 12;
 
   const MonthSelector({
     super.key,
@@ -33,17 +31,22 @@ class MonthSelector extends StatefulWidget {
 
 class _MonthSelectorState extends State<MonthSelector> {
   late ScrollController _scrollController;
-  late DateTime _centerMonth;
   late DateTime _selectedMonth;
-  List<DateTime> _visibleMonths = [];
+  List<DateTime> _allMonths = [];
+  bool _isLoading = false;
+
+  // 每次加载的月份数量
+  static const int _loadCount = 25;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _selectedMonth = widget.selectedMonth ?? DateTime.now();
-    _centerMonth = DateTime.now();
-    _generateVisibleMonths();
+    _initializeMonths();
+
+    // 添加滚动监听器
+    _scrollController.addListener(_onScroll);
 
     // 延迟滚动到选中的月份
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -58,133 +61,133 @@ class _MonthSelectorState extends State<MonthSelector> {
       setState(() {
         _selectedMonth = widget.selectedMonth!;
       });
-      _generateVisibleMonths();
       _scrollToSelectedMonth();
     }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
-  /// 生成可见月份列表（以当前月份为中心的12个月份）
-  void _generateVisibleMonths() {
+  /// 初始化月份列表
+  void _initializeMonths() {
+    final now = DateTime.now();
     final months = <DateTime>[];
-    final halfCount = MonthSelector.visibleMonthCount ~/ 2;
 
-    // 以中心月份为准，生成前后各半个月的月份
-    for (int i = -halfCount; i <= halfCount; i++) {
-      months.add(DateTime(_centerMonth.year, _centerMonth.month + i));
+    // 生成前后各 _loadCount 个月的月份
+    for (int i = -_loadCount; i <= _loadCount; i++) {
+      months.add(DateTime(now.year, now.month + i));
     }
 
-    _visibleMonths = months;
+    _allMonths = months;
+  }
+
+  /// 滚动事件监听
+  void _onScroll() {
+    if (!_scrollController.hasClients || _isLoading) return;
+
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    final threshold = 200.0; // 触发加载的阈值
+
+    // 当滚动到左边界时，向左扩展月份
+    if (currentScroll < threshold) {
+      _loadMoreMonths(left: true);
+    }
+    // 当滚动到右边界时，向右扩展月份
+    else if (currentScroll > maxScroll - threshold) {
+      _loadMoreMonths(left: false);
+    }
+  }
+
+  /// 加载更多月份
+  void _loadMoreMonths({required bool left}) {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final newMonths = <DateTime>[];
+    final loadCount = 10;
+
+    if (left) {
+      // 向左加载（更早的月份）
+      final firstMonth = _allMonths.first;
+      for (int i = 1; i <= loadCount; i++) {
+        newMonths.add(DateTime(firstMonth.year, firstMonth.month - i));
+      }
+      newMonths.addAll(_allMonths);
+    } else {
+      // 向右加载（更晚的月份）
+      final lastMonth = _allMonths.last;
+      for (int i = 1; i <= loadCount; i++) {
+        newMonths.add(DateTime(lastMonth.year, lastMonth.month + i));
+      }
+      _allMonths.addAll(newMonths);
+      return;
+    }
+
+    _allMonths = newMonths;
+
+    // 恢复滚动位置
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        final itemWidth = 80.0 + 12; // 卡片宽度 + 间距
+        final newOffset = _scrollController.offset + (itemWidth * loadCount);
+        _scrollController.jumpTo(newOffset);
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    });
   }
 
   /// 滚动到选中的月份
   void _scrollToSelectedMonth() {
-    final selectedIndex = _visibleMonths.indexWhere(
-      (month) => month.year == _selectedMonth.year && month.month == _selectedMonth.month,
+    final selectedIndex = _allMonths.indexWhere(
+      (month) =>
+          month.year == _selectedMonth.year &&
+          month.month == _selectedMonth.month,
     );
 
-    if (selectedIndex != -1) {
+    if (selectedIndex != -1 && _scrollController.hasClients) {
       // 计算滚动位置，让选中月份居中显示
       final itemWidth = 80.0 + 12; // 卡片宽度 + 间距
-      final viewportWidth = _scrollController.hasClients
-          ? _scrollController.position.viewportDimension
-          : 300; // 默认视口宽度
-      final targetOffset = (selectedIndex * itemWidth) - (viewportWidth / 2) + (itemWidth / 2);
+      final viewportWidth = _scrollController.position.viewportDimension;
+      final targetOffset =
+          (selectedIndex * itemWidth) - (viewportWidth / 2) + (itemWidth / 2);
 
       _scrollController.animateTo(
-        targetOffset,
+        targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
   }
 
-  /// 处理滚动事件，实现虚拟滚动
-  void _handleScroll() {
-    if (!_scrollController.hasClients) return;
-
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    final threshold = 100.0; // 触发加载的阈值
-
-    // 当滚动到左边界时，向左扩展月份
-    if (currentScroll < threshold) {
-      _extendMonthsLeft();
-    }
-    // 当滚动到右边界时，向右扩展月份
-    else if (currentScroll > maxScroll - threshold) {
-      _extendMonthsRight();
-    }
-  }
-
-  /// 向左扩展月份（智能扩展，避免重复月份）
-  void _extendMonthsLeft() {
-    setState(() {
-      final firstMonth = _visibleMonths.first;
-      final newMonths = <DateTime>[];
-      final extendCount = 3; // 每次扩展3个月
-
-      for (int i = extendCount; i >= 1; i--) {
-        final newMonth = DateTime(firstMonth.year, firstMonth.month - i);
-        if (!_isMonthInList(newMonth)) {
-          newMonths.add(newMonth);
-        }
-      }
-
-      if (newMonths.isNotEmpty) {
-        _visibleMonths = [...newMonths, ..._visibleMonths];
-        // 保持控件数量在合理范围内（最多显示18个月份）
-        if (_visibleMonths.length > 18) {
-          _visibleMonths = _visibleMonths.sublist(0, 18);
-        }
-      }
-    });
-  }
-
-  /// 向右扩展月份（智能扩展，避免重复月份）
-  void _extendMonthsRight() {
-    setState(() {
-      final lastMonth = _visibleMonths.last;
-      final newMonths = <DateTime>[];
-      final extendCount = 3; // 每次扩展3个月
-
-      for (int i = 1; i <= extendCount; i++) {
-        final newMonth = DateTime(lastMonth.year, lastMonth.month + i);
-        if (!_isMonthInList(newMonth)) {
-          newMonths.add(newMonth);
-        }
-      }
-
-      if (newMonths.isNotEmpty) {
-        _visibleMonths = [..._visibleMonths, ...newMonths];
-        // 保持控件数量在合理范围内（最多显示18个月份）
-        if (_visibleMonths.length > 18) {
-          _visibleMonths = _visibleMonths.sublist(_visibleMonths.length - 18);
-        }
-      }
-    });
-  }
-
-  /// 检查月份是否已在列表中
-  bool _isMonthInList(DateTime month) {
-    return _visibleMonths.any((m) => m.year == month.year && m.month == month.month);
+  /// 格式化月份显示为 "25年/6月" 格式
+  String _formatMonth(DateTime month) {
+    final year = month.year.toString().substring(2); // 取后两位
+    return '${year}年/${month.month}月';
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollUpdateNotification) {
-          _handleScroll();
+    return Listener(
+      onPointerSignal: (event) {
+        // 处理鼠标滚轮事件
+        if (event is PointerScrollEvent && _scrollController.hasClients) {
+          final newOffset = _scrollController.offset + event.scrollDelta.dy;
+          _scrollController.jumpTo(
+            newOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
+          );
         }
-        return false;
       },
       child: SizedBox(
         height: 90,
@@ -192,10 +195,10 @@ class _MonthSelectorState extends State<MonthSelector> {
           controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           scrollDirection: Axis.horizontal,
-          itemCount: _visibleMonths.length,
+          itemCount: _allMonths.length,
           separatorBuilder: (_, __) => const SizedBox(width: 12),
           itemBuilder: (context, index) {
-            final month = _visibleMonths[index];
+            final month = _allMonths[index];
             final isSelected = month.year == _selectedMonth.year &&
                              month.month == _selectedMonth.month;
             final stats = widget.getMonthStats(month);
@@ -229,9 +232,9 @@ class _MonthSelectorState extends State<MonthSelector> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '${month.month}月',
+                      _formatMonth(month),
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: isSelected
                             ? (isDark ? Colors.white : Colors.black)

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Single Category Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#7C3AED", 
+              "background-light": "#F8F7FA",
+              "background-dark": "#121212",
+              "card-light": "#FFFFFF",
+              "card-dark": "#1E1E1E",
+              "text-light-primary": "#1F2937",
+              "text-dark-primary": "#E5E7EB",
+              "text-light-secondary": "#6B7280",
+              "text-dark-secondary": "#9CA3AF",
+              "border-light": "#E5E7EB",
+              "border-dark": "#374151",
+              "accent": "#4ADE80",
+            },
+            fontFamily: {
+              display: ["Noto Sans SC", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.75rem", 
+              'lg': '1rem', 
+              'xl': '1.25rem' 
+            },
+          },
+        },
+      };
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="max-w-md mx-auto">
+<main class="px-4 pt-6 pb-24">
+<div class="space-y-6">
+<div class="bg-card-light dark:bg-card-dark rounded-xl p-4 shadow-sm">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary">近30日时长趋势</h2>
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">11月1日 - 11月30日</span>
+</div>
+<div class="relative h-48">
+<div class="absolute top-0 left-0 h-full flex flex-col justify-between text-xs text-text-light-secondary dark:text-text-dark-secondary pr-2 -mt-2">
+<span>3h</span>
+<span>2h</span>
+<span>1h</span>
+<span>0h</span>
+</div>
+<div class="absolute top-0 left-8 h-full w-[calc(100%-2rem)] flex flex-col justify-between">
+<div class="border-t border-border-light dark:border-border-dark border-dashed"></div>
+<div class="border-t border-border-light dark:border-border-dark border-dashed"></div>
+<div class="border-t border-border-light dark:border-border-dark border-dashed"></div>
+<div class="border-t border-border-light dark:border-border-dark border-dashed"></div>
+</div>
+<svg class="absolute top-0 left-8 w-[calc(100%-2rem)] h-full" fill="none" preserveAspectRatio="none" viewBox="0 0 300 120">
+<defs>
+<linearGradient id="line-chart-gradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#4ADE80" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#4ADE80" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M0 80 L20 60 L40 70 L60 50 L80 60 L100 40 L120 45 L140 30 L160 55 L180 70 L200 60 L220 80 L240 70 L260 90 L280 85 L300 100" stroke="#4ADE80" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+<path d="M0 80 L20 60 L40 70 L60 50 L80 60 L100 40 L120 45 L140 30 L160 55 L180 70 L200 60 L220 80 L240 70 L260 90 L280 85 L300 100 V120 H0 Z" fill="url(#line-chart-gradient)"></path>
+</svg>
+</div>
+<div class="flex justify-between text-xs text-text-light-secondary dark:text-text-dark-secondary ml-8 mt-2">
+<span>11/1</span>
+<span>11/10</span>
+<span>11/20</span>
+<span>11/30</span>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-xl p-4 shadow-sm">
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary mb-4">近30日热力图</h2>
+<div class="grid grid-cols-7 gap-1.5">
+<span class="text-center text-xs text-text-light-secondary dark:text-text-dark-secondary">日</span>
+<span class="text-center text-xs text-text-light-secondary dark:text-text-dark-secondary">一</span>
+<span class="text-center text-xs text-text-light-secondary dark:text-text-dark-secondary">二</span>
+<span class="text-center text-xs text-text-light-secondary dark:text-text-dark-secondary">三</span>
+<span class="text-center text-xs text-text-light-secondary dark:text-text-dark-secondary">四</span>
+<span class="text-center text-xs text-text-light-secondary dark:text-text-dark-secondary">五</span>
+<span class="text-center text-xs text-text-light-secondary dark:text-text-dark-secondary">六</span>
+<div class="aspect-square rounded-md bg-green-100 dark:bg-green-900/40"></div>
+<div class="aspect-square rounded-md bg-green-200 dark:bg-green-900/60"></div>
+<div class="aspect-square rounded-md bg-green-500 dark:bg-green-600"></div>
+<div class="aspect-square rounded-md bg-green-300 dark:bg-green-800"></div>
+<div class="aspect-square rounded-md bg-green-100 dark:bg-green-900/40"></div>
+<div class="aspect-square rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark"></div>
+<div class="aspect-square rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark"></div>
+<div class="aspect-square rounded-md bg-green-400 dark:bg-green-700"></div>
+<div class="aspect-square rounded-md bg-green-200 dark:bg-green-900/60"></div>
+<div class="aspect-square rounded-md bg-green-600 dark:bg-green-500"></div>
+<div class="aspect-square rounded-md bg-green-300 dark:bg-green-800"></div>
+<div class="aspect-square rounded-md bg-green-100 dark:bg-green-900/40"></div>
+<div class="aspect-square rounded-md bg-green-100 dark:bg-green-900/40"></div>
+<div class="aspect-square rounded-md bg-green-200 dark:bg-green-900/60"></div>
+<div class="aspect-square rounded-md bg-green-500 dark:bg-green-600"></div>
+<div class="aspect-square rounded-md bg-green-300 dark:bg-green-800"></div>
+<div class="aspect-square rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark"></div>
+<div class="aspect-square rounded-md bg-green-200 dark:bg-green-900/60"></div>
+<div class="aspect-square rounded-md bg-green-400 dark:bg-green-700"></div>
+<div class="aspect-square rounded-md bg-green-300 dark:bg-green-800"></div>
+<div class="aspect-square rounded-md bg-green-500 dark:bg-green-600"></div>
+<div class="aspect-square rounded-md bg-green-100 dark:bg-green-900/40"></div>
+<div class="aspect-square rounded-md bg-green-600 dark:bg-green-500"></div>
+<div class="aspect-square rounded-md bg-green-200 dark:bg-green-900/60"></div>
+<div class="aspect-square rounded-md bg-green-400 dark:bg-green-700"></div>
+<div class="aspect-square rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark"></div>
+<div class="aspect-square rounded-md bg-green-100 dark:bg-green-900/40"></div>
+<div class="aspect-square rounded-md bg-green-300 dark:bg-green-800"></div>
+</div>
+<div class="flex items-center justify-end space-x-2 mt-3">
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">少</span>
+<div class="w-4 h-4 rounded-sm bg-green-100 dark:bg-green-900/40"></div>
+<div class="w-4 h-4 rounded-sm bg-green-200 dark:bg-green-900/60"></div>
+<div class="w-4 h-4 rounded-sm bg-green-300 dark:bg-green-800"></div>
+<div class="w-4 h-4 rounded-sm bg-green-400 dark:bg-green-700"></div>
+<div class="w-4 h-4 rounded-sm bg-green-600 dark:bg-green-500"></div>
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">多</span>
+</div>
+</div>
+<div>
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary mb-4">周平均时间分配</h2>
+<div class="flex items-end justify-between space-x-2 h-48 px-2">
+<div class="flex-1 flex flex-col items-center space-y-2">
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">1.5h</span>
+<div class="relative w-full h-32 bg-gray-200/70 dark:bg-gray-700/50 rounded-full overflow-hidden">
+<div class="absolute bottom-0 left-0 right-0 bg-accent" style="height: 60%;"></div>
+</div>
+<span class="text-xs text-text-light-primary dark:text-text-dark-primary font-medium">一</span>
+</div>
+<div class="flex-1 flex flex-col items-center space-y-2">
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">2h</span>
+<div class="relative w-full h-32 bg-gray-200/70 dark:bg-gray-700/50 rounded-full overflow-hidden">
+<div class="absolute bottom-0 left-0 right-0 bg-accent" style="height: 80%;"></div>
+</div>
+<span class="text-xs text-text-light-primary dark:text-text-dark-primary font-medium">二</span>
+</div>
+<div class="flex-1 flex flex-col items-center space-y-2">
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">1.2h</span>
+<div class="relative w-full h-32 bg-gray-200/70 dark:bg-gray-700/50 rounded-full overflow-hidden">
+<div class="absolute bottom-0 left-0 right-0 bg-accent" style="height: 48%;"></div>
+</div>
+<span class="text-xs text-text-light-primary dark:text-text-dark-primary font-medium">三</span>
+</div>
+<div class="flex-1 flex flex-col items-center space-y-2">
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">1.8h</span>
+<div class="relative w-full h-32 bg-gray-200/70 dark:bg-gray-700/50 rounded-full overflow-hidden">
+<div class="absolute bottom-0 left-0 right-0 bg-accent" style="height: 72%;"></div>
+</div>
+<span class="text-xs text-text-light-primary dark:text-text-dark-primary font-medium">四</span>
+</div>
+<div class="flex-1 flex flex-col items-center space-y-2">
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">2.5h</span>
+<div class="relative w-full h-32 bg-gray-200/70 dark:bg-gray-700/50 rounded-full overflow-hidden">
+<div class="absolute bottom-0 left-0 right-0 bg-accent" style="height: 100%;"></div>
+</div>
+<span class="text-xs text-text-light-primary dark:text-text-dark-primary font-medium">五</span>
+</div>
+<div class="flex-1 flex flex-col items-center space-y-2">
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">0.8h</span>
+<div class="relative w-full h-32 bg-gray-200/70 dark:bg-gray-700/50 rounded-full overflow-hidden">
+<div class="absolute bottom-0 left-0 right-0 bg-accent" style="height: 32%;"></div>
+</div>
+<span class="text-xs text-text-light-primary dark:text-text-dark-primary font-medium">六</span>
+</div>
+<div class="flex-1 flex flex-col items-center space-y-2">
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">1h</span>
+<div class="relative w-full h-32 bg-gray-200/70 dark:bg-gray-700/50 rounded-full overflow-hidden">
+<div class="absolute bottom-0 left-0 right-0 bg-accent" style="height: 40%;"></div>
+</div>
+<span class="text-xs text-text-light-primary dark:text-text-dark-primary font-medium">日</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

@@ -7,7 +7,6 @@ import '../models/bill.dart';
 import '../bill_plugin.dart';
 import '../widgets/month_selector.dart';
 import 'bill_edit_screen.dart';
-import 'bill_stats_screen.dart';
 
 class BillListScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -46,10 +45,11 @@ class _BillListScreenState extends State<BillListScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay;
+    // 确保默认选中今天
+    _selectedDay = DateTime.now();
+    _focusedDay = DateTime.now();
     _billPluginListener = () {
       if (mounted) {
-        debugPrint("BillPlugin 通知更新 - 重新加载账单");
         _loadMonthBills();
       }
     };
@@ -224,12 +224,13 @@ class _BillListScreenState extends State<BillListScreen> {
   }
 
   List<BillModel> get _filteredBills {
-    if (_selectedDay == null) return [];
+    // 如果没有选中日期，默认使用今天
+    final selectedDate = _selectedDay ?? DateTime.now();
 
     final dayStart = DateTime(
-      _selectedDay!.year,
-      _selectedDay!.month,
-      _selectedDay!.day,
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
     );
     final dayEnd = dayStart
         .add(const Duration(days: 1))
@@ -283,7 +284,6 @@ class _BillListScreenState extends State<BillListScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = BillLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -308,7 +308,13 @@ class _BillListScreenState extends State<BillListScreen> {
               lastDay: DateTime(2030),
               focusedDay: _focusedDay,
               calendarFormat: _calendarFormat,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              selectedDayPredicate: (day) {
+                // 确保选中判断正确，即使 _selectedDay 为 null 也选中今天
+                if (_selectedDay == null) {
+                  return isSameDay(DateTime.now(), day);
+                }
+                return isSameDay(_selectedDay!, day);
+              },
               headerVisible: false,
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
@@ -354,12 +360,10 @@ class _BillListScreenState extends State<BillListScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  _selectedDay != null
-                      ? DateFormat(
-                        'MMMM d, EEEE',
-                        Localizations.localeOf(context).toString(),
-                      ).format(_selectedDay!)
-                      : '',
+                  DateFormat(
+                    'MMMM d, EEEE',
+                    Localizations.localeOf(context).toString(),
+                  ).format(_selectedDay ?? DateTime.now()),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -655,6 +659,7 @@ class _BillListScreenState extends State<BillListScreen> {
       ),
     );
   }
+}
 
 class _DailyStats {
   double income = 0;
