@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Habit Tracker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#607AFB",
+            "background-light": "#f5f6f8",
+            "background-dark": "#0f1323"
+          },
+          fontFamily: {
+            display: "Inter"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          }
+        }
+      }
+    };
+  </script>
+<style type="text/tailwindcss">
+    @layer utilities {
+      :root {
+        --c-read: #607AFB;
+        --c-workout: #FF6B6B;
+        --c-water: #4ECDC4;
+        --c-sleep: #9D81E8;
+      }
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-white">
+<div class="relative flex min-h-screen w-full flex-col overflow-y-auto">
+<main class="flex flex-1 flex-col p-4 pt-16">
+<div class="flex flex-1 flex-col items-center text-center">
+<div class="flex size-32 items-center justify-center rounded-3xl bg-[var(--c-read)]/20 text-[var(--c-read)]">
+<span class="material-symbols-outlined !text-7xl">auto_stories</span>
+</div>
+<h2 class="mt-4 text-2xl font-bold">Read</h2>
+<p class="mt-6 text-6xl font-semibold tracking-tighter">01:32:45</p>
+<div class="mt-6 flex items-center gap-4">
+<button class="flex h-16 w-40 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full bg-[var(--c-read)] text-lg font-bold text-white">
+<span class="material-symbols-outlined text-3xl">pause</span>
+<span>Pause</span>
+</button>
+<button class="flex size-16 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-3xl">restart_alt</span>
+</button>
+</div>
+</div>
+<div class="mt-8 flex-shrink-0">
+<h3 class="text-base font-semibold text-slate-500 dark:text-slate-400">Quick Notes</h3>
+<div class="mt-3 flex flex-col gap-3">
+<div class="flex items-center gap-3 rounded-xl bg-white p-3 dark:bg-black/20">
+<div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+<span class="material-symbols-outlined text-xl">add</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400">Add a quick note...</p>
+</div>
+<div class="flex items-start gap-3 rounded-xl bg-white p-3 dark:bg-black/20">
+<span class="material-symbols-outlined mt-1 text-base text-slate-400 dark:text-slate-500">radio_button_unchecked</span>
+<p class="flex-1">"The beginning is the most important part of the work." - Plato</p>
+</div>
+<div class="flex items-start gap-3 rounded-xl bg-white p-3 dark:bg-black/20">
+<span class="material-symbols-outlined mt-1 text-base text-[var(--c-read)]">check_circle</span>
+<p class="flex-1 text-slate-400 line-through dark:text-slate-500">Review chapter 3 notes</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
