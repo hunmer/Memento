@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../services/activity_service.dart';
 import '../models/activity_record.dart';
+import 'tag_statistics_screen.dart';
 
 /// 活动统计页面
 class ActivityStatisticsScreen extends StatefulWidget {
@@ -33,10 +36,28 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   String? _selectedTag;
   List<ActivityRecord> _selectedTagActivities = [];
 
+  // Chart colors matching the reference design approximately
+  final List<Color> _chartColors = const [
+    Color(0xFF60A5FA), // blue-400
+    Color(0xFF4ADE80), // green-400
+    Color(0xFF818CF8), // indigo-400
+    Color(0xFFFB923C), // orange-400
+    Color(0xFFF87171), // red-400
+    Color(0xFFFACC15), // yellow-400
+    Color(0xFF2DD4BF), // teal-400
+    Color(0xFFA78BFA), // purple-400
+  ];
+
   @override
   void initState() {
     super.initState();
     _updateDateRange('Today');
+  }
+
+  Color _getColorForTag(String tag) {
+    if (tag.isEmpty) return Colors.grey;
+    final int hash = tag.hashCode;
+    return _chartColors[hash.abs() % _chartColors.length];
   }
 
   // 更新日期范围并加载数据
@@ -60,7 +81,6 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
         end = todayEnd;
         break;
       case 'This Week':
-        // 获取本周一
         start = today.subtract(Duration(days: now.weekday - 1));
         end = todayEnd;
         break;
@@ -73,7 +93,6 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
         end = todayEnd;
         break;
       case 'Custom Range':
-        // 保持当前日期范围，等待用户选择
         if (_startDate == null || _endDate == null) {
           start = today;
           end = todayEnd;
@@ -88,7 +107,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
         });
 
         await _showDateRangePicker();
-        return; // 在日期选择器回调中会更新数据
+        return;
 
       default:
         start = today;
@@ -109,7 +128,6 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     final now = DateTime.now();
     final lastDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
-    // 确保初始日期范围不超过今天
     final initialStart = _startDate ?? now;
     final initialEnd = _endDate ?? now;
     final validEnd = initialEnd.isAfter(lastDate) ? lastDate : initialEnd;
@@ -147,7 +165,6 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     try {
       final activities = <ActivityRecord>[];
 
-      // 遍历日期范围内的每一天
       for (
         var date = _startDate!;
         date.isBefore(_endDate!.add(const Duration(days: 1)));
@@ -178,41 +195,6 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     }
   }
 
-  // 计算活动时间分布数据（24小时）
-  List<int> _calculateHourlyDistribution() {
-    final hourlyMinutes = List<int>.filled(24, 0);
-
-    if (_selectedRange != 'Today') return hourlyMinutes;
-
-    for (var activity in _activities) {
-      final startHour = activity.startTime.hour;
-      final endHour = activity.endTime.hour;
-      final startMinute = activity.startTime.minute;
-      final endMinute = activity.endTime.minute;
-
-      if (startHour == endHour) {
-        // 活动在同一小时内
-        hourlyMinutes[startHour] += activity.durationInMinutes;
-      } else {
-        // 活动跨越多个小时
-        // 第一个小时的分钟数
-        hourlyMinutes[startHour] += 60 - startMinute;
-
-        // 中间的完整小时
-        for (var hour = startHour + 1; hour < endHour; hour++) {
-          hourlyMinutes[hour] += 60;
-        }
-
-        // 最后一个小时的分钟数
-        if (endHour < 24) {
-          hourlyMinutes[endHour] += endMinute;
-        }
-      }
-    }
-
-    return hourlyMinutes;
-  }
-
   // 计算活动类型占比数据
   List<MapEntry<String, int>> _calculateActivityDistribution() {
     final Map<String, int> tagMinutes = {};
@@ -221,13 +203,9 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
       final duration = activity.durationInMinutes;
 
       if (activity.tags.isEmpty) {
-        // 无标签的活动归类为"其他"
-        tagMinutes[ActivityLocalizations.of(context).unnamedActivity] =
-            (tagMinutes[ActivityLocalizations.of(context).unnamedActivity] ??
-                0) +
-            duration;
+        final unnamedKey = ActivityLocalizations.of(context).unnamedActivity;
+        tagMinutes[unnamedKey] = (tagMinutes[unnamedKey] ?? 0) + duration;
       } else {
-        // 将时间平均分配给每个标签
         final minutesPerTag = duration ~/ activity.tags.length;
         for (var tag in activity.tags) {
           tagMinutes[tag] = (tagMinutes[tag] ?? 0) + minutesPerTag;
@@ -235,24 +213,8 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
       }
     }
 
-    // 转换为列表并排序
     final sortedEntries =
         tagMinutes.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
-
-    // 如果超过5个类别，将剩余的合并为"其他"
-    if (sortedEntries.length > 5) {
-      final topEntries = sortedEntries.take(4).toList();
-      final otherMinutes = sortedEntries
-          .skip(4)
-          .fold(0, (sum, entry) => sum + entry.value);
-      topEntries.add(
-        MapEntry(
-          ActivityLocalizations.of(context).unnamedActivity,
-          otherMinutes,
-        ),
-      );
-      return topEntries;
-    }
 
     return sortedEntries;
   }
@@ -260,10 +222,8 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   // 根据标签筛选活动
   List<ActivityRecord> _getActivitiesByTag(String tag) {
     if (tag == ActivityLocalizations.of(context).unnamedActivity) {
-      // 查找没有标签的活动
       return _activities.where((activity) => activity.tags.isEmpty).toList();
     } else {
-      // 查找包含指定标签的活动
       return _activities
           .where((activity) => activity.tags.contains(tag))
           .toList();
@@ -273,13 +233,11 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   // 选择标签并显示相关活动
   void _selectTag(String tag) {
     if (_selectedTag == tag) {
-      // 再次点击同一个标签时，取消选择
       setState(() {
         _selectedTag = null;
         _selectedTagActivities = [];
       });
     } else {
-      // 选择新标签
       final activities = _getActivitiesByTag(tag);
       setState(() {
         _selectedTag = tag;
@@ -288,7 +246,7 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     }
   }
 
-  getRangeText(String range, BuildContext context) {
+  String _getRangeText(String range, BuildContext context) {
     switch (range) {
       case 'Today':
         return ActivityLocalizations.of(context).today;
@@ -300,12 +258,25 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
         return ActivityLocalizations.of(context).yearRange;
       case 'Custom Range':
         return ActivityLocalizations.of(context).customRange;
+      default:
+        return range;
+    }
+  }
+
+  String _formatDuration(int minutes) {
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    final localizations = ActivityLocalizations.of(context);
+
+    if (hours > 0) {
+      return '$hours${localizations.hour}${mins > 0 ? ' $mins${localizations.minute}' : ''}';
+    } else {
+      return '$mins${localizations.minute}';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 时间范围选择
     _timeRanges = [
       'Today',
       'This Week',
@@ -313,97 +284,50 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
       'This Year',
       'Custom Range',
     ];
+
     return Scaffold(
       body: Column(
         children: [
-          // 时间范围选择器
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children:
-                    _timeRanges.map((range) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(getRangeText(range, context)),
-                          selected: _selectedRange == range,
-                          onSelected: (selected) {
-                            if (selected) _updateDateRange(range);
-                          },
-                        ),
-                      );
-                    }).toList(),
-              ),
-            ),
-          ),
-
-          // 显示选中的日期范围
+          _buildDateRangeSelector(context),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               '${DateFormat('yyyy-MM-dd').format(_startDate!)} ${ActivityLocalizations.of(context).to} ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
             ),
           ),
-
-          // 数据加载中显示进度条
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(),
+              child: Center(child: CircularProgressIndicator()),
             )
           else
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 仅在选择"本日"时显示活动时间分布
-                    if (_selectedRange == 'Today') ...[
-                      _buildSectionTitle(
-                        ActivityLocalizations.of(
-                          context,
-                        ).timeDistributionTitle,
-                      ),
-                      SizedBox(
-                        height: 200,
-                        child: _buildTimeDistributionChart(),
-                      ),
-                      const SizedBox(height: 32),
+                    _buildActivityProportionCard(),
+                    const SizedBox(height: 16),
+                    // Only show 24h distribution if range is Today or single day
+                    if (_selectedRange == 'Today' ||
+                        (_startDate != null &&
+                            _endDate != null &&
+                            _startDate!.year == _endDate!.year &&
+                            _startDate!.month == _endDate!.month &&
+                            _startDate!.day == _endDate!.day)) ...[
+                      _build24hDistributionCard(),
+                      const SizedBox(height: 16),
                     ],
-
-                    // 活动占比统计
-                    _buildSectionTitle(
-                      ActivityLocalizations.of(
-                        context,
-                      ).activityDistributionTitle,
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 饼图
-                        Expanded(
-                          flex: 3,
-                          child: SizedBox(
-                            height: 250,
-                            child: _buildActivityPieChart(),
-                          ),
-                        ),
-                        // 图例和总时长
-                        Expanded(
-                          flex: 2,
-                          child: SizedBox(
-                            height: 250,
-                            child: _buildPieChartLegend(),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // 选中标签的活动列表
-                    if (_selectedTag != null) _buildActivityList(),
+                    _buildActivityRankingCard(),
+                    if (_selectedTag != null) ...[
+                      const SizedBox(height: 16),
+                      _buildActivityList(),
+                    ],
                   ],
                 ),
               ),
@@ -413,409 +337,453 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget _buildTimeDistributionChart() {
-    final hourlyData = _calculateHourlyDistribution();
-    final maxMinutes = hourlyData.reduce((a, b) => a > b ? a : b).toDouble();
-
-    final List<BarChartGroupData> barGroups = List.generate(24, (index) {
-      return BarChartGroupData(
-        x: index,
-        barRods: [
-          BarChartRodData(
-            toY: hourlyData[index].toDouble(),
-            color: Theme.of(context).primaryColor,
-            width: 12,
-          ),
-        ],
-      );
-    });
-
-    return BarChart(
-      BarChartData(
-        alignment: BarChartAlignment.spaceAround,
-        maxY: maxMinutes > 0 ? maxMinutes : 60,
-        barTouchData: BarTouchData(
-          enabled: true,
-          touchTooltipData: BarTouchTooltipData(
-            tooltipBgColor: Colors.black87,
-            getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              return BarTooltipItem(
-                '${group.x}${ActivityLocalizations.of(context).hour}: ${rod.toY.toInt()}${ActivityLocalizations.of(context).minutesFormat(1).replaceAll('1 ', '')}',
-                const TextStyle(color: Colors.white),
-              );
-            },
-          ),
-        ),
-        titlesData: FlTitlesData(
-          show: true,
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                if (value % 6 == 0) {
-                  return Text('${value.toInt()}:00');
-                }
-                return const Text('');
-              },
-            ),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                return Text(
-                  '${value.toInt()}${ActivityLocalizations.of(context).minutesFormat(1).replaceAll('1 ', '')}',
+  Widget _buildDateRangeSelector(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children:
+              _timeRanges.map((range) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(_getRangeText(range, context)),
+                    selected: _selectedRange == range,
+                    onSelected: (selected) {
+                      if (selected) _updateDateRange(range);
+                    },
+                  ),
                 );
-              },
-              reservedSize: 40,
-            ),
-          ),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              }).toList(),
         ),
-        gridData: FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        barGroups: barGroups,
       ),
     );
   }
 
-  // 用于整个页面共享的颜色列表
-  final List<Color> _chartColors = [
-    Colors.blue,
-    Colors.green,
-    Colors.orange,
-    Colors.purple,
-    Colors.red,
-    Colors.teal,
-    Colors.amber,
-    Colors.indigo,
-  ];
+  Widget _buildCard({required String title, required Widget child}) {
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).cardColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
 
-  Widget _buildActivityPieChart() {
+  Widget _buildActivityProportionCard() {
     final activityData = _calculateActivityDistribution();
-    if (activityData.isEmpty) {
-      return Center(child: Text(ActivityLocalizations.of(context).noData));
-    }
-
     final totalMinutes = activityData.fold(
       0,
       (sum, entry) => sum + entry.value,
     );
-    if (totalMinutes <= 0) {
-      return Center(
-        child: Text(ActivityLocalizations.of(context).noActivityTimeData),
+
+    if (activityData.isEmpty) {
+      return _buildCard(
+        title: ActivityLocalizations.of(context).activityDistributionTitle,
+        child: Center(child: Text(ActivityLocalizations.of(context).noData)),
       );
     }
 
-    return PieChart(
-      PieChartData(
-        sections: List.generate(activityData.length, (index) {
-          final entry = activityData[index];
-          final percentage = (entry.value / totalMinutes * 100).toStringAsFixed(
-            1,
-          );
-          final isSelected = _selectedTag == entry.key;
-
-          return PieChartSectionData(
-            value: entry.value.toDouble(),
-            title: '$percentage%',
-            titleStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            color: _chartColors[index % _chartColors.length],
-            radius: isSelected ? 90 : 80, // 选中时略大一些
-            badgeWidget:
-                isSelected
-                    ? const Icon(
-                      Icons.check_circle,
-                      color: Colors.white,
-                      size: 18,
-                    )
-                    : null,
-            badgePositionPercentageOffset: 0.98,
-          );
-        }),
-        sectionsSpace: 2,
-        centerSpaceRadius: 40,
-        pieTouchData: PieTouchData(
-          enabled: true,
-          touchCallback: (FlTouchEvent event, pieTouchResponse) {
-            if (mounted &&
-                event is FlTapUpEvent &&
-                pieTouchResponse != null &&
-                pieTouchResponse.touchedSection != null) {
-              final sectionIndex =
-                  pieTouchResponse.touchedSection!.touchedSectionIndex;
-              if (sectionIndex >= 0 && sectionIndex < activityData.length) {
-                setState(() {
-                  _selectTag(activityData[sectionIndex].key);
-                });
-              }
-            }
-          },
+    // Consolidate small segments for the pie chart if too many
+    final List<MapEntry<String, int>> chartData;
+    if (activityData.length > 5) {
+      final topEntries = activityData.take(4).toList();
+      final otherMinutes = activityData
+          .skip(4)
+          .fold(0, (sum, entry) => sum + entry.value);
+      // Check if "Other" already exists (unlikely in this logic but safe to check)
+      topEntries.add(
+        MapEntry(
+          ActivityLocalizations.of(context).unnamedActivity,
+          otherMinutes,
         ),
-      ),
-    );
-  }
-
-  // 构建饼图右侧的图例和总时长
-  Widget _buildPieChartLegend() {
-    final activityData = _calculateActivityDistribution();
-    if (activityData.isEmpty) {
-      return Center(child: Text(ActivityLocalizations.of(context).noData));
+      );
+      chartData = topEntries;
+    } else {
+      chartData = activityData;
     }
 
-    final totalMinutes = activityData.fold(
-      0,
-      (sum, entry) => sum + entry.value,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return _buildCard(
+      title: ActivityLocalizations.of(context).activityDistributionTitle,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // 总时长
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(8.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 4.0,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ActivityLocalizations.of(context).totalDuration,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+          // Pie Chart
+          Expanded(
+            flex: 1,
+            child: SizedBox(
+              height: 160,
+              child: Stack(
+                children: [
+                  PieChart(
+                    PieChartData(
+                      sectionsSpace: 0,
+                      centerSpaceRadius: 60,
+                      sections: List.generate(chartData.length, (index) {
+                        final entry = chartData[index];
+                        final isSelected = _selectedTag == entry.key;
+                        final color = _getColorForTag(entry.key);
+                        return PieChartSectionData(
+                          color: color,
+                          value: entry.value.toDouble(),
+                          title: '',
+                          radius: isSelected ? 14 : 10,
+                        );
+                      }),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatDuration(totalMinutes),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          (totalMinutes ~/ 60).toString(),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          ActivityLocalizations.of(context).hour,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-
-          const SizedBox(height: 16),
-
-          // 图例列表
+          const SizedBox(width: 24),
+          // Legend
           Expanded(
-            child:
-                activityData.isEmpty
-                    ? Center(
-                      child: Text(ActivityLocalizations.of(context).noData),
-                    )
-                    : ListView.builder(
-                      itemCount: activityData.length,
-                      itemBuilder: (context, index) {
-                        final entry = activityData[index];
-                        final color = _chartColors[index % _chartColors.length];
-                        final isSelected = _selectedTag == entry.key;
-
-                        return Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => _selectTag(entry.key),
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(vertical: 4.0),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 6.0,
-                                horizontal: 8.0,
+            flex: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:
+                  chartData.take(4).map((entry) {
+                    // Show top 4 in legend
+                    final percentage = (entry.value / totalMinutes * 100)
+                        .toStringAsFixed(1);
+                    final color = _getColorForTag(entry.key);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                              decoration: BoxDecoration(
-                                color:
-                                    isSelected
-                                        ? color.withValues(alpha: 0.2)
-                                        : Colors.transparent,
-                                borderRadius: BorderRadius.circular(4.0),
-                                border:
-                                    isSelected
-                                        ? Border.all(color: color)
-                                        : null,
+                              const SizedBox(width: 8),
+                              Text(
+                                entry.key,
+                                style: const TextStyle(fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 16,
-                                    height: 16,
-                                    decoration: BoxDecoration(
-                                      color: color,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      entry.key,
-                                      style: TextStyle(
-                                        fontWeight:
-                                            isSelected
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    _formatDuration(entry.value),
-                                    style: TextStyle(
-                                      fontWeight:
-                                          isSelected
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            ],
+                          ),
+                          Text(
+                            '$percentage%',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  Theme.of(context).textTheme.bodySmall?.color,
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+            ),
           ),
         ],
       ),
     );
   }
 
-  // 格式化时长（分钟转为小时和分钟）
-  String _formatDuration(int minutes) {
-    final hours = minutes ~/ 60;
-    final mins = minutes % 60;
+  Widget _build24hDistributionCard() {
+    // Need to sort activities by time
+    final sortedActivities = List<ActivityRecord>.from(_activities)
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    if (hours > 0) {
-      return '$hours小时${mins > 0 ? ' $mins分钟' : ''}';
-    } else {
-      return '$mins分钟';
+    final List<Widget> segments = [];
+    int currentMinute = 0;
+    const totalMinutes = 1440;
+
+    for (var activity in sortedActivities) {
+      // Normalize to today's minutes (0-1440)
+      // Note: This assumes _activities are filtered for a single day
+      // If an activity spans across days, this logic needs to be robust.
+      // For simplicity given the "Today" constraint, we calculate minutes from 00:00 of the activity's day.
+      // If startDate is set, use it as base.
+      final baseDate = DateTime(
+        activity.startTime.year,
+        activity.startTime.month,
+        activity.startTime.day,
+      );
+
+      int startM = activity.startTime.difference(baseDate).inMinutes;
+      int endM = activity.endTime.difference(baseDate).inMinutes;
+
+      // Clamp to 0-1440
+      startM = startM.clamp(0, totalMinutes);
+      endM = endM.clamp(0, totalMinutes);
+
+      if (startM > currentMinute) {
+        // Gap
+        final gap = startM - currentMinute;
+        if (gap > 0) {
+          segments.add(
+            Expanded(
+              flex: gap,
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+              ),
+            ),
+          ); // Use background color for gaps
+        }
+      }
+      
+      final duration = endM - startM;
+      if (duration > 0) {
+        String tag =
+            activity.tags.isNotEmpty
+                ? activity.tags.first
+                : ActivityLocalizations.of(context).unnamedActivity;
+        segments.add(
+          Expanded(
+            flex: duration,
+            child: Container(
+              color: _getColorForTag(tag),
+              alignment: Alignment.center,
+              child:
+                  duration > 30
+                      ? Text(
+                        tag,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      )
+                      : null,
+            ),
+          ),
+        );
+      }
+      currentMinute = max(currentMinute, endM);
     }
+
+    if (currentMinute < totalMinutes) {
+      segments.add(
+        Expanded(
+          flex: totalMinutes - currentMinute,
+          child: Container(color: Theme.of(context).scaffoldBackgroundColor),
+        ),
+      );
+    }
+
+    return _buildCard(
+      title:
+          '24${ActivityLocalizations.of(context).hour} ${ActivityLocalizations.of(context).timeDistributionTitle}', // Hack: "24小时分布" if "timeDistributionTitle" is "时间分布"
+      // Better to use existing keys. "Time Distribution" is "时间分布".
+      // Just use "24h Distribution" or combine keys if needed.
+      // I'll use "24H Distribution" hardcoded for now or generic title.
+      // Actually, let's just use "24H" + Title
+      child: Column(
+        children: [
+          SizedBox(
+            height: 32,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Row(
+                children:
+                    segments.isEmpty
+                        ? [Expanded(child: Container(color: Colors.grey[200]))]
+                        : segments,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text('00:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
+              Text('06:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
+              Text('12:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
+              Text('18:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
+              Text('24:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivityRankingCard() {
+    final activityData =
+        _calculateActivityDistribution(); // This is already sorted by duration desc
+
+    if (activityData.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final maxDuration = activityData.first.value;
+
+    return _buildCard(
+      title:
+          ActivityLocalizations.of(
+            context,
+          ).statistics, // Or "Activity Duration Ranking"
+      child: Column(
+        children:
+            activityData.map((entry) {
+              final tag = entry.key;
+              final duration = entry.value;
+              final color = _getColorForTag(tag);
+              final progress = duration / maxDuration;
+
+              return InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder:
+                          (context) => TagStatisticsScreen(
+                            tagName: tag,
+                            activityService: widget.activityService,
+                          ),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.local_activity,
+                          size: 16,
+                          color: color,
+                        ), // Generic icon
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  tag,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  _formatDuration(duration),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall?.color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).dividerColor.withValues(alpha: 0.1),
+                                color: color,
+                                minHeight: 6,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+      ),
+    );
   }
 
   // 构建活动记录列表
   Widget _buildActivityList() {
-    if (_selectedTag == null) {
+    if (_selectedTag == null || _selectedTagActivities.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    if (_selectedTagActivities.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Text(
-            '${ActivityLocalizations.of(context).loadingFailed.replaceAll('数据', '活动记录')} "$_selectedTag"',
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '${ActivityLocalizations.of(context).activityRecords} "$_selectedTag"',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+    return _buildCard(
+      title:
+          '${ActivityLocalizations.of(context).activityRecords} - $_selectedTag',
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: _selectedTagActivities.length,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) {
+          final activity = _selectedTagActivities[index];
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              activity.title.isEmpty
+                  ? ActivityLocalizations.of(context).unnamedActivity
+                  : activity.title,
+            ),
+            subtitle: Text(
+              '${DateFormat('HH:mm').format(activity.startTime)} - ${DateFormat('HH:mm').format(activity.endTime)}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).textTheme.bodySmall?.color,
               ),
-              TextButton.icon(
-                icon: const Icon(Icons.close),
-                label: Text(ActivityLocalizations.of(context).close),
-                onPressed: () {
-                  setState(() {
-                    _selectedTag = null;
-                    _selectedTagActivities = [];
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 300, // 固定高度，避免布局问题
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: _selectedTagActivities.length,
-            itemBuilder: (context, index) {
-              final activity = _selectedTagActivities[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: ListTile(
-                  title: Text(activity.title, overflow: TextOverflow.ellipsis),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${DateFormat('MM-dd HH:mm').format(activity.startTime)} - '
-                        '${DateFormat('HH:mm').format(activity.endTime)}',
-                      ),
-                      if (activity.tags.isNotEmpty)
-                        Wrap(
-                          spacing: 4,
-                          children:
-                              activity.tags
-                                  .map(
-                                    (tag) => Chip(
-                                      label: Text(
-                                        tag,
-                                        style: const TextStyle(fontSize: 10),
-                                      ),
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      visualDensity: VisualDensity.compact,
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                  )
-                                  .toList(),
-                        ),
-                    ],
-                  ),
-                  trailing: Text(
-                    activity.formattedDuration,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+            ),
+            trailing: Text(
+              _formatDuration(activity.durationInMinutes),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
+          );
+        },
+      ),
     );
   }
 }

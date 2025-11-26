@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Statistics Chart Page</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#7C3AED", // A vibrant purple
+              "background-light": "#F8F7FA",
+              "background-dark": "#121212",
+              "card-light": "#FFFFFF",
+              "card-dark": "#1E1E1E",
+              "text-light-primary": "#1F2937",
+              "text-dark-primary": "#E5E7EB",
+              "text-light-secondary": "#6B7280",
+              "text-dark-secondary": "#9CA3AF",
+              "border-light": "#E5E7EB",
+              "border-dark": "#374151",
+            },
+            fontFamily: {
+              display: ["Noto Sans SC", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.75rem", // 12px
+              'lg': '1rem', // 16px
+              'xl': '1.25rem' // 20px
+            },
+          },
+        },
+      };
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="max-w-md mx-auto">
+<main class="px-4 pb-24 pt-8">
+<div class="space-y-6">
+<div class="bg-card-light dark:bg-card-dark rounded-xl p-4 shadow-sm">
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary mb-4">活动占比</h2>
+<div class="flex items-center space-x-6">
+<div class="relative w-36 h-36">
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+<circle class="text-blue-400" cx="18" cy="18" fill="none" r="16" stroke="currentColor" stroke-dasharray="75.4, 100" stroke-width="4"></circle>
+<circle class="text-green-400" cx="18" cy="18" fill="none" r="16" stroke="currentColor" stroke-dasharray="12.6, 100" stroke-dashoffset="-75.4" stroke-width="4"></circle>
+<circle class="text-indigo-400" cx="18" cy="18" fill="none" r="16" stroke="currentColor" stroke-dasharray="8.4, 100" stroke-dashoffset="-88" stroke-width="4"></circle>
+<circle class="text-orange-400" cx="18" cy="18" fill="none" r="16" stroke="currentColor" stroke-dasharray="4.2, 100" stroke-dashoffset="-96.4" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary">12</span>
+<span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">小时</span>
+</div>
+</div>
+<div class="flex-1 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<span class="w-2.5 h-2.5 rounded-full bg-blue-400 mr-2"></span>
+<span class="text-sm text-text-light-primary dark:text-text-dark-primary">手机</span>
+</div>
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">75%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<span class="w-2.5 h-2.5 rounded-full bg-green-400 mr-2"></span>
+<span class="text-sm text-text-light-primary dark:text-text-dark-primary">运动</span>
+</div>
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">12.5%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<span class="w-2.5 h-2.5 rounded-full bg-indigo-400 mr-2"></span>
+<span class="text-sm text-text-light-primary dark:text-text-dark-primary">睡觉</span>
+</div>
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">8.3%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<span class="w-2.5 h-2.5 rounded-full bg-orange-400 mr-2"></span>
+<span class="text-sm text-text-light-primary dark:text-text-dark-primary">吃饭</span>
+</div>
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">4.2%</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-xl p-4 shadow-sm">
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary mb-4">24小时分布</h2>
+<div class="relative w-full h-8 rounded-full bg-background-light dark:bg-background-dark flex overflow-hidden">
+<div class="bg-blue-400 flex items-center justify-center" style="width: 25%"><span class="text-white text-[10px] font-medium leading-none truncate px-1">手机</span></div>
+<div class="bg-indigo-400 flex items-center justify-center" style="width: 33.33%"><span class="text-white text-[10px] font-medium leading-none truncate px-1">睡觉</span></div>
+<div class="bg-orange-400 flex items-center justify-center" style="width: 8.33%"><span class="text-white text-[10px] font-medium leading-none truncate px-1">吃饭</span></div>
+<div class="bg-green-400 flex items-center justify-center" style="width: 33.33%"><span class="text-white text-[10px] font-medium leading-none truncate px-1">运动</span></div>
+</div>
+<div class="mt-4 grid grid-cols-5 text-center text-xs text-text-light-secondary dark:text-text-dark-secondary">
+<span>00:00</span>
+<span>06:00</span>
+<span>12:00</span>
+<span>18:00</span>
+<span>24:00</span>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-xl p-4 shadow-sm">
+<h2 class="text-base font-bold text-text-light-primary dark:text-text-dark-primary mb-4">活动时长排行</h2>
+<div class="space-y-4">
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-3 flex-shrink-0">
+<span class="material-symbols-outlined text-blue-500 dark:text-blue-400 text-base">phone_iphone</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium text-text-light-primary dark:text-text-dark-primary">手机</span>
+<span class="text-text-light-secondary dark:text-text-dark-secondary">9小时</span>
+</div>
+<div class="w-full bg-background-light dark:bg-background-dark rounded-full h-1.5">
+<div class="bg-blue-400 h-1.5 rounded-full" style="width: 100%"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center mr-3 flex-shrink-0">
+<span class="material-symbols-outlined text-green-500 dark:text-green-400 text-base">fitness_center</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium text-text-light-primary dark:text-text-dark-primary">运动</span>
+<span class="text-text-light-secondary dark:text-text-dark-secondary">4小时</span>
+</div>
+<div class="w-full bg-background-light dark:bg-background-dark rounded-full h-1.5">
+<div class="bg-green-400 h-1.5 rounded-full" style="width: 44.4%"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-3 flex-shrink-0">
+<span class="material-symbols-outlined text-indigo-500 dark:text-indigo-400 text-base">bed</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium text-text-light-primary dark:text-text-dark-primary">睡觉</span>
+<span class="text-text-light-secondary dark:text-text-dark-secondary">4小时</span>
+</div>
+<div class="w-full bg-background-light dark:bg-background-dark rounded-full h-1.5">
+<div class="bg-indigo-400 h-1.5 rounded-full" style="width: 44.4%"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center mr-3 flex-shrink-0">
+<span class="material-symbols-outlined text-orange-500 dark:text-orange-400 text-base">restaurant</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium text-text-light-primary dark:text-text-dark-primary">吃饭</span>
+<span class="text-text-light-secondary dark:text-text-dark-secondary">1小时</span>
+</div>
+<div class="w-full bg-background-light dark:bg-background-dark rounded-full h-1.5">
+<div class="bg-orange-400 h-1.5 rounded-full" style="width: 11.1%"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center mr-3 flex-shrink-0">
+<span class="material-symbols-outlined text-red-500 dark:text-red-400 text-base">commute</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium text-text-light-primary dark:text-text-dark-primary">通勤</span>
+<span class="text-text-light-secondary dark:text-text-dark-secondary">45分钟</span>
+</div>
+<div class="w-full bg-background-light dark:bg-background-dark rounded-full h-1.5">
+<div class="bg-red-400 h-1.5 rounded-full" style="width: 8.3%"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/50 flex items-center justify-center mr-3 flex-shrink-0">
+<span class="material-symbols-outlined text-yellow-500 dark:text-yellow-400 text-base">menu_book</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium text-text-light-primary dark:text-text-dark-primary">学习</span>
+<span class="text-text-light-secondary dark:text-text-dark-secondary">30分钟</span>
+</div>
+<div class="w-full bg-background-light dark:bg-background-dark rounded-full h-1.5">
+<div class="bg-yellow-400 h-1.5 rounded-full" style="width: 5.5%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
