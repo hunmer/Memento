@@ -62,147 +62,145 @@ class _CheckinMainViewState extends State<CheckinMainView>
             : Colors.white.withOpacity(0.6);
 
     return BottomBar(
-        fit: StackFit.expand,
-        icon:
-            (width, height) => Center(
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  // 滚动到顶部功能
-                  if (_tabController.indexIsChanging) return;
+      fit: StackFit.expand,
+      icon:
+          (width, height) => Center(
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                // 滚动到顶部功能
+                if (_tabController.indexIsChanging) return;
 
-                  // 切换到第一个tab
-                  if (_currentPage != 0) {
-                    _tabController.animateTo(0);
-                  }
-                },
-                icon: Icon(
-                  Icons.keyboard_arrow_up,
-                  color: _colors[_currentPage],
-                  size: width,
-                ),
+                // 切换到第一个tab
+                if (_currentPage != 0) {
+                  _tabController.animateTo(0);
+                }
+              },
+              icon: Icon(
+                Icons.keyboard_arrow_up,
+                color: _colors[_currentPage],
+                size: width,
               ),
             ),
-        borderRadius: BorderRadius.circular(25),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.decelerate,
-        showIcon: true,
-        width: MediaQuery.of(context).size.width * 0.85,
-        barColor:
-            _colors[_currentPage].computeLuminance() > 0.5
-                ? Colors.black
-                : Colors.white,
-        start: 2,
-        end: 0,
-        offset: 12,
-        barAlignment: Alignment.bottomCenter,
-        iconHeight: 35,
-        iconWidth: 35,
-        reverse: false,
-        barDecoration: BoxDecoration(
-          color: _colors[_currentPage].withOpacity(0.1),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: _colors[_currentPage].withOpacity(0.3),
-            width: 1,
           ),
+      borderRadius: BorderRadius.circular(25),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.decelerate,
+      showIcon: true,
+      width: MediaQuery.of(context).size.width * 0.85,
+      barColor:
+          _colors[_currentPage].computeLuminance() > 0.5
+              ? Colors.black
+              : Colors.white,
+      start: 2,
+      end: 0,
+      offset: 12,
+      barAlignment: Alignment.bottomCenter,
+      iconHeight: 35,
+      iconWidth: 35,
+      reverse: false,
+      barDecoration: BoxDecoration(
+        color: _colors[_currentPage].withOpacity(0.1),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: _colors[_currentPage].withOpacity(0.3),
+          width: 1,
         ),
-        iconDecoration: BoxDecoration(
-          color: _colors[_currentPage].withOpacity(0.8),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: _colors[_currentPage].withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        hideOnScroll: true,
-        scrollOpposite: false,
-        onBottomBarHidden: () {},
-        onBottomBarShown: () {},
-        body:
-            (context, controller) => TabBarView(
-              controller: _tabController,
-              dragStartBehavior: DragStartBehavior.down,
-              physics: const BouncingScrollPhysics(),
-              children: [
-                // 打卡列表页面
-                StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    final listController = CheckinListController(
-                      context: context,
-                      checkinItems: CheckinPlugin.instance.checkinItems,
-                      onStateChanged: () {
-                        setState(() {});
-                        CheckinPlugin.instance.triggerSave();
-                      },
-                    );
-                    return CheckinListScreen(controller: listController);
-                  },
-                ),
-                // 统计页面
-                ValueListenableBuilder(
-                  valueListenable: ValueNotifier(CheckinPlugin.instance.checkinItems),
-                  builder: (context, _, __) {
-                    return CheckinStatsScreen(
-                      checkinItems: CheckinPlugin.instance.checkinItems,
-                    );
-                  },
-                ),
-              ],
-            ),
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            TabBar(
-              controller: _tabController,
-              dividerColor: Colors.transparent,
-              overlayColor: WidgetStateProperty.all(Colors.transparent),
-              indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-              indicator: UnderlineTabIndicator(
-                borderSide: BorderSide(
-                  color:
-                      _currentPage < 2
-                          ? _colors[_currentPage]
-                          : unselectedColor,
-                  width: 4,
-                ),
-                insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      ),
+      iconDecoration: BoxDecoration(
+        color: _colors[_currentPage].withOpacity(0.8),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: _colors[_currentPage].withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      hideOnScroll: true,
+      scrollOpposite: false,
+      onBottomBarHidden: () {},
+      onBottomBarShown: () {},
+      body:
+          (context, controller) => TabBarView(
+            controller: _tabController,
+            dragStartBehavior: DragStartBehavior.down,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              // 打卡列表页面
+              StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  final listController = CheckinListController(
+                    context: context,
+                    checkinItems: CheckinPlugin.instance.checkinItems,
+                    onStateChanged: () {
+                      setState(() {});
+                      CheckinPlugin.instance.triggerSave();
+                    },
+                  );
+                  return CheckinListScreen(controller: listController);
+                },
               ),
-              labelColor:
-                  _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
-              unselectedLabelColor: unselectedColor,
-              tabs: [
-                Tab(
-                  icon: Icon(Icons.check_circle_outline),
-                  text: CheckinLocalizations.of(context).checkinList,
+              // 统计页面
+              ValueListenableBuilder(
+                valueListenable: ValueNotifier(
+                  CheckinPlugin.instance.checkinItems,
                 ),
-                Tab(
-                  icon: Icon(Icons.bar_chart_outlined),
-                  text: CheckinLocalizations.of(context).checkinStats,
-                ),
-              ],
-            ),
-            Positioned(
-              top: -25,
-              child: FloatingActionButton(
-                backgroundColor: checkinPlugin.color,
-                elevation: 4,
-                shape: const CircleBorder(),
-                child: const Icon(Icons.add, color: Colors.white, size: 32),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => CheckinFormScreen(),
-                    ),
+                builder: (context, _, __) {
+                  return CheckinStatsScreen(
+                    checkinItems: CheckinPlugin.instance.checkinItems,
                   );
                 },
               ),
+            ],
+          ),
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          TabBar(
+            controller: _tabController,
+            dividerColor: Colors.transparent,
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
+            indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+            indicator: UnderlineTabIndicator(
+              borderSide: BorderSide(
+                color:
+                    _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+                width: 4,
+              ),
+              insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             ),
-          ],
+            labelColor:
+                _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+            unselectedLabelColor: unselectedColor,
+            tabs: [
+              Tab(
+                icon: Icon(Icons.check_circle_outline),
+                text: CheckinLocalizations.of(context).checkinList,
+              ),
+              Tab(
+                icon: Icon(Icons.bar_chart_outlined),
+                text: CheckinLocalizations.of(context).checkinStats,
+              ),
+            ],
+          ),
+          Positioned(
+            top: -25,
+            child: FloatingActionButton(
+              backgroundColor: checkinPlugin.color,
+              elevation: 4,
+              shape: const CircleBorder(),
+              child: const Icon(Icons.add, color: Colors.white, size: 32),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => CheckinFormScreen()),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -213,7 +211,6 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   factory CheckinPlugin() => _instance;
   CheckinPlugin._internal();
   static CheckinPlugin get instance => _instance;
-
 
   @override
   String get id => 'checkin';

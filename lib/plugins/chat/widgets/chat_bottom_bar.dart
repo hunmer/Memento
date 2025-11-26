@@ -197,7 +197,11 @@ class _ChatBottomBarState extends State<ChatBottomBar>
           ),
         ],
       ),
-      hideOnScroll: !kIsWeb && defaultTargetPlatform != TargetPlatform.macOS && defaultTargetPlatform != TargetPlatform.windows && defaultTargetPlatform != TargetPlatform.linux,
+      hideOnScroll:
+          !kIsWeb &&
+          defaultTargetPlatform != TargetPlatform.macOS &&
+          defaultTargetPlatform != TargetPlatform.windows &&
+          defaultTargetPlatform != TargetPlatform.linux,
       scrollOpposite: false,
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
@@ -205,7 +209,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
           (context, controller) => TabBarView(
             controller: _tabController,
             dragStartBehavior: DragStartBehavior.start,
-            physics: const BouncingScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             children: [
               // Tab0: 频道列表
               ChannelListScreen(

@@ -237,7 +237,7 @@ class _PhotoViewScreenState extends State<_PhotoViewScreen> {
               ),
             );
           },
-          scrollPhysics: const BouncingScrollPhysics(),
+          scrollPhysics: const NeverScrollableScrollPhysics(),
           pageController: _pageController,
           loadingBuilder:
               (context, event) => Center(

@@ -170,18 +170,6 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
     }
   }
 
-  void _openAddActivity() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => ActivityEditScreen(
-              activityService: ActivityPlugin.instance.activityService,
-              selectedDate: DateTime.now(),
-            ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

@@ -74,7 +74,7 @@ class _EntryDetailImageViewerState extends State<EntryDetailImageViewer> {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: PhotoViewGallery.builder(
-        scrollPhysics: const BouncingScrollPhysics(),
+        scrollPhysics: const NeverScrollableScrollPhysics(),
         builder: (BuildContext context, int index) {
           return PhotoViewGalleryPageOptions(
             imageProvider: _imageProviders[index],

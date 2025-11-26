@@ -18,10 +18,7 @@ import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 class CalendarAlbumBottomBar extends StatefulWidget {
   final CalendarAlbumPlugin plugin;
 
-  const CalendarAlbumBottomBar({
-    super.key,
-    required this.plugin,
-  });
+  const CalendarAlbumBottomBar({super.key, required this.plugin});
 
   @override
   State<CalendarAlbumBottomBar> createState() => _CalendarAlbumBottomBarState();
@@ -35,8 +32,8 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
     const Color.fromARGB(255, 245, 210, 52), // Tab0 - 日历视图 (插件主色)
-    Colors.green.shade600,                    // Tab1 - 标签视图
-    Colors.purple.shade600,                   // Tab2 - 相册视图
+    Colors.green.shade600, // Tab1 - 标签视图
+    Colors.purple.shade600, // Tab2 - 相册视图
   ];
 
   late final CalendarController _calendarController;
@@ -71,16 +68,17 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
   Future<void> _createNewDiary() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(value: _calendarController),
-            ChangeNotifierProvider.value(value: _tagController),
-          ],
-          child: EntryEditorScreen(
+        builder:
+            (context) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(value: _calendarController),
+                ChangeNotifierProvider.value(value: _tagController),
+              ],
+              child: EntryEditorScreen(
                 initialDate: _calendarController.selectedDate,
-            isEditing: false,
-          ),
-        ),
+                isEditing: false,
+              ),
+            ),
       ),
     );
   }
@@ -89,15 +87,16 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
   Future<void> _manageTags() async {
     await showDialog(
       context: context,
-      builder: (context) => TagManagerDialog(
-        groups: _tagController.tagGroups,
-        selectedTags: _tagController.selectedTags,
-        onGroupsChanged: (newGroups) {
-          _tagController.tagGroups = newGroups;
+      builder:
+          (context) => TagManagerDialog(
+            groups: _tagController.tagGroups,
+            selectedTags: _tagController.selectedTags,
+            onGroupsChanged: (newGroups) {
+              _tagController.tagGroups = newGroups;
               // ignore: invalid_use_of_visible_for_testing_member
-          _tagController.notifyListeners();
-        },
-      ),
+              _tagController.notifyListeners();
+            },
+          ),
     );
   }
 
@@ -107,61 +106,62 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('相册统计'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('总图片数量: ${allImages.length}'),
-            const SizedBox(height: 16),
-            if (allImages.isNotEmpty) ...[
-              Text(
-                '最近的照片：',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: allImages.length.clamp(0, 10),
-                  itemBuilder: (context, index) {
-                    final imageUrl = allImages[index];
-                    return Container(
-                      width: 80,
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(7),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey.shade200,
-                              child: const Icon(Icons.broken_image),
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                ),
+      builder:
+          (context) => AlertDialog(
+            title: Text('相册统计'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('总图片数量: ${allImages.length}'),
+                const SizedBox(height: 16),
+                if (allImages.isNotEmpty) ...[
+                  Text(
+                    '最近的照片：',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: allImages.length.clamp(0, 10),
+                      itemBuilder: (context, index) {
+                        final imageUrl = allImages[index];
+                        return Container(
+                          width: 80,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(7),
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey.shade200,
+                                  child: const Icon(Icons.broken_image),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('关闭'),
               ),
             ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('关闭'),
           ),
-        ],
-      ),
     );
   }
 
@@ -174,33 +174,35 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
 
     return BottomBar(
       fit: StackFit.expand,
-      icon: (width, height) => Center(
-        child: IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: () {
-            // 滚动到顶部功能
-            if (_tabController.indexIsChanging) return;
+      icon:
+          (width, height) => Center(
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                // 滚动到顶部功能
+                if (_tabController.indexIsChanging) return;
 
-            // 切换到第一个tab
-            if (_currentPage != 0) {
-              _tabController.animateTo(0);
-            }
-          },
-          icon: Icon(
-            Icons.keyboard_arrow_up,
-            color: _colors[_currentPage],
-            size: width,
+                // 切换到第一个tab
+                if (_currentPage != 0) {
+                  _tabController.animateTo(0);
+                }
+              },
+              icon: Icon(
+                Icons.keyboard_arrow_up,
+                color: _colors[_currentPage],
+                size: width,
+              ),
+            ),
           ),
-        ),
-      ),
       borderRadius: BorderRadius.circular(25),
       duration: const Duration(milliseconds: 300),
       curve: Curves.decelerate,
       showIcon: true,
       width: MediaQuery.of(context).size.width * 0.85,
-      barColor: _colors[_currentPage].computeLuminance() > 0.5
-          ? Colors.black
-          : Colors.white,
+      barColor:
+          _colors[_currentPage].computeLuminance() > 0.5
+              ? Colors.black
+              : Colors.white,
       start: 2,
       end: 0,
       offset: 12,
@@ -227,41 +229,46 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
           ),
         ],
       ),
-      hideOnScroll: !kIsWeb && defaultTargetPlatform != TargetPlatform.macOS && defaultTargetPlatform != TargetPlatform.windows && defaultTargetPlatform != TargetPlatform.linux,
+      hideOnScroll:
+          !kIsWeb &&
+          defaultTargetPlatform != TargetPlatform.macOS &&
+          defaultTargetPlatform != TargetPlatform.windows &&
+          defaultTargetPlatform != TargetPlatform.linux,
       scrollOpposite: false,
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
-      body: (context, controller) => TabBarView(
-        controller: _tabController,
-        dragStartBehavior: DragStartBehavior.start,
-        physics: const BouncingScrollPhysics(),
-        children: [
-          // Tab0: 日历视图
-          MultiProvider(
-            providers: [
-              ChangeNotifierProvider.value(value: _calendarController),
-              ChangeNotifierProvider.value(value: _tagController),
+      body:
+          (context, controller) => TabBarView(
+            controller: _tabController,
+            dragStartBehavior: DragStartBehavior.start,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              // Tab0: 日历视图
+              MultiProvider(
+                providers: [
+                  ChangeNotifierProvider.value(value: _calendarController),
+                  ChangeNotifierProvider.value(value: _tagController),
+                ],
+                child: CalendarScreen(key: const PageStorageKey('calendar')),
+              ),
+              // Tab1: 标签视图
+              MultiProvider(
+                providers: [
+                  ChangeNotifierProvider.value(value: _calendarController),
+                  ChangeNotifierProvider.value(value: _tagController),
+                ],
+                child: TagScreen(key: const PageStorageKey('tags')),
+              ),
+              // Tab2: 相册视图
+              MultiProvider(
+                providers: [
+                  ChangeNotifierProvider.value(value: _calendarController),
+                  ChangeNotifierProvider.value(value: _tagController),
+                ],
+                child: AlbumScreen(key: const PageStorageKey('album')),
+              ),
             ],
-            child: CalendarScreen(key: const PageStorageKey('calendar')),
           ),
-          // Tab1: 标签视图
-          MultiProvider(
-            providers: [
-              ChangeNotifierProvider.value(value: _calendarController),
-              ChangeNotifierProvider.value(value: _tagController),
-            ],
-            child: TagScreen(key: const PageStorageKey('tags')),
-          ),
-          // Tab2: 相册视图
-          MultiProvider(
-            providers: [
-              ChangeNotifierProvider.value(value: _calendarController),
-              ChangeNotifierProvider.value(value: _tagController),
-            ],
-            child: AlbumScreen(key: const PageStorageKey('album')),
-          ),
-        ],
-      ),
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
@@ -273,12 +280,14 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
             indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
             indicator: UnderlineTabIndicator(
               borderSide: BorderSide(
-                color: _currentPage < 3 ? _colors[_currentPage] : unselectedColor,
+                color:
+                    _currentPage < 3 ? _colors[_currentPage] : unselectedColor,
                 width: 4,
               ),
               insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             ),
-            labelColor: _currentPage < 3 ? _colors[_currentPage] : unselectedColor,
+            labelColor:
+                _currentPage < 3 ? _colors[_currentPage] : unselectedColor,
             unselectedLabelColor: unselectedColor,
             tabs: [
               Tab(
@@ -302,9 +311,11 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
               elevation: 4,
               shape: const CircleBorder(),
               child: Icon(
-                _currentPage == 0 ? Icons.create :
-                _currentPage == 1 ? Icons.settings :
-                Icons.photo_size_select_actual,
+                _currentPage == 0
+                    ? Icons.create
+                    : _currentPage == 1
+                    ? Icons.settings
+                    : Icons.photo_size_select_actual,
                 color: Colors.white,
                 size: 32,
               ),

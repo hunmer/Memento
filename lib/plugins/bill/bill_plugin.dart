@@ -1307,7 +1307,7 @@ class _BillMainViewState extends State<BillMainView>
             (context, controller) => TabBarView(
               controller: _tabController,
               dragStartBehavior: DragStartBehavior.down,
-              physics: const BouncingScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               children: [
                 BillListScreen(
                   billPlugin: billPlugin,
