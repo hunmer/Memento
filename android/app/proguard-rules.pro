@@ -37,15 +37,7 @@
     public static <fields>;
 }
 
-# 保留Flutter通知插件相关类
--keep class com.dexterous.** { *; }
--keep class * extends android.app.Notification { *; }
-
-# 保留资源文件（使用替代方案）
--keep class **.R$drawable*
--keep class **.R$mipmap*
--keep class * extends com.dexterous.flutterlocalnotifications.FlutterLocalNotificationsPlugin { *; }
--keep class * implements com.dexterous.flutterlocalnotifications.NotificationReceiver { *; }
+# 保留通知相关类（用于 awesome_notifications）
 -keep class * extends android.app.Notification { *; }
 -keep class * extends android.app.Notification$Builder { *; }
 -keep class * extends android.app.Notification$Style { *; }
@@ -55,3 +47,7 @@
 -keep class * extends android.content.BroadcastReceiver { *; }
 -keep class * extends android.app.Service { *; }
 -keep class * extends android.content.Intent { *; }
+
+# 保留 awesome_notifications 相关类
+-keep class me.carda.** { *; }
+-dontwarn me.carda.**
