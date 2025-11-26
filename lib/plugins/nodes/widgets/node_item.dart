@@ -9,11 +9,13 @@ import '../l10n/nodes_localizations.dart';
 class _StatusInfo {
   final Color color;
   final Color textColor;
+  final Color backgroundColor;
   final String label;
 
   const _StatusInfo({
     required this.color,
     required this.textColor,
+    required this.backgroundColor,
     required this.label,
   });
 }
@@ -30,6 +32,45 @@ class NodeItem extends StatelessWidget {
     required this.depth,
   });
 
+  _StatusInfo _getStatusInfo(BuildContext context, NodeStatus status) {
+    // Colors based on design:
+    // Todo -> Blue (New)
+    // Doing -> Yellow (In Progress)
+    // Done -> Green (Completed)
+    // None/Other -> Grey
+
+    switch (status) {
+      case NodeStatus.todo:
+        return _StatusInfo(
+          color: Colors.blue.shade400,
+          textColor: Colors.blue.shade800,
+          backgroundColor: Colors.blue.shade100,
+          label: 'New', // Mapping TODO to New/Blue style
+        );
+      case NodeStatus.doing:
+        return _StatusInfo(
+          color: Colors.amber.shade400,
+          textColor: Colors.amber.shade800,
+          backgroundColor: Colors.amber.shade100,
+          label: 'In Progress',
+        );
+      case NodeStatus.done:
+        return _StatusInfo(
+          color: Colors.green.shade400,
+          textColor: Colors.green.shade800,
+          backgroundColor: Colors.green.shade100,
+          label: 'Completed',
+        );
+      case NodeStatus.none:
+        return _StatusInfo(
+          color: Colors.grey.shade400,
+          textColor: Colors.grey.shade800,
+          backgroundColor: Colors.grey.shade200,
+          label: 'None',
+        );
+    }
+  }
+
   Widget _buildStatusButton(
     BuildContext context,
     NodesController controller,
@@ -42,7 +83,6 @@ class NodeItem extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        // 更新节点状态并保存
         final updatedNode = Node(
           id: node.id,
           title: node.title,
@@ -56,6 +96,8 @@ class NodeItem extends StatelessWidget {
           parentId: node.parentId,
           pathValue: node.pathValue,
           color: node.color,
+          children: node.children,
+          isExpanded: node.isExpanded,
         );
         controller.updateNode(notebookId, updatedNode);
         Navigator.pop(context);
@@ -79,37 +121,18 @@ class NodeItem extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(BuildContext context, NodeStatus status) {
-    final Map<NodeStatus, _StatusInfo> statusInfo = {
-      NodeStatus.todo: _StatusInfo(
-        color: Colors.grey.shade200,
-        textColor: Colors.yellow.shade700,
-        label: 'TODO',
-      ),
-      NodeStatus.doing: _StatusInfo(
-        color: Colors.blue.shade100,
-        textColor: Colors.blue.shade700,
-        label: 'DOING',
-      ),
-      NodeStatus.done: _StatusInfo(
-        color: Colors.green.shade100,
-        textColor: Colors.green.shade700,
-        label: 'DONE',
-      ),
-    };
-
-    final info = statusInfo[status]!;
+    final info = _getStatusInfo(context, status);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      margin: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        color: info.color,
-        borderRadius: BorderRadius.circular(12),
+        color: info.backgroundColor,
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         info.label,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 11,
           color: info.textColor,
           fontWeight: FontWeight.w500,
         ),
@@ -121,9 +144,8 @@ class NodeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Provider.of<NodesController>(context);
     final l10n = NodesLocalizations.of(context);
-
-    // 使用节点自身的颜色
-    Color nodeColor = node.color;
+    final statusInfo = _getStatusInfo(context, node.status);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,10 +155,8 @@ class NodeItem extends StatelessWidget {
           child: InkWell(
             onTap: () {
               if (node.children.isNotEmpty) {
-                // 如果有子节点，切换折叠状态
                 controller.toggleNodeExpansion(notebookId, node.id);
               } else {
-                // 如果没有子节点，直接进入编辑界面
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -153,85 +173,125 @@ class NodeItem extends StatelessWidget {
                 );
               }
             },
-            child: Padding(
-              padding: EdgeInsets.only(left: depth * 24.0),
-              child: Row(
-                children: [
-                  if (node.children.isNotEmpty)
-                    Icon(
-                      node.isExpanded ? Icons.expand_more : Icons.chevron_right,
-                      size: 20,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Status Bar
+                    Container(
+                      width: 4,
+                      decoration: BoxDecoration(
+                        color: statusInfo.color,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  if (node.children.isEmpty) const SizedBox(width: 20),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: nodeColor,
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    const SizedBox(width: 12),
+                    // Content
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Header: Title + Icon + Badge
                           Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  node.title,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        node.title,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: isDark ? Colors.grey.shade50 : Colors.grey.shade900,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (node.children.isNotEmpty) ...[
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        node.isExpanded
+                                            ? Icons.expand_more
+                                            : Icons.chevron_right,
+                                        size: 20,
+                                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
-                              if (node.status != NodeStatus.none)
+                              if (node.status != NodeStatus.none) ...[
+                                const SizedBox(width: 8),
                                 _buildStatusBadge(context, node.status),
+                              ],
                             ],
                           ),
-                          if (node.tags.isNotEmpty)
+                          
+                          // Tags
+                          if (node.tags.isNotEmpty) ...[
+                            const SizedBox(height: 6),
                             Wrap(
-                              spacing: 4,
-                              children:
-                                  node.tags.map((tag) {
-                                    return Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(
-                                          context,
-                                        ).primaryColor.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        tag,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
+                              spacing: 8,
+                              runSpacing: 4,
+                              children: node.tags.map((tag) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.grey.shade800.withOpacity(0.5) : Colors.grey.shade200.withOpacity(0.7),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    tag,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
                             ),
+                          ],
+
+                          // Notes (Description)
+                          if (node.notes.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              node.notes,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ],
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
+        // Recursion for children
         if (node.isExpanded && node.children.isNotEmpty)
-          ...node.children.map(
-            (child) =>
-                NodeItem(node: child, notebookId: notebookId, depth: depth + 1),
+          Padding(
+            padding: const EdgeInsets.only(left: 36.0), // Align with HTML's pl-9
+            child: Column(
+              children: node.children.map(
+                (child) =>
+                    NodeItem(node: child, notebookId: notebookId, depth: depth + 1),
+              ).toList(),
+            ),
           ),
       ],
     );
@@ -242,7 +302,7 @@ class NodeItem extends StatelessWidget {
     NodesController controller,
     NodesLocalizations l10n,
   ) {
-    // 定义常用颜色列表
+    // 定义常用颜色列表 - keeping existing functionality though UI changed
     final List<Color> commonColors = [
       Colors.grey,
       Colors.red,
@@ -284,7 +344,6 @@ class NodeItem extends StatelessWidget {
 
                     return GestureDetector(
                       onTap: () {
-                        // 更新节点颜色并保存
                         final updatedNode = Node(
                           id: node.id,
                           title: node.title,
@@ -344,25 +403,25 @@ class NodeItem extends StatelessWidget {
                     context,
                     controller,
                     NodeStatus.todo,
-                    'TODO',
-                    Colors.grey.shade200,
-                    Colors.grey.shade700,
+                    'New', // Updated label
+                    Colors.blue.shade100,
+                    Colors.blue.shade800,
                   ),
                   _buildStatusButton(
                     context,
                     controller,
                     NodeStatus.doing,
-                    'DOING',
-                    Colors.blue.shade100,
-                    Colors.blue.shade700,
+                    'In Progress', // Updated label
+                    Colors.amber.shade100,
+                    Colors.amber.shade800,
                   ),
                   _buildStatusButton(
                     context,
                     controller,
                     NodeStatus.done,
-                    'DONE',
+                    'Completed', // Updated label
                     Colors.green.shade100,
-                    Colors.green.shade700,
+                    Colors.green.shade800,
                   ),
                 ],
               ),
@@ -423,6 +482,7 @@ class NodeItem extends StatelessWidget {
       title: '',
       createdAt: DateTime.now(),
       parentId: node.id,
+      status: NodeStatus.todo, // Default new nodes to Todo (New)
     );
 
     Navigator.push(
@@ -447,6 +507,7 @@ class NodeItem extends StatelessWidget {
       title: '',
       createdAt: DateTime.now(),
       parentId: node.parentId,
+      status: NodeStatus.todo,
     );
 
     Navigator.push(

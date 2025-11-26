@@ -57,6 +57,7 @@ class NodesScreen extends StatelessWidget {
           currentNotebook?.nodes.isEmpty ?? true
               ? Center(child: Text(l10n.noNodesYet))
               : ListView.builder(
+                padding: const EdgeInsets.all(16),
                 itemCount: currentNotebook?.nodes.length ?? 0,
                 itemBuilder: (context, index) {
                   return NodeItem(
@@ -157,7 +158,7 @@ class NodesScreen extends StatelessWidget {
     final newNode = Node(
       id: const Uuid().v4(),
       title: '',
-      status: NodeStatus.none,
+      status: NodeStatus.todo,
       createdAt: DateTime.now(),
     );
 

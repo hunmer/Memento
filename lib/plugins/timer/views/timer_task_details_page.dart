@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
 import '../models/timer_task.dart';
@@ -30,6 +31,7 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
     _currentTask = widget.task;
     _currentTimerIndex = _currentTask.getCurrentIndex();
     if (_currentTimerIndex == -1) _currentTimerIndex = 0;
+    _isRunning = _currentTask.isRunning;
     // 订阅任务变更事件
     EventManager.instance.subscribe('timer_task_changed', onTimerTaskChanged);
     // 订阅计时器进度更新事件
@@ -75,111 +77,174 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
     super.dispose();
   }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$hours:$minutes:$seconds";
+  String _formatRemainingTime(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return "$minutes:$seconds remaining";
   }
 
   @override
   Widget build(BuildContext context) {
     final currentTimer = _currentTask.timerItems[_currentTimerIndex];
+    final progress = (currentTimer.completedDuration.inSeconds /
+            currentTimer.duration.inSeconds)
+        .clamp(0.0, 1.0);
+    final remainingTime = currentTimer.duration - currentTimer.completedDuration;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final primaryColor = Color(0xFF607AFB);
+
     return Scaffold(
-      appBar: AppBar(title: Text(_currentTask.name)),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 时间显示
-              Center(
-                child: Text(
-                  _currentTask.timerItems.isNotEmpty
-                      ? '${_formatDuration(currentTimer.completedDuration)}'
-                          '/${_formatDuration(currentTimer.duration)}'
-                      : _formatDuration(currentTimer.completedDuration),
-                  style: Theme.of(context).textTheme.displayMedium,
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // 控制按钮
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(_isRunning ? Icons.pause : Icons.play_arrow),
-                      onPressed: widget.onResume,
-                      tooltip: '切换状态',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.restore),
-                      onPressed: widget.onReset,
-                      tooltip: '重置',
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // 步骤显示
-              if (_currentTask.timerItems.isNotEmpty)
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.4,
+      body: Stack(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 100.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _currentTask.name,
+                    style: theme.textTheme.headlineLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
                   ),
-                  child: Stepper(
-                    currentStep: _currentTimerIndex,
-                    controlsBuilder: (
-                      BuildContext context,
-                      ControlsDetails details,
-                    ) {
-                      return SizedBox(width: 0, height: 0);
-                    },
-                    type: StepperType.horizontal,
-                    steps:
-                        _currentTask.timerItems.map((timer) {
-                          return Step(
-                            title: Text(timer.name),
-                            content: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth:
-                                    MediaQuery.of(context).size.width - 32,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (timer.description != null &&
-                                      timer.description!.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Text(
-                                        '描述: ${timer.description}',
-                                        style:
-                                            Theme.of(
-                                              context,
-                                            ).textTheme.bodySmall,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            isActive:
-                                _currentTimerIndex ==
-                                _currentTask.timerItems.indexOf(timer),
-                          );
-                        }).toList(),
+                  const SizedBox(height: 4),
+                  Text(
+                    currentTimer.name,
+                    style: theme.textTheme.titleLarge
+                        ?.copyWith(color: theme.textTheme.titleLarge?.color?.withOpacity(0.7)),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              const SizedBox(height: 16),
-            ],
+                  const SizedBox(height: 32),
+                  _buildCircularProgress(progress, remainingTime, primaryColor),
+                  const SizedBox(height: 48),
+                  _buildProgressDots(primaryColor),
+                ],
+              ),
+            ),
           ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 32.0),
+              child: _buildControlButton(primaryColor),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            left: 16,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: 16,
+            child: IconButton(
+              icon: const Icon(Icons.restore),
+              onPressed: widget.onReset,
+              tooltip: 'Reset',
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCircularProgress(
+      double progress, Duration remainingTime, Color primaryColor) {
+    final theme = Theme.of(context);
+    return SizedBox(
+      width: 250,
+      height: 250,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CircularProgressIndicator(
+            value: 1,
+            strokeWidth: 10,
+            color: theme.colorScheme.onSurface.withOpacity(0.1),
+          ),
+          CircularProgressIndicator(
+            value: progress,
+            strokeWidth: 10,
+            strokeCap: StrokeCap.round,
+            color: primaryColor,
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${(progress * 100).toInt()}%',
+                  style: theme.textTheme.displayLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _formatRemainingTime(remainingTime),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressDots(Color primaryColor) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children:
+          List.generate(_currentTask.timerItems.length, (index) {
+        bool isActive = index == _currentTimerIndex;
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: index <= _currentTimerIndex
+                ? primaryColor
+                : theme.colorScheme.onSurface.withOpacity(0.2),
+            border: isActive
+                ? Border.all(
+                    color: primaryColor,
+                    width: 2,
+                  )
+                : null,
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildControlButton(Color primaryColor) {
+    final theme = Theme.of(context);
+    return ElevatedButton.icon(
+      onPressed: widget.onResume,
+      icon: Icon(
+        _isRunning ? Icons.pause : Icons.play_arrow,
+        size: 36,
+      ),
+      label: Text(
+        _isRunning ? 'Pause' : 'Play',
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
         ),
+      ),
+      style: ElevatedButton.styleFrom(
+        foregroundColor: theme.colorScheme.onPrimary,
+        backgroundColor: theme.colorScheme.primary,
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        minimumSize: const Size(192, 64),
       ),
     );
   }
