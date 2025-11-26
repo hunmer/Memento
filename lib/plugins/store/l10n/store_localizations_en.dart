@@ -311,4 +311,13 @@ class StoreLocalizationsEn extends StoreLocalizations {
 
   @override
   String get viewRedeemHistory => 'View Redeem History';
+
+  @override
+  String get filterConditions => 'Filter Conditions';
+
+  @override
+  String get notSelected => 'Not Selected';
+
+  @override
+  String get noProducts => 'No Products';
 }

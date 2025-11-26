@@ -8,9 +8,20 @@ import '../../core/js_bridge/js_bridge_plugin.dart';
 import '../base_plugin.dart';
 import 'widgets/calendar_album_bottom_bar.dart';
 import 'controllers/calendar_controller.dart';
+
 import 'controllers/tag_controller.dart';
 import 'models/calendar_entry.dart';
 import 'l10n/calendar_album_localizations.dart';
+
+/// 日历相册插件主视图
+class CalendarAlbumMainView extends StatelessWidget {
+  const CalendarAlbumMainView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return CalendarAlbumBottomBar(plugin: CalendarAlbumPlugin.instance);
+  }
+}
 
 
 class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
@@ -66,7 +77,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return CalendarAlbumBottomBar(plugin: this);
+    return const CalendarAlbumMainView();
   }
 
   // ==================== 小组件统计方法 ====================

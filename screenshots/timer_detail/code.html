@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pomodoro Timer App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#607AFB",
+                        "background-light": "#f5f6f8",
+                        "background-dark": "#0f1323"
+                    },
+                    fontFamily: {
+                        display: "Manrope"
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                        lg: "2rem",
+                        xl: "3rem",
+                        full: "9999px"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark text-white">
+<div class="relative flex min-h-screen w-full flex-col">
+<main class="flex flex-grow flex-col items-center justify-center p-4 pb-28">
+<div class="flex flex-col items-center text-center">
+<h1 class="text-3xl font-bold">Morning Deep Work</h1>
+<p class="text-lg text-slate-300">Focus</p>
+</div>
+<div class="relative mt-8 flex aspect-square w-full max-w-xs items-center justify-center">
+<svg class="absolute inset-0 h-full w-full" viewBox="0 0 120 120">
+<circle class="stroke-white/10" cx="60" cy="60" fill="none" r="55" stroke-width="10"></circle>
+<circle class="stroke-primary -rotate-90 origin-center transform" cx="60" cy="60" fill="none" r="55" stroke-dasharray="345.57" stroke-dashoffset="86.39" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="flex flex-col items-center justify-center text-center">
+<span class="text-6xl font-bold tracking-tighter">75%</span>
+<span class="mt-1 text-base text-slate-300">18:45 remaining</span>
+</div>
+</div>
+<div class="mt-12 flex items-center justify-center gap-4">
+<div class="h-3 w-3 rounded-full bg-primary"></div>
+<div class="h-3 w-3 rounded-full bg-primary"></div>
+<div class="h-3 w-3 rounded-full bg-primary ring-2 ring-primary ring-offset-4 ring-offset-background-dark"></div>
+<div class="h-3 w-3 rounded-full bg-white/20"></div>
+<div class="h-3 w-3 rounded-full bg-white/20"></div>
+</div>
+</main>
+<footer class="absolute bottom-0 left-0 right-0 flex justify-center p-8">
+<button class="flex h-16 w-48 items-center justify-center gap-2 rounded-full bg-white text-2xl font-bold text-background-dark shadow-lg transition-transform active:scale-95">
+<span class="material-symbols-outlined text-4xl">pause</span>
+<span>Pause</span>
+</button>
+</footer>
+</div>
+
+</body></html>

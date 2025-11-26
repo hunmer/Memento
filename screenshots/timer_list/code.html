@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pomodoro Timer App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#607AFB", "background-light": "#f5f6f8", "background-dark": "#0f1323"}, fontFamily: {display: "Manrope"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full flex-col">
+<main class="flex-grow p-4">
+<div class="flex flex-col gap-6">
+<div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm dark:bg-[#1a2e1f]">
+<div class="p-5 pb-4">
+<div class="flex items-start gap-4">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
+<span class="material-symbols-outlined text-3xl">psychology</span>
+</div>
+<div class="flex flex-1 items-center justify-between gap-4">
+<div class="flex-grow">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white">Morning Deep Work</h2>
+<p class="text-sm text-slate-500 dark:text-[#9db9a4]">Maximize productivity with focus intervals.</p>
+</div>
+<button class="flex shrink-0 items-center justify-center gap-1 rounded-full bg-primary px-3 py-1.5 text-sm font-bold text-black transition-transform active:scale-95">
+<span class="material-symbols-outlined text-lg">play_arrow</span>
+<span>Start</span>
+</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 px-5 pb-5">
+<div class="relative flex flex-col p-3">
+<button class="absolute -right-1 -top-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/10 text-slate-800 transition-transform active:scale-90 dark:bg-white/20 dark:text-white">
+<span class="material-symbols-outlined text-xl">play_arrow</span>
+</button>
+<div class="flex flex-grow flex-col items-center justify-center">
+<div class="relative flex aspect-square w-full items-center justify-center">
+<svg class="absolute inset-0 h-full w-full" viewBox="0 0 100 100">
+<circle class="stroke-black/10 dark:stroke-white/10" cx="50" cy="50" fill="none" r="45" stroke-width="10"></circle>
+<circle class="stroke-red-500 -rotate-90 origin-center transform" cx="50" cy="50" fill="none" r="45" stroke-dasharray="282.74" stroke-dashoffset="141.37" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="flex w-full flex-col items-center px-2 text-center">
+<p class="w-full truncate text-base font-bold text-slate-900 dark:text-white">Focus</p>
+<p class="w-full truncate text-xs text-slate-500 dark:text-red-200">2/4 cycles</p>
+<p class="mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300">25 min</p>
+</div>
+</div>
+</div>
+<div class="mt-2 text-center">
+<span class="inline-block rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/50 dark:text-red-200">Work</span>
+</div>
+</div>
+<div class="relative flex flex-col p-3">
+<button class="absolute -right-1 -top-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/10 text-slate-800 transition-transform active:scale-90 dark:bg-white/20 dark:text-white">
+<span class="material-symbols-outlined text-xl">play_arrow</span>
+</button>
+<div class="flex flex-grow flex-col items-center justify-center">
+<div class="relative flex aspect-square w-full items-center justify-center">
+<svg class="absolute inset-0 h-full w-full" viewBox="0 0 100 100">
+<circle class="stroke-black/10 dark:stroke-white/10" cx="50" cy="50" fill="none" r="45" stroke-width="10"></circle>
+<circle class="stroke-blue-500 -rotate-90 origin-center transform" cx="50" cy="50" fill="none" r="45" stroke-dasharray="282.74" stroke-dashoffset="212.055" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="flex w-full flex-col items-center px-2 text-center">
+<p class="w-full truncate text-base font-bold text-slate-900 dark:text-white">Short Break</p>
+<p class="w-full truncate text-xs text-slate-500 dark:text-blue-200">1/4 cycles</p>
+<p class="mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300">5 min</p>
+</div>
+</div>
+</div>
+<div class="mt-2 text-center">
+<span class="inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">Rest</span>
+</div>
+</div>
+<div class="relative flex flex-col p-3">
+<button class="absolute -right-1 -top-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/10 text-slate-800 transition-transform active:scale-90 dark:bg-white/20 dark:text-white">
+<span class="material-symbols-outlined text-xl">play_arrow</span>
+</button>
+<div class="flex flex-grow flex-col items-center justify-center">
+<div class="relative flex aspect-square w-full items-center justify-center">
+<svg class="absolute inset-0 h-full w-full" viewBox="0 0 100 100">
+<circle class="stroke-black/10 dark:stroke-white/10" cx="50" cy="50" fill="none" r="45" stroke-width="10"></circle>
+<circle class="stroke-green-500 -rotate-90 origin-center transform" cx="50" cy="50" fill="none" r="45" stroke-dasharray="282.74" stroke-dashoffset="282.74" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="flex w-full flex-col items-center px-2 text-center">
+<p class="w-full truncate text-base font-bold text-slate-900 dark:text-white">Long Break</p>
+<p class="w-full truncate text-xs text-slate-500 dark:text-green-200">0/1 cycles</p>
+<p class="mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300">15 min</p>
+</div>
+</div>
+</div>
+<div class="mt-2 text-center">
+<span class="inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/50 dark:text-green-200">Relax</span>
+</div>
+</div>
+<div class="relative flex flex-col p-3">
+<button class="absolute -right-1 -top-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/10 text-slate-800 transition-transform active:scale-90 dark:bg-white/20 dark:text-white">
+<span class="material-symbols-outlined text-xl">play_arrow</span>
+</button>
+<div class="flex flex-grow flex-col items-center justify-center">
+<div class="relative flex aspect-square w-full items-center justify-center">
+<svg class="absolute inset-0 h-full w-full" viewBox="0 0 100 100">
+<circle class="stroke-black/10 dark:stroke-white/10" cx="50" cy="50" fill="none" r="45" stroke-width="10"></circle>
+<circle class="stroke-yellow-500 -rotate-90 origin-center transform" cx="50" cy="50" fill="none" r="45" stroke-dasharray="282.74" stroke-dashoffset="282.74" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="flex w-full flex-col items-center px-2 text-center">
+<p class="w-full truncate text-base font-bold text-slate-900 dark:text-white">Focus</p>
+<p class="w-full truncate text-xs text-slate-500 dark:text-yellow-200">0/4 cycles</p>
+<p class="mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300">25 min</p>
+</div>
+</div>
+</div>
+<div class="mt-2 text-center">
+<span class="inline-block rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200">Work</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm dark:bg-[#1a2e1f]">
+<div class="p-5 pb-4">
+<div class="flex items-start gap-4">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
+<span class="material-symbols-outlined text-3xl">auto_stories</span>
+</div>
+<div class="flex flex-1 items-center justify-between gap-4">
+<div class="flex-grow">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white">Reading Sprint</h2>
+<p class="text-sm text-slate-500 dark:text-[#9db9a4]">Dedicated time for focused reading.</p>
+</div>
+<button class="flex shrink-0 items-center justify-center gap-1 rounded-full bg-primary px-3 py-1.5 text-sm font-bold text-black transition-transform active:scale-95">
+<span class="material-symbols-outlined text-lg">play_arrow</span>
+<span>Start</span>
+</button>
+</div>
+</div>
+</div>
+<div class="space-y-4 px-5 pb-5">
+<div class="flex flex-col gap-2">
+<div class="flex items-baseline justify-between">
+<p class="font-medium text-slate-800 dark:text-white">Reading</p>
+<p class="text-xs font-medium text-slate-500 dark:text-[#9db9a4]">0/2 cycles</p>
+</div>
+<div class="h-2 w-full rounded-full bg-slate-200 dark:bg-[#3b5441]">
+<div class="h-2 rounded-full bg-primary" style="width: 0%;"></div>
+</div>
+<p class="text-right text-xs text-slate-500 dark:text-[#9db9a4]">50 min</p>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-baseline justify-between">
+<p class="font-medium text-slate-800 dark:text-white">Break</p>
+<p class="text-xs font-medium text-slate-500 dark:text-[#9db9a4]">0/1 cycles</p>
+</div>
+<div class="h-2 w-full rounded-full bg-slate-200 dark:bg-[#3b5441]">
+<div class="h-2 rounded-full bg-primary" style="width: 0%;"></div>
+</div>
+<p class="text-right text-xs text-slate-500 dark:text-[#9db9a4]">10 min</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-2 ring-primary/50 dark:bg-[#1a2e1f] dark:ring-primary/70">
+<div class="p-5 pb-4">
+<div class="flex items-start gap-4">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
+<span class="material-symbols-outlined text-3xl">code</span>
+</div>
+<div class="flex flex-1 items-center justify-between gap-4">
+<div class="flex-grow">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white">Project Work</h2>
+<p class="text-sm text-slate-500 dark:text-[#9db9a4]">Coding and development tasks.</p>
+</div>
+<button class="flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-slate-200 px-3 py-1.5 text-sm font-bold text-slate-800 transition-transform active:scale-95 dark:bg-slate-600 dark:text-white">
+<span class="material-symbols-outlined text-lg">pause</span>
+<span class="font-mono">23:45</span>
+</button>
+</div>
+</div>
+</div>
+<div class="space-y-4 px-5 pb-5">
+<div class="flex flex-col gap-2">
+<div class="flex items-baseline justify-between">
+<p class="font-medium text-slate-800 dark:text-white">Coding</p>
+<p class="text-xs font-medium text-slate-500 dark:text-[#9db9a4]">1/2 cycles</p>
+</div>
+<div class="h-2 w-full rounded-full bg-slate-200 dark:bg-[#3b5441]">
+<div class="h-2 rounded-full bg-primary" style="width: 75%;"></div>
+</div>
+<p class="text-right text-xs text-slate-500 dark:text-[#9db9a4]">45 min</p>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-baseline justify-between">
+<p class="font-medium text-slate-800 dark:text-white">Break</p>
+<p class="text-xs font-medium text-slate-500 dark:text-[#9db9a4]">0/1 cycles</p>
+</div>
+<div class="h-2 w-full rounded-full bg-slate-200 dark:bg-[#3b5441]">
+<div class="h-2 rounded-full bg-primary" style="width: 0%;"></div>
+</div>
+<p class="text-right text-xs text-slate-500 dark:text-[#9db9a4]">10 min</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

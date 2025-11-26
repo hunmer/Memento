@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Pomodoro Timer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#607AFB",
+            "background-light": "#f5f6f8",
+            "background-dark": "#0f1323"
+          },
+          fontFamily: {
+            display: "Manrope"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      min-height: max(884px, 100 d-vh);
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full flex-col">
+<header class="flex h-14 shrink-0 items-center justify-between p-4">
+<button class="flex h-8 w-8 items-center justify-center text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h1 class="text-lg font-bold text-slate-900 dark:text-white">Add New Timer</h1>
+<div class="h-8 w-8"></div>
+</header>
+<main class="flex-grow overflow-y-auto p-4">
+<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-4 overflow-hidden rounded-xl bg-white p-5 shadow-sm dark:bg-[#181d2c]">
+<label class="block">
+<span class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">Icon</span>
+<div class="grid grid-cols-6 gap-2">
+<button class="flex aspect-square items-center justify-center rounded-lg bg-primary text-white ring-2 ring-primary ring-offset-2 ring-offset-background-light dark:ring-offset-background-dark">
+<span class="material-symbols-outlined text-3xl">psychology</span>
+</button>
+<button class="flex aspect-square items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-3xl">auto_stories</span>
+</button>
+<button class="flex aspect-square items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-3xl">code</span>
+</button>
+<button class="flex aspect-square items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-3xl">fitness_center</span>
+</button>
+<button class="flex aspect-square items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-3xl">edit</span>
+</button>
+<button class="flex aspect-square items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-3xl">more_horiz</span>
+</button>
+</div>
+</label>
+<label class="block">
+<span class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">Title</span>
+<input class="block w-full rounded-lg border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-primary focus:ring-primary dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-500" type="text" value="Morning Deep Work"/>
+</label>
+<div class="grid grid-cols-2 gap-4">
+<label class="block">
+<span class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">Repetitions</span>
+<input class="block w-full rounded-lg border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-primary focus:ring-primary dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-500" type="number" value="4"/>
+</label>
+<label class="block">
+<span class="mb-1.5 block text-sm font-medium text-slate-600 dark:text-slate-400">Group</span>
+<select class="block w-full rounded-lg border-slate-300 bg-slate-50 text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+<option>Work</option>
+<option>Personal</option>
+<option>Study</option>
+</select>
+</label>
+</div>
+</div>
+<div class="flex flex-col gap-4 overflow-hidden rounded-xl bg-white p-5 shadow-sm dark:bg-[#181d2c]">
+<h3 class="text-sm font-medium text-slate-600 dark:text-slate-400">Sub-timers</h3>
+<div class="space-y-3">
+<div class="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-700/50">
+<span class="material-symbols-outlined text-slate-500">drag_indicator</span>
+<div class="flex-grow">
+<p class="font-semibold text-slate-800 dark:text-white">Focus</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">25 min</p>
+</div>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+<div class="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-700/50">
+<span class="material-symbols-outlined text-slate-500">drag_indicator</span>
+<div class="flex-grow">
+<p class="font-semibold text-slate-800 dark:text-white">Short Break</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">5 min</p>
+</div>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-600 dark:hover:text-slate-300">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+<button class="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-200 active:scale-[0.98] dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+<span class="material-symbols-outlined text-lg">add</span>
+            Add Sub-timer
+          </button>
+</div>
+<div class="flex items-center justify-between rounded-xl bg-white p-5 shadow-sm dark:bg-[#181d2c]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">notifications</span>
+<span class="font-medium text-slate-800 dark:text-white">Message Notifications</span>
+</div>
+<button aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-primary transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:ring-offset-background-dark" role="switch">
+<span class="pointer-events-none inline-block h-5 w-5 translate-x-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+</main>
+<footer class="sticky bottom-0 bg-background-light p-4 pt-2 dark:bg-background-dark">
+<button class="w-full rounded-xl bg-primary py-3.5 text-base font-bold text-white shadow-lg shadow-primary/20 transition-transform active:scale-95">
+        Save Timer
+      </button>
+</footer>
+</div>
+
+</body></html>

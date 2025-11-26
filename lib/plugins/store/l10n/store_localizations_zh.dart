@@ -305,4 +305,13 @@ class StoreLocalizationsZh extends StoreLocalizations {
 
   @override
   String get viewRedeemHistory => '查看兑换记录';
+
+  @override
+  String get filterConditions => '筛选条件';
+
+  @override
+  String get notSelected => '未选择';
+
+  @override
+  String get noProducts => '暂无商品';
 }
