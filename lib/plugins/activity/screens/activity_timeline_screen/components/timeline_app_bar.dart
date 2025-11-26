@@ -22,13 +22,16 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       // 添加返回按钮
-      leading: (Platform.isAndroid || Platform.isIOS)
-          ? null
-          : IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => PluginManager.toHomeScreen(context),
-            ),
-      title: Text(viewModeController.isGridMode && viewModeController.selectedMinutes > 0
+      automaticallyImplyLeading: false,
+      leading:
+          (Platform.isAndroid || Platform.isIOS)
+              ? null
+              : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
+      title: Text(
+        viewModeController.isGridMode && viewModeController.selectedMinutes > 0
             ? DiaryLocalizations.of(context).minutesSelected.replaceAll(
               '{minutes}',
               viewModeController.selectedMinutes.toString(),
@@ -38,9 +41,12 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         // 视图切换按钮
         IconButton(
-          icon: Icon(viewModeController.isGridMode ? Icons.timeline : Icons.grid_on),
+          icon: Icon(
+            viewModeController.isGridMode ? Icons.timeline : Icons.grid_on,
+          ),
           onPressed: viewModeController.toggleViewMode,
-          tooltip: viewModeController.isGridMode 
+          tooltip:
+              viewModeController.isGridMode
                   ? DiaryLocalizations.of(context).switchToTimelineView
                   : DiaryLocalizations.of(context).switchToGridView,
         ),

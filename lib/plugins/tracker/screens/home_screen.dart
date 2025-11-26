@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
@@ -21,10 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(TrackerLocalizations.of(context).goalTracking),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         actions: [
           IconButton(
             icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),

@@ -106,12 +106,14 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: (Platform.isAndroid || Platform.isIOS)
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         title: Text(l10n.timelineTab),
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
@@ -57,11 +59,15 @@ class _TodoMainViewState extends State<TodoMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         title: Text(TodoLocalizations.of(context).name),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
         actions: [
           // 过滤按钮
           IconButton(
@@ -178,10 +184,13 @@ class _TodoMainViewState extends State<TodoMainView> {
                   _plugin.taskController.deleteTask(task.id);
                 },
                 onSubtaskStatusChanged: (taskId, subtaskId, isCompleted) {
-                  _plugin.taskController.updateSubtaskStatus(taskId, subtaskId, isCompleted);
+                  _plugin.taskController.updateSubtaskStatus(
+                    taskId,
+                    subtaskId,
+                    isCompleted,
+                  );
                 },
               );
-
         },
       ),
       // 添加任务按钮

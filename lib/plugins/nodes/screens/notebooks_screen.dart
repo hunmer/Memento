@@ -19,12 +19,14 @@ class NotebooksScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: (Platform.isAndroid || Platform.isIOS)
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         title: Text(l10n.notebooks),
         actions: [
           IconButton(

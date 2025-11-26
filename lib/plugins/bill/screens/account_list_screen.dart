@@ -50,12 +50,17 @@ class _AccountListScreenState extends State<AccountListScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        leading: (Platform.isAndroid || Platform.isIOS)
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.black,
+                  ),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
       ),
       body: _buildAccountList(),
       floatingActionButton: SizedBox(
@@ -198,10 +203,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
                       const SizedBox(height: 4),
                       Text(
                         '${account.bills.length} 笔账单',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                       ),
                     ],
                   ),

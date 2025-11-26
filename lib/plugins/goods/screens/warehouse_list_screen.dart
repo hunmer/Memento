@@ -55,12 +55,14 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: (Platform.isAndroid || Platform.isIOS)
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         title: Text(GoodsLocalizations.of(context).allWarehouses),
       ),
       body: ListView.separated(

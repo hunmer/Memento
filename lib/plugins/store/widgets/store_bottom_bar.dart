@@ -16,10 +16,7 @@ import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 class StoreBottomBar extends StatefulWidget {
   final StorePlugin plugin;
 
-  const StoreBottomBar({
-    super.key,
-    required this.plugin,
-  });
+  const StoreBottomBar({super.key, required this.plugin});
 
   @override
   State<StoreBottomBar> createState() => _StoreBottomBarState();
@@ -32,9 +29,9 @@ class _StoreBottomBarState extends State<StoreBottomBar>
 
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
-    Colors.pinkAccent,        // Tab0 - 商品列表 (插件主色)
-    Colors.deepPurpleAccent,  // Tab1 - 我的物品
-    Colors.greenAccent,       // Tab2 - 积分历史
+    Colors.pinkAccent, // Tab0 - 商品列表 (插件主色)
+    Colors.deepPurpleAccent, // Tab1 - 我的物品
+    Colors.greenAccent, // Tab2 - 积分历史
   ];
 
   @override
@@ -61,31 +58,31 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color unselectedColor = isDark
-        ? Colors.white.withOpacity(0.6)
-        : Colors.black.withOpacity(0.6);
+    final Color unselectedColor =
+        isDark ? Colors.white.withOpacity(0.6) : Colors.black.withOpacity(0.6);
     final l10n = StoreLocalizations.of(context);
 
     return Scaffold(
       appBar: _buildAppBar(context, l10n),
       body: BottomBar(
         fit: StackFit.expand,
-        icon: (width, height) => Center(
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            onPressed: () {
-              if (_tabController.indexIsChanging) return;
-              if (_currentPage != 0) {
-                _tabController.animateTo(0);
-              }
-            },
-            icon: Icon(
-              Icons.keyboard_arrow_up,
-              color: _colors[_currentPage],
-              size: width,
+        icon:
+            (width, height) => Center(
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  if (_tabController.indexIsChanging) return;
+                  if (_currentPage != 0) {
+                    _tabController.animateTo(0);
+                  }
+                },
+                icon: Icon(
+                  Icons.keyboard_arrow_up,
+                  color: _colors[_currentPage],
+                  size: width,
+                ),
+              ),
             ),
-          ),
-        ),
         borderRadius: BorderRadius.circular(25),
         duration: const Duration(milliseconds: 300),
         curve: Curves.decelerate,
@@ -118,23 +115,28 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             ),
           ],
         ),
-        hideOnScroll: !kIsWeb && defaultTargetPlatform != TargetPlatform.macOS && defaultTargetPlatform != TargetPlatform.windows && defaultTargetPlatform != TargetPlatform.linux,
+        hideOnScroll:
+            !kIsWeb &&
+            defaultTargetPlatform != TargetPlatform.macOS &&
+            defaultTargetPlatform != TargetPlatform.windows &&
+            defaultTargetPlatform != TargetPlatform.linux,
         scrollOpposite: false,
         onBottomBarHidden: () {},
         onBottomBarShown: () {},
-        body: (context, controller) => TabBarView(
-          controller: _tabController,
-          dragStartBehavior: DragStartBehavior.start,
-          physics: const BouncingScrollPhysics(),
-          children: [
-            // Tab0: 商品列表内容
-            _buildProductListContent(),
-            // Tab1: 我的物品内容
-            _buildUserItemsContent(),
-            // Tab2: 积分历史内容
-            _buildPointsHistoryContent(),
-          ],
-        ),
+        body:
+            (context, controller) => TabBarView(
+              controller: _tabController,
+              dragStartBehavior: DragStartBehavior.start,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                // Tab0: 商品列表内容
+                _buildProductListContent(),
+                // Tab1: 我的物品内容
+                _buildUserItemsContent(),
+                // Tab2: 积分历史内容
+                _buildPointsHistoryContent(),
+              ],
+            ),
         child: Stack(
           alignment: Alignment.center,
           clipBehavior: Clip.none,
@@ -146,12 +148,16 @@ class _StoreBottomBarState extends State<StoreBottomBar>
               indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
               indicator: UnderlineTabIndicator(
                 borderSide: BorderSide(
-                  color: _currentPage < 3 ? _colors[_currentPage] : unselectedColor,
+                  color:
+                      _currentPage < 3
+                          ? _colors[_currentPage]
+                          : unselectedColor,
                   width: 4,
                 ),
                 insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               ),
-              labelColor: _currentPage < 3 ? _colors[_currentPage] : unselectedColor,
+              labelColor:
+                  _currentPage < 3 ? _colors[_currentPage] : unselectedColor,
               unselectedLabelColor: unselectedColor,
               tabs: [
                 Tab(
@@ -204,9 +210,11 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                 elevation: 4,
                 shape: const CircleBorder(),
                 child: Icon(
-                  _currentPage == 0 ? Icons.add_shopping_cart :
-                  _currentPage == 1 ? Icons.receipt_long :
-                  Icons.add,
+                  _currentPage == 0
+                      ? Icons.add_shopping_cart
+                      : _currentPage == 1
+                      ? Icons.receipt_long
+                      : Icons.add,
                   color: Colors.white,
                   size: 32,
                 ),
@@ -215,9 +223,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                     _navigateToAddProduct(context);
                   } else if (_currentPage == 1) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.viewRedeemHistory),
-                      ),
+                      SnackBar(content: Text(l10n.viewRedeemHistory)),
                     );
                   } else {
                     _showAddPointsDialog(context);
@@ -232,27 +238,35 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   }
 
   /// 根据当前页面构建 AppBar
-  PreferredSizeWidget _buildAppBar(BuildContext context, StoreLocalizations l10n) {
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    StoreLocalizations l10n,
+  ) {
     return AppBar(
-      leading: (Platform.isAndroid || Platform.isIOS)
-          ? null
-          : IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => PluginManager.toHomeScreen(context),
-            ),
+      automaticallyImplyLeading: false,
+      leading:
+          (Platform.isAndroid || Platform.isIOS)
+              ? null
+              : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
       title: Text(
         _currentPage == 0
             ? l10n.storeTitle
             : _currentPage == 1
-                ? l10n.myItems
-                : l10n.pointsHistory,
+            ? l10n.myItems
+            : l10n.pointsHistory,
       ),
       actions: _buildAppBarActions(context, l10n),
     );
   }
 
   /// 根据当前页面构建 AppBar 操作按钮
-  List<Widget> _buildAppBarActions(BuildContext context, StoreLocalizations l10n) {
+  List<Widget> _buildAppBarActions(
+    BuildContext context,
+    StoreLocalizations l10n,
+  ) {
     if (_currentPage == 0) {
       // 商品列表页面的操作按钮
       return [
@@ -281,10 +295,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                     ),
                     child: Text(
                       '${widget.plugin.controller.archivedProducts.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 8),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -295,9 +306,10 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ArchivedProductsPage(
-                  controller: widget.plugin.controller,
-                ),
+                builder:
+                    (context) => ArchivedProductsPage(
+                      controller: widget.plugin.controller,
+                    ),
               ),
             ).then((_) {
               if (mounted) setState(() {});
@@ -350,20 +362,19 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   /// 构建商品列表内容
   Widget _buildProductListContent() {
     // 去重处理
-    final uniqueProducts = widget.plugin.controller.products
-        .fold<Map<String, dynamic>>({}, (map, product) {
-          if (!map.containsKey(product.id)) {
-            map[product.id] = product;
-          }
-          return map;
-        })
-        .values
-        .toList();
+    final uniqueProducts =
+        widget.plugin.controller.products
+            .fold<Map<String, dynamic>>({}, (map, product) {
+              if (!map.containsKey(product.id)) {
+                map[product.id] = product;
+              }
+              return map;
+            })
+            .values
+            .toList();
 
     if (uniqueProducts.isEmpty) {
-      return Center(
-        child: Text(StoreLocalizations.of(context).noProducts),
-      );
+      return Center(child: Text(StoreLocalizations.of(context).noProducts));
     }
 
     return GridView.builder(
@@ -382,10 +393,11 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddProductPage(
-                  controller: widget.plugin.controller,
-                  product: product,
-                ),
+                builder:
+                    (context) => AddProductPage(
+                      controller: widget.plugin.controller,
+                      product: product,
+                    ),
               ),
             ).then((_) {
               if (mounted) setState(() {});
@@ -400,17 +412,20 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(8),
+                      ),
                     ),
-                    child: product.image.isNotEmpty
-                        ? Image.network(
-                            product.image,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.image, size: 48);
-                            },
-                          )
-                        : const Icon(Icons.image, size: 48),
+                    child:
+                        product.image.isNotEmpty
+                            ? Image.network(
+                              product.image,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.image, size: 48);
+                              },
+                            )
+                            : const Icon(Icons.image, size: 48),
                   ),
                 ),
                 Padding(
@@ -447,9 +462,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   /// 构建我的物品内容
   Widget _buildUserItemsContent() {
     if (widget.plugin.controller.userItems.isEmpty) {
-      return Center(
-        child: Text(StoreLocalizations.of(context).noItems),
-      );
+      return Center(child: Text(StoreLocalizations.of(context).noItems));
     }
 
     final items = widget.plugin.controller.userItems;
@@ -491,8 +504,13 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: isExpired ? Colors.grey[400] : Theme.of(context).primaryColor.withOpacity(0.1),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                    color:
+                        isExpired
+                            ? Colors.grey[400]
+                            : Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(8),
+                    ),
                   ),
                   child: Stack(
                     children: [
@@ -500,7 +518,10 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                         child: Icon(
                           Icons.card_giftcard,
                           size: 48,
-                          color: isExpired ? Colors.grey[600] : Theme.of(context).primaryColor,
+                          color:
+                              isExpired
+                                  ? Colors.grey[600]
+                                  : Theme.of(context).primaryColor,
                         ),
                       ),
                       if (count > 1)
@@ -540,10 +561,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                     ),
                     const SizedBox(height: 4),
                     if (isExpired)
-                      const Text(
-                        '已过期',
-                        style: TextStyle(color: Colors.red),
-                      )
+                      const Text('已过期', style: TextStyle(color: Colors.red))
                     else
                       Text(
                         '剩余: ${group['item'].remaining}',
@@ -562,9 +580,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   /// 构建积分历史内容
   Widget _buildPointsHistoryContent() {
     if (widget.plugin.controller.pointsLogs.isEmpty) {
-      return Center(
-        child: Text(StoreLocalizations.of(context).noRecords),
-      );
+      return Center(child: Text(StoreLocalizations.of(context).noRecords));
     }
 
     return ListView.builder(
@@ -579,8 +595,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
               color: log.type == '获得' ? Colors.green : Colors.red,
             ),
             title: Text(
-              StoreLocalizations.of(context)
-                  .pointsHistoryEntry
+              StoreLocalizations.of(context).pointsHistoryEntry
                   .replaceFirst('{value}', log.value.toString())
                   .replaceFirst('{type}', log.type),
             ),
@@ -598,9 +613,8 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   void _navigateToAddProduct(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => AddProductPage(
-          controller: widget.plugin.controller,
-        ),
+        builder:
+            (context) => AddProductPage(controller: widget.plugin.controller),
       ),
     );
   }
@@ -613,60 +627,61 @@ class _StoreBottomBarState extends State<StoreBottomBar>
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.addPointsTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: l10n.pointsAmount,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: reasonController,
-              decoration: InputDecoration(
-                labelText: l10n.pointsReason,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              final points = int.tryParse(controller.text);
-              final reason = reasonController.text.trim();
-
-              if (points != null && reason.isNotEmpty) {
-                await widget.plugin.controller.addPoints(points, reason);
-                if (mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.pointsAdded)),
-                  );
-                }
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('请输入有效的积分数量和原因'),
-                    backgroundColor: Colors.red,
+      builder:
+          (context) => AlertDialog(
+            title: Text(l10n.addPointsTitle),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: l10n.pointsAmount,
+                    border: const OutlineInputBorder(),
                   ),
-                );
-              }
-            },
-            child: Text(l10n.add),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: reasonController,
+                  decoration: InputDecoration(
+                    labelText: l10n.pointsReason,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.cancel),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final points = int.tryParse(controller.text);
+                  final reason = reasonController.text.trim();
+
+                  if (points != null && reason.isNotEmpty) {
+                    await widget.plugin.controller.addPoints(points, reason);
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(l10n.pointsAdded)));
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('请输入有效的积分数量和原因'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: Text(l10n.add),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -693,22 +708,22 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                     title: Text(l10n.byStock),
                     value: 'stock',
                     groupValue: selectedSort,
-                    onChanged: (value) =>
-                        setDialogState(() => selectedSort = value),
+                    onChanged:
+                        (value) => setDialogState(() => selectedSort = value),
                   ),
                   RadioListTile<String>(
                     title: Text(l10n.byPrice),
                     value: 'price',
                     groupValue: selectedSort,
-                    onChanged: (value) =>
-                        setDialogState(() => selectedSort = value),
+                    onChanged:
+                        (value) => setDialogState(() => selectedSort = value),
                   ),
                   RadioListTile<String>(
                     title: Text(l10n.byExpiry),
                     value: 'exchangeEnd',
                     groupValue: selectedSort,
-                    onChanged: (value) =>
-                        setDialogState(() => selectedSort = value),
+                    onChanged:
+                        (value) => setDialogState(() => selectedSort = value),
                   ),
                 ],
               ),
@@ -802,64 +817,72 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   }
 
   /// 显示清空物品确认对话框
-  void _showClearItemsConfirmation(BuildContext context, StoreLocalizations l10n) {
+  void _showClearItemsConfirmation(
+    BuildContext context,
+    StoreLocalizations l10n,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.confirmClearTitle),
-        content: Text(l10n.confirmClearItemsMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.cancel),
+      builder:
+          (context) => AlertDialog(
+            title: Text(l10n.confirmClearTitle),
+            content: Text(l10n.confirmClearItemsMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await widget.plugin.controller.clearUserItems();
+                  if (mounted) setState(() {});
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(l10n.itemsCleared)));
+                },
+                child: Text(
+                  l10n.clear,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              await widget.plugin.controller.clearUserItems();
-              if (mounted) setState(() {});
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.itemsCleared)),
-              );
-            },
-            child: Text(
-              l10n.clear,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
   /// 显示清空积分记录确认对话框
-  void _showClearPointsLogsConfirmation(BuildContext context, StoreLocalizations l10n) {
+  void _showClearPointsLogsConfirmation(
+    BuildContext context,
+    StoreLocalizations l10n,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.confirmClearTitle),
-        content: Text(l10n.confirmClearPointsMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.cancel),
+      builder:
+          (context) => AlertDialog(
+            title: Text(l10n.confirmClearTitle),
+            content: Text(l10n.confirmClearPointsMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await widget.plugin.controller.clearPointsLogs();
+                  if (mounted) setState(() {});
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(l10n.pointsCleared)));
+                },
+                child: Text(
+                  l10n.clear,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              await widget.plugin.controller.clearPointsLogs();
-              if (mounted) setState(() {});
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.pointsCleared)),
-              );
-            },
-            child: Text(
-              l10n.clear,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

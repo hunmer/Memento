@@ -78,17 +78,18 @@ class _AgentListScreenState extends State<AgentListScreen> {
     }).toList();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: (Platform.isAndroid || Platform.isIOS)
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         title: Text(OpenAILocalizations.of(context).agentListTitle),
         actions: [
           IconButton(
@@ -116,9 +117,10 @@ class _AgentListScreenState extends State<AgentListScreen> {
           ),
         ],
       ),
-      body: _isGridView
-          ? AgentGridView(agents: _getFilteredAgents())
-          : AgentListView(agents: _getFilteredAgents()),
+      body:
+          _isGridView
+              ? AgentGridView(agents: _getFilteredAgents())
+              : AgentListView(agents: _getFilteredAgents()),
     );
   }
 }
