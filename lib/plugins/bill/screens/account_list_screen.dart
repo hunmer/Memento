@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
@@ -49,10 +50,12 @@ class _AccountListScreenState extends State<AccountListScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
+        leading: (Platform.isAndroid || Platform.isIOS)
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
       ),
       body: _buildAccountList(),
       floatingActionButton: SizedBox(

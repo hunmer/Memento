@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
@@ -1196,10 +1197,12 @@ class _BillMainViewState extends State<BillMainView>
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
+        leading: (Platform.isAndroid || Platform.isIOS)
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
         title: Text(
           billPlugin.selectedAccount?.title ??
               BillLocalizations.of(context).accountTitle,

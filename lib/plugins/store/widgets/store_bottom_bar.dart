@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
@@ -233,10 +234,12 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   /// 根据当前页面构建 AppBar
   PreferredSizeWidget _buildAppBar(BuildContext context, StoreLocalizations l10n) {
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => PluginManager.toHomeScreen(context),
-      ),
+      leading: (Platform.isAndroid || Platform.isIOS)
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => PluginManager.toHomeScreen(context),
+            ),
       title: Text(
         _currentPage == 0
             ? l10n.storeTitle

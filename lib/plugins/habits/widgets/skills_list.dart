@@ -59,10 +59,12 @@ class _SkillsListState extends State<SkillsList> {
   AppBar _buildAppBar(BuildContext context, HabitsLocalizations l10n) {
     return AppBar(
       title: Text(l10n.skills),
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: () => PluginManager.toHomeScreen(context),
-      ),
+      leading: (Platform.isAndroid || Platform.isIOS)
+          ? null
+          : IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () => PluginManager.toHomeScreen(context),
+            ),
       actions: [
         IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
         IconButton(

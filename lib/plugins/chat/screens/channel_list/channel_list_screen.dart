@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../../models/channel.dart';
@@ -50,10 +51,12 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
+        leading: (Platform.isAndroid || Platform.isIOS)
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
         title: Text(ChatLocalizations.of(context).channelList),
         actions: [
           IconButton(

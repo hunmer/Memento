@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
@@ -54,7 +55,11 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
 
   void _onDayClicked(DateTime selectedDay, DateTime focusedDay) {
     // 标准化选中的日期，只保留年月日
-    final normalizedSelectedDay = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+    final normalizedSelectedDay = DateTime(
+      selectedDay.year,
+      selectedDay.month,
+      selectedDay.day,
+    );
     setState(() {
       _selectedDay = normalizedSelectedDay;
       _focusedDay = focusedDay;
@@ -90,7 +95,9 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
 
     // 从存储中获取最新的日记条目，而不是依赖内存缓存
     final entry = await DiaryUtils.loadDiaryEntry(normalizedTargetDay);
-    debugPrint('Loading editor for $normalizedTargetDay: ${entry != null ? "found" : "not found"}');
+    debugPrint(
+      'Loading editor for $normalizedTargetDay: ${entry != null ? "found" : "not found"}',
+    );
 
     Navigator.of(context)
         .push(
@@ -117,27 +124,38 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     // 确保_selectedDay也是标准化的
-    final normalizedSelectedDay = _selectedDay != null
-        ? DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day)
-        : null;
+    final normalizedSelectedDay =
+        _selectedDay != null
+            ? DateTime(
+              _selectedDay!.year,
+              _selectedDay!.month,
+              _selectedDay!.day,
+            )
+            : null;
     final selectedEntry =
-        normalizedSelectedDay != null ? _diaryEntries[normalizedSelectedDay] : null;
+        normalizedSelectedDay != null
+            ? _diaryEntries[normalizedSelectedDay]
+            : null;
 
     // Debug output (可以移除这些调试代码)
     debugPrint('=== Calendar Screen Debug ===');
     debugPrint('Looking for entry: $normalizedSelectedDay');
-    debugPrint('Has entry: ${normalizedSelectedDay != null ? _diaryEntries.containsKey(normalizedSelectedDay) : false}');
+    debugPrint(
+      'Has entry: ${normalizedSelectedDay != null ? _diaryEntries.containsKey(normalizedSelectedDay) : false}',
+    );
     if (selectedEntry != null) {
       debugPrint('Found entry: title="${selectedEntry.title}"');
     } else {
       debugPrint('No entry found for selected date');
     }
-    
+
     // Check if current theme is dark
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? Theme.of(context).scaffoldBackgroundColor : _backgroundColor;
+    final bgColor =
+        isDark ? Theme.of(context).scaffoldBackgroundColor : _backgroundColor;
     final textColor = isDark ? Colors.white : _primaryTextColor;
-    final primaryColor = isDark ? Theme.of(context).colorScheme.primary : _primaryColor;
+    final primaryColor =
+        isDark ? Theme.of(context).colorScheme.primary : _primaryColor;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -145,37 +163,48 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
         child: Column(
           children: [
             // Back Button
-            Padding(
-              padding: const EdgeInsets.only(left: 8, top: 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: Icon(Icons.arrow_back, color: textColor),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                  tooltip: DiaryLocalizations.of(context).myDiary,
+            if (!(Platform.isAndroid || Platform.isIOS))
+              Padding(
+                padding: const EdgeInsets.only(left: 8, top: 4),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back, color: textColor),
+                    onPressed: () => PluginManager.toHomeScreen(context),
+                    tooltip: DiaryLocalizations.of(context).myDiary,
+                  ),
                 ),
               ),
-            ),
             // Month Selector
             MonthSelector(
               selectedMonth: _focusedDay,
               onMonthSelected: (month) {
                 setState(() {
-                  _focusedDay = DateTime(month.year, month.month, _focusedDay.day);
+                  _focusedDay = DateTime(
+                    month.year,
+                    month.month,
+                    _focusedDay.day,
+                  );
                 });
               },
               getMonthStats: (month) {
                 // For diary plugin, we'll show entry count instead of financial stats
-                final monthEntries = _diaryEntries.entries.where((entry) {
-                  return entry.key.year == month.year && entry.key.month == month.month;
-                }).toList();
+                final monthEntries =
+                    _diaryEntries.entries.where((entry) {
+                      return entry.key.year == month.year &&
+                          entry.key.month == month.month;
+                    }).toList();
 
                 final entryCount = monthEntries.length;
-                final totalWords = monthEntries.fold(0, (sum, entry) => sum + entry.value.content.length);
+                final totalWords = monthEntries.fold(
+                  0,
+                  (sum, entry) => sum + entry.value.content.length,
+                );
 
                 return {
                   'income': entryCount.toDouble(), // Use income for entry count
-                  'expense': totalWords.toDouble(), // Use expense for word count
+                  'expense':
+                      totalWords.toDouble(), // Use expense for word count
                 };
               },
               primaryColor: primaryColor,
@@ -218,7 +247,9 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),
-                dowTextFormatter: (date, locale) => DateFormat.E(locale).format(date)[0], // S M T ...
+                dowTextFormatter:
+                    (date, locale) =>
+                        DateFormat.E(locale).format(date)[0], // S M T ...
               ),
               calendarStyle: CalendarStyle(
                 outsideDaysVisible: false,
@@ -246,13 +277,25 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
               ),
               calendarBuilders: CalendarBuilders<DiaryEntry>(
                 defaultBuilder: (context, day, focusedDay) {
-                   return _buildCalendarCell(day, textColor, null, isDark);
+                  return _buildCalendarCell(day, textColor, null, isDark);
                 },
                 todayBuilder: (context, day, focusedDay) {
-                  return _buildCalendarCell(day, textColor, primaryColor, isDark, isToday: true);
+                  return _buildCalendarCell(
+                    day,
+                    textColor,
+                    primaryColor,
+                    isDark,
+                    isToday: true,
+                  );
                 },
                 selectedBuilder: (context, day, focusedDay) {
-                  return _buildCalendarCell(day, textColor, primaryColor, isDark, isSelected: true);
+                  return _buildCalendarCell(
+                    day,
+                    textColor,
+                    primaryColor,
+                    isDark,
+                    isSelected: true,
+                  );
                 },
                 markerBuilder: (context, date, events) {
                   if (events.isEmpty) return null;
@@ -260,16 +303,20 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                   return Positioned(
                     top: 4,
                     right: 4,
-                    child: entry.mood != null
-                        ? Text(entry.mood!, style: const TextStyle(fontSize: 14))
-                        : Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: primaryColor,
-                              shape: BoxShape.circle,
+                    child:
+                        entry.mood != null
+                            ? Text(
+                              entry.mood!,
+                              style: const TextStyle(fontSize: 14),
+                            )
+                            : Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: primaryColor,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
                   );
                 },
               ),
@@ -301,22 +348,48 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                           if (selectedEntry != null)
                             ElevatedButton.icon(
                               onPressed: _navigateToEditor,
-                              icon: Icon(Icons.edit, size: 16, color: Colors.white),
-                              label: Text(DiaryLocalizations.of(context).edit, style: TextStyle(color: Colors.white, fontSize: 12)),
+                              icon: Icon(
+                                Icons.edit,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                              label: Text(
+                                DiaryLocalizations.of(context).edit,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: primaryColor,
-                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 minimumSize: Size(60, 32),
                               ),
                             )
                           else
                             ElevatedButton.icon(
                               onPressed: _navigateToEditor,
-                              icon: Icon(Icons.add, size: 16, color: Colors.white),
-                              label: Text(DiaryLocalizations.of(context).create, style: TextStyle(color: Colors.white, fontSize: 12)),
+                              icon: Icon(
+                                Icons.add,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                              label: Text(
+                                DiaryLocalizations.of(context).create,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: primaryColor,
-                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 minimumSize: Size(60, 32),
                               ),
                             ),
@@ -325,38 +398,47 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                       const SizedBox(height: 12),
                       if (selectedEntry != null) ...[
                         // Images list (if any)
-                         Builder(
-                           builder: (context) {
-                             final images = _extractImagesFromContent(selectedEntry.content);
-                             if (images.isEmpty) return const SizedBox.shrink();
-                             return Container(
-                               height: 100,
-                               margin: const EdgeInsets.only(bottom: 12),
-                               child: ListView.builder(
-                                 scrollDirection: Axis.horizontal,
-                                 itemCount: images.length,
-                                 itemBuilder: (context, index) {
-                                   return Container(
-                                     width: 100,
-                                     margin: const EdgeInsets.only(right: 8),
-                                     decoration: BoxDecoration(
-                                       borderRadius: BorderRadius.circular(8),
-                                       image: DecorationImage(
-                                         image: NetworkImage(images[index]), // Or FileImage if local
-                                         fit: BoxFit.cover,
-                                       ),
-                                     ),
-                                   );
-                                 },
-                               ),
-                             );
-                           }
-                         ),
+                        Builder(
+                          builder: (context) {
+                            final images = _extractImagesFromContent(
+                              selectedEntry.content,
+                            );
+                            if (images.isEmpty) return const SizedBox.shrink();
+                            return Container(
+                              height: 100,
+                              margin: const EdgeInsets.only(bottom: 12),
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: images.length,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    width: 100,
+                                    margin: const EdgeInsets.only(right: 8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                          images[index],
+                                        ), // Or FileImage if local
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+                              border: Border.all(
+                                color:
+                                    isDark
+                                        ? Colors.grey.shade700
+                                        : Colors.grey.shade300,
+                              ),
                             ),
                             child: QuillViewer(
                               data: selectedEntry.content,
@@ -404,20 +486,33 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
     );
   }
 
-  Widget _buildCalendarCell(DateTime day, Color textColor, Color? borderColor, bool isDark, {bool isToday = false, bool isSelected = false}) {
+  Widget _buildCalendarCell(
+    DateTime day,
+    Color textColor,
+    Color? borderColor,
+    bool isDark, {
+    bool isToday = false,
+    bool isSelected = false,
+  }) {
     final normalizedDay = DateTime(day.year, day.month, day.day);
     final entry = _diaryEntries[normalizedDay];
-    
+
     // Simulate random-ish background for demo matching the design's visual interest
     // In a real app, maybe we use a specific color or pattern based on mood/content
     final hasEntry = entry != null;
-    
+
     return Container(
       margin: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: (isSelected || isToday) ? Border.all(color: borderColor ?? Colors.transparent, width: 2) : null,
-        color: hasEntry ? (isDark ? Colors.white10 : Colors.grey.shade100) : Colors.transparent,
+        border:
+            (isSelected || isToday)
+                ? Border.all(color: borderColor ?? Colors.transparent, width: 2)
+                : null,
+        color:
+            hasEntry
+                ? (isDark ? Colors.white10 : Colors.grey.shade100)
+                : Colors.transparent,
       ),
       child: Stack(
         children: [

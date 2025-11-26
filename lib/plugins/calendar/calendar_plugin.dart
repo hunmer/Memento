@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
 import '../../core/plugin_manager.dart';
@@ -904,10 +905,12 @@ class _CalendarMainViewState extends State<CalendarMainView> {
       builder: (context, child) {
         return Scaffold(
           appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => PluginManager.toHomeScreen(context),
-            ),
+            leading: (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => PluginManager.toHomeScreen(context),
+                  ),
             title: Text(CalendarLocalizations.of(context).calendar),
             actions: [
               // 跳转到今天按钮

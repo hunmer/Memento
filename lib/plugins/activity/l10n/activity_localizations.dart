@@ -113,6 +113,22 @@ abstract class ActivityLocalizations {
 
   // Form hints
   String get contentHint;
+
+  // Settings page
+  String get settings;
+  String get notificationSettings;
+  String get enableNotificationBar;
+  String get lastActivity;
+  String get timeSinceLastActivity;
+  String get quickActions;
+  String get addRecord;
+  String get functionDescription;
+  String get notificationEnabled;
+  String get notificationDisabled;
+  String get failedToLoadSettings;
+  String get operationFailed;
+  String get recentActivityInfo;
+  String get onlySupportsAndroid;
 }
 
 class _ActivityLocalizationsDelegate

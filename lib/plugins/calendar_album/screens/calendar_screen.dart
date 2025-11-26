@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -135,10 +136,12 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   AppBar _buildAppBar(BuildContext context, dynamic l10n) {
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => PluginManager.toHomeScreen(context),
-      ),
+      leading: (Platform.isAndroid || Platform.isIOS)
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => PluginManager.toHomeScreen(context),
+            ),
       title: Text(
         CalendarAlbumLocalizations.of(context).calendarDiary,
         style: const TextStyle(fontSize: 18),

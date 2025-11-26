@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
@@ -54,10 +55,12 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
+        leading: (Platform.isAndroid || Platform.isIOS)
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
         title: Text(GoodsLocalizations.of(context).allWarehouses),
       ),
       body: ListView.separated(
