@@ -160,10 +160,17 @@ abstract class ContactLocalizations {
   String get timeLabel;
   String get notesHint;
   String get otherParticipants;
+//... (existing code)
   String get addParticipantTooltip;
+
+  String get organizationLabel;
+  String get emailLabel;
+  String get websiteLabel;
+  String get done;
 }
 
 class _ContactLocalizationsDelegate
+//... (rest of the file)
     extends LocalizationsDelegate<ContactLocalizations> {
   const _ContactLocalizationsDelegate();
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'custom_activity_event_model.dart';
 
 enum ContactGender {
   male,
@@ -13,10 +14,14 @@ class Contact {
   final IconData icon;
   final Color iconColor;
   final String phone;
+  final String? organization;
+  final String? email;
+  final String? website;
   final String? address;
   final String? notes;
   final List<String> tags;
   final Map<String, String> customFields;
+  final List<CustomActivityEvent> customActivityEvents;
   final DateTime createdTime;
   final DateTime lastContactTime;
   final ContactGender? gender;
@@ -28,15 +33,20 @@ class Contact {
     required this.icon,
     required this.iconColor,
     required this.phone,
+    this.organization,
+    this.email,
+    this.website,
     this.address,
     this.notes,
     this.gender,
     List<String>? tags,
     Map<String, String>? customFields,
+    List<CustomActivityEvent>? customActivityEvents,
     DateTime? createdTime,
     DateTime? lastContactTime,
   })  : tags = tags ?? [],
         customFields = customFields ?? {},
+        customActivityEvents = customActivityEvents ?? [],
         createdTime = createdTime ?? DateTime.now(),
         lastContactTime = lastContactTime ?? DateTime.now();
 
@@ -49,11 +59,15 @@ class Contact {
       // ignore: deprecated_member_use
       'iconColor': iconColor.value,
       'phone': phone,
+      'organization': organization,
+      'email': email,
+      'website': website,
       'address': address,
       'notes': notes,
       'gender': gender?.name,
       'tags': tags,
       'customFields': customFields,
+      'customActivityEvents': customActivityEvents.map((e) => e.toJson()).toList(),
       'createdTime': createdTime.toIso8601String(),
       'lastContactTime': lastContactTime.toIso8601String(),
     };
@@ -67,6 +81,9 @@ class Contact {
       icon: IconData(json['icon'] as int, fontFamily: 'MaterialIcons'),
       iconColor: Color(json['iconColor'] as int),
       phone: json['phone'] as String,
+      organization: json['organization'] as String?,
+      email: json['email'] as String?,
+      website: json['website'] as String?,
       address: json['address'] as String?,
       notes: json['notes'] as String?,
       gender: json['gender'] != null
@@ -77,6 +94,9 @@ class Contact {
           : null,
       tags: List<String>.from(json['tags'] as List),
       customFields: Map<String, String>.from(json['customFields'] as Map),
+      customActivityEvents: (json['customActivityEvents'] as List? ?? [])
+          .map((e) => CustomActivityEvent.fromJson(e))
+          .toList(),
       createdTime: DateTime.parse(json['createdTime'] as String),
       lastContactTime: DateTime.parse(json['lastContactTime'] as String),
     );
@@ -98,11 +118,15 @@ class Contact {
     IconData? icon,
     Color? iconColor,
     String? phone,
+    String? organization,
+    String? email,
+    String? website,
     String? address,
     String? notes,
     ContactGender? gender,
     List<String>? tags,
     Map<String, String>? customFields,
+    List<CustomActivityEvent>? customActivityEvents,
     DateTime? lastContactTime,
   }) {
     return Contact(
@@ -112,11 +136,15 @@ class Contact {
       icon: icon ?? this.icon,
       iconColor: iconColor ?? this.iconColor,
       phone: phone ?? this.phone,
+      organization: organization ?? this.organization,
+      email: email ?? this.email,
+      website: website ?? this.website,
       address: address ?? this.address,
       notes: notes ?? this.notes,
       gender: gender ?? this.gender,
       tags: tags ?? List.from(this.tags),
       customFields: customFields ?? Map.from(this.customFields),
+      customActivityEvents: customActivityEvents ?? List.from(this.customActivityEvents),
       createdTime: createdTime,
       lastContactTime: lastContactTime ?? this.lastContactTime,
     );

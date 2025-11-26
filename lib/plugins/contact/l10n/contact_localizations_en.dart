@@ -238,4 +238,16 @@ class ContactLocalizationsEn extends ContactLocalizations {
   String get otherParticipants => 'Other Participants';
   @override
   String get addParticipantTooltip => 'Add participant';
+
+  @override
+  String get organizationLabel => 'Organization';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get websiteLabel => 'Website';
+
+  @override
+  String get done => 'Done';
 }

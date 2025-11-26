@@ -234,4 +234,16 @@ class ContactLocalizationsZh extends ContactLocalizations {
   String get otherParticipants => '其他参与者';
   @override
   String get addParticipantTooltip => '添加参与者';
+
+  @override
+  String get organizationLabel => '组织';
+
+  @override
+  String get emailLabel => '邮箱';
+
+  @override
+  String get websiteLabel => '网站';
+
+  @override
+  String get done => '完成';
 }

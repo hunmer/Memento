@@ -96,7 +96,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
       MaterialPageRoute(
         builder: (context) => Scaffold(
           appBar: AppBar(
-            title: Text(l10n.newSkill),
+            title: Text(l10n.createSkill),
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           ),
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -112,10 +112,10 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
 
   @override
   Widget build(BuildContext context) {
-    final Color unselectedColor =
-        _colors[_currentPage].computeLuminance() < 0.5
-            ? Colors.black.withOpacity(0.6)
-            : Colors.white.withOpacity(0.6);
+    final theme = Theme.of(context);
+    final Color unselectedColor = theme.brightness == Brightness.dark
+        ? Colors.white.withOpacity(0.6)
+        : Colors.black.withOpacity(0.6);
 
     return BottomBar(
       fit: StackFit.expand,
@@ -143,9 +143,8 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
       curve: Curves.decelerate,
       showIcon: true,
       width: MediaQuery.of(context).size.width * 0.85,
-      barColor: _colors[_currentPage].computeLuminance() > 0.5
-          ? Colors.black
-          : Colors.white,
+      barColor: Theme.of(context).bottomAppBarTheme.color ??
+                Theme.of(context).scaffoldBackgroundColor,
       start: 2,
       end: 0,
       offset: 12,
